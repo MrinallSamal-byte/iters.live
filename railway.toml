@@ -1,0 +1,15 @@
+version: 1
+services:
+  - type: web
+    name: iter-college-app
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      NODE_ENV: production
+      PORT: ${{ PORT }}
+      DB_HOST: ${{ MYSQL_HOST }}
+      DB_PORT: ${{ MYSQL_PORT }}
+      DB_USER: ${{ MYSQL_USER }}
+      DB_PASSWORD: ${{ MYSQL_PASSWORD }}
+      DB_NAME: ${{ MYSQL_DATABASE }}

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Page Navigation Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .test-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-item h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .test-item p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.secondary {
+            background: #764ba2;
+        }
+
+        .btn.secondary:hover {
+            background: #663a8f;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            color: #333;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .checklist li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: #2196F3;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .quick-test {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .quick-test h3 {
+            margin-bottom: 15px;
+        }
+
+        .quick-test .btn {
+            background: white;
+            color: #667eea;
+        }
+
+        .quick-test .btn:hover {
+            background: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .test-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .test-section h2 {
+                font-size: 1.1rem;
+            }
+
+            .btn {
+                display: block;
+                margin-right: 0;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Creator Page Navigation Test</h1>
+        <p class="subtitle">Verify all navigation flows are working correctly</p>
+
+        <div class="test-section">
+            <h2>
+                <span>1️⃣</span> 
+                Landing Page → Creator Page
+                <span class="status success">✓ Ready</span>
+            </h2>
+            <div class="test-item">
+                <h3>Test Steps:</h3>
+                <ul class="checklist">
+                    <li>Open the landing page (index.html)</li>
+                    <li>Look for "Creator" button in navigation bar</li>
+                    <li>Click the "Creator" button</li>
+                    <li>Verify it loads creator.html correctly</li>
+                    <li>Check that all content displays properly</li>
+                </ul>
+                <a href="index.html" class="btn">Open Landing Page</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>2️⃣</span> 
+                Creator Page → Landing Page
+                <span class="status success">✓ Ready</span>
+            </h2>
+            <div class="test-item">
+                <h3>Test Steps:</h3>
+                <ul class="checklist">
+                    <li>Open the creator page directly</li>
+                    <li>Scroll to bottom of page</li>
+                    <li>Click "Back to Home" button</li>
+                    <li>Verify it returns to index.html</li>
+                    <li>Alternative: Click "Home" link in navigation</li>
+                </ul>
+                <a href="creator.html" class="btn secondary">Open Creator Page</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>3️⃣</span> 
+                Mobile Navigation
+                <span class="status info">📱 Mobile</span>
+            </h2>
+            <div class="test-item">
+                <h3>Test Steps:</h3>
+                <ul class="checklist">
+                    <li>Open in mobile device or use DevTools (F12 → Toggle device)</li>
+                    <li>Click hamburger menu (☰) button</li>
+                    <li>Verify menu opens smoothly</li>
+                    <li>Click "Creator" link in mobile menu</li>
+                    <li>Verify creator page loads on mobile</li>
+                    <li>Test "Back to Home" button on mobile</li>
+                </ul>
+                <div class="info-box">
+                    <strong>DevTools Tip:</strong> Press F12 → Click the device toggle icon (or Ctrl+Shift+M) to test mobile view
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>4️⃣</span> 
+                Navigation Anchor Links
+                <span class="status success">✓ Ready</span>
+            </h2>
+            <div class="test-item">
+                <h3>Test Steps:</h3>
+                <ul class="checklist">
+                    <li>From creator page, click "About" in navigation</li>
+                    <li>Should go to index.html#about</li>
+                    <li>Try "Features" → should go to index.html#features</li>
+                    <li>Try "Academics" → should go to index.html#academics</li>
+                    <li>Try "Contact" → should go to index.html#contact</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>5️⃣</span> 
+                Console Error Check
+                <span class="status info">🔍 DevTools</span>
+            </h2>
+            <div class="test-item">
+                <h3>Test Steps:</h3>
+                <ul class="checklist">
+                    <li>Open browser DevTools (F12)</li>
+                    <li>Go to Console tab</li>
+                    <li>Navigate between pages</li>
+                    <li>Verify no errors appear (red messages)</li>
+                    <li>Should see: "Creator page loaded" on creator.html</li>
+                </ul>
+                <div class="code-block">
+// Expected console messages on creator.html:
+Creator page loaded
+Creator page animations initialized
+✅ Mobile responsive features initialized</div>
+            </div>
+        </div>
+
+        <div class="quick-test">
+            <h3>⚡ Quick 2-Minute Test</h3>
+            <ol style="margin-left: 20px; line-height: 1.8;">
+                <li>Click "Open Landing Page" button above</li>
+                <li>Click "Creator" in navigation</li>
+                <li>Scroll through creator page</li>
+                <li>Click "Back to Home" at bottom</li>
+                <li>✅ If all works smoothly, navigation is perfect!</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>
+                <span>✅</span> 
+                Expected Results
+            </h2>
+            <div class="test-item">
+                <h3>All tests should pass with:</h3>
+                <ul class="checklist">
+                    <li>Smooth navigation between pages</li>
+                    <li>No broken links or 404 errors</li>
+                    <li>Creator page fully functional</li>
+                    <li>Mobile menu works correctly</li>
+                    <li>Back button returns to home</li>
+                    <li>No console errors or warnings</li>
+                    <li>Responsive design on all devices</li>
+                    <li>Animations work smoothly</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <strong>📝 Note:</strong> This testing page is for verification purposes only. 
+            All navigation flows have been implemented and tested. If any test fails, 
+            check the browser console (F12) for error messages.
+        </div>
+    </div>
+
+    <script>
+        // Log test page loaded
+        console.log('🧪 Navigation Test Page Loaded');
+        console.log('All navigation flows are ready for testing');
+        
+        // Check if pages exist
+        fetch('index.html')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ index.html exists');
+                } else {
+                    console.error('❌ index.html not found');
+                }
+            });
+        
+        fetch('creator.html')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ creator.html exists');
+                } else {
+                    console.error('❌ creator.html not found');
+                }
+            });
+
+        // Add click tracking for testing
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                console.log('🔗 Navigation clicked:', this.href);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<nav class="dashboard-nav glass-card fade-in-down">
+    <div class="nav-logo">
+        <img src="../assets/logo.png" alt="ITER Logo" style="height:40px; border-radius:8px;" onerror="this.style.display='none'">
+        <span class="nav-title">ITER EduHub</span>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html" id="nav-dashboard">Dashboard</a></li>
+        <li><a href="admin-users.html" id="nav-users">Users</a></li>
+        <li><a href="admin-attendance.html" id="nav-attendance">Attendance</a></li>
+        <li><a href="admin-marks.html" id="nav-marks">Marks</a></li>
+        <li><a href="admin-files.html" id="nav-files">Files</a></li>
+        <li><a href="admin-events.html" id="nav-events">Events</a></li>
+    </ul>
+    <div class="nav-user">
+        <div id="top-right-profile-container"></div>
+        <div id="profileControlContainer"></div>
+        <button class="btn btn-sm" onclick="APP.logout()" title="Logout">
+            <span id="adminName">Admin</span> | Logout
+        </button>
+    </div>
+</nav>

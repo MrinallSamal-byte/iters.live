@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test - ITER College</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .result {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+        .loading {
+            border-left: 4px solid #ffc107;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        .credentials {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .credentials h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .credentials p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .credentials code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 API Test Page</h1>
+        
+        <div class="credentials">
+            <h4>Demo Credentials</h4>
+            <p><strong>Admin:</strong> <code>admin1@iter.edu</code> / <code>Admin@123456</code></p>
+            <p><strong>Student:</strong> <code>stu1@iter.edu</code> / <code>Student@123456</code></p>
+            <p><strong>Teacher:</strong> <code>tch1@iter.edu</code> / <code>Teacher@123456</code></p>
+        </div>
+
+        <div class="test-section">
+            <h3>1. Health Check</h3>
+            <button onclick="testHealth()">Test /api/health</button>
+            <div id="health-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Login Test (Admin)</h3>
+            <button onclick="testLogin('admin')">Login as Admin</button>
+            <button onclick="testLogin('student')">Login as Student</button>
+            <button onclick="testLogin('teacher')">Login as Teacher</button>
+            <div id="login-result" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Raw API Response</h3>
+            <button onclick="testRawAPI()">Test Raw /api/auth/login</button>
+            <div id="raw-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = '<span class="status">⏳ TESTING...</span>\nSending request to /api/health...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const contentType = response.headers.get('content-type');
+                const data = await response.text();
+
+                resultDiv.className = response.ok ? 'result success' : 'result error';
+                resultDiv.innerHTML = `<span class="status ${response.ok ? 'success' : 'error'}">${response.ok ? '✅ SUCCESS' : '❌ FAILED'}</span>
+Status: ${response.status} ${response.statusText}
+Content-Type: ${contentType}
+
+Response:
+${data}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status error">❌ ERROR</span>
+${error.message}`;
+            }
+        }
+
+        async function testLogin(type) {
+            const credentials = {
+                admin: { email: 'admin1@iter.edu', password: 'Admin@123456' },
+                student: { email: 'stu1@iter.edu', password: 'Student@123456' },
+                teacher: { email: 'tch1@iter.edu', password: 'Teacher@123456' }
+            };
+
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = `<span class="status">⏳ TESTING...</span>\nLogging in as ${type}...\nEmail: ${credentials[type].email}`;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(credentials[type])
+                });
+
+                const contentType = response.headers.get('content-type');
+                const rawText = await response.text();
+                
+                let data;
+                let isJSON = false;
+                try {
+                    data = JSON.parse(rawText);
+                    isJSON = true;
+                } catch (e) {
+                    data = rawText;
+                }
+
+                resultDiv.className = response.ok && isJSON ? 'result success' : 'result error';
+                resultDiv.innerHTML = `<span class="status ${response.ok && isJSON ? 'success' : 'error'}">${response.ok && isJSON ? '✅ SUCCESS' : '❌ FAILED'}</span>
+Status: ${response.status} ${response.statusText}
+Content-Type: ${contentType}
+Is Valid JSON: ${isJSON ? 'Yes ✅' : 'No ❌'}
+
+${isJSON ? 'Response (JSON):' : 'Response (Raw Text):'}
+${isJSON ? JSON.stringify(data, null, 2) : data.substring(0, 500)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status error">❌ ERROR</span>
+${error.message}
+
+This error typically means the API is returning HTML instead of JSON.`;
+            }
+        }
+
+        async function testRawAPI() {
+            const resultDiv = document.getElementById('raw-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = '<span class="status">⏳ TESTING...</span>\nFetching raw response...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: 'admin1@iter.edu', 
+                        password: 'Admin@123456' 
+                    })
+                });
+
+                const headers = Array.from(response.headers.entries())
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join('\n');
+
+                const rawText = await response.text();
+
+                resultDiv.className = 'result';
+                resultDiv.innerHTML = `<span class="status">📊 RAW DATA</span>
+Status: ${response.status} ${response.statusText}
+
+Headers:
+${headers}
+
+Body (first 1000 chars):
+${rawText.substring(0, 1000)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<span class="status error">❌ ERROR</span>
+${error.message}`;
+            }
+        }
+
+        // Auto-run health check on page load
+        window.addEventListener('load', () => {
+            console.log('API Base URL:', API_BASE);
+            setTimeout(() => testHealth(), 500);
+        });
+    </script>
+</body>
+</html>

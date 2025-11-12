@@ -1,0 +1,114 @@
+/* ============================================
+   SCROLLING NAVIGATION BAR BEHAVIOR
+   Hide on scroll down, show on scroll up
+   ============================================ */
+
+/* Base navbar styling - ensure smooth transitions */
+.navbar {
+    position: fixed;
+    top: var(--spacing-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - var(--spacing-2xl));
+    max-width: 1200px;
+    z-index: 1000;
+    padding: var(--spacing-md) var(--spacing-lg);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, 
+                opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+}
+
+/* Hidden state - slides up and fades out with smooth delay */
+.navbar.navbar-hidden {
+    transform: translateX(-50%) translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Visible state - ensures navbar is always visible when needed with instant response */
+.navbar.navbar-visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Add shadow when scrolled for better visibility */
+.navbar.navbar-scrolled {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Ensure navbar doesn't interfere with page content */
+body {
+    padding-top: 0;
+}
+
+/* Prevent layout shift during animations */
+.navbar-placeholder {
+    height: 0;
+    transition: height 0.3s ease;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .navbar {
+        top: var(--spacing-md);
+        width: calc(100% - var(--spacing-lg));
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .navbar.navbar-hidden {
+        transform: translateX(-50%) translateY(-110%);
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        top: var(--spacing-sm);
+        width: calc(100% - var(--spacing-md));
+    }
+}
+
+/* Smooth entrance animation on page load */
+@keyframes navbarSlideIn {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.navbar.navbar-initial {
+    animation: navbarSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Ensure navbar is always accessible for screen readers */
+.navbar[aria-hidden="true"] {
+    visibility: hidden;
+}
+
+.navbar[aria-hidden="false"] {
+    visibility: visible;
+}
+
+/* Prevent animations on reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .navbar,
+    .navbar.navbar-hidden,
+    .navbar.navbar-visible,
+    .navbar.navbar-initial {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .navbar.navbar-hidden {
+        display: none;
+    }
+}

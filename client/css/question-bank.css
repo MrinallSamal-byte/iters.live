@@ -1,0 +1,622 @@
+/**
+ * Question Bank Styling
+ * Comprehensive styles for question management system
+ */
+
+.question-bank {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Section */
+.qb-header {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qb-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.qb-header h2 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.qb-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Filters */
+.qb-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.qb-search {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.qb-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #718096;
+}
+
+.qb-search input {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.qb-search input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.qb-filters select {
+    padding: 10px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.qb-filters select:hover {
+    border-color: #cbd5e0;
+}
+
+.qb-filters select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Stats Cards */
+.qb-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Content Area */
+.qb-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 400px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Question List */
+.qb-list {
+    display: grid;
+    gap: 16px;
+}
+
+/* Question Card */
+.question-card {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.qc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.qc-type {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.qc-points {
+    background: #edf2f7;
+    color: #2d3748;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.qc-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: white;
+    color: #4a5568;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-icon.btn-danger:hover {
+    background: #f56565;
+}
+
+.qc-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+/* Options */
+.qc-options {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.qc-option {
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.qc-option.correct {
+    background: #c6f6d5;
+    border-color: #48bb78;
+    font-weight: 600;
+}
+
+.qc-option.correct i {
+    color: #48bb78;
+}
+
+.qc-tf-answer {
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.qc-tf-answer strong {
+    color: #48bb78;
+}
+
+/* Footer */
+.qc-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.qc-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: #edf2f7;
+    color: #4a5568;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.qc-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #718096;
+}
+
+.qc-stats i {
+    margin-right: 4px;
+}
+
+/* Empty State */
+.qb-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: #718096;
+}
+
+.qb-empty i {
+    font-size: 64px;
+    color: #cbd5e0;
+    margin-bottom: 16px;
+}
+
+.qb-empty p {
+    font-size: 18px;
+    margin-bottom: 24px;
+}
+
+/* Form */
+.qb-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.qb-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.qb-form-header h3 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #718096;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* Options List */
+.options-list {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.option-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.option-input {
+    flex: 1;
+}
+
+.mark-correct {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    background: white;
+}
+
+.mark-correct.active {
+    background: #48bb78;
+    border-color: #48bb78;
+    color: white;
+}
+
+/* True/False Buttons */
+.tf-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.tf-btn {
+    flex: 1;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.tf-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid #e2e8f0;
+}
+
+/* Preview */
+.qb-preview {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.qb-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.qb-preview-header h3 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.preview-content {
+    margin-bottom: 24px;
+}
+
+.preview-explanation {
+    background: #edf2f7;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 24px;
+}
+
+.preview-explanation h4 {
+    margin: 0 0 12px 0;
+    color: #2d3748;
+    font-size: 16px;
+}
+
+.preview-explanation p {
+    margin: 0;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: #bee3f8;
+    color: #2c5282;
+}
+
+.badge-info {
+    background: #b2f5ea;
+    color: #234e52;
+}
+
+.badge-secondary {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+.badge-success {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.badge-warning {
+    background: #feebc8;
+    color: #744210;
+}
+
+.badge-danger {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-secondary {
+    background: #edf2f7;
+    color: #2d3748;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .qb-header-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .qb-actions {
+        flex-direction: column;
+    }
+
+    .qb-filters {
+        flex-direction: column;
+    }
+
+    .qb-search {
+        min-width: 100%;
+    }
+
+    .qb-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .qc-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .qc-actions {
+        justify-content: flex-start;
+    }
+
+    .qc-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .tf-buttons {
+        flex-direction: column;
+    }
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.question-card,
+.qb-form,
+.qb-preview {
+    animation: slideInUp 0.3s ease;
+}

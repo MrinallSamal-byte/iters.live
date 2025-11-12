@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Students - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">👥</span>
+                        My Students
+                    </h1>
+                    <p class="page-subtitle">View and manage your student roster</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">👨‍🎓</div>
+                <div class="stat-number" id="totalStudents">--</div>
+                <div class="stat-text">Total Students</div>
+                <div class="stat-subtext">Under your guidance</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="avgPerformance">--%</div>
+                <div class="stat-text">Avg Performance</div>
+                <div class="stat-subtext">Overall class average</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⚠️</div>
+                <div class="stat-number" id="lowPerformers">--</div>
+                <div class="stat-text">Need Attention</div>
+                <div class="stat-subtext">Below 50%</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🌟</div>
+                <div class="stat-number" id="topPerformers">--</div>
+                <div class="stat-text">Top Performers</div>
+                <div class="stat-subtext">Above 85%</div>
+            </div>
+        </section>
+
+        <!-- Filter Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔍</span>
+                    Filter Students
+                </h3>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="deptFilter" class="filter-label">
+                            <span class="filter-icon">🎓</span>
+                            Department
+                        </label>
+                        <select id="deptFilter" class="filter-select">
+                            <option value="">All Departments</option>
+                            <option value="CSE">Computer Science</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                            <option value="IT">Information Technology</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="yearFilter" class="filter-label">
+                            <span class="filter-icon">📚</span>
+                            Year
+                        </label>
+                        <select id="yearFilter" class="filter-select">
+                            <option value="">All Years</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sectionFilter" class="filter-label">
+                            <span class="filter-icon">📋</span>
+                            Section
+                        </label>
+                        <select id="sectionFilter" class="filter-select">
+                            <option value="">All Sections</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="searchInput" class="filter-label">
+                            <span class="filter-icon">🔍</span>
+                            Search
+                        </label>
+                        <input type="text" id="searchInput" class="filter-input" placeholder="Search by name or roll no...">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        <span>🔍</span> Apply Filters
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        <span>↺</span> Reset
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <span>📥</span> Export Excel
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Students List -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Student List
+                    <span id="studentCount" class="result-count"></span>
+                </h3>
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="table" onclick="switchView('table')">
+                        <span>📊</span> Table
+                    </button>
+                    <button class="view-btn" data-view="cards" onclick="switchView('cards')">
+                        <span>🎴</span> Cards
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="tableView" class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Roll No</th>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Year</th>
+                            <th>Section</th>
+                            <th>Attendance</th>
+                            <th>Performance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr><td colspan="10" class="loading-text">Loading students...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Card View -->
+            <div id="cardView" class="students-grid" style="display:none;">
+                <div class="loading-text">Loading students...</div>
+            </div>
+        </section>
+
+        <!-- Performance Chart -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📊</span>
+                    Class Performance Distribution
+                </h3>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="performanceChart" height="250"></canvas>
+            </div>
+        </section>
+
+        <!-- Students Needing Attention -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⚠️</span>
+                    Students Needing Attention
+                </h3>
+            </div>
+
+            <div class="attention-list" id="attentionList">
+                <div class="loading-text">Loading data...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Student Details Modal -->
+    <div id="studentModal" class="modal" style="display:none;">
+        <div class="modal-content glass-card modal-large">
+            <div class="modal-header">
+                <h3>Student Details</h3>
+                <button class="modal-close" onclick="closeStudentModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="studentModalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/prototype-mode.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/teacher-students.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .filter-container {
+            margin-top: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-icon {
+            font-size: 1.125rem;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .result-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .student-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+        }
+
+        .performance-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .performance-excellent {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .performance-good {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .performance-average {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .performance-poor {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .students-grid {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .student-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .student-card-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--primary);
+        }
+
+        .student-card-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .student-card-info {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            padding: 1.5rem;
+        }
+
+        .attention-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .attention-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--warning);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .attention-item:hover {
+            transform: translateX(5px);
+        }
+
+        .attention-info {
+            flex: 1;
+        }
+
+        .attention-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .attention-reason {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .attention-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-large {
+            max-width: 900px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .filter-label,
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .student-card-name,
+        [data-theme="dark"] .info-value,
+        [data-theme="dark"] .attention-name,
+        [data-theme="dark"] .modal-header h3 {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .result-count,
+        [data-theme="dark"] .info-label,
+        [data-theme="dark"] .attention-reason {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .filter-input,
+        [data-theme="dark"] .filter-select {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .students-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .view-toggle {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .view-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</body>
+</html>

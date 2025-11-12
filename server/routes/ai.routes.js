@@ -1,0 +1,212 @@
+const express = require('express');
+const router = express.Router();
+const { verifyToken } = require('../middleware/auth');
+const aiService = require('../services/ai.service');
+const db = require('../database/db');
+
+/**
+ * AI Routes for Educational Assistance
+ * Part of ITER EduHub Enhancement Suite
+ */
+
+/**
+ * @route   POST /api/ai/study-plan
+ * @desc    Generate personalized study plan
+ * @access  Private
+ */
+router.post('/study-plan', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Fetch student data
+        const [marks] = await db.query(`SELECT subject, obtained_marks, total_marks, created_at
+             FROM marks 
+             WHERE user_id = $1 
+             ORDER BY created_at DESC 
+             LIMIT 10`, [userId]
+        );
+        
+        const [attendance] = await db.query(`SELECT subject, COUNT(*) as total, 
+             SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present 
+             FROM attendance 
+             WHERE user_id = $1 
+             GROUP BY subject`, [userId]
+        );
+        
+        const [enrollments] = await db.query('SELECT DISTINCT subject FROM enrollments WHERE user_id = $1', [userId]
+        );
+        
+        const studentData = {
+            subjects: enrollments.map(e => e.subject),
+            attendance: attendance.map(a => ({
+                subject: a.subject,
+                percentage: (a.present / a.total) * 100
+            })),
+            marks: marks.map(m => ({
+                subject: m.subject,
+                percentage: ((m.obtained_marks / m.total_marks) * 100)
+            })),
+            preferences: req.body.preferences || {
+                studyHours: 4,
+                preferredTime: 'morning'
+            }
+        };
+        
+        const studyPlan = await aiService.generateStudyPlan(studentData);
+        
+        // Save study plan to database
+        await db.query('INSERT INTO study_plans (user_id, plan_data, created_at) VALUES ($1, $2, NOW())', [userId, JSON.stringify(studyPlan)]
+        );
+        
+        res.json({
+            success: true,
+            studyPlan,
+            message: 'Study plan generated successfully'
+        });
+    } catch (error) {
+        console.error('Study plan generation error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate study plan',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+/**
+ * @route   GET /api/ai/recommendations
+ * @desc    Get personalized subject recommendations
+ * @access  Private
+ */
+router.get('/recommendations', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        const [marks] = await db.query(`SELECT subject, AVG((obtained_marks/total_marks)*100) as percentage 
+             FROM marks 
+             WHERE user_id = $1 
+             GROUP BY subject`, [userId]
+        );
+        
+        const [attendance] = await db.query(`SELECT subject, COUNT(*) as total, 
+             SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present 
+             FROM attendance 
+             WHERE user_id = $1 
+             GROUP BY subject`, [userId]
+        );
+        
+        const recommendations = await aiService.getSubjectRecommendations(
+            marks.map(m => ({ subject: m.subject, percentage: m.percentage })),
+            attendance.map(a => ({
+                subject: a.subject,
+                percentage: (a.present / a.total) * 100
+            }))
+        );
+        
+        res.json({
+            success: true,
+            recommendations
+        });
+    } catch (error) {
+        console.error('Recommendations error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get recommendations'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/ai/chat
+ * @desc    AI chatbot for student questions
+ * @access  Private
+ */
+router.post('/chat', verifyToken, async (req, res) => {
+    try {
+        const { question, context } = req.body;
+        
+        if (!question) {
+            return res.status(400).json({
+                success: false,
+                message: 'Question is required'
+            });
+        }
+        
+        const answer = await aiService.answerQuestion(question, context || '');
+        
+        // Log chat interaction
+        await db.query('INSERT INTO ai_chat_logs (user_id, question, answer, created_at) VALUES ($1, $2, $3, NOW())', [req.user.id, question, answer]
+        ).catch(err => console.error('Failed to log chat:', err));
+        
+        res.json({
+            success: true,
+            answer
+        });
+    } catch (error) {
+        console.error('AI chat error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process question'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/ai/assignment-feedback
+ * @desc    Get AI feedback on assignment
+ * @access  Private
+ */
+router.post('/assignment-feedback', verifyToken, async (req, res) => {
+    try {
+        const { assignmentText, rubric } = req.body;
+        
+        if (!assignmentText) {
+            return res.status(400).json({
+                success: false,
+                message: 'Assignment text is required'
+            });
+        }
+        
+        const feedback = await aiService.generateAssignmentFeedback(assignmentText, rubric);
+        
+        res.json({
+            success: true,
+            feedback
+        });
+    } catch (error) {
+        console.error('Assignment feedback error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate feedback'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/ai/study-plans/history
+ * @desc    Get user's study plan history
+ * @access  Private
+ */
+router.get('/study-plans/history', verifyToken, async (req, res) => {
+    try {
+        const [plans] = await db.query('SELECT id, plan_data, created_at FROM study_plans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', [req.user.id]
+        );
+        
+        res.json({
+            success: true,
+            plans: plans.map(p => ({
+                id: p.id,
+                plan: JSON.parse(p.plan_data),
+                createdAt: p.created_at
+            }))
+        });
+    } catch (error) {
+        console.error('Study plan history error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch study plan history'
+        });
+    }
+});
+
+module.exports = router;

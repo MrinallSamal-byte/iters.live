@@ -1,0 +1,20 @@
+{
+  "name": "ITER College Management System",
+  "short_name": "ITER EduHub",
+  "description": "All-in-One College Management System for Students, Teachers, and Administrators",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false
+}

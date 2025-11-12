@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 9: Student Academic Tools - Demo</title>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="css/gpa-calculator.css">
+  <link rel="stylesheet" href="css/pomodoro-timer.css">
+  <link rel="stylesheet" href="css/assignment-calendar.css">
+  <link rel="stylesheet" href="css/resume-builder.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .demo-container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 60px;
+      color: white;
+    }
+
+    .demo-header h1 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .demo-header p {
+      font-size: 20px;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+
+    .demo-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .demo-tab {
+      padding: 16px 32px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-tab:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .demo-tab.active {
+      background: white;
+      color: #667eea;
+      border-color: white;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .demo-content {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      min-height: 600px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .feature-info {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 32px;
+      border-left: 4px solid #667eea;
+    }
+
+    .feature-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-info p {
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .feature-item i {
+      color: #10b981;
+      font-size: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10000;
+      animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.warning {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .toast i {
+      font-size: 20px;
+    }
+
+    .toast.success i {
+      color: #10b981;
+    }
+
+    .toast.warning i {
+      color: #f59e0b;
+    }
+
+    .toast.error i {
+      color: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .demo-header h1 {
+        font-size: 32px;
+      }
+
+      .demo-header p {
+        font-size: 16px;
+      }
+
+      .demo-content {
+        padding: 24px 16px;
+      }
+
+      .demo-tabs {
+        gap: 8px;
+      }
+
+      .demo-tab {
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1><i class="fas fa-graduation-cap"></i> Student Academic Tools</h1>
+      <p>Complete suite of productivity tools for academic success</p>
+    </div>
+
+    <div class="demo-tabs">
+      <button class="demo-tab active" data-tab="gpa">
+        <i class="fas fa-calculator"></i>
+        GPA Calculator
+      </button>
+      <button class="demo-tab" data-tab="pomodoro">
+        <i class="fas fa-brain"></i>
+        Pomodoro Timer
+      </button>
+      <button class="demo-tab" data-tab="calendar">
+        <i class="fas fa-calendar-alt"></i>
+        Assignment Calendar
+      </button>
+      <button class="demo-tab" data-tab="resume">
+        <i class="fas fa-file-alt"></i>
+        Resume Builder
+      </button>
+    </div>
+
+    <div class="demo-content">
+      <!-- GPA Calculator Tab -->
+      <div class="tab-panel active" id="gpa-tab">
+        <div class="feature-info">
+          <h3><i class="fas fa-info-circle"></i> GPA Calculator</h3>
+          <p>Track your grades with multiple grading systems. Calculate CGPA, SGPA, and total credits earned. All data is saved automatically to your browser.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check"></i> Multiple grade systems</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Credit weighting</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Semester tracking</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Auto-save</div>
+            <div class="feature-item"><i class="fas fa-check"></i> PDF export</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Unlimited courses</div>
+          </div>
+        </div>
+        <div id="gpa-calculator"></div>
+      </div>
+
+      <!-- Pomodoro Timer Tab -->
+      <div class="tab-panel" id="pomodoro-tab">
+        <div class="feature-info">
+          <h3><i class="fas fa-info-circle"></i> Pomodoro Timer</h3>
+          <p>Stay focused with the proven Pomodoro Technique. Work for 25 minutes, break for 5. Track your productivity with session statistics.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check"></i> 25/5/15 min cycles</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Visual progress</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Session tracking</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Browser notifications</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Sound alerts</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Customizable</div>
+          </div>
+        </div>
+        <div id="pomodoro-timer"></div>
+      </div>
+
+      <!-- Assignment Calendar Tab -->
+      <div class="tab-panel" id="calendar-tab">
+        <div class="feature-info">
+          <h3><i class="fas fa-info-circle"></i> Assignment Calendar</h3>
+          <p>Never miss a deadline again. Organize assignments with multiple calendar views, set reminders, and track completion status.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check"></i> Month/Week/Day views</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Color-coded priorities</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Deadline reminders</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Course filtering</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Status tracking</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Upcoming list</div>
+          </div>
+        </div>
+        <div id="assignment-calendar"></div>
+      </div>
+
+      <!-- Resume Builder Tab -->
+      <div class="tab-panel" id="resume-tab">
+        <div class="feature-info">
+          <h3><i class="fas fa-info-circle"></i> Resume Builder</h3>
+          <p>Create professional resumes with beautiful templates. Add education, experience, projects, skills, and certifications. Export to PDF instantly.</p>
+          <div class="feature-list">
+            <div class="feature-item"><i class="fas fa-check"></i> 4 templates</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Live preview</div>
+            <div class="feature-item"><i class="fas fa-check"></i> PDF export</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Auto-save</div>
+            <div class="feature-item"><i class="fas fa-check"></i> Multiple sections</div>
+            <div class="feature-item"><i class="fas fa-check"></i> ATS-friendly</div>
+          </div>
+        </div>
+        <div id="resume-builder"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification system -->
+  <script>
+    window.showToast = function(message, type = 'success') {
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      const icons = {
+        success: 'fa-check-circle',
+        warning: 'fa-exclamation-triangle',
+        error: 'fa-times-circle'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas ${icons[type]}"></i>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideInUp 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    };
+  </script>
+
+  <!-- Load Components as regular scripts (non-module for file:// protocol) -->
+  <script src="js/components/gpa-calculator.js"></script>
+  <script src="js/components/pomodoro-timer.js"></script>
+  <script src="js/components/assignment-calendar.js"></script>
+  <script src="js/components/resume-builder.js"></script>
+
+  <script>
+    // Initialize components
+    let gpaCalculator, pomodoroTimer, assignmentCalendar, resumeBuilder;
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.demo-tab');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.getAttribute('data-tab');
+
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update active panel
+        panels.forEach(p => p.classList.remove('active'));
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+
+        // Initialize component on first view
+        initializeComponent(tabId);
+      });
+    });
+
+    // Initialize component based on tab
+    function initializeComponent(tabId) {
+      switch (tabId) {
+        case 'gpa':
+          if (!gpaCalculator && window.GPACalculator) {
+            gpaCalculator = new window.GPACalculator('gpa-calculator');
+            console.log('✅ GPA Calculator initialized');
+          }
+          break;
+
+        case 'pomodoro':
+          if (!pomodoroTimer && window.PomodoroTimer) {
+            pomodoroTimer = new window.PomodoroTimer('pomodoro-timer');
+            console.log('✅ Pomodoro Timer initialized');
+          }
+          break;
+
+        case 'calendar':
+          if (!assignmentCalendar && window.AssignmentCalendar) {
+            assignmentCalendar = new window.AssignmentCalendar('assignment-calendar');
+            window.calendarInstance = assignmentCalendar;
+            console.log('✅ Assignment Calendar initialized');
+          }
+          break;
+
+        case 'resume':
+          if (!resumeBuilder && window.ResumeBuilder) {
+            resumeBuilder = new window.ResumeBuilder('resume-builder');
+            window.resumeBuilder = resumeBuilder;
+            console.log('✅ Resume Builder initialized');
+          }
+          break;
+      }
+    }
+
+    // Initialize first tab (GPA Calculator) after page loads
+    window.addEventListener('load', () => {
+      initializeComponent('gpa');
+
+      // Welcome message
+      setTimeout(() => {
+        showToast('Welcome to Student Academic Tools! 🎓', 'success');
+      }, 500);
+
+      console.log(`
+╔═══════════════════════════════════════════════════╗
+║     Phase 9: Student Academic Tools - Demo       ║
+╠═══════════════════════════════════════════════════╣
+║  ✅ GPA Calculator - Grade tracking              ║
+║  ✅ Pomodoro Timer - Focus sessions              ║
+║  ✅ Assignment Calendar - Deadline management    ║
+║  ✅ Resume Builder - Professional templates      ║
+╚═══════════════════════════════════════════════════╝
+      `);
+    });
+  </script>
+</body>
+</html>

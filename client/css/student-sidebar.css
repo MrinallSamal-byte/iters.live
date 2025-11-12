@@ -1,0 +1,401 @@
+/* Student Left Sidebar Navigation */
+:root {
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --sidebar-bg: rgba(17, 24, 39, 0.95);
+    --sidebar-hover: rgba(99, 102, 241, 0.1);
+    --sidebar-active: rgba(99, 102, 241, 0.2);
+}
+
+/* Sidebar Container */
+.student-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.student-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* Sidebar Logo Section */
+.sidebar-logo {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 80px;
+}
+
+.sidebar-logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.sidebar-branding {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.student-sidebar.collapsed .sidebar-branding {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.sidebar-subtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+}
+
+/* Toggle Button */
+.sidebar-toggle {
+    position: absolute;
+    right: -12px;
+    top: 30px;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.sidebar-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.6);
+}
+
+/* Navigation Links */
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 0;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.sidebar-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav-item {
+    margin: 0.25rem 0;
+}
+
+.sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    font-size: 0.95rem;
+}
+
+.sidebar-nav-link:hover {
+    background: var(--sidebar-hover);
+    color: white;
+}
+
+.sidebar-nav-link.active {
+    background: var(--sidebar-active);
+    color: white;
+}
+
+.sidebar-nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+}
+
+.sidebar-nav-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+
+.sidebar-nav-text {
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.student-sidebar.collapsed .sidebar-nav-text {
+    opacity: 0;
+    width: 0;
+}
+
+.student-sidebar.collapsed .sidebar-nav-link {
+    justify-content: center;
+    padding: 0.875rem;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.student-sidebar.collapsed .sidebar-user {
+    justify-content: center;
+}
+
+.sidebar-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.student-sidebar.collapsed .sidebar-user-info {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar-user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-logout {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #f87171;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.student-sidebar.collapsed .sidebar-logout {
+    padding: 0.75rem 0.5rem;
+}
+
+.student-sidebar.collapsed .sidebar-logout .logout-text {
+    display: none;
+}
+
+.sidebar-logout:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Main Content Adjustment */
+.dashboard-main {
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.student-sidebar.collapsed ~ .dashboard-main {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Mobile Responsive */
+@media (max-width: 968px) {
+    .student-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .student-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .dashboard-main {
+        margin-left: 0 !important;
+    }
+    
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    /* Mobile menu button */
+    .mobile-sidebar-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        width: 48px;
+        height: 48px;
+        background: var(--primary);
+        border: none;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        z-index: 999;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-sidebar-toggle:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Overlay for mobile */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+}
+
+/* Hide old top navigation on student pages */
+.dashboard-nav {
+    display: none !important;
+}
+
+/* Section badges and improvements */
+.sidebar-badge {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.student-sidebar.collapsed .sidebar-badge {
+    display: none;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Theme toggle positioning */
+.theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 100;
+}
+
+/* Improved animations */
+.sidebar-nav-link {
+    transform-origin: left center;
+}
+
+.sidebar-nav-link:active {
+    transform: scale(0.98);
+}
+
+/* Better focus states */
+.sidebar-nav-link:focus,
+.sidebar-logout:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}

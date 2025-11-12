@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
+  <title>Mobile-First Demo - ITER EduHub</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+  <link rel="stylesheet" href="../css/skeleton.css">
+  
+  <style>
+    /* Demo specific styles */
+    .demo-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 90px; /* Space for bottom nav */
+    }
+
+    .demo-section {
+      margin-bottom: 32px;
+    }
+
+    .demo-section h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: var(--primary-color);
+    }
+
+    .demo-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .demo-card:active {
+      transform: scale(0.98);
+    }
+
+    .demo-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .demo-card p {
+      font-size: 14px;
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+
+    .demo-button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      min-height: 44px;
+    }
+
+    .demo-button:active {
+      transform: scale(0.98);
+    }
+
+    .lazy-image-container {
+      width: 100%;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .lazy-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .demo-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .demo-list-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  
+  <!-- Pull to Refresh Indicator -->
+  <div id="pull-to-refresh" class="pull-to-refresh-indicator">
+    <i class="fas fa-sync-alt"></i>
+    <span>Pull to refresh</span>
+  </div>
+
+  <div class="demo-container">
+    
+    <!-- Header -->
+    <header style="text-align: center; margin-bottom: 32px;">
+      <h1 style="font-size: 28px; margin-bottom: 8px;">
+        <i class="fas fa-mobile-alt"></i> Mobile-First Demo
+      </h1>
+      <p style="opacity: 0.7;">Experience the native app-like interface</p>
+    </header>
+
+    <!-- Demo Section 1: Skeleton Loaders -->
+    <section class="demo-section">
+      <h2><i class="fas fa-spinner"></i> Skeleton Loaders</h2>
+      <button class="demo-button" onclick="demoSkeletonLoader()">
+        Show Skeleton Loading
+      </button>
+      <div id="skeleton-demo"></div>
+    </section>
+
+    <!-- Demo Section 2: Lazy Loading -->
+    <section class="demo-section">
+      <h2><i class="fas fa-image"></i> Lazy Loading Images</h2>
+      <p style="margin-bottom: 16px; opacity: 0.8;">Scroll down to load images efficiently</p>
+      
+      <div class="lazy-image-container">
+        <img 
+          data-src="https://picsum.photos/400/200?random=1" 
+          alt="Lazy loaded image 1"
+          style="background: rgba(255, 255, 255, 0.1);"
+        >
+      </div>
+      
+      <div class="lazy-image-container">
+        <img 
+          data-src="https://picsum.photos/400/200?random=2" 
+          alt="Lazy loaded image 2"
+          style="background: rgba(255, 255, 255, 0.1);"
+        >
+      </div>
+    </section>
+
+    <!-- Demo Section 3: Swipeable Cards -->
+    <section class="demo-section">
+      <h2><i class="fas fa-hand-pointer"></i> Swipeable Cards</h2>
+      <p style="margin-bottom: 16px; opacity: 0.8;">Swipe left to delete, right to archive</p>
+      
+      <div id="swipe-container">
+        <div class="demo-card swipeable" data-id="1">
+          <h3>📚 Assignment Due</h3>
+          <p>Data Structures assignment due tomorrow</p>
+        </div>
+        
+        <div class="demo-card swipeable" data-id="2">
+          <h3>📅 Class Schedule</h3>
+          <p>Operating Systems lecture at 10:00 AM</p>
+        </div>
+        
+        <div class="demo-card swipeable" data-id="3">
+          <h3>📝 Exam Notification</h3>
+          <p>Mid-term exams starting next week</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo Section 4: Touch-Friendly List -->
+    <section class="demo-section">
+      <h2><i class="fas fa-list"></i> Touch-Friendly List</h2>
+      <ul class="demo-list">
+        <li class="demo-list-item">
+          <div class="demo-avatar">JD</div>
+          <div>
+            <div style="font-weight: 600;">John Doe</div>
+            <div style="font-size: 13px; opacity: 0.7;">Computer Science</div>
+          </div>
+        </li>
+        <li class="demo-list-item">
+          <div class="demo-avatar">SA</div>
+          <div>
+            <div style="font-weight: 600;">Sarah Anderson</div>
+            <div style="font-size: 13px; opacity: 0.7;">Information Technology</div>
+          </div>
+        </li>
+        <li class="demo-list-item">
+          <div class="demo-avatar">MK</div>
+          <div>
+            <div style="font-weight: 600;">Mike Kumar</div>
+            <div style="font-size: 13px; opacity: 0.7;">Electronics Engineering</div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Demo Section 5: Mobile Gestures -->
+    <section class="demo-section">
+      <h2><i class="fas fa-hand-rock"></i> Gesture Controls</h2>
+      <div class="demo-card">
+        <p><strong>Swipe Right:</strong> Opens the sidebar menu</p>
+      </div>
+      <div class="demo-card">
+        <p><strong>Swipe Left:</strong> Closes the sidebar menu</p>
+      </div>
+      <div class="demo-card">
+        <p><strong>Pull Down:</strong> Refreshes the page content</p>
+      </div>
+      <div class="demo-card">
+        <p><strong>Long Press:</strong> Shows context menu (cards)</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" id="mobile-nav">
+    <button class="nav-item active" data-page="home">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-page="assignments">
+      <i class="fas fa-tasks"></i>
+      <span>Tasks</span>
+    </button>
+    <button class="nav-item" data-page="notifications">
+      <i class="fas fa-bell"></i>
+      <span>Alerts</span>
+      <span class="badge">3</span>
+    </button>
+    <button class="nav-item" data-page="calendar">
+      <i class="fas fa-calendar"></i>
+      <span>Calendar</span>
+    </button>
+    <button class="nav-item" data-page="profile">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { MobileNavigation, PullToRefresh } from '../js/components/mobile-navigation.js';
+    import skeletonLoader from '../js/components/skeleton-loader.js';
+    import lazyLoader from '../js/components/lazy-loader.js';
+    import { SwipeableCard, swipeableCardManager } from '../js/components/swipeable-card.js';
+
+    // Initialize mobile navigation
+    const mobileNav = new MobileNavigation();
+    window.mobileNav = mobileNav;
+
+    // Initialize pull to refresh
+    const pullToRefresh = new PullToRefresh(async () => {
+      console.log('Refreshing content...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Content refreshed!');
+      showToast('Content refreshed successfully!');
+    });
+    window.pullToRefresh = pullToRefresh;
+
+    // Initialize lazy loading
+    window.lazyLoader = lazyLoader;
+
+    // Initialize swipeable cards
+    document.querySelectorAll('.swipeable').forEach(card => {
+      swipeableCardManager.init(card, {
+        actions: {
+          left: (element) => {
+            const id = element.getAttribute('data-id');
+            showToast(`Card ${id} deleted`);
+            element.style.display = 'none';
+          },
+          right: (element) => {
+            const id = element.getAttribute('data-id');
+            showToast(`Card ${id} archived`);
+            element.style.display = 'none';
+          }
+        },
+        leftActionIcon: '<i class="fas fa-trash"></i>',
+        rightActionIcon: '<i class="fas fa-archive"></i>',
+      });
+    });
+
+    // Skeleton loader demo
+    window.demoSkeletonLoader = function() {
+      const container = document.getElementById('skeleton-demo');
+      
+      // Show skeleton
+      skeletonLoader.show('skeleton-demo', 'card', 3);
+      
+      // Simulate loading and show real content
+      setTimeout(() => {
+        container.innerHTML = `
+          <div class="demo-card">
+            <h3>✅ Content Loaded</h3>
+            <p>This content was loaded after showing skeleton placeholders.</p>
+          </div>
+          <div class="demo-card">
+            <h3>⚡ Fast Loading</h3>
+            <p>Skeleton screens provide instant visual feedback.</p>
+          </div>
+          <div class="demo-card">
+            <h3>🎨 Better UX</h3>
+            <p>Users perceive the app as faster with skeletons.</p>
+          </div>
+        `;
+      }, 2000);
+    };
+
+    // Toast notification helper
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideUp 0.3s ease;
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideDown 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    // Add slideUp/slideDown animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideUp {
+        from { transform: translate(-50%, 100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+      }
+      @keyframes slideDown {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, 100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    console.log('Mobile-First Demo initialized ✓');
+  </script>
+</body>
+</html>

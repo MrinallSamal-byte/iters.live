@@ -1,0 +1,393 @@
+/**
+ * No Animation Override - Student Dashboard
+ * Removes all animations for clean, instant UI/UX
+ * Applied to all student pages
+ */
+
+/* ===== GLOBAL ANIMATION REMOVAL ===== */
+* {
+    animation: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
+
+/* ===== INSTANT STATE CHANGES ===== */
+body,
+body * {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== CLEAN HOVER EFFECTS (INSTANT) ===== */
+.btn:hover,
+.stat-card:hover,
+.glass-card:hover,
+.hover-lift:hover,
+.announcement-item:hover,
+.deadline-item:hover,
+.nav-link-item:hover,
+.profile-dropdown-item:hover,
+.theme-toggle-btn:hover,
+.profile-avatar-btn:hover {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Instant opacity changes */
+.theme-toggle-btn .icon,
+.profile-dropdown-menu {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ===== NAVIGATION - NO ANIMATIONS ===== */
+.nav-links,
+.nav-links li,
+.hamburger-menu,
+.hamburger-menu .line,
+.nav-overlay {
+    animation: none !important;
+    transition: none !important;
+}
+
+.nav-links.active li {
+    animation: none !important;
+}
+
+/* ===== DROPDOWN - INSTANT SHOW/HIDE ===== */
+.profile-dropdown-menu {
+    transition: none !important;
+    animation: none !important;
+}
+
+.profile-dropdown-menu.active {
+    animation: none !important;
+}
+
+/* ===== PROGRESS BARS - NO ANIMATION ===== */
+.progress-fill {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ===== MODALS - INSTANT DISPLAY ===== */
+.modal,
+.modal-content,
+.modal-backdrop {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== TOOLTIPS - INSTANT ===== */
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== COUNTERS - NO COUNTING ANIMATION ===== */
+.counter,
+.stat-value {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== CHARTS - NO ANIMATIONS ===== */
+canvas,
+.chart-container {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== SKELETON LOADERS - NO PULSE ===== */
+.skeleton,
+.skeleton-loader,
+.pulse {
+    animation: none !important;
+}
+
+/* ===== CARDS - NO ANIMATIONS ===== */
+.card,
+.stat-card,
+.glass-card,
+.announcement-item,
+.deadline-item {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== BADGES - NO PULSE ===== */
+.badge,
+.notification-badge,
+.priority-badge {
+    animation: none !important;
+}
+
+/* ===== SPINNERS - STATIC (or hidden) ===== */
+.spinner,
+.loading-spinner {
+    animation: none !important;
+    /* Optionally hide spinners */
+    display: none !important;
+}
+
+/* ===== FILE UPLOADER - NO ANIMATIONS ===== */
+.upload-area,
+.file-item,
+.progress-bar {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== CALENDAR - NO ANIMATIONS ===== */
+.calendar-day,
+.event-item {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== TIMER - NO ANIMATIONS ===== */
+.timer-display,
+.timer-controls,
+.pomodoro-session {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== GPA CALCULATOR - NO ANIMATIONS ===== */
+.grade-input,
+.gpa-result,
+.course-row {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== FORMS - NO ANIMATIONS ===== */
+input,
+select,
+textarea,
+button,
+.form-control {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== THEME TOGGLE - INSTANT SWITCH ===== */
+body,
+body.light-theme,
+body.dark-theme {
+    transition: none !important;
+}
+
+/* ===== RESPONSIVE - NO ANIMATIONS ===== */
+@media (max-width: 768px) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ===== CLEAN FOCUS STATES (INSTANT) ===== */
+:focus,
+:focus-visible {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ===== CLEAN UI/UX ENHANCEMENTS ===== */
+
+/* Better visual feedback without animation */
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn:active {
+    opacity: 0.8;
+}
+
+/* Instant shadow changes for depth */
+.glass-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Instant color changes */
+.nav-link-item:hover {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.profile-dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+/* Instant border changes */
+.theme-toggle-btn:hover,
+.profile-avatar-btn:hover {
+    border-color: rgba(99, 102, 241, 0.7);
+}
+
+/* Clean instant state changes */
+.hamburger-menu.active .line:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.hamburger-menu.active .line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active .line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Progress bars - instant fill */
+.progress-fill {
+    width: var(--progress, 0%) !important;
+}
+
+/* ===== REMOVE ALL KEYFRAMES ===== */
+/* All @keyframes are now overridden by animation: none !important */
+
+/* ===== PERFORMANCE OPTIMIZATION ===== */
+/* No transitions means better performance and instant feedback */
+
+/* ===== ACCESSIBILITY - RESPECT USER PREFERENCES ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ===== CLEAN PROFESSIONAL UI ===== */
+
+/* Sharp, instant interactions */
+.clickable,
+[role="button"],
+button {
+    cursor: pointer;
+}
+
+/* Instant visual feedback */
+.clickable:active,
+[role="button"]:active,
+button:active {
+    opacity: 0.8;
+}
+
+/* No loading states with animations */
+.loading {
+    cursor: wait;
+}
+
+/* ===== OVERRIDE SPECIFIC LIBRARIES ===== */
+
+/* Chart.js */
+canvas {
+    animation: none !important;
+}
+
+/* Socket.io indicators */
+.connection-indicator {
+    animation: none !important;
+}
+
+/* ===== FINAL OVERRIDE ===== */
+/* Ensure absolutely no animations anywhere */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1, h2, h3, h4, h5, h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ===== SMOOTH SCROLLING DISABLED ===== */
+html {
+    scroll-behavior: auto !important;
+}
+
+/* ===== CLEAN UI - BEST PRACTICES ===== */
+
+/* Instant feedback is better than animated feedback */
+/* Users get immediate response to their actions */
+/* No waiting for animations to complete */
+/* Better performance, especially on slower devices */
+/* Cleaner, more professional feel */
+/* Follows modern minimalist design principles */
+
+/* ===== END OF NO ANIMATION STYLES ===== */

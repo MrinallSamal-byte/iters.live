@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ITER - Institute of Technical Education & Research, Siksha 'O' Anusandhan (Deemed to be University). NAAC A++ Accredited premier technical institution in Bhubaneswar, Odisha. Explore our advanced EduHub portal with real-time attendance, marks tracking, digital library, and more.">
+    <meta name="keywords" content="ITER, SOA University, Technical Education, Engineering College, Student Portal, EduHub, NAAC A++, Bhubaneswar, Odisha">
+    <meta name="author" content="ITER - Institute of Technical Education & Research">
+    <meta name="theme-color" content="#6366f1">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ITER - Institute of Technical Education & Research | SOA University">
+    <meta property="og:description" content="Premier technical institution offering world-class education with advanced digital EduHub portal for students, faculty, and administration.">
+    <meta property="og:url" content="https://iter.ac.in">
+    <link rel="canonical" href="/">
+    <title>ITER - Institute of Technical Education & Research | SOA University Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/clean-dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/responsive-enhanced.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/responsive-universal.css">
+    <link rel="stylesheet" href="css/button-fixes.css">
+    <link rel="stylesheet" href="css/responsive-fixes.css">
+    <link rel="stylesheet" href="css/mobile-touch-fixes.css">
+    <link rel="stylesheet" href="css/notice-ticker.css">
+    <link rel="stylesheet" href="css/navbar-scroll-behavior.css">
+    <link rel="stylesheet" href="css/responsive-polish.css">
+    <link rel="stylesheet" href="css/table-responsive-global.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="assets/icon.png">
+</head>
+<body class="landing-page">
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar glass-card">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)" class="logo-img">
+                <span class="logo-text">ITER <span class="accent">EduHub</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#academics" class="nav-link">Academics</a>
+                <a href="creator.html" class="nav-link">Creator</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <a href="register.html" class="btn btn-outline" style="margin-right: 0.5rem;">Register</a>
+                <a href="login.html" class="btn btn-primary">Portal Login</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-icon">🏆</span>
+                    <span class="badge-text">NAAC A++ Accredited | NIRF Ranked | NBA Approved</span>
+                </div>
+                <h1 class="hero-title">
+                    Institute of Technical Education & Research
+                </h1>
+                <p class="hero-subtitle">
+                    Siksha 'O' Anusandhan (Deemed to be University), Bhubaneswar
+                </p>
+                <p class="hero-description">
+                    Welcome to ITER's Advanced EduHub Portal - A premier institution dedicated to excellence in 
+                    technical education, research, and innovation. Experience seamless digital learning with 
+                    real-time attendance tracking, performance analytics, comprehensive digital resources, and 
+                    cutting-edge student management features.
+                </p>
+                <div class="hero-buttons scroll-reveal">
+                    <a href="login.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
+                        Student Portal
+                    </a>
+                    <a href="register.html" class="btn btn-large btn-outline ripple-effect hover-lift">
+                        Register Now
+                    </a>
+                    <a href="#about" class="btn btn-large btn-secondary ripple-effect hover-lift">
+                        Learn More
+                    </a>
+                </div>
+                <div class="hero-stats stagger-animation">
+                    <div class="stat-item scroll-reveal">
+                        <div class="stat-number counter" data-target="10000" data-suffix="+">0</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-item scroll-reveal">
+                        <div class="stat-number counter" data-target="500" data-suffix="+">0</div>
+                        <div class="stat-label">Faculty Members</div>
+                    </div>
+                    <div class="stat-item scroll-reveal">
+                        <div class="stat-number counter" data-target="20" data-suffix="+">0</div>
+                        <div class="stat-label">Programs</div>
+                    </div>
+                    <div class="stat-item scroll-reveal">
+                        <div class="stat-number stat-text">A++</div>
+                        <div class="stat-label">NAAC Grade</div>
+                    </div>
+                    <div class="stat-item scroll-reveal">
+                        <div class="stat-number counter" data-target="95" data-suffix="%+">0</div>
+                        <div class="stat-label">Placement Rate</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image fade-in-up delay-1">
+                <div class="hero-logo-container">
+                    <img src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)" class="hero-logo-img">
+                    <div class="logo-glow"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Notice Ticker -->
+    <div class="notice-ticker-container" id="noticeTicker">
+        <div class="notice-ticker-wrapper glass-card">
+            <div class="notice-ticker-label">
+                <span class="ticker-icon">📢</span>
+                <span class="ticker-text">Latest Updates</span>
+            </div>
+            <div class="notice-ticker-content">
+                <div class="notice-item" data-notice-id="1">
+                    <span class="notice-icon">🎓</span>
+                    <span class="notice-text">Semester exams will commence from January 25th, 2025. Students are advised to check the detailed schedule on the student portal.</span>
+                </div>
+                <div class="notice-item" data-notice-id="2">
+                    <span class="notice-icon">📚</span>
+                    <span class="notice-text">Digital Library has been updated with 500+ new e-books and research papers. Access them now through the EduHub portal.</span>
+                </div>
+                <div class="notice-item" data-notice-id="3">
+                    <span class="notice-icon">💼</span>
+                    <span class="notice-text">Campus placement drive by Google, Microsoft, and Amazon scheduled for February 2025. Register on the placement portal.</span>
+                </div>
+                <div class="notice-item" data-notice-id="4">
+                    <span class="notice-icon">🎉</span>
+                    <span class="notice-text">Annual Tech Fest 'TechVision 2025' - Register your team for hackathons, coding competitions, and tech talks. Last date: January 20th.</span>
+                </div>
+                <div class="notice-item" data-notice-id="5">
+                    <span class="notice-icon">⚠️</span>
+                    <span class="notice-text">Important: Students with attendance below 75% must submit their regularization forms by January 18th to avoid academic penalties.</span>
+                </div>
+            </div>
+            <button class="notice-close-btn" id="noticeCloseBtn" aria-label="Close notice ticker">
+                <span>✕</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <h2 class="section-title">Smart EduHub Features</h2>
+                <p class="section-subtitle">Cutting-edge technology for modern education</p>
+            </div>
+            <div class="features-grid stagger-animation">
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">📊</div>
+                    <h3>Real-time Attendance</h3>
+                    <p>Live attendance tracking with heatmap calendar, subject-wise analytics, and instant notifications</p>
+                </div>
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">📝</div>
+                    <h3>Marks & Performance</h3>
+                    <p>Detailed marks analysis, performance trends, grade distribution, and SGPA/CGPA tracking</p>
+                </div>
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">📚</div>
+                    <h3>Digital Library</h3>
+                    <p>Comprehensive notes repository, PYQs, study materials with drag-and-drop file manager</p>
+                </div>
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">✍️</div>
+                    <h3>Smart Assignments</h3>
+                    <p>Online submission, deadline tracking, instant feedback, and plagiarism detection</p>
+                </div>
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">📅</div>
+                    <h3>Interactive Timetable</h3>
+                    <p>Color-coded schedule, current class highlights, calendar sync, and conflict detection</p>
+                </div>
+                <div class="feature-card glass-card hover-lift hover-tilt scroll-reveal">
+                    <div class="feature-icon float-animation">🎓</div>
+                    <h3>Admit Card Generator</h3>
+                    <p>Dynamic PDF generation with QR codes, photos, and secure verification system</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Study Assistant</h3>
+                    <p>Personalized study schedules, weak subject detection, ML-powered performance predictions</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="700">
+                    <div class="feature-icon">💬</div>
+                    <h3>Real-time Chat</h3>
+                    <p>Instant messaging, group discussions, file sharing with Socket.IO powered updates</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="800">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Smart Notifications</h3>
+                    <p>Push notifications, email alerts, custom filters, and notification management dashboard</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="900">
+                    <div class="feature-icon">🎉</div>
+                    <h3>Events & Clubs</h3>
+                    <p>Event registration, club management, calendar integration, and attendance tracking</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="1000">
+                    <div class="feature-icon">🍽️</div>
+                    <h3>Hostel Management</h3>
+                    <p>Weekly mess menu, complaints system, room allocation, and feedback management</p>
+                </div>
+                <div class="feature-card glass-card hover-lift" data-aos="fade-up" data-aos-delay="1100">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Flashcard System</h3>
+                    <p>Digital flashcards, spaced repetition, category management, and progress tracking</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why Choose ITER?</h2>
+                <p class="section-subtitle">Excellence in every aspect of education</p>
+            </div>
+            <div class="why-choose-grid">
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">🏆</div>
+                    <h3>Academic Excellence</h3>
+                    <p>NAAC A++ accreditation, NBA accredited programs, NIRF ranked institution with consistent academic performance</p>
+                </div>
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">👨‍🏫</div>
+                    <h3>Expert Faculty</h3>
+                    <p>Highly qualified professors with Ph.D. degrees, industry experience, and published research papers</p>
+                </div>
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">🔬</div>
+                    <h3>Research & Innovation</h3>
+                    <p>State-of-the-art research labs, innovation centers, patents, and collaborations with top institutions</p>
+                </div>
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">💼</div>
+                    <h3>Outstanding Placements</h3>
+                    <p>95%+ placement rate, top MNCs recruiting, highest packages 30+ LPA, average package 8+ LPA</p>
+                </div>
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">🌍</div>
+                    <h3>Global Exposure</h3>
+                    <p>International collaborations, student exchange programs, foreign university tie-ups</p>
+                </div>
+                <div class="why-card glass-card hover-lift">
+                    <div class="why-icon">🏗️</div>
+                    <h3>World-Class Infrastructure</h3>
+                    <p>Modern campus, AC classrooms, advanced labs, digital library, sports complex, hostel facilities</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Stack Section -->
+    <section class="tech-stack-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Built with Modern Technology</h2>
+                <p class="section-subtitle">Enterprise-grade architecture for reliability and performance</p>
+            </div>
+            <div class="tech-features">
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>90% faster with multi-tier caching, materialized views, and optimized queries</p>
+                </div>
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">🔒</div>
+                    <h3>Enterprise Security</h3>
+                    <p>JWT authentication, rate limiting, SQL injection protection, XSS prevention, audit logging</p>
+                </div>
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">📱</div>
+                    <h3>Multi-Platform</h3>
+                    <p>Web app, Android PWA/TWA, Desktop (Electron) - works everywhere seamlessly</p>
+                </div>
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">🎨</div>
+                    <h3>Beautiful UI</h3>
+                    <p>Glassmorphism design, smooth animations (GSAP), responsive layout, dark/light themes</p>
+                </div>
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">🔄</div>
+                    <h3>Real-time Updates</h3>
+                    <p>Socket.IO powered live notifications, chat, and instant data synchronization</p>
+                </div>
+                <div class="tech-feature-item glass-card">
+                    <div class="tech-icon">📊</div>
+                    <h3>Advanced Analytics</h3>
+                    <p>ML-powered insights, performance predictions, trend analysis, and comprehensive reports</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Download Now</h2>
+                <p class="section-subtitle">Available on all platforms</p>
+            </div>
+            <div class="download-grid">
+                <div class="download-card glass-card hover-lift">
+                    <div class="download-icon">🌐</div>
+                    <h3>Web App</h3>
+                    <p>Access from any browser, anywhere</p>
+                    <a href="login.html" class="btn btn-primary">Open Web App</a>
+                </div>
+                <div class="download-card glass-card hover-lift">
+                    <div class="download-icon">📱</div>
+                    <h3>Android App</h3>
+                    <p>Full website experience - Android 9+</p>
+                    <a href="/releases/ITER-EduHub-v1.0.0.apk" class="btn btn-primary" download>
+                        <i class="fas fa-download"></i> Download APK
+                    </a>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">
+                        <i class="fas fa-info-circle"></i> 3-5 MB • All features included
+                    </p>
+                </div>
+                <div class="download-card glass-card hover-lift">
+                    <div class="download-icon">💻</div>
+                    <h3>Desktop App <span class="coming-soon-badge">Coming Soon</span></h3>
+                    <p>Windows, Mac, and Linux support</p>
+                    <div class="desktop-downloads">
+                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;">Windows</button>
+                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;">Linux</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">About ITER, SOA University</h2>
+                <p class="section-subtitle">A Legacy of Excellence in Technical Education Since 1996</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p class="about-description">
+                        The Institute of Technical Education and Research (ITER) is a premier constituent college of 
+                        Siksha 'O' Anusandhan (Deemed to be University), Bhubaneswar, Odisha. Established with a vision 
+                        to provide world-class technical education, ITER has been at the forefront of fostering innovation, 
+                        research, and academic excellence for over two decades.
+                    </p>
+                    <p class="about-description">
+                        SOA University is NAAC A++ accredited, recognized by UGC under Section 3 of the UGC Act, 1956, 
+                        and has been granted Category-I status. ITER offers undergraduate, postgraduate, and doctoral 
+                        programs in various engineering disciplines, all designed to meet industry demands and global standards.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">🏆</div>
+                            <h4>NAAC A++ Accredited</h4>
+                            <p>Highest grade for academic excellence and quality education</p>
+                        </div>
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">�</div>
+                            <h4>NBA Accredited</h4>
+                            <p>All major programs accredited by National Board of Accreditation</p>
+                        </div>
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">�🔬</div>
+                            <h4>Research Excellence</h4>
+                            <p>200+ publications, 50+ patents, advanced research centers</p>
+                        </div>
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">🌍</div>
+                            <h4>Global Recognition</h4>
+                            <p>QS ranked, collaborations with 30+ international universities</p>
+                        </div>
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">💼</div>
+                            <h4>95%+ Placement</h4>
+                            <p>Top recruiters: Google, Microsoft, TCS, Wipro, Infosys, Amazon</p>
+                        </div>
+                        <div class="highlight-item glass-card">
+                            <div class="highlight-icon">�‍🎓</div>
+                            <h4>10,000+ Alumni</h4>
+                            <p>Successful graduates working worldwide in leading organizations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vision & Mission -->
+            <div class="vision-mission">
+                <div class="vm-card glass-card">
+                    <div class="vm-icon">🎯</div>
+                    <h3>Our Vision</h3>
+                    <p>To be a globally recognized center of excellence in technical education, research, and innovation, 
+                    producing competent professionals who contribute significantly to societal development and technological advancement.</p>
+                </div>
+                <div class="vm-card glass-card">
+                    <div class="vm-icon">🚀</div>
+                    <h3>Our Mission</h3>
+                    <p>To provide quality education with state-of-the-art infrastructure, foster research and innovation, 
+                    develop industry-ready professionals, promote entrepreneurship, and create a conducive learning environment 
+                    that nurtures creativity, critical thinking, and ethical values.</p>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="achievements-section">
+                <h3 class="achievements-title">Recent Achievements & Rankings</h3>
+                <div class="achievements-grid">
+                    <div class="achievement-item glass-card">
+                        <span class="achievement-badge">🥇</span>
+                        <p><strong>NIRF Rank</strong><br>Among Top 150 Engineering Colleges in India</p>
+                    </div>
+                    <div class="achievement-item glass-card">
+                        <span class="achievement-badge">⭐</span>
+                        <p><strong>QS I-GAUGE</strong><br>Diamond Rating for Academic Excellence</p>
+                    </div>
+                    <div class="achievement-item glass-card">
+                        <span class="achievement-badge">🏅</span>
+                        <p><strong>ARIIA Ranking</strong><br>Recognized for Innovation Achievements</p>
+                    </div>
+                    <div class="achievement-item glass-card">
+                        <span class="achievement-badge">🎓</span>
+                        <p><strong>AICTE Approved</strong><br>All programs approved by AICTE</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Academics Section -->
+    <section id="academics" class="academics-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Academic Programs</h2>
+                <p class="section-subtitle">Industry-aligned programs with NBA accreditation</p>
+            </div>
+            <div class="academics-grid">
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">💻</div>
+                    <h3>Computer Science & Engineering</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: AI/ML, Data Science, Cyber Security, Cloud Computing</p>
+                    <ul class="academic-features">
+                        <li>✓ Industry-relevant curriculum with latest tech stacks</li>
+                        <li>✓ Hands-on labs: AI/ML, IoT, Cloud Computing, Blockchain</li>
+                        <li>✓ Top recruiters: Google, Microsoft, Amazon, Adobe</li>
+                        <li>✓ Research areas: Deep Learning, Computer Vision, NLP</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">⚡</div>
+                    <h3>Electronics & Communication</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: VLSI, Embedded Systems, IoT, Signal Processing</p>
+                    <ul class="academic-features">
+                        <li>✓ Advanced VLSI & PCB design labs</li>
+                        <li>✓ Embedded systems & microcontroller training</li>
+                        <li>✓ Industry tie-ups with Intel, Qualcomm, Texas Instruments</li>
+                        <li>✓ Research in 5G, Wireless Communication, IoT</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">⚙️</div>
+                    <h3>Mechanical Engineering</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: Design, Manufacturing, Thermal, Robotics</p>
+                    <ul class="academic-features">
+                        <li>✓ CAD/CAM/CAE labs with latest software (CATIA, ANSYS)</li>
+                        <li>✓ Modern CNC machines & automation training</li>
+                        <li>✓ Industry internships with L&T, BHEL, Tata Motors</li>
+                        <li>✓ Research in Additive Manufacturing, Robotics</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">🏗️</div>
+                    <h3>Civil Engineering</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: Structural, Environmental, Transportation, Geo-tech</p>
+                    <ul class="academic-features">
+                        <li>✓ Well-equipped labs: Concrete, Soil, Highway, Surveying</li>
+                        <li>✓ Field visits to construction sites & infrastructure projects</li>
+                        <li>✓ Training in STAAD Pro, AutoCAD, Primavera</li>
+                        <li>✓ Research in Sustainable Construction, Smart Cities</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">🔋</div>
+                    <h3>Electrical Engineering</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: Power Systems, Control, Renewable Energy, EV</p>
+                    <ul class="academic-features">
+                        <li>✓ Power systems, machines & control engineering labs</li>
+                        <li>✓ Renewable energy research center (Solar, Wind)</li>
+                        <li>✓ Smart grid & electric vehicle technology training</li>
+                        <li>✓ Placements in power sector (NTPC, Power Grid, ONGC)</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">🌐</div>
+                    <h3>Information Technology</h3>
+                    <p><strong>B.Tech, M.Tech</strong></p>
+                    <p>Specializations: Web Development, Mobile Apps, Networking, Security</p>
+                    <ul class="academic-features">
+                        <li>✓ Full-stack development training (MERN, MEAN)</li>
+                        <li>✓ Cloud computing & DevOps certifications</li>
+                        <li>✓ Cyber security & ethical hacking labs</li>
+                        <li>✓ Placements in IT giants: TCS, Infosys, Wipro, Cognizant</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">🏭</div>
+                    <h3>Industrial & Production</h3>
+                    <p><strong>B.Tech, M.Tech</strong></p>
+                    <p>Specializations: Industrial Management, Operations, Quality Control</p>
+                    <ul class="academic-features">
+                        <li>✓ Operations research & supply chain management</li>
+                        <li>✓ Quality control & Six Sigma training</li>
+                        <li>✓ Industry 4.0 & automation exposure</li>
+                        <li>✓ Placements in manufacturing & consulting firms</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">🧪</div>
+                    <h3>Biotechnology</h3>
+                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
+                    <p>Specializations: Genetic Engineering, Bioinformatics, Bioprocessing</p>
+                    <ul class="academic-features">
+                        <li>✓ State-of-the-art molecular biology labs</li>
+                        <li>✓ Bioinformatics & computational biology</li>
+                        <li>✓ Research in drug discovery, bio-fuels</li>
+                        <li>✓ Collaborations with pharma & biotech companies</li>
+                    </ul>
+                </div>
+                <div class="academic-card glass-card hover-lift">
+                    <div class="academic-icon">📊</div>
+                    <h3>MBA & Management</h3>
+                    <p><strong>MBA (Full-time & Executive)</strong></p>
+                    <p>Specializations: Finance, Marketing, HR, Business Analytics, IT</p>
+                    <ul class="academic-features">
+                        <li>✓ Industry interface with corporate leaders</li>
+                        <li>✓ Live projects & case study methodology</li>
+                        <li>✓ International immersion programs</li>
+                        <li>✓ Placements in top MNCs & consulting firms</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facilities Section -->
+    <section class="facilities-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">World-Class Facilities</h2>
+                <p class="section-subtitle">Infrastructure that inspires learning and innovation</p>
+            </div>
+            <div class="facilities-grid">
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">📚</div>
+                    <h3>Digital Library</h3>
+                    <p>50,000+ books, 5,000+ e-journals, IEEE/Springer databases, digital resources, reading halls</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🔬</div>
+                    <h3>Research Labs</h3>
+                    <p>50+ advanced labs equipped with latest equipment, research centers for AI, IoT, Robotics</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🏫</div>
+                    <h3>Smart Classrooms</h3>
+                    <p>AC classrooms with digital boards, projectors, Wi-Fi, comfortable seating, modern ambiance</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🏃</div>
+                    <h3>Sports Complex</h3>
+                    <p>Basketball, volleyball, badminton courts, gym, yoga center, indoor/outdoor sports facilities</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🏨</div>
+                    <h3>Hostel Facilities</h3>
+                    <p>Separate boys & girls hostels, mess, Wi-Fi, 24/7 security, recreational areas, medical center</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🚌</div>
+                    <h3>Transport</h3>
+                    <p>Bus facility covering all major routes in Bhubaneswar, safe & convenient transport</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">💊</div>
+                    <h3>Health Center</h3>
+                    <p>24/7 medical facility, qualified doctors, ambulance service, health insurance support</p>
+                </div>
+                <div class="facility-card glass-card">
+                    <div class="facility-icon">🍴</div>
+                    <h3>Cafeteria</h3>
+                    <p>Multiple food courts, hygienic & nutritious meals, variety of cuisines, affordable pricing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Placement Section -->
+    <section class="placement-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Placements & Recruiters</h2>
+                <p class="section-subtitle">Connecting talent with opportunity</p>
+            </div>
+            <div class="placement-stats">
+                <div class="placement-stat glass-card">
+                    <h3>95%+</h3>
+                    <p>Overall Placement</p>
+                </div>
+                <div class="placement-stat glass-card">
+                    <h3>30+ LPA</h3>
+                    <p>Highest Package</p>
+                </div>
+                <div class="placement-stat glass-card">
+                    <h3>8+ LPA</h3>
+                    <p>Average Package</p>
+                </div>
+                <div class="placement-stat glass-card">
+                    <h3>200+</h3>
+                    <p>Companies Visit</p>
+                </div>
+            </div>
+            <div class="recruiters-section">
+                <h3>Top Recruiters</h3>
+                <div class="recruiters-grid">
+                    <div class="recruiter-tag">Google</div>
+                    <div class="recruiter-tag">Microsoft</div>
+                    <div class="recruiter-tag">Amazon</div>
+                    <div class="recruiter-tag">Adobe</div>
+                    <div class="recruiter-tag">Flipkart</div>
+                    <div class="recruiter-tag">Walmart</div>
+                    <div class="recruiter-tag">TCS</div>
+                    <div class="recruiter-tag">Infosys</div>
+                    <div class="recruiter-tag">Wipro</div>
+                    <div class="recruiter-tag">Cognizant</div>
+                    <div class="recruiter-tag">Accenture</div>
+                    <div class="recruiter-tag">Capgemini</div>
+                    <div class="recruiter-tag">Oracle</div>
+                    <div class="recruiter-tag">SAP</div>
+                    <div class="recruiter-tag">IBM</div>
+                    <div class="recruiter-tag">Intel</div>
+                    <div class="recruiter-tag">Qualcomm</div>
+                    <div class="recruiter-tag">Texas Instruments</div>
+                    <div class="recruiter-tag">L&T</div>
+                    <div class="recruiter-tag">Tata Motors</div>
+                    <div class="recruiter-tag">BHEL</div>
+                    <div class="recruiter-tag">NTPC</div>
+                    <div class="recruiter-tag">Power Grid</div>
+                    <div class="recruiter-tag">Deloitte</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="section-subtitle">We're here to help you succeed</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">📍</div>
+                    <h3>Visit Us</h3>
+                    <p>Jagamohan Nagar, Khandagiri<br>Bhubaneswar, Odisha 751030</p>
+                </div>
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">📧</div>
+                    <h3>Email Us</h3>
+                    <p>info@iter.ac.in<br>admissions@iter.ac.in</p>
+                </div>
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">📞</div>
+                    <h3>Call Us</h3>
+                    <p>+91-674-2350171<br>+91-674-2351006</p>
+                </div>
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">🕒</div>
+                    <h3>Office Hours</h3>
+                    <p>Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>ITER, SOA University</h4>
+                    <p>Institute of Technical Education & Research</p>
+                    <p>Siksha 'O' Anusandhan (Deemed to be University)</p>
+                    <p style="margin-top: 10px;">
+                        <strong>NAAC A++ Accredited</strong>
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="#about">About Us</a>
+                    <a href="#features">Facilities</a>
+                    <a href="#academics">Academics</a>
+                    <a href="creator.html">About Creator</a>
+                    <a href="login.html">Student Portal</a>
+                    <a href="register.html">Register</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <a href="mailto:info@iter.ac.in">info@iter.ac.in</a>
+                    <a href="tel:+916742350171">+91-674-2350171</a>
+                    <p style="margin-top: 10px; font-size: 0.9em;">
+                        Jagamohan Nagar, Khandagiri<br>
+                        Bhubaneswar, Odisha 751030
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Twitter</a>
+                        <a href="#" class="social-link">LinkedIn</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Institute of Technical Education & Research, SOA University. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- GSAP for Advanced Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lottie for vector animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    
+    <!-- Core Scripts -->
+    <script src="js/mobile-fixes.js"></script>
+    <script src="js/prevent-empty-hash.js"></script>
+    <script src="js/scroll-fix.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script src="js/advanced-animations.js"></script>
+    <script src="js/loading-states.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/notice-ticker.js"></script>
+    <script src="js/navbar-scroll-behavior.js"></script>
+    <script src="js/landing.js"></script>
+</body>
+</html>

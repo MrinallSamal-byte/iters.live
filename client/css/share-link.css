@@ -1,0 +1,466 @@
+/**
+ * Share Link Generator Styles
+ * Modal for creating and managing file share links
+ */
+
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.share-modal-overlay.closing {
+  animation: fadeOut 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.share-modal {
+  background: rgba(30, 30, 50, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.share-modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
+/* Content */
+.share-modal-content {
+  padding: 24px;
+}
+
+/* Form */
+.share-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group label i {
+  color: #667eea;
+  font-size: 16px;
+}
+
+.form-group label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.form-control {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+select.form-control {
+  cursor: pointer;
+}
+
+/* Share Actions */
+.share-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Share Link Container */
+.share-link-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.share-link-success {
+  text-align: center;
+  padding: 20px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.share-link-success i {
+  font-size: 48px;
+  color: #10b981;
+  margin-bottom: 12px;
+}
+
+.share-link-success h4 {
+  font-size: 18px;
+  color: #10b981;
+  margin: 0;
+}
+
+/* Share Link Box */
+.share-link-box {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.share-url-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.share-url-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#copy-link-btn {
+  padding: 12px 20px;
+  white-space: nowrap;
+}
+
+#copy-link-btn.copied {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+/* QR Code */
+.share-qr-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.share-qr-code img {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  background: white;
+  padding: 10px;
+}
+
+.share-qr-code p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Share Details */
+.share-details {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.share-details h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.share-detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-label i {
+  color: #667eea;
+  width: 16px;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .share-modal {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+  }
+
+  .share-modal-header,
+  .share-modal-content {
+    padding: 20px;
+  }
+
+  .share-actions {
+    flex-direction: column;
+  }
+
+  .share-link-box {
+    flex-direction: column;
+  }
+
+  #copy-link-btn {
+    width: 100%;
+  }
+
+  .share-qr-code img {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Dark Theme Adjustments */
+body:not(.dark-theme) .share-modal {
+  background: white;
+}
+
+body:not(.dark-theme) .share-modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark-theme) .form-control {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: #f9fafb;
+}
+
+body:not(.dark-theme) .form-control:focus {
+  background: #f3f4f6;
+}
+
+body:not(.dark-theme) .share-link-box,
+body:not(.dark-theme) .share-qr-code,
+body:not(.dark-theme) .share-details {
+  background: #f9fafb;
+}
+
+body:not(.dark-theme) .share-url-input {
+  background: white;
+}
+
+body:not(.dark-theme) .share-detail-item {
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar */
+.share-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.share-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.share-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.share-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Accessibility */
+.btn:focus-visible,
+.btn-close:focus-visible,
+.form-control:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .share-modal-overlay {
+    display: none;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .share-modal-overlay,
+  .share-modal,
+  .btn,
+  .btn-close {
+    animation: none;
+    transition: none;
+  }
+
+  .btn:hover,
+  .btn-close:hover {
+    transform: none;
+  }
+}

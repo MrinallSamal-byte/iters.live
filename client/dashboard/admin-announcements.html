@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Announcements - Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/clean-dashboard.css" />
+  <link rel="stylesheet" href="../css/universal-sidebar.css" />
+  <link rel="stylesheet" href="../css/universal-profile.css" />
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-animation">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+  <main class="dashboard-main">
+    <!-- Page Hero -->
+    <section class="page-hero glass-card scroll-reveal">
+      <div class="hero-content-inline">
+        <div>
+          <h1 class="page-title">
+            <span class="title-icon">📢</span>
+            Announcements
+          </h1>
+          <p class="page-subtitle">Create and manage institute-wide announcements</p>
+        </div>
+        <div class="hero-actions">
+          <button id="newAnnBtn" class="btn btn-primary">
+            <span>➕</span> Create New
+          </button>
+          <button class="btn btn-secondary" onclick="exportAnnouncements()">
+            <span>📥</span> Export
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics Cards -->
+    <section class="quick-stats stagger-animation">
+      <div class="stat-box success hover-lift scroll-reveal">
+        <div class="stat-icon-large">📊</div>
+        <div class="stat-number" id="totalAnnouncements">--</div>
+        <div class="stat-text">Total</div>
+        <div class="stat-subtext">All announcements</div>
+      </div>
+      <div class="stat-box info hover-lift scroll-reveal">
+        <div class="stat-icon-large">✅</div>
+        <div class="stat-number" id="activeAnnouncements">--</div>
+        <div class="stat-text">Active</div>
+        <div class="stat-subtext">Currently visible</div>
+      </div>
+      <div class="stat-box warning hover-lift scroll-reveal">
+        <div class="stat-icon-large">🔔</div>
+        <div class="stat-number" id="urgentAnnouncements">--</div>
+        <div class="stat-text">Urgent</div>
+        <div class="stat-subtext">High priority</div>
+      </div>
+      <div class="stat-box hover-lift scroll-reveal">
+        <div class="stat-icon-large">📅</div>
+        <div class="stat-number" id="thisMonthAnnouncements">--</div>
+        <div class="stat-text">This Month</div>
+        <div class="stat-subtext">Recent posts</div>
+      </div>
+    </section>
+
+    <!-- Filters and Search -->
+    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+      <div class="section-header-formal">
+        <h3 class="section-title-formal">
+          <span class="title-icon">🔍</span>
+          Filter & Search
+        </h3>
+      </div>
+      
+      <div class="filter-container">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="annSearch" class="filter-label">
+              <span class="filter-icon">🔎</span>
+              Search
+            </label>
+            <input id="annSearch" class="filter-input" placeholder="Search by title, content..." />
+          </div>
+          
+          <div class="filter-group">
+            <label for="filterPriority" class="filter-label">
+              <span class="filter-icon">🎯</span>
+              Priority
+            </label>
+            <select id="filterPriority" class="filter-select">
+              <option value="">All Priorities</option>
+              <option value="urgent">🔴 Urgent</option>
+              <option value="normal">🟢 Normal</option>
+              <option value="info">🔵 Information</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="filterAudience" class="filter-label">
+              <span class="filter-icon">👥</span>
+              Audience
+            </label>
+            <select id="filterAudience" class="filter-select">
+              <option value="">All Audiences</option>
+              <option value="all">Everyone</option>
+              <option value="students">Students Only</option>
+              <option value="teachers">Teachers Only</option>
+              <option value="department">Department Specific</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterStatus" class="filter-label">
+              <span class="filter-icon">📊</span>
+              Status
+            </label>
+            <select id="filterStatus" class="filter-select">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1rem;">
+          <button id="resetFilters" class="btn btn-secondary">
+            <span>↺</span> Reset Filters
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Announcements Grid -->
+    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+      <div class="section-header-formal">
+        <h3 class="section-title-formal">
+          <span class="title-icon">📰</span>
+          All Announcements
+          <span id="annCount" class="result-count"></span>
+        </h3>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid" title="Grid View">
+            <span>⊞</span>
+          </button>
+          <button class="view-btn" data-view="list" title="List View">
+            <span>☰</span>
+          </button>
+        </div>
+      </div>
+      
+      <div id="annList" class="announcements-grid"></div>
+      <div id="annEmpty" class="empty-state" style="display: none;">
+        <div class="empty-icon">📢</div>
+        <h3>No Announcements Found</h3>
+        <p>Create your first announcement to get started</p>
+        <button class="btn btn-primary" onclick="document.getElementById('newAnnBtn').click()">
+          Create Announcement
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create/Edit Announcement Modal -->
+  <div id="announcementModal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeAnnouncementModal()"></div>
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="title-icon">📢</span>
+          <span id="modalTitleText">Create New Announcement</span>
+        </h3>
+        <button class="modal-close" onclick="closeAnnouncementModal()">&times;</button>
+      </div>
+      
+      <form id="announcementForm" class="modal-body">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">📝</span> Title
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="annTitle" name="title" class="form-input" placeholder="Enter announcement title..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">📄</span> Content
+            <span class="required">*</span>
+          </label>
+          <textarea id="annContent" name="content" class="form-textarea" rows="6" placeholder="Enter announcement details..." required></textarea>
+          <small class="form-hint">Use clear and concise language</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🎯</span> Priority
+              <span class="required">*</span>
+            </label>
+            <select id="annPriority" name="priority" class="form-select" required>
+              <option value="normal">🟢 Normal</option>
+              <option value="urgent">🔴 Urgent</option>
+              <option value="info">🔵 Information</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">👥</span> Target Audience
+              <span class="required">*</span>
+            </label>
+            <select id="annAudience" name="audience" class="form-select" required onchange="toggleDepartmentField()">
+              <option value="all">Everyone</option>
+              <option value="students">Students Only</option>
+              <option value="teachers">Teachers Only</option>
+              <option value="department">Specific Department</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" id="departmentRow" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🎓</span> Department
+            </label>
+            <select id="annDepartment" name="department" class="form-select">
+              <option value="">Select Department</option>
+              <option value="CSE">Computer Science & Engineering</option>
+              <option value="IT">Information Technology</option>
+              <option value="ECE">Electronics & Communication</option>
+              <option value="EEE">Electrical & Electronics</option>
+              <option value="MECH">Mechanical Engineering</option>
+              <option value="CIVIL">Civil Engineering</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📅</span> Start Date
+            </label>
+            <input type="date" id="annStartDate" name="start_date" class="form-input">
+            <small class="form-hint">Leave empty for immediate posting</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📅</span> End Date
+            </label>
+            <input type="date" id="annEndDate" name="end_date" class="form-input">
+            <small class="form-hint">Leave empty for no expiration</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" id="annSendEmail" name="send_email">
+            <span>📧 Send email notification to recipients</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" id="annPinned" name="pinned">
+            <span>📌 Pin this announcement to the top</span>
+          </label>
+        </div>
+
+        <input type="hidden" id="annId" name="id">
+        
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Save Announcement
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeAnnouncementModal()">
+            <span>✕</span> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+    <span class="theme-icon">🌙</span>
+  </button>
+
+  <!-- Scripts -->
+  <script src="../js/universal-sidebar.js"></script>
+  <script src="../js/universal-profile.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/prototype-mode.js"></script>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/dummy-data-init.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages/admin-announcements.js"></script>
+
+  <link rel="stylesheet" href="../css/admin-pages-enhanced.css">
+</body>
+</html>

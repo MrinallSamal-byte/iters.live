@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Management - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📝</span>
+                        Assignment Management
+                    </h1>
+                    <p class="page-subtitle">Create, manage and grade student assignments</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📋</div>
+                <div class="stat-number" id="totalAssignments">--</div>
+                <div class="stat-text">Total Assignments</div>
+                <div class="stat-subtext">All time</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="activeAssignments">--</div>
+                <div class="stat-text">Active</div>
+                <div class="stat-subtext">Currently open</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏳</div>
+                <div class="stat-number" id="pendingSubmissions">--</div>
+                <div class="stat-text">Pending Review</div>
+                <div class="stat-subtext">To be graded</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="avgSubmissionRate">--%</div>
+                <div class="stat-text">Submission Rate</div>
+                <div class="stat-subtext">Overall average</div>
+            </div>
+        </section>
+
+        <!-- Create New Assignment -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">➕</span>
+                    Create New Assignment
+                </h3>
+            </div>
+            
+            <form id="createAssignmentForm" class="upload-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="assignmentTitle" class="form-label">
+                            <span class="label-icon">📌</span>
+                            Assignment Title
+                        </label>
+                        <input type="text" id="assignmentTitle" name="title" class="form-input" placeholder="e.g., Data Structures Lab Assignment 1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject" class="form-label">
+                            <span class="label-icon">📖</span>
+                            Subject
+                        </label>
+                        <input type="text" id="subject" name="subject" class="form-input" placeholder="e.g., Data Structures" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <span class="label-icon">📝</span>
+                        Description
+                    </label>
+                    <textarea id="description" name="description" class="form-textarea" rows="4" placeholder="Detailed instructions for the assignment..." required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="department" class="form-label">
+                            <span class="label-icon">🎓</span>
+                            Department
+                        </label>
+                        <select id="department" name="department" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">Computer Science</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                            <option value="IT">Information Technology</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="year" class="form-label">
+                            <span class="label-icon">📚</span>
+                            Year
+                        </label>
+                        <select id="year" name="year" class="form-select" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="section" class="form-label">
+                            <span class="label-icon">📋</span>
+                            Section
+                        </label>
+                        <select id="section" name="section" class="form-select" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                            <option value="ALL">All Sections</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dueDate" class="form-label">
+                            <span class="label-icon">📅</span>
+                            Due Date
+                        </label>
+                        <input type="date" id="dueDate" name="dueDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dueTime" class="form-label">
+                            <span class="label-icon">⏰</span>
+                            Due Time
+                        </label>
+                        <input type="time" id="dueTime" name="dueTime" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxMarks" class="form-label">
+                            <span class="label-icon">💯</span>
+                            Max Marks
+                        </label>
+                        <input type="number" id="maxMarks" name="maxMarks" class="form-input" placeholder="100" min="1" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="attachments" class="form-label">
+                        <span class="label-icon">📎</span>
+                        Attachments (Optional)
+                    </label>
+                    <div class="file-upload-area">
+                        <input type="file" id="attachments" name="attachments" multiple class="file-input">
+                        <div class="file-upload-text">
+                            <span class="upload-icon">📁</span>
+                            <p>Click to upload or drag and drop</p>
+                            <small>PDF, DOC, DOCX, PPT, ZIP (Max 50MB)</small>
+                        </div>
+                    </div>
+                    <div id="fileList" class="file-list"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <span>✓</span> Create Assignment
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <span>↺</span> Reset
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Active Assignments -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Active Assignments
+                </h3>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">All</button>
+                    <button class="tab-btn" data-filter="active">Active</button>
+                    <button class="tab-btn" data-filter="closed">Closed</button>
+                    <button class="tab-btn" data-filter="graded">Graded</button>
+                </div>
+            </div>
+
+            <div class="assignments-grid" id="assignmentsList">
+                <div class="loading-text">Loading assignments...</div>
+            </div>
+        </section>
+
+        <!-- Pending Submissions -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⏳</span>
+                    Pending Submissions to Grade
+                </h3>
+                <span class="notification-badge" id="pendingCount">0</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Student</th>
+                            <th>Roll No</th>
+                            <th>Submitted On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody">
+                        <tr><td colspan="6" class="loading-text">Loading submissions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Assignment Details Modal -->
+    <div id="assignmentModal" class="modal" style="display:none;">
+        <div class="modal-content glass-card modal-large">
+            <div class="modal-header">
+                <h3 id="modalTitle">Assignment Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Grading Modal -->
+    <div id="gradingModal" class="modal" style="display:none;">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Grade Submission</h3>
+                <button class="modal-close" onclick="closeGradingModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="gradingForm">
+                    <div class="form-group">
+                        <label>Student Name</label>
+                        <input type="text" id="studentName" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Marks Obtained</label>
+                        <input type="number" id="marksObtained" class="form-input" placeholder="Enter marks" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Feedback</label>
+                        <textarea id="feedback" class="form-textarea" rows="4" placeholder="Provide feedback to student..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">
+                            <span>✓</span> Submit Grade
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeGradingModal()">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/teacher-assignments.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .upload-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .label-icon {
+            font-size: 1.125rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .file-upload-area {
+            position: relative;
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            background: var(--glass-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-text p {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-text small {
+            color: var(--text-secondary);
+        }
+
+        .file-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+        }
+
+        .file-name {
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .file-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .assignments-grid {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .assignment-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .assignment-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .assignment-subject {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .assignment-status {
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .status-closed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .status-graded {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .assignment-meta {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-icon {
+            font-size: 1rem;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-large {
+            max-width: 900px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .assignment-title,
+        [data-theme="dark"] .file-name,
+        [data-theme="dark"] .modal-header h3 {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .assignment-subject,
+        [data-theme="dark"] .meta-item {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .form-select option {
+            background: rgba(17, 24, 39, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</body>
+</html>

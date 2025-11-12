@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/responsive-universal.css">
+    <link rel="manifest" href="../manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Welcome Section -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        Welcome back, <span id="studentWelcomeName">Student</span>! 👋
+                    </h1>
+                    <p class="page-subtitle">Here's what's happening with your academics today</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="overallAttendance">--</div>
+                <div class="stat-text">Attendance</div>
+                <div class="stat-subtext">Overall percentage</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎯</div>
+                <div class="stat-number" id="currentCGPA">--</div>
+                <div class="stat-text">Current CGPA</div>
+                <div class="stat-subtext">Academic performance</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📝</div>
+                <div class="stat-number" id="pendingAssignments">--</div>
+                <div class="stat-text">Assignments</div>
+                <div class="stat-subtext">Pending submissions</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎉</div>
+                <div class="stat-number" id="upcomingEvents">--</div>
+                <div class="stat-text">Events</div>
+                <div class="stat-subtext">Coming up soon</div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <div class="dashboard-grid">
+            <!-- Attendance Chart -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📊</span>
+                        Attendance Overview
+                    </h3>
+                    <span class="section-badge">Current Semester</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="attendanceChart" height="250"></canvas>
+                </div>
+            </section>
+
+            <!-- Performance Chart -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📈</span>
+                        Academic Performance
+                    </h3>
+                    <span class="section-badge">Progress Tracking</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="performanceChart" height="250"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Today's Schedule -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📅</span>
+                    Today's Schedule
+                </h3>
+                <span class="section-badge">Active Classes</span>
+            </div>
+            <div id="todaySchedule" class="schedule-grid">
+                <div class="loading-text">Loading schedule...</div>
+            </div>
+        </section>
+
+        <!-- Grid Layout: Announcements & Upcoming Deadlines -->
+        <div class="dashboard-grid">
+            <!-- Announcements -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📢</span>
+                        Announcements
+                    </h3>
+                    <span class="notification-badge">3 New</span>
+                </div>
+                <div id="announcementsList" class="announcements-list">
+                    <div class="announcement-item">
+                        <div class="announcement-header">
+                            <span class="priority-badge priority-urgent">Urgent</span>
+                            <span class="announcement-date">2 hours ago</span>
+                        </div>
+                        <div class="announcement-content">
+                            <h4 class="announcement-title">Mid-Term Examination Schedule</h4>
+                            <p class="announcement-text">Mid-term examinations will commence from next week. Check your timetable for details.</p>
+                        </div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-header">
+                            <span class="priority-badge priority-info">Info</span>
+                            <span class="announcement-date">5 hours ago</span>
+                        </div>
+                        <div class="announcement-content">
+                            <h4 class="announcement-title">Library Hours Extended</h4>
+                            <p class="announcement-text">Central library hours extended till 10 PM during examination period.</p>
+                        </div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-header">
+                            <span class="priority-badge priority-reminder">Reminder</span>
+                            <span class="announcement-date">1 day ago</span>
+                        </div>
+                        <div class="announcement-content">
+                            <h4 class="announcement-title">Fee Payment Deadline</h4>
+                            <p class="announcement-text">Semester fee payment deadline is approaching. Pay before the due date to avoid penalties.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upcoming Deadlines -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">⏰</span>
+                        Upcoming Deadlines
+                    </h3>
+                </div>
+                <div id="deadlinesList" class="deadlines-list">
+                    <div class="deadline-item">
+                        <div class="deadline-header">
+                            <span class="deadline-type">Assignment</span>
+                            <span class="time-remaining urgent">2 days</span>
+                        </div>
+                        <h4 class="deadline-title">Data Structures Project</h4>
+                        <div class="deadline-details">
+                            <span class="deadline-date">📅 Due: Oct 15, 2025</span>
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-header">
+                            <span class="deadline-type">Exam</span>
+                            <span class="time-remaining warning">5 days</span>
+                        </div>
+                        <h4 class="deadline-title">Database Systems Mid-Term</h4>
+                        <div class="deadline-details">
+                            <span class="deadline-date">📅 Exam: Oct 18, 2025</span>
+                        </div>
+                    </div>
+                    <div class="deadline-item">
+                        <div class="deadline-header">
+                            <span class="deadline-type">Submission</span>
+                            <span class="time-remaining normal">1 week</span>
+                        </div>
+                        <h4 class="deadline-title">Lab Report - Computer Networks</h4>
+                        <div class="deadline-details">
+                            <span class="deadline-date">📅 Due: Oct 20, 2025</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Recent Activity -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🕒</span>
+                    Recent Activity
+                </h3>
+            </div>
+            <div id="recentActivity" class="activity-timeline">
+                <div class="loading-text">Loading recent activity...</div>
+            </div>
+        </section>
+
+        <!-- Quick Links -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔗</span>
+                    Quick Links
+                </h3>
+            </div>
+            <div class="quick-links-grid">
+                <a href="student-attendance.html" class="quick-link-card">
+                    <div class="quick-link-icon">📊</div>
+                    <div class="quick-link-content">
+                        <h4>View Attendance</h4>
+                        <p>Check your attendance records</p>
+                    </div>
+                </a>
+                <a href="student-marks.html" class="quick-link-card">
+                    <div class="quick-link-icon">📈</div>
+                    <div class="quick-link-content">
+                        <h4>View Marks</h4>
+                        <p>Check your academic scores</p>
+                    </div>
+                </a>
+                <a href="student-timetable.html" class="quick-link-card">
+                    <div class="quick-link-icon">📅</div>
+                    <div class="quick-link-content">
+                        <h4>Timetable</h4>
+                        <p>View your class schedule</p>
+                    </div>
+                </a>
+                <a href="student-notes.html" class="quick-link-card">
+                    <div class="quick-link-icon">📚</div>
+                    <div class="quick-link-content">
+                        <h4>Study Notes</h4>
+                        <p>Access learning materials</p>
+                    </div>
+                </a>
+                <a href="student-admit-card.html" class="quick-link-card">
+                    <div class="quick-link-icon">🎫</div>
+                    <div class="quick-link-content">
+                        <h4>Admit Card</h4>
+                        <p>Download exam hall ticket</p>
+                    </div>
+                </a>
+                <a href="student-events.html" class="quick-link-card">
+                    <div class="quick-link-icon">🎉</div>
+                    <div class="quick-link-content">
+                        <h4>Events</h4>
+                        <p>Upcoming campus events</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts - Load in specific order -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/pages/student-dashboard.js"></script>
+    <script src="../js/student.js"></script>
+    
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-wrapper {
+            padding: 1.5rem;
+        }
+
+        .schedule-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .schedule-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .schedule-item:hover {
+            transform: translateX(5px);
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .quick-link-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .quick-link-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .quick-link-content h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .quick-link-content p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .activity-timeline {
+            margin-top: 1rem;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-left: 2px solid var(--glass-border);
+            margin-left: 1rem;
+            position: relative;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 1.25rem;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</body>
+</html>

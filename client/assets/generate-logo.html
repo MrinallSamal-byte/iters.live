@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Logo</title>
+</head>
+<body>
+    <canvas id="canvas" width="256" height="256"></canvas>
+    <div>
+        <button onclick="downloadLogo()">Download logo.png</button>
+        <button onclick="downloadIcon()">Download icon.png</button>
+    </div>
+    
+    <script>
+        function drawLogo(ctx, size) {
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(1, '#8b5cf6');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Book icon
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(size * 0.25, size * 0.3, size * 0.5, size * 0.4);
+            
+            // Book spine
+            ctx.fillStyle = '#6366f1';
+            ctx.fillRect(size * 0.48, size * 0.3, size * 0.04, size * 0.4);
+            
+            // Text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.2}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('ITER', size / 2, size * 0.75);
+        }
+        
+        function downloadLogo() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 256;
+            drawLogo(ctx, 256);
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'logo.png';
+                a.click();
+            });
+        }
+        
+        function downloadIcon() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 512;
+            drawLogo(ctx, 512);
+            
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icon.png';
+                a.click();
+            });
+        }
+        
+        // Initial draw
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        drawLogo(ctx, 256);
+    </script>
+</body>
+</html>

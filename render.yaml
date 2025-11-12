@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: iter-aio
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_WHITELIST
+        value: https://iter-aio.onrender.com
+      - key: MAX_FILE_SIZE
+        value: "10485760"
+    disk:
+      name: uploads
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
+
+## Using an existing Render PostgreSQL database as provided. No auto DB provision here.

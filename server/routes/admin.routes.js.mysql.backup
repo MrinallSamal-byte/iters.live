@@ -1,0 +1,95 @@
+const express = require('express');
+const router = express.Router();
+const { query } = require('../database/db');
+const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const bcrypt = require('bcrypt');
+
+// User management
+router.get('/users', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { role, department, page = 1, limit = 50 } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 50;
+    const offset = (pageNum - 1) * limitNum;
+    
+    let whereClause = '';
+    let params = [];
+    
+    if (role) {
+      whereClause += ' WHERE role = ?';
+      params.push(role);
+    }
+    if (department) {
+      whereClause += (whereClause ? ' AND' : ' WHERE') + ' department = ?';
+      params.push(department);
+    }
+
+    // Use direct values for LIMIT and OFFSET instead of placeholders
+    const users = await query(
+      `SELECT id, name, registration_number, email, phone_number, role, department, year, section, is_active, created_at 
+       FROM users ${whereClause} ORDER BY created_at DESC LIMIT ${limitNum} OFFSET ${offset}`,
+      params
+    );
+
+    res.json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { name, registration_number, email, password, phone_number, department, year, section, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    const result = await query(
+      'INSERT INTO users (name, registration_number, email, password, phone_number, department, year, section, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, registration_number, email, hashedPassword, phone_number, department, year, section, role]
+    );
+
+    res.status(201).json({ success: true, message: 'User created successfully', data: { id: result.insertId } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/users/:id/toggle-active', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    await query('UPDATE users SET is_active = NOT is_active WHERE id = ?', [req.params.id]);
+    res.json({ success: true, message: 'User status updated' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Approvals queue
+router.get('/approvals/files', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const files = await query(
+      `SELECT f.*, u.name as uploaded_by_name FROM files f
+       LEFT JOIN users u ON f.uploaded_by = u.id
+       WHERE f.approved = FALSE ORDER BY f.created_at DESC LIMIT 100`
+    );
+    res.json({ success: true, data: files });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Activity logs
+router.get('/logs', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { limit = 100 } = req.query;
+    const logs = await query(
+      `SELECT al.*, u.name as user_name FROM activity_log al
+       LEFT JOIN users u ON al.user_id = u.id
+       ORDER BY al.created_at DESC LIMIT ?`,
+      [parseInt(limit)]
+    );
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;

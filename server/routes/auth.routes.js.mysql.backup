@@ -1,0 +1,467 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
+const { query, transaction } = require('../database/db');
+const { authMiddleware } = require('../middleware/auth');
+const autoDataGenerator = require('../services/autoDataGenerator');
+
+/**
+ * Generate JWT tokens
+ */
+const generateTokens = (userId, role) => {
+  const accessToken = jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || '1h' }
+  );
+
+  const refreshToken = jwt.sign(
+    { userId, role },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' }
+  );
+
+  return { accessToken, refreshToken };
+};
+
+/**
+ * Store refresh token in database
+ */
+const storeRefreshToken = async (userId, refreshToken) => {
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  await query(
+    'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)',
+    [userId, refreshToken, expiresAt]
+  );
+};
+
+/**
+ * POST /api/auth/register-student
+ * Register a new student with automatic dummy data generation
+ */
+router.post('/register-student', [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+  body('registration_number').trim().notEmpty().withMessage('Registration number is required'),
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('password')
+    .isLength({ min: 10 }).withMessage('Password must be at least 10 characters')
+    .matches(/[A-Z]/).withMessage('Password must contain uppercase letter')
+    .matches(/[a-z]/).withMessage('Password must contain lowercase letter')
+    .matches(/[0-9]/).withMessage('Password must contain number')
+    .matches(/[!@#$%^&*]/).withMessage('Password must contain special character'),
+  body('phone').optional().trim(),
+  body('phone_number').optional().trim(),
+  body('department').trim().notEmpty().withMessage('Department is required'),
+  body('year').isInt({ min: 1, max: 5 }).withMessage('Valid year is required'),
+  body('section').trim().notEmpty().withMessage('Section is required')
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const {
+      name,
+      registration_number,
+      email,
+      password,
+      department,
+      year,
+      section
+    } = req.body;
+    const phone_number = req.body.phone_number || req.body.phone || null;
+
+    // Check if user already exists
+    const existingUsers = await query(
+      'SELECT id FROM users WHERE registration_number = ? OR email = ?',
+      [registration_number, email]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Registration number or email already exists'
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Insert user
+    const result = await query(
+      `INSERT INTO users (name, registration_number, email, password, phone_number, 
+       department, year, section, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'student')`,
+      [name, registration_number, email, hashedPassword, phone_number, department, year, section]
+    );
+
+    const userId = result.insertId;
+
+    // AUTO-GENERATE DUMMY DATA FOR NEW STUDENT
+    try {
+      console.log(`🎯 Auto-generating data for new student: ${userId}`);
+      await autoDataGenerator.generateForNewUser(userId, {
+        role: 'student',
+        department,
+        year: parseInt(year),
+        section,
+        name,
+        registration_number
+      });
+      console.log(`✅ Successfully generated data for student: ${userId}`);
+    } catch (dataGenError) {
+      console.error('⚠️ Data generation failed (non-critical):', dataGenError);
+      // Don't fail registration if data generation fails
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(userId, 'student');
+    await storeRefreshToken(userId, refreshToken);
+
+    res.status(201).json({
+      success: true,
+      message: 'Student registered successfully with complete profile data',
+      data: {
+        user: {
+          id: userId,
+          name,
+          registration_number,
+          email,
+          role: 'student',
+          department,
+          year,
+          section
+        },
+        accessToken,
+        refreshToken
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/auth/register-teacher
+ * Register a new teacher with automatic dummy data generation
+ */
+router.post('/register-teacher', [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+  body('registration_number').trim().notEmpty().withMessage('Registration number is required'),
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('password')
+    .isLength({ min: 10 }).withMessage('Password must be at least 10 characters')
+    .matches(/[A-Z]/).withMessage('Password must contain uppercase letter')
+    .matches(/[a-z]/).withMessage('Password must contain lowercase letter')
+    .matches(/[0-9]/).withMessage('Password must contain number')
+    .matches(/[!@#$%^&*]/).withMessage('Password must contain special character'),
+  body('phone').optional().trim(),
+  body('phone_number').optional().trim(),
+  body('department').trim().notEmpty().withMessage('Department is required'),
+  body('subjects_taught').trim().notEmpty().withMessage('Subjects taught is required')
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const {
+      name,
+      registration_number,
+      email,
+      password,
+      department,
+      subjects_taught
+    } = req.body;
+    const phone_number = req.body.phone_number || req.body.phone || null;
+
+    // Check if user already exists
+    const existingUsers = await query(
+      'SELECT id FROM users WHERE registration_number = ? OR email = ?',
+      [registration_number, email]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Registration number or email already exists'
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Insert user
+    const result = await query(
+      `INSERT INTO users (name, registration_number, email, password, phone_number, 
+       department, subjects_taught, role) VALUES (?, ?, ?, ?, ?, ?, ?, 'teacher')`,
+      [name, registration_number, email, hashedPassword, phone_number, department, subjects_taught]
+    );
+
+    const userId = result.insertId;
+
+    // AUTO-GENERATE DUMMY DATA FOR NEW TEACHER
+    try {
+      console.log(`🎯 Auto-generating data for new teacher: ${userId}`);
+      await autoDataGenerator.generateForNewUser(userId, {
+        role: 'teacher',
+        department,
+        name,
+        registration_number,
+        subjects_taught
+      });
+      console.log(`✅ Successfully generated data for teacher: ${userId}`);
+    } catch (dataGenError) {
+      console.error('⚠️ Data generation failed (non-critical):', dataGenError);
+      // Don't fail registration if data generation fails
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(userId, 'teacher');
+    await storeRefreshToken(userId, refreshToken);
+
+    res.status(201).json({
+      success: true,
+      message: 'Teacher registered successfully with complete profile',
+      data: {
+        user: {
+          id: userId,
+          name,
+          registration_number,
+          email,
+          role: 'teacher',
+          department,
+          subjects_taught
+        },
+        accessToken,
+        refreshToken
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/auth/login
+ * Login with registration_number and password
+ */
+router.post('/login', [
+  body('registration_number').trim().notEmpty().withMessage('Registration number is required'),
+  body('password').notEmpty().withMessage('Password is required')
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const { registration_number, password } = req.body;
+
+    // Find user with better error handling
+    let users;
+    try {
+      users = await query(
+        `SELECT id, name, registration_number, email, password, role, department, 
+         year, section, subjects_taught, profile_picture, is_active 
+         FROM users WHERE registration_number = ?`,
+        [registration_number]
+      );
+    } catch (dbError) {
+      console.error('Database error during login:', dbError);
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection error. Please try again later.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid registration number or password'
+      });
+    }
+
+    const user = users[0];
+
+    if (!user.is_active) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is inactive. Please contact administrator.'
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid registration number or password'
+      });
+    }
+
+    // Update last login (non-critical, don't fail if it errors)
+    try {
+      await query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    } catch (updateError) {
+      console.warn('Failed to update last login:', updateError.message);
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(user.id, user.role);
+    
+    // Store refresh token (non-critical for login success)
+    try {
+      await storeRefreshToken(user.id, refreshToken);
+    } catch (tokenError) {
+      console.warn('Failed to store refresh token:', tokenError.message);
+    }
+
+    // Remove password from response
+    delete user.password;
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        user,
+        accessToken,
+        refreshToken
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    // Ensure JSON response even if error handler fails
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred during login. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    } else {
+      next(error);
+    }
+  }
+});
+
+/**
+ * POST /api/auth/refresh
+ * Refresh access token using refresh token
+ */
+router.post('/refresh', async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Check if token exists in database
+    const tokens = await query(
+      'SELECT * FROM refresh_tokens WHERE token = ? AND user_id = ? AND expires_at > NOW()',
+      [refreshToken, decoded.userId]
+    );
+
+    if (tokens.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token'
+      });
+    }
+
+    // Generate new access token
+    const accessToken = jwt.sign(
+      { userId: decoded.userId, role: decoded.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '1h' }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        accessToken
+      }
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid refresh token'
+    });
+  }
+});
+
+/**
+ * POST /api/auth/logout
+ * Logout and invalidate refresh token
+ */
+router.post('/logout', authMiddleware, async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      await query('DELETE FROM refresh_tokens WHERE token = ?', [refreshToken]);
+    }
+
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/auth/me
+ * Get current user profile
+ */
+router.get('/me', authMiddleware, async (req, res, next) => {
+  try {
+    const users = await query(
+      `SELECT id, name, registration_number, email, 
+       phone_number AS phone, role, 
+       department, year, section, subjects_taught, 
+       profile_picture AS profile_pic, 
+       created_at, last_login FROM users WHERE id = ?`,
+      [req.user.id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: users[0]
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;

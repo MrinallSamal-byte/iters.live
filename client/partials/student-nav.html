@@ -1,0 +1,215 @@
+<!-- Sidebar Navigation -->
+<style>
+    .sidebar-nav {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255,255,255,0.1);
+        z-index: 1000;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar-nav.collapsed {
+        transform: translateX(-280px);
+    }
+    
+    .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .sidebar-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .sidebar-user-info h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .sidebar-user-info p {
+        margin: 3px 0 0 0;
+        font-size: 0.85rem;
+        color: #888;
+    }
+    
+    .sidebar-menu {
+        padding: 20px 0;
+    }
+    
+    .sidebar-menu-item {
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: inherit;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+    }
+    
+    .sidebar-menu-item:hover {
+        background: rgba(255,255,255,0.05);
+        border-left-color: #667eea;
+    }
+    
+    .sidebar-menu-item.active {
+        background: rgba(102, 126, 234, 0.2);
+        border-left-color: #667eea;
+        font-weight: 600;
+    }
+    
+    .sidebar-menu-icon {
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+    }
+    
+    .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        left: 300px;
+        background: rgba(102, 126, 234, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 10px;
+        cursor: pointer;
+        z-index: 1001;
+        transition: left 0.3s ease;
+    }
+    
+    .sidebar-toggle.collapsed {
+        left: 20px;
+    }
+    
+    .dashboard-main {
+        margin-left: 280px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .dashboard-main.expanded {
+        margin-left: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar-nav {
+            transform: translateX(-280px);
+        }
+        
+        .sidebar-nav.mobile-open {
+            transform: translateX(0);
+        }
+        
+        .sidebar-toggle {
+            left: 20px;
+        }
+        
+        .dashboard-main {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+    <span style="font-size: 1.2rem;">☰</span>
+</button>
+
+<nav class="sidebar-nav" id="sidebarNav">
+    <div class="sidebar-header">
+        <div class="sidebar-avatar" id="sidebarAvatar">S</div>
+        <div class="sidebar-user-info">
+            <h3 id="sidebarUserName">Student</h3>
+            <p id="sidebarUserRole">Student Account</p>
+        </div>
+    </div>
+    
+    <div class="sidebar-menu">
+        <a href="student.html" class="sidebar-menu-item" id="nav-dashboard">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🏠</span>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="student-attendance.html" class="sidebar-menu-item" id="nav-attendance">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">📊</span>
+            <span>Attendance</span>
+        </a>
+        
+        <a href="student-marks.html" class="sidebar-menu-item" id="nav-marks">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🎓</span>
+            <span>Marks</span>
+        </a>
+        
+        <a href="student-admit-card.html" class="sidebar-menu-item" id="nav-admit-card">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🎫</span>
+            <span>Admit Card</span>
+        </a>
+        
+        <a href="student-hostel-menu.html" class="sidebar-menu-item" id="nav-hostel">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🍽️</span>
+            <span>Hostel Menu</span>
+        </a>
+        
+        <a href="student-timetable.html" class="sidebar-menu-item" id="nav-timetable">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">📅</span>
+            <span>Timetable</span>
+        </a>
+        
+        <a href="student-notes.html" class="sidebar-menu-item" id="nav-notes">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">📚</span>
+            <span>Notes</span>
+        </a>
+        
+        <a href="student-events.html" class="sidebar-menu-item" id="nav-events">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🎉</span>
+            <span>Events</span>
+        </a>
+        
+        <a href="student-clubs.html" class="sidebar-menu-item" id="nav-clubs">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">👥</span>
+            <span>Clubs</span>
+        </a>
+        
+        <a href="#" class="sidebar-menu-item" id="nav-profile" onclick="event.preventDefault(); window.APP && window.APP.openProfile && window.APP.openProfile();">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">👤</span>
+            <span>Profile</span>
+        </a>
+        
+        <a href="#" class="sidebar-menu-item" id="nav-logout" onclick="event.preventDefault(); window.APP && window.APP.logout && window.APP.logout();">
+            <span class="active-indicator" aria-hidden="true"></span>
+            <span class="sidebar-menu-icon">🚪</span>
+            <span>Logout</span>
+        </a>
+    </div>
+</nav>
+
+<!-- Inline script removed; nav behaviors are initialized by nav-loader.js after injection -->

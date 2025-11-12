@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Departments - Admin Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/clean-dashboard.css" />
+  <link rel="stylesheet" href="../css/universal-sidebar.css" />
+  <link rel="stylesheet" href="../css/universal-profile.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-animation">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+  </div>
+
+  <main class="dashboard-main">
+    <!-- Page Hero -->
+    <section class="page-hero glass-card scroll-reveal">
+      <div class="hero-content-inline">
+        <div>
+          <h1 class="page-title">
+            <span class="title-icon">🎓</span>
+            Departments
+          </h1>
+          <p class="page-subtitle">Manage academic departments and view statistics</p>
+        </div>
+        <div class="hero-actions">
+          <button id="addDeptBtn" class="btn btn-primary">
+            <span>➕</span> Add Department
+          </button>
+          <button class="btn btn-secondary" onclick="exportDepartments()">
+            <span>📥</span> Export
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics Cards -->
+    <section class="quick-stats stagger-animation">
+      <div class="stat-box success hover-lift scroll-reveal">
+        <div class="stat-icon-large">🏛️</div>
+        <div class="stat-number" id="totalDepartments">--</div>
+        <div class="stat-text">Departments</div>
+        <div class="stat-subtext">Total active</div>
+      </div>
+      <div class="stat-box info hover-lift scroll-reveal">
+        <div class="stat-icon-large">👨‍🎓</div>
+        <div class="stat-number" id="totalStudents">--</div>
+        <div class="stat-text">Total Students</div>
+        <div class="stat-subtext">All departments</div>
+      </div>
+      <div class="stat-box warning hover-lift scroll-reveal">
+        <div class="stat-icon-large">👨‍🏫</div>
+        <div class="stat-number" id="totalTeachers">--</div>
+        <div class="stat-text">Total Faculty</div>
+        <div class="stat-subtext">Teaching staff</div>
+      </div>
+      <div class="stat-box hover-lift scroll-reveal">
+        <div class="stat-icon-large">📚</div>
+        <div class="stat-number" id="totalCourses">--</div>
+        <div class="stat-text">Total Courses</div>
+        <div class="stat-subtext">Across all depts</div>
+      </div>
+    </section>
+
+    <!-- Charts Row -->
+    <div class="dashboard-grid" style="margin-bottom: 2rem;">
+      <!-- Department Distribution Chart -->
+      <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <div class="section-header-formal">
+          <h3 class="section-title-formal">
+            <span class="title-icon">📊</span>
+            Student Distribution
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="studentDistChart" height="250"></canvas>
+        </div>
+      </section>
+
+      <!-- Faculty Distribution Chart -->
+      <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <div class="section-header-formal">
+          <h3 class="section-title-formal">
+            <span class="title-icon">👥</span>
+            Faculty Distribution
+          </h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="facultyDistChart" height="250"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- Search and Filter -->
+    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+      <div class="section-header-formal">
+        <h3 class="section-title-formal">
+          <span class="title-icon">🔍</span>
+          Search & Filter
+        </h3>
+      </div>
+      
+      <div class="filter-container">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="deptSearch" class="filter-label">
+              <span class="filter-icon">🔎</span>
+              Search
+            </label>
+            <input id="deptSearch" class="filter-input" placeholder="Search by name, code, or HOD..." />
+          </div>
+          
+          <div class="filter-group">
+            <label for="sortBy" class="filter-label">
+              <span class="filter-icon">📊</span>
+              Sort By
+            </label>
+            <select id="sortBy" class="filter-select">
+              <option value="name">Department Name</option>
+              <option value="students">Number of Students</option>
+              <option value="teachers">Number of Faculty</option>
+              <option value="courses">Number of Courses</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1rem;">
+          <button id="resetFilters" class="btn btn-secondary">
+            <span>↺</span> Reset Filters
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Departments View -->
+    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+      <div class="section-header-formal">
+        <h3 class="section-title-formal">
+          <span class="title-icon">🏛️</span>
+          All Departments
+          <span id="deptCount" class="result-count"></span>
+        </h3>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="cards" title="Card View">
+            <span>⊞</span>
+          </button>
+          <button class="view-btn" data-view="table" title="Table View">
+            <span>☰</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Cards View -->
+      <div id="deptCards" class="departments-grid"></div>
+      
+      <!-- Table View -->
+      <div id="deptTable" class="table-responsive" style="display: none;">
+        <table class="data-table modern-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>HOD</th>
+              <th>Students</th>
+              <th>Faculty</th>
+              <th>Courses</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deptTableBody">
+            <tr><td colspan="7" class="loading-text">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="deptEmpty" class="empty-state" style="display: none;">
+        <div class="empty-icon">🎓</div>
+        <h3>No Departments Found</h3>
+        <p>Add your first department to get started</p>
+        <button class="btn btn-primary" onclick="document.getElementById('addDeptBtn').click()">
+          Add Department
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add/Edit Department Modal -->
+  <div id="departmentModal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeDepartmentModal()"></div>
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="title-icon">🎓</span>
+          <span id="modalTitleText">Add New Department</span>
+        </h3>
+        <button class="modal-close" onclick="closeDepartmentModal()">&times;</button>
+      </div>
+      
+      <form id="departmentForm" class="modal-body">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">🏷️</span> Department Code
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="deptCode" name="code" class="form-input" placeholder="e.g., CSE" required maxlength="10">
+          <small class="form-hint">Short code for the department</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">📝</span> Department Name
+            <span class="required">*</span>
+          </label>
+          <input type="text" id="deptName" name="name" class="form-input" placeholder="e.g., Computer Science & Engineering" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">👨‍💼</span> Head of Department (HOD)
+          </label>
+          <input type="text" id="deptHOD" name="hod" class="form-input" placeholder="Enter HOD name">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📧</span> Department Email
+            </label>
+            <input type="email" id="deptEmail" name="email" class="form-input" placeholder="dept@iter.edu">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">📞</span> Contact Number
+            </label>
+            <input type="tel" id="deptPhone" name="phone" class="form-input" placeholder="+91 1234567890">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">📄</span> Description
+          </label>
+          <textarea id="deptDesc" name="description" class="form-textarea" rows="4" placeholder="Brief description about the department..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox">
+            <input type="checkbox" id="deptActive" name="active" checked>
+            <span>✓ Department is active</span>
+          </label>
+        </div>
+
+        <input type="hidden" id="deptId" name="id">
+        
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Save Department
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeDepartmentModal()">
+            <span>✕</span> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+    <span class="theme-icon">🌙</span>
+  </button>
+
+  <!-- Scripts -->
+  <script src="../js/universal-sidebar.js"></script>
+  <script src="../js/universal-profile.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/prototype-mode.js"></script>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/dummy-data-init.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages/admin-departments.js"></script>
+
+  <link rel="stylesheet" href="../css/admin-pages-enhanced.css">
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Sidebar will be injected by student-sidebar.js -->
+    
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">🎉</span>
+                        Campus Events
+                    </h1>
+                    <p class="page-subtitle">Discover and register for exciting college events</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎭</div>
+                <div class="stat-number" id="totalEvents">--</div>
+                <div class="stat-text">Total Events</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="registeredEvents">--</div>
+                <div class="stat-text">Registered</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📅</div>
+                <div class="stat-number" id="upcomingEvents">--</div>
+                <div class="stat-text">Upcoming</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏰</div>
+                <div class="stat-number" id="todayEvents">--</div>
+                <div class="stat-text">Today</div>
+            </div>
+        </section>
+
+        <!-- Event Filters -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔍</span>
+                    Filter Events
+                </h3>
+            </div>
+            <div class="event-filters">
+                <button class="filter-chip active" data-category="all">All Events</button>
+                <button class="filter-chip" data-category="technical">💻 Technical</button>
+                <button class="filter-chip" data-category="cultural">🎨 Cultural</button>
+                <button class="filter-chip" data-category="sports">⚽ Sports</button>
+                <button class="filter-chip" data-category="workshop">🛠️ Workshop</button>
+                <button class="filter-chip" data-category="seminar">📢 Seminar</button>
+                <button class="filter-chip" data-category="competition">🏆 Competition</button>
+            </div>
+        </section>
+
+        <!-- Events Grid -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🎪</span>
+                    Available Events
+                </h3>
+                <span class="section-badge">Browse & Register</span>
+            </div>
+            <div class="events-grid" id="eventsGrid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎪</div>
+                    <p>Loading events...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/student-events.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .hero-content-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .event-filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .filter-chip {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .filter-chip.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .event-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .event-banner {
+            height: 150px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .event-category-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+        }
+        
+        .event-content {
+            padding: 1.5rem;
+        }
+        
+        .event-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+        
+        .event-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .event-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .event-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .event-participants {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .register-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .register-btn.registered {
+            background: linear-gradient(135deg, var(--success), #22c55e);
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

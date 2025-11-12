@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">❓</span>
+                        Question Bank
+                    </h1>
+                    <p class="page-subtitle">Create and manage exam questions and question papers</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📝</div>
+                <div class="stat-number" id="totalQuestions">--</div>
+                <div class="stat-text">Total Questions</div>
+                <div class="stat-subtext">In database</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">📄</div>
+                <div class="stat-number" id="questionPapers">--</div>
+                <div class="stat-text">Question Papers</div>
+                <div class="stat-subtext">Generated</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎯</div>
+                <div class="stat-number" id="subjectCovered">--</div>
+                <div class="stat-text">Subjects</div>
+                <div class="stat-subtext">Coverage</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">⭐</div>
+                <div class="stat-number" id="avgDifficulty">--</div>
+                <div class="stat-text">Avg Difficulty</div>
+                <div class="stat-subtext">Question level</div>
+            </div>
+        </section>
+
+        <!-- Create Question -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">➕</span>
+                    Add New Question
+                </h3>
+            </div>
+            
+            <form id="addQuestionForm" class="upload-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject" class="form-label">
+                            <span class="label-icon">📖</span>
+                            Subject
+                        </label>
+                        <input type="text" id="subject" name="subject" class="form-input" placeholder="e.g., Data Structures" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="unit" class="form-label">
+                            <span class="label-icon">📑</span>
+                            Unit/Chapter
+                        </label>
+                        <input type="text" id="unit" name="unit" class="form-input" placeholder="e.g., Unit 1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="topic" class="form-label">
+                            <span class="label-icon">🏷️</span>
+                            Topic
+                        </label>
+                        <input type="text" id="topic" name="topic" class="form-input" placeholder="e.g., Arrays" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="questionType" class="form-label">
+                            <span class="label-icon">📋</span>
+                            Question Type
+                        </label>
+                        <select id="questionType" name="questionType" class="form-select" required onchange="toggleMCQOptions()">
+                            <option value="">Select Type</option>
+                            <option value="mcq">Multiple Choice (MCQ)</option>
+                            <option value="short">Short Answer</option>
+                            <option value="long">Long Answer/Essay</option>
+                            <option value="numerical">Numerical</option>
+                            <option value="true-false">True/False</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficulty" class="form-label">
+                            <span class="label-icon">🎯</span>
+                            Difficulty Level
+                        </label>
+                        <select id="difficulty" name="difficulty" class="form-select" required>
+                            <option value="">Select Difficulty</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="marks" class="form-label">
+                            <span class="label-icon">💯</span>
+                            Marks
+                        </label>
+                        <input type="number" id="marks" name="marks" class="form-input" placeholder="e.g., 5" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bloomLevel" class="form-label">
+                            <span class="label-icon">🧠</span>
+                            Bloom's Level
+                        </label>
+                        <select id="bloomLevel" name="bloomLevel" class="form-select">
+                            <option value="">Select Level</option>
+                            <option value="remember">Remember</option>
+                            <option value="understand">Understand</option>
+                            <option value="apply">Apply</option>
+                            <option value="analyze">Analyze</option>
+                            <option value="evaluate">Evaluate</option>
+                            <option value="create">Create</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="question" class="form-label">
+                        <span class="label-icon">❓</span>
+                        Question Text
+                    </label>
+                    <textarea id="question" name="question" class="form-textarea" rows="4" placeholder="Enter the question text..." required></textarea>
+                </div>
+
+                <!-- MCQ Options (shown only for MCQ type) -->
+                <div id="mcqOptions" class="mcq-options-section" style="display:none;">
+                    <h4 class="options-title">MCQ Options</h4>
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label class="option-label">
+                                <input type="radio" name="correctOption" value="A">
+                                <span>Option A (Correct)</span>
+                            </label>
+                            <textarea class="option-input" id="optionA" placeholder="Enter option A..."></textarea>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">
+                                <input type="radio" name="correctOption" value="B">
+                                <span>Option B (Correct)</span>
+                            </label>
+                            <textarea class="option-input" id="optionB" placeholder="Enter option B..."></textarea>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">
+                                <input type="radio" name="correctOption" value="C">
+                                <span>Option C (Correct)</span>
+                            </label>
+                            <textarea class="option-input" id="optionC" placeholder="Enter option C..."></textarea>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-label">
+                                <input type="radio" name="correctOption" value="D">
+                                <span>Option D (Correct)</span>
+                            </label>
+                            <textarea class="option-input" id="optionD" placeholder="Enter option D..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="answer" class="form-label">
+                        <span class="label-icon">✅</span>
+                        Answer/Solution (Optional)
+                    </label>
+                    <textarea id="answer" name="answer" class="form-textarea" rows="3" placeholder="Enter the answer or solution..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags" class="form-label">
+                        <span class="label-icon">🏷️</span>
+                        Tags (comma separated)
+                    </label>
+                    <input type="text" id="tags" name="tags" class="form-input" placeholder="e.g., sorting, algorithms, complexity">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <span>✓</span> Add Question
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetQuestionForm()">
+                        <span>↺</span> Reset
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="importQuestions()">
+                        <span>📥</span> Import CSV
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Generate Question Paper -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📄</span>
+                    Generate Question Paper
+                </h3>
+            </div>
+
+            <form id="generatePaperForm" class="upload-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paperSubject" class="form-label">
+                            <span class="label-icon">📖</span>
+                            Subject
+                        </label>
+                        <input type="text" id="paperSubject" class="form-input" placeholder="Subject name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="examType" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Exam Type
+                        </label>
+                        <select id="examType" class="form-select" required>
+                            <option value="">Select Type</option>
+                            <option value="internal">Internal Exam</option>
+                            <option value="midterm">Mid Term</option>
+                            <option value="endterm">End Term</option>
+                            <option value="quiz">Quiz</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="totalMarks" class="form-label">
+                            <span class="label-icon">💯</span>
+                            Total Marks
+                        </label>
+                        <input type="number" id="totalMarks" class="form-input" placeholder="100" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration" class="form-label">
+                            <span class="label-icon">⏰</span>
+                            Duration (mins)
+                        </label>
+                        <input type="number" id="duration" class="form-input" placeholder="180" min="1" required>
+                    </div>
+                </div>
+
+                <div class="difficulty-distribution">
+                    <h4>Difficulty Distribution</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Easy Questions</label>
+                            <input type="number" id="easyCount" class="form-input" placeholder="0" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Medium Questions</label>
+                            <input type="number" id="mediumCount" class="form-input" placeholder="0" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Hard Questions</label>
+                            <input type="number" id="hardCount" class="form-input" placeholder="0" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <span>📄</span> Generate Paper
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="previewPaper()">
+                        <span>👁️</span> Preview
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Question Bank -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📚</span>
+                    Question Bank
+                </h3>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">All</button>
+                    <button class="tab-btn" data-filter="mcq">MCQ</button>
+                    <button class="tab-btn" data-filter="short">Short</button>
+                    <button class="tab-btn" data-filter="long">Long</button>
+                    <button class="tab-btn" data-filter="numerical">Numerical</button>
+                </div>
+            </div>
+
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="questionSearch" placeholder="Search questions..." class="search-input">
+                </div>
+                <select id="subjectFilter" class="filter-select-small">
+                    <option value="">All Subjects</option>
+                </select>
+                <select id="difficultyFilter" class="filter-select-small">
+                    <option value="">All Difficulties</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+                <button class="btn btn-secondary" onclick="exportQuestions()">
+                    <span>📥</span> Export
+                </button>
+            </div>
+
+            <div class="questions-list" id="questionsList">
+                <div class="loading-text">Loading questions...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Question Preview Modal -->
+    <div id="questionModal" class="modal" style="display:none;">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Question Details</h3>
+                <button class="modal-close" onclick="closeQuestionModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="questionModalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/teacher-question-bank.js"></script>
+
+    <script>
+        function toggleMCQOptions() {
+            const type = document.getElementById('questionType').value;
+            const mcqOptions = document.getElementById('mcqOptions');
+            mcqOptions.style.display = type === 'mcq' ? 'block' : 'none';
+        }
+    </script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .upload-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .label-icon {
+            font-size: 1.125rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .mcq-options-section {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .options-title {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .option-label input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .option-input {
+            padding: 0.75rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .option-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .difficulty-distribution {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+        }
+
+        .difficulty-distribution h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-select-small {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .questions-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .question-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-type {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-difficulty-easy {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .badge-difficulty-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-difficulty-hard {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .question-text {
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] .options-title,
+        [data-theme="dark"] .difficulty-distribution h4,
+        [data-theme="dark"] .option-label,
+        [data-theme="dark"] .question-text,
+        [data-theme="dark"] .modal-header h3 {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea,
+        [data-theme="dark"] .option-input,
+        [data-theme="dark"] .search-input,
+        [data-theme="dark"] .filter-select-small {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-tabs {
+                width: 100%;
+            }
+
+            .tab-btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</body>
+</html>

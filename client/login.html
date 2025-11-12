@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Login - ITER EduHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/responsive-enhanced.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/responsive-universal.css">
+    <link rel="stylesheet" href="css/button-fixes.css">
+    <link rel="stylesheet" href="css/table-responsive-global.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card glass-card fade-in-up">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img class="login-logo-img" src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
+                </div>
+                <h1>Welcome Back</h1>
+                <p>Login to ITER EduHub</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="registration_number">Registration Number</label>
+                    <input 
+                        type="text" 
+                        id="registration_number" 
+                        name="registration_number"
+                        placeholder="STU20250001"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember"> Remember me
+                    </label>
+                    <a href="#forgot-password" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large btn-block" id="loginBtn">
+                    Login
+                </button>
+
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+                <a href="index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <div class="demo-hint">
+                <p>🎭 <strong>Demo Accounts:</strong></p>
+                <div class="demo-accounts-mini">
+                    <div class="demo-item" onclick="fillDemo('STU20250001', 'Student@123')">
+                        <span class="demo-role">Student</span>
+                        <span class="demo-id">STU20250001</span>
+                    </div>
+                    <div class="demo-item" onclick="fillDemo('TCH2025001', 'Teacher@123')">
+                        <span class="demo-role">Teacher</span>
+                        <span class="demo-id">TCH2025001</span>
+                    </div>
+                    <div class="demo-item" onclick="fillDemo('ADM2025001', 'Admin@123456')">
+                        <span class="demo-role">Admin</span>
+                        <span class="demo-id">ADM2025001</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            padding: var(--spacing-2xl);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .login-logo {
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-logo-img {
+            width: 84px;
+            height: 84px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+        }
+
+        .login-form {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-base);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: var(--danger);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.875rem;
+            flex: 0 0 auto; /* prevent stretching overlaying other elements */
+            pointer-events: auto;
+        }
+
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color var(--transition-fast);
+        }
+
+        .forgot-link:hover {
+            color: var(--primary-dark);
+        }
+
+        .btn-block {
+            width: 100%;
+            position: relative; /* create stacking context */
+            z-index: 1;
+        }
+
+        .error-message {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: var(--radius-md);
+            color: var(--danger);
+            text-align: center;
+        }
+
+        .login-footer {
+            text-align: center;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .login-footer p {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-dark);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .demo-hint {
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-lg);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .demo-hint p {
+            margin-bottom: var(--spacing-md);
+            font-size: 0.875rem;
+        }
+
+        .demo-accounts-mini {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .demo-item {
+            display: flex;
+            flex-direction: column;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--glass-bg);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .demo-item:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .demo-role {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .demo-id {
+            font-size: 0.7rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: var(--spacing-lg);
+            }
+
+            .login-logo-img {
+                width: 72px;
+                height: 72px;
+            }
+
+            .form-options {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+        }
+    </style>
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="js/mobile-fixes.js"></script>
+    <script src="js/prevent-empty-hash.js"></script>
+    <script src="js/scroll-fix.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script>
+        // Wait for DOM and APP to be ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Check if APP is loaded
+            if (typeof APP === 'undefined') {
+                console.error('APP object not loaded!');
+                showError('Application failed to load. Please refresh the page.');
+                return;
+            }
+
+            console.log('Login form initialized. APP object loaded:', !!APP);
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log('Login form submitted');
+
+                const registration_number = document.getElementById('registration_number').value;
+                const password = document.getElementById('password').value;
+
+                console.log('Registration:', registration_number);
+
+                // Validate
+                if (!registration_number || !password) {
+                    showError('Please fill in all fields');
+                    return;
+                }
+
+                // Show loading
+                const originalText = loginBtn.textContent;
+                loginBtn.textContent = 'Logging in...';
+                loginBtn.disabled = true;
+                errorMessage.style.display = 'none';
+
+                try {
+                    console.log('Sending login request...');
+                    const response = await APP.API.post('/auth/login', {
+                        registration_number,
+                        password
+                    });
+
+                    console.log('Login response:', response);
+
+                    if (response.success) {
+                        console.log('Login successful, storing tokens...');
+                        
+                        // Store tokens and user data
+                        APP.Storage.set('accessToken', response.data.accessToken);
+                        APP.Storage.set('refreshToken', response.data.refreshToken);
+                        APP.Storage.set('user', response.data.user);
+
+                        // Verify storage
+                        console.log('Verifying stored data...');
+                        console.log('Access token stored:', !!APP.Storage.get('accessToken'));
+                        console.log('User stored:', APP.Storage.get('user'));
+                        console.log('Is authenticated:', APP.isAuthenticated());
+                        console.log('User role:', APP.getUserRole());
+
+                        // Show success
+                        if (typeof APP.showToast === 'function') {
+                            APP.showToast('Login successful!', 'success');
+                        }
+                        showError('✅ Login successful! Redirecting...');
+                        errorMessage.style.color = '#10b981';
+
+                        // Redirect based on role
+                        const dashboards = {
+                            student: '/dashboard/student.html',
+                            teacher: '/dashboard/teacher.html',
+                            admin: '/dashboard/admin.html'
+                        };
+
+                        const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                        console.log('Redirecting to:', redirectUrl);
+
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                    } else {
+                        showError(response.message || 'Login failed');
+                        loginBtn.textContent = originalText;
+                        loginBtn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showError(error.message || 'Login failed. Please check your credentials.');
+                    loginBtn.textContent = originalText;
+                    loginBtn.disabled = false;
+                }
+            });
+
+            // Ensure footer links work correctly on touch
+            const registerLink = document.querySelector('.login-footer a[href="register.html"]');
+            const homeLink = document.querySelector('.login-footer .back-link');
+            function ensureNav(el, href) {
+                if (!el) return;
+                // Remove any existing problematic listeners by cloning
+                const clone = el.cloneNode(true);
+                el.parentNode.replaceChild(clone, el);
+                clone.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    window.location.href = href;
+                }, { passive: false });
+                clone.addEventListener('touchend', (ev) => {
+                    ev.preventDefault();
+                    window.location.href = href;
+                }, { passive: false });
+            }
+            ensureNav(registerLink, 'register.html');
+            ensureNav(homeLink, 'index.html');
+        });
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            if (!errorEl) return;
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function fillDemo(regNum, pass) {
+            document.getElementById('registration_number').value = regNum;
+            document.getElementById('password').value = pass;
+            APP.showToast('Demo credentials filled. Click Login!', 'info');
+        }
+
+        // Make fillDemo global
+        window.fillDemo = fillDemo;
+
+        // Register service worker (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('✓ Service worker registered'))
+                .catch(err => {
+                    // Silent fail - service worker is optional
+                    console.log('Service worker not available (optional feature)');
+                });
+        }
+    </script>
+</body>
+</html>

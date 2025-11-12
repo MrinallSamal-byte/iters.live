@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Page - College Management System</title>
+    
+    <!-- Main styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Profile component styles -->
+    <link rel="stylesheet" href="/css/profile.css">
+    
+    <style>
+        /* Example page styles */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 40px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 32px;
+        }
+        
+        h2 {
+            color: #1f2937;
+            margin-top: 0;
+        }
+        
+        .info-text {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Profile Control -->
+    <header class="header">
+        <div class="logo">🎓 ITER College Management</div>
+        
+        <!-- Profile Control Container - Profile control will be loaded here -->
+        <div id="profileControlContainer"></div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1>Welcome to the Dashboard</h1>
+        
+        <div class="card">
+            <h2>🎯 How to Use the Profile Control</h2>
+            <p class="info-text">
+                The profile control in the top-right corner provides quick access to:
+            </p>
+            <ul class="info-text">
+                <li><strong>View Profile</strong>: Edit your name, phone, department, and section</li>
+                <li><strong>Show ID Card</strong>: View and download your admit card</li>
+                <li><strong>Change Photo</strong>: Upload a new profile picture (JPG/PNG, max 2MB)</li>
+                <li><strong>Settings</strong>: Access application settings</li>
+                <li><strong>Logout</strong>: Securely logout from your account</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>📝 Demo Credentials</h2>
+            <p class="info-text">
+                Use these credentials to test the profile feature:
+            </p>
+            <ul class="info-text">
+                <li><strong>Registration No:</strong> SOA2025001</li>
+                <li><strong>Password:</strong> Password123!</li>
+            </ul>
+            <br>
+            <a href="/login.html" class="button">Go to Login</a>
+        </div>
+        
+        <div class="card">
+            <h2>✨ Features</h2>
+            <ul class="info-text">
+                <li>Real-time profile updates with Socket.IO</li>
+                <li>Glassmorphism design with smooth animations</li>
+                <li>Fully accessible (keyboard navigation, ARIA labels)</li>
+                <li>Responsive and mobile-friendly</li>
+                <li>Dark mode support</li>
+                <li>File upload with progress tracking</li>
+                <li>Activity logging for audit trail</li>
+            </ul>
+        </div>
+    </main>
+    
+    <!-- Socket.IO Client -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- Load Profile Control HTML and Initialize -->
+    <script>
+        // Load profile control HTML
+        async function loadProfileControl() {
+            try {
+                // Fetch and insert profile control HTML
+                const profileResponse = await fetch('/partials/top-right-profile.html');
+                const profileHTML = await profileResponse.text();
+                document.getElementById('profileControlContainer').innerHTML = profileHTML;
+                
+                // Fetch and insert ID card modal HTML
+                const modalResponse = await fetch('/partials/idcard-modal.html');
+                const modalHTML = await modalResponse.text();
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                
+                console.log('✓ Profile control loaded');
+            } catch (error) {
+                console.error('Failed to load profile control:', error);
+            }
+        }
+        
+        // Load on page ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadProfileControl);
+        } else {
+            loadProfileControl();
+        }
+    </script>
+    
+    <!-- Profile Control JavaScript -->
+    <script src="/js/profile.js"></script>
+</body>
+</html>

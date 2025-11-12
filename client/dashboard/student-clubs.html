@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubs - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Sidebar will be injected by student-sidebar.js -->
+    
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">👥</span>
+                        Student Clubs
+                    </h1>
+                    <p class="page-subtitle">Join clubs and connect with like-minded peers</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎪</div>
+                <div class="stat-number" id="totalClubs">--</div>
+                <div class="stat-text">Total Clubs</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="myClubsCount">--</div>
+                <div class="stat-text">My Clubs</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">👤</div>
+                <div class="stat-number" id="totalMembers">--</div>
+                <div class="stat-text">Total Members</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="activeClubs">--</div>
+                <div class="stat-text">Active Clubs</div>
+            </div>
+        </section>
+
+        <!-- My Clubs Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal" id="myClubsSection" style="display: none;">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⭐</span>
+                    My Clubs
+                </h3>
+            </div>
+            <div class="my-clubs-list" id="myClubsList">
+                <!-- My clubs will be loaded here -->
+            </div>
+        </section>
+
+        <!-- All Clubs -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🎭</span>
+                    All Clubs
+                </h3>
+                <span class="section-badge">Explore & Join</span>
+            </div>
+            <div class="clubs-grid" id="clubsGrid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>Loading clubs...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/student-clubs.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .my-clubs-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .my-club-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .my-club-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+        
+        .my-club-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        
+        .my-club-info {
+            flex: 1;
+        }
+        
+        .my-club-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .my-club-role {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .leave-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--radius-md);
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .leave-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .club-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .club-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .club-header {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+        
+        .club-content {
+            padding: 1.5rem;
+        }
+        
+        .club-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .club-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+        
+        .club-description {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            min-height: 60px;
+        }
+        
+        .club-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .club-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .club-footer {
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .join-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .join-btn.joined {
+            background: linear-gradient(135deg, var(--success), #22c55e);
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .clubs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

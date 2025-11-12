@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes & Resources - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📚</span>
+                        Notes & Resources
+                    </h1>
+                    <p class="page-subtitle">Access study materials, notes, and previous year questions</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📄</div>
+                <div class="stat-number" id="totalNotes">--</div>
+                <div class="stat-text">Total Notes</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">📥</div>
+                <div class="stat-number" id="downloadedNotes">--</div>
+                <div class="stat-text">Downloaded</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⭐</div>
+                <div class="stat-number" id="savedNotes">--</div>
+                <div class="stat-text">Saved</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">📁</div>
+                <div class="stat-number" id="totalSubjects">--</div>
+                <div class="stat-text">Subjects</div>
+            </div>
+        </section>
+
+        <!-- Enhanced Filter Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔍</span>
+                    Filter Notes
+                </h3>
+            </div>
+            
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="branchFilter" class="filter-label">
+                            <span class="filter-icon">🎓</span>
+                            Branch
+                        </label>
+                        <select id="branchFilter" class="filter-select">
+                            <option value="">All Branches</option>
+                            <option value="CSE">Computer Science Engineering</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                            <option value="IT">Information Technology</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="semesterFilter" class="filter-label">
+                            <span class="filter-icon">📚</span>
+                            Semester
+                        </label>
+                        <select id="semesterFilter" class="filter-select">
+                            <option value="">All Semesters</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="typeFilter" class="filter-label">
+                            <span class="filter-icon">📋</span>
+                            Type
+                        </label>
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="notes">Notes</option>
+                            <option value="pyqs">Previous Year Questions</option>
+                            <option value="assignments">Assignments</option>
+                            <option value="books">Reference Books</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <button id="applyFilterBtn" class="btn btn-primary filter-apply-btn">
+                            <span>🔎</span>
+                            Apply Filter
+                        </button>
+                        <button id="resetFilterBtn" class="btn btn-secondary filter-reset-btn">
+                            <span>🔄</span>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-box-container">
+                    <input type="text" id="searchInput" placeholder="🔍 Search by subject name, title, or keywords..." class="search-input">
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Display -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📖</span>
+                    Available Resources
+                    <span id="resultCount" class="result-count"></span>
+                </h3>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Loading resources...</p>
+            </div>
+
+            <!-- No Results State -->
+            <div id="noResultsState" class="no-results-container" style="display: none;">
+                <div class="no-results-icon">📭</div>
+                <h3>No notes found</h3>
+                <p>Try adjusting your filters or search criteria</p>
+            </div>
+
+            <!-- Resources Grid -->
+            <div class="resources-grid" id="resourcesGrid" style="display: none;">
+                <!-- Resources will be populated here dynamically -->
+            </div>
+        </section>
+
+        <!-- Recent Downloads -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⏱️</span>
+                    Recent Downloads
+                </h3>
+            </div>
+            <div class="recent-list" id="recentDownloads">
+                <!-- Recent downloads will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/student-notes-enhanced.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .hero-content-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .filter-container {
+            margin-top: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-icon {
+            font-size: 1.125rem;
+        }
+
+        .filter-select {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-apply-btn, .filter-reset-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .filter-apply-btn {
+            margin-bottom: 0.5rem;
+        }
+
+        .search-box-container {
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .result-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-results-container {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-results-container h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results-container p {
+            color: var(--text-secondary);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .resource-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .resource-icon {
+            font-size: 2.5rem;
+        }
+
+        .resource-badge {
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .resource-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .resource-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .resource-actions .btn {
+            flex: 1;
+            padding: 0.625rem;
+            font-size: 0.875rem;
+        }
+
+        .recent-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .recent-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .recent-icon {
+            font-size: 2rem;
+        }
+
+        .recent-details {
+            flex: 1;
+        }
+
+        .recent-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .recent-time {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Dark Mode Improvements */
+        [data-theme="dark"] .filter-select,
+        [data-theme="dark"] .search-input {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme="dark"] .filter-select option {
+            background: rgba(17, 24, 39, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Uploads Directory
+
+User-uploaded files will be stored here.
+The seed script will also populate this directory with sample files.
+
+Directory structure is managed automatically by the application.

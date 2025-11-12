@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Sidebar will be injected by student-sidebar.js -->
+    
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📅</span>
+                        Class Timetable
+                    </h1>
+                    <p class="page-subtitle">Your weekly schedule at a glance</p>
+                </div>
+                <div class="current-class-badge" id="currentClassBadge">
+                    <div class="badge-icon">⏰</div>
+                    <div class="badge-content">
+                        <span class="badge-label">Current Class</span>
+                        <span class="badge-value" id="currentClassName">No class now</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📚</div>
+                <div class="stat-number" id="todayClasses">--</div>
+                <div class="stat-text">Classes Today</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏰</div>
+                <div class="stat-number" id="nextClassTime">--</div>
+                <div class="stat-text">Next Class At</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">📖</div>
+                <div class="stat-number" id="weeklyClasses">--</div>
+                <div class="stat-text">Classes This Week</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🏫</div>
+                <div class="stat-number" id="totalSubjects">--</div>
+                <div class="stat-text">Total Subjects</div>
+            </div>
+        </section>
+
+        <!-- Weekly Timetable -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📆</span>
+                    Weekly Schedule
+                </h3>
+                <div class="timetable-controls">
+                    <button class="btn btn-sm btn-primary" onclick="downloadTimetable()">
+                        📥 Download PDF
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="syncToCalendar()">
+                        🔄 Sync to Calendar
+                    </button>
+                </div>
+            </div>
+            <div class="timetable-wrapper">
+                <table class="timetable-table" id="timetableTable">
+                    <thead>
+                        <tr>
+                            <th class="day-column">Day</th>
+                            <th>09:00-10:00</th>
+                            <th>10:00-11:00</th>
+                            <th>11:00-12:00</th>
+                            <th>12:00-13:00</th>
+                            <th class="break-column">13:00-14:00<br><small>Lunch</small></th>
+                            <th>14:00-15:00</th>
+                            <th>15:00-16:00</th>
+                            <th>16:00-17:00</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetableBody">
+                        <tr><td colspan="9" style="text-align: center; padding: 3rem;">Loading timetable...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Today's Schedule -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Today's Schedule
+                </h3>
+                <span class="section-badge" id="todayDate">Loading...</span>
+            </div>
+            <div class="today-schedule" id="todaySchedule">
+                <!-- Today's classes will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/pages/student-timetable.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .hero-content-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .current-class-badge {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 2px solid rgba(99, 102, 241, 0.4);
+            border-radius: var(--radius-lg);
+        }
+        
+        .badge-icon {
+            font-size: 2rem;
+        }
+        
+        .badge-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .badge-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .badge-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .timetable-controls {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .timetable-wrapper {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+        
+        .timetable-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1000px;
+        }
+        
+        .timetable-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+        
+        .timetable-table th {
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+        }
+        
+        .timetable-table td {
+            padding: 1rem 0.5rem;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            transition: all 0.2s ease;
+        }
+        
+        .day-column {
+            font-weight: 700;
+            background: rgba(99, 102, 241, 0.15);
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+        
+        .break-column {
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .class-cell {
+            background: var(--glass-bg);
+            border-left: 3px solid var(--primary);
+            cursor: pointer;
+        }
+        
+        .class-cell:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .class-name {
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        .class-room {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .today-schedule {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .schedule-item:hover {
+            transform: translateX(10px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .timetable-controls {
+                width: 100%;
+            }
+            
+            .timetable-controls .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</body>
+</html>

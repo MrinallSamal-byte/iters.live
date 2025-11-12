@@ -1,0 +1,473 @@
+/**
+ * Mobile Touch & Interaction Fixes
+ * Ensures all elements are tappable and responsive
+ */
+
+/* ===================================
+   Touch Target Enhancements
+   =================================== */
+
+/* Minimum 44x44px touch targets on all devices */
+@media (max-width: 900px) {
+    button,
+    a,
+    .btn,
+    .nav-link,
+    input[type="button"],
+    input[type="submit"],
+    .mobile-menu-btn,
+    .hamburger-menu,
+    [role="button"],
+    .clickable {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 20px;
+        position: relative;
+        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+        cursor: pointer;
+    }
+
+    /* Larger touch area for small buttons */
+    button::before,
+    .btn::before,
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        z-index: -1;
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-width: 900px) and (orientation: landscape) {
+    button,
+    a,
+    .btn,
+    .nav-link {
+        min-height: 38px;
+        padding: 10px 18px;
+    }
+}
+
+/* ===================================
+   Touch Active States
+   =================================== */
+
+.touch-active {
+    opacity: 0.7 !important;
+    transform: scale(0.98) !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Prevent text selection during touch */
+@media (max-width: 900px) {
+    button,
+    .btn,
+    .nav-link,
+    .mobile-menu-btn {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+}
+
+/* ===================================
+   Mobile Menu Button Enhancement
+   =================================== */
+
+@media (max-width: 768px) {
+    .mobile-menu-btn,
+    #mobileMenuBtn {
+        position: relative;
+        z-index: 1002;
+        width: 48px;
+        height: 48px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .mobile-menu-btn span,
+    #mobileMenuBtn span {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background: var(--text-primary);
+        border-radius: 2px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
+    }
+
+    .mobile-menu-btn.active span:nth-child(1),
+    #mobileMenuBtn.active span:nth-child(1) {
+        transform: translateY(9px) rotate(45deg);
+    }
+
+    .mobile-menu-btn.active span:nth-child(2),
+    #mobileMenuBtn.active span:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    .mobile-menu-btn.active span:nth-child(3),
+    #mobileMenuBtn.active span:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+    }
+}
+
+/* ===================================
+   Prevent Scroll Jump
+   =================================== */
+
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-anchor: none; /* Disable scroll anchoring */
+}
+
+body {
+    overflow-x: hidden;
+    overflow-anchor: none;
+    position: relative;
+}
+
+/* Disable scroll anchoring on all elements */
+* {
+    overflow-anchor: none !important;
+}
+
+/* ===================================
+   Button Visibility & Clickability
+   =================================== */
+
+@media (max-width: 900px) {
+    /* Ensure all buttons are visible and clickable */
+    .btn,
+    button,
+    a.btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto !important;
+        touch-action: manipulation;
+        min-height: 44px;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Hero buttons */
+    .hero-buttons .btn {
+        width: 100%;
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    /* Navigation buttons */
+    .nav-links .btn {
+        width: 100%;
+        margin: 8px 0;
+        justify-content: center;
+    }
+
+    /* Card action buttons */
+    .feature-card,
+    .why-card,
+    .academic-card,
+    .contact-card,
+    .creator-link {
+        pointer-events: auto !important;
+        touch-action: manipulation;
+        cursor: pointer;
+    }
+}
+
+/* ===================================
+   Link Enhancement
+   =================================== */
+
+@media (max-width: 900px) {
+    a {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+    }
+
+    /* Nav links in mobile menu */
+    .nav-links a {
+        display: block;
+        width: 100%;
+        padding: 16px 20px;
+        min-height: 52px;
+        margin: 4px 0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-links a:active {
+        background: rgba(99, 102, 241, 0.15);
+        transform: scale(0.98);
+    }
+}
+
+/* ===================================
+   Mobile Overlay Enhancement
+   =================================== */
+
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    touch-action: none;
+}
+
+.mobile-nav-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ===================================
+   Landscape Mode Specific Fixes
+   =================================== */
+
+@media (max-width: 900px) and (orientation: landscape) {
+    /* Reduce heights in landscape for better usability */
+    .navbar {
+        padding: 8px 16px;
+    }
+
+    .mobile-menu-btn,
+    #mobileMenuBtn {
+        width: 40px;
+        height: 40px;
+        padding: 10px;
+    }
+
+    .nav-links {
+        padding: 3rem 1.5rem 1.5rem;
+    }
+
+    .nav-links a {
+        padding: 12px 16px;
+        min-height: 44px;
+    }
+
+    .hero-section {
+        min-height: auto;
+        padding: 80px 0 40px;
+    }
+
+    /* Buttons smaller in landscape */
+    .btn {
+        min-height: 38px;
+        padding: 10px 18px;
+    }
+}
+
+/* ===================================
+   Scroll Performance
+   =================================== */
+
+@media (max-width: 900px) {
+    /* Use GPU acceleration for smoother scrolling */
+    .hero-section,
+    .features-section,
+    .about-section,
+    .academics-section,
+    .contact-section {
+        will-change: auto;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+
+    /* Smooth momentum scrolling on iOS */
+    body,
+    .nav-links {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ===================================
+   Input & Form Elements
+   =================================== */
+
+@media (max-width: 900px) {
+    /* Prevent zoom on input focus (iOS) */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="search"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        min-height: 44px;
+        padding: 12px;
+        touch-action: manipulation;
+    }
+
+    /* Better select dropdowns on mobile */
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+}
+
+/* ===================================
+   Creator Section Enhancement
+   =================================== */
+
+@media (max-width: 900px) {
+    .creator-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        padding: 14px 24px;
+        gap: 12px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .back-to-top-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 14px 28px;
+        gap: 8px;
+        width: 100%;
+        max-width: 300px;
+        touch-action: manipulation;
+    }
+}
+
+/* ===================================
+   Debug Helper (add ?debug to URL)
+   =================================== */
+
+body.debug-mode * {
+    outline: 1px solid rgba(255, 0, 0, 0.2) !important;
+}
+
+body.debug-mode button,
+body.debug-mode a,
+body.debug-mode .btn {
+    outline: 2px solid rgba(0, 255, 0, 0.5) !important;
+}
+
+/* ===================================
+   iOS Specific Fixes
+   =================================== */
+
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific */
+    @media (max-width: 900px) {
+        button,
+        .btn,
+        a {
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+            -webkit-touch-callout: none;
+        }
+
+        /* Fix for iOS rubber band effect */
+        body {
+            overscroll-behavior-y: none;
+        }
+
+        /* Fix for iOS momentum scrolling */
+        .nav-links {
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
+        }
+    }
+}
+
+/* ===================================
+   Android Specific Fixes
+   =================================== */
+
+@supports not (-webkit-touch-callout: none) {
+    /* Android Chrome specific */
+    @media (max-width: 900px) {
+        button,
+        .btn,
+        a {
+            -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+        }
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+@media (max-width: 900px) {
+    /* Focus states for keyboard navigation */
+    button:focus-visible,
+    a:focus-visible,
+    .btn:focus-visible {
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    /* Reduce motion if preferred */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+/* ===================================
+   Safe Area Insets (iPhone Notch)
+   =================================== */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+    @media (max-width: 900px) {
+        body {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .navbar {
+            padding-left: max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+        }
+
+        .footer {
+            padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+        }
+    }
+}

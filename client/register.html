@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Register - ITER EduHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/responsive-enhanced.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/responsive-universal.css">
+    <link rel="stylesheet" href="css/button-fixes.css">
+    <link rel="stylesheet" href="css/table-responsive-global.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card glass-card fade-in-up">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan University" style="width: 80px; height: 80px; object-fit: contain;">
+                </div>
+                <h1>Create Account</h1>
+                <p>Register for ITER EduHub</p>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="role-selection">
+                <button class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">
+                    🎓 Student
+                </button>
+                <button class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">
+                    👨‍🏫 Teacher
+                </button>
+            </div>
+
+            <form id="registerForm" class="login-form">
+                <input type="hidden" name="role" id="selectedRole" value="student">
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name"
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registration_number">Registration Number</label>
+                        <input 
+                            type="text" 
+                            id="registration_number" 
+                            name="registration_number"
+                            placeholder="STU20250001"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone"
+                            placeholder="+91 1234567890"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row" id="studentFields">
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">Computer Science & Engineering</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <select id="year" name="year" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="sectionField">
+                    <label for="section">Section</label>
+                    <select id="section" name="section" required>
+                        <option value="">Select Section</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        placeholder="Enter strong password"
+                        required
+                    >
+                    <small class="form-hint">
+                        Min 10 characters, with uppercase, lowercase, number & symbol
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirm_password" 
+                        name="confirm_password"
+                        placeholder="Re-enter password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
+                    Register
+                </button>
+
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>Already have an account? <a href="login.html">Login here</a></p>
+                <a href="index.html" class="back-link">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl, 2rem);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 600px;
+            padding: var(--spacing-2xl, 2.5rem);
+            margin: auto;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl, 2rem);
+        }
+
+        .login-logo {
+            margin-bottom: var(--spacing-lg, 1.5rem);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm, 0.5rem);
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: var(--text-secondary, #94a3b8);
+            font-size: 1rem;
+        }
+
+        .role-selection {
+            display: flex;
+            gap: var(--spacing-md, 1rem);
+            margin-bottom: var(--spacing-xl, 2rem);
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: var(--spacing-md, 1rem);
+            transition: all var(--transition-fast, 0.2s);
+            font-size: 1rem;
+            font-weight: 500;
+            border: 2px solid var(--border-color, #e2e8f0);
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .role-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .role-btn.active {
+            background: var(--primary, #6366f1);
+            color: white;
+            border-color: var(--primary, #6366f1);
+        }
+
+        .login-form {
+            margin-bottom: var(--spacing-xl, 2rem);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg, 1.5rem);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm, 0.5rem);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: var(--spacing-md, 1rem);
+            border: 2px solid var(--border-color, #e2e8f0);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg, rgba(255, 255, 255, 0.05));
+            color: var(--text-primary, inherit);
+            transition: all var(--transition-fast, 0.2s);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-hint {
+            display: block;
+            color: var(--text-secondary, #94a3b8);
+            font-size: 0.75rem;
+            margin-top: var(--spacing-xs, 0.25rem);
+            line-height: 1.4;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md, 1rem);
+            margin-bottom: var(--spacing-lg, 1.5rem);
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-large {
+            padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-fast, 0.2s);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark, #4f46e5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: var(--spacing-md, 1rem);
+            border-radius: 8px;
+            margin-top: var(--spacing-md, 1rem);
+            border-left: 4px solid #ef4444;
+            font-size: 0.9rem;
+        }
+
+        .login-footer {
+            text-align: center;
+            padding-top: var(--spacing-lg, 1.5rem);
+            border-top: 1px solid var(--border-color, #e2e8f0);
+        }
+
+        .login-footer p {
+            margin-bottom: var(--spacing-sm, 0.5rem);
+            color: var(--text-secondary, #94a3b8);
+        }
+
+        .login-footer a {
+            color: var(--primary, #6366f1);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-fast, 0.2s);
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-dark, #4f46e5);
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: var(--spacing-sm, 0.5rem);
+        }
+
+        @media (max-width: 768px) {
+            .login-card {
+                padding: var(--spacing-xl, 1.5rem);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .login-header h1 {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: var(--spacing-md, 1rem);
+            }
+
+            .login-card {
+                padding: var(--spacing-lg, 1.25rem);
+            }
+
+            .role-selection {
+                flex-direction: column;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="js/mobile-fixes.js"></script>
+    <script src="js/prevent-empty-hash.js"></script>
+    <script src="js/scroll-fix.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile-nav.js"></script>
+    <script>
+        function selectRole(role) {
+            document.getElementById('selectedRole').value = role;
+            
+            // Update button states
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-role="${role}"]`).classList.add('active');
+
+            // Show/hide fields based on role
+            const studentFields = document.getElementById('studentFields');
+            const sectionField = document.getElementById('sectionField');
+            
+            if (role === 'student') {
+                studentFields.style.display = 'grid';
+                sectionField.style.display = 'block';
+                document.getElementById('year').required = true;
+                document.getElementById('section').required = true;
+            } else {
+                studentFields.style.display = 'none';
+                sectionField.style.display = 'none';
+                document.getElementById('year').required = false;
+                document.getElementById('section').required = false;
+            }
+        }
+
+        // Make selectRole global
+        window.selectRole = selectRole;
+
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const registerBtn = document.getElementById('registerBtn');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            // Validate passwords match
+            if (data.password !== data.confirm_password) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            // Validate password strength
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+            if (!passwordRegex.test(data.password)) {
+                showError('Password must be at least 10 characters with uppercase, lowercase, number and symbol');
+                return;
+            }
+
+            // Remove confirm_password from data
+            delete data.confirm_password;
+
+            // Show loading
+            const originalText = registerBtn.textContent;
+            registerBtn.textContent = 'Registering...';
+            registerBtn.disabled = true;
+            errorMessage.style.display = 'none';
+
+            try {
+                const endpoint = data.role === 'student' ? '/auth/register-student' : '/auth/register-teacher';
+                const response = await APP.API.post(endpoint, data);
+
+                if (response.success) {
+                    APP.showToast('Registration successful! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 1500);
+                } else {
+                    showError(response.message || 'Registration failed');
+                }
+            } catch (error) {
+                showError(error.message || 'Registration failed. Please try again.');
+            } finally {
+                registerBtn.textContent = originalText;
+                registerBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Register service worker (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('✓ Service worker registered'))
+                .catch(err => {
+                    // Silent fail - service worker is optional
+                    console.log('Service worker not available (optional feature)');
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+const express = require('express');
+const router = express.Router();
+const { query } = require('../database/db');
+
+// Get hostel menu
+router.get('/menu', async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    const menu = await query(
+      'SELECT * FROM hostel_menu WHERE date = ? ORDER BY FIELD(meal_type, "breakfast", "lunch", "snacks", "dinner")',
+      [targetDate]
+    );
+
+    res.json({ success: true, data: menu });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get menu for week
+router.get('/menu/week', async (req, res, next) => {
+  try {
+    const today = new Date();
+    const weekLater = new Date(today);
+    weekLater.setDate(weekLater.getDate() + 7);
+
+    const menu = await query(
+      'SELECT * FROM hostel_menu WHERE date BETWEEN ? AND ? ORDER BY date, FIELD(meal_type, "breakfast", "lunch", "snacks", "dinner")',
+      [today.toISOString().split('T')[0], weekLater.toISOString().split('T')[0]]
+    );
+
+    res.json({ success: true, data: menu });
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;

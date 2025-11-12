@@ -1,0 +1,95 @@
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                  ║
+║                 🎓 SOA UNIVERSITY LOGO - INSTALLATION GUIDE 🎓                   ║
+║                                                                                  ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+
+✅ LOGO UPDATE COMPLETE!
+
+📋 WHAT'S BEEN DONE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ✓ Updated landing page navigation to use new SOA logo
+2. ✓ Enhanced CSS styling for circular logo display
+3. ✓ Added white background and shadow for better visibility
+4. ✓ Increased logo size from 40px to 50px for better prominence
+
+📁 MANUAL STEP REQUIRED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Please save the SOA University logo image (the circular red and green logo you provided) as:
+
+   📍 Location: c:\All_In_One_College_Website\client\assets\soa-logo.png
+   
+   ⚠️ Important: Make sure to save it as "soa-logo.png" (without quotes)
+
+🎨 LOGO SPECIFICATIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The logo should be:
+   • Circular shape
+   • Red border with text "SIKSHA 'O' ANUSANDHAN (DEEMED TO BE UNIVERSITY)"
+   • Green triangle/eye symbol in center
+   • PNG format with transparent or white background
+   • Recommended size: 500x500px or larger (will be scaled to 50x50px)
+
+📝 CHANGES MADE TO CODE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ client/index.html:
+   - Changed logo source from "assets/logo.png" to "assets/soa-logo.png"
+   - Updated alt text to "Siksha 'O' Anusandhan (Deemed to be University)"
+   - Changed logo text from "SOA" to "ITER"
+
+✅ client/css/style.css:
+   - Increased logo size to 50x50px
+   - Added circular border-radius (50%)
+   - Added white background with padding
+   - Added subtle shadow for depth
+   - Set object-fit: contain to preserve aspect ratio
+
+🚀 HOW TO SAVE THE LOGO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option 1: Right-click the logo image → Save As → Navigate to folder above
+Option 2: Download the image and rename it to "soa-logo.png"
+Option 3: Copy-paste into the assets folder with correct filename
+
+🎯 VERIFICATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After saving the logo, refresh the landing page:
+   
+   1. Open: http://localhost:3000/index.html
+   2. Check the top-left corner of the navigation bar
+   3. You should see the circular SOA logo next to "ITER EduHub"
+
+✨ EXPECTED RESULT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The SOA University logo will appear:
+   ✓ In the navigation bar (top-left)
+   ✓ Circular shape with white background
+   ✓ Proper size (50x50px)
+   ✓ With a subtle shadow effect
+   ✓ Professional and prominent display
+
+🔧 TROUBLESHOOTING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If logo doesn't appear:
+   ❌ Check filename is exactly "soa-logo.png" (case-sensitive)
+   ❌ Verify it's in the correct folder: client\assets\
+   ❌ Clear browser cache (Ctrl+Shift+R or Ctrl+F5)
+   ❌ Check browser console for 404 errors
+
+💡 ADDITIONAL NOTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• The logo will automatically scale and maintain its aspect ratio
+• The circular styling ensures it looks professional
+• The white background ensures visibility on any navbar color
+• The shadow adds depth and makes it stand out
+
+🎉 ALL SET! Just save the logo file and you're done! 🎉
+

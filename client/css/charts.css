@@ -1,0 +1,409 @@
+/**
+ * Chart Styling
+ * Beautiful, responsive chart containers and elements
+ */
+
+/* ===================================
+   Chart Section Layout
+   =================================== */
+
+.charts-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-row .full-width {
+  grid-column: 1 / -1;
+}
+
+/* ===================================
+   Chart Cards
+   =================================== */
+
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+              0 10px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.08),
+              0 16px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* ===================================
+   Chart Headers
+   =================================== */
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.5rem 0 0 0;
+}
+
+.chart-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.chart-filter {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.875rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-filter:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.chart-filter:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ===================================
+   Chart Containers
+   =================================== */
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.chart-container-large {
+  height: 400px;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* ===================================
+   Legends & Info
+   =================================== */
+
+.attendance-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.legend-item::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-item.safe {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.legend-item.safe::before {
+  background: #10b981;
+}
+
+.legend-item.warning {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.legend-item.warning::before {
+  background: #f59e0b;
+}
+
+.legend-item.danger {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.legend-item.danger::before {
+  background: #ef4444;
+}
+
+.gpa-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.current-cgpa {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.current-cgpa strong {
+  font-size: 1.25rem;
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+/* ===================================
+   Chart Error State
+   =================================== */
+
+.chart-error {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+}
+
+.chart-error i {
+  font-size: 3rem;
+  color: #f59e0b;
+  margin-bottom: 1rem;
+}
+
+.chart-error p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ===================================
+   Loading State
+   =================================== */
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #94a3b8;
+}
+
+.chart-loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: chart-spinner 0.8s linear infinite;
+}
+
+@keyframes chart-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media (max-width: 1200px) {
+  .chart-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .charts-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-row {
+    gap: 1rem;
+  }
+  
+  .chart-card {
+    padding: 1rem;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+  
+  .chart-container-large {
+    height: 300px;
+  }
+  
+  .attendance-legend {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .charts-section {
+    padding: 0.5rem;
+  }
+  
+  .chart-card {
+    border-radius: 12px;
+    padding: 0.75rem;
+  }
+  
+  .chart-header h3 {
+    font-size: 1rem;
+  }
+  
+  .chart-container {
+    height: 200px;
+  }
+  
+  .chart-container-large {
+    height: 250px;
+  }
+}
+
+/* ===================================
+   Dark Mode Support
+   =================================== */
+
+@media (prefers-color-scheme: dark) {
+  .chart-card {
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-header h3 {
+    color: #f1f5f9;
+  }
+  
+  .chart-subtitle {
+    color: #94a3b8;
+  }
+  
+  .chart-filter {
+    background: #334155;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+  
+  .chart-filter:hover {
+    background: #475569;
+    border-color: #3b82f6;
+  }
+  
+  .current-cgpa {
+    color: #94a3b8;
+  }
+  
+  .chart-error {
+    color: #94a3b8;
+  }
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+
+@media print {
+  .chart-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .chart-filters {
+    display: none;
+  }
+  
+  .chart-row {
+    gap: 1rem;
+  }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.chart-card:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.chart-filter:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .chart-card {
+    border-width: 2px;
+  }
+  
+  .legend-item {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chart-card {
+    transition: none;
+  }
+  
+  .chart-card:hover {
+    transform: none;
+  }
+  
+  @keyframes chart-spinner {
+    to {
+      transform: none;
+    }
+  }
+}

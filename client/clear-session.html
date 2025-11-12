@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Session - ITER EduHub</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0.5rem;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔓 Clear Session</h1>
+        <p>Click the button below to clear all stored authentication data and start fresh.</p>
+        
+        <button onclick="clearSession()">Clear Session Data</button>
+        <button onclick="goToLogin()">Go to Login</button>
+        
+        <div class="success" id="successMessage">
+            ✅ Session cleared successfully! You can now login fresh.
+        </div>
+        
+        <div class="info">
+            <strong>What this does:</strong><br>
+            • Removes authentication tokens<br>
+            • Clears user data<br>
+            • Logs you out completely
+        </div>
+    </div>
+
+    <script>
+        function clearSession() {
+            // Clear all authentication data
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            
+            // Clear any other stored data
+            localStorage.clear();
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Auto redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 2000);
+        }
+        
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+        
+        // Show what's currently stored
+        window.addEventListener('DOMContentLoaded', () => {
+            const hasToken = !!localStorage.getItem('accessToken');
+            const hasUser = !!localStorage.getItem('user');
+            
+            if (hasToken || hasUser) {
+                console.log('Found existing session data');
+            } else {
+                console.log('No session data found');
+            }
+        });
+    </script>
+</body>
+</html>

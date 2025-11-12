@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admit Card - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">🎫</span>
+                        Admit Card
+                    </h1>
+                    <p class="page-subtitle">Download your examination admit card</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Information -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">👤</span>
+                    Student Information
+                </h3>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Enrollment No.</span>
+                    <span class="info-value" id="enrollmentNo">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Student Name</span>
+                    <span class="info-value" id="studentNameDisplay">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Program</span>
+                    <span class="info-value" id="program">B.Tech</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Branch</span>
+                    <span class="info-value" id="branch">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Current Semester</span>
+                    <span class="info-value" id="semester">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Academic Year</span>
+                    <span class="info-value" id="academicYear">2024-25</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exam Selection -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Select Examination
+                </h3>
+            </div>
+            <div class="exam-form">
+                <div class="form-group">
+                    <label for="registrationCode" class="form-label">Registration Code *</label>
+                    <select id="registrationCode" class="form-select">
+                        <option value="">Select Registration Code</option>
+                        <option value="REG2025-01">REG2025-01 - Spring Semester 2025</option>
+                        <option value="REG2025-02">REG2025-02 - Fall Semester 2025</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="examDescription" class="form-label">Exam Description *</label>
+                    <select id="examDescription" class="form-select">
+                        <option value="">Select Exam Description</option>
+                        <option value="Mid Semester 2025">Mid Semester Examination 2025</option>
+                        <option value="End Semester 2025">End Semester Examination 2025</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="examCode" class="form-label">Exam Code *</label>
+                    <select id="examCode" class="form-select">
+                        <option value="">Select Exam Code</option>
+                        <option value="EXAM-2025-MID">EXAM-2025-MID</option>
+                        <option value="EXAM-2025-END">EXAM-2025-END</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary btn-large" id="downloadBtn">
+                    📥 Download Admit Card
+                </button>
+            </div>
+        </section>
+
+        <!-- Important Notes -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⚠️</span>
+                    Important Instructions
+                </h3>
+            </div>
+            <div class="notes-container">
+                <div class="note-card">
+                    <div class="note-icon">ℹ️</div>
+                    <div class="note-content">
+                        <h4>Note 1</h4>
+                        <p>Please contact the University Office in case of any dispute or mismatch in data.</p>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-icon">📄</div>
+                    <div class="note-content">
+                        <h4>Note 2</h4>
+                        <p>This is a computer-generated report. No signature is required.</p>
+                    </div>
+                </div>
+                <div class="note-card">
+                    <div class="note-icon">✅</div>
+                    <div class="note-content">
+                        <h4>Note 3</h4>
+                        <p>Carry a printed copy of the admit card along with a valid photo ID to the examination hall.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/student-admit-card.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .info-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .exam-form {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .form-select {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            margin-top: 1rem;
+        }
+        
+        .notes-container {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .note-card {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+        }
+        
+        .note-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .note-content h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .note-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

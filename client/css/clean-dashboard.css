@@ -1,0 +1,242 @@
+/**
+ * Simplified Student Dashboard Styling
+ * Clean, professional UI without excessive animations
+ */
+
+/* Disable heavy animations */
+.fade-in-up,
+.fade-in-down,
+.scroll-reveal,
+.parallax-text,
+.float-animation,
+.ripple-effect,
+.pulse,
+.stagger-animation {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Simple hover effect for cards */
+.hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Clean stat cards */
+.stat-card {
+    transition: border-color 0.2s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--primary);
+}
+
+/* Simple announcement hover */
+.announcement-item:hover {
+    background: var(--glass-bg);
+    transition: background 0.2s ease;
+}
+
+/* Simple deadline hover */
+.deadline-item:hover {
+    background: var(--glass-bg);
+    transition: background 0.2s ease;
+}
+
+/* Clean widget transition */
+.widget {
+    transition: border-color 0.2s ease;
+}
+
+.widget:hover {
+    border-color: var(--glass-border);
+}
+
+/* Remove particle canvas */
+#particleCanvas {
+    display: none !important;
+}
+
+/* Disable GSAP animations */
+[data-aos],
+[data-speed],
+[data-tooltip] {
+    animation: none !important;
+}
+
+/* Clean progress bars - simple fill */
+.progress-fill {
+    transition: width 0.8s ease !important;
+}
+
+/* Simple counter - no fancy animations */
+.counter {
+    transition: none !important;
+}
+
+/* Clean table styling */
+.timetable-table {
+    border-collapse: collapse;
+}
+
+.timetable-table th,
+.timetable-table td {
+    transition: background 0.2s ease;
+}
+
+.timetable-table tr:hover {
+    background: var(--glass-bg);
+}
+
+/* Simplified navigation */
+.dashboard-nav {
+    animation: none !important;
+}
+
+.nav-link-item {
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Clean glass card effect - subtle */
+.glass-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+}
+
+/* Disable gradient orbs animation */
+.gradient-orb {
+    animation: none !important;
+}
+
+/* Clean buttons */
+.btn {
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+    transform: scale(1.02);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Remove floating animations */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+}
+
+/* Disable all GSAP-based animations */
+.gsap-animation {
+    animation: none !important;
+}
+
+/* Clean section transitions */
+.dashboard-section {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Simple loading state */
+.loading {
+    opacity: 0.6;
+}
+
+/* Attendance table clean styling */
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.attendance-table th {
+    background: var(--glass-bg);
+    padding: 0.75rem;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.attendance-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.attendance-table tr:hover {
+    background: var(--glass-bg);
+}
+
+/* Status badges - clean */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-good {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-warning {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.status-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Clean responsive behavior */
+@media (max-width: 768px) {
+    .dashboard-content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Performance optimization - disable expensive effects */
+* {
+    will-change: auto !important;
+}
+
+/* Clean focus states */
+button:focus,
+a:focus,
+input:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Clean scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">✅</span>
+                        Pending Approvals
+                    </h1>
+                    <p class="page-subtitle">Review and approve submitted content from teachers and students</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📄</div>
+                <div class="stat-number" id="pendingNotes">--</div>
+                <div class="stat-text">Pending Notes</div>
+                <div class="stat-subtext">Awaiting review</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📝</div>
+                <div class="stat-number" id="pendingAssignments">--</div>
+                <div class="stat-text">Assignments</div>
+                <div class="stat-subtext">Need approval</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✓</div>
+                <div class="stat-number" id="approvedToday">--</div>
+                <div class="stat-text">Approved Today</div>
+                <div class="stat-subtext">Successfully processed</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏱️</div>
+                <div class="stat-number" id="avgResponseTime">--</div>
+                <div class="stat-text">Avg Response</div>
+                <div class="stat-subtext">Processing time</div>
+            </div>
+        </section>
+
+        <!-- Filter Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔍</span>
+                    Filter Approvals
+                </h3>
+            </div>
+            
+            <div class="filter-buttons-container">
+                <button class="filter-btn active" data-filter="all" onclick="filterApprovals('all')">
+                    <span>📋</span> All Items
+                </button>
+                <button class="filter-btn" data-filter="notes" onclick="filterApprovals('notes')">
+                    <span>📚</span> Notes
+                </button>
+                <button class="filter-btn" data-filter="assignments" onclick="filterApprovals('assignments')">
+                    <span>📝</span> Assignments
+                </button>
+                <button class="filter-btn" data-filter="events" onclick="filterApprovals('events')">
+                    <span>🎉</span> Events
+                </button>
+                <button class="filter-btn" data-filter="announcements" onclick="filterApprovals('announcements')">
+                    <span>📢</span> Announcements
+                </button>
+            </div>
+        </section>
+
+        <!-- Approvals Table -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Approval Queue
+                    <span id="approvalCount" class="result-count"></span>
+                </h3>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Uploaded By</th>
+                            <th>Department</th>
+                            <th>Submitted Date</th>
+                            <th>Priority</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvalsTableBody">
+                        <tr><td colspan="7" class="loading-text">Loading approval queue...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Recently Approved -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">✅</span>
+                    Recently Approved
+                </h3>
+            </div>
+            
+            <div class="approved-list" id="recentlyApproved">
+                <div class="loading-text">Loading recent approvals...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+        <script src="../js/universal-sidebar.js"></script>
+        <script src="../js/toast.js"></script>
+        <script src="../js/prototype-mode.js"></script>
+        <script src="../js/dummy-data.js"></script>
+        <script src="../js/main.js"></script>
+    <script src="../js/pages/admin-approvals.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .filter-buttons-container {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .result-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .approved-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .approved-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--success);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .approved-item:hover {
+            transform: translateX(5px);
+        }
+
+        .approved-content {
+            flex: 1;
+        }
+
+        .approved-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .approved-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .approved-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Dark theme improvements */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .filter-btn,
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .approved-title {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .result-count,
+        [data-theme="dark"] .approved-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .filter-btn.active {
+            color: rgba(139, 92, 246, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-buttons-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</body>
+</html>

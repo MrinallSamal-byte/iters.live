@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <section class="page-hero glass-card">
+            <h1 class="page-title">
+                <span class="title-icon">📊</span>
+                System Analytics
+            </h1>
+            <p class="page-subtitle">Comprehensive system insights and statistics</p>
+        </section>
+
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box hover-lift">
+                <div class="stat-icon-large">📄</div>
+                <div class="stat-number" id="totalFiles">--</div>
+                <div class="stat-text">Total Files</div>
+            </div>
+            <div class="stat-box hover-lift">
+                <div class="stat-icon-large">📝</div>
+                <div class="stat-number" id="totalAssignments">--</div>
+                <div class="stat-text">Assignments</div>
+            </div>
+            <div class="stat-box hover-lift">
+                <div class="stat-icon-large">🎉</div>
+                <div class="stat-number" id="totalEvents">--</div>
+                <div class="stat-text">Events</div>
+            </div>
+            <div class="stat-box hover-lift">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="avgAttendance">--%</div>
+                <div class="stat-text">Avg Attendance</div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <section class="dashboard-section glass-card">
+                <h3>User Distribution</h3>
+                <div class="chart-wrapper">
+                    <canvas id="userChart" height="250"></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-section glass-card">
+                <h3>Department Statistics</h3>
+                <div class="chart-wrapper">
+                    <canvas id="deptChart" height="250"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <section class="dashboard-section glass-card">
+            <h3>Recent Activity Log</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="activityLogBody">
+                    <tr><td colspan="4">Loading...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/prototype-mode.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/admin-analytics.js"></script>
+
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-wrapper {
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Integration Example - Profile Control</title>
+    
+    <!-- Your existing styles -->
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+        
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 16px;
+            border-left: 4px solid #f59e0b;
+            margin: 24px 0;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Profile Control -->
+    <header class="header">
+        <div class="logo">🎓 My College App</div>
+        
+        <!-- 
+            STEP 1: Add a container div with an ID
+            The profile control will be loaded here automatically
+        -->
+        <div id="profileControlContainer"></div>
+    </header>
+    
+    <!-- Your page content -->
+    <div class="container">
+        <div class="card">
+            <h1>✨ Easiest Integration Method</h1>
+            
+            <p>
+                This page demonstrates the <strong>simplest way</strong> to add the profile control
+                to any existing page. Just 2 steps!
+            </p>
+            
+            <div class="highlight">
+                <strong>Step 1:</strong> Add the container div in your header<br>
+                <code>&lt;div id="profileControlContainer"&gt;&lt;/div&gt;</code>
+            </div>
+            
+            <div class="highlight">
+                <strong>Step 2:</strong> Include the loader script at the bottom<br>
+                <code>&lt;script src="/js/profile-loader.js"&gt;&lt;/script&gt;</code>
+            </div>
+            
+            <h2>That's it! 🎉</h2>
+            
+            <p>
+                The <code>profile-loader.js</code> script automatically:
+            </p>
+            <ul>
+                <li>✅ Loads the required CSS</li>
+                <li>✅ Loads Socket.IO</li>
+                <li>✅ Fetches the profile control HTML</li>
+                <li>✅ Fetches the ID card modal HTML</li>
+                <li>✅ Initializes the JavaScript</li>
+            </ul>
+            
+            <h3>Custom Container</h3>
+            <p>
+                Want to use a different container ID? Just add a data attribute:
+            </p>
+            <code>&lt;script src="/js/profile-loader.js" data-container="myCustomId"&gt;&lt;/script&gt;</code>
+            
+            <h3>Listen for Load Complete</h3>
+            <p>
+                The loader dispatches a <code>profileControlLoaded</code> event when ready:
+            </p>
+            <pre style="background: #f3f4f6; padding: 16px; border-radius: 4px; overflow-x: auto;">
+window.addEventListener('profileControlLoaded', (event) => {
+    console.log('Profile control ready!', event.detail);
+    // Your code here
+});</pre>
+        </div>
+    </div>
+    
+    <!-- 
+        STEP 2: Include the profile loader script
+        This automatically loads everything needed for the profile control
+    -->
+    <script src="/js/profile-loader.js"></script>
+</body>
+</html>

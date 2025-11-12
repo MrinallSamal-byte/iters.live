@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Menu - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Sidebar will be injected by student-sidebar.js -->
+    
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">🍽️</span>
+                        Hostel Menu
+                    </h1>
+                    <p class="page-subtitle">View daily meal schedules for your hostel block</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Block Selection -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🏢</span>
+                    Select Hostel Block
+                </h3>
+            </div>
+            <div class="block-tabs">
+                <button class="block-tab active" data-block="A">Block A</button>
+                <button class="block-tab" data-block="B">Block B</button>
+                <button class="block-tab" data-block="C">Block C</button>
+                <button class="block-tab" data-block="D">Block D</button>
+            </div>
+        </section>
+
+        <!-- Date Selection -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📅</span>
+                    Select Date
+                </h3>
+            </div>
+            <div class="date-selector">
+                <button class="date-nav-btn" id="prevDay">◀ Previous</button>
+                <input type="date" id="menuDate" class="date-input" />
+                <button class="date-nav-btn" id="nextDay">Next ▶</button>
+            </div>
+        </section>
+
+        <!-- Menu Display -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal" id="menuSection">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Today's Menu
+                </h3>
+                <span class="section-badge" id="menuDate Badge">Loading...</span>
+            </div>
+            <div class="menu-container" id="menuContainer">
+                <!-- Menu will be loaded here -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">🍽️</div>
+                    <p>Loading menu...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="info-card">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <h4>Important Information</h4>
+                    <ul>
+                        <li>Menu may vary based on availability of ingredients</li>
+                        <li>Special dietary requirements can be requested at the mess office</li>
+                        <li>Meal timings: Breakfast (7-9 AM), Lunch (12-2 PM), Dinner (7-9 PM)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/student-hostel-menu.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .block-tabs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .block-tab {
+            padding: 1rem 2rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .block-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .block-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        
+        .date-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .date-nav-btn {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .date-nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .menu-container {
+            margin-top: 1.5rem;
+        }
+        
+        .meal-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .meal-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+        
+        .meal-type {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .meal-icon {
+            font-size: 2rem;
+        }
+        
+        .meal-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .meal-item {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .info-card {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-lg);
+        }
+        
+        .info-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+        
+        .info-content h4 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+        }
+        
+        .info-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-content li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+        
+        .info-content li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .date-selector {
+                flex-direction: column;
+            }
+            
+            .date-input, .date-nav-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marks - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="manifest" href="../manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📈</span>
+                        Academic Performance
+                    </h1>
+                    <p class="page-subtitle">Track your marks, grades, and overall academic progress</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎯</div>
+                <div class="stat-number" id="currentCGPA">--</div>
+                <div class="stat-text">Current CGPA</div>
+                <div class="stat-trend positive">
+                    <span class="trend-icon">↑</span>
+                    <span>Excellent Performance</span>
+                </div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="currentSGPA">--</div>
+                <div class="stat-text">Current SGPA</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📚</div>
+                <div class="stat-number" id="totalSubjects">--</div>
+                <div class="stat-text">Total Subjects</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🏆</div>
+                <div class="stat-number" id="classRank">--</div>
+                <div class="stat-text">Class Rank</div>
+            </div>
+        </section>
+
+        <!-- Performance Chart -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📊</span>
+                    Performance Trend
+                </h3>
+                <span class="section-badge">Semester-wise Analysis</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="performanceChart" height="100"></canvas>
+            </div>
+        </section>
+
+        <!-- Current Semester Marks -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📝</span>
+                    Current Semester Marks
+                </h3>
+                <span class="section-badge">Latest Results</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Internal</th>
+                            <th>External</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th>Credits</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marksTableBody">
+                        <tr><td colspan="7" style="text-align:center; padding: 3rem;">Loading marks data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Grade Distribution -->
+        <div class="dashboard-grid">
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📊</span>
+                        Grade Distribution
+                    </h3>
+                </div>
+                <div class="chart-wrapper" style="max-width: 400px; margin: 0 auto;">
+                    <canvas id="gradeDistChart" height="250"></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">💡</span>
+                        Performance Insights
+                    </h3>
+                </div>
+                <div class="insights-list">
+                    <div class="insight-item">
+                        <div class="insight-icon-small">🌟</div>
+                        <div>
+                            <h4>Top Performing Subject</h4>
+                            <p id="topSubject">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon-small">📈</div>
+                        <div>
+                            <h4>Average Score</h4>
+                            <p id="averageScore">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon-small">⚠️</div>
+                        <div>
+                            <h4>Needs Improvement</h4>
+                            <p id="weakSubject">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon-small">🎯</div>
+                        <div>
+                            <h4>Target CGPA</h4>
+                            <p>Maintain current performance to achieve 9.0+ CGPA</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Semester History -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📚</span>
+                    Semester History
+                </h3>
+                <span class="section-badge">All Semesters</span>
+            </div>
+            <div class="semester-timeline" id="semesterHistory">
+                <!-- Semester cards will be populated here -->
+                <div class="loading-text">Loading semester history...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts - Load in specific order -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/pages/student-marks.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+        
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+        }
+        
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+            transform: scale(1.01);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .insights-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .insight-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+        
+        .insight-item:hover {
+            transform: translateX(5px);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .insight-icon-small {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .insight-item h4 {
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .insight-item p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .semester-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .semester-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .semester-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .chart-wrapper {
+            padding: 1rem;
+        }
+        
+        .stat-trend {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        
+        .stat-trend.positive {
+            color: var(--success);
+        }
+        
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

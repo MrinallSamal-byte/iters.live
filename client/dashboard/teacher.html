@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="manifest" href="../manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Welcome Section -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        Welcome, <span id="teacherName">Teacher</span>! 👨‍🏫
+                    </h1>
+                    <p class="page-subtitle">Manage your classes, track student progress, and create learning content</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">👨‍🎓</div>
+                <div class="stat-number" id="totalStudents">--</div>
+                <div class="stat-text">My Students</div>
+                <div class="stat-subtext">Total enrolled</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="avgAttendance">--%</div>
+                <div class="stat-text">Avg Attendance</div>
+                <div class="stat-subtext">Class average</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📝</div>
+                <div class="stat-number" id="pendingSubmissions">--</div>
+                <div class="stat-text">Pending</div>
+                <div class="stat-subtext">Submissions to grade</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎯</div>
+                <div class="stat-number" id="classAverage">--</div>
+                <div class="stat-text">Class Average</div>
+                <div class="stat-subtext">Overall performance</div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <div class="dashboard-grid">
+            <!-- Attendance Overview -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📈</span>
+                        Attendance Overview
+                    </h3>
+                    <span class="section-badge">Last 7 Days</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="attendanceChart" height="250"></canvas>
+                </div>
+            </section>
+
+            <!-- Performance Distribution -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📊</span>
+                        Performance Distribution
+                    </h3>
+                    <span class="section-badge">Current Semester</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="performanceChart" height="250"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Pending Submissions -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Pending Submissions
+                </h3>
+                <span class="notification-badge" id="submissionCount">0</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Submitted Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody">
+                        <tr><td colspan="5" class="loading-text">Loading submissions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Grid Layout: Upcoming Classes & Recent Activity -->
+        <div class="dashboard-grid">
+            <!-- Upcoming Classes -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📅</span>
+                        Today's Classes
+                    </h3>
+                </div>
+                <div id="todayClasses" class="schedule-list">
+                    <div class="schedule-item">
+                        <div class="schedule-time">09:00 AM - 10:30 AM</div>
+                        <div class="schedule-details">
+                            <h4 class="schedule-subject">Data Structures</h4>
+                            <p class="schedule-info">CSE - 2nd Year - Section A</p>
+                        </div>
+                    </div>
+                    <div class="schedule-item">
+                        <div class="schedule-time">11:00 AM - 12:30 PM</div>
+                        <div class="schedule-details">
+                            <h4 class="schedule-subject">Database Management</h4>
+                            <p class="schedule-info">CSE - 3rd Year - Section B</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Announcements -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📢</span>
+                        Recent Announcements
+                    </h3>
+                </div>
+                <div id="recentAnnouncements" class="announcements-list">
+                    <div class="announcement-item">
+                        <div class="announcement-header">
+                            <span class="priority-badge priority-info">Info</span>
+                            <span class="announcement-date">Today</span>
+                        </div>
+                        <div class="announcement-content">
+                            <h4 class="announcement-title">Mid-term Evaluations</h4>
+                            <p class="announcement-text">Submit mid-term marks by end of this week.</p>
+                        </div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-header">
+                            <span class="priority-badge priority-reminder">Reminder</span>
+                            <span class="announcement-date">Yesterday</span>
+                        </div>
+                        <div class="announcement-content">
+                            <h4 class="announcement-title">Faculty Meeting</h4>
+                            <p class="announcement-text">Department meeting scheduled for Friday at 3 PM.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Quick Links -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🔗</span>
+                    Quick Actions
+                </h3>
+            </div>
+            <div class="quick-links-grid">
+                <a href="teacher-attendance.html" class="quick-link-card">
+                    <div class="quick-link-icon">📊</div>
+                    <div class="quick-link-content">
+                        <h4>Mark Attendance</h4>
+                        <p>Take class attendance</p>
+                    </div>
+                </a>
+                <a href="teacher-marks.html" class="quick-link-card">
+                    <div class="quick-link-icon">📈</div>
+                    <div class="quick-link-content">
+                        <h4>Upload Marks</h4>
+                        <p>Enter student scores</p>
+                    </div>
+                </a>
+                <a href="teacher-assignments.html" class="quick-link-card">
+                    <div class="quick-link-icon">📝</div>
+                    <div class="quick-link-content">
+                        <h4>Assignments</h4>
+                        <p>Create & manage tasks</p>
+                    </div>
+                </a>
+                <a href="teacher-notes.html" class="quick-link-card">
+                    <div class="quick-link-icon">📚</div>
+                    <div class="quick-link-content">
+                        <h4>Study Materials</h4>
+                        <p>Upload learning resources</p>
+                    </div>
+                </a>
+                <a href="teacher-students.html" class="quick-link-card">
+                    <div class="quick-link-icon">👥</div>
+                    <div class="quick-link-content">
+                        <h4>My Students</h4>
+                        <p>View student details</p>
+                    </div>
+                </a>
+                <a href="teacher-rubric-creator.html" class="quick-link-card">
+                    <div class="quick-link-icon">📋</div>
+                    <div class="quick-link-content">
+                        <h4>Rubric Creator</h4>
+                        <p>Design grading rubrics</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts - Load in specific order -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/prototype-mode.js"></script>
+    <script src="../js/teacher.js"></script>
+    
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-wrapper {
+            padding: 1.5rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .quick-link-card {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .quick-link-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .quick-link-content h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .quick-link-content p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .schedule-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .schedule-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .schedule-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .schedule-details {
+            flex: 1;
+        }
+
+        .schedule-subject {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .schedule-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        /* Dark theme improvements */
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .quick-link-content h4,
+        [data-theme="dark"] .schedule-subject {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .quick-link-content p,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .schedule-info {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .schedule-time {
+            color: rgba(99, 102, 241, 0.9);
+        }
+    </style>
+</body>
+</html>

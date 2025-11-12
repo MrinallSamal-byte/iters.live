@@ -1,0 +1,544 @@
+/* =====================================================
+   FUTURISTIC DASHBOARD ENHANCEMENTS
+   Matches landing page UI/UX with advanced animations
+   ===================================================== */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --glow-primary: 0 0 20px rgba(102, 126, 234, 0.5);
+    --glow-secondary: 0 0 20px rgba(240, 147, 251, 0.5);
+}
+
+/* =====================================================
+   HERO WELCOME SECTIONS (Landing Page Style)
+   ===================================================== */
+
+.dashboard-welcome {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    padding: 3rem 2rem;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.dashboard-welcome::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    animation: welcome-pulse 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes welcome-pulse {
+    0%, 100% { transform: translate(-25%, -25%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-20%, -20%) scale(1.1); opacity: 0.8; }
+}
+
+.dashboard-welcome h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-welcome p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    position: relative;
+    z-index: 1;
+}
+
+/* =====================================================
+   MAGNETIC BUTTONS (Interactive Hover)
+   ===================================================== */
+
+.btn-magnetic {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease;
+}
+
+.btn-magnetic::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    filter: blur(10px);
+}
+
+.btn-magnetic:hover::before {
+    opacity: 0.6;
+}
+
+.btn-magnetic:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-magnetic:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* =====================================================
+   3D CARD TILT EFFECT
+   ===================================================== */
+
+.card-3d {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d-inner {
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d:hover .card-3d-inner {
+    transform: rotateY(5deg) rotateX(-5deg);
+}
+
+.card-3d::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.card-3d:hover::after {
+    opacity: 1;
+}
+
+/* =====================================================
+   ANIMATED GRADIENT BORDERS
+   ===================================================== */
+
+.gradient-border {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 2px;
+    overflow: hidden;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg at 50% 50%, 
+        #667eea 0deg, 
+        #764ba2 90deg, 
+        #f093fb 180deg, 
+        #667eea 270deg, 
+        #667eea 360deg);
+    border-radius: inherit;
+    animation: gradient-rotate 4s linear infinite;
+}
+
+.gradient-border > * {
+    position: relative;
+    background: var(--bg-color, #0a0a0f);
+    border-radius: 14px;
+    z-index: 1;
+}
+
+@keyframes gradient-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =====================================================
+   PARALLAX STAT CARDS
+   ===================================================== */
+
+.stat-card-parallax {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-card-parallax:hover {
+    transform: translateZ(20px) scale(1.05);
+}
+
+.stat-card-parallax .stat-icon {
+    transform: translateZ(40px);
+    transition: transform 0.4s ease;
+}
+
+.stat-card-parallax:hover .stat-icon {
+    transform: translateZ(60px) rotateY(15deg);
+}
+
+.stat-card-parallax .stat-value {
+    transform: translateZ(30px);
+}
+
+.stat-card-parallax .stat-label {
+    transform: translateZ(20px);
+}
+
+/* =====================================================
+   GLOWING NEON TEXT
+   ===================================================== */
+
+.neon-text {
+    color: #667eea;
+    text-shadow: 
+        0 0 5px rgba(102, 126, 234, 0.5),
+        0 0 10px rgba(102, 126, 234, 0.4),
+        0 0 20px rgba(102, 126, 234, 0.3),
+        0 0 40px rgba(102, 126, 234, 0.2);
+    animation: neon-flicker 3s ease-in-out infinite;
+}
+
+@keyframes neon-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
+    75% { opacity: 0.98; }
+}
+
+/* =====================================================
+   MORPHING HOVER EFFECTS
+   ===================================================== */
+
+.morph-hover {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.morph-hover::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3), transparent);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.morph-hover:hover::before {
+    width: 300%;
+    height: 300%;
+}
+
+.morph-hover:hover {
+    transform: scale(1.02);
+}
+
+/* =====================================================
+   LIQUID FILL ANIMATION
+   ===================================================== */
+
+.liquid-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.liquid-fill::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 200%;
+    height: 0%;
+    background: var(--primary-gradient);
+    transition: height 0.6s ease, left 0.8s ease;
+    border-radius: 50% 50% 0 0;
+    z-index: -1;
+}
+
+.liquid-fill:hover::after {
+    height: 100%;
+    left: 0;
+}
+
+/* =====================================================
+   PARTICLE TRAIL ON HOVER
+   ===================================================== */
+
+.particle-trail {
+    position: relative;
+}
+
+.particle-trail::before,
+.particle-trail::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #667eea;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.particle-trail:hover::before {
+    animation: particle-float 1s ease-out;
+}
+
+.particle-trail:hover::after {
+    animation: particle-float 1s ease-out 0.2s;
+}
+
+@keyframes particle-float {
+    0% { opacity: 1; transform: translate(0, 0); }
+    100% { opacity: 0; transform: translate(20px, -30px); }
+}
+
+/* =====================================================
+   GLASS MORPHISM ENHANCED
+   ===================================================== */
+
+.glass-enhanced {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* =====================================================
+   RIPPLE EFFECT ON CLICK
+   ===================================================== */
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+    opacity: 0;
+}
+
+.ripple-effect:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 0.3;
+    transition: none;
+}
+
+/* =====================================================
+   FLOATING ANIMATIONS
+   ===================================================== */
+
+@keyframes float-gentle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes float-rotate {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.float-gentle {
+    animation: float-gentle 3s ease-in-out infinite;
+}
+
+.float-rotate {
+    animation: float-rotate 4s ease-in-out infinite;
+}
+
+/* =====================================================
+   SCROLL REVEAL ANIMATIONS
+   ===================================================== */
+
+.reveal-fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-fade-up.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal-scale.revealed {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* =====================================================
+   HOLOGRAPHIC EFFECT
+   ===================================================== */
+
+.holographic {
+    position: relative;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.1),
+        rgba(118, 75, 162, 0.1),
+        rgba(240, 147, 251, 0.1));
+    background-size: 200% 200%;
+    animation: holographic-shift 5s ease infinite;
+}
+
+@keyframes holographic-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* =====================================================
+   ENHANCED NAVIGATION
+   ===================================================== */
+
+.sidebar-nav {
+    background: rgba(10, 10, 15, 0.95) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    border-right: 1px solid rgba(102, 126, 234, 0.2) !important;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+.sidebar-avatar {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    animation: float-gentle 3s ease-in-out infinite;
+}
+
+.sidebar-menu-item {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sidebar-menu-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-gradient);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu-item:hover::before,
+.sidebar-menu-item.active::before {
+    transform: scaleY(1);
+}
+
+.sidebar-menu-item:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), transparent) !important;
+    transform: translateX(5px);
+}
+
+.sidebar-menu-item.active {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.2), transparent) !important;
+    border-left-color: #667eea !important;
+}
+
+.sidebar-menu-icon {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu-item:hover .sidebar-menu-icon {
+    transform: scale(1.2) rotateZ(5deg);
+}
+
+/* =====================================================
+   RESPONSIVE ENHANCEMENTS
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .dashboard-welcome h2 {
+        font-size: 1.8rem;
+    }
+    
+    .card-3d:hover .card-3d-inner {
+        transform: none;
+    }
+    
+    .stat-card-parallax:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* =====================================================
+   UTILITY CLASSES
+   ===================================================== */
+
+.text-gradient-primary {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-secondary {
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glow-primary {
+    box-shadow: var(--glow-primary);
+}
+
+.glow-secondary {
+    box-shadow: var(--glow-secondary);
+}

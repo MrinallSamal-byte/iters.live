@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/table-responsive-global.css">
+    <link rel="manifest" href="../manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📊</span>
+                        Attendance Tracker
+                    </h1>
+                    <p class="page-subtitle">Monitor your attendance across all subjects in real-time</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overall Attendance Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✓</div>
+                <div class="stat-number" id="overallAttendance">--</div>
+                <div class="stat-text">Overall Attendance</div>
+                <div class="stat-trend positive">
+                    <span class="trend-icon">↑</span>
+                    <span>+2.5% from last month</span>
+                </div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📅</div>
+                <div class="stat-number" id="totalClasses">--</div>
+                <div class="stat-text">Total Classes</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="presentClasses">--</div>
+                <div class="stat-text">Present</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">❌</div>
+                <div class="stat-number" id="absentClasses">--</div>
+                <div class="stat-text">Absent</div>
+            </div>
+        </section>
+
+        <!-- Attendance Visualization -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📈</span>
+                    Attendance Distribution
+                </h3>
+                <span class="section-badge">Visual Overview</span>
+            </div>
+            <div class="chart-wrapper" style="max-width: 500px; margin: 2rem auto;">
+                <canvas id="attendanceChart" height="300"></canvas>
+            </div>
+        </section>
+
+        <!-- Subject-wise Attendance Table -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📚</span>
+                    Subject-wise Attendance
+                </h3>
+                <span class="section-badge">Detailed Breakdown</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Present</th>
+                            <th>Total Classes</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding: 3rem;">Loading attendance data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Attendance Insights -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">💡</span>
+                    Attendance Insights
+                </h3>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card glass-card">
+                    <div class="insight-icon">⚠️</div>
+                    <h4>Action Required</h4>
+                    <p id="lowAttendanceWarning">All subjects have healthy attendance</p>
+                </div>
+                <div class="insight-card glass-card">
+                    <div class="insight-icon">📅</div>
+                    <h4>This Week</h4>
+                    <p id="weeklyAttendance">Check your weekly attendance progress</p>
+                </div>
+                <div class="insight-card glass-card">
+                    <div class="insight-icon">🎯</div>
+                    <h4>Attendance Goal</h4>
+                    <p>Maintain at least 75% attendance to avoid issues</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts - Load in specific order -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/pages/student-attendance.js"></script>
+    
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .title-icon {
+            font-size: 2.5rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+        
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+        
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+        }
+        
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+            transform: scale(1.01);
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .insight-card {
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+        
+        .insight-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .insight-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .chart-wrapper {
+            padding: 1rem;
+        }
+        
+        .stat-trend {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        
+        .stat-trend.positive {
+            color: var(--success);
+        }
+        
+        .trend-icon {
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>

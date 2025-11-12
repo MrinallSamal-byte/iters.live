@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="stylesheet" href="../css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📊</span>
+                        Mark Attendance
+                    </h1>
+                    <p class="page-subtitle">Record student attendance for your classes</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="todayPresent">--</div>
+                <div class="stat-text">Present Today</div>
+                <div class="stat-subtext">Students attended</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">❌</div>
+                <div class="stat-number" id="todayAbsent">--</div>
+                <div class="stat-text">Absent Today</div>
+                <div class="stat-subtext">Students missed</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="avgAttendance">--%</div>
+                <div class="stat-text">Average</div>
+                <div class="stat-subtext">Overall attendance</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">📅</div>
+                <div class="stat-number" id="classesToday">--</div>
+                <div class="stat-text">Classes Today</div>
+                <div class="stat-subtext">Total sessions</div>
+            </div>
+        </section>
+
+        <!-- Class Selection Form -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🎯</span>
+                    Select Class
+                </h3>
+            </div>
+            
+            <form id="attendanceForm" class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="dept" class="filter-label">
+                            <span class="filter-icon">🎓</span>
+                            Department
+                        </label>
+                        <select id="dept" name="department" class="filter-select" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">Computer Science</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                            <option value="IT">Information Technology</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="year" class="filter-label">
+                            <span class="filter-icon">📚</span>
+                            Year
+                        </label>
+                        <select id="year" name="year" class="filter-select" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="section" class="filter-label">
+                            <span class="filter-icon">📋</span>
+                            Section
+                        </label>
+                        <select id="section" name="section" class="filter-select" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="subject" class="filter-label">
+                            <span class="filter-icon">📖</span>
+                            Subject
+                        </label>
+                        <input type="text" id="subject" name="subject" class="filter-input" placeholder="e.g., Data Structures" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="loadStudentsForAttendance()">
+                        <span>🔍</span> Load Students
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="markAllPresent()">
+                        <span>✓</span> Mark All Present
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="markAllAbsent()">
+                        <span>✕</span> Mark All Absent
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Students List -->
+        <section id="studentsList" class="dashboard-section glass-card hover-lift scroll-reveal" style="display:none;">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">👥</span>
+                    Student List
+                    <span id="studentCount" class="result-count"></span>
+                </h3>
+                <div class="attendance-summary">
+                    <span class="summary-item success">
+                        <span class="summary-icon">✓</span>
+                        Present: <strong id="presentCount">0</strong>
+                    </span>
+                    <span class="summary-item warning">
+                        <span class="summary-icon">✕</span>
+                        Absent: <strong id="absentCount">0</strong>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-success btn-lg" onclick="submitAttendance()">
+                    <span>✓</span> Submit Attendance
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    <span>↺</span> Reset
+                </button>
+            </div>
+        </section>
+
+        <!-- Recent Attendance Records -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Recent Attendance Records
+                </h3>
+            </div>
+            
+            <div class="recent-records" id="recentRecords">
+                <div class="loading-text">Loading recent records...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/teacher-attendance.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .filter-container {
+            margin-top: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-icon {
+            font-size: 1.125rem;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+
+        .attendance-summary {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+        }
+
+        .summary-item.success {
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .summary-item.warning {
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .summary-icon {
+            font-weight: bold;
+        }
+
+        .result-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        /* Attendance Radio Buttons */
+        .attendance-radio {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .recent-records {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .record-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .record-item:hover {
+            transform: translateX(5px);
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .record-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .record-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .stat-present {
+            color: var(--success);
+        }
+
+        .stat-absent {
+            color: var(--warning);
+        }
+
+        /* Dark theme improvements */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .filter-label,
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .record-title {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .result-count,
+        [data-theme="dark"] .record-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .filter-input,
+        [data-theme="dark"] .filter-select {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .filter-select option {
+            background: rgba(17, 24, 39, 0.95);
+        }
+
+        [data-theme="dark"] .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .attendance-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

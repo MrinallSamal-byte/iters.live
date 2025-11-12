@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">⚙️</span>
+                        System Settings
+                    </h1>
+                    <p class="page-subtitle">Configure system preferences and manage platform settings</p>
+                </div>
+                <div class="hero-actions">
+                    <button id="saveAllBtn" class="btn btn-success">
+                        <span>💾</span> Save All Changes
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Overview Cards -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">💻</div>
+                <div class="stat-number" id="systemStatus">Active</div>
+                <div class="stat-text">System Status</div>
+                <div class="stat-subtext">All services running</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">💾</div>
+                <div class="stat-number" id="lastBackup">2 days ago</div>
+                <div class="stat-text">Last Backup</div>
+                <div class="stat-subtext">Database backup</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">📦</div>
+                <div class="stat-number" id="storageUsed">45%</div>
+                <div class="stat-text">Storage Used</div>
+                <div class="stat-subtext">500 GB available</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🔄</div>
+                <div class="stat-number" id="systemUptime">99.9%</div>
+                <div class="stat-text">Uptime</div>
+                <div class="stat-subtext">Last 30 days</div>
+            </div>
+        </section>
+
+        <!-- Tabbed Settings Interface -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="general">
+                    <span class="tab-icon">⚙️</span>
+                    <span class="tab-label">General</span>
+                </button>
+                <button class="settings-tab" data-tab="academic">
+                    <span class="tab-icon">📚</span>
+                    <span class="tab-label">Academic</span>
+                </button>
+                <button class="settings-tab" data-tab="notifications">
+                    <span class="tab-icon">📢</span>
+                    <span class="tab-label">Notifications</span>
+                </button>
+                <button class="settings-tab" data-tab="database">
+                    <span class="tab-icon">💾</span>
+                    <span class="tab-label">Database</span>
+                </button>
+                <button class="settings-tab" data-tab="security">
+                    <span class="tab-icon">🔒</span>
+                    <span class="tab-label">Security</span>
+                </button>
+                <button class="settings-tab" data-tab="appearance">
+                    <span class="tab-icon">🎨</span>
+                    <span class="tab-label">Appearance</span>
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+
+            <!-- General Settings Tab -->
+            <div class="tab-content active" id="general-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">🏫</span>
+                        Institution Information
+                    </h3>
+                    <form id="generalForm" class="settings-form">
+                        <div class="form-group">
+                            <label class="form-label">Institution Name</label>
+                            <input type="text" name="institution_name" class="form-input" value="ITER - Institute of Technical Education and Research" placeholder="Enter institution name">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Short Name / Acronym</label>
+                                <input type="text" name="short_name" class="form-input" value="ITER" placeholder="e.g., ITER">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Established Year</label>
+                                <input type="number" name="established_year" class="form-input" value="1996" placeholder="YYYY">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Contact Email</label>
+                                <input type="email" name="contact_email" class="form-input" value="info@iter.edu" placeholder="contact@institution.edu">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contact Phone</label>
+                                <input type="tel" name="contact_phone" class="form-input" value="+91 674 2379509" placeholder="+91 1234567890">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <textarea name="address" class="form-textarea" rows="3" placeholder="Enter full address">Jagamara, Khandagiri, Bhubaneswar, Odisha - 751030</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Website URL</label>
+                            <input type="url" name="website" class="form-input" value="https://www.soa.ac.in/iter" placeholder="https://www.institution.edu">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">⚙️</span>
+                        System Preferences
+                    </h3>
+                    <form id="systemPrefsForm" class="settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Timezone</label>
+                                <select name="timezone" class="form-select">
+                                    <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
+                                    <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                                    <option value="America/New_York">America/New_York (EST)</option>
+                                    <option value="Europe/London">Europe/London (GMT)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date Format</label>
+                                <select name="date_format" class="form-select">
+                                    <option value="DD-MM-YYYY" selected>DD-MM-YYYY</option>
+                                    <option value="MM-DD-YYYY">MM-DD-YYYY</option>
+                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Max File Upload Size (MB)</label>
+                                <input type="number" name="max_file_size" class="form-input" value="50" min="1" max="500">
+                                <small class="form-hint">Maximum file size for uploads</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Session Timeout (minutes)</label>
+                                <input type="number" name="session_timeout" class="form-input" value="30" min="5" max="120">
+                                <small class="form-hint">Auto-logout after inactivity</small>
+                            </div>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="maintenance_mode">
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Maintenance Mode</strong>
+                                    <small>Temporarily disable user access</small>
+                                </span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Academic Settings Tab -->
+            <div class="tab-content" id="academic-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">📚</span>
+                        Academic Year Configuration
+                    </h3>
+                    <form id="academicForm" class="settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Current Academic Year</label>
+                                <input type="text" name="academic_year" class="form-input" value="2024-2025" placeholder="YYYY-YYYY">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Current Semester</label>
+                                <select name="current_semester" class="form-select">
+                                    <option value="1">Semester 1 (Odd)</option>
+                                    <option value="2" selected>Semester 2 (Even)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Semester Start Date</label>
+                                <input type="date" name="semester_start" class="form-input" value="2025-01-15">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Semester End Date</label>
+                                <input type="date" name="semester_end" class="form-input" value="2025-06-30">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">📊</span>
+                        Grading Configuration
+                    </h3>
+                    <form id="gradingForm" class="settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Passing Percentage</label>
+                                <input type="number" name="passing_percentage" class="form-input" value="40" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Min Attendance Required (%)</label>
+                                <input type="number" name="min_attendance" class="form-input" value="75" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="enable_grade_points" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Enable Grade Point System</strong>
+                                    <small>Use GPA calculation for results</small>
+                                </span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="tab-content" id="notifications-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">📧</span>
+                        Email Notifications
+                    </h3>
+                    <form id="emailNotifForm" class="settings-form">
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="email_new_user" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>New User Registration</strong>
+                                    <small>Send email when new user registers</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="email_assignments" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Assignment Notifications</strong>
+                                    <small>Notify students of new assignments</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="email_attendance" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Attendance Alerts</strong>
+                                    <small>Alert students with low attendance</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="email_announcements" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Announcements</strong>
+                                    <small>Send email for important announcements</small>
+                                </span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">🔔</span>
+                        Push Notifications
+                    </h3>
+                    <form id="pushNotifForm" class="settings-form">
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="push_enabled" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Enable Push Notifications</strong>
+                                    <small>Allow browser push notifications</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="push_grades">
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Grade Updates</strong>
+                                    <small>Notify when grades are posted</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="push_events" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Event Reminders</strong>
+                                    <small>Remind about upcoming events</small>
+                                </span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Database Tab -->
+            <div class="tab-content" id="database-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">💾</span>
+                        Database Management
+                    </h3>
+                    <div class="action-cards">
+                        <div class="action-card">
+                            <div class="action-icon">💾</div>
+                            <h4>Backup Database</h4>
+                            <p>Create a complete backup of all system data</p>
+                            <button class="btn btn-primary" onclick="backupDatabase()">
+                                <span>⬇️</span> Create Backup
+                            </button>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">🔄</div>
+                            <h4>Restore Database</h4>
+                            <p>Restore from a previous backup file</p>
+                            <button class="btn btn-warning" onclick="restoreDatabase()">
+                                <span>⬆️</span> Restore Backup
+                            </button>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">🗑️</div>
+                            <h4>Clear Cache</h4>
+                            <p>Clear all cached data to improve performance</p>
+                            <button class="btn btn-secondary" onclick="clearCache()">
+                                <span>🗑️</span> Clear Cache
+                            </button>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">🔧</div>
+                            <h4>Optimize Database</h4>
+                            <p>Run optimization and cleanup tasks</p>
+                            <button class="btn btn-info" onclick="optimizeDatabase()">
+                                <span>⚡</span> Optimize Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">📊</span>
+                        Database Information
+                    </h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Database Size:</span>
+                            <span class="info-value">2.4 GB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Tables:</span>
+                            <span class="info-value">42</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Records:</span>
+                            <span class="info-value">125,847</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Last Optimized:</span>
+                            <span class="info-value">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="tab-content" id="security-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">🔒</span>
+                        Security Settings
+                    </h3>
+                    <form id="securityForm" class="settings-form">
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="enforce_2fa">
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Enforce Two-Factor Authentication</strong>
+                                    <small>Require 2FA for all admin accounts</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="password_expiry" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Password Expiration</strong>
+                                    <small>Force password change every 90 days</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="login_attempts" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Login Attempt Limit</strong>
+                                    <small>Lock account after failed attempts</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Min Password Length</label>
+                                <input type="number" name="min_password_length" class="form-input" value="8" min="6" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Login Attempts</label>
+                                <input type="number" name="max_login_attempts" class="form-input" value="5" min="3" max="10">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">📜</span>
+                        Activity Log
+                    </h3>
+                    <div class="activity-log">
+                        <div class="activity-item">
+                            <span class="activity-icon">👤</span>
+                            <div class="activity-details">
+                                <strong>Admin Login</strong>
+                                <small>admin@iter.edu logged in from 192.168.1.100</small>
+                            </div>
+                            <span class="activity-time">2 hours ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-icon">⚙️</span>
+                            <div class="activity-details">
+                                <strong>Settings Changed</strong>
+                                <small>Academic year updated to 2024-2025</small>
+                            </div>
+                            <span class="activity-time">5 hours ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <span class="activity-icon">💾</span>
+                            <div class="activity-details">
+                                <strong>Database Backup</strong>
+                                <small>Automatic backup completed successfully</small>
+                            </div>
+                            <span class="activity-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appearance Tab -->
+            <div class="tab-content" id="appearance-tab">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">🎨</span>
+                        Theme & Appearance
+                    </h3>
+                    <form id="appearanceForm" class="settings-form">
+                        <div class="form-group">
+                            <label class="form-label">Default Theme</label>
+                            <select name="default_theme" class="form-select">
+                                <option value="system">System Default</option>
+                                <option value="light">Light Mode</option>
+                                <option value="dark" selected>Dark Mode</option>
+                            </select>
+                        </div>
+                        
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="allow_theme_switch" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Allow User Theme Selection</strong>
+                                    <small>Let users choose their preferred theme</small>
+                                </span>
+                            </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" class="toggle-input" name="enable_animations" checked>
+                                <span class="toggle-switch"></span>
+                                <span class="toggle-text">
+                                    <strong>Enable Animations</strong>
+                                    <small>Show smooth transitions and effects</small>
+                                </span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <span class="title-icon">🖼️</span>
+                        Branding
+                    </h3>
+                    <form id="brandingForm" class="settings-form">
+                        <div class="form-group">
+                            <label class="form-label">Institution Logo</label>
+                            <div class="file-upload-area">
+                                <input type="file" id="logoUpload" accept="image/*" hidden>
+                                <label for="logoUpload" class="file-upload-label">
+                                    <span class="upload-icon">📤</span>
+                                    <span>Click to upload logo</span>
+                                    <small>PNG, JPG or SVG (Max 2MB)</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Favicon</label>
+                            <div class="file-upload-area">
+                                <input type="file" id="faviconUpload" accept="image/x-icon,image/png" hidden>
+                                <label for="faviconUpload" class="file-upload-label">
+                                    <span class="upload-icon">🔖</span>
+                                    <span>Click to upload favicon</span>
+                                    <small>ICO or PNG (32x32px)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/prototype-mode.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/admin-settings.js"></script>
+
+    <link rel="stylesheet" href="../css/admin-pages-enhanced.css">
+</body>
+</html>

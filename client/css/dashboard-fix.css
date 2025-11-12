@@ -1,0 +1,59 @@
+/* Dashboard Visibility Fix */
+.dashboard-main {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.dashboard-welcome,
+.quick-stats-container,
+.dashboard-widgets,
+.dashboard-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.quick-stats {
+    display: grid !important;
+}
+
+.dashboard-widgets {
+    display: grid !important;
+}
+
+.widget {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Override scroll-reveal on dashboard to prevent hiding */
+.dashboard-main .scroll-reveal {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Ensure animations don't hide content permanently */
+.fade-in-up,
+.fade-in-down {
+    animation-fill-mode: forwards !important;
+}
+
+/* Particle canvas should be behind everything */
+#particleCanvas {
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+.dashboard-bg {
+    z-index: -1 !important;
+    pointer-events: none !important;
+}
+
+.dashboard-bg .gradient-orb {
+    z-index: -1 !important;
+    pointer-events: none !important;
+}

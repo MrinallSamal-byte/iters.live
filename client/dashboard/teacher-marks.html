@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Marks - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📈</span>
+                        Upload Marks
+                    </h1>
+                    <p class="page-subtitle">Enter and manage student examination scores</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="marksEntered">--</div>
+                <div class="stat-text">Marks Entered</div>
+                <div class="stat-subtext">This semester</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="classAvg">--</div>
+                <div class="stat-text">Class Average</div>
+                <div class="stat-subtext">Overall score</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏳</div>
+                <div class="stat-number" id="pending">--</div>
+                <div class="stat-text">Pending</div>
+                <div class="stat-subtext">To be graded</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">🎯</div>
+                <div class="stat-number" id="passPercentage">--%</div>
+                <div class="stat-text">Pass Rate</div>
+                <div class="stat-subtext">Above passing</div>
+            </div>
+        </section>
+
+        <!-- Exam Selection Form -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🎯</span>
+                    Select Exam Details
+                </h3>
+            </div>
+            
+            <form id="marksForm" class="filter-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="examType" class="filter-label">
+                            <span class="filter-icon">📝</span>
+                            Exam Type
+                        </label>
+                        <select id="examType" name="examType" class="filter-select" required>
+                            <option value="">Select Exam Type</option>
+                            <option value="internal1">Internal 1</option>
+                            <option value="internal2">Internal 2</option>
+                            <option value="internal3">Internal 3</option>
+                            <option value="midterm">Mid Term</option>
+                            <option value="endterm">End Term</option>
+                            <option value="assignment">Assignment</option>
+                            <option value="quiz">Quiz</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="subject" class="filter-label">
+                            <span class="filter-icon">📖</span>
+                            Subject
+                        </label>
+                        <input type="text" id="subject" name="subject" class="filter-input" placeholder="e.g., Data Structures" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="maxMarks" class="filter-label">
+                            <span class="filter-icon">💯</span>
+                            Max Marks
+                        </label>
+                        <input type="number" id="maxMarks" name="maxMarks" class="filter-input" placeholder="100" min="1" max="100" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="passingMarks" class="filter-label">
+                            <span class="filter-icon">✔️</span>
+                            Passing Marks
+                        </label>
+                        <input type="number" id="passingMarks" name="passingMarks" class="filter-input" placeholder="40" min="1" max="100" required>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="dept" class="filter-label">
+                            <span class="filter-icon">🎓</span>
+                            Department
+                        </label>
+                        <select id="dept" name="department" class="filter-select" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">Computer Science</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                            <option value="IT">Information Technology</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="year" class="filter-label">
+                            <span class="filter-icon">📚</span>
+                            Year
+                        </label>
+                        <select id="year" name="year" class="filter-select" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="section" class="filter-label">
+                            <span class="filter-icon">📋</span>
+                            Section
+                        </label>
+                        <select id="section" name="section" class="filter-select" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="loadStudentsForMarks()">
+                        <span>🔍</span> Load Students
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="importCSV()">
+                        <span>📄</span> Import CSV
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="downloadTemplate()">
+                        <span>⬇️</span> Download Template
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Students Marks Entry -->
+        <section id="studentsList" class="dashboard-section glass-card hover-lift scroll-reveal" style="display:none;">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">👥</span>
+                    Enter Marks
+                    <span id="studentCount" class="result-count"></span>
+                </h3>
+                <div class="marks-summary">
+                    <span class="summary-item success">
+                        <span class="summary-icon">✓</span>
+                        Passed: <strong id="passedCount">0</strong>
+                    </span>
+                    <span class="summary-item warning">
+                        <span class="summary-icon">✕</span>
+                        Failed: <strong id="failedCount">0</strong>
+                    </span>
+                    <span class="summary-item info">
+                        <span class="summary-icon">📊</span>
+                        Average: <strong id="avgMarks">0</strong>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="data-table modern-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>Marks (out of <span id="maxMarksDisplay">--</span>)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-success btn-lg" onclick="submitMarks()">
+                    <span>✓</span> Submit Marks
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    <span>↺</span> Reset
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="autoCalculateGrade()">
+                    <span>🎯</span> Auto Calculate Grades
+                </button>
+            </div>
+        </section>
+
+        <!-- Statistics Chart -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📊</span>
+                    Marks Distribution
+                </h3>
+            </div>
+            
+            <div class="marks-distribution">
+                <div class="grade-stats">
+                    <div class="grade-item">
+                        <div class="grade-label">A+ (90-100)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill" style="width: 0%" id="gradeA"></div>
+                        </div>
+                        <div class="grade-count" id="countA">0</div>
+                    </div>
+                    <div class="grade-item">
+                        <div class="grade-label">A (80-89)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill" style="width: 0%" id="gradeB"></div>
+                        </div>
+                        <div class="grade-count" id="countB">0</div>
+                    </div>
+                    <div class="grade-item">
+                        <div class="grade-label">B+ (70-79)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill" style="width: 0%" id="gradeC"></div>
+                        </div>
+                        <div class="grade-count" id="countC">0</div>
+                    </div>
+                    <div class="grade-item">
+                        <div class="grade-label">B (60-69)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill" style="width: 0%" id="gradeD"></div>
+                        </div>
+                        <div class="grade-count" id="countD">0</div>
+                    </div>
+                    <div class="grade-item">
+                        <div class="grade-label">C (50-59)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill" style="width: 0%" id="gradeE"></div>
+                        </div>
+                        <div class="grade-count" id="countE">0</div>
+                    </div>
+                    <div class="grade-item">
+                        <div class="grade-label">F (<50)</div>
+                        <div class="grade-bar">
+                            <div class="grade-fill fail" style="width: 0%" id="gradeF"></div>
+                        </div>
+                        <div class="grade-count" id="countF">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Submissions -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Recent Marks Submissions
+                </h3>
+            </div>
+            
+            <div class="recent-records" id="recentRecords">
+                <div class="loading-text">Loading recent submissions...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- File Upload Modal -->
+    <div id="csvModal" class="modal" style="display:none;">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Import Marks from CSV</h3>
+                <button class="modal-close" onclick="closeCsvModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="csvUploadArea">
+                    <div class="upload-icon">📄</div>
+                    <p>Drag & drop CSV file here or click to browse</p>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">
+                        Select CSV File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/pages/teacher-marks.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .filter-container {
+            margin-top: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-icon {
+            font-size: 1.125rem;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+
+        .marks-summary {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+        }
+
+        .summary-item.success {
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .summary-item.warning {
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .summary-item.info {
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .modern-table thead tr {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        }
+
+        .modern-table th {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .modern-table tbody tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .marks-input {
+            width: 100px;
+            padding: 0.5rem;
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .marks-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .marks-input.pass {
+            border-color: var(--success);
+        }
+
+        .marks-input.fail {
+            border-color: var(--warning);
+        }
+
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pass {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.fail {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .marks-distribution {
+            margin-top: 1.5rem;
+        }
+
+        .grade-stats {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grade-item {
+            display: grid;
+            grid-template-columns: 120px 1fr 60px;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .grade-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .grade-bar {
+            height: 32px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .grade-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .grade-fill.fail {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .grade-count {
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            text-align: center;
+            background: var(--glass-bg);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .recent-records {
+            margin-top: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .record-item {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border-left: 4px solid var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .record-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .filter-label,
+        [data-theme="dark"] .modern-table th,
+        [data-theme="dark"] .modern-table td,
+        [data-theme="dark"] .grade-label,
+        [data-theme="dark"] .grade-count,
+        [data-theme="dark"] .record-title {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .record-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .filter-input,
+        [data-theme="dark"] .filter-select,
+        [data-theme="dark"] .marks-input {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .marks-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .grade-item {
+                grid-template-columns: 100px 1fr 50px;
+            }
+        }
+    </style>
+</body>
+</html>
