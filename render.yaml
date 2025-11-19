@@ -13,7 +13,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: CORS_WHITELIST
