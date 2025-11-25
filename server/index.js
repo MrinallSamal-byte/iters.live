@@ -56,8 +56,9 @@ app.set('io', io);
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable for development
-  crossOriginEmbedderPolicy: false
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false
 }));
 
 // CORS configuration
