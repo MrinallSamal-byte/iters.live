@@ -45,12 +45,12 @@
 
 /* Logo Section */
 .sidebar-header {
-    padding: 1.5rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     border-bottom: 1px solid var(--sidebar-border);
-    min-height: 80px;
+    min-height: 70px;
 }
 
 .sidebar-logo {
@@ -89,28 +89,29 @@
 
 /* Toggle Button */
 .sidebar-toggle {
-    position: absolute;
-    right: -12px;
-    top: 30px;
-    width: 24px;
-    height: 24px;
-    background: var(--primary);
-    border: none;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: white;
-    font-size: 0.875rem;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    color: var(--text-secondary);
+    font-size: 1.25rem;
     transition: all 0.3s ease;
-    z-index: 10;
+    margin-left: auto; /* Push to right */
 }
 
 .sidebar-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.6);
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.universal-sidebar.collapsed .sidebar-toggle {
+    margin: 0 auto; /* Center when collapsed */
 }
 
 /* Navigation */

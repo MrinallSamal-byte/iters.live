@@ -15,12 +15,12 @@ const { authMiddleware: authenticateToken } = require('../middleware/auth');
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../../uploads');
-    
+
     // Create uploads directory if it doesn't exist
     if (!fsSync.existsSync(uploadDir)) {
       await fs.mkdir(uploadDir, { recursive: true });
     }
-    
+
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
@@ -73,15 +73,15 @@ router.post('/upload', authenticateToken, upload.single('file'), async (req, res
       mimetype: req.file.mimetype,
       size: req.file.size,
       path: req.file.path,
-      uploadedBy: req.user.userId,
+      uploadedBy: req.user.id,
       uploadedAt: new Date()
     };
 
     // Save file metadata to database
     const db = require('../database/db');
     await db.query(`INSERT INTO files (id, filename, original_name, mime_type, size, file_path, uploaded_by, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [fileData.id, fileData.filename, fileData.originalname, fileData.mimetype, 
-       fileData.size, fileData.path, fileData.uploadedBy, fileData.uploadedAt]
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [fileData.id, fileData.filename, fileData.originalname, fileData.mimetype,
+    fileData.size, fileData.path, fileData.uploadedBy, fileData.uploadedAt]
     );
 
     res.json({
@@ -117,7 +117,7 @@ router.post('/upload-chunk', authenticateToken, upload.single('chunk'), async (r
       chunkUploads.set(uploadId, {
         filename,
         chunks: new Array(parseInt(totalChunks)).fill(null),
-        uploadedBy: req.user.userId,
+        uploadedBy: req.user.id,
         createdAt: Date.now()
       });
     }
@@ -133,20 +133,20 @@ router.post('/upload-chunk', authenticateToken, upload.single('chunk'), async (r
     if (allChunksReceived) {
       // Merge chunks
       const finalPath = await mergeChunks(uploadId, uploadData);
-      
+
       // Save to database
       const fileId = crypto.randomBytes(16).toString('hex');
       const stats = await fs.stat(finalPath);
-      
+
       const db = require('../database/db');
       await db.query(`INSERT INTO files (id, filename, original_name, mime_type, size, file_path, uploaded_by, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [fileId, path.basename(finalPath), uploadData.filename, 
-         'application/octet-stream', stats.size, finalPath, 
-         uploadData.uploadedBy, new Date()]
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [fileId, path.basename(finalPath), uploadData.filename,
+        'application/octet-stream', stats.size, finalPath,
+        uploadData.uploadedBy, new Date()]
       );
 
       // Clean up chunk files
-      await Promise.all(uploadData.chunks.map(chunkPath => 
+      await Promise.all(uploadData.chunks.map(chunkPath =>
         fs.unlink(chunkPath).catch(console.error)
       ));
 
@@ -221,7 +221,14 @@ router.get('/files/:fileId', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'File not found' });
     }
 
-    res.json({ file: files[0] });
+    const file = files[0];
+
+    // Check ownership or admin role
+    if (file.uploaded_by !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    res.json({ file });
 
   } catch (error) {
     console.error('Get file error:', error);
@@ -243,7 +250,12 @@ router.get('/files/:fileId/download', authenticateToken, async (req, res) => {
     }
 
     const file = files[0];
-    
+
+    // Check ownership or admin role
+    if (file.uploaded_by !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     res.download(file.file_path, file.original_name, (err) => {
       if (err) {
         console.error('Download error:', err);
@@ -265,7 +277,7 @@ router.get('/files/:fileId/download', authenticateToken, async (req, res) => {
 router.delete('/files/:fileId', authenticateToken, async (req, res) => {
   try {
     const db = require('../database/db');
-    const files = await db.query('SELECT * FROM files WHERE id = $1 AND uploaded_by = $2', [req.params.fileId, req.user.userId]
+    const files = await db.query('SELECT * FROM files WHERE id = $1 AND uploaded_by = $2', [req.params.fileId, req.user.id]
     );
 
     if (files.length === 0) {
@@ -297,7 +309,7 @@ router.get('/files', authenticateToken, async (req, res) => {
     const offset = (page - 1) * limit;
 
     const db = require('../database/db');
-    
+
     let query = 'SELECT * FROM files WHERE uploaded_by = ?';
     const params = [req.user.userId];
 
@@ -400,7 +412,7 @@ router.patch('/folders/:folderId', authenticateToken, async (req, res) => {
 router.delete('/folders/:folderId', authenticateToken, async (req, res) => {
   try {
     const db = require('../database/db');
-    
+
     // Check if folder is empty
     const countRows = await db.query('SELECT COUNT(*) as file_count FROM files WHERE folder_id = $1', [req.params.folderId]
     );
@@ -449,7 +461,7 @@ router.post('/files/:fileId/share', authenticateToken, async (req, res) => {
 
     const shareId = crypto.randomBytes(16).toString('hex');
     const shareToken = crypto.randomBytes(32).toString('hex');
-    
+
     let passwordHash = null;
     if (password) {
       const bcrypt = require('bcrypt');
@@ -458,8 +470,8 @@ router.post('/files/:fileId/share', authenticateToken, async (req, res) => {
 
     const db = require('../database/db');
     await db.query(`INSERT INTO file_shares (id, file_id, share_token, password_hash, max_downloads, expires_at, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`, [shareId, req.params.fileId, shareToken, passwordHash, 
-       max_downloads || null, expires_at || null, req.user.userId]
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`, [shareId, req.params.fileId, shareToken, passwordHash,
+      max_downloads || null, expires_at || null, req.user.userId]
     );
 
     const shareRows = await db.query('SELECT * FROM file_shares WHERE id = $1', [shareId]
@@ -502,8 +514,8 @@ router.get('/share/:token', async (req, res) => {
       return res.status(404).json({ error: 'File not found' });
     }
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       file: {
         id: file.id,
         name: file.original_name,
@@ -523,7 +535,7 @@ router.get('/share/:token', async (req, res) => {
 router.post('/share/:token/download', async (req, res) => {
   try {
     const { password } = req.body;
-    
+
     const db = require('../database/db');
     const shareRows2 = await db.query('SELECT * FROM file_shares WHERE share_token = $1', [req.params.token]
     );
@@ -537,10 +549,10 @@ router.post('/share/:token/download', async (req, res) => {
       if (!password) {
         return res.status(401).json({ error: 'Password required' });
       }
-      
+
       const bcrypt = require('bcrypt');
       const valid = await bcrypt.compare(password, share2.password_hash);
-      
+
       if (!valid) {
         return res.status(401).json({ error: 'Invalid password' });
       }
@@ -556,7 +568,7 @@ router.post('/share/:token/download', async (req, res) => {
     );
 
     // Download file
-  res.download(file2.file_path, file2.original_name);
+    res.download(file2.file_path, file2.original_name);
 
   } catch (error) {
     console.error('Download shared file error:', error);

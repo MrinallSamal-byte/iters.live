@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,10 @@
     <link rel="stylesheet" href="../css/clean-dashboard.css">
     <link rel="stylesheet" href="../css/universal-sidebar.css">
     <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="stylesheet" href="../css/table-responsive-global.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <!-- Background -->
     <div class="bg-animation">
@@ -121,7 +124,8 @@
                             <span class="filter-icon">🔍</span>
                             Search
                         </label>
-                        <input type="text" id="searchInput" class="filter-input" placeholder="Search by name or roll no...">
+                        <input type="text" id="searchInput" class="filter-input"
+                            placeholder="Search by name or roll no...">
                     </div>
                 </div>
 
@@ -175,7 +179,9 @@
                         </tr>
                     </thead>
                     <tbody id="studentsTableBody">
-                        <tr><td colspan="10" class="loading-text">Loading students...</td></tr>
+                        <tr>
+                            <td colspan="10" class="loading-text">Loading students...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -194,7 +200,7 @@
                     Class Performance Distribution
                 </h3>
             </div>
-            
+
             <div class="chart-wrapper">
                 <canvas id="performanceChart" height="250"></canvas>
             </div>
@@ -651,4 +657,5 @@
         }
     </style>
 </body>
+
 </html>

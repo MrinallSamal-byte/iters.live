@@ -1,6 +1,6 @@
 // Main JavaScript File
-const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api' 
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000/api'
     : '/api';
 
 // Check if localStorage is available
@@ -44,7 +44,7 @@ const Storage = {
                 // Fall through to next option
             }
         }
-        
+
         // Try sessionStorage second
         if (sessionStorageAvailable) {
             try {
@@ -54,15 +54,15 @@ const Storage = {
                 // Fall through to next option
             }
         }
-        
+
         // Use memory storage last
         return memoryStorage[key] !== undefined ? memoryStorage[key] : null;
     },
-    
+
     set(key, value) {
         // Try to save to all available storage methods
         let saved = false;
-        
+
         // Try localStorage
         if (storageAvailable) {
             try {
@@ -72,7 +72,7 @@ const Storage = {
                 // Continue to try other methods
             }
         }
-        
+
         // Try sessionStorage
         if (sessionStorageAvailable) {
             try {
@@ -82,18 +82,18 @@ const Storage = {
                 // Continue to try other methods
             }
         }
-        
+
         // Always keep in memory as last resort
         memoryStorage[key] = value;
-        
+
         if (!saved && !sessionStorageAvailable) {
             console.warn(`Storage unavailable: ${key} will not persist across page reloads`);
         }
     },
-    
+
     remove(key) {
         delete memoryStorage[key];
-        
+
         if (storageAvailable) {
             try {
                 localStorage.removeItem(key);
@@ -101,7 +101,7 @@ const Storage = {
                 // Silent fail
             }
         }
-        
+
         if (sessionStorageAvailable) {
             try {
                 sessionStorage.removeItem(key);
@@ -110,10 +110,10 @@ const Storage = {
             }
         }
     },
-    
+
     clear() {
         Object.keys(memoryStorage).forEach(key => delete memoryStorage[key]);
-        
+
         if (storageAvailable) {
             try {
                 localStorage.clear();
@@ -121,7 +121,7 @@ const Storage = {
                 // Silent fail
             }
         }
-        
+
         if (sessionStorageAvailable) {
             try {
                 sessionStorage.clear();
@@ -136,7 +136,7 @@ const Storage = {
 const API = {
     async request(endpoint, options = {}) {
         const token = Storage.get('accessToken');
-        
+
         const config = {
             ...options,
             headers: {
@@ -256,7 +256,7 @@ function initThemeToggle() {
     themeToggle.addEventListener('click', () => {
         const isDark = !document.body.classList.contains('light-theme');
         const newTheme = isDark ? 'light' : 'dark';
-        
+
         document.body.classList.toggle('light-theme');
         Storage.set('theme', newTheme);
         updateThemeIcon(newTheme);
@@ -271,7 +271,7 @@ function updateThemeIcon(theme) {
 }
 
 // Copy to Clipboard
-window.copyToClipboard = function(text) {
+window.copyToClipboard = function (text) {
     navigator.clipboard.writeText(text).then(() => {
         showToast('Copied to clipboard!', 'success');
     }).catch(err => {
@@ -285,7 +285,7 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type} toast-enter`;
     toast.textContent = message;
-    
+
     toast.style.cssText = `
         position: fixed;
         top: 20px;
@@ -372,18 +372,18 @@ function debounce(func, wait) {
 // Intersection Observer for Animations
 function initScrollAnimations() {
     const animatedElements = document.querySelectorAll('[data-aos]');
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const element = entry.target;
                 const animation = element.dataset.aos;
                 const delay = element.dataset.aosDelay || 0;
-                
+
                 setTimeout(() => {
                     element.classList.add(animation);
                 }, delay);
-                
+
                 observer.unobserve(element);
             }
         });
@@ -420,9 +420,9 @@ function checkAuth() {
 // Logout
 function logout() {
     const refreshToken = Storage.get('refreshToken');
-    
+
     if (refreshToken) {
-        API.post('/auth/logout', { refreshToken }).catch(() => {});
+        API.post('/auth/logout', { refreshToken }).catch(() => { });
     }
 
     Storage.clear();
@@ -475,7 +475,13 @@ window.APP = {
     logout,
     isAuthenticated,
     getUserRole,
-    openProfile: function() {
+    sanitize: function (str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+    openProfile: function () {
         // Try to open edit panel if profile control exists
         if (window.profileControl && typeof window.profileControl.openEditPanel === 'function') {
             window.profileControl.openEditPanel();

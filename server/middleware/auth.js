@@ -1,14 +1,13 @@
-const jwt = require('jsonwebtoken');
-const { query } = require('../database/db');
+const { auth, db } = require('../database/firebase');
 
 /**
- * Verify JWT token and attach user to request
+ * Verify Firebase ID token and attach user to request
  */
 const authMiddleware = async (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -18,37 +17,58 @@ const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.substring(7);
 
-    // Verify token
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify Firebase ID Token
+    const decodedToken = await auth.verifyIdToken(token);
+    const uid = decodedToken.uid;
 
-    // Get user from database
-    const users = await query(
-      'SELECT id, registration_number, email, name, role, department, year, section FROM users WHERE id = $1 AND is_active = TRUE',
-      [decoded.userId]
-    );
+    // Get user from Firestore
+    // Note: We might want to cache this or just use the token data if sufficient
+    // But for full user details (role, department, etc.), we usually need the DB record
+    // unless we put custom claims in the token.
+    // For now, let's fetch from DB to be safe and consistent with previous logic.
 
-    if (users.length === 0) {
+    const userDoc = await db.collection('users').doc(uid).get();
+
+    if (!userDoc.exists) {
+      // Fallback: Try to find by email if UID doesn't match (e.g. legacy data migration issue)
+      if (decodedToken.email) {
+        const snapshot = await db.collection('users').where('email', '==', decodedToken.email).limit(1).get();
+        if (!snapshot.empty) {
+          req.user = snapshot.docs[0].data();
+          req.user.id = snapshot.docs[0].id;
+          return next();
+        }
+      }
+
       return res.status(401).json({
         success: false,
         message: 'User not found or inactive'
       });
     }
 
-    // Attach user to request
-    req.user = users[0];
-    // Attach per-login variation seed if present in token
-    if (decoded.varSeed !== undefined) {
-      req.variationSeed = decoded.varSeed;
+    const user = userDoc.data();
+
+    if (!user.is_active) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is inactive'
+      });
     }
+
+    // Attach user to request
+    req.user = user;
+    req.user.id = userDoc.id; // Ensure ID is available
+
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
+    console.error('Auth Middleware Error:', error);
+    if (error.code === 'auth/id-token-expired') {
       return res.status(401).json({
         success: false,
         message: 'Token expired'
       });
     }
-    
+
     return res.status(401).json({
       success: false,
       message: 'Invalid token'
@@ -85,24 +105,22 @@ const roleMiddleware = (...allowedRoles) => {
 const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      const users = await query(
-        'SELECT id, registration_number, email, name, role, department FROM users WHERE id = $1 AND is_active = TRUE',
-        [decoded.userId]
-      );
+      const decodedToken = await auth.verifyIdToken(token);
+      const uid = decodedToken.uid;
 
-      if (users.length > 0) {
-        req.user = users[0];
+      const userDoc = await db.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        req.user = userDoc.data();
+        req.user.id = userDoc.id;
       }
     }
   } catch (error) {
     // Ignore errors for optional auth
   }
-  
+
   next();
 };
 
@@ -112,3 +130,4 @@ module.exports = {
   roleMiddleware,
   optionalAuth
 };
+

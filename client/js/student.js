@@ -79,7 +79,7 @@ async function loadAttendance() {
             if (attendancePercentEl) {
                 attendancePercentEl.textContent = percent + '%';
             }
-            
+
             // Pie chart: Present vs Absent (only if canvas exists)
             if (attendanceChartCtx && totalClasses > 0) {
                 if (attendanceChart) attendanceChart.destroy();
@@ -120,11 +120,11 @@ async function loadMarks() {
         }
         if (res && res.success && res.data) {
             const { marks, summary } = res.data;
-            
+
             // Calculate GPA (assuming 10-point scale)
             let totalPercentage = 0;
             let subjectCount = 0;
-            
+
             if (summary && summary.length > 0) {
                 summary.forEach(s => {
                     const percentage = (s.avg_marks / s.avg_total) * 100;
@@ -132,14 +132,14 @@ async function loadMarks() {
                     subjectCount++;
                 });
             }
-            
+
             const avgPercentage = subjectCount > 0 ? totalPercentage / subjectCount : 0;
             const gpa = (avgPercentage / 10).toFixed(2); // Convert percentage to 10-point GPA
             const marksGPAEl = document.getElementById('marksGPA');
             if (marksGPAEl) {
                 marksGPAEl.textContent = gpa;
             }
-            
+
             // Bar chart: Subject-wise marks (only if canvas exists)
             if (marksChartCtx && summary && summary.length > 0) {
                 if (marksChart) marksChart.destroy();
@@ -172,7 +172,7 @@ async function loadEvents() {
         console.warn('Events list element not found');
         return;
     }
-    
+
     try {
         let res;
         try {
@@ -186,7 +186,7 @@ async function loadEvents() {
             res.data.slice(0, 5).forEach(ev => {
                 const li = document.createElement('li');
                 const eventDate = new Date(ev.event_date).toLocaleDateString();
-                li.innerHTML = `<strong>${ev.title}</strong> <span class="event-date">${eventDate}</span>`;
+                li.innerHTML = `<strong>${APP.sanitize(ev.title)}</strong> <span class="event-date">${eventDate}</span>`;
                 list.appendChild(li);
             });
             if (res.data.length === 0) list.innerHTML = '<li>No upcoming events</li>';
@@ -202,7 +202,7 @@ async function loadEvents() {
             res.data.slice(0, 5).forEach(ev => {
                 const li = document.createElement('li');
                 const eventDate = new Date(ev.event_date).toLocaleDateString();
-                li.innerHTML = `<strong>${ev.title}</strong> <span class="event-date">${eventDate}</span>`;
+                li.innerHTML = `<strong>${APP.sanitize(ev.title)}</strong> <span class="event-date">${eventDate}</span>`;
                 list.appendChild(li);
             });
         } else if (list) list.innerHTML = '<li>Failed to load events</li>';
@@ -215,7 +215,7 @@ async function loadAssignments() {
         console.warn('Assignments list element not found');
         return;
     }
-    
+
     try {
         let res;
         try {
@@ -230,7 +230,7 @@ async function loadAssignments() {
                 const li = document.createElement('li');
                 const dueDate = new Date(asg.deadline).toLocaleDateString();
                 const status = asg.submission_status || 'Not Submitted';
-                li.innerHTML = `<strong>${asg.title}</strong> <span class="due-date">Due: ${dueDate}</span> <span class="status-${status.toLowerCase().replace(' ', '-')}">${status}</span>`;
+                li.innerHTML = `<strong>${APP.sanitize(asg.title)}</strong> <span class="due-date">Due: ${dueDate}</span> <span class="status-${status.toLowerCase().replace(' ', '-')}">${status}</span>`;
                 list.appendChild(li);
             });
             if (res.data.length === 0) list.innerHTML = '<li>No assignments</li>';
@@ -246,7 +246,7 @@ async function loadAssignments() {
                 const li = document.createElement('li');
                 const dueDate = new Date(asg.deadline).toLocaleDateString();
                 const status = asg.submission_status || 'Not Submitted';
-                li.innerHTML = `<strong>${asg.title}</strong> <span class="due-date">Due: ${dueDate}</span> <span class="status-${status.toLowerCase().replace(' ', '-')}">${status}</span>`;
+                li.innerHTML = `<strong>${APP.sanitize(asg.title)}</strong> <span class="due-date">Due: ${dueDate}</span> <span class="status-${status.toLowerCase().replace(' ', '-')}">${status}</span>`;
                 list.appendChild(li);
             });
         } else if (list) list.innerHTML = '<li>Failed to load assignments</li>';
@@ -259,7 +259,7 @@ async function loadDownloads() {
         console.warn('Downloads list element not found');
         return;
     }
-    
+
     try {
         let res;
         try {
@@ -272,7 +272,7 @@ async function loadDownloads() {
             list.innerHTML = '';
             res.data.files.forEach(file => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="/api/files/download/${file.id}" target="_blank">${file.original_name}</a> <span class="file-meta">${file.category || 'Document'}</span>`;
+                li.innerHTML = `<a href="/api/files/download/${file.id}" target="_blank">${APP.sanitize(file.original_name)}</a> <span class="file-meta">${APP.sanitize(file.category || 'Document')}</span>`;
                 list.appendChild(li);
             });
             if (res.data.files.length === 0) list.innerHTML = '<li>No files available</li>';
@@ -286,7 +286,7 @@ async function loadDownloads() {
             list.innerHTML = '';
             res.data.files.forEach(file => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span>${file.original_name}</span> <span class="file-meta">${file.category || 'Document'}</span>`;
+                li.innerHTML = `<span>${APP.sanitize(file.original_name)}</span> <span class="file-meta">${APP.sanitize(file.category || 'Document')}</span>`;
                 list.appendChild(li);
             });
         } else if (list) list.innerHTML = '<li>Failed to load files</li>';
@@ -296,7 +296,7 @@ async function loadDownloads() {
 async function loadTimetable() {
     const table = document.getElementById('timetableTable')?.getElementsByTagName('tbody')[0];
     if (!table) return;
-    
+
     try {
         let res;
         try {
@@ -307,30 +307,30 @@ async function loadTimetable() {
         }
         if (res && res.success && res.data) {
             table.innerHTML = '';
-            
+
             // Group timetable by day
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const timetableByDay = {};
-            
+
             res.data.forEach(slot => {
                 if (!timetableByDay[slot.day_of_week]) {
                     timetableByDay[slot.day_of_week] = [];
                 }
                 timetableByDay[slot.day_of_week].push(slot);
             });
-            
+
             // Create rows for each day
             days.forEach(day => {
                 if (timetableByDay[day]) {
                     const tr = document.createElement('tr');
                     const slots = timetableByDay[day];
-                    tr.innerHTML = `<td>${day}</td>` + slots.map(s => 
+                    tr.innerHTML = `<td>${day}</td>` + slots.map(s =>
                         `<td>${s.subject}<br><small>${s.time_slot}</small></td>`
                     ).join('');
                     table.appendChild(tr);
                 }
             });
-            
+
             if (res.data.length === 0) {
                 table.innerHTML = '<tr><td colspan="7">No timetable available</td></tr>';
             }
@@ -344,7 +344,7 @@ async function loadTimetable() {
 // Initial load with error isolation
 (async function initializeDashboard() {
     console.log('🚀 Initializing dashboard...');
-    
+
     // Load all functions independently so one failure doesn't break others
     try { await loadAttendance(); } catch (e) { console.error('Attendance load failed:', e); }
     try { await loadMarks(); } catch (e) { console.error('Marks load failed:', e); }
@@ -352,7 +352,7 @@ async function loadTimetable() {
     try { await loadAssignments(); } catch (e) { console.error('Assignments load failed:', e); }
     try { await loadDownloads(); } catch (e) { console.error('Downloads load failed:', e); }
     try { await loadTimetable(); } catch (e) { console.error('Timetable load failed:', e); }
-    
+
     console.log('✅ Dashboard initialization complete');
 })();
 

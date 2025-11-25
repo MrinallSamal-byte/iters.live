@@ -13,15 +13,16 @@
     width: 100%;
     overflow-x: auto;
     overflow-y: visible;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
     margin-bottom: 1.5rem;
     border-radius: var(--radius-md, 8px);
     /* Add scroll indicator shadow */
-    background: 
-        linear-gradient(to right, var(--bg-primary, #fff) 30%, rgba(255,255,255,0)),
-        linear-gradient(to right, rgba(255,255,255,0), var(--bg-primary, #fff) 70%) 0 100%,
-        radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,.2), rgba(0,0,0,0)),
-        radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.2), rgba(0,0,0,0)) 0 100%;
+    background:
+        linear-gradient(to right, var(--bg-primary, #fff) 30%, rgba(255, 255, 255, 0)),
+        linear-gradient(to right, rgba(255, 255, 255, 0), var(--bg-primary, #fff) 70%) 0 100%,
+        radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)),
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)) 0 100%;
     background-repeat: no-repeat;
     background-color: transparent;
     background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
@@ -36,6 +37,12 @@ table:not(.no-responsive) {
     white-space: nowrap;
 }
 
+/* FIX: Restore table layout when inside a responsive wrapper to ensure alignment */
+.table-responsive table {
+    display: table;
+    width: 100%;
+}
+
 /* ============================================
    TABLE STYLING - MOBILE OPTIMIZED
    ============================================ */
@@ -45,7 +52,8 @@ table:not(.no-responsive) {
 .modern-table,
 table {
     width: 100%;
-    min-width: 600px; /* Ensure table has minimum width for scrolling */
+    min-width: 600px;
+    /* Ensure table has minimum width for scrolling */
     border-collapse: separate;
     border-spacing: 0;
     background: var(--glass-bg, rgba(255, 255, 255, 0.05));
@@ -62,7 +70,8 @@ table thead th {
     text-align: left;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
     border-bottom: 2px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-    white-space: nowrap; /* Prevent header text wrapping */
+    white-space: nowrap;
+    /* Prevent header text wrapping */
     position: sticky;
     top: 0;
     z-index: 10;
@@ -74,7 +83,8 @@ table thead th {
 table td {
     padding: 0.875rem 1rem;
     border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-    white-space: nowrap; /* Prevent cell content wrapping */
+    white-space: nowrap;
+    /* Prevent cell content wrapping */
 }
 
 /* Table rows */
@@ -96,12 +106,13 @@ table tbody tr:hover {
    ============================================ */
 
 @media (max-width: 768px) {
+
     /* Increase touch targets on mobile */
     .table-responsive {
         /* Add visual hint for scrollability */
         position: relative;
     }
-    
+
     .table-responsive::after {
         content: '← Scroll to see more →';
         position: absolute;
@@ -114,7 +125,7 @@ table tbody tr:hover {
         pointer-events: none;
         white-space: nowrap;
     }
-    
+
     /* Adjust table padding for mobile */
     .data-table td,
     .modern-table td,
@@ -125,7 +136,7 @@ table tbody tr:hover {
         padding: 0.75rem;
         font-size: 0.875rem;
     }
-    
+
     /* Reduce minimum table width on very small screens */
     .data-table,
     .modern-table,
@@ -135,6 +146,7 @@ table tbody tr:hover {
 }
 
 @media (max-width: 480px) {
+
     /* Further optimize for small phones */
     .data-table,
     .modern-table,
@@ -142,7 +154,7 @@ table tbody tr:hover {
         min-width: 450px;
         font-size: 0.8125rem;
     }
-    
+
     .data-table td,
     .modern-table td,
     table td,
@@ -189,6 +201,7 @@ table tbody tr:hover {
    ============================================ */
 
 @media (max-width: 375px) {
+
     /* Option to convert tables to cards on very small screens */
     .table-responsive.table-card-mobile table,
     .table-responsive.table-card-mobile thead,
@@ -197,11 +210,12 @@ table tbody tr:hover {
     .table-responsive.table-card-mobile td {
         display: block;
     }
-    
+
     .table-responsive.table-card-mobile thead {
-        display: none; /* Hide headers in card view */
+        display: none;
+        /* Hide headers in card view */
     }
-    
+
     .table-responsive.table-card-mobile tr {
         margin-bottom: 1rem;
         padding: 1rem;
@@ -209,14 +223,14 @@ table tbody tr:hover {
         border-radius: var(--radius-md, 8px);
         border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
     }
-    
+
     .table-responsive.table-card-mobile td {
         padding: 0.5rem 0;
         border: none;
         text-align: left;
         white-space: normal;
     }
-    
+
     .table-responsive.table-card-mobile td::before {
         content: attr(data-label);
         font-weight: 600;

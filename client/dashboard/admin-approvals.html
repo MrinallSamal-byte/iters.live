@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
     <link rel="stylesheet" href="../css/clean-dashboard.css">
     <link rel="stylesheet" href="../css/universal-sidebar.css">
     <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="stylesheet" href="../css/table-responsive-global.css">
 </head>
+
 <body>
     <!-- Background -->
     <div class="bg-animation">
@@ -68,7 +71,7 @@
                     Filter Approvals
                 </h3>
             </div>
-            
+
             <div class="filter-buttons-container">
                 <button class="filter-btn active" data-filter="all" onclick="filterApprovals('all')">
                     <span>📋</span> All Items
@@ -97,7 +100,7 @@
                     <span id="approvalCount" class="result-count"></span>
                 </h3>
             </div>
-            
+
             <div class="table-responsive">
                 <table class="data-table modern-table">
                     <thead>
@@ -112,7 +115,9 @@
                         </tr>
                     </thead>
                     <tbody id="approvalsTableBody">
-                        <tr><td colspan="7" class="loading-text">Loading approval queue...</td></tr>
+                        <tr>
+                            <td colspan="7" class="loading-text">Loading approval queue...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -126,7 +131,7 @@
                     Recently Approved
                 </h3>
             </div>
-            
+
             <div class="approved-list" id="recentlyApproved">
                 <div class="loading-text">Loading recent approvals...</div>
             </div>
@@ -139,11 +144,11 @@
     </button>
 
     <!-- Scripts -->
-        <script src="../js/universal-sidebar.js"></script>
-        <script src="../js/toast.js"></script>
-        <script src="../js/prototype-mode.js"></script>
-        <script src="../js/dummy-data.js"></script>
-        <script src="../js/main.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/prototype-mode.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/main.js"></script>
     <script src="../js/pages/admin-approvals.js"></script>
 
     <style>
@@ -334,4 +339,5 @@
         }
     </style>
 </body>
+
 </html>

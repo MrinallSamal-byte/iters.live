@@ -21,7 +21,7 @@ router.get('/departments', authMiddleware, roleMiddleware('admin'), async (req, 
       GROUP BY department
       ORDER BY department
     `);
-    
+
     res.json({ success: true, data: departments });
   } catch (error) {
     next(error);
@@ -40,7 +40,7 @@ router.get('/stats', authMiddleware, roleMiddleware('admin'), async (req, res, n
         (SELECT COUNT(*) FROM events) as total_events,
         (SELECT COUNT(*) FROM announcements) as total_announcements
     `);
-    
+
     res.json({ success: true, data: stats[0] || {} });
   } catch (error) {
     next(error);
@@ -54,16 +54,18 @@ router.get('/users', authMiddleware, roleMiddleware('admin'), async (req, res, n
     const pageNum = parseInt(page) || 1;
     const limitNum = parseInt(limit) || 50;
     const offset = (pageNum - 1) * limitNum;
-    
+
     let whereClause = '';
     let params = [];
-    
+
+    let paramCount = 1;
+
     if (role) {
-      whereClause += ' WHERE role = ?';
+      whereClause += ` WHERE role = $${paramCount++}`;
       params.push(role);
     }
     if (department) {
-      whereClause += (whereClause ? ' AND' : ' WHERE') + ' department = ?';
+      whereClause += (whereClause ? ' AND' : ' WHERE') + ` department = $${paramCount++}`;
       params.push(department);
     }
 
@@ -83,7 +85,7 @@ router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, 
   try {
     const { name, registration_number, email, password, phone_number, department, year, section, role } = req.body;
     const hashedPassword = await bcrypt.hash(password, 12);
-    
+
     const result = await query(
       'INSERT INTO users (name, registration_number, email, password, phone_number, department, year, section, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       [name, registration_number, email, hashedPassword, phone_number, department, year, section, role]
@@ -97,7 +99,7 @@ router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, 
 
 router.put('/users/:id/toggle-active', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
-    await query('UPDATE users SET is_active = NOT is_active WHERE id = $10', [req.params.id]);
+    await query('UPDATE users SET is_active = NOT is_active WHERE id = $1', [req.params.id]);
     res.json({ success: true, message: 'User status updated' });
   } catch (error) {
     next(error);
@@ -125,7 +127,7 @@ router.get('/logs', authMiddleware, roleMiddleware('admin'), async (req, res, ne
     const logs = await query(
       `SELECT al.*, u.name as user_name FROM activity_log al
        LEFT JOIN users u ON al.user_id = u.id
-       ORDER BY al.created_at DESC LIMIT $11`, [parseInt(limit)]
+       ORDER BY al.created_at DESC LIMIT $1`, [parseInt(limit)]
     );
     res.json({ success: true, data: logs });
   } catch (error) {

@@ -65,7 +65,7 @@
     border: 3px solid var(--glass-border);
     position: relative;
     z-index: 2;
-    animation: float 6s ease-in-out infinite;
+    animation: profile-float 6s ease-in-out infinite;
 }
 
 .profile-glow {
@@ -80,6 +80,18 @@
     filter: blur(30px);
     z-index: 1;
     animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes profile-float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-15px) scale(1.05);
+    }
 }
 
 .creator-name {
@@ -338,6 +350,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

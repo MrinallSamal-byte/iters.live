@@ -26,11 +26,11 @@ async function loadUsers() {
     const items = res?.data || [];
     tbody.innerHTML = items.map(u => `
         <tr>
-            <td>${u.registration_number || '-'}</td>
-            <td>${u.name}</td>
-            <td><span class="badge ${u.role==='admin'?'warning':'primary'}">${u.role}</span></td>
-            <td>${u.department || '--'}</td>
-            <td>${u.email || '--'}</td>
+            <td>${APP.sanitize(u.registration_number || '-')}</td>
+            <td>${APP.sanitize(u.name)}</td>
+            <td><span class="badge ${u.role === 'admin' ? 'warning' : 'primary'}">${u.role}</span></td>
+            <td>${APP.sanitize(u.department || '--')}</td>
+            <td>${APP.sanitize(u.email || '--')}</td>
             <td><span class="badge ${u.is_active ? 'success' : 'danger'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
             <td class="action-btns">
                 <button class="btn btn-primary btn-sm">Edit</button>
@@ -58,12 +58,12 @@ function closeAddUserModal() {
 
 function exportUsers() {
     // simple CSV from current table rows
-    const rows = [['Reg No','Name','Role','Department','Email','Status']];
+    const rows = [['Reg No', 'Name', 'Role', 'Department', 'Email', 'Status']];
     document.querySelectorAll('#usersTableBody tr').forEach(tr => {
-        const cells = [...tr.children].slice(0,6).map(td => td.textContent.trim());
+        const cells = [...tr.children].slice(0, 6).map(td => td.textContent.trim());
         if (cells.length) rows.push(cells);
     });
-    const csv = rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const csv = rows.map(r => r.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -71,4 +71,4 @@ function exportUsers() {
     URL.revokeObjectURL(url);
 }
 
-function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), ms); }; }
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }

@@ -3,12 +3,12 @@
 // For Student, Teacher & Admin Dashboards
 // ============================================
 
-(function() {
+(function () {
     'use strict';
 
     const UniversalSidebar = {
         currentRole: '',
-        
+
         // Navigation menus for different roles
         menus: {
             student: [
@@ -95,7 +95,7 @@
         detectRole() {
             // Detect role from current page or localStorage
             const currentPage = window.location.pathname.split('/').pop();
-            
+
             if (currentPage.startsWith('student')) {
                 this.currentRole = 'student';
             } else if (currentPage.startsWith('teacher')) {
@@ -116,19 +116,18 @@
         createSidebar() {
             const menuItems = this.menus[this.currentRole] || this.menus.student;
             const roleTitle = this.currentRole.charAt(0).toUpperCase() + this.currentRole.slice(1);
-            
+
             const sidebarHTML = `
                 <aside class="universal-sidebar" id="universalSidebar">
-                    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
-                        ‹
-                    </button>
-                    
                     <div class="sidebar-header">
                         <img src="../assets/logo.png" alt="ITER Logo" class="sidebar-logo" onerror="this.style.display='none'">
                         <div class="sidebar-branding">
                             <span class="sidebar-title">ITER Portal</span>
                             <span class="sidebar-subtitle">${roleTitle} Dashboard</span>
                         </div>
+                        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+                            ☰
+                        </button>
                     </div>
 
                     <nav class="sidebar-nav">
@@ -167,10 +166,10 @@
                 <div class="top-profile-container">
                     <div class="profile-icon-wrapper">
                         <div class="profile-icon" id="profileIcon" title="${userName}">
-                            ${user.profile_picture ? 
-                                `<img src="${user.profile_picture}" alt="${userName}">` : 
-                                userInitial
-                            }
+                            ${user.profile_picture ?
+                    `<img src="${user.profile_picture}" alt="${userName}">` :
+                    userInitial
+                }
                         </div>
                         <div class="profile-dropdown" id="profileDropdown">
                             <div class="profile-dropdown-header">
@@ -244,7 +243,9 @@
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             if (isCollapsed && sidebar) {
                 sidebar.classList.add('collapsed');
-                if (toggleBtn) toggleBtn.textContent = '›';
+                if (toggleBtn) toggleBtn.textContent = '☰';
+            } else {
+                if (toggleBtn) toggleBtn.textContent = '«';
             }
             // Wire Logout link in sidebar
             const logoutLink = document.querySelector('.sidebar-nav-link[data-page="logout"]');
@@ -263,11 +264,11 @@
             if (sidebar) {
                 sidebar.classList.toggle('collapsed');
                 const isCollapsed = sidebar.classList.contains('collapsed');
-                
+
                 if (toggleBtn) {
-                    toggleBtn.textContent = isCollapsed ? '›' : '‹';
+                    toggleBtn.textContent = isCollapsed ? '☰' : '«';
                 }
-                
+
                 localStorage.setItem('sidebarCollapsed', isCollapsed);
             }
         },
@@ -317,7 +318,7 @@
 
             links.forEach(link => {
                 const pageName = link.getAttribute('data-page');
-                
+
                 if (currentPage === this.currentRole && pageName === 'dashboard') {
                     link.classList.add('active');
                 } else if (currentPage.includes(pageName)) {
@@ -330,7 +331,7 @@
         changeProfilePicture() {
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) dropdown.classList.remove('show');
-            
+
             // Create file input dynamically
             const input = document.createElement('input');
             input.type = 'file';
@@ -352,7 +353,7 @@
                     const formData = new FormData();
                     // Server expects the field name 'avatar'
                     formData.append('avatar', file);
-                    
+
                     try {
                         const token = localStorage.getItem('token');
                         const response = await fetch('/api/profile/photo', {
@@ -362,12 +363,12 @@
                             },
                             body: formData
                         });
-                        
+
                         const data = await response.json().catch(() => ({}));
                         if (response.ok && data && data.success) {
                             // Persist returned URL for consistent display across pages
                             if (data.data && data.data.profile_pic) {
-                                try { localStorage.setItem('profilePicture', data.data.profile_pic); } catch {}
+                                try { localStorage.setItem('profilePicture', data.data.profile_pic); } catch { }
                             }
                             if (typeof Toast !== 'undefined') {
                                 Toast.success('Profile picture updated successfully!');
@@ -396,7 +397,7 @@
         showIDCard() {
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) dropdown.classList.remove('show');
-            
+
             // Open the actual ID Card modal via ProfileControl if available
             try {
                 if (window.profileControl && typeof window.profileControl.openIdCardModal === 'function') {
@@ -488,7 +489,7 @@
             };
             overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
             header.querySelector('#fallbackIdCardClose').addEventListener('click', close);
-            document.addEventListener('keydown', function onEsc(ev){ if (ev.key === 'Escape'){ close(); document.removeEventListener('keydown', onEsc); } });
+            document.addEventListener('keydown', function onEsc(ev) { if (ev.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); } });
 
             // Draw the ID card on canvas
             const ctx = canvas.getContext('2d');
@@ -498,15 +499,15 @@
             ctx.scale(DPR, DPR);
 
             // Background
-            const grd = ctx.createLinearGradient(0,0,640,360);
+            const grd = ctx.createLinearGradient(0, 0, 640, 360);
             grd.addColorStop(0, '#111827');
             grd.addColorStop(1, '#1f2937');
             ctx.fillStyle = grd;
-            ctx.fillRect(0,0,640,360);
+            ctx.fillRect(0, 0, 640, 360);
 
             // Card panel
             const panelX = 24, panelY = 24, panelW = 592, panelH = 312, radius = 14;
-            const roundRect = (x,y,w,h,r) => { ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); };
+            const roundRect = (x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
             ctx.fillStyle = '#0b1220';
             roundRect(panelX, panelY, panelW, panelH, radius);
             ctx.fill();
@@ -520,7 +521,7 @@
 
             // Photo placeholder or image
             const photoX = panelX + 24, photoY = panelY + 74, photoSize = 96;
-            const drawText = (text, x, y, opts={}) => { ctx.save(); ctx.fillStyle = opts.color || '#e5e7eb'; ctx.font = opts.font || '14px Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx.fillText(text, x, y); ctx.restore(); };
+            const drawText = (text, x, y, opts = {}) => { ctx.save(); ctx.fillStyle = opts.color || '#e5e7eb'; ctx.font = opts.font || '14px Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx.fillText(text, x, y); ctx.restore(); };
 
             const drawDetails = () => {
                 // Labels and values
@@ -562,9 +563,9 @@
                         img.onload = () => {
                             // Draw image clipped into rounded rect
                             ctx.save();
-                            roundRect(photoX+1, photoY+1, photoSize-2, photoSize-2, 10);
+                            roundRect(photoX + 1, photoY + 1, photoSize - 2, photoSize - 2, 10);
                             ctx.clip();
-                            ctx.drawImage(img, photoX+1, photoY+1, photoSize-2, photoSize-2);
+                            ctx.drawImage(img, photoX + 1, photoY + 1, photoSize - 2, photoSize - 2);
                             ctx.restore();
                             drawDetails();
                         };
@@ -613,7 +614,7 @@
         openSettings() {
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) dropdown.classList.remove('show');
-            
+
             // Prefer a common settings page if available
             const byRole = {
                 student: '/settings.html',
@@ -628,7 +629,7 @@
         logout() {
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) dropdown.classList.remove('show');
-            
+
             if (confirm('Are you sure you want to logout?')) {
                 // Use APP.logout if available
                 if (typeof APP !== 'undefined' && typeof APP.logout === 'function') {
