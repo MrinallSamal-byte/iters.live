@@ -18,18 +18,18 @@ console.log('🤖 Building Android TWA configuration...\n');
 
 // TWA Manifest (twa-manifest.json)
 const twaManifest = {
-  packageId: "edu.iter.collegemanagement",
-  host: "iter-edu.example.com", // Replace with your actual domain
-  name: "ITER EduHub",
-  launcherName: "ITER EduHub",
+  packageId: "live.iters.app", // Updated package ID
+  host: "iters.live", // Correct domain
+  name: "ITER", // Requested app name
+  launcherName: "ITER",
   display: "standalone",
   themeColor: "#6366f1",
   backgroundColor: "#0f172a",
   enableNotifications: true,
   startUrl: "/",
-  iconUrl: "/assets/icon-512.png",
-  maskableIconUrl: "/assets/icon-512.png",
-  monochromeIconUrl: "/assets/icon-512.png",
+  iconUrl: "/assets/soa-logo.png", // Using the existing logo
+  maskableIconUrl: "/assets/soa-logo.png",
+  monochromeIconUrl: "/assets/soa-logo.png",
   splashScreenFadeOutDuration: 300,
   signingKey: {
     path: "./android.keystore",
@@ -42,7 +42,7 @@ const twaManifest = {
       name: "Dashboard",
       shortName: "Dashboard",
       url: "/dashboard/student.html",
-      icon: "/assets/icon-96.png"
+      icon: "/assets/soa-logo.png"
     }
   ],
   generatorApp: "bubblewrap-cli",

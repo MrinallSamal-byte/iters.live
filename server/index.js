@@ -111,6 +111,9 @@ app.use('/static', express.static(path.join(__dirname, '../client')));
 // Serve client files directly from root
 app.use(express.static(path.join(__dirname, '../client')));
 
+// Serve releases (APK)
+app.use('/releases', express.static(path.join(__dirname, '../releases')));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
