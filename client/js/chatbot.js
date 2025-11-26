@@ -377,13 +377,8 @@ Or you can visit the <a href="student-forum.html" class="nav-suggestion">💬 Fo
 
 // Initialize chatbot when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Only initialize on student pages
-    if (window.location.pathname.includes('student') || 
-        window.location.pathname.includes('dashboard') ||
-        window.location.pathname === '/' ||
-        window.location.pathname.includes('index.html')) {
-        window.chatbot = new Chatbot();
-    }
+    // Initialize on all pages - available for student, teacher, admin and public pages
+    window.chatbot = new Chatbot();
 });
 
 // Export for module use
