@@ -469,6 +469,8 @@ body.light-theme .creator-main-title {
     background: linear-gradient(135deg, var(--primary), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
 }
 
 body.light-theme .profile-icon {
