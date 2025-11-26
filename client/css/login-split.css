@@ -351,6 +351,7 @@ body.light-theme .brand-title {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: #4f46e5; /* Fallback for browsers that don't support background-clip: text */
 }
 
 body.light-theme .brand-subtitle {
