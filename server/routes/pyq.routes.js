@@ -73,8 +73,9 @@ router.get('/papers', async (req, res) => {
         }
 
         if (search) {
-            query += ` AND (LOWER(pyq.subject) LIKE LOWER($${paramIndex}) OR LOWER(pyq.subject_code) LIKE LOWER($${paramIndex++}))`;
+            query += ` AND (LOWER(pyq.subject) LIKE LOWER($${paramIndex}) OR LOWER(pyq.subject_code) LIKE LOWER($${paramIndex}))`;
             params.push(`%${search}%`);
+            paramIndex++;
         }
 
         // Sorting
@@ -97,7 +98,7 @@ router.get('/papers', async (req, res) => {
 
         const papers = await db.query(query, params);
 
-        // Get total count
+        // Get total count with all applied filters
         let countQuery = 'SELECT COUNT(*) FROM pyq_papers WHERE 1=1';
         const countParams = [];
         let countParamIndex = 1;
@@ -110,6 +111,22 @@ router.get('/papers', async (req, res) => {
         if (year) {
             countQuery += ` AND year = $${countParamIndex++}`;
             countParams.push(parseInt(year));
+        }
+
+        if (semester) {
+            countQuery += ` AND semester = $${countParamIndex++}`;
+            countParams.push(parseInt(semester));
+        }
+
+        if (examType) {
+            countQuery += ` AND exam_type = $${countParamIndex++}`;
+            countParams.push(examType);
+        }
+
+        if (search) {
+            countQuery += ` AND (LOWER(subject) LIKE LOWER($${countParamIndex}) OR LOWER(subject_code) LIKE LOWER($${countParamIndex}))`;
+            countParams.push(`%${search}%`);
+            countParamIndex++;
         }
 
         const totalCount = await db.query(countQuery, countParams);

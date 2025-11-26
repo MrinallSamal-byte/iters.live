@@ -59,15 +59,16 @@ router.get('/questions', optionalAuth, async (req, res) => {
             if (status === 'answered') {
                 query += ` AND fq.status = 'answered'`;
             } else if (status === 'unanswered') {
-                query += ` AND (SELECT COUNT(*) FROM forum_answers fa WHERE fa.question_id = fq.id) = 0`;
+                query += ` AND NOT EXISTS (SELECT 1 FROM forum_answers fa WHERE fa.question_id = fq.id)`;
             } else if (status === 'open') {
                 query += ` AND fq.status = 'open'`;
             }
         }
         
         if (search) {
-            query += ` AND (fq.title ILIKE $${paramIndex} OR fq.description ILIKE $${paramIndex++})`;
+            query += ` AND (fq.title ILIKE $${paramIndex} OR fq.description ILIKE $${paramIndex})`;
             params.push(`%${search}%`);
+            paramIndex++;
         }
         
         if (tag) {
