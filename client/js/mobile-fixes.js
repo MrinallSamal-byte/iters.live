@@ -142,7 +142,7 @@
                     
                     if (isLink && href) {
                         if (href.startsWith('#')) {
-                            // Internal anchor link
+                            // Internal anchor link (same page)
                             e.preventDefault();
                             const target = document.querySelector(href);
                             if (target) {
@@ -150,14 +150,17 @@
                             } else if (href === '#' || href === '#top') {
                                 smoothScrollToTop();
                             }
-                        } else if (href.startsWith('http') || href.endsWith('.html')) {
-                            // External link or page navigation
+                        } else if (href.startsWith('http') || href.includes('.html') || href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+                            // External link, page navigation, or relative URLs (including URLs with anchors like index.html#about)
                             const target = this.getAttribute('target');
                             if (target === '_blank') {
                                 window.open(href, '_blank', 'noopener,noreferrer');
                             } else {
                                 window.location.href = href;
                             }
+                        } else {
+                            // Fallback: navigate to the href for any other link format
+                            window.location.href = href;
                         }
                     } else {
                         // Regular button - trigger click
