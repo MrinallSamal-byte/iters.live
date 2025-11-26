@@ -4,6 +4,82 @@
     background: var(--bg-primary);
 }
 
+/* Creator Hero Section */
+.creator-hero {
+    min-height: 100vh;
+}
+
+.creator-hero .hero-content {
+    flex: 1;
+}
+
+.creator-avatar {
+    position: relative;
+}
+
+.creator-avatar-inner {
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border-radius: 50%;
+    border: 3px solid var(--glass-border);
+    animation: creator-float 6s ease-in-out infinite;
+}
+
+.creator-emoji {
+    font-size: 8rem;
+}
+
+@keyframes creator-float {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-20px) scale(1.02);
+    }
+}
+
+/* Tech Tag Pills */
+.tech-tag-pill {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 9999px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tech-tag-pill:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+/* Light Theme Adjustments for Creator Page */
+body.light-theme .creator-avatar-inner {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+body.light-theme .tech-tag-pill {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+    color: var(--text-primary);
+}
+
+body.light-theme .tech-tag-pill:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Legacy Creator Page Styles - kept for compatibility */
 .about-creator-section {
     min-height: 100vh;
     padding: 120px 0 var(--spacing-2xl);
@@ -388,6 +464,51 @@
     height: 300px;
 }
 
+/* Light Theme Specific Styles */
+body.light-theme .creator-main-title {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-theme .profile-icon {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+body.light-theme .profile-glow {
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 40%, transparent 70%);
+}
+
+body.light-theme .tech-tag {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+body.light-theme .tech-tag:hover {
+    background: var(--primary);
+    color: white;
+}
+
+body.light-theme .info-card,
+body.light-theme .creator-link,
+body.light-theme .disclaimer-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(99, 102, 241, 0.15);
+}
+
+body.light-theme .why-card,
+body.light-theme .tech-feature-item,
+body.light-theme .feature-card,
+body.light-theme .download-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(99, 102, 241, 0.1);
+}
+
+body.light-theme .vm-card {
+    background: rgba(255, 255, 255, 0.9);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .about-creator-section {
@@ -443,6 +564,15 @@
         padding: var(--spacing-xs) var(--spacing-md);
         font-size: 0.875rem;
     }
+    
+    .creator-avatar-inner {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .creator-emoji {
+        font-size: 5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -468,5 +598,14 @@
     .back-to-home-btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    .creator-avatar-inner {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .creator-emoji {
+        font-size: 4rem;
     }
 }
