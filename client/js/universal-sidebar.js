@@ -17,6 +17,7 @@
                 { icon: '📈', text: 'Marks', href: 'student-marks.html', page: 'marks' },
                 { icon: '📅', text: 'Timetable', href: 'student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: 'student-notes.html', page: 'notes' },
+                { icon: '💬', text: 'Forum', href: 'student-forum.html', page: 'forum' },
                 { icon: '🎫', text: 'Admit Card', href: 'student-admit-card.html', page: 'admit-card' },
                 { icon: '🎉', text: 'Events', href: 'student-events.html', page: 'events' },
                 { icon: '🎪', text: 'Clubs', href: 'student-clubs.html', page: 'clubs' },
