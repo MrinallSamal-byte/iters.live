@@ -140,6 +140,25 @@
                     const href = this.getAttribute('href');
                     const isLink = this.tagName.toLowerCase() === 'a';
                     
+                    // Helper function to check if href is a safe navigation URL
+                    const isSafeNavigationUrl = (url) => {
+                        if (!url) return false;
+                        // Block potentially dangerous protocols
+                        const lowerUrl = url.toLowerCase().trim();
+                        if (lowerUrl.startsWith('javascript:') || lowerUrl.startsWith('data:') || lowerUrl.startsWith('vbscript:')) {
+                            return false;
+                        }
+                        // Allow http/https URLs
+                        if (lowerUrl.startsWith('http://') || lowerUrl.startsWith('https://')) return true;
+                        // Allow URLs containing .html (followed by end, query, or hash)
+                        if (/\.html($|[?#])/.test(url)) return true;
+                        // Allow relative paths
+                        if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) return true;
+                        // Allow mailto and tel links
+                        if (lowerUrl.startsWith('mailto:') || lowerUrl.startsWith('tel:')) return true;
+                        return false;
+                    };
+                    
                     if (isLink && href) {
                         if (href.startsWith('#')) {
                             // Internal anchor link (same page)
@@ -150,7 +169,7 @@
                             } else if (href === '#' || href === '#top') {
                                 smoothScrollToTop();
                             }
-                        } else if (href.startsWith('http') || href.includes('.html') || href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+                        } else if (isSafeNavigationUrl(href)) {
                             // External link, page navigation, or relative URLs (including URLs with anchors like index.html#about)
                             const target = this.getAttribute('target');
                             if (target === '_blank') {
@@ -158,10 +177,8 @@
                             } else {
                                 window.location.href = href;
                             }
-                        } else {
-                            // Fallback: navigate to the href for any other link format
-                            window.location.href = href;
                         }
+                        // If URL is not recognized as safe, let the browser handle it naturally (don't block)
                     } else {
                         // Regular button - trigger click
                         this.click();
