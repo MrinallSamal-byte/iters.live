@@ -430,6 +430,14 @@ class Chatbot {
             }
         });
 
+        // Event delegation for FAQ items in messages (using data-query attribute)
+        this.messagesContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('faq-item') && e.target.dataset.query) {
+                this.input.value = e.target.dataset.query;
+                this.sendMessage();
+            }
+        });
+
         document.addEventListener('click', (e) => {
             if (this.isOpen && 
                 !this.container.contains(e.target) && 
@@ -617,17 +625,27 @@ class Chatbot {
     }
 
     getSmartFallback(message) {
+        // Using data attributes for security instead of inline onclick
         const fallbacks = {
-            student: `I understand you're asking about "${message}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='attendance'; document.getElementById('chatbotSend').click();">📊 Attendance & Marks</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='study notes'; document.getElementById('chatbotSend').click();">📚 Study Materials</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='help solve'; document.getElementById('chatbotSend').click();">💡 Solve Questions</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='forum'; document.getElementById('chatbotSend').click();">💬 Ask in Forum</div>\n</div>\n\nOr visit <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a> to ask your question!`,
+            student: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="attendance">📊 Attendance & Marks</div>\n    <div class="faq-item" data-query="study notes">📚 Study Materials</div>\n    <div class="faq-item" data-query="help solve">💡 Solve Questions</div>\n    <div class="faq-item" data-query="forum">💬 Ask in Forum</div>\n</div>\n\nOr visit <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a> to ask your question!`,
             
-            teacher: `I understand you're asking about "${message}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='mark attendance'; document.getElementById('chatbotSend').click();">📊 Mark Attendance</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='upload marks'; document.getElementById('chatbotSend').click();">📈 Upload Marks</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='assignments'; document.getElementById('chatbotSend').click();">📝 Manage Assignments</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='my students'; document.getElementById('chatbotSend').click();">👥 View Students</div>\n</div>\n\nNeed more help? Contact admin office!`,
+            teacher: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="mark attendance">📊 Mark Attendance</div>\n    <div class="faq-item" data-query="upload marks">📈 Upload Marks</div>\n    <div class="faq-item" data-query="assignments">📝 Manage Assignments</div>\n    <div class="faq-item" data-query="my students">👥 View Students</div>\n</div>\n\nNeed more help? Contact admin office!`,
             
-            admin: `I understand you're asking about "${message}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='manage users'; document.getElementById('chatbotSend').click();">👥 User Management</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='pending approvals'; document.getElementById('chatbotSend').click();">✅ Approvals</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='analytics'; document.getElementById('chatbotSend').click();">📊 View Analytics</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='settings'; document.getElementById('chatbotSend').click();">⚙️ System Settings</div>\n</div>\n\nFor technical issues, contact IT department!`,
+            admin: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="manage users">👥 User Management</div>\n    <div class="faq-item" data-query="pending approvals">✅ Approvals</div>\n    <div class="faq-item" data-query="analytics">📊 View Analytics</div>\n    <div class="faq-item" data-query="settings">⚙️ System Settings</div>\n</div>\n\nFor technical issues, contact IT department!`,
             
-            guest: `Thanks for asking about "${message}"! 🤔\n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='about iter'; document.getElementById('chatbotSend').click();">🎓 About ITER</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='features'; document.getElementById('chatbotSend').click();">✨ EduHub Features</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='register'; document.getElementById('chatbotSend').click();">📝 How to Register</div>\n    <div class="faq-item" onclick="document.querySelector('.chatbot-input').value='contact'; document.getElementById('chatbotSend').click();">📞 Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion">🔐 Login</a> or <a href="/register.html" class="nav-suggestion">📝 Register</a> to access more features!`
+            guest: `Thanks for asking about "${this.escapeHtml(message)}"! 🤔\n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="about iter">🎓 About ITER</div>\n    <div class="faq-item" data-query="features">✨ EduHub Features</div>\n    <div class="faq-item" data-query="register">📝 How to Register</div>\n    <div class="faq-item" data-query="contact">📞 Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion">🔐 Login</a> or <a href="/register.html" class="nav-suggestion">📝 Register</a> to access more features!`
         };
 
         return fallbacks[this.userRole] || fallbacks.guest;
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
