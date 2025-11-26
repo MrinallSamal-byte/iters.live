@@ -17,7 +17,6 @@
                 { icon: '📈', text: 'Marks', href: 'student-marks.html', page: 'marks' },
                 { icon: '📅', text: 'Timetable', href: 'student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: 'student-notes.html', page: 'notes' },
-                { icon: '📝', text: 'PYQ Bank', href: 'student-pyq.html', page: 'pyq' },
                 { icon: '💬', text: 'Forum', href: 'student-forum.html', page: 'forum' },
                 { icon: '🎫', text: 'Admit Card', href: 'student-admit-card.html', page: 'admit-card' },
                 { icon: '🎉', text: 'Events', href: 'student-events.html', page: 'events' },

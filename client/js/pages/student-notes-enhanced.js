@@ -1,6 +1,6 @@
 // ============================================
 // ENHANCED STUDENT NOTES PAGE
-// With Branch, Semester, and Type Filters
+// With Branch, Semester, Type, and PYQ Features
 // ============================================
 
 (function() {
@@ -11,6 +11,7 @@
             branch: '',
             semester: '',
             type: '',
+            examType: '',
             search: ''
         },
         allNotes: [],
@@ -18,9 +19,29 @@
 
         init() {
             this.setupEventListeners();
+            this.handleUrlParams();
             this.loadNotes();
             this.loadStats();
             this.loadRecentDownloads();
+        },
+
+        handleUrlParams() {
+            // Check for URL parameters to pre-select filters
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            
+            if (typeParam) {
+                const typeSelect = document.getElementById('typeFilter');
+                if (typeSelect) {
+                    typeSelect.value = typeParam;
+                    this.currentFilters.type = typeParam;
+                    
+                    // Show PYQ-specific elements if type is pyqs
+                    if (typeParam === 'pyqs') {
+                        this.togglePYQElements(true);
+                    }
+                }
+            }
         },
 
         setupEventListeners() {
@@ -53,8 +74,35 @@
                 });
             }
 
+            // Type filter - show/hide PYQ-specific elements
+            const typeFilter = document.getElementById('typeFilter');
+            if (typeFilter) {
+                typeFilter.addEventListener('change', (e) => {
+                    this.togglePYQElements(e.target.value === 'pyqs');
+                });
+            }
+
+            // Exam Type filter for PYQs
+            const examTypeFilter = document.getElementById('examTypeFilter');
+            if (examTypeFilter) {
+                examTypeFilter.addEventListener('change', () => {
+                    this.applyFilters();
+                });
+            }
+
+            // Popular Subject Tags
+            document.querySelectorAll('.subject-tag').forEach(tag => {
+                tag.addEventListener('click', (e) => {
+                    const subject = e.currentTarget.dataset.subject;
+                    this.filterBySubject(subject);
+                    // Toggle active state
+                    document.querySelectorAll('.subject-tag').forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                });
+            });
+
             // Filter selects - apply on Enter key
-            ['branchFilter', 'semesterFilter', 'typeFilter'].forEach(id => {
+            ['branchFilter', 'semesterFilter', 'typeFilter', 'examTypeFilter'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
                     element.addEventListener('keypress', (e) => {
@@ -64,6 +112,83 @@
                     });
                 }
             });
+        },
+
+        togglePYQElements(show) {
+            const examTypeGroup = document.getElementById('examTypeFilterGroup');
+            const popularSubjects = document.getElementById('popularSubjectsSection');
+            const requestSection = document.getElementById('requestPaperSection');
+
+            if (examTypeGroup) examTypeGroup.style.display = show ? 'flex' : 'none';
+            if (popularSubjects) popularSubjects.style.display = show ? 'block' : 'none';
+            if (requestSection) requestSection.style.display = show ? 'block' : 'none';
+        },
+
+        filterBySubject(subject) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                const subjectNames = {
+                    'data-structures': 'Data Structures',
+                    'algorithms': 'Algorithms',
+                    'dbms': 'Database',
+                    'os': 'Operating Systems',
+                    'cn': 'Computer Networks',
+                    'ml': 'Machine Learning',
+                    'oops': 'Object Oriented',
+                    'se': 'Software Engineering'
+                };
+                searchInput.value = subjectNames[subject] || subject;
+                this.currentFilters.search = subjectNames[subject] || subject;
+                this.filterNotes();
+            }
+        },
+
+        async requestPaper() {
+            const subject = document.getElementById('requestSubject')?.value;
+            const year = document.getElementById('requestYear')?.value;
+            const examType = document.getElementById('requestExamType')?.value;
+
+            if (!subject || !year) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.error('Please enter subject name and year');
+                } else {
+                    alert('Please enter subject name and year');
+                }
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/pyq/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ subject, year, examType })
+                });
+
+                if (response.ok) {
+                    if (typeof Toast !== 'undefined') {
+                        Toast.success('Request submitted successfully! We will try to add this paper.');
+                    }
+                    // Clear form
+                    document.getElementById('requestSubject').value = '';
+                    document.getElementById('requestYear').value = '';
+                    document.getElementById('requestExamType').value = '';
+                } else {
+                    throw new Error('Request failed');
+                }
+            } catch (error) {
+                console.error('Request error:', error);
+                if (typeof Toast !== 'undefined') {
+                    Toast.info('Request noted! We will try to add this paper to our collection.');
+                }
+                // Clear form anyway for demo
+                document.getElementById('requestSubject').value = '';
+                document.getElementById('requestYear').value = '';
+                document.getElementById('requestExamType').value = '';
+            }
         },
 
         async loadNotes() {
@@ -160,6 +285,82 @@
                     uploaded_by: 'Prof. Reddy',
                     uploaded_at: '2025-10-02',
                     downloads: 112
+                },
+                // Additional PYQ entries with exam types and solution indicators
+                {
+                    id: 6,
+                    title: 'Data Structures End-Term 2024',
+                    subject: 'Data Structures',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'pyqs',
+                    examType: 'endterm',
+                    hasSolution: true,
+                    file_type: 'PDF',
+                    file_size: '1.2 MB',
+                    uploaded_by: 'Prof. Kumar',
+                    uploaded_at: '2025-10-12',
+                    downloads: 1256
+                },
+                {
+                    id: 7,
+                    title: 'Algorithms Mid-Term 2024',
+                    subject: 'Algorithms',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'pyqs',
+                    examType: 'midterm',
+                    hasSolution: false,
+                    file_type: 'PDF',
+                    file_size: '0.9 MB',
+                    uploaded_by: 'Prof. Sharma',
+                    uploaded_at: '2025-10-08',
+                    downloads: 867
+                },
+                {
+                    id: 8,
+                    title: 'Computer Networks End-Term 2023',
+                    subject: 'Computer Networks',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'pyqs',
+                    examType: 'endterm',
+                    hasSolution: true,
+                    file_type: 'PDF',
+                    file_size: '1.5 MB',
+                    uploaded_by: 'Prof. Patel',
+                    uploaded_at: '2025-09-25',
+                    downloads: 1543
+                },
+                {
+                    id: 9,
+                    title: 'Machine Learning Internal Test 2024',
+                    subject: 'Machine Learning',
+                    branch: 'CSE',
+                    semester: 6,
+                    type: 'pyqs',
+                    examType: 'internal',
+                    hasSolution: true,
+                    file_type: 'PDF',
+                    file_size: '0.7 MB',
+                    uploaded_by: 'Prof. Reddy',
+                    uploaded_at: '2025-10-15',
+                    downloads: 2134
+                },
+                {
+                    id: 10,
+                    title: 'Operating Systems Quiz 1 2024',
+                    subject: 'Operating Systems',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'pyqs',
+                    examType: 'quiz',
+                    hasSolution: false,
+                    file_type: 'PDF',
+                    file_size: '0.4 MB',
+                    uploaded_by: 'Prof. Kumar',
+                    uploaded_at: '2025-10-10',
+                    downloads: 645
                 }
             ];
             this.filteredNotes = [...this.allNotes];
@@ -173,10 +374,12 @@
             const branchSelect = document.getElementById('branchFilter');
             const semesterSelect = document.getElementById('semesterFilter');
             const typeSelect = document.getElementById('typeFilter');
+            const examTypeSelect = document.getElementById('examTypeFilter');
 
             this.currentFilters.branch = branchSelect ? branchSelect.value : '';
             this.currentFilters.semester = semesterSelect ? semesterSelect.value : '';
             this.currentFilters.type = typeSelect ? typeSelect.value : '';
+            this.currentFilters.examType = examTypeSelect ? examTypeSelect.value : '';
 
             // Show loading animation
             this.showLoading();
@@ -195,20 +398,29 @@
             const branchSelect = document.getElementById('branchFilter');
             const semesterSelect = document.getElementById('semesterFilter');
             const typeSelect = document.getElementById('typeFilter');
+            const examTypeSelect = document.getElementById('examTypeFilter');
             const searchInput = document.getElementById('searchInput');
 
             if (branchSelect) branchSelect.value = '';
             if (semesterSelect) semesterSelect.value = '';
             if (typeSelect) typeSelect.value = '';
+            if (examTypeSelect) examTypeSelect.value = '';
             if (searchInput) searchInput.value = '';
+
+            // Hide PYQ-specific elements
+            this.togglePYQElements(false);
 
             // Reset filter state
             this.currentFilters = {
                 branch: '',
                 semester: '',
                 type: '',
+                examType: '',
                 search: ''
             };
+
+            // Clear active tags
+            document.querySelectorAll('.subject-tag').forEach(t => t.classList.remove('active'));
 
             // Show all notes
             this.filteredNotes = [...this.allNotes];
@@ -233,6 +445,11 @@
 
                 // Type filter
                 if (this.currentFilters.type && note.type !== this.currentFilters.type) {
+                    return false;
+                }
+
+                // Exam Type filter (for PYQs)
+                if (this.currentFilters.examType && note.type === 'pyqs' && note.examType !== this.currentFilters.examType) {
                     return false;
                 }
 
@@ -302,11 +519,31 @@
                 books: 'Book'
             };
 
+            const examTypeLabels = {
+                midterm: 'Mid-Term',
+                endterm: 'End-Term',
+                internal: 'Internal',
+                quiz: 'Quiz'
+            };
+
+            // Solution badge for PYQs
+            const solutionBadge = (note.type === 'pyqs' && note.hasSolution) 
+                ? '<span class="solution-badge">✅ With Solution</span>' 
+                : '';
+
+            // Exam type info for PYQs
+            const examTypeInfo = (note.type === 'pyqs' && note.examType) 
+                ? `<span class="resource-meta-item"><span>📝</span> ${examTypeLabels[note.examType] || note.examType}</span>` 
+                : '';
+
             return `
                 <div class="resource-card" data-id="${note.id}">
                     <div class="resource-header">
                         <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
-                        <div class="resource-badge">${typeLabels[note.type] || 'Resource'}</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div class="resource-badge">${typeLabels[note.type] || 'Resource'}</div>
+                            ${solutionBadge}
+                        </div>
                     </div>
                     <h4 class="resource-title">${note.title}</h4>
                     <div class="resource-meta">
@@ -316,11 +553,12 @@
                         <span class="resource-meta-item">
                             <span>🎓</span> ${note.branch} - Sem ${note.semester}
                         </span>
+                        ${examTypeInfo}
                         <span class="resource-meta-item">
                             <span>📊</span> ${note.file_type} - ${note.file_size}
                         </span>
                         <span class="resource-meta-item">
-                            <span>📥</span> ${note.downloads} downloads
+                            <span>📥</span> ${this.formatDownloads(note.downloads)} downloads
                         </span>
                     </div>
                     <div class="resource-actions">
@@ -335,6 +573,13 @@
             `;
         },
 
+        formatDownloads(count) {
+            if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            }
+            return count;
+        },
+
         showLoading() {
             const loading = document.getElementById('loadingState');
             const grid = document.getElementById('resourcesGrid');
@@ -343,6 +588,11 @@
             if (loading) loading.style.display = 'block';
             if (grid) grid.style.display = 'none';
             if (noResults) noResults.style.display = 'none';
+        },
+
+        hideLoading() {
+            const loading = document.getElementById('loadingState');
+            if (loading) loading.style.display = 'none';
         },
 
         showError(message) {

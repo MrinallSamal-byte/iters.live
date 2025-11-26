@@ -117,6 +117,20 @@
                         </select>
                     </div>
 
+                    <div class="filter-group" id="examTypeFilterGroup" style="display: none;">
+                        <label for="examTypeFilter" class="filter-label">
+                            <span class="filter-icon">📝</span>
+                            Exam Type
+                        </label>
+                        <select id="examTypeFilter" class="filter-select">
+                            <option value="">All Exam Types</option>
+                            <option value="midterm">Mid-Term</option>
+                            <option value="endterm">End-Term</option>
+                            <option value="internal">Internal</option>
+                            <option value="quiz">Quiz</option>
+                        </select>
+                    </div>
+
                     <div class="filter-group">
                         <button id="applyFilterBtn" class="btn btn-primary filter-apply-btn">
                             <span>🔎</span>
@@ -133,6 +147,42 @@
                 <div class="search-box-container">
                     <input type="text" id="searchInput" placeholder="🔍 Search by subject name, title, or keywords..." class="search-input">
                 </div>
+            </div>
+        </section>
+
+        <!-- Popular Subjects for PYQs (shown when PYQ type is selected) -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal" id="popularSubjectsSection" style="display: none;">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⭐</span>
+                    Popular Subjects
+                </h3>
+            </div>
+            <div class="subject-tags" id="popularSubjectTags">
+                <button class="subject-tag" data-subject="data-structures">
+                    <span class="tag-icon">📊</span> Data Structures
+                </button>
+                <button class="subject-tag" data-subject="algorithms">
+                    <span class="tag-icon">🧮</span> Algorithms
+                </button>
+                <button class="subject-tag" data-subject="dbms">
+                    <span class="tag-icon">🗄️</span> DBMS
+                </button>
+                <button class="subject-tag" data-subject="os">
+                    <span class="tag-icon">💻</span> Operating Systems
+                </button>
+                <button class="subject-tag" data-subject="cn">
+                    <span class="tag-icon">🌐</span> Computer Networks
+                </button>
+                <button class="subject-tag" data-subject="ml">
+                    <span class="tag-icon">🤖</span> Machine Learning
+                </button>
+                <button class="subject-tag" data-subject="oops">
+                    <span class="tag-icon">📦</span> OOPS
+                </button>
+                <button class="subject-tag" data-subject="se">
+                    <span class="tag-icon">⚙️</span> Software Engineering
+                </button>
             </div>
         </section>
 
@@ -175,6 +225,32 @@
             </div>
             <div class="recent-list" id="recentDownloads">
                 <!-- Recent downloads will be populated here -->
+            </div>
+        </section>
+
+        <!-- Request Paper Section (shown when PYQ type is selected) -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal" id="requestPaperSection" style="display: none;">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📨</span>
+                    Can't Find a Paper?
+                </h3>
+            </div>
+            <div class="request-form">
+                <p class="request-text">Request a question paper and we'll try to add it to our collection.</p>
+                <div class="request-row">
+                    <input type="text" id="requestSubject" class="form-input" placeholder="Subject Name">
+                    <input type="text" id="requestYear" class="form-input" placeholder="Year (e.g., 2023)">
+                    <select id="requestExamType" class="form-select">
+                        <option value="">Exam Type</option>
+                        <option value="midterm">Mid-Term</option>
+                        <option value="endterm">End-Term</option>
+                        <option value="internal">Internal</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="NotesManager.requestPaper()">
+                        <span>📨</span> Submit Request
+                    </button>
+                </div>
             </div>
         </section>
     </main>
@@ -473,6 +549,85 @@
             color: var(--text-secondary);
         }
 
+        /* Popular Subjects Tags */
+        .subject-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .subject-tag {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subject-tag:hover,
+        .subject-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tag-icon {
+            font-size: 1.125rem;
+        }
+
+        /* Request Paper Form */
+        .request-form {
+            margin-top: 1rem;
+        }
+
+        .request-text {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .request-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .request-row .form-input,
+        .request-row .form-select {
+            flex: 1;
+            min-width: 150px;
+            padding: 0.75rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+        }
+
+        .request-row .form-input:focus,
+        .request-row .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Solution Badge */
+        .solution-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
         /* Dark Mode Improvements */
         [data-theme="dark"] .filter-select,
         [data-theme="dark"] .search-input {
@@ -482,6 +637,21 @@
 
         [data-theme="dark"] .filter-select option {
             background: rgba(17, 24, 39, 0.95);
+        }
+
+        [data-theme="dark"] .subject-tag {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        [data-theme="dark"] .subject-tag:hover,
+        [data-theme="dark"] .subject-tag.active {
+            color: white;
+        }
+
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
         }
 
         /* Responsive */
@@ -496,6 +666,10 @@
 
             .page-title {
                 font-size: 2rem;
+            }
+
+            .request-row {
+                flex-direction: column;
             }
         }
     </style>

@@ -56,7 +56,7 @@ class Chatbot {
             },
             'pyq': {
                 keywords: ['pyq', 'previous year', 'question papers', 'old papers', 'question bank'],
-                answer: 'Previous Year Questions are available in <a href="student-pyq.html" class="nav-suggestion">📝 PYQ Section</a>. You can:\n• Filter by subject & year\n• Download question papers\n• Practice with solutions'
+                answer: 'Previous Year Questions are available in <a href="student-notes.html?type=pyqs" class="nav-suggestion">📚 Study Notes → PYQ Section</a>. You can:\n• Filter by subject, year & exam type\n• Download question papers\n• See which papers have solutions'
             },
             // Events & Activities
             'events': {
