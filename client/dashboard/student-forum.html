@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Forum - ITER EduHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/clean-dashboard.css">
+    <link rel="stylesheet" href="../css/universal-sidebar.css">
+    <link rel="stylesheet" href="../css/universal-profile.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <link rel="stylesheet" href="../css/responsive-universal.css">
+    <link rel="stylesheet" href="../css/chatbot.css">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="../css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">💬</span>
+                        Student Forum
+                    </h1>
+                    <p class="page-subtitle">Ask questions, share knowledge, and connect with peers & faculty</p>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="openNewQuestionModal()">
+                    <span>➕</span> Ask Question
+                </button>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">💬</div>
+                <div class="stat-number" id="totalQuestions">--</div>
+                <div class="stat-text">Questions</div>
+                <div class="stat-subtext">Total asked</div>
+            </div>
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="answeredQuestions">--</div>
+                <div class="stat-text">Answered</div>
+                <div class="stat-subtext">Resolved</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">👥</div>
+                <div class="stat-number" id="activeUsers">--</div>
+                <div class="stat-text">Active Users</div>
+                <div class="stat-subtext">This week</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">⭐</div>
+                <div class="stat-number" id="topContributors">--</div>
+                <div class="stat-text">Top Contributors</div>
+                <div class="stat-subtext">Best answers</div>
+            </div>
+        </section>
+
+        <!-- Category Navigation -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📂</span>
+                    Categories
+                </h3>
+            </div>
+            <div class="category-grid">
+                <button class="category-btn active" data-category="all">
+                    <span class="category-icon">📚</span>
+                    <span class="category-name">All Topics</span>
+                    <span class="category-count" id="countAll">--</span>
+                </button>
+                <button class="category-btn" data-category="academic">
+                    <span class="category-icon">📖</span>
+                    <span class="category-name">Academic</span>
+                    <span class="category-count" id="countAcademic">--</span>
+                </button>
+                <button class="category-btn" data-category="technical">
+                    <span class="category-icon">💻</span>
+                    <span class="category-name">Technical</span>
+                    <span class="category-count" id="countTechnical">--</span>
+                </button>
+                <button class="category-btn" data-category="placement">
+                    <span class="category-icon">💼</span>
+                    <span class="category-name">Placement</span>
+                    <span class="category-count" id="countPlacement">--</span>
+                </button>
+                <button class="category-btn" data-category="campus">
+                    <span class="category-icon">🏛️</span>
+                    <span class="category-name">Campus Life</span>
+                    <span class="category-count" id="countCampus">--</span>
+                </button>
+                <button class="category-btn" data-category="general">
+                    <span class="category-icon">💡</span>
+                    <span class="category-name">General</span>
+                    <span class="category-count" id="countGeneral">--</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Search and Filter -->
+        <section class="forum-controls glass-card">
+            <div class="search-filter-row">
+                <div class="search-box-forum">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="forumSearch" class="search-input" 
+                        placeholder="Search questions, topics, or keywords...">
+                </div>
+                <select id="filterStatus" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="open">Open Questions</option>
+                    <option value="answered">Answered</option>
+                    <option value="unanswered">Unanswered</option>
+                </select>
+                <select id="sortOrder" class="filter-select">
+                    <option value="newest">Newest First</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="unanswered">Needs Answer</option>
+                    <option value="recent-activity">Recent Activity</option>
+                </select>
+            </div>
+            <div class="filter-tags">
+                <span class="tag-label">Popular Tags:</span>
+                <button class="filter-tag" data-tag="python">Python</button>
+                <button class="filter-tag" data-tag="java">Java</button>
+                <button class="filter-tag" data-tag="dsa">DSA</button>
+                <button class="filter-tag" data-tag="dbms">DBMS</button>
+                <button class="filter-tag" data-tag="placement">Placement</button>
+                <button class="filter-tag" data-tag="exam">Exams</button>
+            </div>
+        </section>
+
+        <!-- Questions List -->
+        <section class="questions-container">
+            <div id="questionsList" class="questions-list">
+                <!-- Questions will be loaded here -->
+                <div class="loading-text">Loading discussions...</div>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+            <!-- Pagination controls -->
+        </div>
+
+        <!-- Top Contributors -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🏆</span>
+                    Top Contributors
+                </h3>
+            </div>
+            <div id="contributorsList" class="contributors-grid">
+                <!-- Contributors will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- New Question Modal -->
+    <div id="newQuestionModal" class="modal" style="display: none;">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Ask a Question</h3>
+                <button class="modal-close" onclick="closeNewQuestionModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="newQuestionForm">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-icon">📝</span>
+                            Question Title
+                        </label>
+                        <input type="text" id="questionTitle" class="form-input" 
+                            placeholder="What's your question? Be specific and clear..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-icon">📂</span>
+                            Category
+                        </label>
+                        <select id="questionCategory" class="form-select" required>
+                            <option value="">Select a category</option>
+                            <option value="academic">Academic</option>
+                            <option value="technical">Technical</option>
+                            <option value="placement">Placement</option>
+                            <option value="campus">Campus Life</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-icon">📄</span>
+                            Description
+                        </label>
+                        <textarea id="questionDescription" class="form-textarea" rows="6"
+                            placeholder="Provide more details about your question. Include any relevant context, what you've tried, or specific issues you're facing..."
+                            required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-icon">🏷️</span>
+                            Tags (comma separated)
+                        </label>
+                        <input type="text" id="questionTags" class="form-input" 
+                            placeholder="e.g., python, algorithms, exam">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeNewQuestionModal()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <span>📤</span> Post Question
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Detail Modal -->
+    <div id="questionDetailModal" class="modal" style="display: none;">
+        <div class="modal-content glass-card modal-large">
+            <div class="modal-header">
+                <h3 id="modalQuestionTitle">Question Title</h3>
+                <button class="modal-close" onclick="closeQuestionDetailModal()">✕</button>
+            </div>
+            <div class="modal-body" id="questionDetailBody">
+                <!-- Question details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/dummy-data.js"></script>
+    <script src="../js/dummy-data-init.js"></script>
+    <script src="../js/universal-sidebar.js"></script>
+    <script src="../js/universal-profile.js"></script>
+    <script src="../js/chatbot.js"></script>
+    <script src="../js/pages/student-forum.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .hero-content-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .title-icon {
+            font-size: 2rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .category-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.25rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .category-count {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius-full);
+        }
+
+        .category-btn.active .category-count {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Forum Controls */
+        .forum-controls {
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius-lg);
+        }
+
+        .search-filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .search-box-forum {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.125rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            min-width: 150px;
+        }
+
+        .filter-tags {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tag:hover,
+        .filter-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Questions List */
+        .questions-container {
+            margin-bottom: 2rem;
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .question-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .question-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .question-status {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .status-answered {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .status-open {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .question-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .question-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .question-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .author-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark, #4f46e5));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .question-stats {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .question-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .question-tag {
+            padding: 0.25rem 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Contributors Grid */
+        .contributors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contributor-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            transition: all 0.2s ease;
+        }
+
+        .contributor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .contributor-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark, #4f46e5));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .contributor-info {
+            flex: 1;
+        }
+
+        .contributor-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .contributor-stats {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .contributor-badge {
+            font-size: 1.25rem;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: var(--radius-xl);
+        }
+
+        .modal-large {
+            max-width: 800px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: var(--glass-bg);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .label-icon {
+            font-size: 1rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        /* Answer Section in Modal */
+        .answer-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .answer-card {
+            padding: 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+        }
+
+        .answer-card.accepted {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .answer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .answer-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .answer-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .answer-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.375rem 0.75rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .vote-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .question-title,
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] .modal-header h3,
+        [data-theme="dark"] .contributor-name,
+        [data-theme="dark"] .answer-content {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .question-excerpt,
+        [data-theme="dark"] .tag-label,
+        [data-theme="dark"] .contributor-stats {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme="dark"] .search-input,
+        [data-theme="dark"] .filter-select,
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background: rgba(17, 24, 39, 0.6);
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .search-filter-row {
+                flex-direction: column;
+            }
+
+            .search-box-forum {
+                min-width: 100%;
+            }
+
+            .question-header {
+                flex-direction: column;
+            }
+
+            .question-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .question-tags {
+                margin-left: 0;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .contributors-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</body>
+</html>

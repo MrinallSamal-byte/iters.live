@@ -32,6 +32,8 @@ const aiRoutes = require('./routes/ai.routes');
 const questionBankRoutes = require('./routes/question-bank.routes');
 const rubricRoutes = require('./routes/rubric.routes');
 const notesRoutes = require('./routes/notes.routes');
+const forumRoutes = require('./routes/forum.routes');
+const pyqRoutes = require('./routes/pyq.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -147,6 +149,8 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/question-bank', questionBankRoutes);
 app.use('/api/rubrics', rubricRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/forum', forumRoutes);
+app.use('/api/pyq', pyqRoutes);
 
 // Serve landing page (index.html) for root path
 app.get('/', (req, res) => {
