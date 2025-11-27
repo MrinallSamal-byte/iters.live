@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Animate tech tags with visible fallback
-        const techTags = document.querySelectorAll('.tech-tag-pill');
-        if (techTags.length > 0) {
-            gsap.set(techTags, { opacity: 1, scale: 1 });
-            gsap.from(techTags, {
+        const techTagPills = document.querySelectorAll('.tech-tag-pill');
+        if (techTagPills.length > 0) {
+            gsap.set(techTagPills, { opacity: 1, scale: 1 });
+            gsap.from(techTagPills, {
                 scrollTrigger: {
                     trigger: '.tech-tags',
                     start: 'top 80%',
@@ -65,7 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Animate skill bars
         const skillBars = document.querySelectorAll('.skill-progress');
         skillBars.forEach(bar => {
-            const progress = bar.getAttribute('data-progress');
+            const progressAttr = bar.getAttribute('data-progress');
+            const progress = parseInt(progressAttr, 10);
+            
+            // Validate progress value is a valid number between 0 and 100
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                console.warn('Invalid data-progress value:', progressAttr);
+                return;
+            }
+            
             gsap.set(bar, { width: 0 });
             
             ScrollTrigger.create({
