@@ -21,28 +21,25 @@ router.post('/google-login', async (req, res, next) => {
     const { uid, email, name, picture } = decodedToken;
 
     // Check if user exists in Firestore
-    const userRef = db.collection('users').doc(uid); // Use UID as doc ID for Google users? 
-    // Actually, for consistency with existing dummy data which uses Registration Number, 
-    // we might want to query by email first.
-
     const usersSnapshot = await db.collection('users').where('email', '==', email).limit(1).get();
 
     let user;
     let userId;
+    let isNewUser = false;
 
     if (usersSnapshot.empty) {
-      // New user? For now, let's assume we auto-register them or reject if not allowed.
-      // The prompt says "add google based logins", implying we should allow it.
-      // But we need a registration number. Let's generate a temp one or ask user to complete profile.
-      // For simplicity, we'll create a basic record.
-
-      userId = uid; // Use Firebase UID as ID
+      // New user - create basic record and flag as new
+      isNewUser = true;
+      userId = uid;
       const newUser = {
         name: name || 'Google User',
         email,
-        role: 'student', // Default role
+        role: 'student',
         profile_picture: picture,
         is_active: true,
+        isVerified: false,
+        portalConnected: false,
+        usingDummyData: false,
         created_at: new Date(),
         last_login: new Date(),
         registration_number: 'GOOGLE_' + uid.substring(0, 8).toUpperCase()
@@ -56,27 +53,21 @@ router.post('/google-login', async (req, res, next) => {
       user = userDoc.data();
       user.id = userDoc.id;
 
+      // Check if user has connected portal
+      isNewUser = !user.portalConnected && !user.isVerified && !user.usingDummyData;
+
       // Update last login
       await userDoc.ref.update({ last_login: new Date() });
     }
-
-    // Create a custom session token or just return the user data
-    // Since the frontend uses the ID token for Firebase Auth, we might not need our own JWT 
-    // if we switch fully to Firebase Auth on client. 
-    // BUT, the existing app uses JWTs. To minimize frontend changes, let's issue our own JWT 
-    // OR just return the user and let frontend use Firebase Token.
-    // The user request says "use firebase for all database related queries".
-    // It doesn't explicitly say "replace JWT with Firebase Auth tokens everywhere".
-    // However, "add google based logins" usually implies using Firebase Auth.
-
-    // Let's return the user data. The frontend will likely use the Firebase User object.
 
     res.json({
       success: true,
       message: 'Login successful',
       data: {
         user,
-        token: idToken // Client can use this or the one they already have
+        token: idToken,
+        isNewUser,
+        redirectUrl: isNewUser ? '/connect-portal.html' : null
       }
     });
 
