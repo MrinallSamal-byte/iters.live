@@ -22,7 +22,7 @@
     };
     
     // Default folder ID for semesters 6-8 (uses semester 5 folder as fallback)
-    const DEFAULT_FOLDER_ID = '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ';
+    const DEFAULT_FOLDER_ID = SEMESTER_FOLDER_IDS[5];
     
     // Helper function to get folder ID for a semester
     function getSemesterFolderId(semester) {
@@ -1081,7 +1081,7 @@
             const folderId = semester ? getSemesterFolderId(semester) : DEFAULT_FOLDER_ID;
             const folderUrl = `${DRIVE_FOLDER_URL}${folderId}`;
             
-            const semesterText = semester ? `Semester ${semester}` : 'main';
+            const semesterText = semester ? `Semester ${semester}` : 'default (Semester 5)';
             if (typeof Toast !== 'undefined') {
                 Toast.info(`Opening ${semesterText} Google Drive folder...`);
             }

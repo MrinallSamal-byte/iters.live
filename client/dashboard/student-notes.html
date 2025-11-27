@@ -34,8 +34,7 @@
                 </div>
                 <div class="hero-actions">
                     <button onclick="NotesManager.openDriveFolder()" 
-                       class="btn btn-primary"
-                       style="display: flex; align-items: center; gap: 0.5rem;">
+                       class="btn btn-primary btn-with-icon">
                         <span>📁</span> Open Google Drive
                     </button>
                 </div>
@@ -352,6 +351,13 @@
         }
 
         /* Semester Quick Links Grid */
+        /* Button with icon */
+        .btn-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .semester-links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
