@@ -1,10 +1,15 @@
 """
-Student Portal Scraper for SOA Portal (https://soaportals.com/StudentPortalSOA/#/)
+Student Portal Scraper for SOA Portal
 Uses Selenium with human-like behavior and Google Vision API for CAPTCHA solving
+
+Supports multiple portal URLs with fallback:
+1. Primary URL from PORTAL_URL environment variable
+2. Alternative URLs for backup
 """
 import time
 import random
 import re
+import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -26,6 +31,7 @@ from config import get_config
 STATUS_SUCCESS = 'SUCCESS'
 STATUS_AUTH_FAILED = 'AUTH_FAILED'
 STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR'
+STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE'
 
 
 class StudentPortalScraper:
@@ -33,10 +39,11 @@ class StudentPortalScraper:
     Scraper for the SOA Student Portal
     Implements human-like behavior to avoid detection
     
-    Portal URL: https://soaportals.com/StudentPortalSOA/#/
+    Supports multiple portal URLs with automatic fallback.
     
-    Login form structure:
+    Login form structure (typical Angular portal):
     - USER ID field: input for registration number
+    - Password field: input for password
     - CAPTCHA image: img element with captcha
     - CAPTCHA input: text input for captcha answer
     - Login button: disabled until CAPTCHA is entered
@@ -48,6 +55,60 @@ class StudentPortalScraper:
         self.captcha_solver = get_captcha_solver()
         self.driver = None
         self.max_captcha_retries = 3  # Try CAPTCHA solving up to 3 times
+        self.portal_url = None  # Will be set after verification
+        
+        # Get alternative URLs from config if available, otherwise use defaults
+        self.alternative_urls = getattr(
+            self.config, 
+            'ALTERNATIVE_PORTAL_URLS', 
+            [
+                'https://iterservices.soa.ac.in/StudentPortalSOA/',
+                'https://iterservices.soa.ac.in/studentPortal/',
+                'https://studentportal.soa.ac.in/',
+            ]
+        )
+    
+    def _verify_portal_reachable(self, url, timeout=10):
+        """
+        Verify that a portal URL is reachable
+        
+        Args:
+            url: Portal URL to check
+            timeout: Timeout in seconds
+            
+        Returns:
+            bool: True if portal is reachable
+        """
+        try:
+            # Remove hash fragment for request (Angular handles routing)
+            base_url = url.split('#')[0]
+            response = requests.head(base_url, timeout=timeout, allow_redirects=True)
+            return response.status_code < 500
+        except requests.exceptions.RequestException as e:
+            print(f'Portal unreachable at {url}: {str(e)}')
+            return False
+    
+    def _find_working_portal_url(self):
+        """
+        Find a working portal URL from configured and alternative URLs
+        
+        Returns:
+            str: Working portal URL or None if all fail
+        """
+        # Try primary URL first
+        primary_url = self.config.PORTAL_URL
+        if primary_url and self._verify_portal_reachable(primary_url):
+            print(f'Primary portal URL verified: {primary_url}')
+            return primary_url
+        
+        # Try alternative URLs
+        for alt_url in self.alternative_urls:
+            if self._verify_portal_reachable(alt_url):
+                print(f'Alternative portal URL verified: {alt_url}')
+                return alt_url
+        
+        print('No reachable portal URL found')
+        return None
     
     def _human_type(self, element, text):
         """
@@ -129,46 +190,77 @@ class StudentPortalScraper:
     def _find_user_id_field(self):
         """Find the USER ID input field on the login form"""
         selectors = [
-            # Common ID-based selectors
+            # Common ID-based selectors for SOA/ITER portal
             (By.ID, 'userId'),
             (By.ID, 'username'),
             (By.ID, 'regNo'),
             (By.ID, 'registrationNumber'),
             (By.ID, 'txtUserId'),
             (By.ID, 'txtUsername'),
+            (By.ID, 'studentId'),
+            (By.ID, 'rollNo'),
+            (By.ID, 'loginId'),
             # Name-based selectors
             (By.NAME, 'userId'),
             (By.NAME, 'username'),
             (By.NAME, 'regNo'),
             (By.NAME, 'registrationNumber'),
-            # CSS selectors for common patterns
+            (By.NAME, 'studentId'),
+            (By.NAME, 'rollNo'),
+            # Angular-specific selectors
+            (By.CSS_SELECTOR, 'input[ng-model*="user"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="User"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="login"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="Login"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="regNo"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="studentId"]'),
+            (By.CSS_SELECTOR, 'input[formcontrolname*="user"]'),
+            (By.CSS_SELECTOR, 'input[formcontrolname*="login"]'),
+            (By.CSS_SELECTOR, 'input[formcontrolname*="regNo"]'),
+            # Placeholder-based selectors
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="User"]'),
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="user"]'),
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="ID"]'),
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Registration"]'),
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Reg"]'),
-            (By.CSS_SELECTOR, 'input[ng-model*="user"]'),
-            (By.CSS_SELECTOR, 'input[ng-model*="User"]'),
-            (By.CSS_SELECTOR, 'input[formcontrolname*="user"]'),
-            # XPath selectors
+            (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Roll"]'),
+            (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Student"]'),
+            (By.CSS_SELECTOR, 'input[placeholder*="Enter your"]'),
+            # XPath selectors for label associations
             (By.XPATH, '//input[@type="text" and contains(@placeholder, "User")]'),
             (By.XPATH, '//input[@type="text" and contains(@placeholder, "ID")]'),
+            (By.XPATH, '//input[@type="text" and contains(@placeholder, "Reg")]'),
             (By.XPATH, '//label[contains(text(),"User")]/following::input[1]'),
             (By.XPATH, '//label[contains(text(),"USER")]/following::input[1]'),
-            # Generic fallbacks - first text input
+            (By.XPATH, '//label[contains(text(),"Registration")]/following::input[1]'),
+            (By.XPATH, '//label[contains(text(),"Roll")]/following::input[1]'),
+            (By.XPATH, '//*[contains(text(),"User ID")]/following::input[1]'),
+            (By.XPATH, '//*[contains(text(),"USER ID")]/following::input[1]'),
+            # Generic fallbacks - first text input in form
             (By.CSS_SELECTOR, 'form input[type="text"]:first-of-type'),
             (By.XPATH, '(//form//input[@type="text"])[1]'),
+            (By.CSS_SELECTOR, '.login-form input[type="text"]'),
+            (By.XPATH, '(//input[@type="text"])[1]'),
         ]
         return self._find_element_with_fallback(selectors, timeout=10, description='USER ID field')
     
     def _find_password_field(self):
         """Find the password input field on the login form"""
         selectors = [
+            # Standard password selectors
             (By.ID, 'password'),
             (By.ID, 'txtPassword'),
             (By.ID, 'pwd'),
+            (By.ID, 'pass'),
             (By.NAME, 'password'),
             (By.NAME, 'pwd'),
+            (By.NAME, 'pass'),
+            # Angular-specific
+            (By.CSS_SELECTOR, 'input[ng-model*="password"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="Password"]'),
+            (By.CSS_SELECTOR, 'input[ng-model*="pwd"]'),
+            (By.CSS_SELECTOR, 'input[formcontrolname*="password"]'),
+            # Generic password input
             (By.CSS_SELECTOR, 'input[type="password"]'),
             (By.XPATH, '//input[@type="password"]'),
         ]
@@ -419,10 +511,17 @@ class StudentPortalScraper:
             tuple: (success: bool, error_type: str or None)
         """
         try:
+            # Verify and get working portal URL
+            if not self.portal_url:
+                self.portal_url = self._find_working_portal_url()
+            
+            if not self.portal_url:
+                return False, 'Portal is currently unreachable. Please try again later.'
+            
             # Navigate to portal
-            print(f'Navigating to portal: {self.config.PORTAL_URL}')
-            self.driver.get(self.config.PORTAL_URL)
-            self._wait_for_page_load()
+            print(f'Navigating to portal: {self.portal_url}')
+            self.driver.get(self.portal_url)
+            self._wait_for_page_load(timeout=20)
             self._random_delay(2, 3)
             
             # Wait for Angular/React to initialize (SOA portal uses Angular)
@@ -435,10 +534,18 @@ class StudentPortalScraper:
             
             self._random_delay(1, 2)
             
+            # Check if the page loaded correctly
+            page_source = self.driver.page_source.lower()
+            if 'error' in page_source and ('not found' in page_source or '404' in page_source):
+                return False, 'Portal page not found. The portal may have moved.'
+            
             # Find USER ID field
             user_id_field = self._find_user_id_field()
             if not user_id_field:
-                return False, 'Could not find USER ID field'
+                # Take a screenshot for debugging
+                print(f'Current URL: {self.driver.current_url}')
+                print(f'Page title: {self.driver.title}')
+                return False, 'Could not find USER ID field. Portal structure may have changed.'
             
             # Clear and fill USER ID
             self._human_click(user_id_field)
@@ -455,22 +562,29 @@ class StudentPortalScraper:
                 self._random_delay(0.2, 0.5)
                 self._human_type(password_field, password)
                 self._random_delay(0.5, 1.0)
+            else:
+                print('Warning: No password field found. Portal may use different authentication flow.')
             
-            # Solve CAPTCHA
-            success, captcha_text, error = self._solve_captcha_with_retry()
-            if not success:
-                return False, 'CAPTCHA_FAILED'
-            
-            # Find and fill CAPTCHA input
-            captcha_input = self._find_captcha_input()
-            if not captcha_input:
-                return False, 'CAPTCHA input field not found'
-            
-            self._human_click(captcha_input)
-            captcha_input.clear()
-            self._random_delay(0.2, 0.5)
-            self._human_type(captcha_input, captcha_text)
-            self._random_delay(0.5, 1.0)
+            # Try to find and solve CAPTCHA (not all portals have CAPTCHA)
+            captcha_img = self._find_captcha_image()
+            if captcha_img:
+                # Solve CAPTCHA
+                success, captcha_text, error = self._solve_captcha_with_retry()
+                if not success:
+                    return False, 'CAPTCHA_FAILED'
+                
+                # Find and fill CAPTCHA input
+                captcha_input = self._find_captcha_input()
+                if not captcha_input:
+                    return False, 'CAPTCHA input field not found'
+                
+                self._human_click(captcha_input)
+                captcha_input.clear()
+                self._random_delay(0.2, 0.5)
+                self._human_type(captcha_input, captcha_text)
+                self._random_delay(0.5, 1.0)
+            else:
+                print('No CAPTCHA detected on this portal')
             
             # Find and click login button
             login_button = self._find_login_button()
@@ -487,7 +601,12 @@ class StudentPortalScraper:
                 self._human_click(login_button)
             else:
                 # Try pressing Enter as fallback
-                captcha_input.send_keys(Keys.RETURN)
+                if captcha_img and captcha_input:
+                    captcha_input.send_keys(Keys.RETURN)
+                elif password_field:
+                    password_field.send_keys(Keys.RETURN)
+                elif user_id_field:
+                    user_id_field.send_keys(Keys.RETURN)
             
             # Wait for response
             self._random_delay(3, 5)
@@ -497,7 +616,7 @@ class StudentPortalScraper:
             return self._check_login_success()
             
         except TimeoutException:
-            return False, 'Page load timeout'
+            return False, 'Page load timeout. Portal may be slow or unreachable.'
         except WebDriverException as e:
             return False, f'Browser error: {str(e)}'
         except Exception as e:
@@ -702,6 +821,15 @@ class StudentPortalScraper:
         print(f'Starting scrape for registration: {reg_number}')
         
         try:
+            # First verify portal is reachable before launching browser
+            self.portal_url = self._find_working_portal_url()
+            if not self.portal_url:
+                print('Portal unreachable - all URLs failed verification')
+                return {
+                    'status': STATUS_PORTAL_UNREACHABLE,
+                    'message': 'Student portal is currently unreachable. Please try again later or use demo data.'
+                }
+            
             # Create a fresh driver for this session
             self.driver = self.browser_manager.create_fresh_driver()
             
@@ -721,7 +849,12 @@ class StudentPortalScraper:
                 elif 'captcha' in (error or '').lower():
                     return {
                         'status': STATUS_SCRAPE_ERROR,
-                        'message': 'Failed to solve CAPTCHA'
+                        'message': 'Failed to solve CAPTCHA. Please try again.'
+                    }
+                elif 'unreachable' in (error or '').lower():
+                    return {
+                        'status': STATUS_PORTAL_UNREACHABLE,
+                        'message': error
                     }
                 else:
                     return {

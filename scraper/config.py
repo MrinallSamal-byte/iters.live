@@ -11,6 +11,10 @@ load_dotenv()
 # This key is used as fallback if GOOGLE_VISION_API_KEY env var is not set
 DEFAULT_VISION_API_KEY = 'AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A'
 
+# Default portal URL - can be overridden via PORTAL_URL environment variable
+# This is the primary URL for the SOA Student Portal
+DEFAULT_PORTAL_URL = 'https://iterservices.soa.ac.in/StudentPortalSOA/'
+
 
 class Config:
     """Base configuration"""
@@ -18,8 +22,16 @@ class Config:
     FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-in-production')
     
-    # Portal URL
-    PORTAL_URL = os.getenv('PORTAL_URL', 'https://soaportals.com/StudentPortalSOA/#/')
+    # Portal URL - prioritize environment variable, otherwise use default
+    PORTAL_URL = os.getenv('PORTAL_URL', DEFAULT_PORTAL_URL)
+    
+    # Alternative portal URLs to try if primary fails
+    # These are tried in order if the primary URL is unreachable
+    ALTERNATIVE_PORTAL_URLS = [
+        'https://iterservices.soa.ac.in/studentPortal/',
+        'https://soaportals.com/StudentPortalSOA/',
+        'https://studentportal.soa.ac.in/',
+    ]
     
     # Browser settings
     BROWSER_HEADLESS = os.getenv('BROWSER_HEADLESS', 'True').lower() == 'true'
