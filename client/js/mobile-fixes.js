@@ -150,13 +150,13 @@
                         if (lowerUrl.startsWith('http://') || lowerUrl.startsWith('https://')) return true;
                         // Allow URLs containing .html (followed by end, query, or hash)
                         if (/\.html($|[?#])/.test(url)) return true;
-                        // Allow relative paths starting with / ./ or ../
+                        // Allow relative paths starting with /, ./, or ../
                         if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) return true;
                         // Allow mailto and tel links
                         if (lowerUrl.startsWith('mailto:') || lowerUrl.startsWith('tel:')) return true;
                         // Allow simple relative paths (like filename.html without leading /)
                         // This catches cases like "creator.html" that don't start with / but are safe
-                        if (/^[a-zA-Z0-9_-]+\.html/.test(url)) return true;
+                        if (/^[a-zA-Z0-9_-]+\.html($|[?#])/.test(url)) return true;
                         return false;
                     };
                     
