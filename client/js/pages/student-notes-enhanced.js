@@ -7,11 +7,27 @@
 (function() {
     'use strict';
 
-    // Google Drive folder configuration
-    const DRIVE_FOLDER_ID = '1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7';
+    // Google Drive folder configuration - Semester-specific folders
     const DRIVE_BASE_URL = 'https://drive.google.com';
     const DRIVE_VIEW_URL = `${DRIVE_BASE_URL}/file/d/`;
     const DRIVE_FOLDER_URL = `${DRIVE_BASE_URL}/drive/folders/`;
+    
+    // Semester-specific Google Drive folder IDs
+    const SEMESTER_FOLDER_IDS = {
+        1: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
+        2: '1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD',
+        3: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
+        4: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
+        5: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ'
+    };
+    
+    // Default folder ID for semesters 6-8 (uses semester 5 folder as fallback)
+    const DEFAULT_FOLDER_ID = '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ';
+    
+    // Helper function to get folder ID for a semester
+    function getSemesterFolderId(semester) {
+        return SEMESTER_FOLDER_IDS[semester] || DEFAULT_FOLDER_ID;
+    }
 
     const NotesManager = {
         currentFilters: {
@@ -227,10 +243,16 @@
 
         loadDummyData() {
             // Sample data for demonstration including Google Drive resources
-            // Resources from Google Drive folder: https://drive.google.com/drive/folders/1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7
+            // Semester-specific Google Drive folders:
+            // Sem 1: https://drive.google.com/drive/folders/19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd
+            // Sem 2: https://drive.google.com/drive/folders/1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD
+            // Sem 3: https://drive.google.com/drive/folders/1rY3THSdETNyJ-40J4olVVB5BgoW19nYA
+            // Sem 4: https://drive.google.com/drive/folders/1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen
+            // Sem 5: https://drive.google.com/drive/folders/1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ
             this.allNotes = [
                 // ===============================
                 // SEMESTER 1 - Google Drive Resources
+                // Folder: https://drive.google.com/drive/folders/19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd
                 // ===============================
                 {
                     id: 101,
@@ -245,7 +267,7 @@
                     uploaded_at: '2025-01-15',
                     downloads: 245,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_math1_notes',
+                    driveFolderId: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
                     drivePath: 'Semester 1/Mathematics-I/'
                 },
                 {
@@ -261,7 +283,7 @@
                     uploaded_at: '2025-01-10',
                     downloads: 189,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_physics1_notes',
+                    driveFolderId: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
                     drivePath: 'Semester 1/Physics-I/'
                 },
                 {
@@ -277,7 +299,7 @@
                     uploaded_at: '2025-01-08',
                     downloads: 156,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_chem_lab',
+                    driveFolderId: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
                     drivePath: 'Semester 1/Chemistry/'
                 },
                 {
@@ -293,12 +315,13 @@
                     uploaded_at: '2025-01-05',
                     downloads: 134,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_bee_notes',
+                    driveFolderId: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
                     drivePath: 'Semester 1/Basic Electrical/'
                 },
 
                 // ===============================
                 // SEMESTER 2 - Google Drive Resources
+                // Folder: https://drive.google.com/drive/folders/1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD
                 // ===============================
                 {
                     id: 105,
@@ -313,7 +336,7 @@
                     uploaded_at: '2025-01-20',
                     downloads: 267,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_math2_notes',
+                    driveFolderId: '1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD',
                     drivePath: 'Semester 2/Mathematics-II/'
                 },
                 {
@@ -329,7 +352,7 @@
                     uploaded_at: '2025-01-18',
                     downloads: 198,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_physics2_notes',
+                    driveFolderId: '1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD',
                     drivePath: 'Semester 2/Physics-II/'
                 },
                 {
@@ -345,12 +368,13 @@
                     uploaded_at: '2025-01-15',
                     downloads: 312,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_c_programming',
+                    driveFolderId: '1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD',
                     drivePath: 'Semester 2/Programming/'
                 },
 
                 // ===============================
                 // SEMESTER 3 - Google Drive Resources
+                // Folder: https://drive.google.com/drive/folders/1rY3THSdETNyJ-40J4olVVB5BgoW19nYA
                 // ===============================
                 {
                     id: 1,
@@ -365,7 +389,7 @@
                     uploaded_at: '2025-02-01',
                     downloads: 445,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ds_notes',
+                    driveFolderId: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
                     drivePath: 'Semester 3/Data Structures/'
                 },
                 {
@@ -381,7 +405,7 @@
                     uploaded_at: '2025-01-28',
                     downloads: 287,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dm_notes',
+                    driveFolderId: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
                     drivePath: 'Semester 3/Discrete Mathematics/'
                 },
                 {
@@ -397,12 +421,13 @@
                     uploaded_at: '2025-01-22',
                     downloads: 212,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_de_notes',
+                    driveFolderId: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
                     drivePath: 'Semester 3/Digital Electronics/'
                 },
 
                 // ===============================
                 // SEMESTER 4 - Google Drive Resources
+                // Folder: https://drive.google.com/drive/folders/1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen
                 // ===============================
                 {
                     id: 109,
@@ -417,7 +442,7 @@
                     uploaded_at: '2025-02-05',
                     downloads: 523,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_notes',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Semester 4/DBMS/'
                 },
                 {
@@ -433,7 +458,7 @@
                     uploaded_at: '2025-02-08',
                     downloads: 478,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_os_notes',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Semester 4/Operating Systems/'
                 },
                 {
@@ -449,12 +474,13 @@
                     uploaded_at: '2025-02-10',
                     downloads: 398,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_algo_notes',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Semester 4/Algorithms/'
                 },
 
                 // ===============================
                 // SEMESTER 5 - Google Drive Resources
+                // Folder: https://drive.google.com/drive/folders/1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ
                 // ===============================
                 {
                     id: 4,
@@ -469,7 +495,7 @@
                     uploaded_at: '2025-02-15',
                     downloads: 534,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_cn_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 5/Computer Networks/'
                 },
                 {
@@ -485,12 +511,13 @@
                     uploaded_at: '2025-02-12',
                     downloads: 345,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_se_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 5/Software Engineering/'
                 },
 
                 // ===============================
                 // SEMESTER 6 - Google Drive Resources
+                // (Uses Semester 5 folder as fallback)
                 // ===============================
                 {
                     id: 113,
@@ -505,7 +532,7 @@
                     uploaded_at: '2025-02-20',
                     downloads: 612,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ml_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 6/Machine Learning/'
                 },
                 {
@@ -521,12 +548,13 @@
                     uploaded_at: '2025-02-18',
                     downloads: 289,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_cd_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 6/Compiler Design/'
                 },
 
                 // ===============================
                 // SEMESTER 7 - Google Drive Resources
+                // (Uses Semester 5 folder as fallback)
                 // ===============================
                 {
                     id: 115,
@@ -541,7 +569,7 @@
                     uploaded_at: '2025-02-25',
                     downloads: 456,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ai_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 7/AI/'
                 },
                 {
@@ -557,12 +585,13 @@
                     uploaded_at: '2025-02-22',
                     downloads: 378,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_cloud_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 7/Cloud Computing/'
                 },
 
                 // ===============================
                 // SEMESTER 8 - Google Drive Resources
+                // (Uses Semester 5 folder as fallback)
                 // ===============================
                 {
                     id: 117,
@@ -577,12 +606,13 @@
                     uploaded_at: '2025-03-01',
                     downloads: 234,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_bigdata_notes',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'Semester 8/Big Data/'
                 },
 
                 // ===============================
                 // PYQ PAPERS - Google Drive Resources
+                // (Links to respective semester folders)
                 // ===============================
                 {
                     id: 6,
@@ -599,7 +629,7 @@
                     uploaded_at: '2025-01-25',
                     downloads: 1856,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ds_pyq',
+                    driveFolderId: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
                     drivePath: 'PYQ Papers/Data Structures/'
                 },
                 {
@@ -617,7 +647,7 @@
                     uploaded_at: '2025-01-30',
                     downloads: 1289,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_pyq',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'PYQ Papers/DBMS/'
                 },
                 {
@@ -635,7 +665,7 @@
                     uploaded_at: '2025-02-01',
                     downloads: 1743,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_cn_pyq',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'PYQ Papers/Computer Networks/'
                 },
                 {
@@ -653,7 +683,7 @@
                     uploaded_at: '2025-02-05',
                     downloads: 2434,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ml_pyq',
+                    driveFolderId: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ',
                     drivePath: 'PYQ Papers/Machine Learning/'
                 },
                 {
@@ -671,7 +701,7 @@
                     uploaded_at: '2025-02-08',
                     downloads: 1067,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_algo_pyq',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'PYQ Papers/Algorithms/'
                 },
                 {
@@ -689,12 +719,13 @@
                     uploaded_at: '2025-02-10',
                     downloads: 845,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_os_quiz',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'PYQ Papers/Operating Systems/'
                 },
 
                 // ===============================
                 // LAB MANUALS - Google Drive Resources
+                // (Links to respective semester folders)
                 // ===============================
                 {
                     id: 118,
@@ -709,7 +740,7 @@
                     uploaded_at: '2025-01-20',
                     downloads: 567,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ds_lab',
+                    driveFolderId: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
                     drivePath: 'Lab Manuals/Data Structures/'
                 },
                 {
@@ -725,7 +756,7 @@
                     uploaded_at: '2025-01-22',
                     downloads: 489,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_lab',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Lab Manuals/DBMS/'
                 },
                 {
@@ -741,12 +772,13 @@
                     uploaded_at: '2025-01-25',
                     downloads: 423,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_os_lab',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Lab Manuals/Operating Systems/'
                 },
 
                 // ===============================
                 // REFERENCE BOOKS - Google Drive Resources
+                // (Links to respective semester folders)
                 // ===============================
                 {
                     id: 120,
@@ -761,7 +793,7 @@
                     uploaded_at: '2025-01-01',
                     downloads: 1234,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_clrs_book',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Reference Books/Algorithms/'
                 },
                 {
@@ -777,7 +809,7 @@
                     uploaded_at: '2025-01-01',
                     downloads: 987,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_book',
+                    driveFolderId: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
                     drivePath: 'Reference Books/DBMS/'
                 }
             ];
@@ -1013,7 +1045,7 @@
             `;
         },
 
-        // Open file directly in Google Drive
+        // Open file directly in Google Drive using semester-specific folder
         openInDrive(noteId) {
             const note = this.allNotes.find(n => n.id === noteId);
             if (!note || !note.isGoogleDrive) return;
@@ -1023,9 +1055,12 @@
                 Toast.info(`Opening "${note.title}" in Google Drive...`);
             }
 
-            // Construct Google Drive URL - search for the file in the folder
+            // Use the note's specific folder ID or get semester-specific folder
+            const folderId = note.driveFolderId || getSemesterFolderId(note.semester);
+            
+            // Construct Google Drive URL - search for the file in the semester folder
             const encodedName = encodeURIComponent(note.title);
-            const fileUrl = `${DRIVE_FOLDER_URL}${DRIVE_FOLDER_ID}?q=${encodedName}`;
+            const fileUrl = `${DRIVE_FOLDER_URL}${folderId}?q=${encodedName}`;
 
             // Open in new tab
             window.open(fileUrl, '_blank');
@@ -1034,12 +1069,33 @@
             this.addToRecentDownloads(note);
         },
 
-        // Open the main Google Drive folder
-        openDriveFolder() {
-            const folderUrl = `${DRIVE_FOLDER_URL}${DRIVE_FOLDER_ID}`;
+        // Open semester-specific Google Drive folder (based on current filter)
+        openDriveFolder(semester = null) {
+            // Get semester from filter if not provided
+            if (!semester) {
+                const semesterSelect = document.getElementById('semesterFilter');
+                semester = semesterSelect ? parseInt(semesterSelect.value) : null;
+            }
+            
+            // Get the appropriate folder ID
+            const folderId = semester ? getSemesterFolderId(semester) : DEFAULT_FOLDER_ID;
+            const folderUrl = `${DRIVE_FOLDER_URL}${folderId}`;
+            
+            const semesterText = semester ? `Semester ${semester}` : 'main';
+            if (typeof Toast !== 'undefined') {
+                Toast.info(`Opening ${semesterText} Google Drive folder...`);
+            }
+            
+            window.open(folderUrl, '_blank');
+        },
+
+        // Open a specific semester folder directly
+        openSemesterFolder(semester) {
+            const folderId = getSemesterFolderId(semester);
+            const folderUrl = `${DRIVE_FOLDER_URL}${folderId}`;
             
             if (typeof Toast !== 'undefined') {
-                Toast.info('Opening Google Drive folder...');
+                Toast.info(`Opening Semester ${semester} folder in Google Drive...`);
             }
             
             window.open(folderUrl, '_blank');
