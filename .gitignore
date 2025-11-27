@@ -60,3 +60,17 @@ android-app/build/
 *.apk
 *.aab
 local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv/
+scraper/.env
+*.egg-info/
+.eggs/
