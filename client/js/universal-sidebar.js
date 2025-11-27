@@ -17,7 +17,6 @@
                 { icon: '📈', text: 'Marks', href: '/dashboard/student-marks.html', page: 'marks' },
                 { icon: '📅', text: 'Timetable', href: '/dashboard/student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: '/dashboard/student-notes.html', page: 'notes' },
-                { icon: '📁', text: 'Drive Resources', href: '/dashboard/student-drive-resources.html', page: 'drive-resources' },
                 { icon: '💬', text: 'Forum', href: '/dashboard/student-forum.html', page: 'forum' },
                 { icon: '🎫', text: 'Admit Card', href: '/dashboard/student-admit-card.html', page: 'admit-card' },
                 { icon: '🎉', text: 'Events', href: '/dashboard/student-events.html', page: 'events' },

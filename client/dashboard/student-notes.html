@@ -30,7 +30,15 @@
                         <span class="title-icon">📚</span>
                         Notes & Resources
                     </h1>
-                    <p class="page-subtitle">Access study materials, notes, and previous year questions</p>
+                    <p class="page-subtitle">Access study materials, notes, and previous year questions from Google Drive</p>
+                </div>
+                <div class="hero-actions">
+                    <a href="https://drive.google.com/drive/folders/1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7" 
+                       target="_blank" 
+                       class="btn btn-primary"
+                       style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📁</span> Open Google Drive
+                    </a>
                 </div>
             </div>
         </section>
@@ -630,6 +638,36 @@
             font-weight: 600;
         }
 
+        /* Google Drive Badge */
+        .drive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(66, 133, 244, 0.15);
+            color: #4285f4;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Google Drive Resource Card */
+        .resource-card.drive-resource {
+            border-left: 3px solid #4285f4;
+            cursor: pointer;
+        }
+
+        .resource-card.drive-resource:hover {
+            border-color: #4285f4;
+            box-shadow: 0 8px 30px rgba(66, 133, 244, 0.25);
+        }
+
+        /* Drive Path */
+        .drive-path {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
         /* Dark Mode Improvements */
         [data-theme="dark"] .filter-select,
         [data-theme="dark"] .search-input {
@@ -654,6 +692,11 @@
         [data-theme="dark"] .form-select {
             background: rgba(17, 24, 39, 0.6);
             color: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] .drive-badge {
+            background: rgba(66, 133, 244, 0.25);
+            color: #82b1ff;
         }
 
         /* Responsive */
