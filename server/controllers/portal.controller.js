@@ -8,6 +8,11 @@ const { db } = require('../database/firebase');
 // Flask Scraper Service URL (configurable via environment)
 const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
 
+// Status constants matching Python scraper
+const STATUS_SUCCESS = 'SUCCESS';
+const STATUS_AUTH_FAILED = 'AUTH_FAILED';
+const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
+
 // Dummy data for fallback when scraping fails
 const DUMMY_DATA = {
   profile: {
@@ -43,7 +48,8 @@ const DUMMY_DATA = {
 const syncPortalData = async (req, res) => {
   try {
     const { reg_number, password, useDemoData } = req.body;
-    const userId = req.user ? req.user.id : null;
+    // Get userId from req.user if authenticated, supports both id and uid
+    const userId = req.user ? (req.user.id || req.user.uid) : null;
 
     // If explicitly requesting demo data
     if (useDemoData === true) {
@@ -54,34 +60,35 @@ const syncPortalData = async (req, res) => {
     if (!reg_number || !password) {
       return res.status(400).json({
         success: false,
+        status: STATUS_SCRAPE_ERROR,
         message: 'Registration number and password are required'
       });
     }
 
     // Call Flask scraper service - DO NOT log password
-    console.log(`Portal sync request for: ${reg_number}`);
+    console.log(`Portal sync request for: ${reg_number}, userId: ${userId || 'anonymous'}`);
 
     try {
       const scraperResponse = await axios.post(
         `${FLASK_SERVICE_URL}/api/scrape`,
         { reg_number, password },
         {
-          timeout: 60000, // 60 second timeout
+          timeout: 90000, // 90 second timeout for slow CAPTCHA solving
           headers: {
             'Content-Type': 'application/json'
           }
         }
       );
 
-      const { status, data } = scraperResponse.data;
+      const { status, data, message } = scraperResponse.data;
 
-      if (status === 'SUCCESS') {
+      if (status === STATUS_SUCCESS) {
         // Save scraped data to Firestore
         await savePortalData(userId, reg_number, data, true);
 
         return res.json({
           success: true,
-          status: 'SUCCESS',
+          status: STATUS_SUCCESS,
           message: 'Portal data synced successfully',
           data: {
             profile: data.profile,
@@ -91,42 +98,55 @@ const syncPortalData = async (req, res) => {
             portalConnected: true
           }
         });
-      } else if (status === 'AUTH_FAILED') {
+      } else if (status === STATUS_AUTH_FAILED) {
         return res.status(401).json({
           success: false,
-          status: 'AUTH_FAILED',
-          message: 'Invalid portal credentials'
+          status: STATUS_AUTH_FAILED,
+          message: message || 'Invalid portal credentials'
         });
       } else {
         return res.status(500).json({
           success: false,
-          status: 'SCRAPE_ERROR',
-          message: 'Failed to fetch portal data'
+          status: STATUS_SCRAPE_ERROR,
+          message: message || 'Failed to fetch portal data'
         });
       }
     } catch (scraperError) {
       console.error('Scraper service error:', scraperError.message);
 
-      // Check if it's an auth failure from scraper
-      if (scraperError.response && scraperError.response.status === 401) {
-        return res.status(401).json({
+      // Handle different error responses from scraper
+      if (scraperError.response) {
+        const { status, data } = scraperError.response;
+        
+        if (status === 401 || (data && data.status === STATUS_AUTH_FAILED)) {
+          return res.status(401).json({
+            success: false,
+            status: STATUS_AUTH_FAILED,
+            message: data?.message || 'Invalid portal credentials'
+          });
+        }
+        
+        return res.status(500).json({
           success: false,
-          status: 'AUTH_FAILED',
-          message: 'Invalid portal credentials'
+          status: data?.status || STATUS_SCRAPE_ERROR,
+          message: data?.message || 'Portal scraper service error'
         });
       }
 
+      // Connection error or timeout
       return res.status(500).json({
         success: false,
-        status: 'SCRAPE_ERROR',
-        message: 'Portal scraper service unavailable'
+        status: STATUS_SCRAPE_ERROR,
+        message: scraperError.code === 'ECONNREFUSED' 
+          ? 'Portal scraper service unavailable' 
+          : 'Failed to connect to portal scraper service'
       });
     }
   } catch (error) {
     console.error('Portal sync error:', error.message);
     return res.status(500).json({
       success: false,
-      status: 'SCRAPE_ERROR',
+      status: STATUS_SCRAPE_ERROR,
       message: 'Internal server error'
     });
   }
@@ -214,7 +234,7 @@ const saveDemoData = async (userId, regNumber, res) => {
 
     return res.json({
       success: true,
-      status: 'SUCCESS',
+      status: STATUS_SUCCESS,
       message: 'Demo data loaded',
       data: {
         profile: DUMMY_DATA.profile,
@@ -228,6 +248,7 @@ const saveDemoData = async (userId, regNumber, res) => {
     console.error('Error saving demo data:', error.message);
     return res.status(500).json({
       success: false,
+      status: STATUS_SCRAPE_ERROR,
       message: 'Failed to save demo data'
     });
   }
@@ -240,7 +261,7 @@ const saveDemoData = async (userId, regNumber, res) => {
  */
 const getPortalStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
 
@@ -277,7 +298,7 @@ const getPortalStatus = async (req, res) => {
  */
 const disconnectPortal = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
 
     await userRef.update({
@@ -307,7 +328,7 @@ const disconnectPortal = async (req, res) => {
  */
 const getPortalData = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
 

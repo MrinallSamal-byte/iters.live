@@ -1,6 +1,6 @@
 """
 Flask Application for Student Portal Scraper Microservice
-Exposes POST /api/scrape endpoint
+Exposes POST /api/scrape endpoint with proper error handling
 """
 import os
 from flask import Flask, request, jsonify
@@ -10,14 +10,13 @@ import time
 from collections import defaultdict
 
 from config import get_config
-from scraper import create_scraper
+from scraper import create_scraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Enable CORS for cross-origin requests from frontend
-CORS(app, origins=['http://localhost:3000', 'http://localhost:5000'], 
-     supports_credentials=True)
+CORS(app, origins=['*'], supports_credentials=True)
 
 # Load configuration
 config = get_config()
@@ -81,7 +80,8 @@ def health_check():
     return jsonify({
         'status': 'ok',
         'service': 'student-portal-scraper',
-        'timestamp': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        'timestamp': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        'version': '2.0.0'
     })
 
 
@@ -99,8 +99,8 @@ def scrape_portal():
     
     Response:
     - Success: { "status": "SUCCESS", "data": {...} }
-    - Auth Failed: { "status": "AUTH_FAILED" }
-    - Error: { "status": "SCRAPE_ERROR" }
+    - Auth Failed: { "status": "AUTH_FAILED", "message": "..." }
+    - Scrape Error: { "status": "SCRAPE_ERROR", "message": "..." }
     """
     try:
         # Get JSON data
@@ -110,7 +110,7 @@ def scrape_portal():
         is_valid, error_message = validate_scrape_request(data)
         if not is_valid:
             return jsonify({
-                'status': 'SCRAPE_ERROR',
+                'status': STATUS_SCRAPE_ERROR,
                 'message': error_message
             }), 400
         
@@ -124,19 +124,72 @@ def scrape_portal():
         scraper = create_scraper()
         result = scraper.scrape(reg_number, password)
         
-        # Return appropriate response
-        if result['status'] == 'SUCCESS':
+        # Return appropriate response based on status
+        status = result.get('status', STATUS_SCRAPE_ERROR)
+        
+        if status == STATUS_SUCCESS:
             return jsonify(result), 200
-        elif result['status'] == 'AUTH_FAILED':
-            return jsonify(result), 401
+        elif status == STATUS_AUTH_FAILED:
+            return jsonify({
+                'status': STATUS_AUTH_FAILED,
+                'message': result.get('message', 'Invalid credentials')
+            }), 401
         else:
-            return jsonify(result), 500
+            # SCRAPE_ERROR or any other error
+            return jsonify({
+                'status': STATUS_SCRAPE_ERROR,
+                'message': result.get('message', 'Failed to scrape portal data')
+            }), 500
             
     except Exception as e:
         # Log error without exposing sensitive details
-        print(f'Scrape endpoint error: {type(e).__name__}')
+        print(f'Scrape endpoint error: {type(e).__name__}: {str(e)}')
         return jsonify({
-            'status': 'SCRAPE_ERROR'
+            'status': STATUS_SCRAPE_ERROR,
+            'message': 'Internal server error'
+        }), 500
+
+
+@app.route('/api/test-captcha', methods=['POST'])
+def test_captcha():
+    """
+    Test CAPTCHA solving capability
+    
+    Request body (optional):
+    {
+        "image_url": "string" (URL of a CAPTCHA image to test)
+    }
+    
+    Response:
+    {
+        "status": "ok",
+        "api_key_configured": true/false,
+        "captcha_text": "string" (if image provided)
+    }
+    """
+    try:
+        from captcha_solver import get_captcha_solver
+        
+        solver = get_captcha_solver()
+        api_key_configured = bool(solver.api_key)
+        
+        response = {
+            'status': 'ok',
+            'api_key_configured': api_key_configured,
+            'api_key_length': len(solver.api_key) if solver.api_key else 0
+        }
+        
+        data = request.get_json() or {}
+        if 'image_url' in data:
+            captcha_text = solver.solve_captcha_from_url(data['image_url'])
+            response['captcha_text'] = captcha_text
+        
+        return jsonify(response), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
         }), 500
 
 
@@ -153,7 +206,7 @@ def not_found(e):
 def internal_error(e):
     """Handle 500 errors"""
     return jsonify({
-        'status': 'SCRAPE_ERROR',
+        'status': STATUS_SCRAPE_ERROR,
         'message': 'Internal server error'
     }), 500
 

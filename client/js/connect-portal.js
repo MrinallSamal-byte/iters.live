@@ -113,6 +113,7 @@
     function showStatus(message, type) {
         statusMessage.textContent = message;
         statusMessage.className = 'status-message ' + type;
+        statusMessage.style.display = 'block';
     }
 
     /**
@@ -191,7 +192,7 @@
         }
 
         setLoading(true);
-        showStatus('Connecting to portal...', 'loading');
+        showStatus('🔄 Connecting to portal... This may take up to 30 seconds while we solve the CAPTCHA.', 'loading');
         hideRetryInfo();
 
         try {
@@ -225,14 +226,19 @@
             console.error('Sync error:', error);
             // Determine error status from error object
             let errorStatus = 'SCRAPE_ERROR';
+            let errorMessage = error.message || 'Unknown error';
+            
             if (error.status === 401 || (error.data && error.data.status === 'AUTH_FAILED')) {
                 errorStatus = 'AUTH_FAILED';
+                errorMessage = error.data?.message || 'Invalid credentials';
             } else if (error.data && error.data.status) {
                 errorStatus = error.data.status;
+                errorMessage = error.data.message || 'Failed to fetch portal data';
             }
+            
             handleSyncFailure({
                 status: errorStatus,
-                message: error.message
+                message: errorMessage
             });
         } finally {
             setLoading(false);
@@ -248,16 +254,20 @@
 
         const remaining = MAX_RETRY_ATTEMPTS - currentAttempts;
 
+        // Show specific error message based on status
         if (response.status === 'AUTH_FAILED') {
-            showStatus('❌ Invalid portal credentials', 'error');
+            showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
+        } else if (response.message && response.message.toLowerCase().includes('captcha')) {
+            showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
         } else {
-            showStatus('❌ Failed to fetch portal data', 'error');
+            const msg = response.message || 'Failed to fetch portal data';
+            showStatus(`❌ ${msg}`, 'error');
         }
 
         if (remaining > 0) {
             // Attempts 1 or 2 - show retry option
             showRetryInfo(
-                `Attempt ${currentAttempts} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`,
+                `Attempt ${currentAttempts} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining. Click "Sync Portal Data" to retry.`,
                 'warning'
             );
             updateAttemptDisplay();
@@ -278,7 +288,7 @@
      * Handle auto-fallback after 3 failed attempts
      */
     async function handleAutoFallback() {
-        showStatus('⚠️ Verification failed. Loading demo data...', 'loading');
+        showStatus('⚠️ Verification failed after 3 attempts. Loading demo data...', 'loading');
         setLoading(true);
 
         try {
