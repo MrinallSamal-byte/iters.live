@@ -223,8 +223,15 @@
             }
         } catch (error) {
             console.error('Sync error:', error);
+            // Determine error status from error object
+            let errorStatus = 'SCRAPE_ERROR';
+            if (error.status === 401 || (error.data && error.data.status === 'AUTH_FAILED')) {
+                errorStatus = 'AUTH_FAILED';
+            } else if (error.data && error.data.status) {
+                errorStatus = error.data.status;
+            }
             handleSyncFailure({
-                status: error.message.includes('401') ? 'AUTH_FAILED' : 'SCRAPE_ERROR',
+                status: errorStatus,
                 message: error.message
             });
         } finally {
