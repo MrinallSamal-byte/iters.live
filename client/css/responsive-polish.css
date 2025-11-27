@@ -254,7 +254,7 @@
 /* Landscape mobile adjustments */
 @media (max-width: 896px) and (orientation: landscape) {
     .theme-toggle {
-        /* Position above chatbot toggle in landscape */
+        /* Position above chatbot toggle in landscape (approx: bottom 10px + 40px height + 10px gap) */
         bottom: 60px;
         right: 12px;
         width: 40px;
