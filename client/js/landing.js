@@ -148,7 +148,22 @@ function animateStats() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const target = entry.target;
+                
+                // Skip elements with stat-text class (non-numeric values like NAAC A++)
+                if (target.classList.contains('stat-text')) {
+                    target.style.opacity = '1';
+                    observer.unobserve(target);
+                    return;
+                }
+                
                 const targetValue = parseInt(target.textContent);
+                
+                // Skip if the value is not a valid number
+                if (isNaN(targetValue)) {
+                    observer.unobserve(target);
+                    return;
+                }
+                
                 let current = 0;
                 const increment = targetValue / 50;
                 const timer = setInterval(() => {
