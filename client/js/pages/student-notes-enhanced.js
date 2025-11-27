@@ -244,6 +244,10 @@
         loadDummyData() {
             // Academic Subject Data organized by semester (1-6)
             // Each subject has: subject code, full name, and direct Google Drive link
+            // NOTE: Some subjects share Google Drive folders as per the source dataset:
+            // - DLD (Sem 3) and COA (Sem 4) share the same folder
+            // - IES (Sem 3) and IDM (Sem 4) share the same folder
+            // - IM (Introduction to Microeconomics) appears in both Sem 3 and Sem 4 with the same folder
             this.allNotes = [
                 // ===============================
                 // SEMESTER 1 - Subject Notes
