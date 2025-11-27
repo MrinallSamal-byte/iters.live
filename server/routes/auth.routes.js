@@ -152,18 +152,18 @@ router.post('/login', [
       try {
         // Attempt to sync with portal using the same credentials
         // NOTE: We do NOT log the password
-        console.log(`Auto-sync triggered for: ${registration_number}`);
+        console.log(`Auto-sync triggered for: ${registration_number}, userId: ${user.id}`);
         
         const scraperResponse = await axios.post(
           `${FLASK_SERVICE_URL}/api/scrape`,
           { reg_number: registration_number, password },
           {
-            timeout: 60000,
+            timeout: 90000, // 90 second timeout for slow CAPTCHA solving
             headers: { 'Content-Type': 'application/json' }
           }
         );
 
-        const { status, data } = scraperResponse.data;
+        const { status, data, message } = scraperResponse.data;
 
         if (status === 'SUCCESS') {
           // Update user with portal data
@@ -184,6 +184,7 @@ router.post('/login', [
         } else {
           portalSyncResult = {
             status: status,
+            message: message,
             isVerified: false,
             portalConnected: false
           };
@@ -191,8 +192,11 @@ router.post('/login', [
       } catch (syncError) {
         console.error('Auto-sync error:', syncError.message);
         // Don't fail login, just report sync status
+        const errorStatus = syncError.response?.data?.status || 
+          (syncError.response?.status === 401 ? 'AUTH_FAILED' : 'SCRAPE_ERROR');
         portalSyncResult = {
-          status: syncError.response?.status === 401 ? 'AUTH_FAILED' : 'SCRAPE_ERROR',
+          status: errorStatus,
+          message: syncError.response?.data?.message || 'Portal sync failed',
           isVerified: false,
           portalConnected: false
         };
