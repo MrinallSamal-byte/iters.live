@@ -200,9 +200,7 @@ class StudentPortalScraper:
                 "button[type='submit']",
                 "input[type='submit']",
                 "button[id*='login' i]",
-                "button[class*='login' i]",
-                "button:contains('Login')",
-                "button:contains('Sign In')"
+                "button[class*='login' i]"
             ]
 
             login_btn = None
@@ -449,15 +447,16 @@ class StudentPortalScraper:
 
             if th_elements:
                 headers = [th.text.strip() for th in th_elements]
+                data_rows = rows[1:]  # Skip header row
             else:
                 # Use first row as headers if no th elements
                 td_elements = header_row.find_elements(By.TAG_NAME, 'td')
                 headers = [td.text.strip() for td in td_elements]
-                rows = rows[1:]  # Skip first row as it's headers
+                data_rows = rows[1:]  # Skip first row as it's headers
 
             # Parse data rows
             data = []
-            for row in rows[1:]:
+            for row in data_rows:
                 cells = row.find_elements(By.TAG_NAME, 'td')
                 if cells and len(cells) == len(headers):
                     row_dict = {}

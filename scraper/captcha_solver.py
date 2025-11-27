@@ -8,7 +8,7 @@ import re
 import requests
 import cv2
 import numpy as np
-from io import BytesIO
+from selenium.webdriver.common.by import By
 
 
 def preprocess_captcha_image(image_bytes):
@@ -69,7 +69,7 @@ def solve_captcha_google(driver, api_key):
         captcha_element = None
         for selector in captcha_selectors:
             try:
-                captcha_element = driver.find_element("css selector", selector)
+                captcha_element = driver.find_element(By.CSS_SELECTOR, selector)
                 if captcha_element:
                     break
             except Exception:
@@ -77,7 +77,7 @@ def solve_captcha_google(driver, api_key):
 
         if captcha_element is None:
             # Try to find any image that might be the CAPTCHA
-            images = driver.find_elements("tag name", "img")
+            images = driver.find_elements(By.TAG_NAME, "img")
             for img in images:
                 src = img.get_attribute('src') or ''
                 alt = img.get_attribute('alt') or ''
@@ -208,7 +208,7 @@ def refresh_captcha(driver):
 
         for selector in refresh_selectors:
             try:
-                refresh_btn = driver.find_element("css selector", selector)
+                refresh_btn = driver.find_element(By.CSS_SELECTOR, selector)
                 if refresh_btn:
                     refresh_btn.click()
                     return True
@@ -224,7 +224,7 @@ def refresh_captcha(driver):
 
         for selector in captcha_selectors:
             try:
-                captcha_img = driver.find_element("css selector", selector)
+                captcha_img = driver.find_element(By.CSS_SELECTOR, selector)
                 if captcha_img:
                     captcha_img.click()
                     return True
