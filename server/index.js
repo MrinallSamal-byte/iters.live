@@ -222,6 +222,15 @@ app.get('/home', (req, res) => {
   res.redirect(obfuscatedUrl);
 });
 
+// Serve connect-portal page directly (no obfuscation for OAuth redirect)
+app.get('/connect-portal', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+});
+
+app.get('/connect-portal.html', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+});
+
 // Serve static HTML pages - redirect to obfuscated URLs
 app.get('/about', (req, res) => {
   const obfuscatedUrl = urlRouter.getObfuscatedUrl('about');
@@ -241,6 +250,41 @@ app.get('/academics', (req, res) => {
 app.get('/contact', (req, res) => {
   const obfuscatedUrl = urlRouter.getObfuscatedUrl('contact');
   res.redirect(obfuscatedUrl);
+});
+
+// Serve dashboard pages directly (needed for login redirects)
+app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
+  const page = req.params.page;
+  
+  // Validate page parameter to prevent path traversal attacks
+  // Only allow alphanumeric characters, hyphens, and .html extension
+  if (!/^[a-zA-Z0-9-]+\.html$/.test(page)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid page name'
+    });
+  }
+  
+  const dashboardDir = path.resolve(__dirname, '../client/dashboard');
+  const filePath = path.join(dashboardDir, page);
+  
+  // Ensure the resolved path is within the dashboard directory
+  const resolvedPath = path.resolve(filePath);
+  if (!resolvedPath.startsWith(dashboardDir)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied'
+    });
+  }
+  
+  res.sendFile(resolvedPath, (err) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({
+        success: false,
+        message: 'Dashboard page not found'
+      });
+    }
+  });
 });
 
 // 404 handler for API routes only

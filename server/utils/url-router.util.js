@@ -27,6 +27,7 @@ const PAGE_CONFIG = {
     'login': '/login.html',
     'register': '/register.html',
     'creator': '/creator.html',
+    'connect-portal': '/connect-portal.html',
     
     // Student Dashboard pages
     'student': '/dashboard/student.html',
@@ -213,9 +214,12 @@ function shouldObfuscatePath(path) {
         path.startsWith('/assets/') ||
         path.startsWith('/releases/') ||
         path.startsWith('/web/') ||
+        path.startsWith('/dashboard/') ||
         path === '/health' ||
         path === '/manifest.json' ||
-        path === '/service-worker.js') {
+        path === '/service-worker.js' ||
+        path === '/connect-portal' ||
+        path === '/connect-portal.html') {
         return false;
     }
     return true;
