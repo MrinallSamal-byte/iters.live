@@ -255,8 +255,29 @@ app.get('/contact', (req, res) => {
 // Serve dashboard pages directly (needed for login redirects)
 app.get('/dashboard/:page', (req, res) => {
   const page = req.params.page;
-  const filePath = path.join(__dirname, `../client/dashboard/${page}`);
-  res.sendFile(filePath, (err) => {
+  
+  // Validate page parameter to prevent path traversal attacks
+  // Only allow alphanumeric characters, hyphens, and .html extension
+  if (!/^[a-zA-Z0-9-]+\.html$/.test(page)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid page name'
+    });
+  }
+  
+  const dashboardDir = path.resolve(__dirname, '../client/dashboard');
+  const filePath = path.join(dashboardDir, page);
+  
+  // Ensure the resolved path is within the dashboard directory
+  const resolvedPath = path.resolve(filePath);
+  if (!resolvedPath.startsWith(dashboardDir)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied'
+    });
+  }
+  
+  res.sendFile(resolvedPath, (err) => {
     if (err && !res.headersSent) {
       res.status(404).json({
         success: false,
