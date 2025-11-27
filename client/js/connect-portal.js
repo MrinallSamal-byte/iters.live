@@ -79,10 +79,13 @@
         // Check if user is authenticated
         checkAuthentication();
 
-        // Pre-fill registration number if available
+        // Pre-fill registration number if available (only if not a Google temp registration)
         const user = APP?.Storage?.get('user');
         if (user && user.registration_number) {
-            registrationInput.value = user.registration_number.replace('GOOGLE_', '');
+            // Only pre-fill if it's not a temporary Google registration number
+            if (!user.registration_number.startsWith('GOOGLE_')) {
+                registrationInput.value = user.registration_number;
+            }
         }
     }
 

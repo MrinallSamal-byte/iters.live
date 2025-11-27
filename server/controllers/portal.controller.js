@@ -143,7 +143,7 @@ async function checkScraperHealth(req, res) {
  */
 async function updateVerificationStatus(req, res) {
     const { db } = require('../database/firebase');
-    const userId = req.user?.uid;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(401).json({
@@ -189,7 +189,7 @@ async function updateVerificationStatus(req, res) {
  */
 async function getPortalStatus(req, res) {
     const { db } = require('../database/firebase');
-    const userId = req.user?.uid;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(401).json({
