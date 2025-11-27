@@ -26,7 +26,6 @@ from config import get_config
 STATUS_SUCCESS = 'SUCCESS'
 STATUS_AUTH_FAILED = 'AUTH_FAILED'
 STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR'
-STATUS_CAPTCHA_FAILED = 'CAPTCHA_FAILED'
 
 
 class StudentPortalScraper:
@@ -363,7 +362,7 @@ class StudentPortalScraper:
                         error_text = element.text.lower()
                         if any(word in error_text for word in ['invalid', 'incorrect', 'wrong', 'failed', 'error']):
                             if 'captcha' in error_text:
-                                return False, 'CAPTCHA_FAILED'
+                                return False, 'Invalid CAPTCHA'
                             if any(word in error_text for word in ['credential', 'password', 'user', 'id']):
                                 return False, 'AUTH_FAILED'
                             return False, 'AUTH_FAILED'
@@ -719,7 +718,7 @@ class StudentPortalScraper:
                         'status': STATUS_AUTH_FAILED,
                         'message': 'Invalid registration number or password'
                     }
-                elif error == 'CAPTCHA_FAILED':
+                elif 'captcha' in (error or '').lower():
                     return {
                         'status': STATUS_SCRAPE_ERROR,
                         'message': 'Failed to solve CAPTCHA'

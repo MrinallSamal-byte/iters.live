@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Default Google Vision API Key (can be overridden by environment)
-DEFAULT_GOOGLE_VISION_API_KEY = 'AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A'
-
 
 class Config:
     """Base configuration"""
@@ -25,8 +22,8 @@ class Config:
     BROWSER_TIMEOUT = int(os.getenv('BROWSER_TIMEOUT', '30'))
     
     # Google Vision API (for CAPTCHA solving)
-    # API key-based authentication (preferred for simplicity)
-    GOOGLE_VISION_API_KEY = os.getenv('GOOGLE_VISION_API_KEY', DEFAULT_GOOGLE_VISION_API_KEY)
+    # API key-based authentication - must be set in environment
+    GOOGLE_VISION_API_KEY = os.getenv('GOOGLE_VISION_API_KEY', '')
     # Service account-based authentication (alternative)
     GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
     
