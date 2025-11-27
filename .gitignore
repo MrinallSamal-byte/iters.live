@@ -52,3 +52,11 @@ electron-builder.yml
 *.sql.gz
 *.sql
 .vercel
+
+# Android build cache
+android-app/.gradle/
+android-app/app/build/
+android-app/build/
+*.apk
+*.aab
+local.properties
