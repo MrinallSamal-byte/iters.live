@@ -1,0 +1,83 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'android-app/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'android-app/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Make gradlew executable
+      run: chmod +x ./android-app/gradlew
+
+    - name: Build Debug APK
+      run: |
+        cd android-app
+        ./gradlew assembleDebug --no-daemon
+
+    - name: Copy APK to releases folder
+      run: |
+        mkdir -p client/releases
+        cp android-app/app/build/outputs/apk/debug/app-debug.apk client/releases/ITER.apk
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ITER-EduHub-APK
+        path: client/releases/ITER.apk
+        retention-days: 90
+
+    - name: Create Release (on main branch)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        body: |
+          ## ITER EduHub Android App
+          
+          ### Features
+          - Full website experience in native Android app
+          - All pages and features from the website
+          - Offline caching support
+          - File download capability
+          - Back button navigation
+          - Pull to refresh
+          
+          ### Installation
+          1. Download ITER.apk below
+          2. Enable "Install from Unknown Sources" on your device
+          3. Open the downloaded APK
+          4. Follow installation prompts
+          
+          ### Requirements
+          - Android 9.0 (Pie) or higher
+          - ~5 MB storage space
+          - Internet connection for content
+        files: client/releases/ITER.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
