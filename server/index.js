@@ -35,6 +35,7 @@ const notesRoutes = require('./routes/notes.routes');
 const forumRoutes = require('./routes/forum.routes');
 const pyqRoutes = require('./routes/pyq.routes');
 const webRoutes = require('./routes/web.routes');
+const portalRoutes = require('./routes/portal.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -204,6 +205,7 @@ app.use('/api/rubrics', rubricRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
+app.use('/api/portal', portalRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);

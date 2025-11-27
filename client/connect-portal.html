@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <title>Connect Portal - ITER EduHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/responsive-enhanced.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/button-fixes.css">
+    <link rel="stylesheet" href="/css/login-split.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        .portal-connect-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .portal-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+        }
+
+        .portal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .portal-header h1 {
+            font-size: 1.75rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .portal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .portal-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .portal-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .portal-form input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .portal-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .portal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-sync {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-sync:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-sync:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-demo {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 0.875rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-demo:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .retry-info {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+        }
+
+        .retry-info.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
+        .retry-info.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            display: block;
+        }
+
+        .status-message.loading {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary);
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .skip-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .skip-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .skip-link a:hover {
+            color: var(--primary);
+        }
+
+        .attempt-counter {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Toast notification */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            z-index: 10000;
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast-notification.error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .toast-notification.success {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .toast-notification.warning {
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="portal-connect-container">
+        <div class="portal-card">
+            <div class="portal-header">
+                <div class="portal-icon">🔗</div>
+                <h1>Connect Your Portal</h1>
+                <p>Link your SOA Student Portal to sync your academic data</p>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+
+            <form id="portalForm" class="portal-form">
+                <div class="form-group">
+                    <label for="regNumber">Registration Number</label>
+                    <input type="text" id="regNumber" name="regNumber" placeholder="e.g. 2101234567" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="portalPassword">Portal Password</label>
+                    <input type="password" id="portalPassword" name="portalPassword" placeholder="Your SOA Portal password" required autocomplete="current-password">
+                </div>
+
+                <div class="portal-actions">
+                    <button type="submit" class="btn-sync" id="syncBtn">
+                        Sync Portal Data
+                    </button>
+                    <button type="button" class="btn-demo" id="demoBtn">
+                        Use Demo Data Instead
+                    </button>
+                </div>
+            </form>
+
+            <div class="retry-info" id="retryInfo" style="display: none;"></div>
+            <div class="attempt-counter" id="attemptCounter"></div>
+
+            <div class="skip-link">
+                <a href="/dashboard/student.html">Skip for now →</a>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/connect-portal.js"></script>
+</body>
+
+</html>

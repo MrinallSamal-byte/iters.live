@@ -142,7 +142,7 @@
         window.firebaseAuth = auth;
         window.signInWithCustomToken = signInWithCustomToken;
 
-        // Google Login Handler
+        // Google Login Handler - Cases A & B
         const googleLoginBtn = document.getElementById('googleLoginBtn');
         if (googleLoginBtn) {
             googleLoginBtn.addEventListener('click', async () => {
@@ -158,17 +158,23 @@
 
                     if (response.success) {
                         // Store user data
-                        APP.Storage.set('accessToken', idToken); // Use ID token as access token
+                        APP.Storage.set('accessToken', idToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // Redirect
-                        const dashboards = {
-                            student: '/dashboard/student.html',
-                            teacher: '/dashboard/teacher.html',
-                            admin: '/dashboard/admin.html'
-                        };
-                        const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
-                        window.location.href = redirectUrl;
+                        // Check if portal connection is needed (Case B - new user)
+                        if (response.data.needsPortalConnection) {
+                            // Redirect to connect-portal page
+                            window.location.href = '/connect-portal.html';
+                        } else {
+                            // Case A - existing user with portal connected
+                            const dashboards = {
+                                student: '/dashboard/student.html',
+                                teacher: '/dashboard/teacher.html',
+                                admin: '/dashboard/admin.html'
+                            };
+                            const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                            window.location.href = redirectUrl;
+                        }
                     } else {
                         alert('Login failed: ' + response.message);
                     }
@@ -240,8 +246,6 @@
                                 APP.Storage.set('accessToken', idToken);
                             } catch (firebaseError) {
                                 console.error('Firebase Custom Token Sign-In Failed:', firebaseError);
-                                // Fallback to using the custom token directly if it was meant to be a JWT (but we changed it to Custom Token)
-                                // If it fails, we might have issues.
                                 APP.Storage.set('accessToken', response.data.accessToken);
                             }
                         } else {
@@ -258,12 +262,43 @@
                         console.log('Is authenticated:', APP.isAuthenticated());
                         console.log('User role:', APP.getUserRole());
 
-                        // Show success
-                        if (typeof APP.showToast === 'function') {
-                            APP.showToast('Login successful!', 'success');
+                        // Case C: Handle portal sync result
+                        const portalSync = response.data.portalSync;
+                        if (portalSync) {
+                            console.log('Portal sync result:', portalSync);
+                            
+                            if (portalSync.status === 'SUCCESS') {
+                                // Portal sync successful
+                                if (typeof APP.showToast === 'function') {
+                                    APP.showToast('Login & Portal sync successful!', 'success');
+                                }
+                                showError('✅ Login & Portal synced! Redirecting...');
+                                errorMessage.style.color = '#10b981';
+                            } else if (portalSync.status === 'AUTH_FAILED') {
+                                // Portal auth failed - store attempt and show warning
+                                handlePortalSyncFailure('AUTH_FAILED', response.data.user.id);
+                                if (typeof APP.showToast === 'function') {
+                                    APP.showToast('Login OK, but portal sync failed. Using demo data.', 'warning');
+                                }
+                                showError('⚠️ Login OK. Portal sync failed - check credentials on Portal page.');
+                                errorMessage.style.color = '#f59e0b';
+                            } else if (portalSync.status === 'SCRAPE_ERROR') {
+                                // Portal scrape error - store attempt
+                                handlePortalSyncFailure('SCRAPE_ERROR', response.data.user.id);
+                                if (typeof APP.showToast === 'function') {
+                                    APP.showToast('Login OK, but portal unavailable. Using demo data.', 'warning');
+                                }
+                                showError('⚠️ Login OK. Portal unavailable - try reconnecting later.');
+                                errorMessage.style.color = '#f59e0b';
+                            }
+                        } else {
+                            // No portal sync attempted (teacher/admin or already connected)
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Login successful!', 'success');
+                            }
+                            showError('✅ Login successful! Redirecting...');
+                            errorMessage.style.color = '#10b981';
                         }
-                        showError('✅ Login successful! Redirecting...');
-                        errorMessage.style.color = '#10b981';
 
                         // Redirect based on role
                         const dashboards = {
@@ -277,7 +312,7 @@
 
                         setTimeout(() => {
                             window.location.href = redirectUrl;
-                        }, 1000);
+                        }, 1500);
                     } else {
                         showError(response.message || 'Login failed');
                         loginBtn.textContent = originalText;
@@ -317,6 +352,17 @@
             if (!errorEl) return;
             errorEl.textContent = message;
             errorEl.style.display = 'block';
+        }
+
+        /**
+         * Handle portal sync failure for retry tracking
+         * Used when login succeeds but portal sync fails
+         */
+        function handlePortalSyncFailure(status, userId) {
+            const RETRY_KEY = 'portalRetryAttempts:' + userId;
+            const currentAttempts = parseInt(localStorage.getItem(RETRY_KEY) || '0', 10);
+            localStorage.setItem(RETRY_KEY, (currentAttempts + 1).toString());
+            console.log(`Portal sync failed (${status}). Attempt ${currentAttempts + 1} recorded.`);
         }
 
         function fillDemo(regNum, pass) {
