@@ -99,8 +99,8 @@
                 </div>
 
                 <div class="login-footer">
-                    <p>Don't have an account? <a href="register.html">Register here</a></p>
-                    <a href="index.html" class="back-link">← Back to Home</a>
+                    <p>Don't have an account? <a href="/register.html">Register here</a></p>
+                    <a href="/index.html" class="back-link">← Back to Home</a>
                 </div>
             </div>
         </div>
@@ -308,8 +308,8 @@
                     window.location.href = href;
                 }, { passive: false });
             }
-            ensureNav(registerLink, 'register.html');
-            ensureNav(homeLink, 'index.html');
+            ensureNav(registerLink, '/register.html');
+            ensureNav(homeLink, '/index.html');
         });
 
         function showError(message) {
