@@ -6,6 +6,7 @@ import threading
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from config import get_config
 
 class BrowserManager:
@@ -55,8 +56,9 @@ class BrowserManager:
         chrome_options.add_experimental_option('excludeSwitches', ['enable-automation'])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        # Create driver
-        driver = webdriver.Chrome(options=chrome_options)
+        # Create driver using webdriver-manager for automatic ChromeDriver management
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         
         # Set timeouts
         driver.set_page_load_timeout(self.config.BROWSER_TIMEOUT)

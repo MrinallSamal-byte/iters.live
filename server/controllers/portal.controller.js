@@ -153,20 +153,35 @@ const savePortalData = async (userId, regNumber, data, isVerified) => {
   // Update by userId if available, otherwise by registration number
   const docId = userId || regNumber;
 
-  if (docId) {
+  if (!docId) {
+    console.warn('savePortalData: No docId available, cannot save data');
+    return false;
+  }
+
+  try {
     const userRef = db.collection('users').doc(docId);
     const userDoc = await userRef.get();
 
     if (userDoc.exists) {
       await userRef.update(updateData);
+      console.log(`Portal data saved for user: ${docId}`);
+      return true;
     } else if (regNumber && regNumber !== docId) {
-      // Try with registration number
+      // Try with registration number as fallback
       const regRef = db.collection('users').doc(regNumber);
       const regDoc = await regRef.get();
       if (regDoc.exists) {
         await regRef.update(updateData);
+        console.log(`Portal data saved for registration: ${regNumber}`);
+        return true;
       }
     }
+    
+    console.warn(`savePortalData: No document found for ${docId} or ${regNumber}`);
+    return false;
+  } catch (error) {
+    console.error(`savePortalData error for ${docId}:`, error.message);
+    return false;
   }
 };
 

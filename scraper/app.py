@@ -4,6 +4,7 @@ Exposes POST /api/scrape endpoint
 """
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from functools import wraps
 import time
 from collections import defaultdict
@@ -13,6 +14,10 @@ from scraper import create_scraper
 
 # Initialize Flask app
 app = Flask(__name__)
+
+# Enable CORS for cross-origin requests from frontend
+CORS(app, origins=['http://localhost:3000', 'http://localhost:5000'], 
+     supports_credentials=True)
 
 # Load configuration
 config = get_config()
@@ -158,9 +163,10 @@ if __name__ == '__main__':
     port = int(os.getenv('FLASK_PORT', 5001))
     
     # Run the app
-    # Debug mode is controlled by config.FLASK_DEBUG (default False)
+    # Debug mode is ALWAYS disabled for security - use gunicorn in production
+    # For development, use: FLASK_ENV=development flask run --debug
     app.run(
         host='0.0.0.0',
         port=port,
-        debug=config.FLASK_DEBUG
+        debug=False  # Never enable debug in this entry point
     )
