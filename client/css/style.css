@@ -959,7 +959,7 @@ body.light-theme select optgroup {
 /* Theme Toggle - Perfectly centered and positioned */
 .theme-toggle {
     position: fixed;
-    bottom: 24px;
+    bottom: 100px;
     right: 24px;
     width: 56px;
     height: 56px;
@@ -975,7 +975,7 @@ body.light-theme select optgroup {
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-base);
-    z-index: 1000;
+    z-index: 9999;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     padding: 0;
     margin: 0;
@@ -1065,9 +1065,9 @@ body.light-theme .theme-toggle:hover {
         font-size: 2rem;
     }
     
-    /* Theme toggle mobile positioning */
+    /* Theme toggle mobile positioning - above chatbot */
     .theme-toggle {
-        bottom: 16px;
+        bottom: 85px;
         right: 16px;
         width: 48px;
         height: 48px;
@@ -1081,10 +1081,10 @@ body.light-theme .theme-toggle:hover {
 }
 
 @media (max-width: 480px) {
-    /* Theme toggle small mobile */
+    /* Theme toggle small mobile - above chatbot */
     .theme-toggle {
-        bottom: 12px;
-        right: 12px;
+        bottom: 80px;
+        right: 15px;
         width: 44px;
         height: 44px;
         min-width: 44px;

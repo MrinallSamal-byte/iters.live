@@ -331,3 +331,123 @@
         display: none;
     }
 }
+
+/* ========================================
+   Light Theme Overrides for Login Page
+   ======================================== */
+body.light-theme .login-wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .login-brand-section {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    border-right-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .brand-title {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: #4f46e5; /* Fallback for browsers that don't support background-clip: text */
+}
+
+body.light-theme .brand-subtitle {
+    color: #475569;
+}
+
+body.light-theme .login-form-section {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+body.light-theme .login-header h2 {
+    color: #0f172a;
+}
+
+body.light-theme .login-header p {
+    color: #475569;
+}
+
+body.light-theme .form-group label {
+    color: #334155;
+}
+
+body.light-theme .form-group input {
+    background: rgba(241, 245, 249, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #0f172a;
+}
+
+body.light-theme .form-group input::placeholder {
+    color: #94a3b8;
+}
+
+body.light-theme .form-group input:focus {
+    background: rgba(255, 255, 255, 1);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+body.light-theme .checkbox-label {
+    color: #475569;
+}
+
+body.light-theme .forgot-link {
+    color: #6366f1;
+}
+
+body.light-theme .forgot-link:hover {
+    color: #4f46e5;
+}
+
+body.light-theme .divider span {
+    background: rgba(255, 255, 255, 0.95);
+    color: #64748b;
+}
+
+body.light-theme .divider::before {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .demo-hint-compact {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+body.light-theme .demo-hint-compact p {
+    color: #475569;
+}
+
+body.light-theme .demo-chip {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+    color: #4f46e5;
+}
+
+body.light-theme .demo-chip:hover {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+body.light-theme .login-footer {
+    color: #475569;
+}
+
+body.light-theme .login-footer a {
+    color: #6366f1;
+}
+
+body.light-theme .login-footer a:hover {
+    color: #4f46e5;
+}
+
+body.light-theme .error-message {
+    color: #ef4444;
+}
+
+body.light-theme .mobile-brand-title {
+    color: #0f172a;
+}
