@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Animate tech tags with visible fallback
-        const techTags = document.querySelectorAll('.tech-tag');
+        const techTags = document.querySelectorAll('.tech-tag-pill');
         if (techTags.length > 0) {
             gsap.set(techTags, { opacity: 1, scale: 1 });
             gsap.from(techTags, {
@@ -62,7 +62,130 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Animate info cards with visible fallback
+        // Animate skill bars
+        const skillBars = document.querySelectorAll('.skill-progress');
+        skillBars.forEach(bar => {
+            const progress = bar.getAttribute('data-progress');
+            gsap.set(bar, { width: 0 });
+            
+            ScrollTrigger.create({
+                trigger: bar,
+                start: 'top 85%',
+                once: true,
+                onEnter: () => {
+                    gsap.to(bar, {
+                        width: progress + '%',
+                        duration: 1.5,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+        });
+
+        // Animate timeline items
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        if (timelineItems.length > 0) {
+            gsap.set(timelineItems, { opacity: 1, x: 0 });
+            timelineItems.forEach((item, index) => {
+                gsap.from(item, {
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 85%',
+                        once: true
+                    },
+                    opacity: 0,
+                    x: -30,
+                    duration: 0.6,
+                    delay: index * 0.2,
+                    ease: 'power2.out',
+                    clearProps: 'all'
+                });
+            });
+        }
+
+        // Animate project cards
+        const projectCards = document.querySelectorAll('.project-card');
+        if (projectCards.length > 0) {
+            gsap.set(projectCards, { opacity: 1, y: 0 });
+            projectCards.forEach((card, index) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        once: true
+                    },
+                    opacity: 0,
+                    y: 40,
+                    duration: 0.7,
+                    delay: index * 0.15,
+                    ease: 'power2.out',
+                    clearProps: 'all'
+                });
+            });
+        }
+
+        // Animate skill categories
+        const skillCategories = document.querySelectorAll('.skill-category');
+        if (skillCategories.length > 0) {
+            gsap.set(skillCategories, { opacity: 1, y: 0 });
+            skillCategories.forEach((category, index) => {
+                gsap.from(category, {
+                    scrollTrigger: {
+                        trigger: category,
+                        start: 'top 85%',
+                        once: true
+                    },
+                    opacity: 0,
+                    y: 30,
+                    duration: 0.6,
+                    delay: index * 0.15,
+                    ease: 'power2.out',
+                    clearProps: 'all'
+                });
+            });
+        }
+
+        // Animate contact cards
+        const contactCards = document.querySelectorAll('.contact-card');
+        if (contactCards.length > 0) {
+            gsap.set(contactCards, { opacity: 1, y: 0 });
+            contactCards.forEach((card, index) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        once: true
+                    },
+                    opacity: 0,
+                    y: 30,
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    ease: 'power2.out',
+                    clearProps: 'all'
+                });
+            });
+        }
+
+        // Animate feature items
+        const featureItems = document.querySelectorAll('.feature-item');
+        if (featureItems.length > 0) {
+            gsap.set(featureItems, { opacity: 1, scale: 1 });
+            gsap.from(featureItems, {
+                scrollTrigger: {
+                    trigger: '.features-list',
+                    start: 'top 85%',
+                    once: true
+                },
+                opacity: 0,
+                scale: 0.9,
+                stagger: 0.08,
+                duration: 0.5,
+                ease: 'back.out(1.7)',
+                clearProps: 'all'
+            });
+        }
+
+        // Animate info cards with visible fallback (legacy support)
         const infoCards = document.querySelectorAll('.info-card');
         if (infoCards.length > 0) {
             gsap.set(infoCards, { opacity: 1, y: 0 });
@@ -81,26 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Animate highlight items with visible fallback
-        const highlightItems = document.querySelectorAll('.highlight-item');
-        if (highlightItems.length > 0) {
-            gsap.set(highlightItems, { opacity: 1, y: 0 });
-            gsap.from(highlightItems, {
-                scrollTrigger: {
-                    trigger: '.highlights-grid',
-                    start: 'top 80%',
-                    once: true
-                },
-                opacity: 0,
-                y: 40,
-                stagger: 0.15,
-                duration: 0.7,
-                ease: 'power2.out',
-                clearProps: 'all'
-            });
-        }
-
-        // Animate creator links with visible fallback
+        // Animate creator links with visible fallback (legacy support)
         const creatorLinks = document.querySelectorAll('.creator-link');
         if (creatorLinks.length > 0) {
             gsap.set(creatorLinks, { opacity: 1, x: 0 });
@@ -121,8 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add hover effect to tech tags
-    const techTags = document.querySelectorAll('.tech-tag');
-    techTags.forEach(tag => {
+    const techTagPills = document.querySelectorAll('.tech-tag-pill');
+    techTagPills.forEach(tag => {
         tag.addEventListener('mouseenter', function() {
             if (typeof gsap !== 'undefined') {
                 gsap.to(this, {
@@ -137,6 +241,54 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof gsap !== 'undefined') {
                 gsap.to(this, {
                     scale: 1,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            }
+        });
+    });
+
+    // Add hover effect to project cards
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(this, {
+                    y: -5,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            }
+        });
+
+        card.addEventListener('mouseleave', function() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(this, {
+                    y: 0,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            }
+        });
+    });
+
+    // Add hover effect to contact cards
+    const contactCards = document.querySelectorAll('.contact-card');
+    contactCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(this, {
+                    y: -5,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            }
+        });
+
+        card.addEventListener('mouseleave', function() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to(this, {
+                    y: 0,
                     duration: 0.3,
                     ease: 'power2.out'
                 });
