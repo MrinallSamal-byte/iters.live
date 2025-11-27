@@ -149,15 +149,23 @@ function animateStats() {
             if (entry.isIntersecting) {
                 const target = entry.target;
                 const targetValue = parseInt(target.textContent);
+                
+                // Skip animation for text-based stats (like "A+" NAAC Grade)
+                if (isNaN(targetValue)) {
+                    observer.unobserve(target);
+                    return;
+                }
+                
                 let current = 0;
+                const hasPlusSuffix = target.textContent.includes('+');
                 const increment = targetValue / 50;
                 const timer = setInterval(() => {
                     current += increment;
                     if (current >= targetValue) {
-                        target.textContent = targetValue + (target.textContent.includes('+') ? '+' : '');
+                        target.textContent = targetValue + (hasPlusSuffix ? '+' : '');
                         clearInterval(timer);
                     } else {
-                        target.textContent = Math.floor(current) + (target.textContent.includes('+') ? '+' : '');
+                        target.textContent = Math.floor(current) + (hasPlusSuffix ? '+' : '');
                     }
                 }, 30);
                 
