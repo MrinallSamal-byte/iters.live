@@ -134,8 +134,6 @@
 
                 // If touch was quick (< 500ms) and didn't move much, treat as click
                 if (touchDuration < 500) {
-                    e.preventDefault(); // Prevent double-tap zoom
-                    
                     // Get the actual link/button target
                     const href = this.getAttribute('href');
                     const isLink = this.tagName.toLowerCase() === 'a';
@@ -152,10 +150,13 @@
                         if (lowerUrl.startsWith('http://') || lowerUrl.startsWith('https://')) return true;
                         // Allow URLs containing .html (followed by end, query, or hash)
                         if (/\.html($|[?#])/.test(url)) return true;
-                        // Allow relative paths
+                        // Allow relative paths starting with / ./ or ../
                         if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) return true;
                         // Allow mailto and tel links
                         if (lowerUrl.startsWith('mailto:') || lowerUrl.startsWith('tel:')) return true;
+                        // Allow simple relative paths (like filename.html without leading /)
+                        // This catches cases like "creator.html" that don't start with / but are safe
+                        if (/^[a-zA-Z0-9_-]+\.html/.test(url)) return true;
                         return false;
                     };
                     
@@ -170,7 +171,8 @@
                                 smoothScrollToTop();
                             }
                         } else if (isSafeNavigationUrl(href)) {
-                            // External link, page navigation, or relative URLs (including URLs with anchors like index.html#about)
+                            // Safe navigation URL - handle it ourselves
+                            e.preventDefault();
                             const target = this.getAttribute('target');
                             if (target === '_blank') {
                                 window.open(href, '_blank', 'noopener,noreferrer');
@@ -178,9 +180,10 @@
                                 window.location.href = href;
                             }
                         }
-                        // If URL is not recognized as safe, let the browser handle it naturally (don't block)
+                        // If URL is not recognized as safe, don't preventDefault - let browser handle it
                     } else {
                         // Regular button - trigger click
+                        e.preventDefault();
                         this.click();
                     }
                 }
