@@ -223,11 +223,11 @@ app.get('/home', (req, res) => {
 });
 
 // Serve connect-portal page directly (no obfuscation for OAuth redirect)
-app.get('/connect-portal', (req, res) => {
+app.get('/connect-portal', staticFileLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
 });
 
-app.get('/connect-portal.html', (req, res) => {
+app.get('/connect-portal.html', staticFileLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
 });
 
@@ -253,7 +253,7 @@ app.get('/contact', (req, res) => {
 });
 
 // Serve dashboard pages directly (needed for login redirects)
-app.get('/dashboard/:page', (req, res) => {
+app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
   const page = req.params.page;
   
   // Validate page parameter to prevent path traversal attacks
