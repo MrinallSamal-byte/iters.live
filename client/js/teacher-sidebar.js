@@ -29,55 +29,55 @@
                     <nav class="sidebar-nav">
                         <ul class="sidebar-nav-list">
                             <li class="sidebar-nav-item">
-                                <a href="teacher.html" class="sidebar-nav-link" data-page="dashboard">
+                                <a href="/dashboard/teacher.html" class="sidebar-nav-link" data-page="dashboard">
                                     <span class="sidebar-nav-icon">🏠</span>
                                     <span class="sidebar-nav-text">Dashboard</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-attendance.html" class="sidebar-nav-link" data-page="attendance">
+                                <a href="/dashboard/teacher-attendance.html" class="sidebar-nav-link" data-page="attendance">
                                     <span class="sidebar-nav-icon">📊</span>
                                     <span class="sidebar-nav-text">Attendance</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-marks.html" class="sidebar-nav-link" data-page="marks">
+                                <a href="/dashboard/teacher-marks.html" class="sidebar-nav-link" data-page="marks">
                                     <span class="sidebar-nav-icon">📈</span>
                                     <span class="sidebar-nav-text">Marks</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-assignments.html" class="sidebar-nav-link" data-page="assignments">
+                                <a href="/dashboard/teacher-assignments.html" class="sidebar-nav-link" data-page="assignments">
                                     <span class="sidebar-nav-icon">📝</span>
                                     <span class="sidebar-nav-text">Assignments</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-notes.html" class="sidebar-nav-link" data-page="notes">
+                                <a href="/dashboard/teacher-notes.html" class="sidebar-nav-link" data-page="notes">
                                     <span class="sidebar-nav-icon">📚</span>
                                     <span class="sidebar-nav-text">Study Material</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-students.html" class="sidebar-nav-link" data-page="students">
+                                <a href="/dashboard/teacher-students.html" class="sidebar-nav-link" data-page="students">
                                     <span class="sidebar-nav-icon">👥</span>
                                     <span class="sidebar-nav-text">My Students</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-question-bank.html" class="sidebar-nav-link" data-page="question-bank">
+                                <a href="/dashboard/teacher-question-bank.html" class="sidebar-nav-link" data-page="question-bank">
                                     <span class="sidebar-nav-icon">❓</span>
                                     <span class="sidebar-nav-text">Question Bank</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-rubric-creator.html" class="sidebar-nav-link" data-page="rubric">
+                                <a href="/dashboard/teacher-rubric-creator.html" class="sidebar-nav-link" data-page="rubric">
                                     <span class="sidebar-nav-icon">📋</span>
                                     <span class="sidebar-nav-text">Rubric Creator</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="teacher-timetable.html" class="sidebar-nav-link" data-page="timetable">
+                                <a href="/dashboard/teacher-timetable.html" class="sidebar-nav-link" data-page="timetable">
                                     <span class="sidebar-nav-icon">📅</span>
                                     <span class="sidebar-nav-text">My Timetable</span>
                                 </a>
