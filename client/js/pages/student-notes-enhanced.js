@@ -29,6 +29,16 @@
         return SEMESTER_FOLDER_IDS[semester] || DEFAULT_FOLDER_ID;
     }
 
+    // Shared constant for link type labels (used in createNoteCard and openTypeLink)
+    const LINK_TYPE_LABELS = {
+        previousYearQuestions: { label: 'PYQ', icon: '📋', tooltip: 'Previous Year Questions' },
+        classNotes: { label: 'Notes', icon: '📝', tooltip: 'Class Notes' },
+        midTerm: { label: 'Mid-Term', icon: '📄', tooltip: 'Mid-Term Papers' }
+    };
+
+    // Whitelist of valid link type keys for security
+    const VALID_LINK_TYPES = Object.keys(LINK_TYPE_LABELS);
+
     const NotesManager = {
         currentFilters: {
             branch: '',
@@ -266,7 +276,14 @@
                     uploaded_at: '2025-01-15',
                     downloads: 245,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co',
                     drivePath: 'Semester 1/UPM/'
                 },
@@ -284,7 +301,14 @@
                     uploaded_at: '2025-01-10',
                     downloads: 189,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j?midterm'
+                        }
+                    },
                     driveFolderId: '1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j',
                     drivePath: 'Semester 1/Calculus A/'
                 },
@@ -302,7 +326,14 @@
                     uploaded_at: '2025-01-08',
                     downloads: 156,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX',
                     drivePath: 'Semester 1/UHV/'
                 },
@@ -320,7 +351,14 @@
                     uploaded_at: '2025-01-05',
                     downloads: 312,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a?midterm'
+                        }
+                    },
                     driveFolderId: '1qDS9s575O8EWHluJklhjwggXTQIjFn6a',
                     drivePath: 'Semester 1/ICP/'
                 },
@@ -338,7 +376,14 @@
                     uploaded_at: '2025-01-12',
                     downloads: 278,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q',
                     drivePath: 'Semester 1/DM/'
                 },
@@ -360,7 +405,14 @@
                     uploaded_at: '2025-01-20',
                     downloads: 267,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1?midterm'
+                        }
+                    },
                     driveFolderId: '1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1',
                     drivePath: 'Semester 2/UPEM/'
                 },
@@ -378,7 +430,14 @@
                     uploaded_at: '2025-01-18',
                     downloads: 198,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc?midterm'
+                        }
+                    },
                     driveFolderId: '1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc',
                     drivePath: 'Semester 2/Calculus B/'
                 },
@@ -396,7 +455,14 @@
                     uploaded_at: '2025-01-15',
                     downloads: 145,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc',
                     drivePath: 'Semester 2/ITW/'
                 },
@@ -414,7 +480,14 @@
                     uploaded_at: '2025-01-22',
                     downloads: 534,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD?midterm'
+                        }
+                    },
                     driveFolderId: '1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD',
                     drivePath: 'Semester 2/DSA/'
                 },
@@ -432,7 +505,14 @@
                     uploaded_at: '2025-01-25',
                     downloads: 223,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc',
                     drivePath: 'Semester 2/IGT/'
                 },
@@ -454,7 +534,14 @@
                     uploaded_at: '2025-02-01',
                     downloads: 189,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF',
                     drivePath: 'Semester 3/FPGA/'
                 },
@@ -472,7 +559,14 @@
                     uploaded_at: '2025-02-03',
                     downloads: 312,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/11y8iBePAW1ailt6rxHpulm5ctrFpFjB2',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/11y8iBePAW1ailt6rxHpulm5ctrFpFjB2',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/11y8iBePAW1ailt6rxHpulm5ctrFpFjB2?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '11y8iBePAW1ailt6rxHpulm5ctrFpFjB2',
                     drivePath: 'Semester 3/CSW/'
                 },
@@ -490,7 +584,14 @@
                     uploaded_at: '2025-02-05',
                     downloads: 267,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa?midterm'
+                        }
+                    },
                     driveFolderId: '12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa',
                     drivePath: 'Semester 3/PS/'
                 },
@@ -508,7 +609,14 @@
                     uploaded_at: '2025-02-07',
                     downloads: 345,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?midterm'
+                        }
+                    },
                     driveFolderId: '1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
                     drivePath: 'Semester 3/DLD/'
                 },
@@ -526,7 +634,14 @@
                     uploaded_at: '2025-02-08',
                     downloads: 156,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
                     drivePath: 'Semester 3/IES/'
                 },
@@ -544,7 +659,14 @@
                     uploaded_at: '2025-02-10',
                     downloads: 423,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW?midterm'
+                        }
+                    },
                     driveFolderId: '1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW',
                     drivePath: 'Semester 3/AD1/'
                 },
@@ -562,7 +684,14 @@
                     uploaded_at: '2025-02-12',
                     downloads: 178,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
                     drivePath: 'Semester 3/IM/'
                 },
@@ -580,7 +709,14 @@
                     uploaded_at: '2025-02-14',
                     downloads: 567,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw?midterm'
+                        }
+                    },
                     driveFolderId: '1kuvQDq39YI6DG_hmejcs4whOhplYD7yw',
                     drivePath: 'Semester 3/AI/'
                 },
@@ -598,7 +734,14 @@
                     uploaded_at: '2025-02-16',
                     downloads: 489,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64',
                     drivePath: 'Semester 3/MLW/'
                 },
@@ -620,7 +763,14 @@
                     uploaded_at: '2025-02-18',
                     downloads: 334,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS',
                     drivePath: 'Semester 4/CSW-II/'
                 },
@@ -638,7 +788,14 @@
                     uploaded_at: '2025-02-20',
                     downloads: 289,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm?midterm'
+                        }
+                    },
                     driveFolderId: '1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm',
                     drivePath: 'Semester 4/ALA/'
                 },
@@ -656,7 +813,14 @@
                     uploaded_at: '2025-02-22',
                     downloads: 456,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x?midterm'
+                        }
+                    },
                     driveFolderId: '1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
                     drivePath: 'Semester 4/COA/'
                 },
@@ -674,7 +838,14 @@
                     uploaded_at: '2025-02-24',
                     downloads: 167,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
                     drivePath: 'Semester 4/IDM/'
                 },
@@ -692,7 +863,14 @@
                     uploaded_at: '2025-02-26',
                     downloads: 512,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6?midterm'
+                        }
+                    },
                     driveFolderId: '1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6',
                     drivePath: 'Semester 4/AD2/'
                 },
@@ -710,7 +888,14 @@
                     uploaded_at: '2025-02-28',
                     downloads: 198,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
                     drivePath: 'Semester 4/IM/'
                 },
@@ -732,7 +917,14 @@
                     uploaded_at: '2025-03-01',
                     downloads: 423,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT',
                     drivePath: 'Semester 5/C/'
                 },
@@ -750,7 +942,14 @@
                     uploaded_at: '2025-03-03',
                     downloads: 567,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW?midterm'
+                        }
+                    },
                     driveFolderId: '1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW',
                     drivePath: 'Semester 5/OS/'
                 },
@@ -768,7 +967,14 @@
                     uploaded_at: '2025-03-05',
                     downloads: 489,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb?midterm'
+                        }
+                    },
                     driveFolderId: '1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb',
                     drivePath: 'Semester 5/Networking/'
                 },
@@ -786,7 +992,14 @@
                     uploaded_at: '2025-03-07',
                     downloads: 612,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA',
                     drivePath: 'Semester 5/Python/'
                 },
@@ -804,7 +1017,14 @@
                     uploaded_at: '2025-03-09',
                     downloads: 345,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY',
                     drivePath: 'Semester 5/Theory Computation/'
                 },
@@ -822,7 +1042,14 @@
                     uploaded_at: '2025-03-11',
                     downloads: 534,
                     isGoogleDrive: true,
-                    driveLink: null,
+                    links: {
+                        root: null,
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: null,
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: null,
                     drivePath: 'Semester 5/Machine Learning/',
                     noLinkAvailable: true
@@ -845,7 +1072,14 @@
                     uploaded_at: '2025-03-13',
                     downloads: 278,
                     isGoogleDrive: true,
-                    driveLink: null,
+                    links: {
+                        root: null,
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: null,
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: null,
                     drivePath: 'Semester 6/C++/',
                     noLinkAvailable: true
@@ -864,7 +1098,14 @@
                     uploaded_at: '2025-03-15',
                     downloads: 456,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF?notes',
+                            midTerm: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF?midterm'
+                        }
+                    },
                     driveFolderId: '13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF',
                     drivePath: 'Semester 6/Databases/'
                 },
@@ -882,7 +1123,14 @@
                     uploaded_at: '2025-03-17',
                     downloads: 389,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff',
                     drivePath: 'Semester 6/Security/'
                 },
@@ -900,7 +1148,14 @@
                     uploaded_at: '2025-03-19',
                     downloads: 312,
                     isGoogleDrive: true,
-                    driveLink: 'https://drive.google.com/drive/folders/1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX',
+                    links: {
+                        root: 'https://drive.google.com/drive/folders/1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX',
+                        types: {
+                            previousYearQuestions: 'https://drive.google.com/drive/folders/1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX?pyq',
+                            classNotes: 'https://drive.google.com/drive/folders/1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX?notes',
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: '1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX',
                     drivePath: 'Semester 6/Compilers/'
                 },
@@ -918,7 +1173,14 @@
                     uploaded_at: '2025-03-21',
                     downloads: 467,
                     isGoogleDrive: true,
-                    driveLink: null,
+                    links: {
+                        root: null,
+                        types: {
+                            previousYearQuestions: null,
+                            classNotes: null,
+                            midTerm: null
+                        }
+                    },
                     driveFolderId: null,
                     drivePath: 'Semester 6/Machine Learning/',
                     noLinkAvailable: true
@@ -1124,10 +1386,33 @@
                        ⏳ Link Coming Soon
                    </button>`;
             } else if (note.isGoogleDrive) {
-                actionButtons = `<button class="btn btn-primary" onclick="NotesManager.openInDrive(${note.id})">
-                       🔗 Open in Drive
-                   </button>
-                   <button class="btn btn-secondary" onclick="NotesManager.openDriveFolder(${note.semester})">
+                // Primary action - Open in Drive (using root link)
+                const rootLink = note.links?.root;
+                const primaryButton = rootLink 
+                    ? `<button class="btn btn-primary" onclick="NotesManager.openInDrive(${note.id})">
+                           🔗 Open in Drive
+                       </button>`
+                    : '';
+                
+                // Generate Quick Access chips dynamically from links.types
+                let quickAccessButtons = '';
+                if (note.links?.types) {
+                    Object.entries(note.links.types).forEach(([key, url]) => {
+                        // Only process valid link types (security: prevents XSS from invalid keys)
+                        if (url && VALID_LINK_TYPES.includes(key)) {
+                            const typeInfo = LINK_TYPE_LABELS[key];
+                            quickAccessButtons += `<button class="btn btn-quick-access" 
+                                onclick="NotesManager.openTypeLink(${note.id}, '${key}')" 
+                                title="${typeInfo.tooltip}">
+                                ${typeInfo.icon} ${typeInfo.label}
+                            </button>`;
+                        }
+                    });
+                }
+                
+                actionButtons = `${primaryButton}
+                   ${quickAccessButtons ? `<div class="quick-access-container">${quickAccessButtons}</div>` : ''}
+                   <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${note.semester})">
                        📂 Browse Semester ${note.semester}
                    </button>`;
             } else {
@@ -1180,8 +1465,9 @@
             const note = this.allNotes.find(n => n.id === noteId);
             if (!note || !note.isGoogleDrive) return;
 
-            // Check if note has no link available
-            if (note.noLinkAvailable || !note.driveLink) {
+            // Check if note has no link available (use links.root)
+            const rootLink = note.links?.root;
+            if (note.noLinkAvailable || !rootLink) {
                 if (typeof Toast !== 'undefined') {
                     Toast.warning(`No Google Drive link available for "${note.title}"`);
                 }
@@ -1193,8 +1479,42 @@
                 Toast.info(`Opening "${note.title}" in Google Drive...`);
             }
 
-            // Use the note's direct drive link
-            window.open(note.driveLink, '_blank');
+            // Use the note's root drive link
+            window.open(rootLink, '_blank');
+
+            // Add to recent downloads
+            this.addToRecentDownloads(note);
+        },
+
+        // Open a specific type link (PYQ, Notes, Mid-Term)
+        openTypeLink(noteId, typeKey) {
+            const note = this.allNotes.find(n => n.id === noteId);
+            if (!note || !note.isGoogleDrive || !note.links?.types) return;
+
+            // Security: Validate typeKey against whitelist
+            if (!VALID_LINK_TYPES.includes(typeKey)) {
+                console.warn(`Invalid link type: ${typeKey}`);
+                return;
+            }
+
+            const typeUrl = note.links.types[typeKey];
+            if (!typeUrl) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.warning(`No link available for this resource type`);
+                }
+                return;
+            }
+
+            // Use shared constant for tooltip (which contains full label)
+            const typeInfo = LINK_TYPE_LABELS[typeKey];
+
+            // Show toast notification
+            if (typeof Toast !== 'undefined') {
+                Toast.info(`Opening ${typeInfo?.tooltip || typeKey} for "${note.title}"...`);
+            }
+
+            // Open the specific type link
+            window.open(typeUrl, '_blank');
 
             // Add to recent downloads
             this.addToRecentDownloads(note);
