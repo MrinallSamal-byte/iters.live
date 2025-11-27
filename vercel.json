@@ -23,6 +23,22 @@
       "dest": "/client/$1"
     },
     {
+      "src": "/login$",
+      "dest": "/client/login.html"
+    },
+    {
+      "src": "/register$",
+      "dest": "/client/register.html"
+    },
+    {
+      "src": "/creator$",
+      "dest": "/client/creator.html"
+    },
+    {
+      "src": "/(.*)\\.html$",
+      "dest": "/client/$1.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/client/$1"
     }
