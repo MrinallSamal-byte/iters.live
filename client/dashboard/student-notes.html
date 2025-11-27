@@ -33,12 +33,57 @@
                     <p class="page-subtitle">Access study materials, notes, and previous year questions from Google Drive</p>
                 </div>
                 <div class="hero-actions">
-                    <a href="https://drive.google.com/drive/folders/1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7" 
-                       target="_blank" 
-                       class="btn btn-primary"
-                       style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button onclick="NotesManager.openDriveFolder()" 
+                       class="btn btn-primary btn-with-icon">
                         <span>📁</span> Open Google Drive
-                    </a>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Semester Quick Links Section -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📂</span>
+                    Quick Access - Semester Folders
+                </h3>
+            </div>
+            <div class="semester-links-grid">
+                <a href="https://drive.google.com/drive/folders/19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd" 
+                   target="_blank" 
+                   class="semester-link-card">
+                    <span class="semester-number">1</span>
+                    <span class="semester-label">Semester 1</span>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD" 
+                   target="_blank" 
+                   class="semester-link-card">
+                    <span class="semester-number">2</span>
+                    <span class="semester-label">Semester 2</span>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1rY3THSdETNyJ-40J4olVVB5BgoW19nYA" 
+                   target="_blank" 
+                   class="semester-link-card">
+                    <span class="semester-number">3</span>
+                    <span class="semester-label">Semester 3</span>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen" 
+                   target="_blank" 
+                   class="semester-link-card">
+                    <span class="semester-number">4</span>
+                    <span class="semester-label">Semester 4</span>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ" 
+                   target="_blank" 
+                   class="semester-link-card">
+                    <span class="semester-number">5</span>
+                    <span class="semester-label">Semester 5</span>
+                </a>
+                <div class="semester-link-card semester-6-partial">
+                    <span class="semester-number">6</span>
+                    <span class="semester-label">Semester 6</span>
+                    <span class="partial-badge">Partial</span>
                 </div>
             </div>
         </section>
@@ -308,6 +353,129 @@
         .page-subtitle {
             font-size: 1.125rem;
             color: var(--text-secondary);
+        }
+
+        /* Semester Quick Links Grid */
+        /* Button with icon */
+        .btn-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .semester-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .semester-link-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.25rem 1rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .semester-link-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+        }
+
+        .semester-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .semester-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Semester 6 partial card */
+        .semester-6-partial {
+            opacity: 0.7;
+            cursor: default;
+            position: relative;
+        }
+
+        .partial-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+        }
+
+        /* Subject code badge */
+        .subject-code-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* No link available badge */
+        .no-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* No link card style */
+        .resource-card.no-link {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .resource-card.no-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Dark mode semester cards */
+        [data-theme="dark"] .semester-link-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+        }
+
+        [data-theme="dark"] .semester-link-card:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+        }
+
+        [data-theme="dark"] .subject-code-badge {
+            background: rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .no-link-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
         }
 
         .filter-container {

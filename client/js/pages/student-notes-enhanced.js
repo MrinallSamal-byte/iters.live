@@ -7,11 +7,27 @@
 (function() {
     'use strict';
 
-    // Google Drive folder configuration
-    const DRIVE_FOLDER_ID = '1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7';
+    // Google Drive folder configuration - Semester-specific folders
     const DRIVE_BASE_URL = 'https://drive.google.com';
     const DRIVE_VIEW_URL = `${DRIVE_BASE_URL}/file/d/`;
     const DRIVE_FOLDER_URL = `${DRIVE_BASE_URL}/drive/folders/`;
+    
+    // Semester-specific Google Drive folder IDs
+    const SEMESTER_FOLDER_IDS = {
+        1: '19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd',
+        2: '1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD',
+        3: '1rY3THSdETNyJ-40J4olVVB5BgoW19nYA',
+        4: '1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen',
+        5: '1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ'
+    };
+    
+    // Default folder ID for semesters 6-8 (uses semester 5 folder as fallback)
+    const DEFAULT_FOLDER_ID = SEMESTER_FOLDER_IDS[5];
+    
+    // Helper function to get folder ID for a semester
+    function getSemesterFolderId(semester) {
+        return SEMESTER_FOLDER_IDS[semester] || DEFAULT_FOLDER_ID;
+    }
 
     const NotesManager = {
         currentFilters: {
@@ -226,16 +242,21 @@
         },
 
         loadDummyData() {
-            // Sample data for demonstration including Google Drive resources
-            // Resources from Google Drive folder: https://drive.google.com/drive/folders/1rZ3bB5Ozjtfv0RyxlqPw33pDS8LmiPs7
+            // Academic Subject Data organized by semester (1-6)
+            // Each subject has: subject code, full name, and direct Google Drive link
+            // NOTE: Some subjects share Google Drive folders as per the source dataset:
+            // - DLD (Sem 3) and COA (Sem 4) share the same folder
+            // - IES (Sem 3) and IDM (Sem 4) share the same folder
+            // - IM (Introduction to Microeconomics) appears in both Sem 3 and Sem 4 with the same folder
             this.allNotes = [
                 // ===============================
-                // SEMESTER 1 - Google Drive Resources
+                // SEMESTER 1 - Subject Notes
                 // ===============================
                 {
                     id: 101,
-                    title: 'Mathematics-I Complete Notes',
-                    subject: 'Mathematics-I',
+                    title: 'Universal Physics and Mechanics',
+                    subjectCode: 'UPM',
+                    subject: 'Universal Physics and Mechanics',
                     branch: 'CSE',
                     semester: 1,
                     type: 'notes',
@@ -245,13 +266,15 @@
                     uploaded_at: '2025-01-15',
                     downloads: 245,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_math1_notes',
-                    drivePath: 'Semester 1/Mathematics-I/'
+                    driveLink: 'https://drive.google.com/drive/folders/1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co',
+                    driveFolderId: '1EI_Pr2QIAENS4t4lqdJpRqTYjMejy0co',
+                    drivePath: 'Semester 1/UPM/'
                 },
                 {
                     id: 102,
-                    title: 'Physics-I Lecture Notes',
-                    subject: 'Physics-I',
+                    title: 'Calculus A',
+                    subjectCode: 'CALCULUS A',
+                    subject: 'Calculus A',
                     branch: 'CSE',
                     semester: 1,
                     type: 'notes',
@@ -261,13 +284,15 @@
                     uploaded_at: '2025-01-10',
                     downloads: 189,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_physics1_notes',
-                    drivePath: 'Semester 1/Physics-I/'
+                    driveLink: 'https://drive.google.com/drive/folders/1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j',
+                    driveFolderId: '1qHImcccEFqyRmDV6yBv1oBnMvdo2w07j',
+                    drivePath: 'Semester 1/Calculus A/'
                 },
                 {
                     id: 103,
-                    title: 'Chemistry Lab Manual',
-                    subject: 'Chemistry',
+                    title: 'Universal Human Values',
+                    subjectCode: 'UHV',
+                    subject: 'Universal Human Values',
                     branch: 'CSE',
                     semester: 1,
                     type: 'notes',
@@ -277,13 +302,15 @@
                     uploaded_at: '2025-01-08',
                     downloads: 156,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_chem_lab',
-                    drivePath: 'Semester 1/Chemistry/'
+                    driveLink: 'https://drive.google.com/drive/folders/1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX',
+                    driveFolderId: '1w12sn8Q3MZq4SZ-L-2BAiOyI8pfCbHtX',
+                    drivePath: 'Semester 1/UHV/'
                 },
                 {
                     id: 104,
-                    title: 'Basic Electrical Engineering Notes',
-                    subject: 'Basic Electrical',
+                    title: 'Introduction to Computer Programming',
+                    subjectCode: 'ICP',
+                    subject: 'Introduction to Computer Programming',
                     branch: 'CSE',
                     semester: 1,
                     type: 'notes',
@@ -291,19 +318,39 @@
                     file_size: '2.1 MB',
                     uploaded_by: 'Google Drive',
                     uploaded_at: '2025-01-05',
-                    downloads: 134,
+                    downloads: 312,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_bee_notes',
-                    drivePath: 'Semester 1/Basic Electrical/'
+                    driveLink: 'https://drive.google.com/drive/folders/1qDS9s575O8EWHluJklhjwggXTQIjFn6a',
+                    driveFolderId: '1qDS9s575O8EWHluJklhjwggXTQIjFn6a',
+                    drivePath: 'Semester 1/ICP/'
+                },
+                {
+                    id: 105,
+                    title: 'Discrete Mathematics',
+                    subjectCode: 'DM',
+                    subject: 'Discrete Mathematics',
+                    branch: 'CSE',
+                    semester: 1,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.4 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-01-12',
+                    downloads: 278,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q',
+                    driveFolderId: '1Ydwgzm-bzsTTMGY8uFfUkUNSUvoOil6q',
+                    drivePath: 'Semester 1/DM/'
                 },
 
                 // ===============================
-                // SEMESTER 2 - Google Drive Resources
+                // SEMESTER 2 - Subject Notes
                 // ===============================
                 {
-                    id: 105,
-                    title: 'Mathematics-II Complete Notes',
-                    subject: 'Mathematics-II',
+                    id: 201,
+                    title: 'Universal Physics Electrics and Mechanics',
+                    subjectCode: 'UPEM',
+                    subject: 'Universal Physics Electrics and Mechanics',
                     branch: 'CSE',
                     semester: 2,
                     type: 'notes',
@@ -313,13 +360,15 @@
                     uploaded_at: '2025-01-20',
                     downloads: 267,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_math2_notes',
-                    drivePath: 'Semester 2/Mathematics-II/'
+                    driveLink: 'https://drive.google.com/drive/folders/1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1',
+                    driveFolderId: '1vWTmv1IFnxzP2iJXpfpyduIYBLU2mkz1',
+                    drivePath: 'Semester 2/UPEM/'
                 },
                 {
-                    id: 106,
-                    title: 'Physics-II Lecture Notes',
-                    subject: 'Physics-II',
+                    id: 202,
+                    title: 'Calculus B',
+                    subjectCode: 'CALCULUS B',
+                    subject: 'Calculus B',
                     branch: 'CSE',
                     semester: 2,
                     type: 'notes',
@@ -329,456 +378,550 @@
                     uploaded_at: '2025-01-18',
                     downloads: 198,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_physics2_notes',
-                    drivePath: 'Semester 2/Physics-II/'
+                    driveLink: 'https://drive.google.com/drive/folders/1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc',
+                    driveFolderId: '1wrg-ZXp36GBcFNBL5Zm7xbje7a2ET0Hc',
+                    drivePath: 'Semester 2/Calculus B/'
                 },
                 {
-                    id: 107,
-                    title: 'Programming in C Notes',
-                    subject: 'Programming',
+                    id: 203,
+                    title: 'Introduction to Technical Writing',
+                    subjectCode: 'ITW',
+                    subject: 'Introduction to Technical Writing',
                     branch: 'CSE',
                     semester: 2,
                     type: 'notes',
                     file_type: 'PDF',
-                    file_size: '2.4 MB',
+                    file_size: '1.8 MB',
                     uploaded_by: 'Google Drive',
                     uploaded_at: '2025-01-15',
-                    downloads: 312,
+                    downloads: 145,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_c_programming',
-                    drivePath: 'Semester 2/Programming/'
+                    driveLink: 'https://drive.google.com/drive/folders/13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc',
+                    driveFolderId: '13XNoaqgL8VK6qRnHgdfJfjLUqaoHMKmc',
+                    drivePath: 'Semester 2/ITW/'
+                },
+                {
+                    id: 204,
+                    title: 'Data Structures and Algorithms',
+                    subjectCode: 'DSA',
+                    subject: 'Data Structures and Algorithms',
+                    branch: 'CSE',
+                    semester: 2,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '4.2 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-01-22',
+                    downloads: 534,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD',
+                    driveFolderId: '1FBRMN47L049gPx2C4MVkBXRwUeDjgCUD',
+                    drivePath: 'Semester 2/DSA/'
+                },
+                {
+                    id: 205,
+                    title: 'Introduction to Graph Theory',
+                    subjectCode: 'IGT',
+                    subject: 'Introduction to Graph Theory',
+                    branch: 'CSE',
+                    semester: 2,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.3 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-01-25',
+                    downloads: 223,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc',
+                    driveFolderId: '1737Jx4RIWRUGgLKJQgl4Jj4ocXJCb7fc',
+                    drivePath: 'Semester 2/IGT/'
                 },
 
                 // ===============================
-                // SEMESTER 3 - Google Drive Resources
+                // SEMESTER 3 - Subject Notes
                 // ===============================
                 {
-                    id: 1,
-                    title: 'Data Structures Complete Notes',
-                    subject: 'Data Structures',
+                    id: 301,
+                    title: 'Field Programmable Gate Array',
+                    subjectCode: 'FPGA',
+                    subject: 'Field Programmable Gate Array',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.1 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-01',
+                    downloads: 189,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF',
+                    driveFolderId: '1f2D9jn0kn8mT2GZyD5nWdEaJOwXXi9tF',
+                    drivePath: 'Semester 3/FPGA/'
+                },
+                {
+                    id: 302,
+                    title: 'Computer Science Workshop - I',
+                    subjectCode: 'CSW',
+                    subject: 'Computer Science Workshop - I',
                     branch: 'CSE',
                     semester: 3,
                     type: 'notes',
                     file_type: 'PDF',
                     file_size: '2.5 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-01',
-                    downloads: 445,
+                    uploaded_at: '2025-02-03',
+                    downloads: 312,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ds_notes',
-                    drivePath: 'Semester 3/Data Structures/'
+                    driveLink: 'https://drive.google.com/drive/folders/11y8iBePAW1ailt6rxHpulm5ctrFpFjB2',
+                    driveFolderId: '11y8iBePAW1ailt6rxHpulm5ctrFpFjB2',
+                    drivePath: 'Semester 3/CSW/'
                 },
                 {
-                    id: 108,
-                    title: 'Discrete Mathematics Notes',
-                    subject: 'Discrete Mathematics',
+                    id: 303,
+                    title: 'Probability and Statistics',
+                    subjectCode: 'PS',
+                    subject: 'Probability and Statistics',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.8 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-05',
+                    downloads: 267,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa',
+                    driveFolderId: '12N_tI3O0Ul0J7Wqd9ZUzW3dAzwdbhZJa',
+                    drivePath: 'Semester 3/PS/'
+                },
+                {
+                    id: 304,
+                    title: 'Digital Logic and Design',
+                    subjectCode: 'DLD',
+                    subject: 'Digital Logic and Design',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.4 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-07',
+                    downloads: 345,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    driveFolderId: '1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    drivePath: 'Semester 3/DLD/'
+                },
+                {
+                    id: 305,
+                    title: 'Introduction to Environmental Science',
+                    subjectCode: 'IES',
+                    subject: 'Introduction to Environmental Science',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '1.9 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-08',
+                    downloads: 156,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    driveFolderId: '1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    drivePath: 'Semester 3/IES/'
+                },
+                {
+                    id: 306,
+                    title: 'Algorithms and Design - I',
+                    subjectCode: 'AD 1',
+                    subject: 'Algorithms and Design - I',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.8 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-10',
+                    downloads: 423,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW',
+                    driveFolderId: '1cmt1FArJDZ5e0jGJvWN2qxhQ-hpCdKZW',
+                    drivePath: 'Semester 3/AD1/'
+                },
+                {
+                    id: 307,
+                    title: 'Introduction to Microeconomics',
+                    subjectCode: 'IM',
+                    subject: 'Introduction to Microeconomics',
                     branch: 'CSE',
                     semester: 3,
                     type: 'notes',
                     file_type: 'PDF',
                     file_size: '2.2 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-28',
-                    downloads: 287,
+                    uploaded_at: '2025-02-12',
+                    downloads: 178,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_dm_notes',
-                    drivePath: 'Semester 3/Discrete Mathematics/'
+                    driveLink: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    driveFolderId: '1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    drivePath: 'Semester 3/IM/'
                 },
                 {
-                    id: 5,
-                    title: 'Digital Electronics Notes',
-                    subject: 'Digital Electronics',
-                    branch: 'ECE',
+                    id: 308,
+                    title: 'Introduction to Artificial Intelligence',
+                    subjectCode: 'AI',
+                    subject: 'Introduction to Artificial Intelligence',
+                    branch: 'CSE',
                     semester: 3,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '3.1 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-22',
-                    downloads: 212,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_de_notes',
-                    drivePath: 'Semester 3/Digital Electronics/'
-                },
-
-                // ===============================
-                // SEMESTER 4 - Google Drive Resources
-                // ===============================
-                {
-                    id: 109,
-                    title: 'DBMS Complete Notes',
-                    subject: 'Database Management',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '3.8 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-05',
-                    downloads: 523,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_notes',
-                    drivePath: 'Semester 4/DBMS/'
-                },
-                {
-                    id: 110,
-                    title: 'Operating Systems Notes',
-                    subject: 'Operating Systems',
-                    branch: 'CSE',
-                    semester: 4,
                     type: 'notes',
                     file_type: 'PDF',
                     file_size: '4.1 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-08',
-                    downloads: 478,
+                    uploaded_at: '2025-02-14',
+                    downloads: 567,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_os_notes',
-                    drivePath: 'Semester 4/Operating Systems/'
+                    driveLink: 'https://drive.google.com/drive/folders/1kuvQDq39YI6DG_hmejcs4whOhplYD7yw',
+                    driveFolderId: '1kuvQDq39YI6DG_hmejcs4whOhplYD7yw',
+                    drivePath: 'Semester 3/AI/'
                 },
                 {
-                    id: 111,
-                    title: 'Algorithms Design Notes',
-                    subject: 'Algorithms',
+                    id: 309,
+                    title: 'Machine Learning Workshop - I',
+                    subjectCode: 'MLW',
+                    subject: 'Machine Learning Workshop - I',
+                    branch: 'CSE',
+                    semester: 3,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.5 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-16',
+                    downloads: 489,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64',
+                    driveFolderId: '1fSvQ67HCm28t6LN7cZ9Lb8-nKd2d5J64',
+                    drivePath: 'Semester 3/MLW/'
+                },
+
+                // ===============================
+                // SEMESTER 4 - Subject Notes
+                // ===============================
+                {
+                    id: 401,
+                    title: 'Computer Science Workshop - II',
+                    subjectCode: 'CSW-II',
+                    subject: 'Computer Science Workshop - II',
+                    branch: 'CSE',
+                    semester: 4,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.7 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-18',
+                    downloads: 334,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS',
+                    driveFolderId: '1Q4ssemkq7RWy4mgZtxm0roydqdVD9tjS',
+                    drivePath: 'Semester 4/CSW-II/'
+                },
+                {
+                    id: 402,
+                    title: 'Applied Linear Algebra',
+                    subjectCode: 'ALA',
+                    subject: 'Applied Linear Algebra',
                     branch: 'CSE',
                     semester: 4,
                     type: 'notes',
                     file_type: 'PDF',
                     file_size: '3.2 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-10',
-                    downloads: 398,
+                    uploaded_at: '2025-02-20',
+                    downloads: 289,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_algo_notes',
-                    drivePath: 'Semester 4/Algorithms/'
+                    driveLink: 'https://drive.google.com/drive/folders/1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm',
+                    driveFolderId: '1S4fMwpVETQ_3hjIfh47pl4LSicZprFAm',
+                    drivePath: 'Semester 4/ALA/'
+                },
+                {
+                    id: 403,
+                    title: 'Computer Organisation and Architecture',
+                    subjectCode: 'COA',
+                    subject: 'Computer Organisation and Architecture',
+                    branch: 'CSE',
+                    semester: 4,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.9 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-22',
+                    downloads: 456,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    driveFolderId: '1UYnyiLal-bwoe28iw6RHyZCmEa9fRi4x',
+                    drivePath: 'Semester 4/COA/'
+                },
+                {
+                    id: 404,
+                    title: 'Introduction to Disaster Management',
+                    subjectCode: 'IDM',
+                    subject: 'Introduction to Disaster Management',
+                    branch: 'CSE',
+                    semester: 4,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.1 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-24',
+                    downloads: 167,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    driveFolderId: '1-7yeL6GxA8DZsdEh0sh-JlLVQxKdPvfr',
+                    drivePath: 'Semester 4/IDM/'
+                },
+                {
+                    id: 405,
+                    title: 'Algorithms and Design - II',
+                    subjectCode: 'AD 2',
+                    subject: 'Algorithms and Design - II',
+                    branch: 'CSE',
+                    semester: 4,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '4.0 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-26',
+                    downloads: 512,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6',
+                    driveFolderId: '1KcT-lVag-kV5OpZA_dxT4JTRcPaIxDn6',
+                    drivePath: 'Semester 4/AD2/'
+                },
+                {
+                    id: 406,
+                    title: 'Introduction to Microeconomics',
+                    subjectCode: 'IM',
+                    subject: 'Introduction to Microeconomics',
+                    branch: 'CSE',
+                    semester: 4,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.3 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-02-28',
+                    downloads: 198,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    driveFolderId: '1ZY5rPHL44JrilDc-XZZ43F7_NqaWMroPc',
+                    drivePath: 'Semester 4/IM/'
                 },
 
                 // ===============================
-                // SEMESTER 5 - Google Drive Resources
+                // SEMESTER 5 - Subject Notes
                 // ===============================
                 {
-                    id: 4,
-                    title: 'Computer Networks Notes',
-                    subject: 'Computer Networks',
+                    id: 501,
+                    title: 'Practical Programming with C',
+                    subjectCode: 'C',
+                    subject: 'Practical Programming with C',
                     branch: 'CSE',
                     semester: 5,
                     type: 'notes',
                     file_type: 'PDF',
-                    file_size: '3.5 MB',
+                    file_size: '3.1 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-15',
-                    downloads: 534,
+                    uploaded_at: '2025-03-01',
+                    downloads: 423,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_cn_notes',
-                    drivePath: 'Semester 5/Computer Networks/'
+                    driveLink: 'https://drive.google.com/drive/folders/10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT',
+                    driveFolderId: '10Rz8FR5mP1o9HH-MdmZnSJsed_7ZvnCT',
+                    drivePath: 'Semester 5/C/'
                 },
                 {
-                    id: 112,
-                    title: 'Software Engineering Notes',
-                    subject: 'Software Engineering',
+                    id: 502,
+                    title: 'Design of Operating System',
+                    subjectCode: 'OS',
+                    subject: 'Design of Operating System',
                     branch: 'CSE',
                     semester: 5,
                     type: 'notes',
                     file_type: 'PDF',
-                    file_size: '2.8 MB',
+                    file_size: '4.5 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-12',
+                    uploaded_at: '2025-03-03',
+                    downloads: 567,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW',
+                    driveFolderId: '1TANZsdRdsNAXTqJvjTI2gFY6h6kbbmtW',
+                    drivePath: 'Semester 5/OS/'
+                },
+                {
+                    id: 503,
+                    title: 'Computer Networking: Concepts',
+                    subjectCode: 'Networking',
+                    subject: 'Computer Networking: Concepts',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.8 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-05',
+                    downloads: 489,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb',
+                    driveFolderId: '1ffp0UK0i4G8pD1mKjPIC6EOufPs2GQHb',
+                    drivePath: 'Semester 5/Networking/'
+                },
+                {
+                    id: 504,
+                    title: 'Python Programming',
+                    subjectCode: 'Python',
+                    subject: 'Python Programming',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.2 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-07',
+                    downloads: 612,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA',
+                    driveFolderId: '1x81F5_NGrNutR7u8NTW4kKg7UftAL5GA',
+                    drivePath: 'Semester 5/Python/'
+                },
+                {
+                    id: 505,
+                    title: 'Introduction to Theory of Computation',
+                    subjectCode: 'Theory Computation',
+                    subject: 'Introduction to Theory of Computation',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '2.9 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-09',
                     downloads: 345,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_se_notes',
-                    drivePath: 'Semester 5/Software Engineering/'
+                    driveLink: 'https://drive.google.com/drive/folders/14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY',
+                    driveFolderId: '14Vd4nADRgnRLJU_DrpYIuq3rETIGj3YY',
+                    drivePath: 'Semester 5/Theory Computation/'
+                },
+                {
+                    id: 506,
+                    title: 'Foundation of Machine Learning',
+                    subjectCode: 'Machine Learning',
+                    subject: 'Foundation of Machine Learning',
+                    branch: 'CSE',
+                    semester: 5,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '4.2 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-11',
+                    downloads: 534,
+                    isGoogleDrive: true,
+                    driveLink: null,
+                    driveFolderId: null,
+                    drivePath: 'Semester 5/Machine Learning/',
+                    noLinkAvailable: true
                 },
 
                 // ===============================
-                // SEMESTER 6 - Google Drive Resources
+                // SEMESTER 6 - Subject Notes
                 // ===============================
                 {
-                    id: 113,
-                    title: 'Machine Learning Notes',
-                    subject: 'Machine Learning',
+                    id: 601,
+                    title: 'Game Programming with C++',
+                    subjectCode: 'C++',
+                    subject: 'Game Programming with C++',
+                    branch: 'CSE',
+                    semester: 6,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.6 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-13',
+                    downloads: 278,
+                    isGoogleDrive: true,
+                    driveLink: null,
+                    driveFolderId: null,
+                    drivePath: 'Semester 6/C++/',
+                    noLinkAvailable: true
+                },
+                {
+                    id: 602,
+                    title: 'Introduction to Databases',
+                    subjectCode: 'Databases',
+                    subject: 'Introduction to Databases',
+                    branch: 'CSE',
+                    semester: 6,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '4.1 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-15',
+                    downloads: 456,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF',
+                    driveFolderId: '13uZPTMbGcSqpIRCabrusaQ07ECwR-zrF',
+                    drivePath: 'Semester 6/Databases/'
+                },
+                {
+                    id: 603,
+                    title: 'Computer Networking: Security',
+                    subjectCode: 'Security',
+                    subject: 'Computer Networking: Security',
+                    branch: 'CSE',
+                    semester: 6,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '3.4 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-17',
+                    downloads: 389,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff',
+                    driveFolderId: '1h54x1_TMzOGv9vC9B8eF0GbPLi-Umkff',
+                    drivePath: 'Semester 6/Security/'
+                },
+                {
+                    id: 604,
+                    title: 'Compiler Principles, Techniques and Tools',
+                    subjectCode: 'Compilers',
+                    subject: 'Compiler Principles, Techniques and Tools',
+                    branch: 'CSE',
+                    semester: 6,
+                    type: 'notes',
+                    file_type: 'PDF',
+                    file_size: '4.8 MB',
+                    uploaded_by: 'Google Drive',
+                    uploaded_at: '2025-03-19',
+                    downloads: 312,
+                    isGoogleDrive: true,
+                    driveLink: 'https://drive.google.com/drive/folders/1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX',
+                    driveFolderId: '1R9ljdlD8LZNLqsOWcsaZaBlTncTeAmnX',
+                    drivePath: 'Semester 6/Compilers/'
+                },
+                {
+                    id: 605,
+                    title: 'Fundamentals of Machine Learning',
+                    subjectCode: 'Machine Learning',
+                    subject: 'Fundamentals of Machine Learning',
                     branch: 'CSE',
                     semester: 6,
                     type: 'notes',
                     file_type: 'PDF',
                     file_size: '4.5 MB',
                     uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-20',
-                    downloads: 612,
+                    uploaded_at: '2025-03-21',
+                    downloads: 467,
                     isGoogleDrive: true,
-                    driveFileId: 'drive_ml_notes',
-                    drivePath: 'Semester 6/Machine Learning/'
-                },
-                {
-                    id: 114,
-                    title: 'Compiler Design Notes',
-                    subject: 'Compiler Design',
-                    branch: 'CSE',
-                    semester: 6,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '3.1 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-18',
-                    downloads: 289,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_cd_notes',
-                    drivePath: 'Semester 6/Compiler Design/'
-                },
-
-                // ===============================
-                // SEMESTER 7 - Google Drive Resources
-                // ===============================
-                {
-                    id: 115,
-                    title: 'Artificial Intelligence Notes',
-                    subject: 'Artificial Intelligence',
-                    branch: 'CSE',
-                    semester: 7,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '3.8 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-25',
-                    downloads: 456,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_ai_notes',
-                    drivePath: 'Semester 7/AI/'
-                },
-                {
-                    id: 116,
-                    title: 'Cloud Computing Notes',
-                    subject: 'Cloud Computing',
-                    branch: 'CSE',
-                    semester: 7,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '2.9 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-22',
-                    downloads: 378,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_cloud_notes',
-                    drivePath: 'Semester 7/Cloud Computing/'
-                },
-
-                // ===============================
-                // SEMESTER 8 - Google Drive Resources
-                // ===============================
-                {
-                    id: 117,
-                    title: 'Big Data Analytics Notes',
-                    subject: 'Big Data',
-                    branch: 'CSE',
-                    semester: 8,
-                    type: 'notes',
-                    file_type: 'PDF',
-                    file_size: '3.4 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-03-01',
-                    downloads: 234,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_bigdata_notes',
-                    drivePath: 'Semester 8/Big Data/'
-                },
-
-                // ===============================
-                // PYQ PAPERS - Google Drive Resources
-                // ===============================
-                {
-                    id: 6,
-                    title: 'Data Structures PYQ 2024',
-                    subject: 'Data Structures',
-                    branch: 'CSE',
-                    semester: 3,
-                    type: 'pyqs',
-                    examType: 'endterm',
-                    hasSolution: true,
-                    file_type: 'PDF',
-                    file_size: '1.2 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-25',
-                    downloads: 1856,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_ds_pyq',
-                    drivePath: 'PYQ Papers/Data Structures/'
-                },
-                {
-                    id: 2,
-                    title: 'DBMS PYQ 2024',
-                    subject: 'Database Management',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'pyqs',
-                    examType: 'endterm',
-                    hasSolution: false,
-                    file_type: 'PDF',
-                    file_size: '1.8 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-30',
-                    downloads: 1289,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_pyq',
-                    drivePath: 'PYQ Papers/DBMS/'
-                },
-                {
-                    id: 8,
-                    title: 'Computer Networks PYQ 2024',
-                    subject: 'Computer Networks',
-                    branch: 'CSE',
-                    semester: 5,
-                    type: 'pyqs',
-                    examType: 'endterm',
-                    hasSolution: true,
-                    file_type: 'PDF',
-                    file_size: '1.5 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-01',
-                    downloads: 1743,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_cn_pyq',
-                    drivePath: 'PYQ Papers/Computer Networks/'
-                },
-                {
-                    id: 9,
-                    title: 'Machine Learning PYQ 2024',
-                    subject: 'Machine Learning',
-                    branch: 'CSE',
-                    semester: 6,
-                    type: 'pyqs',
-                    examType: 'endterm',
-                    hasSolution: true,
-                    file_type: 'PDF',
-                    file_size: '0.9 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-05',
-                    downloads: 2434,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_ml_pyq',
-                    drivePath: 'PYQ Papers/Machine Learning/'
-                },
-                {
-                    id: 7,
-                    title: 'Algorithms Mid-Term 2024',
-                    subject: 'Algorithms',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'pyqs',
-                    examType: 'midterm',
-                    hasSolution: false,
-                    file_type: 'PDF',
-                    file_size: '0.9 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-08',
-                    downloads: 1067,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_algo_pyq',
-                    drivePath: 'PYQ Papers/Algorithms/'
-                },
-                {
-                    id: 10,
-                    title: 'Operating Systems Quiz 2024',
-                    subject: 'Operating Systems',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'pyqs',
-                    examType: 'quiz',
-                    hasSolution: false,
-                    file_type: 'PDF',
-                    file_size: '0.4 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-02-10',
-                    downloads: 845,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_os_quiz',
-                    drivePath: 'PYQ Papers/Operating Systems/'
-                },
-
-                // ===============================
-                // LAB MANUALS - Google Drive Resources
-                // ===============================
-                {
-                    id: 118,
-                    title: 'Data Structures Lab Manual',
-                    subject: 'Data Structures',
-                    branch: 'CSE',
-                    semester: 3,
-                    type: 'assignments',
-                    file_type: 'PDF',
-                    file_size: '1.8 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-20',
-                    downloads: 567,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_ds_lab',
-                    drivePath: 'Lab Manuals/Data Structures/'
-                },
-                {
-                    id: 119,
-                    title: 'DBMS Lab Manual',
-                    subject: 'Database Management',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'assignments',
-                    file_type: 'PDF',
-                    file_size: '2.1 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-22',
-                    downloads: 489,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_lab',
-                    drivePath: 'Lab Manuals/DBMS/'
-                },
-                {
-                    id: 3,
-                    title: 'Operating Systems Lab Manual',
-                    subject: 'Operating Systems',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'assignments',
-                    file_type: 'PDF',
-                    file_size: '1.5 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-25',
-                    downloads: 423,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_os_lab',
-                    drivePath: 'Lab Manuals/Operating Systems/'
-                },
-
-                // ===============================
-                // REFERENCE BOOKS - Google Drive Resources
-                // ===============================
-                {
-                    id: 120,
-                    title: 'Introduction to Algorithms - CLRS',
-                    subject: 'Algorithms',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'books',
-                    file_type: 'PDF',
-                    file_size: '15.2 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-01',
-                    downloads: 1234,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_clrs_book',
-                    drivePath: 'Reference Books/Algorithms/'
-                },
-                {
-                    id: 121,
-                    title: 'Database System Concepts - Silberschatz',
-                    subject: 'Database Management',
-                    branch: 'CSE',
-                    semester: 4,
-                    type: 'books',
-                    file_type: 'PDF',
-                    file_size: '12.8 MB',
-                    uploaded_by: 'Google Drive',
-                    uploaded_at: '2025-01-01',
-                    downloads: 987,
-                    isGoogleDrive: true,
-                    driveFileId: 'drive_dbms_book',
-                    drivePath: 'Reference Books/DBMS/'
+                    driveLink: null,
+                    driveFolderId: null,
+                    drivePath: 'Semester 6/Machine Learning/',
+                    noLinkAvailable: true
                 }
             ];
             this.filteredNotes = [...this.allNotes];
@@ -954,6 +1097,16 @@
                 ? '<span class="drive-badge">📁 Drive</span>' 
                 : '';
 
+            // No link available badge
+            const noLinkBadge = note.noLinkAvailable 
+                ? '<span class="no-link-badge">⚠️ Coming Soon</span>' 
+                : '';
+
+            // Subject code badge
+            const subjectCodeBadge = note.subjectCode 
+                ? `<span class="subject-code-badge">${note.subjectCode}</span>` 
+                : '';
+
             // Exam type info for PYQs
             const examTypeInfo = (note.type === 'pyqs' && note.examType) 
                 ? `<span class="resource-meta-item"><span>📝</span> ${examTypeLabels[note.examType] || note.examType}</span>` 
@@ -964,29 +1117,38 @@
                 ? `<span class="resource-meta-item drive-path"><span>📂</span> ${note.drivePath}</span>`
                 : '';
 
-            // Action buttons - different for Google Drive files
-            const actionButtons = note.isGoogleDrive
-                ? `<button class="btn btn-primary" onclick="NotesManager.openInDrive(${note.id})">
+            // Action buttons - different for Google Drive files and unavailable links
+            let actionButtons;
+            if (note.noLinkAvailable) {
+                actionButtons = `<button class="btn btn-secondary" disabled>
+                       ⏳ Link Coming Soon
+                   </button>`;
+            } else if (note.isGoogleDrive) {
+                actionButtons = `<button class="btn btn-primary" onclick="NotesManager.openInDrive(${note.id})">
                        🔗 Open in Drive
                    </button>
-                   <button class="btn btn-secondary" onclick="NotesManager.openDriveFolder()">
-                       📂 Browse Folder
-                   </button>`
-                : `<button class="btn btn-primary" onclick="NotesManager.downloadNote(${note.id})">
+                   <button class="btn btn-secondary" onclick="NotesManager.openDriveFolder(${note.semester})">
+                       📂 Browse Semester ${note.semester}
+                   </button>`;
+            } else {
+                actionButtons = `<button class="btn btn-primary" onclick="NotesManager.downloadNote(${note.id})">
                        📥 Download
                    </button>
                    <button class="btn btn-secondary" onclick="NotesManager.viewNote(${note.id})">
                        👁️ View
                    </button>`;
+            }
 
             return `
-                <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''}" data-id="${note.id}" ${note.isGoogleDrive ? `onclick="NotesManager.openInDrive(${note.id})"` : ''}>
+                <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''} ${note.noLinkAvailable ? 'no-link' : ''}" data-id="${note.id}" ${note.isGoogleDrive && !note.noLinkAvailable ? `onclick="NotesManager.openInDrive(${note.id})"` : ''}>
                     <div class="resource-header">
                         <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
                         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            ${subjectCodeBadge}
                             <div class="resource-badge">${typeLabels[note.type] || 'Resource'}</div>
                             ${driveBadge}
                             ${solutionBadge}
+                            ${noLinkBadge}
                         </div>
                     </div>
                     <h4 class="resource-title">${note.title}</h4>
@@ -1013,33 +1175,58 @@
             `;
         },
 
-        // Open file directly in Google Drive
+        // Open file directly in Google Drive using subject-specific folder
         openInDrive(noteId) {
             const note = this.allNotes.find(n => n.id === noteId);
             if (!note || !note.isGoogleDrive) return;
+
+            // Check if note has no link available
+            if (note.noLinkAvailable || !note.driveLink) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.warning(`No Google Drive link available for "${note.title}"`);
+                }
+                return;
+            }
 
             // Show toast notification
             if (typeof Toast !== 'undefined') {
                 Toast.info(`Opening "${note.title}" in Google Drive...`);
             }
 
-            // Construct Google Drive URL - search for the file in the folder
-            const encodedName = encodeURIComponent(note.title);
-            const fileUrl = `${DRIVE_FOLDER_URL}${DRIVE_FOLDER_ID}?q=${encodedName}`;
-
-            // Open in new tab
-            window.open(fileUrl, '_blank');
+            // Use the note's direct drive link
+            window.open(note.driveLink, '_blank');
 
             // Add to recent downloads
             this.addToRecentDownloads(note);
         },
 
-        // Open the main Google Drive folder
-        openDriveFolder() {
-            const folderUrl = `${DRIVE_FOLDER_URL}${DRIVE_FOLDER_ID}`;
+        // Open semester-specific Google Drive folder (based on current filter)
+        openDriveFolder(semester = null) {
+            // Get semester from filter if not provided
+            if (!semester) {
+                const semesterSelect = document.getElementById('semesterFilter');
+                semester = semesterSelect ? parseInt(semesterSelect.value) : null;
+            }
+            
+            // Get the appropriate folder ID
+            const folderId = semester ? getSemesterFolderId(semester) : DEFAULT_FOLDER_ID;
+            const folderUrl = `${DRIVE_FOLDER_URL}${folderId}`;
+            
+            const semesterText = semester ? `Semester ${semester}` : 'default (Semester 5)';
+            if (typeof Toast !== 'undefined') {
+                Toast.info(`Opening ${semesterText} Google Drive folder...`);
+            }
+            
+            window.open(folderUrl, '_blank');
+        },
+
+        // Open a specific semester folder directly
+        openSemesterFolder(semester) {
+            const folderId = getSemesterFolderId(semester);
+            const folderUrl = `${DRIVE_FOLDER_URL}${folderId}`;
             
             if (typeof Toast !== 'undefined') {
-                Toast.info('Opening Google Drive folder...');
+                Toast.info(`Opening Semester ${semester} folder in Google Drive...`);
             }
             
             window.open(folderUrl, '_blank');
