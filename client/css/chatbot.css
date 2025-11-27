@@ -6,12 +6,12 @@
 /* Chatbot Container */
 .chatbot-container {
     position: fixed;
-    bottom: 100px;
-    right: 30px;
+    bottom: 170px;
+    right: 24px;
     width: 380px;
     max-width: calc(100vw - 40px);
     height: 500px;
-    max-height: calc(100vh - 150px);
+    max-height: calc(100vh - 200px);
     background: var(--glass-bg, rgba(255, 255, 255, 0.95));
     backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
@@ -35,8 +35,8 @@
 /* Chatbot Toggle Button */
 .chatbot-toggle {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 100px;
+    right: 24px;
     width: 60px;
     height: 60px;
     background: linear-gradient(135deg, var(--primary, #6366f1), var(--primary-dark, #4f46e5));
@@ -335,15 +335,15 @@
     .chatbot-container {
         width: calc(100vw - 20px);
         right: 10px;
-        bottom: 80px;
-        height: calc(100vh - 100px);
-        max-height: calc(100vh - 100px);
+        bottom: 150px;
+        height: calc(100vh - 180px);
+        max-height: calc(100vh - 180px);
         border-radius: 16px;
     }
 
     .chatbot-toggle {
-        right: 15px;
-        bottom: 15px;
+        right: 12px;
+        bottom: 80px;
         width: 55px;
         height: 55px;
     }
