@@ -31,9 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
     
-    // Replace this with your actual website URL
-    private static final String WEBSITE_URL = "https://your-domain.com";
-    // For local testing: private static final String WEBSITE_URL = "http://10.0.2.2:5000";
+    // Production website URL
+    private static final String WEBSITE_URL = "https://iter-college-management.vercel.app";
+    // Alternative custom domain: https://www.iters.live
+    // For local testing: http://10.0.2.2:5000
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override

@@ -37,8 +37,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="your-domain.com" />
-                <data android:scheme="http" android:host="your-domain.com" />
+                <data android:scheme="https" android:host="iter-college-management.vercel.app" />
+                <data android:scheme="https" android:host="www.iters.live" />
             </intent-filter>
         </activity>
 

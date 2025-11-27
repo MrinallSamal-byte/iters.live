@@ -19,7 +19,7 @@ console.log('🤖 Building Android TWA configuration...\n');
 // TWA Manifest (twa-manifest.json)
 const twaManifest = {
   packageId: "live.iters.app", // Updated package ID
-  host: "iters.live", // Correct domain
+  host: "iter-college-management.vercel.app", // Production domain
   name: "ITER", // Requested app name
   launcherName: "ITER",
   display: "standalone",
