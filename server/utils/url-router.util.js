@@ -27,6 +27,7 @@ const PAGE_CONFIG = {
     'login': '/login.html',
     'register': '/register.html',
     'creator': '/creator.html',
+    'connect-portal': '/connect-portal.html',
     
     // Student Dashboard pages
     'student': '/dashboard/student.html',

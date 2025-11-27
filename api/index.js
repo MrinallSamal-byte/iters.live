@@ -46,6 +46,8 @@ const searchRoutes = require('../server/routes/search.routes');
 const healthRoutes = require('../server/routes/health.routes');
 const bulkRoutes = require('../server/routes/bulk.routes');
 const notesRoutes = require('../server/routes/notes.routes');
+const portalRoutes = require('../server/routes/portal.routes');
+const webRoutes = require('../server/routes/web.routes');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -67,6 +69,8 @@ app.use('/api/search', searchRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/bulk', bulkRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/portal', portalRoutes);
+app.use('/web', webRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

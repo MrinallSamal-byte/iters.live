@@ -222,6 +222,15 @@ app.get('/home', (req, res) => {
   res.redirect(obfuscatedUrl);
 });
 
+// Serve connect-portal page directly (no obfuscation for OAuth redirect)
+app.get('/connect-portal', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+});
+
+app.get('/connect-portal.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+});
+
 // Serve static HTML pages - redirect to obfuscated URLs
 app.get('/about', (req, res) => {
   const obfuscatedUrl = urlRouter.getObfuscatedUrl('about');
@@ -241,6 +250,20 @@ app.get('/academics', (req, res) => {
 app.get('/contact', (req, res) => {
   const obfuscatedUrl = urlRouter.getObfuscatedUrl('contact');
   res.redirect(obfuscatedUrl);
+});
+
+// Serve dashboard pages directly (needed for login redirects)
+app.get('/dashboard/:page', (req, res) => {
+  const page = req.params.page;
+  const filePath = path.join(__dirname, `../client/dashboard/${page}`);
+  res.sendFile(filePath, (err) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({
+        success: false,
+        message: 'Dashboard page not found'
+      });
+    }
+  });
 });
 
 // 404 handler for API routes only
