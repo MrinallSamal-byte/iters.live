@@ -164,6 +164,6 @@ if __name__ == '__main__':
     # Run Flask app
     app.run(
         host='0.0.0.0',
-        port=5001,
-        debug=True
+        port=Config.FLASK_PORT,
+        debug=Config.FLASK_DEBUG
     )

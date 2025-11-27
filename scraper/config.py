@@ -23,6 +23,10 @@ class Config:
     # Browser settings
     HEADLESS_MODE = os.getenv('HEADLESS_MODE', 'True').lower() == 'true'
 
+    # Flask settings
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    FLASK_PORT = int(os.getenv('FLASK_PORT', '5001'))
+
     # Target URL
     PORTAL_URL = 'https://soaportals.com/StudentPortalSOA/#/'
 
