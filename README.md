@@ -144,6 +144,7 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - 🐳 **Docker Ready** - docker-compose for easy deployment
 - 🧪 **Testing** - Jest unit tests and Playwright E2E test skeletons
 - 🚀 **CI/CD** - GitHub Actions workflow for automated builds
+- 🔗 **Portal Scraper** - Python Flask microservice for SOA student portal integration
 
 ---
 
@@ -153,6 +154,8 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - **Node.js** >= 18.0.0
 - **MySQL** >= 8.0
 - **npm** >= 9.0.0
+- **Python** >= 3.9 (for portal scraper, optional)
+- **Chrome** (for Selenium-based scraping, optional)
 
 ### Installation
 
@@ -195,6 +198,41 @@ npm run dev
 
 Server will start at `http://localhost:5000`  
 Frontend served at `http://localhost:3000` (if using serve)
+
+### Portal Scraper Setup (Optional)
+
+The portal scraper is a separate Python Flask microservice that integrates with the SOA student portal. To set it up:
+
+1. **Navigate to scraper directory**
+```bash
+cd scraper
+```
+
+2. **Create virtual environment**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install Python dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+4. **Configure environment**
+```bash
+cp .env.example .env
+# Edit .env with your Google Vision API key (for CAPTCHA solving)
+```
+
+5. **Start the scraper service**
+```bash
+python app.py
+```
+
+The scraper service will run at `http://localhost:5001`
+
+**Note:** The main application works without the scraper - students can use demo data if the scraper is unavailable.
 
 ---
 

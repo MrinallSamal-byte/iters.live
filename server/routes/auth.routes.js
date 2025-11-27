@@ -3,10 +3,17 @@ const router = express.Router();
 const { db, auth } = require('../database/firebase');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
+const axios = require('axios');
+
+// Flask Scraper Service URL
+const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
 
 /**
  * POST /api/auth/google-login
  * Verify Google ID token and create/return session
+ * 
+ * Case A - Existing user with portal connected → Redirect to Dashboard
+ * Case B - New user (never connected portal) → Redirect to /connect-portal
  */
 router.post('/google-login', async (req, res, next) => {
   try {
@@ -21,21 +28,18 @@ router.post('/google-login', async (req, res, next) => {
     const { uid, email, name, picture } = decodedToken;
 
     // Check if user exists in Firestore
-    const userRef = db.collection('users').doc(uid); // Use UID as doc ID for Google users? 
-    // Actually, for consistency with existing dummy data which uses Registration Number, 
-    // we might want to query by email first.
-
     const usersSnapshot = await db.collection('users').where('email', '==', email).limit(1).get();
 
     let user;
     let userId;
+    let isNewUser = false;
+    let needsPortalConnection = false;
 
     if (usersSnapshot.empty) {
-      // New user? For now, let's assume we auto-register them or reject if not allowed.
-      // The prompt says "add google based logins", implying we should allow it.
-      // But we need a registration number. Let's generate a temp one or ask user to complete profile.
-      // For simplicity, we'll create a basic record.
-
+      // Case B: New user - needs portal connection
+      isNewUser = true;
+      needsPortalConnection = true;
+      
       userId = uid; // Use Firebase UID as ID
       const newUser = {
         name: name || 'Google User',
@@ -45,7 +49,11 @@ router.post('/google-login', async (req, res, next) => {
         is_active: true,
         created_at: new Date(),
         last_login: new Date(),
-        registration_number: 'GOOGLE_' + uid.substring(0, 8).toUpperCase()
+        registration_number: 'GOOGLE_' + uid.substring(0, 8).toUpperCase(),
+        // New fields for portal connection
+        portalConnected: false,
+        isVerified: false,
+        profile: null
       };
 
       await db.collection('users').doc(userId).set(newUser);
@@ -56,27 +64,26 @@ router.post('/google-login', async (req, res, next) => {
       user = userDoc.data();
       user.id = userDoc.id;
 
+      // Check if portal is connected
+      // Case A: Existing user with portal connected
+      // Case B: Existing user but never connected portal
+      if (!user.portalConnected) {
+        needsPortalConnection = true;
+      }
+
       // Update last login
       await userDoc.ref.update({ last_login: new Date() });
     }
-
-    // Create a custom session token or just return the user data
-    // Since the frontend uses the ID token for Firebase Auth, we might not need our own JWT 
-    // if we switch fully to Firebase Auth on client. 
-    // BUT, the existing app uses JWTs. To minimize frontend changes, let's issue our own JWT 
-    // OR just return the user and let frontend use Firebase Token.
-    // The user request says "use firebase for all database related queries".
-    // It doesn't explicitly say "replace JWT with Firebase Auth tokens everywhere".
-    // However, "add google based logins" usually implies using Firebase Auth.
-
-    // Let's return the user data. The frontend will likely use the Firebase User object.
 
     res.json({
       success: true,
       message: 'Login successful',
       data: {
         user,
-        token: idToken // Client can use this or the one they already have
+        token: idToken,
+        isNewUser,
+        needsPortalConnection,
+        redirectUrl: needsPortalConnection ? '/connect-portal.html' : null
       }
     });
 
@@ -89,6 +96,9 @@ router.post('/google-login', async (req, res, next) => {
 /**
  * POST /api/auth/login
  * Login with registration_number and password (Legacy/Dummy Accounts)
+ * 
+ * Case C - Direct login with reg+pass automatically triggers portal sync
+ * User never sees /connect-portal unless using Google OAuth first time
  */
 router.post('/login', [
   body('registration_number').trim().notEmpty().withMessage('Registration number is required'),
@@ -100,7 +110,7 @@ router.post('/login', [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { registration_number, password } = req.body;
+    const { registration_number, password, skipPortalSync } = req.body;
 
     // Get user from Firestore
     const userDoc = await db.collection('users').doc(registration_number).get();
@@ -112,8 +122,6 @@ router.post('/login', [
     const user = userDoc.data();
 
     // Verify password (using bcrypt as these are dummy accounts seeded with hashed passwords)
-    // Note: In a real Firebase app, we wouldn't handle passwords manually like this, 
-    // but we need to support the dummy data.
     const bcrypt = require('bcrypt');
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
@@ -128,24 +136,77 @@ router.post('/login', [
     // Update last login
     await userDoc.ref.update({ last_login: new Date() });
 
-    // Remove password
+    // Remove password from response
     delete user.password;
     user.id = userDoc.id;
 
-    // We need to return a token because the frontend expects it.
-    // Since we are migrating, we can generate a custom JWT signed by us, 
-    // OR we can create a custom Firebase Token.
-    // Let's generate a custom Firebase Token so the frontend can sign in to Firebase with it!
-
+    // Generate Firebase custom token
     const customToken = await auth.createCustomToken(user.id, { role: user.role });
+
+    // Case C: If portal not connected and not explicitly skipping, trigger auto-sync
+    // The frontend will handle the sync result and retry logic
+    let portalSyncResult = null;
+    let shouldAutoSync = !user.portalConnected && !skipPortalSync && user.role === 'student';
+
+    if (shouldAutoSync) {
+      try {
+        // Attempt to sync with portal using the same credentials
+        // NOTE: We do NOT log the password
+        console.log(`Auto-sync triggered for: ${registration_number}`);
+        
+        const scraperResponse = await axios.post(
+          `${FLASK_SERVICE_URL}/api/scrape`,
+          { reg_number: registration_number, password },
+          {
+            timeout: 60000,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+
+        const { status, data } = scraperResponse.data;
+
+        if (status === 'SUCCESS') {
+          // Update user with portal data
+          await userDoc.ref.update({
+            profile: data.profile || {},
+            marks_data: data.marks || [],
+            attendance_data: data.attendance || [],
+            isVerified: true,
+            portalConnected: true,
+            portal_last_synced: new Date()
+          });
+
+          portalSyncResult = {
+            status: 'SUCCESS',
+            isVerified: true,
+            portalConnected: true
+          };
+        } else {
+          portalSyncResult = {
+            status: status,
+            isVerified: false,
+            portalConnected: false
+          };
+        }
+      } catch (syncError) {
+        console.error('Auto-sync error:', syncError.message);
+        // Don't fail login, just report sync status
+        portalSyncResult = {
+          status: syncError.response?.status === 401 ? 'AUTH_FAILED' : 'SCRAPE_ERROR',
+          isVerified: false,
+          portalConnected: false
+        };
+      }
+    }
 
     res.json({
       success: true,
       message: 'Login successful',
       data: {
         user,
-        accessToken: customToken, // Frontend should use signInWithCustomToken
-        refreshToken: null // Firebase handles refresh
+        accessToken: customToken,
+        refreshToken: null,
+        portalSync: portalSyncResult
       }
     });
 

@@ -1,0 +1,48 @@
+"""
+Configuration settings for the Flask Scraper Microservice
+"""
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+class Config:
+    """Base configuration"""
+    # Flask settings
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-in-production')
+    
+    # Portal URL
+    PORTAL_URL = os.getenv('PORTAL_URL', 'https://soaportals.com/StudentPortalSOA/#/')
+    
+    # Browser settings
+    BROWSER_HEADLESS = os.getenv('BROWSER_HEADLESS', 'True').lower() == 'true'
+    BROWSER_TIMEOUT = int(os.getenv('BROWSER_TIMEOUT', '30'))
+    
+    # Google Vision API
+    GOOGLE_VISION_API_KEY = os.getenv('GOOGLE_VISION_API_KEY', '')
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
+    
+    # Rate limiting
+    SCRAPE_RATE_LIMIT = int(os.getenv('SCRAPE_RATE_LIMIT', '10'))
+    SCRAPE_RATE_WINDOW = int(os.getenv('SCRAPE_RATE_WINDOW', '60'))
+    
+    # Retry settings
+    MAX_RETRIES = int(os.getenv('MAX_RETRIES', '3'))
+    RETRY_DELAY = int(os.getenv('RETRY_DELAY', '2'))
+
+class DevelopmentConfig(Config):
+    """Development configuration"""
+    FLASK_DEBUG = True
+
+class ProductionConfig(Config):
+    """Production configuration"""
+    FLASK_DEBUG = False
+
+# Get config based on environment
+def get_config():
+    env = os.getenv('FLASK_ENV', 'development')
+    if env == 'production':
+        return ProductionConfig
+    return DevelopmentConfig
