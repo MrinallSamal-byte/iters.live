@@ -161,13 +161,7 @@
                         APP.Storage.set('accessToken', idToken); // Use ID token as access token
                         APP.Storage.set('user', response.data.user);
 
-                        // Check if new user needs to connect portal
-                        if (response.data.isNewUser || response.data.redirectUrl) {
-                            window.location.href = response.data.redirectUrl || '/connect-portal.html';
-                            return;
-                        }
-
-                        // Redirect to dashboard
+                        // Redirect
                         const dashboards = {
                             student: '/dashboard/student.html',
                             teacher: '/dashboard/teacher.html',
