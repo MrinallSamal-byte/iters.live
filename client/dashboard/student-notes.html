@@ -80,6 +80,11 @@
                     <span class="semester-number">5</span>
                     <span class="semester-label">Semester 5</span>
                 </a>
+                <div class="semester-link-card semester-6-partial">
+                    <span class="semester-number">6</span>
+                    <span class="semester-label">Semester 6</span>
+                    <span class="partial-badge">Partial</span>
+                </div>
             </div>
         </section>
 
@@ -398,6 +403,62 @@
             color: var(--text-primary);
         }
 
+        /* Semester 6 partial card */
+        .semester-6-partial {
+            opacity: 0.7;
+            cursor: default;
+            position: relative;
+        }
+
+        .partial-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+        }
+
+        /* Subject code badge */
+        .subject-code-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* No link available badge */
+        .no-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* No link card style */
+        .resource-card.no-link {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .resource-card.no-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         /* Dark mode semester cards */
         [data-theme="dark"] .semester-link-card {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
@@ -405,6 +466,16 @@
 
         [data-theme="dark"] .semester-link-card:hover {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+        }
+
+        [data-theme="dark"] .subject-code-badge {
+            background: rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .no-link-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
         }
 
         .filter-container {
