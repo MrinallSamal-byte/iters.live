@@ -29,61 +29,61 @@
                     <nav class="sidebar-nav">
                         <ul class="sidebar-nav-list">
                             <li class="sidebar-nav-item">
-                                <a href="admin.html" class="sidebar-nav-link" data-page="dashboard">
+                                <a href="/dashboard/admin.html" class="sidebar-nav-link" data-page="dashboard">
                                     <span class="sidebar-nav-icon">🏠</span>
                                     <span class="sidebar-nav-text">Dashboard</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-users.html" class="sidebar-nav-link" data-page="users">
+                                <a href="/dashboard/admin-users.html" class="sidebar-nav-link" data-page="users">
                                     <span class="sidebar-nav-icon">👥</span>
                                     <span class="sidebar-nav-text">User Management</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-approvals.html" class="sidebar-nav-link" data-page="approvals">
+                                <a href="/dashboard/admin-approvals.html" class="sidebar-nav-link" data-page="approvals">
                                     <span class="sidebar-nav-icon">✅</span>
                                     <span class="sidebar-nav-text">Approvals</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-analytics.html" class="sidebar-nav-link" data-page="analytics">
+                                <a href="/dashboard/admin-analytics.html" class="sidebar-nav-link" data-page="analytics">
                                     <span class="sidebar-nav-icon">📊</span>
                                     <span class="sidebar-nav-text">Analytics</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-reports.html" class="sidebar-nav-link" data-page="reports">
+                                <a href="/dashboard/admin-reports.html" class="sidebar-nav-link" data-page="reports">
                                     <span class="sidebar-nav-icon">📈</span>
                                     <span class="sidebar-nav-text">Reports</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-announcements.html" class="sidebar-nav-link" data-page="announcements">
+                                <a href="/dashboard/admin-announcements.html" class="sidebar-nav-link" data-page="announcements">
                                     <span class="sidebar-nav-icon">📢</span>
                                     <span class="sidebar-nav-text">Announcements</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-departments.html" class="sidebar-nav-link" data-page="departments">
+                                <a href="/dashboard/admin-departments.html" class="sidebar-nav-link" data-page="departments">
                                     <span class="sidebar-nav-icon">🏢</span>
                                     <span class="sidebar-nav-text">Departments</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-courses.html" class="sidebar-nav-link" data-page="courses">
+                                <a href="/dashboard/admin-courses.html" class="sidebar-nav-link" data-page="courses">
                                     <span class="sidebar-nav-icon">📚</span>
                                     <span class="sidebar-nav-text">Courses</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-settings.html" class="sidebar-nav-link" data-page="settings">
+                                <a href="/dashboard/admin-settings.html" class="sidebar-nav-link" data-page="settings">
                                     <span class="sidebar-nav-icon">⚙️</span>
                                     <span class="sidebar-nav-text">System Settings</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="admin-logs.html" class="sidebar-nav-link" data-page="logs">
+                                <a href="/dashboard/admin-logs.html" class="sidebar-nav-link" data-page="logs">
                                     <span class="sidebar-nav-icon">📋</span>
                                     <span class="sidebar-nav-text">Activity Logs</span>
                                 </a>

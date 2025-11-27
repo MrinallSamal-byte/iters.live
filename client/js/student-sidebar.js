@@ -29,55 +29,55 @@
                     <nav class="sidebar-nav">
                         <ul class="sidebar-nav-list">
                             <li class="sidebar-nav-item">
-                                <a href="student.html" class="sidebar-nav-link" data-page="dashboard">
+                                <a href="/dashboard/student.html" class="sidebar-nav-link" data-page="dashboard">
                                     <span class="sidebar-nav-icon">🏠</span>
                                     <span class="sidebar-nav-text">Dashboard</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-attendance.html" class="sidebar-nav-link" data-page="attendance">
+                                <a href="/dashboard/student-attendance.html" class="sidebar-nav-link" data-page="attendance">
                                     <span class="sidebar-nav-icon">📊</span>
                                     <span class="sidebar-nav-text">Attendance</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-marks.html" class="sidebar-nav-link" data-page="marks">
+                                <a href="/dashboard/student-marks.html" class="sidebar-nav-link" data-page="marks">
                                     <span class="sidebar-nav-icon">📈</span>
                                     <span class="sidebar-nav-text">Marks</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-timetable.html" class="sidebar-nav-link" data-page="timetable">
+                                <a href="/dashboard/student-timetable.html" class="sidebar-nav-link" data-page="timetable">
                                     <span class="sidebar-nav-icon">📅</span>
                                     <span class="sidebar-nav-text">Timetable</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-notes.html" class="sidebar-nav-link" data-page="notes">
+                                <a href="/dashboard/student-notes.html" class="sidebar-nav-link" data-page="notes">
                                     <span class="sidebar-nav-icon">📚</span>
                                     <span class="sidebar-nav-text">Study Notes</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-admit-card.html" class="sidebar-nav-link" data-page="admit-card">
+                                <a href="/dashboard/student-admit-card.html" class="sidebar-nav-link" data-page="admit-card">
                                     <span class="sidebar-nav-icon">🎫</span>
                                     <span class="sidebar-nav-text">Admit Card</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-events.html" class="sidebar-nav-link" data-page="events">
+                                <a href="/dashboard/student-events.html" class="sidebar-nav-link" data-page="events">
                                     <span class="sidebar-nav-icon">🎉</span>
                                     <span class="sidebar-nav-text">Events</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-clubs.html" class="sidebar-nav-link" data-page="clubs">
+                                <a href="/dashboard/student-clubs.html" class="sidebar-nav-link" data-page="clubs">
                                     <span class="sidebar-nav-icon">🎪</span>
                                     <span class="sidebar-nav-text">Clubs</span>
                                 </a>
                             </li>
                             <li class="sidebar-nav-item">
-                                <a href="student-hostel-menu.html" class="sidebar-nav-link" data-page="hostel">
+                                <a href="/dashboard/student-hostel-menu.html" class="sidebar-nav-link" data-page="hostel">
                                     <span class="sidebar-nav-icon">🍽️</span>
                                     <span class="sidebar-nav-text">Hostel Menu</span>
                                 </a>
