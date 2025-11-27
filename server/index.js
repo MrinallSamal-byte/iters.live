@@ -34,6 +34,10 @@ const rubricRoutes = require('./routes/rubric.routes');
 const notesRoutes = require('./routes/notes.routes');
 const forumRoutes = require('./routes/forum.routes');
 const pyqRoutes = require('./routes/pyq.routes');
+const webRoutes = require('./routes/web.routes');
+
+// Import utilities
+const urlRouter = require('./utils/url-router.util');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -105,13 +109,56 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Serve static files
+// URL Obfuscation Middleware - Must come BEFORE static file serving
+// Redirects direct HTML page access to obfuscated URLs
+app.use((req, res, next) => {
+  const reqPath = req.path;
+  
+  // Skip if not an HTML page request or if it's an API/static/web route
+  if (!urlRouter.shouldObfuscatePath(reqPath)) {
+    return next();
+  }
+  
+  // Check if it's a direct HTML file access that should be obfuscated
+  const pageKey = urlRouter.getPageKeyFromPath(reqPath);
+  if (pageKey) {
+    const obfuscatedUrl = urlRouter.getObfuscatedUrl(pageKey);
+    return res.redirect(obfuscatedUrl);
+  }
+  
+  // Check for common page paths (without .html extension)
+  const commonPaths = {
+    '/login': 'login',
+    '/register': 'register',
+    '/creator': 'creator'
+  };
+  
+  if (commonPaths[reqPath]) {
+    const obfuscatedUrl = urlRouter.getObfuscatedUrl(commonPaths[reqPath]);
+    return res.redirect(obfuscatedUrl);
+  }
+  
+  next();
+});
+
+// Serve static files (CSS, JS, images, etc. - NOT HTML files for pages)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/static', express.static(path.join(__dirname, '../client')));
 
-// Serve client files directly from root
-app.use(express.static(path.join(__dirname, '../client')));
+// Serve client static assets (CSS, JS, images) but not HTML pages
+app.use('/css', express.static(path.join(__dirname, '../client/css')));
+app.use('/js', express.static(path.join(__dirname, '../client/js')));
+app.use('/assets', express.static(path.join(__dirname, '../client/assets')));
+app.use('/partials', express.static(path.join(__dirname, '../client/partials')));
+
+// Serve manifest and service worker
+app.get('/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/manifest.json'));
+});
+app.get('/service-worker.js', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/service-worker.js'));
+});
 
 // Serve releases (APK)
 app.use('/releases', express.static(path.join(__dirname, '../releases')));
@@ -152,31 +199,40 @@ app.use('/api/notes', notesRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 
-// Serve landing page (index.html) for root path
+// Web routes for obfuscated URLs (/web/:sessionId)
+app.use('/web', webRoutes);
+
+// Serve landing page (index.html) for root path - redirect to obfuscated URL
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('home');
+  res.redirect(obfuscatedUrl);
 });
 
 // Redirect /home to landing page
 app.get('/home', (req, res) => {
-  res.redirect('/');
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('home');
+  res.redirect(obfuscatedUrl);
 });
 
-// Serve static HTML pages
+// Serve static HTML pages - redirect to obfuscated URLs
 app.get('/about', (req, res) => {
-  res.redirect('/#about');
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('about');
+  res.redirect(obfuscatedUrl);
 });
 
 app.get('/features', (req, res) => {
-  res.redirect('/#features');
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('features');
+  res.redirect(obfuscatedUrl);
 });
 
 app.get('/academics', (req, res) => {
-  res.redirect('/#academics');
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('academics');
+  res.redirect(obfuscatedUrl);
 });
 
 app.get('/contact', (req, res) => {
-  res.redirect('/#contact');
+  const obfuscatedUrl = urlRouter.getObfuscatedUrl('contact');
+  res.redirect(obfuscatedUrl);
 });
 
 // 404 handler for API routes only
