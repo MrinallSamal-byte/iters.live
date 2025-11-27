@@ -41,6 +41,10 @@ GOOGLE_VISION_API_KEY=your_google_vision_api_key
 
 # Browser Configuration
 HEADLESS_MODE=True
+
+# Flask Configuration
+FLASK_DEBUG=False
+FLASK_PORT=5001
 ```
 
 ### 3. Run the Application
