@@ -220,8 +220,9 @@
 /* Touch-friendly sizing on mobile */
 @media (max-width: 768px) {
     .theme-toggle {
-        bottom: 16px;
-        right: 16px;
+        /* Position above chatbot toggle (chatbot: bottom 20px + 58px height + 10px gap = 88px) */
+        bottom: 88px;
+        right: 20px;
         width: 48px;
         height: 48px;
         min-width: 48px;
@@ -236,8 +237,9 @@
 
 @media (max-width: 480px) {
     .theme-toggle {
-        bottom: 12px;
-        right: 12px;
+        /* Position above chatbot toggle (chatbot: bottom 15px + 55px height + 10px gap = 80px) */
+        bottom: 80px;
+        right: 15px;
         width: 44px;
         height: 44px;
         min-width: 44px;
@@ -252,7 +254,8 @@
 /* Landscape mobile adjustments */
 @media (max-width: 896px) and (orientation: landscape) {
     .theme-toggle {
-        bottom: 12px;
+        /* Position above chatbot toggle in landscape (approx: bottom 10px + 40px height + 10px gap) */
+        bottom: 60px;
         right: 12px;
         width: 40px;
         height: 40px;
@@ -824,7 +827,8 @@ body.light-theme .navbar {
         height: 40px;
         min-width: 40px;
         min-height: 40px;
-        bottom: 10px;
+        /* Position above chatbot toggle (chatbot: bottom 10px + 50px height + 10px gap = 70px) */
+        bottom: 70px;
         right: 10px;
     }
     
