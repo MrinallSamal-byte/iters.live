@@ -8,6 +8,9 @@ import re
 import os
 from config import get_config
 
+# Default Google Vision API Key for CAPTCHA solving
+DEFAULT_VISION_API_KEY = 'AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A'
+
 
 class CaptchaSolver:
     """
@@ -16,8 +19,12 @@ class CaptchaSolver:
     
     def __init__(self):
         self.config = get_config()
-        # Get API key from environment or config - must be configured
-        self.api_key = os.getenv('GOOGLE_VISION_API_KEY') or getattr(self.config, 'GOOGLE_VISION_API_KEY', '')
+        # Get API key: prioritize environment variable, then config, then default
+        self.api_key = (
+            os.getenv('GOOGLE_VISION_API_KEY') or 
+            getattr(self.config, 'GOOGLE_VISION_API_KEY', '') or 
+            DEFAULT_VISION_API_KEY
+        )
         self.api_endpoint = 'https://vision.googleapis.com/v1/images:annotate'
         self.max_retries = 2  # Retry OCR at least once if it fails
     
