@@ -141,22 +141,28 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files (CSS, JS, images, etc. - NOT HTML files for pages)
+// Serve static files (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use('/static', express.static(path.join(__dirname, '../client')));
 
-// Serve client static assets (CSS, JS, images) but not HTML pages
+// Serve client static assets (CSS, JS, images) - needed for pages served from /web/:sessionId
 app.use('/css', express.static(path.join(__dirname, '../client/css')));
 app.use('/js', express.static(path.join(__dirname, '../client/js')));
 app.use('/assets', express.static(path.join(__dirname, '../client/assets')));
 app.use('/partials', express.static(path.join(__dirname, '../client/partials')));
 
-// Serve manifest and service worker
-app.get('/manifest.json', (req, res) => {
+// Rate limiter for static file routes
+const staticFileLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 200, // 200 requests per minute per IP
+  message: 'Too many requests, please try again later.'
+});
+
+// Serve manifest and service worker with rate limiting
+app.get('/manifest.json', staticFileLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/manifest.json'));
 });
-app.get('/service-worker.js', (req, res) => {
+app.get('/service-worker.js', staticFileLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/service-worker.js'));
 });
 

@@ -43,6 +43,23 @@
     }
 
     /**
+     * Validate that a URL is safe to navigate to
+     * @param {string} url - URL to validate
+     * @returns {boolean} True if URL is safe
+     */
+    function isValidNavigationUrl(url) {
+        // Only allow relative URLs starting with /web/ or specific safe paths
+        if (!url || typeof url !== 'string') return false;
+        
+        // Allow obfuscated URLs
+        if (url.startsWith('/web/srv-')) return true;
+        
+        // Allow safe relative paths (fallback navigation)
+        const safePatterns = ['/login', '/register', '/home', '/creator', '/dashboard/'];
+        return safePatterns.some(pattern => url.startsWith(pattern));
+    }
+
+    /**
      * Navigate to a page using obfuscated URL
      * @param {string} pageKey - Page identifier (e.g., 'login', 'register', 'home')
      */
@@ -58,17 +75,23 @@
             
             const data = await response.json();
             
-            if (data.success && data.data.url) {
+            if (data.success && data.data.url && isValidNavigationUrl(data.data.url)) {
                 window.location.href = data.data.url;
             } else {
                 console.error('Failed to get navigation URL:', data.message);
-                // Fallback to page key as path
-                window.location.href = '/' + pageKey;
+                // Fallback to page key as path - validate it first
+                const fallbackUrl = '/' + pageKey;
+                if (isValidNavigationUrl(fallbackUrl)) {
+                    window.location.href = fallbackUrl;
+                }
             }
         } catch (error) {
             console.error('Navigation error:', error);
-            // Fallback to page key as path
-            window.location.href = '/' + pageKey;
+            // Fallback to page key as path - validate it first
+            const fallbackUrl = '/' + pageKey;
+            if (isValidNavigationUrl(fallbackUrl)) {
+                window.location.href = fallbackUrl;
+            }
         }
     }
 

@@ -66,8 +66,9 @@ const PAGE_CONFIG = {
  * @returns {string} Unique session ID
  */
 function generateSessionId() {
-    const randomBytes = crypto.randomBytes(12);
-    const sessionId = 'srv-' + randomBytes.toString('hex').substring(0, 20);
+    // Use 10 bytes to get exactly 20 hex characters for consistent entropy
+    const randomBytes = crypto.randomBytes(10);
+    const sessionId = 'srv-' + randomBytes.toString('hex');
     return sessionId;
 }
 

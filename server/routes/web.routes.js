@@ -6,8 +6,19 @@
 
 const express = require('express');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const urlRouter = require('../utils/url-router.util');
+
+// Rate limiter for web routes - prevents abuse
+const webRouteLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100, // 100 requests per minute per IP
+    message: { success: false, message: 'Too many requests, please try again later.' }
+});
+
+// Apply rate limiter to all web routes
+router.use(webRouteLimiter);
 
 /**
  * GET /web/urls
@@ -48,12 +59,10 @@ router.get('/:sessionId', (req, res) => {
         
         // Extract the actual file path (without hash fragments)
         let actualPath = mapping.actualPath;
-        let hashFragment = '';
         
         if (actualPath.includes('#')) {
             const parts = actualPath.split('#');
             actualPath = parts[0];
-            hashFragment = '#' + parts[1];
         }
         
         // Construct full file path
@@ -71,14 +80,15 @@ router.get('/:sessionId', (req, res) => {
             });
         }
         
-        // Serve the file
-        // For hash fragments, we need to serve the base HTML and let client handle the hash
+        // Serve the file - use callback only for error logging
+        // Don't redirect in callback as response may already be sent
         res.sendFile(resolvedPath, (err) => {
-            if (err) {
+            if (err && !res.headersSent) {
                 console.error('Error serving file:', err);
-                // If file not found, redirect to home
-                const homeUrl = urlRouter.getObfuscatedUrl('home');
-                return res.redirect(homeUrl);
+                res.status(404).json({
+                    success: false,
+                    message: 'Page not found'
+                });
             }
         });
         
