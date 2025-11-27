@@ -57,16 +57,8 @@ class StudentPortalScraper:
         self.max_captcha_retries = 3  # Try CAPTCHA solving up to 3 times
         self.portal_url = None  # Will be set after verification
         
-        # Get alternative URLs from config if available, otherwise use defaults
-        self.alternative_urls = getattr(
-            self.config, 
-            'ALTERNATIVE_PORTAL_URLS', 
-            [
-                'https://iterservices.soa.ac.in/StudentPortalSOA/',
-                'https://iterservices.soa.ac.in/studentPortal/',
-                'https://studentportal.soa.ac.in/',
-            ]
-        )
+        # Get alternative URLs from config
+        self.alternative_urls = getattr(self.config, 'ALTERNATIVE_PORTAL_URLS', [])
     
     def _verify_portal_reachable(self, url, timeout=10):
         """
@@ -226,10 +218,7 @@ class StudentPortalScraper:
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Roll"]'),
             (By.CSS_SELECTOR, 'input[type="text"][placeholder*="Student"]'),
             (By.CSS_SELECTOR, 'input[placeholder*="Enter your"]'),
-            # XPath selectors for label associations
-            (By.XPATH, '//input[@type="text" and contains(@placeholder, "User")]'),
-            (By.XPATH, '//input[@type="text" and contains(@placeholder, "ID")]'),
-            (By.XPATH, '//input[@type="text" and contains(@placeholder, "Reg")]'),
+            # XPath selectors for label associations (finds inputs by their label text)
             (By.XPATH, '//label[contains(text(),"User")]/following::input[1]'),
             (By.XPATH, '//label[contains(text(),"USER")]/following::input[1]'),
             (By.XPATH, '//label[contains(text(),"Registration")]/following::input[1]'),
@@ -600,10 +589,8 @@ class StudentPortalScraper:
                 self._random_delay(0.3, 0.7)
                 self._human_click(login_button)
             else:
-                # Try pressing Enter as fallback
-                if captcha_img and captcha_input:
-                    captcha_input.send_keys(Keys.RETURN)
-                elif password_field:
+                # Try pressing Enter as fallback on the last focused field
+                if password_field:
                     password_field.send_keys(Keys.RETURN)
                 elif user_id_field:
                     user_id_field.send_keys(Keys.RETURN)
