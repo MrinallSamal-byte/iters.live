@@ -274,6 +274,11 @@ describe('Link Encoding Module', () => {
       '/creator.html',
       '/dashboard/student-attendance.html',
       '/dashboard/student-marks.html',
+      '/dashboard/student-notes.html?type=pyqs',
+      '/dashboard/student-notes.html?type=pyqs&page=1',
+      '/dashboard/student-events.html',
+      '/dashboard/student-timetable.html',
+      '/search.html?q=test+query',
     ];
 
     testUrls.forEach(url => {
@@ -308,20 +313,41 @@ describe('Server-side Redirect Handler', () => {
     if (url.includes('://')) return false;
     if (url.includes('..')) return false;
     
-    const allowedPatterns = [
-      /^\/$/,
-      /^\/[a-z0-9\-_]+\.html$/i,
-      /^\/dashboard\/[a-z0-9\-_]+\.html$/i,
-      /^\/[a-z0-9\-_]+\.html#[a-z0-9\-_]+$/i,
-      /^\/[a-z0-9\-_]+$/i,
-      /^\/web\/[a-z0-9\-_]+$/i,
-      /^\/[a-z0-9\-_]+#[a-z0-9\-_]+$/i,
-      /^\/index\.html(#[a-z0-9\-_]+)?$/i,
-    ];
+    // Parse URL to separate path from query string and hash
+    let path = url;
+    let queryAndHash = '';
     
-    for (const pattern of allowedPatterns) {
-      if (pattern.test(url)) return true;
+    const queryStart = url.indexOf('?');
+    const hashStart = url.indexOf('#');
+    
+    if (queryStart !== -1) {
+        path = url.substring(0, queryStart);
+        queryAndHash = url.substring(queryStart);
+    } else if (hashStart !== -1) {
+        path = url.substring(0, hashStart);
+        queryAndHash = url.substring(hashStart);
     }
+    
+    // Validate query parameters (only allow safe characters)
+    if (queryAndHash) {
+        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot in query
+        if (!/^[?#][a-z0-9\-_=&%+.#]*$/i.test(queryAndHash)) return false;
+    }
+    
+    // Root path
+    if (path === '/') return true;
+    
+    // HTML files in root (login.html, register.html, etc.)
+    if (/^\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
+    
+    // Dashboard pages
+    if (/^\/dashboard\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
+    
+    // Simple paths without extensions (like /login, /register)
+    if (/^\/[a-z0-9\-_]+$/i.test(path)) return true;
+    
+    // Obfuscated URLs (/web/srv-xxx)
+    if (/^\/web\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     return false;
   }
@@ -375,6 +401,22 @@ describe('Server-side Redirect Handler', () => {
     it('should allow URLs with hash fragments', () => {
       expect(isValidRedirectUrl('/index.html#about')).toBe(true);
       expect(isValidRedirectUrl('/index.html#features')).toBe(true);
+    });
+
+    it('should allow URLs with query parameters', () => {
+      expect(isValidRedirectUrl('/dashboard/student-notes.html?type=pyqs')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student-notes.html?type=pyqs&page=1')).toBe(true);
+      expect(isValidRedirectUrl('/search.html?q=test')).toBe(true);
+    });
+
+    it('should allow URLs with both query parameters and hash fragments', () => {
+      expect(isValidRedirectUrl('/index.html?page=1#section')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student.html?tab=marks#top')).toBe(true);
+    });
+
+    it('should reject URLs with invalid query parameter characters', () => {
+      expect(isValidRedirectUrl('/page.html?evil=<script>')).toBe(false);
+      expect(isValidRedirectUrl('/page.html?bad="test"')).toBe(false);
     });
   });
 });

@@ -59,20 +59,41 @@ function isValidRedirectUrl(url) {
     if (url.includes('..')) return false;
     
     // Allow safe URL patterns using a single comprehensive validation
+    // Parse URL to separate path from query string and hash
+    let path = url;
+    let queryAndHash = '';
+    
+    const queryStart = url.indexOf('?');
+    const hashStart = url.indexOf('#');
+    
+    if (queryStart !== -1) {
+        path = url.substring(0, queryStart);
+        queryAndHash = url.substring(queryStart);
+    } else if (hashStart !== -1) {
+        path = url.substring(0, hashStart);
+        queryAndHash = url.substring(hashStart);
+    }
+    
+    // Validate query parameters (only allow safe characters)
+    if (queryAndHash) {
+        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot in query
+        if (!/^[?#][a-z0-9\-_=&%+.#]*$/i.test(queryAndHash)) return false;
+    }
+    
     // Root path
-    if (url === '/') return true;
+    if (path === '/') return true;
     
     // HTML files in root (login.html, register.html, etc.)
-    if (/^\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
     
     // Dashboard pages
-    if (/^\/dashboard\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/dashboard\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
     
     // Simple paths without extensions (like /login, /register)
-    if (/^\/[a-z0-9\-_]+(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     // Obfuscated URLs (/web/srv-xxx)
-    if (/^\/web\/[a-z0-9\-_]+$/i.test(url)) return true;
+    if (/^\/web\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     return false;
 }
