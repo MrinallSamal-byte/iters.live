@@ -140,11 +140,28 @@
     }
   }
 
+  // Store chart instances to destroy before re-creating
+  let attendanceChartInstance = null;
+  let performanceChartInstance = null;
+
   function renderAttendanceChart(present, absent) {
     const el = document.getElementById('attendanceChart');
     if (!el) return;
+    
+    // Destroy existing chart if it exists
+    if (attendanceChartInstance) {
+      attendanceChartInstance.destroy();
+      attendanceChartInstance = null;
+    }
+    
+    // Also check for Chart.js internal reference
+    const existingChart = Chart.getChart(el);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+    
     try {
-      new Chart(el, {
+      attendanceChartInstance = new Chart(el, {
         type: 'doughnut',
         data: {
           labels: ['Present', 'Absent'],
@@ -173,6 +190,18 @@
   function renderPerformanceChart(summary) {
     const el = document.getElementById('performanceChart');
     if (!el) return;
+
+    // Destroy existing chart if it exists
+    if (performanceChartInstance) {
+      performanceChartInstance.destroy();
+      performanceChartInstance = null;
+    }
+    
+    // Also check for Chart.js internal reference
+    const existingChart = Chart.getChart(el);
+    if (existingChart) {
+      existingChart.destroy();
+    }
 
     // Use dummy data if summary is empty
     if (!summary || !summary.length) {
@@ -204,7 +233,7 @@
     console.log('Performance Chart Data:', { labels, data });
 
     try {
-      new Chart(el, {
+      performanceChartInstance = new Chart(el, {
         type: 'bar',
         data: {
           labels,

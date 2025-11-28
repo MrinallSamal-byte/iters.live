@@ -114,6 +114,29 @@
             transform: none;
         }
 
+        .btn-backup {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-backup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-backup:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-demo {
             background: transparent;
             color: var(--text-secondary);
@@ -273,8 +296,8 @@
         <div class="portal-card">
             <div class="portal-header">
                 <div class="portal-icon">🔗</div>
-                <h1>Connect Your Portal</h1>
-                <p>Link your SOA Student Portal to sync your academic data</p>
+                <h1>Fetch Your Academic Data</h1>
+                <p>Connect to SOA Student Portal to sync your latest academic records</p>
             </div>
 
             <div class="status-message" id="statusMessage"></div>
@@ -292,10 +315,13 @@
 
                 <div class="portal-actions">
                     <button type="submit" class="btn-sync" id="syncBtn">
-                        Sync Portal Data
+                        🔄 Fetch Fresh Data from SOA Portal
+                    </button>
+                    <button type="button" class="btn-backup" id="loadBackupBtn" style="background: linear-gradient(135deg, #059669, #047857); margin-top: 0.5rem;">
+                        📂 Load Last Saved Data (Backup)
                     </button>
                     <button type="button" class="btn-demo" id="demoBtn">
-                        Use Demo Data Instead
+                        🎭 Use Demo Data Instead
                     </button>
                 </div>
             </form>

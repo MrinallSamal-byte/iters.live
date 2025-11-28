@@ -82,7 +82,17 @@ async function loadAttendance() {
 
             // Pie chart: Present vs Absent (only if canvas exists)
             if (attendanceChartCtx && totalClasses > 0) {
-                if (attendanceChart) attendanceChart.destroy();
+                // Destroy existing chart
+                if (attendanceChart) {
+                    attendanceChart.destroy();
+                    attendanceChart = null;
+                }
+                // Also check for Chart.js internal reference
+                if (attendanceChartEl && typeof Chart !== 'undefined' && Chart.getChart) {
+                    const existingChart = Chart.getChart(attendanceChartEl);
+                    if (existingChart) existingChart.destroy();
+                }
+                
                 attendanceChart = new Chart(attendanceChartCtx, {
                     type: 'doughnut',
                     data: {
@@ -142,7 +152,17 @@ async function loadMarks() {
 
             // Bar chart: Subject-wise marks (only if canvas exists)
             if (marksChartCtx && summary && summary.length > 0) {
-                if (marksChart) marksChart.destroy();
+                // Destroy existing chart
+                if (marksChart) {
+                    marksChart.destroy();
+                    marksChart = null;
+                }
+                // Also check for Chart.js internal reference
+                if (marksChartEl && typeof Chart !== 'undefined' && Chart.getChart) {
+                    const existingChart = Chart.getChart(marksChartEl);
+                    if (existingChart) existingChart.destroy();
+                }
+                
                 marksChart = new Chart(marksChartCtx, {
                     type: 'bar',
                     data: {

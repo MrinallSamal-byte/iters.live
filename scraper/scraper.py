@@ -793,6 +793,236 @@ class StudentPortalScraper:
         
         return attendance
     
+    def _scrape_timetable(self):
+        """
+        Scrape student timetable
+        """
+        timetable = []
+        
+        try:
+            # Navigate to timetable page if needed
+            timetable_links = [
+                'a[href*="timetable"]', 'a[href*="schedule"]', '#timetableLink',
+                '.timetable-link', '//*[contains(text(),"Timetable")]',
+                '//*[contains(text(),"Schedule")]', '//*[contains(text(),"Time Table")]'
+            ]
+            
+            for selector in timetable_links:
+                try:
+                    if selector.startswith('//'):
+                        link = self.driver.find_element(By.XPATH, selector)
+                    else:
+                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    
+                    if link.is_displayed():
+                        self._human_click(link)
+                        self._random_delay(1, 2)
+                        self._wait_for_page_load()
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+            
+            # Scrape timetable table
+            table_selectors = ['table', '#timetableTable', '.timetable-table', 'table.schedule']
+            
+            for selector in table_selectors:
+                try:
+                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    rows = table.find_elements(By.CSS_SELECTOR, 'tr')
+                    
+                    # Get headers
+                    headers = []
+                    header_row = rows[0] if rows else None
+                    if header_row:
+                        headers = [th.text.strip() for th in header_row.find_elements(By.TAG_NAME, 'th')]
+                    
+                    for row in rows[1:]:
+                        cells = row.find_elements(By.TAG_NAME, 'td')
+                        if len(cells) >= 2:
+                            day = cells[0].text.strip() if len(cells) > 0 else ''
+                            # Parse each time slot
+                            for i, cell in enumerate(cells[1:], 1):
+                                text = cell.text.strip()
+                                if text:
+                                    time_slot = headers[i] if i < len(headers) else f'Period {i}'
+                                    timetable.append({
+                                        'day': day,
+                                        'time_slot': time_slot,
+                                        'subject': text,
+                                        'teacher': '',
+                                        'room': ''
+                                    })
+                    
+                    if timetable:
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+                    
+        except Exception as e:
+            print(f'Timetable scraping error: {str(e)}')
+        
+        return timetable
+    
+    def _scrape_courses(self):
+        """
+        Scrape enrolled courses
+        """
+        courses = []
+        
+        try:
+            # Navigate to courses page if needed
+            course_links = [
+                'a[href*="course"]', 'a[href*="subject"]', '#coursesLink',
+                '.courses-link', '//*[contains(text(),"Courses")]',
+                '//*[contains(text(),"Subjects")]', '//*[contains(text(),"Enrollment")]'
+            ]
+            
+            for selector in course_links:
+                try:
+                    if selector.startswith('//'):
+                        link = self.driver.find_element(By.XPATH, selector)
+                    else:
+                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    
+                    if link.is_displayed():
+                        self._human_click(link)
+                        self._random_delay(1, 2)
+                        self._wait_for_page_load()
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+            
+            # Scrape courses table
+            table_selectors = ['table', '#coursesTable', '.courses-table']
+            
+            for selector in table_selectors:
+                try:
+                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
+                    
+                    for row in rows:
+                        cells = row.find_elements(By.TAG_NAME, 'td')
+                        if len(cells) >= 2:
+                            course = {
+                                'code': cells[0].text.strip() if len(cells) > 0 else '',
+                                'name': cells[1].text.strip() if len(cells) > 1 else '',
+                                'credits': cells[2].text.strip() if len(cells) > 2 else '',
+                                'instructor': cells[3].text.strip() if len(cells) > 3 else ''
+                            }
+                            if course['name']:
+                                courses.append(course)
+                    
+                    if courses:
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+                    
+        except Exception as e:
+            print(f'Courses scraping error: {str(e)}')
+        
+        return courses
+    
+    def _scrape_results(self):
+        """
+        Scrape semester results
+        """
+        results = []
+        
+        try:
+            # Navigate to results page if needed
+            result_links = [
+                'a[href*="result"]', 'a[href*="cgpa"]', 'a[href*="sgpa"]',
+                '#resultsLink', '.results-link', '//*[contains(text(),"Result")]',
+                '//*[contains(text(),"CGPA")]', '//*[contains(text(),"Semester Result")]'
+            ]
+            
+            for selector in result_links:
+                try:
+                    if selector.startswith('//'):
+                        link = self.driver.find_element(By.XPATH, selector)
+                    else:
+                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    
+                    if link.is_displayed():
+                        self._human_click(link)
+                        self._random_delay(1, 2)
+                        self._wait_for_page_load()
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+            
+            # Scrape results table
+            table_selectors = ['table', '#resultsTable', '.results-table']
+            
+            for selector in table_selectors:
+                try:
+                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
+                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
+                    
+                    for row in rows:
+                        cells = row.find_elements(By.TAG_NAME, 'td')
+                        if len(cells) >= 2:
+                            result = {
+                                'semester': cells[0].text.strip() if len(cells) > 0 else '',
+                                'sgpa': cells[1].text.strip() if len(cells) > 1 else '',
+                                'cgpa': cells[2].text.strip() if len(cells) > 2 else '',
+                                'credits_earned': cells[3].text.strip() if len(cells) > 3 else '',
+                                'total_credits': cells[4].text.strip() if len(cells) > 4 else ''
+                            }
+                            if result['semester']:
+                                results.append(result)
+                    
+                    if results:
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+                    
+        except Exception as e:
+            print(f'Results scraping error: {str(e)}')
+        
+        return results
+    
+    def _scrape_notifications(self):
+        """
+        Scrape notifications/announcements
+        """
+        notifications = []
+        
+        try:
+            # Look for notifications on the page
+            notification_selectors = [
+                '.notification', '.announcement', '.notice', '.alert',
+                '#notifications', '#announcements', '[class*="notification"]',
+                '[class*="announcement"]', '//*[contains(@class,"notice")]'
+            ]
+            
+            for selector in notification_selectors:
+                try:
+                    if selector.startswith('//'):
+                        elements = self.driver.find_elements(By.XPATH, selector)
+                    else:
+                        elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                    
+                    for elem in elements[:10]:  # Limit to 10 notifications
+                        text = elem.text.strip()
+                        if text and len(text) > 10:
+                            notifications.append({
+                                'title': text[:100],
+                                'message': text,
+                                'date': '',
+                                'type': 'general'
+                            })
+                    
+                    if notifications:
+                        break
+                except (NoSuchElementException, StaleElementReferenceException):
+                    continue
+                    
+        except Exception as e:
+            print(f'Notifications scraping error: {str(e)}')
+        
+        return notifications
+    
     def scrape(self, reg_number, password):
         """
         Main scraping method
@@ -853,9 +1083,14 @@ class StudentPortalScraper:
             print('Login successful, scraping data...')
             self._random_delay(1, 2)
             
+            # Scrape all modules
             profile = self._scrape_profile()
             marks = self._scrape_marks()
             attendance = self._scrape_attendance()
+            timetable = self._scrape_timetable()
+            courses = self._scrape_courses()
+            results = self._scrape_results()
+            notifications = self._scrape_notifications()
             
             # Cleanup
             self.browser_manager.quit_driver(self.driver)
@@ -866,7 +1101,11 @@ class StudentPortalScraper:
                 'data': {
                     'profile': profile,
                     'marks': marks,
-                    'attendance': attendance
+                    'attendance': attendance,
+                    'timetable': timetable,
+                    'courses': courses,
+                    'results': results,
+                    'notifications': notifications
                 }
             }
             
