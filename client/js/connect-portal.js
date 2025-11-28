@@ -204,15 +204,20 @@
             syncBtn.disabled = true;
             syncBtn.innerHTML = '<span class="spinner"></span> Syncing...';
             demoBtn.disabled = true;
+            const backupBtn = document.getElementById('loadBackupBtn');
+            if (backupBtn) backupBtn.disabled = true;
         } else {
             syncBtn.disabled = false;
-            syncBtn.textContent = 'Sync Portal Data';
+            syncBtn.innerHTML = '🔄 Fetch Fresh Data from SOA Portal';
             demoBtn.disabled = false;
+            const backupBtn = document.getElementById('loadBackupBtn');
+            if (backupBtn) backupBtn.disabled = false;
         }
     }
 
     /**
      * Handle sync form submission
+     * Uses the new /api/portal/login endpoint with 3-attempt logic
      */
     async function handleSyncSubmit(e) {
         e.preventDefault();
@@ -225,26 +230,21 @@
             return;
         }
 
-        // Check if max attempts already reached
-        const currentAttempts = getRetryAttempts();
-        if (currentAttempts >= MAX_RETRY_ATTEMPTS) {
-            handleAutoFallback();
-            return;
-        }
-
         setLoading(true);
-        showStatus('🔄 Connecting to SOA Portal... This may take up to 60 seconds while we solve the CAPTCHA.', 'loading');
+        showStatus('🔄 Connecting to SOA Portal... This may take up to 90 seconds while we solve the CAPTCHA.', 'loading');
         hideRetryInfo();
 
         try {
-            const response = await APP.API.post('/portal/sync', {
+            // Use the new login endpoint with 3-attempt logic
+            const response = await APP.API.post('/portal/login', {
                 reg_number: regNumber,
                 password: password
             });
 
+            // Handle successful responses (including backup/demo fallback)
             if (response.success) {
                 if (response.status === 'SUCCESS') {
-                    // Success - clear retry attempts and redirect
+                    // Live data fetched successfully
                     clearRetryAttempts();
                     showStatus('✅ Portal data synced successfully!', 'success');
                     showToast('Live data synced successfully!', 'success');
@@ -257,10 +257,24 @@
                         window.location.href = '/dashboard/student.html';
                     }, 1500);
                 } else if (response.status === 'BACKUP_LOADED') {
-                    // Backup data loaded
+                    // Backup data loaded (after max attempts or portal unreachable)
                     clearRetryAttempts();
-                    showStatus(`⚠️ ${response.data.warning || 'Showing previously saved data.'}`, 'warning');
+                    const msg = response.data.warning || response.message || 'Showing previously saved data.';
+                    showStatus(`📂 ${msg}`, 'success');
                     showToast('Loaded backup data', 'warning');
+
+                    // Update user data in storage
+                    updateUserStorage(false, false, response.data);
+
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/student.html';
+                    }, 2000);
+                } else if (response.status === 'DEMO_LOADED') {
+                    // Demo data loaded (after max attempts with no backup)
+                    clearRetryAttempts();
+                    showStatus('🎭 No backup found. Loading demo data to explore the system.', 'success');
+                    showToast('Demo data loaded', 'warning');
 
                     // Update user data in storage
                     updateUserStorage(false, false, response.data);
@@ -271,28 +285,24 @@
                     }, 2000);
                 }
             } else {
+                // Handle failures with attempt tracking from server
                 handleSyncFailure(response);
             }
         } catch (error) {
             console.error('Sync error:', error);
-            // Determine error status from error object
-            let errorStatus = 'SCRAPE_ERROR';
-            let errorMessage = error.message || 'Unknown error';
             
-            if (error.status === 401 || (error.data && error.data.status === 'AUTH_FAILED')) {
-                errorStatus = 'AUTH_FAILED';
-                errorMessage = error.data?.message || 'Invalid credentials';
-            } else if (error.status === 503 || (error.data && error.data.status === 'PORTAL_UNREACHABLE')) {
-                errorStatus = 'PORTAL_UNREACHABLE';
-                errorMessage = error.data?.message || 'Student portal is currently unreachable';
-            } else if (error.data && error.data.status) {
-                errorStatus = error.data.status;
-                errorMessage = error.data.message || 'Failed to fetch portal data';
-            }
+            // Extract error details
+            const errorData = error.data || error;
+            const errorStatus = errorData.status || 'SCRAPE_ERROR';
+            const errorMessage = errorData.message || error.message || 'Unknown error';
+            const attempt = errorData.attempt;
+            const attemptsRemaining = errorData.attemptsRemaining;
             
             handleSyncFailure({
                 status: errorStatus,
-                message: errorMessage
+                message: errorMessage,
+                attempt: attempt,
+                attemptsRemaining: attemptsRemaining
             });
         } finally {
             setLoading(false);
@@ -301,24 +311,33 @@
 
     /**
      * Handle sync failure with retry logic
+     * Now uses server-side attempt tracking
      */
     function handleSyncFailure(response) {
-        const currentAttempts = getRetryAttempts() + 1;
-        setRetryAttempts(currentAttempts);
+        // Use server-provided attempt info if available
+        const attempt = response.attempt || (getRetryAttempts() + 1);
+        const remaining = response.attemptsRemaining !== undefined 
+            ? response.attemptsRemaining 
+            : (MAX_RETRY_ATTEMPTS - attempt);
 
-        const remaining = MAX_RETRY_ATTEMPTS - currentAttempts;
+        // Update local tracking to match server
+        if (response.attempt) {
+            setRetryAttempts(response.attempt);
+        } else {
+            setRetryAttempts(attempt);
+        }
 
         // Show specific error message based on status
         if (response.status === 'AUTH_FAILED') {
             showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
         } else if (response.status === 'PORTAL_UNREACHABLE') {
             showStatus('⚠️ Student portal is currently unreachable. The university portal may be down for maintenance.', 'error');
-            // For portal unreachable, offer to load backup immediately
+            // For portal unreachable, offer to load backup immediately (doesn't count against attempts)
             showRetryInfo(
-                'The student portal appears to be offline. Click "Load Backup Data" to use your last saved data, or "Use Demo Data" to explore the system.',
+                'The student portal appears to be offline. Click "Load Last Saved Data" to use your backup, or "Use Demo Data" to explore the system.',
                 'warning'
             );
-            return; // Don't count against retry attempts for portal outages
+            return; // Don't process further - portal unreachable doesn't count against attempts
         } else if (response.message && response.message.toLowerCase().includes('captcha')) {
             showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
         } else {
@@ -329,12 +348,13 @@
         if (remaining > 0) {
             // Attempts 1 or 2 - show retry option
             showRetryInfo(
-                `Attempt ${currentAttempts} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining. Click "Sync Portal Data" to retry.`,
+                `Attempt ${attempt} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`,
                 'warning'
             );
             updateAttemptDisplay();
         } else {
-            // Attempt 3 - auto-fallback
+            // Attempt 3 reached - server should have already triggered fallback
+            // But if we get here, trigger manual fallback
             handleAutoFallback();
         }
     }
@@ -445,19 +465,38 @@
 
     /**
      * Load backup data via API
+     * Uses the new /api/portal/recover endpoint
      */
     async function loadBackupData() {
         const user = APP.Storage.get('user');
         const regNumber = regNumberInput.value.trim() || (user ? user.registration_number : '');
 
-        const response = await APP.API.post('/portal/backup', {
-            reg_number: regNumber
-        });
+        try {
+            // Use the recover endpoint which tries Drive backup first, then falls back to demo
+            const response = await APP.API.get('/portal/recover', {
+                params: { reg_number: regNumber }
+            });
 
-        if (response.success && response.status === 'BACKUP_LOADED') {
-            // Update user data in storage
-            updateUserStorage(false, false, response.data);
-            return true;
+            if (response.success && (response.status === 'BACKUP_LOADED' || response.status === 'DEMO_LOADED')) {
+                // Update user data in storage
+                updateUserStorage(false, false, response.data);
+                return true;
+            }
+        } catch (error) {
+            console.warn('Recover endpoint failed, trying backup endpoint:', error);
+            // Fallback to backup endpoint
+            try {
+                const response = await APP.API.post('/portal/backup', {
+                    reg_number: regNumber
+                });
+
+                if (response.success && response.status === 'BACKUP_LOADED') {
+                    updateUserStorage(false, false, response.data);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Backup endpoint also failed:', e);
+            }
         }
         return false;
     }

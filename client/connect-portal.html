@@ -244,6 +244,24 @@
             margin-top: 0.5rem;
         }
 
+        .info-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .info-box p {
+            margin: 0.25rem 0;
+        }
+
+        .info-box strong {
+            color: var(--primary);
+        }
+
         /* Toast notification */
         .toast-notification {
             position: fixed;
@@ -328,6 +346,11 @@
 
             <div class="retry-info" id="retryInfo" style="display: none;"></div>
             <div class="attempt-counter" id="attemptCounter"></div>
+
+            <div class="info-box" id="infoBox">
+                <p><strong>🔐 3-Attempt System:</strong></p>
+                <p>You have 3 attempts to login. After 3 failed attempts, we'll automatically load your backup data or demo data so you can continue using the app.</p>
+            </div>
 
             <div class="skip-link">
                 <a href="/dashboard/student.html">Skip for now →</a>

@@ -1,6 +1,16 @@
 /**
  * Portal Routes
- * API routes for portal sync operations
+ * API routes for portal sync operations with 3-attempt login system
+ * 
+ * Endpoints:
+ * - POST /api/portal/login - 3-attempt login with structured response
+ * - POST /api/portal/sync - Legacy sync endpoint (uses login logic)
+ * - POST /api/portal/fetch - Fetch all portal data
+ * - POST /api/portal/backup - Save backup to Google Drive
+ * - GET /api/portal/recover - Recover data from backup or demo
+ * - GET /api/portal/status - Get portal connection status
+ * - GET /api/portal/data - Get stored portal data
+ * - POST /api/portal/disconnect - Disconnect portal
  */
 const express = require('express');
 const router = express.Router();
@@ -8,8 +18,29 @@ const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const portalController = require('../controllers/portal.controller');
 
 /**
+ * POST /api/portal/login
+ * 3-Attempt Login System
+ * 
+ * Request body:
+ * {
+ *   "reg_number": "string",
+ *   "password": "string"
+ * }
+ * 
+ * Response (Attempt 1-2 failure):
+ * { success: false, status: "AUTH_FAILED", attempt: 1, attemptsRemaining: 2, message: "..." }
+ * 
+ * Response (Attempt 3 failure - triggers fallback):
+ * { success: true, status: "BACKUP_LOADED" | "DEMO_LOADED", data: {...}, message: "..." }
+ * 
+ * Response (Success):
+ * { success: true, status: "SUCCESS", data: {...} }
+ */
+router.post('/login', optionalAuth, portalController.portalLogin);
+
+/**
  * POST /api/portal/sync
- * Sync portal data - forwards credentials to Flask scraper
+ * Sync portal data (legacy endpoint, uses login logic)
  * 
  * Request body:
  * {
@@ -17,20 +48,36 @@ const portalController = require('../controllers/portal.controller');
  *   "password": "string",
  *   "useDemoData": boolean (optional)
  * }
- * 
- * Response:
- * Success: { success: true, status: "SUCCESS", data: {...} }
- * Auth Failed: { success: false, status: "AUTH_FAILED", message: "..." }
- * Error: { success: false, status: "SCRAPE_ERROR", message: "..." }
- * Backup Loaded: { success: true, status: "BACKUP_LOADED", data: {...}, warning: "..." }
  */
 router.post('/sync', optionalAuth, portalController.syncPortalData);
 
 /**
- * POST /api/portal/backup
- * Load backup data from Google Sheets or Firestore
+ * POST /api/portal/fetch
+ * Fetch all portal data (bypasses attempt tracking)
+ * Use this when you want to force a fresh data fetch
  */
-router.post('/backup', optionalAuth, portalController.loadBackupData);
+router.post('/fetch', optionalAuth, portalController.fetchPortalData);
+
+/**
+ * POST /api/portal/backup
+ * Manually save backup to Google Drive
+ * 
+ * Request body:
+ * {
+ *   "reg_number": "string",
+ *   "data": {...} (optional - if not provided, loads from Firestore)
+ * }
+ */
+router.post('/backup', optionalAuth, portalController.saveBackup);
+
+/**
+ * GET /api/portal/recover
+ * Recover data from backup or return demo data
+ * 
+ * Query params:
+ * - reg_number: string (optional if authenticated)
+ */
+router.get('/recover', optionalAuth, portalController.recoverPortalData);
 
 /**
  * GET /api/portal/status
