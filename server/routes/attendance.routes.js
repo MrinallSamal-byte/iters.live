@@ -44,7 +44,11 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
     
     // Use Firestore to store attendance
     const attendanceRef = db.collection('attendance');
-    const docId = `${student_id}_${subject}_${date}`;
+    // Sanitize inputs for document ID to prevent special character issues
+    const sanitizedStudentId = String(student_id).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sanitizedSubject = String(subject).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sanitizedDate = String(date).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const docId = `${sanitizedStudentId}_${sanitizedSubject}_${sanitizedDate}`;
     
     await attendanceRef.doc(docId).set({
       student_id,
