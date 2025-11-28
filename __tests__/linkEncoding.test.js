@@ -8,7 +8,11 @@ describe('Link Encoding Module', () => {
   const LinkEncoding = {
     isEncoded(str) {
       if (!str || typeof str !== 'string') return false;
-      return /^[A-Za-z0-9\-_]+$/.test(str) && str.length > 8;
+      // Minimum length of 12 to avoid false positives
+      if (str.length < 12) return false;
+      // Must not contain dots or slashes (not a path)
+      if (str.includes('.') || str.includes('/')) return false;
+      return /^[A-Za-z0-9\-_]+$/.test(str);
     },
 
     encodeLink(raw) {
@@ -16,8 +20,13 @@ describe('Link Encoding Module', () => {
       if (this.isEncoded(raw)) return raw;
       if (raw === '' || raw === '#' || raw.startsWith('#')) return raw;
       if (this.isExternalLink(raw)) return raw;
-      if (raw.toLowerCase().startsWith('javascript:')) return raw;
-      if (raw.toLowerCase().startsWith('data:')) return raw;
+      // Don't encode javascript:, vbscript:, or data: URLs (security-sensitive)
+      const lowerRaw = raw.toLowerCase();
+      if (lowerRaw.startsWith('javascript:') || 
+          lowerRaw.startsWith('vbscript:') || 
+          lowerRaw.startsWith('data:')) {
+        return raw;
+      }
       if (raw.startsWith('/api/') || raw.includes('/api/')) return raw;
       if (this.isStaticAsset(raw)) return raw;
 
@@ -83,19 +92,26 @@ describe('Link Encoding Module', () => {
       expect(LinkEncoding.isEncoded(null)).toBe(false);
     });
 
-    it('should return false for short strings', () => {
+    it('should return false for short strings (less than 12 chars)', () => {
       expect(LinkEncoding.isEncoded('abc')).toBe(false);
       expect(LinkEncoding.isEncoded('12345678')).toBe(false);
+      expect(LinkEncoding.isEncoded('abcdefghijk')).toBe(false); // 11 chars
     });
 
     it('should return true for valid Base64 URL-safe encoded strings', () => {
-      expect(LinkEncoding.isEncoded('L2Rhc2hib2FyZC9zdHVkZW50Lmh0bWw')).toBe(true);
-      expect(LinkEncoding.isEncoded('L2xvZ2luLmh0bWw')).toBe(true);
+      // These are encoded versions of paths (no dots or slashes in encoded form)
+      expect(LinkEncoding.isEncoded('L2xvZ2luLmh0bWw')).toBe(true);  // /login.html encoded
+      expect(LinkEncoding.isEncoded('L2Rhc2hib2FyZC9zdHVkZW50')).toBe(true);  // /dashboard/student encoded
     });
 
-    it('should return false for strings with invalid characters', () => {
+    it('should return false for strings with dots or slashes', () => {
       expect(LinkEncoding.isEncoded('/dashboard/student.html')).toBe(false);
-      expect(LinkEncoding.isEncoded('hello world')).toBe(false);
+      expect(LinkEncoding.isEncoded('hello.world1234')).toBe(false);
+      expect(LinkEncoding.isEncoded('path/to/file123')).toBe(false);
+    });
+
+    it('should return false for strings with spaces or invalid characters', () => {
+      expect(LinkEncoding.isEncoded('hello world ab')).toBe(false);
     });
   });
 
@@ -143,6 +159,14 @@ describe('Link Encoding Module', () => {
 
     it('should not encode javascript: links', () => {
       expect(LinkEncoding.encodeLink('javascript:void(0)')).toBe('javascript:void(0)');
+    });
+
+    it('should not encode vbscript: links', () => {
+      expect(LinkEncoding.encodeLink('vbscript:msgbox("test")')).toBe('vbscript:msgbox("test")');
+    });
+
+    it('should not encode data: URLs', () => {
+      expect(LinkEncoding.encodeLink('data:text/html,<h1>test</h1>')).toBe('data:text/html,<h1>test</h1>');
     });
   });
 

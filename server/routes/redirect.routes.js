@@ -11,7 +11,7 @@ const rateLimit = require('express-rate-limit');
 // Rate limiter for redirect routes
 const redirectLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 200, // 200 requests per minute per IP
+    max: 60, // 60 requests per minute per IP
     message: { success: false, message: 'Too many requests, please try again later.' }
 });
 
@@ -58,39 +58,21 @@ function isValidRedirectUrl(url) {
     // Prevent directory traversal
     if (url.includes('..')) return false;
     
-    // Allow common patterns
-    const allowedPatterns = [
-        /^\/$/,                          // Home
-        /^\/[a-z0-9\-_]+\.html$/i,       // .html files in root
-        /^\/dashboard\/[a-z0-9\-_]+\.html$/i,  // Dashboard pages
-        /^\/[a-z0-9\-_]+\.html#[a-z0-9\-_]+$/i, // .html files with hash
-        /^\/[a-z0-9\-_]+$/i,             // Simple paths like /login
-        /^\/web\/[a-z0-9\-_]+$/i,        // Obfuscated URLs
-        /^\/[a-z0-9\-_]+#[a-z0-9\-_]+$/i, // Paths with hash fragments
-        /^\/index\.html(#[a-z0-9\-_]+)?$/i, // Index page
-    ];
+    // Allow safe URL patterns using a single comprehensive validation
+    // Root path
+    if (url === '/') return true;
     
-    for (const pattern of allowedPatterns) {
-        if (pattern.test(url)) return true;
-    }
+    // HTML files in root (login.html, register.html, etc.)
+    if (/^\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
     
-    // Check for valid page paths
-    const validPaths = [
-        '/', '/index.html', '/login.html', '/register.html', '/creator.html',
-        '/connect-portal.html', '/connect-portal',
-        '/dashboard/student.html', '/dashboard/teacher.html', '/dashboard/admin.html'
-    ];
+    // Dashboard pages
+    if (/^\/dashboard\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
     
-    // Allow with hash fragments
-    const baseUrl = url.split('#')[0];
-    if (validPaths.includes(baseUrl) || validPaths.includes(url)) {
-        return true;
-    }
+    // Simple paths without extensions (like /login, /register)
+    if (/^\/[a-z0-9\-_]+(#[a-z0-9\-_]+)?$/i.test(url)) return true;
     
-    // Allow dashboard subpages
-    if (url.startsWith('/dashboard/') && url.endsWith('.html')) {
-        return true;
-    }
+    // Obfuscated URLs (/web/srv-xxx)
+    if (/^\/web\/[a-z0-9\-_]+$/i.test(url)) return true;
     
     return false;
 }

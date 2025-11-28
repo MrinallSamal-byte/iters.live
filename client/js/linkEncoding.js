@@ -18,8 +18,11 @@
     function isEncoded(str) {
         if (!str || typeof str !== 'string') return false;
         // Base64 URL-safe chars are alphanumeric, hyphen, underscore
-        // Minimum length check to avoid false positives with short strings
-        return /^[A-Za-z0-9\-_]+$/.test(str) && str.length > 8;
+        // Minimum length of 12 to avoid false positives with common short paths
+        // Also check that it doesn't look like a path (no dots for extensions, no slashes)
+        if (str.length < 12) return false;
+        if (str.includes('.') || str.includes('/')) return false;
+        return /^[A-Za-z0-9\-_]+$/.test(str);
     }
 
     /**
@@ -41,11 +44,13 @@
         // Don't encode external links (http://, https://, mailto:, tel:, etc.)
         if (isExternalLink(raw)) return raw;
         
-        // Don't encode javascript: links
-        if (raw.toLowerCase().startsWith('javascript:')) return raw;
-        
-        // Don't encode data: URLs
-        if (raw.toLowerCase().startsWith('data:')) return raw;
+        // Don't encode javascript:, vbscript:, or data: URLs (security-sensitive)
+        const lowerRaw = raw.toLowerCase();
+        if (lowerRaw.startsWith('javascript:') || 
+            lowerRaw.startsWith('vbscript:') || 
+            lowerRaw.startsWith('data:')) {
+            return raw;
+        }
         
         // Don't encode API endpoints
         if (raw.startsWith('/api/') || raw.includes('/api/')) return raw;
