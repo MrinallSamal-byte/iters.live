@@ -51,6 +51,24 @@ const marksChartEl = document.getElementById('marksChart');
 const marksChartCtx = marksChartEl ? marksChartEl.getContext('2d') : null;
 let marksChart;
 
+/**
+ * Helper function to safely destroy existing chart on a canvas
+ * @param {HTMLCanvasElement} canvasEl - Canvas element
+ * @param {Chart} chartInstance - Current chart instance
+ * @returns {null} - Returns null to reset the chart reference
+ */
+function destroyExistingChart(canvasEl, chartInstance) {
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+    // Also check for Chart.js internal reference
+    if (canvasEl && typeof Chart !== 'undefined' && Chart.getChart) {
+        const existingChart = Chart.getChart(canvasEl);
+        if (existingChart) existingChart.destroy();
+    }
+    return null;
+}
+
 async function loadAttendance() {
     try {
         if (!user.id) {
@@ -82,16 +100,8 @@ async function loadAttendance() {
 
             // Pie chart: Present vs Absent (only if canvas exists)
             if (attendanceChartCtx && totalClasses > 0) {
-                // Destroy existing chart
-                if (attendanceChart) {
-                    attendanceChart.destroy();
-                    attendanceChart = null;
-                }
-                // Also check for Chart.js internal reference
-                if (attendanceChartEl && typeof Chart !== 'undefined' && Chart.getChart) {
-                    const existingChart = Chart.getChart(attendanceChartEl);
-                    if (existingChart) existingChart.destroy();
-                }
+                // Destroy existing chart using helper
+                attendanceChart = destroyExistingChart(attendanceChartEl, attendanceChart);
                 
                 attendanceChart = new Chart(attendanceChartCtx, {
                     type: 'doughnut',
@@ -152,16 +162,8 @@ async function loadMarks() {
 
             // Bar chart: Subject-wise marks (only if canvas exists)
             if (marksChartCtx && summary && summary.length > 0) {
-                // Destroy existing chart
-                if (marksChart) {
-                    marksChart.destroy();
-                    marksChart = null;
-                }
-                // Also check for Chart.js internal reference
-                if (marksChartEl && typeof Chart !== 'undefined' && Chart.getChart) {
-                    const existingChart = Chart.getChart(marksChartEl);
-                    if (existingChart) existingChart.destroy();
-                }
+                // Destroy existing chart using helper
+                marksChart = destroyExistingChart(marksChartEl, marksChart);
                 
                 marksChart = new Chart(marksChartCtx, {
                     type: 'bar',

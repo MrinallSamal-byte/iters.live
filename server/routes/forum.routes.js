@@ -10,6 +10,9 @@ const { db } = require('../database/firebase');
  * Note: Migrated from SQL to Firestore with dummy data fallback
  */
 
+// Helper function to get user ID from request
+const getUserId = (user) => user?.id || user?.uid || null;
+
 // Helper to generate dummy questions
 const getDummyQuestions = () => [
     {
@@ -226,7 +229,7 @@ router.get('/questions/:id', async (req, res) => {
 router.post('/questions', verifyToken, async (req, res) => {
     try {
         const { title, description, category, tags } = req.body;
-        const userId = req.user.id || req.user.uid;
+        const userId = getUserId(req.user);
         
         if (!title || !description || !category) {
             return res.status(400).json({
@@ -284,7 +287,7 @@ router.post('/questions/:id/answers', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { content } = req.body;
-        const userId = req.user.id || req.user.uid;
+        const userId = getUserId(req.user);
         
         if (!content) {
             return res.status(400).json({

@@ -99,7 +99,8 @@ const syncPortalData = async (req, res) => {
 
         // Also save to Google Sheets as backup (non-blocking)
         saveToGoogleSheetsBackup(reg_number, data).catch(err => {
-          console.warn('Google Sheets backup failed (non-critical):', err.message);
+          // Generic error logging without exposing sensitive details
+          console.warn('Google Sheets backup failed (non-critical)');
         });
 
         return res.json({

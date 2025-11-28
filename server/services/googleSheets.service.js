@@ -2,14 +2,15 @@
  * Google Sheets Service
  * Handles backup storage to Google Drive Sheets
  * 
- * Target folder: https://drive.google.com/drive/folders/16K2jlOyy7GgLcfGebmus-kCuG0BF_k-6
+ * Target folder ID is configurable via GOOGLE_DRIVE_FOLDER_ID environment variable
  */
 const { google } = require('googleapis');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
-// Configuration
-const GOOGLE_DRIVE_FOLDER_ID = '16K2jlOyy7GgLcfGebmus-kCuG0BF_k-6';
+// Configuration - folder ID can be set via environment variable
+const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '16K2jlOyy7GgLcfGebmus-kCuG0BF_k-6';
 const SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets',
   'https://www.googleapis.com/auth/drive.file'
@@ -38,8 +39,11 @@ async function initializeAuth() {
       const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || 
                               path.join(__dirname, '../googleServiceAccount.json');
       try {
-        credentials = require(credentialsPath);
+        // Use fs.readFileSync and JSON.parse for better error handling
+        const fileContent = fs.readFileSync(credentialsPath, 'utf8');
+        credentials = JSON.parse(fileContent);
       } catch (e) {
+        // Generic error message to avoid exposing path information
         console.warn('Google Sheets: No service account credentials found');
         return null;
       }

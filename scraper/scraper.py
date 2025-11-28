@@ -33,6 +33,9 @@ STATUS_AUTH_FAILED = 'AUTH_FAILED'
 STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR'
 STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE'
 
+# Scraping configuration
+MAX_NOTIFICATIONS_TO_SCRAPE = 10
+
 
 class StudentPortalScraper:
     """
@@ -1003,7 +1006,7 @@ class StudentPortalScraper:
                     else:
                         elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
                     
-                    for elem in elements[:10]:  # Limit to 10 notifications
+                    for elem in elements[:MAX_NOTIFICATIONS_TO_SCRAPE]:  # Limit notifications
                         text = elem.text.strip()
                         if text and len(text) > 10:
                             notifications.append({
