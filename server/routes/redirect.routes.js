@@ -58,21 +58,60 @@ function isValidRedirectUrl(url) {
     // Prevent directory traversal
     if (url.includes('..')) return false;
     
-    // Allow safe URL patterns using a single comprehensive validation
+    // Parse URL to separate path, query string, and hash fragment
+    let path = url;
+    let queryString = '';
+    let hashFragment = '';
+    
+    const queryStart = url.indexOf('?');
+    const hashStart = url.indexOf('#');
+    
+    // Handle both query and hash - find earliest separator
+    if (queryStart !== -1 && (hashStart === -1 || queryStart < hashStart)) {
+        // Query comes first (or only query exists)
+        path = url.substring(0, queryStart);
+        const afterQuery = url.substring(queryStart);
+        const hashInQuery = afterQuery.indexOf('#');
+        if (hashInQuery !== -1) {
+            queryString = afterQuery.substring(0, hashInQuery);
+            hashFragment = afterQuery.substring(hashInQuery);
+        } else {
+            queryString = afterQuery;
+        }
+    } else if (hashStart !== -1) {
+        // Only hash exists (or hash comes first - unusual but handle it)
+        path = url.substring(0, hashStart);
+        hashFragment = url.substring(hashStart);
+    }
+    
+    // Validate query string (only allow safe characters)
+    // Format: ?key=value&key2=value2
+    if (queryString) {
+        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot
+        if (!/^\?[a-z0-9\-_=&%+.]*$/i.test(queryString)) return false;
+    }
+    
+    // Validate hash fragment (only allow safe characters)
+    // Format: #section-name or #id_value
+    if (hashFragment) {
+        // Allow alphanumeric, hyphen, underscore only in hash (no query chars like = or &)
+        if (!/^#[a-z0-9\-_]*$/i.test(hashFragment)) return false;
+    }
+    
     // Root path
-    if (url === '/') return true;
+    if (path === '/') return true;
     
     // HTML files in root (login.html, register.html, etc.)
-    if (/^\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
     
     // Dashboard pages
-    if (/^\/dashboard\/[a-z0-9\-_]+\.html(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/dashboard\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
     
     // Simple paths without extensions (like /login, /register)
-    if (/^\/[a-z0-9\-_]+(#[a-z0-9\-_]+)?$/i.test(url)) return true;
+    if (/^\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     // Obfuscated URLs (/web/srv-xxx)
-    if (/^\/web\/[a-z0-9\-_]+$/i.test(url)) return true;
+    if (/^\/web\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     return false;
 }

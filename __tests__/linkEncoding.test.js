@@ -274,6 +274,11 @@ describe('Link Encoding Module', () => {
       '/creator.html',
       '/dashboard/student-attendance.html',
       '/dashboard/student-marks.html',
+      '/dashboard/student-notes.html?type=pyqs',
+      '/dashboard/student-notes.html?type=pyqs&page=1',
+      '/dashboard/student-events.html',
+      '/dashboard/student-timetable.html',
+      '/search.html?q=test+query',
     ];
 
     testUrls.forEach(url => {
@@ -308,20 +313,60 @@ describe('Server-side Redirect Handler', () => {
     if (url.includes('://')) return false;
     if (url.includes('..')) return false;
     
-    const allowedPatterns = [
-      /^\/$/,
-      /^\/[a-z0-9\-_]+\.html$/i,
-      /^\/dashboard\/[a-z0-9\-_]+\.html$/i,
-      /^\/[a-z0-9\-_]+\.html#[a-z0-9\-_]+$/i,
-      /^\/[a-z0-9\-_]+$/i,
-      /^\/web\/[a-z0-9\-_]+$/i,
-      /^\/[a-z0-9\-_]+#[a-z0-9\-_]+$/i,
-      /^\/index\.html(#[a-z0-9\-_]+)?$/i,
-    ];
+    // Parse URL to separate path, query string, and hash fragment
+    let path = url;
+    let queryString = '';
+    let hashFragment = '';
     
-    for (const pattern of allowedPatterns) {
-      if (pattern.test(url)) return true;
+    const queryStart = url.indexOf('?');
+    const hashStart = url.indexOf('#');
+    
+    // Handle both query and hash - find earliest separator
+    if (queryStart !== -1 && (hashStart === -1 || queryStart < hashStart)) {
+        // Query comes first (or only query exists)
+        path = url.substring(0, queryStart);
+        const afterQuery = url.substring(queryStart);
+        const hashInQuery = afterQuery.indexOf('#');
+        if (hashInQuery !== -1) {
+            queryString = afterQuery.substring(0, hashInQuery);
+            hashFragment = afterQuery.substring(hashInQuery);
+        } else {
+            queryString = afterQuery;
+        }
+    } else if (hashStart !== -1) {
+        // Only hash exists (or hash comes first - unusual but handle it)
+        path = url.substring(0, hashStart);
+        hashFragment = url.substring(hashStart);
     }
+    
+    // Validate query string (only allow safe characters)
+    // Format: ?key=value&key2=value2
+    if (queryString) {
+        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot
+        if (!/^\?[a-z0-9\-_=&%+.]*$/i.test(queryString)) return false;
+    }
+    
+    // Validate hash fragment (only allow safe characters)
+    // Format: #section-name or #id_value
+    if (hashFragment) {
+        // Allow alphanumeric, hyphen, underscore only in hash (no query chars like = or &)
+        if (!/^#[a-z0-9\-_]*$/i.test(hashFragment)) return false;
+    }
+    
+    // Root path
+    if (path === '/') return true;
+    
+    // HTML files in root (login.html, register.html, etc.)
+    if (/^\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
+    
+    // Dashboard pages
+    if (/^\/dashboard\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
+    
+    // Simple paths without extensions (like /login, /register)
+    if (/^\/[a-z0-9\-_]+$/i.test(path)) return true;
+    
+    // Obfuscated URLs (/web/srv-xxx)
+    if (/^\/web\/[a-z0-9\-_]+$/i.test(path)) return true;
     
     return false;
   }
@@ -375,6 +420,28 @@ describe('Server-side Redirect Handler', () => {
     it('should allow URLs with hash fragments', () => {
       expect(isValidRedirectUrl('/index.html#about')).toBe(true);
       expect(isValidRedirectUrl('/index.html#features')).toBe(true);
+    });
+
+    it('should allow URLs with query parameters', () => {
+      expect(isValidRedirectUrl('/dashboard/student-notes.html?type=pyqs')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student-notes.html?type=pyqs&page=1')).toBe(true);
+      expect(isValidRedirectUrl('/search.html?q=test')).toBe(true);
+    });
+
+    it('should allow URLs with both query parameters and hash fragments', () => {
+      expect(isValidRedirectUrl('/index.html?page=1#section')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student.html?tab=marks#top')).toBe(true);
+    });
+
+    it('should reject URLs with invalid query parameter characters', () => {
+      expect(isValidRedirectUrl('/page.html?evil=<script>')).toBe(false);
+      expect(isValidRedirectUrl('/page.html?bad="test"')).toBe(false);
+    });
+
+    it('should reject hash fragments with invalid characters', () => {
+      // Hash fragments should not contain query-like characters
+      expect(isValidRedirectUrl('/page.html#param=value')).toBe(false);
+      expect(isValidRedirectUrl('/page.html#section&other')).toBe(false);
     });
   });
 });
