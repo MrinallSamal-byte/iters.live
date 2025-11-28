@@ -1,0 +1,118 @@
+{
+  "mode": "demo",
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-28T00:00:00.000Z",
+  "profile": {
+    "name": "Demo Student",
+    "registration_number": "2101234567",
+    "email": "demo.student@iter.ac.in",
+    "department": "Computer Science & Engineering",
+    "year": 3,
+    "section": "A",
+    "semester": 5,
+    "phone": "9876543210",
+    "father_name": "Demo Parent",
+    "dob": "2003-05-15",
+    "address": "Bhubaneswar, Odisha",
+    "blood_group": "O+",
+    "admission_year": 2021,
+    "hostel": "Block A, Room 203"
+  },
+  "marks": [
+    { "subject": "Data Structures & Algorithms", "subject_code": "CSE2001", "marks": "85", "grade": "A", "exam_type": "Mid-1", "total_marks": "100", "credits": 4 },
+    { "subject": "Data Structures & Algorithms", "subject_code": "CSE2001", "marks": "82", "grade": "A", "exam_type": "Mid-2", "total_marks": "100", "credits": 4 },
+    { "subject": "Data Structures & Algorithms", "subject_code": "CSE2001", "marks": "18", "grade": "A", "exam_type": "Assignment", "total_marks": "20", "credits": 4 },
+    { "subject": "Database Management Systems", "subject_code": "CSE2002", "marks": "78", "grade": "B+", "exam_type": "Mid-1", "total_marks": "100", "credits": 4 },
+    { "subject": "Database Management Systems", "subject_code": "CSE2002", "marks": "80", "grade": "A", "exam_type": "Mid-2", "total_marks": "100", "credits": 4 },
+    { "subject": "Database Management Systems", "subject_code": "CSE2002", "marks": "17", "grade": "A", "exam_type": "Assignment", "total_marks": "20", "credits": 4 },
+    { "subject": "Operating Systems", "subject_code": "CSE2003", "marks": "82", "grade": "A", "exam_type": "Mid-1", "total_marks": "100", "credits": 4 },
+    { "subject": "Operating Systems", "subject_code": "CSE2003", "marks": "79", "grade": "B+", "exam_type": "Mid-2", "total_marks": "100", "credits": 4 },
+    { "subject": "Operating Systems", "subject_code": "CSE2003", "marks": "19", "grade": "A", "exam_type": "Assignment", "total_marks": "20", "credits": 4 },
+    { "subject": "Computer Networks", "subject_code": "CSE2004", "marks": "75", "grade": "B", "exam_type": "Mid-1", "total_marks": "100", "credits": 3 },
+    { "subject": "Computer Networks", "subject_code": "CSE2004", "marks": "78", "grade": "B+", "exam_type": "Mid-2", "total_marks": "100", "credits": 3 },
+    { "subject": "Computer Networks", "subject_code": "CSE2004", "marks": "16", "grade": "B+", "exam_type": "Assignment", "total_marks": "20", "credits": 3 },
+    { "subject": "Software Engineering", "subject_code": "CSE2005", "marks": "88", "grade": "A", "exam_type": "Mid-1", "total_marks": "100", "credits": 3 },
+    { "subject": "Software Engineering", "subject_code": "CSE2005", "marks": "85", "grade": "A", "exam_type": "Mid-2", "total_marks": "100", "credits": 3 },
+    { "subject": "Software Engineering", "subject_code": "CSE2005", "marks": "19", "grade": "A", "exam_type": "Assignment", "total_marks": "20", "credits": 3 },
+    { "subject": "Web Technologies", "subject_code": "CSE2006", "marks": "90", "grade": "A+", "exam_type": "Mid-1", "total_marks": "100", "credits": 3 },
+    { "subject": "Web Technologies", "subject_code": "CSE2006", "marks": "88", "grade": "A", "exam_type": "Mid-2", "total_marks": "100", "credits": 3 },
+    { "subject": "Web Technologies", "subject_code": "CSE2006", "marks": "20", "grade": "A+", "exam_type": "Assignment", "total_marks": "20", "credits": 3 }
+  ],
+  "attendance": [
+    { "subject": "Data Structures & Algorithms", "subject_code": "CSE2001", "attended": "42", "total": "45", "percentage": "93%", "teacher": "Dr. Sharma" },
+    { "subject": "Database Management Systems", "subject_code": "CSE2002", "attended": "38", "total": "45", "percentage": "84%", "teacher": "Dr. Patel" },
+    { "subject": "Operating Systems", "subject_code": "CSE2003", "attended": "40", "total": "45", "percentage": "89%", "teacher": "Dr. Kumar" },
+    { "subject": "Computer Networks", "subject_code": "CSE2004", "attended": "35", "total": "45", "percentage": "78%", "teacher": "Dr. Singh" },
+    { "subject": "Software Engineering", "subject_code": "CSE2005", "attended": "43", "total": "45", "percentage": "96%", "teacher": "Dr. Mishra" },
+    { "subject": "Web Technologies", "subject_code": "CSE2006", "attended": "44", "total": "45", "percentage": "98%", "teacher": "Dr. Das" }
+  ],
+  "timetable": [
+    { "day": "Monday", "time_slot": "09:00-10:00", "subject": "Data Structures & Algorithms", "teacher": "Dr. Sharma", "room": "LH-101" },
+    { "day": "Monday", "time_slot": "10:00-11:00", "subject": "Database Management Systems", "teacher": "Dr. Patel", "room": "LH-102" },
+    { "day": "Monday", "time_slot": "11:00-12:00", "subject": "Operating Systems", "teacher": "Dr. Kumar", "room": "LH-103" },
+    { "day": "Monday", "time_slot": "14:00-16:00", "subject": "DSA Lab", "teacher": "Dr. Sharma", "room": "Lab-201" },
+    { "day": "Tuesday", "time_slot": "09:00-10:00", "subject": "Computer Networks", "teacher": "Dr. Singh", "room": "LH-104" },
+    { "day": "Tuesday", "time_slot": "10:00-11:00", "subject": "Software Engineering", "teacher": "Dr. Mishra", "room": "LH-101" },
+    { "day": "Tuesday", "time_slot": "11:00-12:00", "subject": "Web Technologies", "teacher": "Dr. Das", "room": "LH-102" },
+    { "day": "Tuesday", "time_slot": "14:00-16:00", "subject": "DBMS Lab", "teacher": "Dr. Patel", "room": "Lab-202" },
+    { "day": "Wednesday", "time_slot": "09:00-10:00", "subject": "Data Structures & Algorithms", "teacher": "Dr. Sharma", "room": "LH-101" },
+    { "day": "Wednesday", "time_slot": "10:00-11:00", "subject": "Database Management Systems", "teacher": "Dr. Patel", "room": "LH-102" },
+    { "day": "Wednesday", "time_slot": "11:00-12:00", "subject": "Operating Systems", "teacher": "Dr. Kumar", "room": "LH-103" },
+    { "day": "Wednesday", "time_slot": "14:00-16:00", "subject": "OS Lab", "teacher": "Dr. Kumar", "room": "Lab-203" },
+    { "day": "Thursday", "time_slot": "09:00-10:00", "subject": "Computer Networks", "teacher": "Dr. Singh", "room": "LH-104" },
+    { "day": "Thursday", "time_slot": "10:00-11:00", "subject": "Software Engineering", "teacher": "Dr. Mishra", "room": "LH-101" },
+    { "day": "Thursday", "time_slot": "11:00-12:00", "subject": "Web Technologies", "teacher": "Dr. Das", "room": "LH-102" },
+    { "day": "Thursday", "time_slot": "14:00-16:00", "subject": "CN Lab", "teacher": "Dr. Singh", "room": "Lab-204" },
+    { "day": "Friday", "time_slot": "09:00-10:00", "subject": "Data Structures & Algorithms", "teacher": "Dr. Sharma", "room": "LH-101" },
+    { "day": "Friday", "time_slot": "10:00-11:00", "subject": "Software Engineering", "teacher": "Dr. Mishra", "room": "LH-102" },
+    { "day": "Friday", "time_slot": "11:00-12:00", "subject": "Web Technologies", "teacher": "Dr. Das", "room": "LH-103" },
+    { "day": "Friday", "time_slot": "14:00-16:00", "subject": "Web Tech Lab", "teacher": "Dr. Das", "room": "Lab-205" }
+  ],
+  "courses": [
+    { "code": "CSE2001", "name": "Data Structures & Algorithms", "credits": 4, "instructor": "Dr. Sharma", "type": "Theory + Lab" },
+    { "code": "CSE2002", "name": "Database Management Systems", "credits": 4, "instructor": "Dr. Patel", "type": "Theory + Lab" },
+    { "code": "CSE2003", "name": "Operating Systems", "credits": 4, "instructor": "Dr. Kumar", "type": "Theory + Lab" },
+    { "code": "CSE2004", "name": "Computer Networks", "credits": 3, "instructor": "Dr. Singh", "type": "Theory + Lab" },
+    { "code": "CSE2005", "name": "Software Engineering", "credits": 3, "instructor": "Dr. Mishra", "type": "Theory" },
+    { "code": "CSE2006", "name": "Web Technologies", "credits": 3, "instructor": "Dr. Das", "type": "Theory + Lab" }
+  ],
+  "results": [
+    { "semester": 1, "sgpa": "8.5", "cgpa": "8.5", "credits_earned": "24", "total_credits": "24", "status": "Pass" },
+    { "semester": 2, "sgpa": "8.7", "cgpa": "8.6", "credits_earned": "24", "total_credits": "24", "status": "Pass" },
+    { "semester": 3, "sgpa": "8.3", "cgpa": "8.5", "credits_earned": "23", "total_credits": "24", "status": "Pass" },
+    { "semester": 4, "sgpa": "8.9", "cgpa": "8.6", "credits_earned": "24", "total_credits": "24", "status": "Pass" },
+    { "semester": 5, "sgpa": "In Progress", "cgpa": "8.6", "credits_earned": "0", "total_credits": "21", "status": "In Progress" }
+  ],
+  "backlogs": [],
+  "notifications": [
+    { "title": "Mid-Semester Exams", "message": "Mid-semester examinations will commence from December 15, 2025. Please check your admit card.", "date": "2025-11-25", "type": "exam", "priority": "high" },
+    { "title": "Fee Payment Reminder", "message": "Last date for fee payment for odd semester is November 30, 2025.", "date": "2025-11-20", "type": "fee", "priority": "medium" },
+    { "title": "Placement Drive", "message": "Campus placement drive by TCS will be held on December 5, 2025. Register through the placement portal.", "date": "2025-11-18", "type": "placement", "priority": "high" },
+    { "title": "Library Book Return", "message": "Please return all library books by November 28, 2025 to avoid penalty.", "date": "2025-11-15", "type": "general", "priority": "low" },
+    { "title": "Workshop on AI/ML", "message": "A 2-day workshop on Artificial Intelligence and Machine Learning will be conducted on December 10-11, 2025.", "date": "2025-11-10", "type": "event", "priority": "medium" }
+  ],
+  "internal_assessments": [
+    { "subject": "Data Structures & Algorithms", "quiz_1": 18, "quiz_2": 17, "assignment_1": 9, "assignment_2": 9, "total": 53, "max_total": 60 },
+    { "subject": "Database Management Systems", "quiz_1": 16, "quiz_2": 18, "assignment_1": 8, "assignment_2": 9, "total": 51, "max_total": 60 },
+    { "subject": "Operating Systems", "quiz_1": 17, "quiz_2": 16, "assignment_1": 10, "assignment_2": 9, "total": 52, "max_total": 60 },
+    { "subject": "Computer Networks", "quiz_1": 15, "quiz_2": 16, "assignment_1": 8, "assignment_2": 8, "total": 47, "max_total": 60 },
+    { "subject": "Software Engineering", "quiz_1": 19, "quiz_2": 18, "assignment_1": 9, "assignment_2": 10, "total": 56, "max_total": 60 },
+    { "subject": "Web Technologies", "quiz_1": 20, "quiz_2": 19, "assignment_1": 10, "assignment_2": 10, "total": 59, "max_total": 60 }
+  ],
+  "fees": {
+    "total_fee": 150000,
+    "paid_amount": 100000,
+    "due_amount": 50000,
+    "due_date": "2025-11-30",
+    "payment_status": "Partial",
+    "transactions": [
+      { "date": "2025-07-15", "amount": 50000, "mode": "Online", "transaction_id": "TXN123456789" },
+      { "date": "2025-09-10", "amount": 50000, "mode": "Online", "transaction_id": "TXN987654321" }
+    ]
+  },
+  "raw_api_data": {
+    "portal_version": "2.1.0",
+    "last_login": "2025-11-27T10:30:00.000Z",
+    "session_id": "DEMO_SESSION_12345"
+  }
+}

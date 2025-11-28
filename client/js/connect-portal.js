@@ -1,13 +1,39 @@
 /**
  * Connect Portal JavaScript
- * Handles portal sync with retry logic, backup loading, and fallback to demo data
  * 
- * Flow:
- * 1. Try live data from SOA Portal
- * 2. If fails, try Google Sheets backup
- * 3. If fails, try Firestore backup
- * 4. If all fail, offer demo data
+ * NOTE: Portal data fetching from the SOA website is currently SUSPENDED.
+ * This page will automatically redirect users to the dashboard.
+ * 
+ * The portal fetching functionality has been temporarily disabled as per requirement.
+ * Users will be redirected directly to the dashboard after login.
  */
+
+(function() {
+    'use strict';
+
+    /**
+     * Initialize the connect portal page
+     * Portal fetching is suspended - redirect directly to dashboard
+     */
+    function init() {
+        // Check if user is logged in
+        const user = APP.Storage.get('user');
+        if (!user) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        // PORTAL FETCHING SUSPENDED
+        // Automatically redirect to dashboard without showing portal connection options
+        console.log('Portal fetching is suspended. Redirecting to dashboard...');
+        window.location.href = '/dashboard/student.html';
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+})();
+
+/* COMMENTED OUT - Portal fetching functionality suspended
 
 (function() {
     'use strict';
@@ -26,9 +52,6 @@
     let regNumberInput;
     let portalPasswordInput;
 
-    /**
-     * Initialize the connect portal page
-     */
     function init() {
         // Get DOM elements
         portalForm = document.getElementById('portalForm');
@@ -95,42 +118,27 @@
         }
     }
 
-    /**
-     * Get the user ID for storage key
-     */
     function getUserId() {
         const user = APP.Storage.get('user');
         return user ? (user.id || user.registration_number) : 'unknown';
     }
 
-    /**
-     * Get current retry attempts from localStorage
-     */
     function getRetryAttempts() {
         const key = RETRY_KEY_PREFIX + getUserId();
         const attempts = parseInt(localStorage.getItem(key) || '0', 10);
         return attempts;
     }
 
-    /**
-     * Set retry attempts in localStorage
-     */
     function setRetryAttempts(count) {
         const key = RETRY_KEY_PREFIX + getUserId();
         localStorage.setItem(key, count.toString());
     }
 
-    /**
-     * Clear retry attempts (on success)
-     */
     function clearRetryAttempts() {
         const key = RETRY_KEY_PREFIX + getUserId();
         localStorage.removeItem(key);
     }
 
-    /**
-     * Update the attempt counter display
-     */
     function updateAttemptDisplay() {
         const attempts = getRetryAttempts();
         const remaining = MAX_RETRY_ATTEMPTS - attempts;
@@ -148,37 +156,24 @@
         }
     }
 
-    /**
-     * Show status message
-     */
     function showStatus(message, type) {
         statusMessage.textContent = message;
         statusMessage.className = 'status-message ' + type;
         statusMessage.style.display = 'block';
     }
 
-    /**
-     * Hide status message
-     */
     function hideStatus() {
         statusMessage.className = 'status-message';
         statusMessage.style.display = 'none';
     }
 
-    /**
-     * Show retry info
-     */
     function showRetryInfo(message, type) {
         retryInfo.textContent = message;
         retryInfo.className = 'retry-info ' + type;
         retryInfo.style.display = 'block';
     }
 
-    /**
-     * Show toast notification
-     */
     function showToast(message, type) {
-        // Remove existing toast
         const existingToast = document.querySelector('.toast-notification');
         if (existingToast) {
             existingToast.remove();
@@ -189,31 +184,28 @@
         toast.textContent = message;
         document.body.appendChild(toast);
 
-        // Auto remove after 5 seconds
         setTimeout(() => {
             toast.style.animation = 'slideIn 0.3s ease-out reverse';
             setTimeout(() => toast.remove(), 300);
         }, 5000);
     }
 
-    /**
-     * Set loading state
-     */
     function setLoading(isLoading) {
         if (isLoading) {
             syncBtn.disabled = true;
             syncBtn.innerHTML = '<span class="spinner"></span> Syncing...';
             demoBtn.disabled = true;
+            const backupBtn = document.getElementById('loadBackupBtn');
+            if (backupBtn) backupBtn.disabled = true;
         } else {
             syncBtn.disabled = false;
-            syncBtn.textContent = 'Sync Portal Data';
+            syncBtn.innerHTML = '🔄 Fetch Fresh Data from SOA Portal';
             demoBtn.disabled = false;
+            const backupBtn = document.getElementById('loadBackupBtn');
+            if (backupBtn) backupBtn.disabled = false;
         }
     }
 
-    /**
-     * Handle sync form submission
-     */
     async function handleSyncSubmit(e) {
         e.preventDefault();
 
@@ -225,47 +217,39 @@
             return;
         }
 
-        // Check if max attempts already reached
-        const currentAttempts = getRetryAttempts();
-        if (currentAttempts >= MAX_RETRY_ATTEMPTS) {
-            handleAutoFallback();
-            return;
-        }
-
         setLoading(true);
-        showStatus('🔄 Connecting to SOA Portal... This may take up to 60 seconds while we solve the CAPTCHA.', 'loading');
+        showStatus('🔄 Connecting to SOA Portal... This may take up to 90 seconds while we solve the CAPTCHA.', 'loading');
         hideRetryInfo();
 
         try {
-            const response = await APP.API.post('/portal/sync', {
+            const response = await APP.API.post('/portal/login', {
                 reg_number: regNumber,
                 password: password
             });
 
             if (response.success) {
                 if (response.status === 'SUCCESS') {
-                    // Success - clear retry attempts and redirect
                     clearRetryAttempts();
                     showStatus('✅ Portal data synced successfully!', 'success');
                     showToast('Live data synced successfully!', 'success');
-
-                    // Update user data in storage
                     updateUserStorage(true, true, response.data);
-
-                    // Redirect to dashboard after brief delay
                     setTimeout(() => {
                         window.location.href = '/dashboard/student.html';
                     }, 1500);
                 } else if (response.status === 'BACKUP_LOADED') {
-                    // Backup data loaded
                     clearRetryAttempts();
-                    showStatus(`⚠️ ${response.data.warning || 'Showing previously saved data.'}`, 'warning');
+                    const msg = response.data.warning || response.message || 'Showing previously saved data.';
+                    showStatus(`📂 ${msg}`, 'success');
                     showToast('Loaded backup data', 'warning');
-
-                    // Update user data in storage
                     updateUserStorage(false, false, response.data);
-
-                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/student.html';
+                    }, 2000);
+                } else if (response.status === 'DEMO_LOADED') {
+                    clearRetryAttempts();
+                    showStatus('🎭 No backup found. Loading demo data to explore the system.', 'success');
+                    showToast('Demo data loaded', 'warning');
+                    updateUserStorage(false, false, response.data);
                     setTimeout(() => {
                         window.location.href = '/dashboard/student.html';
                     }, 2000);
@@ -275,50 +259,44 @@
             }
         } catch (error) {
             console.error('Sync error:', error);
-            // Determine error status from error object
-            let errorStatus = 'SCRAPE_ERROR';
-            let errorMessage = error.message || 'Unknown error';
-            
-            if (error.status === 401 || (error.data && error.data.status === 'AUTH_FAILED')) {
-                errorStatus = 'AUTH_FAILED';
-                errorMessage = error.data?.message || 'Invalid credentials';
-            } else if (error.status === 503 || (error.data && error.data.status === 'PORTAL_UNREACHABLE')) {
-                errorStatus = 'PORTAL_UNREACHABLE';
-                errorMessage = error.data?.message || 'Student portal is currently unreachable';
-            } else if (error.data && error.data.status) {
-                errorStatus = error.data.status;
-                errorMessage = error.data.message || 'Failed to fetch portal data';
-            }
+            const errorData = error.data || error;
+            const errorStatus = errorData.status || 'SCRAPE_ERROR';
+            const errorMessage = errorData.message || error.message || 'Unknown error';
+            const attempt = errorData.attempt;
+            const attemptsRemaining = errorData.attemptsRemaining;
             
             handleSyncFailure({
                 status: errorStatus,
-                message: errorMessage
+                message: errorMessage,
+                attempt: attempt,
+                attemptsRemaining: attemptsRemaining
             });
         } finally {
             setLoading(false);
         }
     }
 
-    /**
-     * Handle sync failure with retry logic
-     */
     function handleSyncFailure(response) {
-        const currentAttempts = getRetryAttempts() + 1;
-        setRetryAttempts(currentAttempts);
+        const attempt = response.attempt || (getRetryAttempts() + 1);
+        const remaining = response.attemptsRemaining !== undefined 
+            ? response.attemptsRemaining 
+            : (MAX_RETRY_ATTEMPTS - attempt);
 
-        const remaining = MAX_RETRY_ATTEMPTS - currentAttempts;
+        if (response.attempt) {
+            setRetryAttempts(response.attempt);
+        } else {
+            setRetryAttempts(attempt);
+        }
 
-        // Show specific error message based on status
         if (response.status === 'AUTH_FAILED') {
             showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
         } else if (response.status === 'PORTAL_UNREACHABLE') {
             showStatus('⚠️ Student portal is currently unreachable. The university portal may be down for maintenance.', 'error');
-            // For portal unreachable, offer to load backup immediately
             showRetryInfo(
-                'The student portal appears to be offline. Click "Load Backup Data" to use your last saved data, or "Use Demo Data" to explore the system.',
+                'The student portal appears to be offline. Click "Load Last Saved Data" to use your backup, or "Use Demo Data" to explore the system.',
                 'warning'
             );
-            return; // Don't count against retry attempts for portal outages
+            return;
         } else if (response.message && response.message.toLowerCase().includes('captcha')) {
             showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
         } else {
@@ -327,43 +305,30 @@
         }
 
         if (remaining > 0) {
-            // Attempts 1 or 2 - show retry option
             showRetryInfo(
-                `Attempt ${currentAttempts} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining. Click "Sync Portal Data" to retry.`,
+                `Attempt ${attempt} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`,
                 'warning'
             );
             updateAttemptDisplay();
         } else {
-            // Attempt 3 - auto-fallback
             handleAutoFallback();
         }
     }
 
-    /**
-     * Hide retry info
-     */
     function hideRetryInfo() {
         retryInfo.style.display = 'none';
     }
 
-    /**
-     * Handle auto-fallback after 3 failed attempts
-     */
     async function handleAutoFallback() {
         showStatus('⚠️ Verification failed. Loading backup data...', 'loading');
         setLoading(true);
 
-        // First try to load backup data
         try {
             const backupLoaded = await loadBackupData();
             if (backupLoaded) {
                 showStatus('📂 Loaded your previously saved data.', 'success');
                 showToast('Backup data loaded successfully', 'success');
-                
-                // Clear retry attempts for future attempts
                 clearRetryAttempts();
-                
-                // Redirect to dashboard
                 setTimeout(() => {
                     window.location.href = '/dashboard/student.html';
                 }, 1500);
@@ -373,7 +338,6 @@
             console.warn('Backup load failed:', e);
         }
 
-        // If backup failed, load demo data
         try {
             await loadDemoData();
             showToast('Demo data loaded (no backup available)', 'warning');
@@ -382,18 +346,12 @@
             showToast('Error loading data', 'error');
         }
 
-        // Clear retry attempts for future attempts
         clearRetryAttempts();
-
-        // Redirect to dashboard
         setTimeout(() => {
             window.location.href = '/dashboard/student.html';
         }, 2000);
     }
 
-    /**
-     * Handle load backup button click
-     */
     async function handleLoadBackup() {
         setLoading(true);
         showStatus('📂 Loading backup data...', 'loading');
@@ -403,7 +361,6 @@
             if (backupLoaded) {
                 showStatus('✅ Backup data loaded successfully!', 'success');
                 showToast('Backup data loaded', 'success');
-                
                 setTimeout(() => {
                     window.location.href = '/dashboard/student.html';
                 }, 1000);
@@ -420,9 +377,6 @@
         }
     }
 
-    /**
-     * Handle use demo data button click
-     */
     async function handleUseDemoData() {
         setLoading(true);
         showStatus('Loading demo data...', 'loading');
@@ -430,7 +384,6 @@
         try {
             await loadDemoData();
             showToast('Demo data loaded successfully', 'success');
-            
             setTimeout(() => {
                 window.location.href = '/dashboard/student.html';
             }, 1000);
@@ -443,28 +396,37 @@
         }
     }
 
-    /**
-     * Load backup data via API
-     */
     async function loadBackupData() {
         const user = APP.Storage.get('user');
         const regNumber = regNumberInput.value.trim() || (user ? user.registration_number : '');
 
-        const response = await APP.API.post('/portal/backup', {
-            reg_number: regNumber
-        });
+        try {
+            const response = await APP.API.get('/portal/recover', {
+                params: { reg_number: regNumber }
+            });
 
-        if (response.success && response.status === 'BACKUP_LOADED') {
-            // Update user data in storage
-            updateUserStorage(false, false, response.data);
-            return true;
+            if (response.success && (response.status === 'BACKUP_LOADED' || response.status === 'DEMO_LOADED')) {
+                updateUserStorage(false, false, response.data);
+                return true;
+            }
+        } catch (error) {
+            console.warn('Recover endpoint failed, trying backup endpoint:', error);
+            try {
+                const response = await APP.API.post('/portal/backup', {
+                    reg_number: regNumber
+                });
+
+                if (response.success && response.status === 'BACKUP_LOADED') {
+                    updateUserStorage(false, false, response.data);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Backup endpoint also failed:', e);
+            }
         }
         return false;
     }
 
-    /**
-     * Load demo data via API
-     */
     async function loadDemoData() {
         const user = APP.Storage.get('user');
         const regNumber = regNumberInput.value.trim() || (user ? user.registration_number : '');
@@ -475,7 +437,6 @@
         });
 
         if (response.success) {
-            // Update user data in storage
             updateUserStorage(false, false, response.data);
             return response;
         } else {
@@ -483,9 +444,6 @@
         }
     }
 
-    /**
-     * Update user storage with portal data
-     */
     function updateUserStorage(isVerified, portalConnected, data) {
         const user = APP.Storage.get('user');
         if (user) {
@@ -497,6 +455,7 @@
         }
     }
 
-    // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', init);
 })();
+
+*/ // END COMMENTED OUT - Portal fetching functionality suspended

@@ -1,14 +1,26 @@
 /**
  * Portal Controller
  * Handles portal sync operations with the Flask scraper microservice
- * Includes Google Sheets backup integration and multi-layer fallback
+ * Includes Google Sheets/Drive backup integration and multi-layer fallback
+ * 
+ * Features:
+ * - 3-attempt login system with structured response
+ * - Google Drive JSON backup per user
+ * - Recovery system (Drive backup → Dummy data)
+ * - Comprehensive error handling
  */
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 const { db } = require('../database/firebase');
 const googleSheetsService = require('../services/googleSheets.service');
+const googleDriveBackup = require('../services/googleDriveBackup.service');
 
 // Flask Scraper Service URL (configurable via environment)
 const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
+
+// Maximum login attempts before fallback
+const MAX_LOGIN_ATTEMPTS = 3;
 
 // Status constants matching Python scraper
 const STATUS_SUCCESS = 'SUCCESS';
@@ -16,56 +28,118 @@ const STATUS_AUTH_FAILED = 'AUTH_FAILED';
 const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
 const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 const STATUS_BACKUP_LOADED = 'BACKUP_LOADED';
+const STATUS_DEMO_LOADED = 'DEMO_LOADED';
+const STATUS_MAX_ATTEMPTS_REACHED = 'MAX_ATTEMPTS_REACHED';
 
-// Dummy data for fallback when scraping fails
-const DUMMY_DATA = {
-  profile: {
-    name: 'Demo Student',
-    email: 'demo.student@iter.ac.in',
-    department: 'Computer Science & Engineering',
-    year: 3,
-    section: 'A',
-    semester: 5,
-    phone: '9876543210'
-  },
-  marks: [
-    { subject: 'Data Structures', marks: '85', grade: 'A' },
-    { subject: 'Database Management', marks: '78', grade: 'B+' },
-    { subject: 'Operating Systems', marks: '82', grade: 'A' },
-    { subject: 'Computer Networks', marks: '75', grade: 'B' },
-    { subject: 'Software Engineering', marks: '88', grade: 'A' }
-  ],
-  attendance: [
-    { subject: 'Data Structures', attended: '42', total: '45', percentage: '93%' },
-    { subject: 'Database Management', attended: '38', total: '45', percentage: '84%' },
-    { subject: 'Operating Systems', attended: '40', total: '45', percentage: '89%' },
-    { subject: 'Computer Networks', attended: '35', total: '45', percentage: '78%' },
-    { subject: 'Software Engineering', attended: '43', total: '45', percentage: '96%' }
-  ],
-  timetable: [],
-  courses: [],
-  results: [],
-  notifications: []
-};
+// Load comprehensive dummy data from JSON file
+let DUMMY_DATA;
+try {
+  const dummyDataPath = path.join(__dirname, '../data/dummyStudentData.json');
+  DUMMY_DATA = JSON.parse(fs.readFileSync(dummyDataPath, 'utf8'));
+} catch (e) {
+  console.warn('Could not load dummyStudentData.json, using basic dummy data');
+  // Fallback dummy data
+  DUMMY_DATA = {
+    mode: 'demo',
+    profile: {
+      name: 'Demo Student',
+      email: 'demo.student@iter.ac.in',
+      department: 'Computer Science & Engineering',
+      year: 3,
+      section: 'A',
+      semester: 5,
+      phone: '9876543210'
+    },
+    marks: [
+      { subject: 'Data Structures', marks: '85', grade: 'A' },
+      { subject: 'Database Management', marks: '78', grade: 'B+' },
+      { subject: 'Operating Systems', marks: '82', grade: 'A' },
+      { subject: 'Computer Networks', marks: '75', grade: 'B' },
+      { subject: 'Software Engineering', marks: '88', grade: 'A' }
+    ],
+    attendance: [
+      { subject: 'Data Structures', attended: '42', total: '45', percentage: '93%' },
+      { subject: 'Database Management', attended: '38', total: '45', percentage: '84%' },
+      { subject: 'Operating Systems', attended: '40', total: '45', percentage: '89%' },
+      { subject: 'Computer Networks', attended: '35', total: '45', percentage: '78%' },
+      { subject: 'Software Engineering', attended: '43', total: '45', percentage: '96%' }
+    ],
+    timetable: [],
+    courses: [],
+    results: [],
+    notifications: [],
+    backlogs: [],
+    internal_assessments: []
+  };
+}
+
+// In-memory attempt tracking (for session-based tracking)
+// NOTE: This is a simple implementation for single-server deployments.
+// For production multi-instance deployments, replace with Redis or database storage.
+// The 15-minute expiry provides reasonable UX without permanent lockouts.
+const loginAttempts = new Map();
 
 /**
- * Sync portal data for a user
- * Enhanced with Google Sheets backup and multi-layer fallback
- * Flow: Live Portal → Google Sheets Backup → Firestore → Demo Data
+ * Get attempt key for a user
+ */
+function getAttemptKey(regNumber, userId) {
+  return userId || regNumber || 'unknown';
+}
+
+/**
+ * Get current attempt count for a user
+ */
+function getAttemptCount(regNumber, userId) {
+  const key = getAttemptKey(regNumber, userId);
+  const attemptData = loginAttempts.get(key);
+  if (!attemptData) return 0;
+  
+  // Reset if last attempt was more than 15 minutes ago
+  const fifteenMinutesAgo = Date.now() - (15 * 60 * 1000);
+  if (attemptData.lastAttempt < fifteenMinutesAgo) {
+    loginAttempts.delete(key);
+    return 0;
+  }
+  
+  return attemptData.count;
+}
+
+/**
+ * Increment attempt count for a user
+ */
+function incrementAttemptCount(regNumber, userId) {
+  const key = getAttemptKey(regNumber, userId);
+  const currentCount = getAttemptCount(regNumber, userId);
+  loginAttempts.set(key, {
+    count: currentCount + 1,
+    lastAttempt: Date.now()
+  });
+  return currentCount + 1;
+}
+
+/**
+ * Clear attempt count for a user (on success)
+ */
+function clearAttemptCount(regNumber, userId) {
+  const key = getAttemptKey(regNumber, userId);
+  loginAttempts.delete(key);
+}
+
+/**
+ * Portal Login - 3-Attempt System
+ * POST /api/portal/login
+ * 
+ * Implements the 3-attempt login system with structured response:
+ * - Attempt 1-2: Returns failure with attempts remaining
+ * - Attempt 3: After final failure, triggers fallback to backup/demo
  * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
-const syncPortalData = async (req, res) => {
+const portalLogin = async (req, res) => {
   try {
-    const { reg_number, password, useDemoData, forceBackup } = req.body;
-    // Get userId from req.user if authenticated, supports both id and uid
+    const { reg_number, password } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
-
-    // If explicitly requesting demo data
-    if (useDemoData === true) {
-      return await saveDemoData(userId, reg_number, res);
-    }
 
     // Validate required fields
     if (!reg_number || !password) {
@@ -76,74 +150,87 @@ const syncPortalData = async (req, res) => {
       });
     }
 
-    // Call Flask scraper service - DO NOT log password
-    console.log(`Portal sync request for: ${reg_number}, userId: ${userId || 'anonymous'}`);
+    // Get current attempt count
+    const currentAttempt = getAttemptCount(reg_number, userId);
+    
+    // If max attempts already reached, return recovery data
+    if (currentAttempt >= MAX_LOGIN_ATTEMPTS) {
+      console.log(`Max attempts reached for: ${reg_number}, returning recovery data`);
+      return await handleMaxAttemptsReached(reg_number, userId, res);
+    }
+
+    // Increment attempt count before trying
+    const attemptNumber = incrementAttemptCount(reg_number, userId);
+    const attemptsRemaining = MAX_LOGIN_ATTEMPTS - attemptNumber;
+
+    console.log(`Portal login attempt ${attemptNumber}/${MAX_LOGIN_ATTEMPTS} for: ${reg_number}`);
 
     try {
       const scraperResponse = await axios.post(
         `${FLASK_SERVICE_URL}/api/scrape`,
         { reg_number, password },
         {
-          timeout: 90000, // 90 second timeout for slow CAPTCHA solving
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          timeout: 90000,
+          headers: { 'Content-Type': 'application/json' }
         }
       );
 
       const { status, data, message } = scraperResponse.data;
 
       if (status === STATUS_SUCCESS) {
-        // Save scraped data to Firestore
-        await savePortalData(userId, reg_number, data, true);
+        // Clear attempt count on success
+        clearAttemptCount(reg_number, userId);
 
-        // Also save to Google Sheets as backup (non-blocking)
+        // Save to Firestore
+        await savePortalDataToFirestore(userId, reg_number, data, true);
+
+        // Save to Google Drive as backup (non-blocking)
+        saveToGoogleDriveBackup(reg_number, data).catch(err => {
+          console.warn('Google Drive backup failed (non-critical)');
+        });
+
+        // Also save to Google Sheets for compatibility
         saveToGoogleSheetsBackup(reg_number, data).catch(err => {
-          // Generic error logging without exposing sensitive details
           console.warn('Google Sheets backup failed (non-critical)');
         });
 
         return res.json({
           success: true,
           status: STATUS_SUCCESS,
-          message: 'Portal data synced successfully',
-          data: {
-            profile: data.profile,
-            marks: data.marks,
-            attendance: data.attendance,
-            timetable: data.timetable || [],
-            courses: data.courses || [],
-            results: data.results || [],
-            notifications: data.notifications || [],
-            isVerified: true,
-            portalConnected: true,
-            dataSource: 'live_portal'
-          }
+          message: 'Portal login successful',
+          attempt: attemptNumber,
+          attemptsRemaining: MAX_LOGIN_ATTEMPTS,
+          data: formatPortalData(data, true, true, 'live_portal')
         });
-      } else if (status === STATUS_AUTH_FAILED) {
-        // Try loading backup data on auth failure (user might have correct data stored)
-        const backupData = await tryLoadBackupData(reg_number, userId);
-        if (backupData) {
-          return res.json({
-            success: true,
-            status: STATUS_BACKUP_LOADED,
-            message: 'Authentication failed. Showing previously saved data.',
-            data: {
-              ...backupData,
-              isVerified: false,
-              portalConnected: false,
-              dataSource: backupData.dataSource,
-              warning: 'Portal authentication failed. Displaying cached data.'
-            }
-          });
+      }
+
+      // Handle failure cases
+      if (status === STATUS_AUTH_FAILED) {
+        // Check if this was the final attempt
+        if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
+          return await handleMaxAttemptsReached(reg_number, userId, res);
         }
+
         return res.status(401).json({
           success: false,
           status: STATUS_AUTH_FAILED,
-          message: message || 'Invalid portal credentials'
+          message: message || 'Invalid portal credentials',
+          attempt: attemptNumber,
+          attemptsRemaining
         });
-      } else if (status === STATUS_PORTAL_UNREACHABLE) {
-        // Portal unreachable - try backup
+      }
+
+      if (status === STATUS_PORTAL_UNREACHABLE) {
+        // Portal unreachable doesn't count against attempts
+        // Decrement the attempt since it's not the user's fault
+        const key = getAttemptKey(reg_number, userId);
+        const attemptData = loginAttempts.get(key);
+        if (attemptData && attemptData.count > 0) {
+          attemptData.count--;
+          loginAttempts.set(key, attemptData);
+        }
+
+        // Try to load backup data
         const backupData = await tryLoadBackupData(reg_number, userId);
         if (backupData) {
           return res.json({
@@ -154,112 +241,49 @@ const syncPortalData = async (req, res) => {
               ...backupData,
               isVerified: false,
               portalConnected: false,
-              dataSource: backupData.dataSource,
-              warning: 'Student portal is currently unreachable. Displaying cached data.'
+              warning: 'Student portal is currently unreachable.'
             }
           });
         }
+
         return res.status(503).json({
           success: false,
           status: STATUS_PORTAL_UNREACHABLE,
-          message: message || 'Student portal is currently unreachable. Please try again later.'
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          status: STATUS_SCRAPE_ERROR,
-          message: message || 'Failed to fetch portal data'
+          message: message || 'Student portal is currently unreachable'
         });
       }
+
+      // Other scrape errors
+      if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
+        return await handleMaxAttemptsReached(reg_number, userId, res);
+      }
+
+      return res.status(500).json({
+        success: false,
+        status: STATUS_SCRAPE_ERROR,
+        message: message || 'Failed to fetch portal data',
+        attempt: attemptNumber,
+        attemptsRemaining
+      });
+
     } catch (scraperError) {
       console.error('Scraper service error:', scraperError.message);
-
-      // Try to load backup data on any scraper error
-      const backupData = await tryLoadBackupData(reg_number, userId);
-
-      // Handle different error responses from scraper
-      if (scraperError.response) {
-        const { status, data } = scraperError.response;
-        
-        if (status === 401 || (data && data.status === STATUS_AUTH_FAILED)) {
-          if (backupData) {
-            return res.json({
-              success: true,
-              status: STATUS_BACKUP_LOADED,
-              message: 'Authentication failed. Showing previously saved data.',
-              data: {
-                ...backupData,
-                isVerified: false,
-                portalConnected: false,
-                dataSource: backupData.dataSource,
-                warning: 'Portal authentication failed. Displaying cached data.'
-              }
-            });
-          }
-          return res.status(401).json({
-            success: false,
-            status: STATUS_AUTH_FAILED,
-            message: data?.message || 'Invalid portal credentials'
-          });
-        }
-        
-        if (status === 503 || (data && data.status === STATUS_PORTAL_UNREACHABLE)) {
-          if (backupData) {
-            return res.json({
-              success: true,
-              status: STATUS_BACKUP_LOADED,
-              message: 'Portal unreachable. Showing previously saved data.',
-              data: {
-                ...backupData,
-                isVerified: false,
-                portalConnected: false,
-                dataSource: backupData.dataSource,
-                warning: 'Student portal is currently unreachable. Displaying cached data.'
-              }
-            });
-          }
-          return res.status(503).json({
-            success: false,
-            status: STATUS_PORTAL_UNREACHABLE,
-            message: data?.message || 'Student portal is currently unreachable. Please try again later.'
-          });
-        }
-
-        if (backupData) {
-          return res.json({
-            success: true,
-            status: STATUS_BACKUP_LOADED,
-            message: 'Scraping failed. Showing previously saved data.',
-            data: {
-              ...backupData,
-              isVerified: false,
-              portalConnected: false,
-              dataSource: backupData.dataSource,
-              warning: 'Could not fetch live data. Displaying cached data.'
-            }
-          });
-        }
-        
-        return res.status(500).json({
-          success: false,
-          status: data?.status || STATUS_SCRAPE_ERROR,
-          message: data?.message || 'Portal scraper service error'
-        });
+      
+      // Check if max attempts reached
+      if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
+        return await handleMaxAttemptsReached(reg_number, userId, res);
       }
 
-      // Connection error or timeout - try backup
-      if (backupData) {
-        return res.json({
-          success: true,
-          status: STATUS_BACKUP_LOADED,
-          message: 'Scraper service unavailable. Showing previously saved data.',
-          data: {
-            ...backupData,
-            isVerified: false,
-            portalConnected: false,
-            dataSource: backupData.dataSource,
-            warning: 'Portal service unavailable. Displaying cached data.'
-          }
+      const errorData = scraperError.response?.data;
+      const errorStatus = scraperError.response?.status;
+
+      if (errorStatus === 401 || errorData?.status === STATUS_AUTH_FAILED) {
+        return res.status(401).json({
+          success: false,
+          status: STATUS_AUTH_FAILED,
+          message: errorData?.message || 'Invalid portal credentials',
+          attempt: attemptNumber,
+          attemptsRemaining
         });
       }
 
@@ -268,9 +292,137 @@ const syncPortalData = async (req, res) => {
         status: STATUS_SCRAPE_ERROR,
         message: scraperError.code === 'ECONNREFUSED' 
           ? 'Portal scraper service unavailable' 
-          : 'Failed to connect to portal scraper service'
+          : 'Failed to connect to portal scraper service',
+        attempt: attemptNumber,
+        attemptsRemaining
       });
     }
+  } catch (error) {
+    console.error('Portal login error:', error.message);
+    return res.status(500).json({
+      success: false,
+      status: STATUS_SCRAPE_ERROR,
+      message: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * Handle max attempts reached - trigger fallback
+ * @param {string} regNumber - Registration number
+ * @param {string} userId - User ID
+ * @param {Object} res - Express response
+ */
+async function handleMaxAttemptsReached(regNumber, userId, res) {
+  console.log(`Handling max attempts reached for: ${regNumber}`);
+
+  // Step 1: Try Google Drive backup
+  try {
+    const driveBackup = await googleDriveBackup.loadUserBackup(regNumber);
+    if (driveBackup && (driveBackup.profile || driveBackup.marks?.length || driveBackup.attendance?.length)) {
+      console.log(`Loaded backup from Google Drive for: ${regNumber}`);
+      clearAttemptCount(regNumber, userId);
+      
+      return res.json({
+        success: true,
+        status: STATUS_BACKUP_LOADED,
+        message: 'Login failed 3 times. Loaded your previously saved data from backup.',
+        data: {
+          ...driveBackup,
+          isVerified: false,
+          portalConnected: false,
+          dataSource: 'google_drive_backup',
+          warning: 'Displaying cached data after failed login attempts.'
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Google Drive backup load failed:', e.message);
+  }
+
+  // Step 2: Try Google Sheets backup
+  try {
+    const sheetsBackup = await tryLoadBackupData(regNumber, userId);
+    if (sheetsBackup) {
+      console.log(`Loaded backup from alternative source for: ${regNumber}`);
+      clearAttemptCount(regNumber, userId);
+      
+      return res.json({
+        success: true,
+        status: STATUS_BACKUP_LOADED,
+        message: 'Login failed 3 times. Loaded your previously saved data.',
+        data: {
+          ...sheetsBackup,
+          isVerified: false,
+          portalConnected: false,
+          warning: 'Displaying cached data after failed login attempts.'
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Alternative backup load failed:', e.message);
+  }
+
+  // Step 3: Return dummy data
+  console.log(`No backup found, returning demo data for: ${regNumber}`);
+  clearAttemptCount(regNumber, userId);
+  
+  return res.json({
+    success: true,
+    status: STATUS_DEMO_LOADED,
+    message: 'Login failed 3 times. No backup found. Showing demo data.',
+    data: {
+      mode: 'demo',
+      ...DUMMY_DATA,
+      isVerified: false,
+      portalConnected: false,
+      dataSource: 'demo',
+      warning: 'Displaying demo data. Your real data will appear after successful portal login.'
+    }
+  });
+}
+
+/**
+ * Format portal data for response
+ */
+function formatPortalData(data, isVerified, portalConnected, dataSource) {
+  return {
+    profile: data.profile || DUMMY_DATA.profile,
+    marks: data.marks || [],
+    attendance: data.attendance || [],
+    timetable: data.timetable || [],
+    courses: data.courses || [],
+    results: data.results || [],
+    notifications: data.notifications || [],
+    backlogs: data.backlogs || [],
+    internal_assessments: data.internal_assessments || [],
+    fees: data.fees || {},
+    raw_api_data: data.raw_api_data || {},
+    isVerified,
+    portalConnected,
+    dataSource
+  };
+}
+
+/**
+ * Sync portal data for a user (legacy endpoint, redirects to login)
+ * Enhanced with Google Sheets backup and multi-layer fallback
+ * 
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
+const syncPortalData = async (req, res) => {
+  try {
+    const { reg_number, password, useDemoData } = req.body;
+    const userId = req.user ? (req.user.id || req.user.uid) : null;
+
+    // If explicitly requesting demo data
+    if (useDemoData === true) {
+      return await saveDemoData(userId, reg_number, res);
+    }
+
+    // Use the new login function with 3-attempt logic
+    return await portalLogin(req, res);
   } catch (error) {
     console.error('Portal sync error:', error.message);
     return res.status(500).json({
@@ -513,6 +665,83 @@ const getPortalData = async (req, res) => {
 };
 
 /**
+ * Save portal data to Firestore (renamed to avoid conflict)
+ * @param {string} userId - User document ID
+ * @param {string} regNumber - Registration number
+ * @param {Object} data - Scraped data
+ * @param {boolean} isVerified - Whether data is verified from portal
+ */
+const savePortalDataToFirestore = async (userId, regNumber, data, isVerified) => {
+  const updateData = {
+    profile: data.profile || {},
+    marks_data: data.marks || [],
+    attendance_data: data.attendance || [],
+    timetable_data: data.timetable || [],
+    courses_data: data.courses || [],
+    results_data: data.results || [],
+    notifications_data: data.notifications || [],
+    backlogs_data: data.backlogs || [],
+    internal_assessments_data: data.internal_assessments || [],
+    fees_data: data.fees || {},
+    isVerified: isVerified,
+    portalConnected: true,
+    portal_last_synced: new Date(),
+    updated_at: new Date()
+  };
+
+  const docId = userId || regNumber;
+
+  if (!docId) {
+    console.warn('savePortalDataToFirestore: No docId available, cannot save data');
+    return false;
+  }
+
+  try {
+    const userRef = db.collection('users').doc(docId);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      await userRef.update(updateData);
+      console.log(`Portal data saved for user: ${docId}`);
+      return true;
+    } else if (regNumber && regNumber !== docId) {
+      const regRef = db.collection('users').doc(regNumber);
+      const regDoc = await regRef.get();
+      if (regDoc.exists) {
+        await regRef.update(updateData);
+        console.log(`Portal data saved for registration: ${regNumber}`);
+        return true;
+      }
+    }
+    
+    console.warn(`savePortalDataToFirestore: No document found for ${docId} or ${regNumber}`);
+    return false;
+  } catch (error) {
+    console.error(`savePortalDataToFirestore error for ${docId}:`, error.message);
+    return false;
+  }
+};
+
+/**
+ * Save data to Google Drive as JSON backup (non-blocking)
+ * @param {string} regNumber - Registration number
+ * @param {Object} data - Data to save
+ */
+async function saveToGoogleDriveBackup(regNumber, data) {
+  try {
+    const isAvailable = await googleDriveBackup.isAvailable();
+    if (!isAvailable) {
+      console.log('Google Drive Backup service not available, skipping backup');
+      return false;
+    }
+    return await googleDriveBackup.saveUserBackup(regNumber, data);
+  } catch (error) {
+    console.error('Error saving to Google Drive:', error.message);
+    return false;
+  }
+}
+
+/**
  * Save data to Google Sheets as backup (non-blocking)
  * @param {string} regNumber - Registration number
  * @param {Object} data - Data to save
@@ -533,13 +762,39 @@ async function saveToGoogleSheetsBackup(regNumber, data) {
 
 /**
  * Try to load backup data from multiple sources
- * Priority: Google Sheets → Firestore → null
+ * Priority: Google Drive → Google Sheets → Firestore → null
  * @param {string} regNumber - Registration number
  * @param {string} userId - User ID
  * @returns {Object|null} - Backup data or null
  */
 async function tryLoadBackupData(regNumber, userId) {
-  // Try Google Sheets first
+  // Try Google Drive JSON backup first
+  try {
+    const driveAvailable = await googleDriveBackup.isAvailable();
+    if (driveAvailable) {
+      const driveData = await googleDriveBackup.loadUserBackup(regNumber);
+      if (driveData && (driveData.profile || driveData.attendance?.length || driveData.marks?.length)) {
+        console.log(`Loaded backup data from Google Drive for ${regNumber}`);
+        return {
+          profile: driveData.profile || DUMMY_DATA.profile,
+          marks: driveData.marks || DUMMY_DATA.marks,
+          attendance: driveData.attendance || DUMMY_DATA.attendance,
+          timetable: driveData.timetable || DUMMY_DATA.timetable,
+          courses: driveData.courses || DUMMY_DATA.courses,
+          results: driveData.results || [],
+          notifications: driveData.notifications || [],
+          backlogs: driveData.backlogs || [],
+          internal_assessments: driveData.internal_assessments || [],
+          dataSource: 'google_drive',
+          lastUpdated: driveData.backupMetadata?.savedAt || null
+        };
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load from Google Drive:', error.message);
+  }
+
+  // Try Google Sheets next
   try {
     const isAvailable = await googleSheetsService.isAvailable();
     if (isAvailable) {
@@ -640,8 +895,243 @@ const loadBackupData = async (req, res) => {
   }
 };
 
+/**
+ * Recovery endpoint - GET /api/portal/recover
+ * Attempts to load backup data for a user, falls back to demo data
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
+const recoverPortalData = async (req, res) => {
+  try {
+    const { reg_number } = req.query;
+    const userId = req.user ? (req.user.id || req.user.uid) : null;
+    const regNumber = reg_number || (req.user ? req.user.registration_number : null);
+
+    if (!regNumber && !userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registration number or authentication is required'
+      });
+    }
+
+    // Try Google Drive backup first
+    try {
+      const driveAvailable = await googleDriveBackup.isAvailable();
+      if (driveAvailable) {
+        const driveData = await googleDriveBackup.loadUserBackup(regNumber);
+        if (driveData && (driveData.profile || driveData.marks?.length || driveData.attendance?.length)) {
+          console.log(`Recovered data from Google Drive for: ${regNumber}`);
+          return res.json({
+            success: true,
+            status: STATUS_BACKUP_LOADED,
+            message: 'Data recovered from Google Drive backup',
+            data: {
+              ...driveData,
+              isVerified: false,
+              portalConnected: false,
+              dataSource: 'google_drive'
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Google Drive recovery failed:', e.message);
+    }
+
+    // Try Google Sheets backup
+    const backupData = await tryLoadBackupData(regNumber, userId);
+    if (backupData) {
+      return res.json({
+        success: true,
+        status: STATUS_BACKUP_LOADED,
+        message: `Data recovered from ${backupData.dataSource}`,
+        data: {
+          ...backupData,
+          isVerified: false,
+          portalConnected: false
+        }
+      });
+    }
+
+    // Return demo data as fallback
+    return res.json({
+      success: true,
+      status: STATUS_DEMO_LOADED,
+      message: 'No backup found. Returning demo data.',
+      data: {
+        mode: 'demo',
+        ...DUMMY_DATA,
+        isVerified: false,
+        portalConnected: false,
+        dataSource: 'demo'
+      }
+    });
+  } catch (error) {
+    console.error('Recovery error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * Fetch all portal data endpoint - POST /api/portal/fetch
+ * Fetches all available student data after login
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
+const fetchPortalData = async (req, res) => {
+  try {
+    const { reg_number, password } = req.body;
+    const userId = req.user ? (req.user.id || req.user.uid) : null;
+
+    if (!reg_number || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registration number and password are required'
+      });
+    }
+
+    // This endpoint directly calls the scraper without attempt tracking
+    // Use it when you specifically want to refresh data
+    try {
+      const scraperResponse = await axios.post(
+        `${FLASK_SERVICE_URL}/api/scrape`,
+        { reg_number, password },
+        {
+          timeout: 120000, // 2 minute timeout for comprehensive data fetch
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      const { status, data, message } = scraperResponse.data;
+
+      if (status === STATUS_SUCCESS) {
+        // Save to Firestore
+        await savePortalDataToFirestore(userId, reg_number, data, true);
+
+        // Save to Google Drive backup
+        await saveToGoogleDriveBackup(reg_number, data);
+
+        // Save to Google Sheets backup
+        await saveToGoogleSheetsBackup(reg_number, data);
+
+        return res.json({
+          success: true,
+          status: STATUS_SUCCESS,
+          message: 'All portal data fetched and saved successfully',
+          data: formatPortalData(data, true, true, 'live_portal')
+        });
+      }
+
+      return res.status(status === STATUS_AUTH_FAILED ? 401 : 500).json({
+        success: false,
+        status,
+        message: message || 'Failed to fetch portal data'
+      });
+
+    } catch (scraperError) {
+      console.error('Fetch portal data error:', scraperError.message);
+      return res.status(500).json({
+        success: false,
+        status: STATUS_SCRAPE_ERROR,
+        message: scraperError.response?.data?.message || 'Failed to fetch portal data'
+      });
+    }
+  } catch (error) {
+    console.error('Fetch portal data error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+/**
+ * Save backup endpoint - POST /api/portal/backup
+ * Manually triggers backup save to Google Drive
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
+const saveBackup = async (req, res) => {
+  try {
+    const { reg_number, data } = req.body;
+    const userId = req.user ? (req.user.id || req.user.uid) : null;
+    const regNumber = reg_number || (req.user ? req.user.registration_number : null);
+
+    if (!regNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registration number is required'
+      });
+    }
+
+    // If data provided, save it; otherwise, try to get from Firestore
+    let dataToSave = data;
+    if (!dataToSave) {
+      const docId = userId || regNumber;
+      if (docId) {
+        const userRef = db.collection('users').doc(docId);
+        const userDoc = await userRef.get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          dataToSave = {
+            profile: userData.profile,
+            marks: userData.marks_data,
+            attendance: userData.attendance_data,
+            timetable: userData.timetable_data,
+            courses: userData.courses_data,
+            results: userData.results_data,
+            notifications: userData.notifications_data
+          };
+        }
+      }
+    }
+
+    if (!dataToSave) {
+      return res.status(400).json({
+        success: false,
+        message: 'No data to backup'
+      });
+    }
+
+    // Save to Google Drive
+    const driveSuccess = await saveToGoogleDriveBackup(regNumber, dataToSave);
+
+    // Also save to Google Sheets
+    const sheetsSuccess = await saveToGoogleSheetsBackup(regNumber, dataToSave);
+
+    if (driveSuccess || sheetsSuccess) {
+      return res.json({
+        success: true,
+        message: 'Backup saved successfully',
+        savedTo: {
+          googleDrive: driveSuccess,
+          googleSheets: sheetsSuccess
+        }
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to save backup'
+    });
+  } catch (error) {
+    console.error('Save backup error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   syncPortalData,
+  portalLogin,
+  fetchPortalData,
+  saveBackup,
+  recoverPortalData,
   getPortalStatus,
   disconnectPortal,
   getPortalData,
@@ -651,5 +1141,8 @@ module.exports = {
   STATUS_AUTH_FAILED,
   STATUS_SCRAPE_ERROR,
   STATUS_PORTAL_UNREACHABLE,
-  STATUS_BACKUP_LOADED
+  STATUS_BACKUP_LOADED,
+  STATUS_DEMO_LOADED,
+  STATUS_MAX_ATTEMPTS_REACHED,
+  MAX_LOGIN_ATTEMPTS
 };
