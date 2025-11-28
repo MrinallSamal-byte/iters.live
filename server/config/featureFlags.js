@@ -11,7 +11,7 @@
 
 // TEMPORARILY DISABLED — DO NOT REMOVE
 // Portal features are disabled until further notice
-const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED === 'true' ? true : false;
+const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED === 'true';
 
 // Message to show users when portal features are disabled
 const PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily suspended. Please try again later.';

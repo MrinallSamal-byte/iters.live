@@ -140,61 +140,61 @@ def scrape_portal():
     # TEMPORARILY DISABLED — DO NOT REMOVE
     # The following code is disabled but preserved for future re-enablement
     # To re-enable: Set PORTAL_FEATURES_ENABLED=true in environment
-    """
-    try:
-        # Get JSON data
-        data = request.get_json()
-        
-        # Validate request
-        is_valid, error_message = validate_scrape_request(data)
-        if not is_valid:
-            return jsonify({
-                'status': STATUS_SCRAPE_ERROR,
-                'message': error_message
-            }), 400
-        
-        reg_number = data['reg_number'].strip()
-        password = data['password']  # Do NOT log this
-        
-        # Log the request (without password)
-        print(f'Scrape request received for: {reg_number}')
-        
-        # Create scraper and run
-        from scraper import create_scraper
-        scraper = create_scraper()
-        result = scraper.scrape(reg_number, password)
-        
-        # Return appropriate response based on status
-        status = result.get('status', STATUS_SCRAPE_ERROR)
-        
-        if status == STATUS_SUCCESS:
-            return jsonify(result), 200
-        elif status == STATUS_AUTH_FAILED:
-            return jsonify({
-                'status': STATUS_AUTH_FAILED,
-                'message': result.get('message', 'Invalid credentials')
-            }), 401
-        elif status == STATUS_PORTAL_UNREACHABLE:
-            return jsonify({
-                'status': STATUS_PORTAL_UNREACHABLE,
-                'message': result.get('message', 'Student portal is currently unreachable')
-            }), 503  # Service Unavailable
-        else:
-            # SCRAPE_ERROR or any other error
-            return jsonify({
-                'status': STATUS_SCRAPE_ERROR,
-                'message': result.get('message', 'Failed to scrape portal data')
-            }), 500
-            
-    except Exception as e:
-        # Log error without exposing sensitive details
-        print(f'Scrape endpoint error: {type(e).__name__}: {str(e)}')
-        return jsonify({
-            'status': STATUS_SCRAPE_ERROR,
-            'message': 'Internal server error'
-        }), 500
-    """
-    # Return disabled message (this code path is reached if somehow the check above is bypassed)
+    #
+    # try:
+    #     # Get JSON data
+    #     data = request.get_json()
+    #     
+    #     # Validate request
+    #     is_valid, error_message = validate_scrape_request(data)
+    #     if not is_valid:
+    #         return jsonify({
+    #             'status': STATUS_SCRAPE_ERROR,
+    #             'message': error_message
+    #         }), 400
+    #     
+    #     reg_number = data['reg_number'].strip()
+    #     password = data['password']  # Do NOT log this
+    #     
+    #     # Log the request (without password)
+    #     print(f'Scrape request received for: {reg_number}')
+    #     
+    #     # Create scraper and run
+    #     from scraper import create_scraper
+    #     scraper = create_scraper()
+    #     result = scraper.scrape(reg_number, password)
+    #     
+    #     # Return appropriate response based on status
+    #     status = result.get('status', STATUS_SCRAPE_ERROR)
+    #     
+    #     if status == STATUS_SUCCESS:
+    #         return jsonify(result), 200
+    #     elif status == STATUS_AUTH_FAILED:
+    #         return jsonify({
+    #             'status': STATUS_AUTH_FAILED,
+    #             'message': result.get('message', 'Invalid credentials')
+    #         }), 401
+    #     elif status == STATUS_PORTAL_UNREACHABLE:
+    #         return jsonify({
+    #             'status': STATUS_PORTAL_UNREACHABLE,
+    #             'message': result.get('message', 'Student portal is currently unreachable')
+    #         }), 503  # Service Unavailable
+    #     else:
+    #         # SCRAPE_ERROR or any other error
+    #         return jsonify({
+    #             'status': STATUS_SCRAPE_ERROR,
+    #             'message': result.get('message', 'Failed to scrape portal data')
+    #         }), 500
+    #         
+    # except Exception as e:
+    #     # Log error without exposing sensitive details
+    #     print(f'Scrape endpoint error: {type(e).__name__}: {str(e)}')
+    #     return jsonify({
+    #         'status': STATUS_SCRAPE_ERROR,
+    #         'message': 'Internal server error'
+    #     }), 500
+    
+    # This should not be reached, but return disabled message as fallback
     return jsonify({
         'status': STATUS_PORTAL_DISABLED,
         'message': PORTAL_DISABLED_MESSAGE,
@@ -233,32 +233,33 @@ def test_captcha():
     
     # TEMPORARILY DISABLED — DO NOT REMOVE
     # The following code is disabled but preserved for future re-enablement
-    """
-    try:
-        from captcha_solver import get_captcha_solver
-        
-        solver = get_captcha_solver()
-        api_key_configured = bool(solver.api_key)
-        
-        response = {
-            'status': 'ok',
-            'api_key_configured': api_key_configured,
-            'api_key_length': len(solver.api_key) if solver.api_key else 0
-        }
-        
-        data = request.get_json() or {}
-        if 'image_url' in data:
-            captcha_text = solver.solve_captcha_from_url(data['image_url'])
-            response['captcha_text'] = captcha_text
-        
-        return jsonify(response), 200
-        
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-    """
+    #
+    # try:
+    #     from captcha_solver import get_captcha_solver
+    #     
+    #     solver = get_captcha_solver()
+    #     api_key_configured = bool(solver.api_key)
+    #     
+    #     response = {
+    #         'status': 'ok',
+    #         'api_key_configured': api_key_configured,
+    #         'api_key_length': len(solver.api_key) if solver.api_key else 0
+    #     }
+    #     
+    #     data = request.get_json() or {}
+    #     if 'image_url' in data:
+    #         captcha_text = solver.solve_captcha_from_url(data['image_url'])
+    #         response['captcha_text'] = captcha_text
+    #     
+    #     return jsonify(response), 200
+    #     
+    # except Exception as e:
+    #     return jsonify({
+    #         'status': 'error',
+    #         'message': str(e)
+    #     }), 500
+    
+    # This should not be reached, but return disabled message as fallback
     return jsonify({
         'status': STATUS_PORTAL_DISABLED,
         'message': PORTAL_DISABLED_MESSAGE,
