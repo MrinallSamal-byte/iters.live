@@ -36,10 +36,9 @@ router.post('/google-login', async (req, res, next) => {
     let needsPortalConnection = false;
 
     if (usersSnapshot.empty) {
-      // New user - create account and go directly to dashboard
-      // Portal fetching is suspended - users go straight to dashboard
+      // Case B: New user - needs portal connection
       isNewUser = true;
-      needsPortalConnection = false; // Disabled: Portal connection page is suspended
+      needsPortalConnection = true;
       
       userId = uid; // Use Firebase UID as ID
       const newUser = {
@@ -51,8 +50,8 @@ router.post('/google-login', async (req, res, next) => {
         created_at: new Date(),
         last_login: new Date(),
         registration_number: 'GOOGLE_' + uid.substring(0, 8).toUpperCase(),
-        // Portal connection fields - defaulting to connected with demo data
-        portalConnected: true, // Mark as connected so user goes to dashboard
+        // New fields for portal connection
+        portalConnected: false,
         isVerified: false,
         profile: null
       };
@@ -65,12 +64,12 @@ router.post('/google-login', async (req, res, next) => {
       user = userDoc.data();
       user.id = userDoc.id;
 
-      // Portal fetching is suspended - all users go directly to dashboard
-      // Commented out portal connection check:
-      // if (!user.portalConnected) {
-      //   needsPortalConnection = true;
-      // }
-      needsPortalConnection = false; // Always go to dashboard
+      // Check if portal is connected
+      // Case A: Existing user with portal connected
+      // Case B: Existing user but never connected portal
+      if (!user.portalConnected) {
+        needsPortalConnection = true;
+      }
 
       // Update last login
       await userDoc.ref.update({ last_login: new Date() });
@@ -84,7 +83,7 @@ router.post('/google-login', async (req, res, next) => {
         token: idToken,
         isNewUser,
         needsPortalConnection,
-        redirectUrl: null // Portal connection page is suspended - go directly to dashboard
+        redirectUrl: needsPortalConnection ? '/connect-portal.html' : null
       }
     });
 
@@ -144,12 +143,9 @@ router.post('/login', [
     // Generate Firebase custom token
     const customToken = await auth.createCustomToken(user.id, { role: user.role });
 
-    // SUSPENDED: Portal auto-sync is disabled
-    // Users will go directly to dashboard after login
-    // The portal fetching feature has been temporarily suspended
+    // Case C: If portal not connected and not explicitly skipping, trigger auto-sync
+    // The frontend will handle the sync result and retry logic
     let portalSyncResult = null;
-    
-    /* COMMENTED OUT - Portal auto-sync suspended
     let shouldAutoSync = !user.portalConnected && !skipPortalSync && user.role === 'student';
 
     if (shouldAutoSync) {
@@ -206,7 +202,6 @@ router.post('/login', [
         };
       }
     }
-    */ // END COMMENTED OUT - Portal auto-sync suspended
 
     res.json({
       success: true,
