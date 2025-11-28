@@ -300,13 +300,7 @@ iframe {
         gap: 2rem;
     }
 
-    /* Theme Toggle */
-    .theme-toggle {
-        bottom: 20px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-    }
+    /* Theme Toggle - positioning handled in style.css */
 
     /* Buttons */
     .btn {

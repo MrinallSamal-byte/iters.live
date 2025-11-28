@@ -246,12 +246,7 @@ body.light-theme .stat-card::before {
 
 /* Responsive Improvements */
 @media (max-width: 768px) {
-    .theme-toggle {
-        bottom: 90px;
-        right: 24px;
-        width: 48px;
-        height: 48px;
-    }
+    /* Theme toggle positioning handled in style.css */
     
     .fab {
         width: 48px;

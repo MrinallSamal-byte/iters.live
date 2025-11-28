@@ -493,13 +493,7 @@ body {
         gap: 2rem;
     }
 
-    /* Theme Toggle */
-    .theme-toggle {
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-    }
+    /* Theme Toggle - positioning handled in style.css */
 }
 
 /* Small mobile devices (max-width: 480px) */

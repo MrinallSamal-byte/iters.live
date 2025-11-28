@@ -736,23 +736,8 @@ pre, code, .code-block {
 
 /* ============================================================================
    FLOATING BUTTONS
+   NOTE: Theme toggle positioning is now in style.css for global consistency.
    ============================================================================ */
-
-@media (max-width: 767px) {
-    .theme-toggle {
-        bottom: 90px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-    }
-}
-
-@media (min-width: 768px) {
-    .theme-toggle {
-        bottom: 24px;
-        right: 96px;
-    }
-}
 
 /* ============================================================================
    LANDSCAPE MODE
