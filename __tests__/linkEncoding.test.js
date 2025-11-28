@@ -313,25 +313,44 @@ describe('Server-side Redirect Handler', () => {
     if (url.includes('://')) return false;
     if (url.includes('..')) return false;
     
-    // Parse URL to separate path from query string and hash
+    // Parse URL to separate path, query string, and hash fragment
     let path = url;
-    let queryAndHash = '';
+    let queryString = '';
+    let hashFragment = '';
     
     const queryStart = url.indexOf('?');
     const hashStart = url.indexOf('#');
     
-    if (queryStart !== -1) {
+    // Handle both query and hash - find earliest separator
+    if (queryStart !== -1 && (hashStart === -1 || queryStart < hashStart)) {
+        // Query comes first (or only query exists)
         path = url.substring(0, queryStart);
-        queryAndHash = url.substring(queryStart);
+        const afterQuery = url.substring(queryStart);
+        const hashInQuery = afterQuery.indexOf('#');
+        if (hashInQuery !== -1) {
+            queryString = afterQuery.substring(0, hashInQuery);
+            hashFragment = afterQuery.substring(hashInQuery);
+        } else {
+            queryString = afterQuery;
+        }
     } else if (hashStart !== -1) {
+        // Only hash exists (or hash comes first - unusual but handle it)
         path = url.substring(0, hashStart);
-        queryAndHash = url.substring(hashStart);
+        hashFragment = url.substring(hashStart);
     }
     
-    // Validate query parameters (only allow safe characters)
-    if (queryAndHash) {
-        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot in query
-        if (!/^[?#][a-z0-9\-_=&%+.#]*$/i.test(queryAndHash)) return false;
+    // Validate query string (only allow safe characters)
+    // Format: ?key=value&key2=value2
+    if (queryString) {
+        // Allow alphanumeric, hyphen, underscore, equals, ampersand, percent, plus, dot
+        if (!/^\?[a-z0-9\-_=&%+.]*$/i.test(queryString)) return false;
+    }
+    
+    // Validate hash fragment (only allow safe characters)
+    // Format: #section-name or #id_value
+    if (hashFragment) {
+        // Allow alphanumeric, hyphen, underscore only in hash (no query chars like = or &)
+        if (!/^#[a-z0-9\-_]*$/i.test(hashFragment)) return false;
     }
     
     // Root path
@@ -417,6 +436,12 @@ describe('Server-side Redirect Handler', () => {
     it('should reject URLs with invalid query parameter characters', () => {
       expect(isValidRedirectUrl('/page.html?evil=<script>')).toBe(false);
       expect(isValidRedirectUrl('/page.html?bad="test"')).toBe(false);
+    });
+
+    it('should reject hash fragments with invalid characters', () => {
+      // Hash fragments should not contain query-like characters
+      expect(isValidRedirectUrl('/page.html#param=value')).toBe(false);
+      expect(isValidRedirectUrl('/page.html#section&other')).toBe(false);
     });
   });
 });
