@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/auth');
 const aiService = require('../services/ai.service');
-const db = require('../database/db');
+const { db } = require('../database/firebase');
 
 /**
  * AI Routes for Educational Assistance
  * Part of ITER EduHub Enhancement Suite
+ * 
+ * Note: Migrated from SQL to Firestore
  */
 
 /**
@@ -16,35 +18,26 @@ const db = require('../database/db');
  */
 router.post('/study-plan', verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.id || req.user.uid;
         
-        // Fetch student data
-        const [marks] = await db.query(`SELECT subject, obtained_marks, total_marks, created_at
-             FROM marks 
-             WHERE user_id = $1 
-             ORDER BY created_at DESC 
-             LIMIT 10`, [userId]
-        );
+        // Fetch student data from Firestore
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
         
-        const [attendance] = await db.query(`SELECT subject, COUNT(*) as total, 
-             SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present 
-             FROM attendance 
-             WHERE user_id = $1 
-             GROUP BY subject`, [userId]
-        );
-        
-        const [enrollments] = await db.query('SELECT DISTINCT subject FROM enrollments WHERE user_id = $1', [userId]
-        );
+        // Extract data from user document
+        const marksData = userData.marks_data || [];
+        const attendanceData = userData.attendance_data || [];
+        const coursesData = userData.courses_data || [];
         
         const studentData = {
-            subjects: enrollments.map(e => e.subject),
-            attendance: attendance.map(a => ({
+            subjects: coursesData.map(c => c.name || c.subject).filter(Boolean),
+            attendance: attendanceData.map(a => ({
                 subject: a.subject,
-                percentage: (a.present / a.total) * 100
+                percentage: parseFloat(a.percentage) || 0
             })),
-            marks: marks.map(m => ({
+            marks: marksData.map(m => ({
                 subject: m.subject,
-                percentage: ((m.obtained_marks / m.total_marks) * 100)
+                percentage: m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0
             })),
             preferences: req.body.preferences || {
                 studyHours: 4,
@@ -54,9 +47,12 @@ router.post('/study-plan', verifyToken, async (req, res) => {
         
         const studyPlan = await aiService.generateStudyPlan(studentData);
         
-        // Save study plan to database
-        await db.query('INSERT INTO study_plans (user_id, plan_data, created_at) VALUES ($1, $2, NOW())', [userId, JSON.stringify(studyPlan)]
-        );
+        // Save study plan to Firestore
+        await db.collection('study_plans').add({
+            user_id: userId,
+            plan_data: studyPlan,
+            created_at: new Date()
+        });
         
         res.json({
             success: true,
@@ -80,26 +76,23 @@ router.post('/study-plan', verifyToken, async (req, res) => {
  */
 router.get('/recommendations', verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.id || req.user.uid;
         
-        const [marks] = await db.query(`SELECT subject, AVG((obtained_marks/total_marks)*100) as percentage 
-             FROM marks 
-             WHERE user_id = $1 
-             GROUP BY subject`, [userId]
-        );
+        // Fetch student data from Firestore
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
         
-        const [attendance] = await db.query(`SELECT subject, COUNT(*) as total, 
-             SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present 
-             FROM attendance 
-             WHERE user_id = $1 
-             GROUP BY subject`, [userId]
-        );
+        const marksData = userData.marks_data || [];
+        const attendanceData = userData.attendance_data || [];
         
         const recommendations = await aiService.getSubjectRecommendations(
-            marks.map(m => ({ subject: m.subject, percentage: m.percentage })),
-            attendance.map(a => ({
+            marksData.map(m => ({ 
+                subject: m.subject, 
+                percentage: m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0 
+            })),
+            attendanceData.map(a => ({
                 subject: a.subject,
-                percentage: (a.present / a.total) * 100
+                percentage: parseFloat(a.percentage) || 0
             }))
         );
         
@@ -134,9 +127,13 @@ router.post('/chat', verifyToken, async (req, res) => {
         
         const answer = await aiService.answerQuestion(question, context || '');
         
-        // Log chat interaction
-        await db.query('INSERT INTO ai_chat_logs (user_id, question, answer, created_at) VALUES ($1, $2, $3, NOW())', [req.user.id, question, answer]
-        ).catch(err => console.error('Failed to log chat:', err));
+        // Log chat interaction to Firestore
+        await db.collection('ai_chat_logs').add({
+            user_id: req.user.id || req.user.uid,
+            question,
+            answer,
+            created_at: new Date()
+        }).catch(err => console.error('Failed to log chat:', err));
         
         res.json({
             success: true,
@@ -189,16 +186,24 @@ router.post('/assignment-feedback', verifyToken, async (req, res) => {
  */
 router.get('/study-plans/history', verifyToken, async (req, res) => {
     try {
-        const [plans] = await db.query('SELECT id, plan_data, created_at FROM study_plans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10', [req.user.id]
-        );
+        const userId = req.user.id || req.user.uid;
+        
+        // Fetch from Firestore
+        const plansSnapshot = await db.collection('study_plans')
+            .where('user_id', '==', userId)
+            .orderBy('created_at', 'desc')
+            .limit(10)
+            .get();
+        
+        const plans = plansSnapshot.docs.map(doc => ({
+            id: doc.id,
+            plan: doc.data().plan_data,
+            createdAt: doc.data().created_at
+        }));
         
         res.json({
             success: true,
-            plans: plans.map(p => ({
-                id: p.id,
-                plan: JSON.parse(p.plan_data),
-                createdAt: p.created_at
-            }))
+            plans
         });
     } catch (error) {
         console.error('Study plan history error:', error);

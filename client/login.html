@@ -227,7 +227,8 @@
                     console.log('Sending login request...');
                     const response = await APP.API.post('/auth/login', {
                         registration_number,
-                        password
+                        password,
+                        skipPortalSync: true  // Skip auto-sync, redirect to portal page instead
                     });
 
                     console.log('Login response:', response);
@@ -254,6 +255,9 @@
 
                         APP.Storage.set('refreshToken', response.data.refreshToken);
                         APP.Storage.set('user', response.data.user);
+                        
+                        // Store the portal password temporarily for the sync page
+                        sessionStorage.setItem('portalPassword', password);
 
                         // Verify storage
                         console.log('Verifying stored data...');
@@ -262,80 +266,38 @@
                         console.log('Is authenticated:', APP.isAuthenticated());
                         console.log('User role:', APP.getUserRole());
 
-                        // Case C: Handle portal sync result
-                        const portalSync = response.data.portalSync;
                         let redirectUrl;
+                        const userRole = response.data.user.role;
                         
-                        if (portalSync) {
-                            console.log('Portal sync result:', portalSync);
+                        // ALWAYS redirect students to connect-portal page for data fetching
+                        // This ensures they can choose to pull fresh data from SOA Portal
+                        if (userRole === 'student') {
+                            // Store credentials for the portal sync page
+                            sessionStorage.setItem('pendingPortalSync', JSON.stringify({
+                                reg_number: registration_number,
+                                timestamp: Date.now()
+                            }));
                             
-                            if (portalSync.status === 'SUCCESS') {
-                                // Portal sync successful
-                                if (typeof APP.showToast === 'function') {
-                                    APP.showToast('Login & Portal sync successful!', 'success');
-                                }
-                                showError('✅ Login & Portal synced! Redirecting...');
-                                errorMessage.style.color = '#10b981';
-                                
-                                // Redirect to dashboard
-                                const dashboards = {
-                                    student: '/dashboard/student.html',
-                                    teacher: '/dashboard/teacher.html',
-                                    admin: '/dashboard/admin.html'
-                                };
-                                redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
-                            } else if (portalSync.status === 'AUTH_FAILED' || portalSync.status === 'SCRAPE_ERROR') {
-                                // Portal sync failed - check retry count
-                                const userId = response.data.user.id;
-                                const attempts = handlePortalSyncFailure(portalSync.status, userId);
-                                
-                                if (attempts >= 3) {
-                                    // After 3 failed attempts, auto-fallback to demo data and go to dashboard
-                                    if (typeof APP.showToast === 'function') {
-                                        APP.showToast('Portal unavailable. Using demo data.', 'warning');
-                                    }
-                                    showError('⚠️ Using demo data. Redirecting to dashboard...');
-                                    errorMessage.style.color = '#f59e0b';
-                                    
-                                    // Update user to show portal not connected
-                                    const storedUser = APP.Storage.get('user');
-                                    if (storedUser) {
-                                        storedUser.portalConnected = false;
-                                        storedUser.isVerified = false;
-                                        APP.Storage.set('user', storedUser);
-                                    }
-                                    
-                                    const dashboards = {
-                                        student: '/dashboard/student.html',
-                                        teacher: '/dashboard/teacher.html',
-                                        admin: '/dashboard/admin.html'
-                                    };
-                                    redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
-                                } else {
-                                    // Less than 3 attempts - redirect to connect-portal for retry
-                                    if (typeof APP.showToast === 'function') {
-                                        APP.showToast(`Portal sync failed. ${3 - attempts} attempts remaining.`, 'warning');
-                                    }
-                                    showError(`⚠️ Portal sync failed. Redirecting to retry page... (${3 - attempts} attempts left)`);
-                                    errorMessage.style.color = '#f59e0b';
-                                    redirectUrl = '/connect-portal.html';
-                                }
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Login successful! Redirecting to data sync...', 'success');
                             }
+                            showError('✅ Login successful! Redirecting to fetch your data...');
+                            errorMessage.style.color = '#10b981';
+                            
+                            redirectUrl = '/connect-portal.html';
                         } else {
-                            // No portal sync attempted (teacher/admin or already connected)
+                            // Teachers and Admins go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
                             showError('✅ Login successful! Redirecting...');
                             errorMessage.style.color = '#10b981';
                             
-                            // Redirect to dashboard based on role
                             const dashboards = {
-                                student: '/dashboard/student.html',
                                 teacher: '/dashboard/teacher.html',
                                 admin: '/dashboard/admin.html'
                             };
-                            redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                            redirectUrl = dashboards[userRole] || '/dashboard/teacher.html';
                         }
 
                         console.log('Redirecting to:', redirectUrl);

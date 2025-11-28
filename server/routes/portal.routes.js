@@ -22,8 +22,15 @@ const portalController = require('../controllers/portal.controller');
  * Success: { success: true, status: "SUCCESS", data: {...} }
  * Auth Failed: { success: false, status: "AUTH_FAILED", message: "..." }
  * Error: { success: false, status: "SCRAPE_ERROR", message: "..." }
+ * Backup Loaded: { success: true, status: "BACKUP_LOADED", data: {...}, warning: "..." }
  */
 router.post('/sync', optionalAuth, portalController.syncPortalData);
+
+/**
+ * POST /api/portal/backup
+ * Load backup data from Google Sheets or Firestore
+ */
+router.post('/backup', optionalAuth, portalController.loadBackupData);
 
 /**
  * GET /api/portal/status
