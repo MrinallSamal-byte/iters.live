@@ -204,68 +204,14 @@
 
 /* ============================================
    THEME TOGGLE POLISH & ACCESSIBILITY
+   NOTE: Positioning is handled in style.css for global consistency.
+   Only keeping accessibility and transition enhancements here.
    ============================================ */
-
-/* Ensure theme toggle doesn't overlap with other elements */
-.theme-toggle {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 /* Focus styles for accessibility */
 .theme-toggle:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 3px;
-}
-
-/* Touch-friendly sizing on mobile */
-@media (max-width: 768px) {
-    .theme-toggle {
-        /* Position above chatbot toggle (chatbot: bottom 20px + 58px height + 10px gap = 88px) */
-        bottom: 88px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        min-height: 48px;
-        touch-action: manipulation;
-    }
-    
-    .theme-icon {
-        font-size: 1.25rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .theme-toggle {
-        /* Position above chatbot toggle (chatbot: bottom 15px + 55px height + 10px gap = 80px) */
-        bottom: 80px;
-        right: 15px;
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        min-height: 44px;
-    }
-    
-    .theme-icon {
-        font-size: 1.125rem;
-    }
-}
-
-/* Landscape mobile adjustments */
-@media (max-width: 896px) and (orientation: landscape) {
-    .theme-toggle {
-        /* Position above chatbot toggle in landscape (approx: bottom 10px + 40px height + 10px gap) */
-        bottom: 60px;
-        right: 12px;
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
-        min-height: 40px;
-    }
-    
-    .theme-icon {
-        font-size: 1rem;
-    }
 }
 
 /* ============================================
@@ -822,19 +768,7 @@ body.light-theme .navbar {
         padding: 0.4rem 0.75rem;
     }
     
-    .theme-toggle {
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
-        min-height: 40px;
-        /* Position above chatbot toggle (chatbot: bottom 10px + 50px height + 10px gap = 70px) */
-        bottom: 70px;
-        right: 10px;
-    }
-    
-    .theme-icon {
-        font-size: 1rem;
-    }
+    /* Theme toggle positioning handled in style.css */
     
     .notice-ticker-wrapper {
         padding: 0.4rem;

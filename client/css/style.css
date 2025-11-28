@@ -956,11 +956,11 @@ body.light-theme select optgroup {
     color: var(--text-muted);
 }
 
-/* Theme Toggle - Perfectly centered and positioned */
+/* Theme Toggle - Universal alignment across all pages */
 .theme-toggle {
     position: fixed;
-    bottom: 100px;
-    right: 24px;
+    bottom: 24px;
+    right: 96px;
     width: 56px;
     height: 56px;
     min-width: 56px;
@@ -1067,8 +1067,8 @@ body.light-theme .theme-toggle:hover {
     
     /* Theme toggle mobile positioning - above chatbot */
     .theme-toggle {
-        bottom: 85px;
-        right: 16px;
+        bottom: 90px;
+        right: 20px;
         width: 48px;
         height: 48px;
         min-width: 48px;
@@ -1083,8 +1083,8 @@ body.light-theme .theme-toggle:hover {
 @media (max-width: 480px) {
     /* Theme toggle small mobile - above chatbot */
     .theme-toggle {
-        bottom: 80px;
-        right: 15px;
+        bottom: 85px;
+        right: 18px;
         width: 44px;
         height: 44px;
         min-width: 44px;
@@ -1093,6 +1093,22 @@ body.light-theme .theme-toggle:hover {
     
     .theme-icon {
         font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Theme toggle very small screens - above chatbot */
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        bottom: 70px;
+        right: 10px;
+    }
+    
+    .theme-icon {
+        font-size: 1rem;
     }
 }
 

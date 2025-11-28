@@ -503,14 +503,7 @@ svg {
         padding: 0.75rem 0.5rem;
     }
 
-    /* Theme Toggle */
-    .theme-toggle {
-        bottom: 80px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        font-size: 1.25rem;
-    }
+    /* Theme Toggle - positioning handled in style.css */
 
     /* Academic Features List */
     .academic-features {
