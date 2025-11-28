@@ -8,6 +8,11 @@
  * - Google Drive JSON backup per user
  * - Recovery system (Drive backup → Dummy data)
  * - Comprehensive error handling
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * All portal-related functionality has been temporarily suspended.
+ * The feature flag check at the start of each function will return
+ * a disabled response until PORTAL_FEATURES_ENABLED=true is set.
  */
 const axios = require('axios');
 const path = require('path');
@@ -15,6 +20,10 @@ const fs = require('fs');
 const { db } = require('../database/firebase');
 const googleSheetsService = require('../services/googleSheets.service');
 const googleDriveBackup = require('../services/googleDriveBackup.service');
+
+// TEMPORARILY DISABLED — DO NOT REMOVE
+// Import feature flags to check if portal features are enabled
+const { isPortalEnabled, getPortalDisabledResponse, PORTAL_DISABLED_MESSAGE } = require('../config/featureFlags');
 
 // Flask Scraper Service URL (configurable via environment)
 const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
@@ -133,10 +142,20 @@ function clearAttemptCount(regNumber, userId) {
  * - Attempt 1-2: Returns failure with attempts remaining
  * - Attempt 3: After final failure, triggers fallback to backup/demo
  * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * This endpoint is disabled when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const portalLogin = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Check if portal features are enabled
+  if (!isPortalEnabled()) {
+    console.log('Portal login attempted but feature is disabled');
+    return res.status(503).json(getPortalDisabledResponse());
+  }
+
   try {
     const { reg_number, password } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -408,10 +427,20 @@ function formatPortalData(data, isVerified, portalConnected, dataSource) {
  * Sync portal data for a user (legacy endpoint, redirects to login)
  * Enhanced with Google Sheets backup and multi-layer fallback
  * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * This endpoint is disabled when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const syncPortalData = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Check if portal features are enabled
+  if (!isPortalEnabled()) {
+    console.log('Portal sync attempted but feature is disabled');
+    return res.status(503).json(getPortalDisabledResponse());
+  }
+
   try {
     const { reg_number, password, useDemoData } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -541,10 +570,29 @@ const saveDemoData = async (userId, regNumber, res) => {
 
 /**
  * Get portal connection status
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * Returns portal disabled status when features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const getPortalStatus = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Return portal disabled status when features are suspended
+  if (!isPortalEnabled()) {
+    return res.json({
+      success: true,
+      data: {
+        portalConnected: false,
+        isVerified: false,
+        lastSynced: null,
+        portalEnabled: false,
+        message: PORTAL_DISABLED_MESSAGE
+      }
+    });
+  }
+
   try {
     const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
@@ -608,10 +656,34 @@ const disconnectPortal = async (req, res) => {
 
 /**
  * Get scraped portal data
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * Returns demo data when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const getPortalData = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Return demo data when portal features are suspended
+  if (!isPortalEnabled()) {
+    console.log('Portal data requested but feature is disabled - returning demo data');
+    return res.json({
+      success: true,
+      data: {
+        profile: DUMMY_DATA.profile,
+        marks: DUMMY_DATA.marks,
+        attendance: DUMMY_DATA.attendance,
+        timetable: DUMMY_DATA.timetable,
+        courses: DUMMY_DATA.courses,
+        isVerified: false,
+        portalConnected: false,
+        portalEnabled: false,
+        message: PORTAL_DISABLED_MESSAGE
+      }
+    });
+  }
+
   try {
     const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
@@ -852,10 +924,33 @@ async function tryLoadBackupData(regNumber, userId) {
 
 /**
  * Load backup data endpoint - explicit backup loading
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * Returns demo data when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const loadBackupData = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Return demo data when portal features are suspended
+  if (!isPortalEnabled()) {
+    console.log('Portal backup load attempted but feature is disabled - returning demo data');
+    return res.json({
+      success: true,
+      status: STATUS_DEMO_LOADED,
+      message: PORTAL_DISABLED_MESSAGE + ' Showing demo data.',
+      data: {
+        mode: 'demo',
+        ...DUMMY_DATA,
+        isVerified: false,
+        portalConnected: false,
+        dataSource: 'demo',
+        warning: PORTAL_DISABLED_MESSAGE
+      }
+    });
+  }
+
   try {
     const { reg_number } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -898,10 +993,33 @@ const loadBackupData = async (req, res) => {
 /**
  * Recovery endpoint - GET /api/portal/recover
  * Attempts to load backup data for a user, falls back to demo data
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * This endpoint returns demo data when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const recoverPortalData = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // When portal is disabled, always return demo data instead
+  if (!isPortalEnabled()) {
+    console.log('Portal recover attempted but feature is disabled - returning demo data');
+    return res.json({
+      success: true,
+      status: STATUS_DEMO_LOADED,
+      message: PORTAL_DISABLED_MESSAGE + ' Showing demo data.',
+      data: {
+        mode: 'demo',
+        ...DUMMY_DATA,
+        isVerified: false,
+        portalConnected: false,
+        dataSource: 'demo',
+        warning: PORTAL_DISABLED_MESSAGE
+      }
+    });
+  }
+
   try {
     const { reg_number } = req.query;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -978,10 +1096,21 @@ const recoverPortalData = async (req, res) => {
 /**
  * Fetch all portal data endpoint - POST /api/portal/fetch
  * Fetches all available student data after login
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * This endpoint is disabled when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const fetchPortalData = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Check if portal features are enabled
+  if (!isPortalEnabled()) {
+    console.log('Portal fetch attempted but feature is disabled');
+    return res.status(503).json(getPortalDisabledResponse());
+  }
+
   try {
     const { reg_number, password } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -1051,10 +1180,21 @@ const fetchPortalData = async (req, res) => {
 /**
  * Save backup endpoint - POST /api/portal/backup
  * Manually triggers backup save to Google Drive
+ * 
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * This endpoint is disabled when portal features are suspended.
+ * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const saveBackup = async (req, res) => {
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Check if portal features are enabled
+  if (!isPortalEnabled()) {
+    console.log('Portal backup attempted but feature is disabled');
+    return res.status(503).json(getPortalDisabledResponse());
+  }
+
   try {
     const { reg_number, data } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
@@ -1144,5 +1284,9 @@ module.exports = {
   STATUS_BACKUP_LOADED,
   STATUS_DEMO_LOADED,
   STATUS_MAX_ATTEMPTS_REACHED,
-  MAX_LOGIN_ATTEMPTS
+  MAX_LOGIN_ATTEMPTS,
+  // TEMPORARILY DISABLED — DO NOT REMOVE
+  // Export feature flag check function for use in routes
+  isPortalEnabled,
+  getPortalDisabledResponse
 };
