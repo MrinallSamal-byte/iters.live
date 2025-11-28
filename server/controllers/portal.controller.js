@@ -12,6 +12,7 @@ const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:500
 const STATUS_SUCCESS = 'SUCCESS';
 const STATUS_AUTH_FAILED = 'AUTH_FAILED';
 const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
+const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 
 // Dummy data for fallback when scraping fails
 const DUMMY_DATA = {
@@ -104,6 +105,12 @@ const syncPortalData = async (req, res) => {
           status: STATUS_AUTH_FAILED,
           message: message || 'Invalid portal credentials'
         });
+      } else if (status === STATUS_PORTAL_UNREACHABLE) {
+        return res.status(503).json({
+          success: false,
+          status: STATUS_PORTAL_UNREACHABLE,
+          message: message || 'Student portal is currently unreachable. Please try again later.'
+        });
       } else {
         return res.status(500).json({
           success: false,
@@ -123,6 +130,14 @@ const syncPortalData = async (req, res) => {
             success: false,
             status: STATUS_AUTH_FAILED,
             message: data?.message || 'Invalid portal credentials'
+          });
+        }
+        
+        if (status === 503 || (data && data.status === STATUS_PORTAL_UNREACHABLE)) {
+          return res.status(503).json({
+            success: false,
+            status: STATUS_PORTAL_UNREACHABLE,
+            message: data?.message || 'Student portal is currently unreachable. Please try again later.'
           });
         }
         

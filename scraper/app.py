@@ -10,7 +10,7 @@ import time
 from collections import defaultdict
 
 from config import get_config
-from scraper import create_scraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR
+from scraper import create_scraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -134,6 +134,11 @@ def scrape_portal():
                 'status': STATUS_AUTH_FAILED,
                 'message': result.get('message', 'Invalid credentials')
             }), 401
+        elif status == STATUS_PORTAL_UNREACHABLE:
+            return jsonify({
+                'status': STATUS_PORTAL_UNREACHABLE,
+                'message': result.get('message', 'Student portal is currently unreachable')
+            }), 503  # Service Unavailable
         else:
             # SCRAPE_ERROR or any other error
             return jsonify({

@@ -231,6 +231,9 @@
             if (error.status === 401 || (error.data && error.data.status === 'AUTH_FAILED')) {
                 errorStatus = 'AUTH_FAILED';
                 errorMessage = error.data?.message || 'Invalid credentials';
+            } else if (error.status === 503 || (error.data && error.data.status === 'PORTAL_UNREACHABLE')) {
+                errorStatus = 'PORTAL_UNREACHABLE';
+                errorMessage = error.data?.message || 'Student portal is currently unreachable';
             } else if (error.data && error.data.status) {
                 errorStatus = error.data.status;
                 errorMessage = error.data.message || 'Failed to fetch portal data';
@@ -257,6 +260,14 @@
         // Show specific error message based on status
         if (response.status === 'AUTH_FAILED') {
             showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
+        } else if (response.status === 'PORTAL_UNREACHABLE') {
+            showStatus('⚠️ Student portal is currently unreachable. The university portal may be down for maintenance. Please try again later or use demo data.', 'error');
+            // For portal unreachable, offer demo data immediately
+            showRetryInfo(
+                'The student portal appears to be offline. You can use demo data to explore the system, or try again later.',
+                'warning'
+            );
+            return; // Don't count against retry attempts for portal outages
         } else if (response.message && response.message.toLowerCase().includes('captcha')) {
             showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
         } else {
