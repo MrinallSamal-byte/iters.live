@@ -36,6 +36,7 @@ const forumRoutes = require('./routes/forum.routes');
 const pyqRoutes = require('./routes/pyq.routes');
 const webRoutes = require('./routes/web.routes');
 const portalRoutes = require('./routes/portal.routes');
+const redirectRoutes = require('./routes/redirect.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -209,6 +210,9 @@ app.use('/api/portal', portalRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
+
+// Link encoding redirect handler (/r/:encoded)
+app.use('/r', redirectRoutes);
 
 // Serve landing page (index.html) for root path - redirect to obfuscated URL
 app.get('/', (req, res) => {
