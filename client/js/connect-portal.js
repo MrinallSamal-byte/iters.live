@@ -1,11 +1,12 @@
 /**
  * Connect Portal JavaScript
  * 
- * NOTE: Portal data fetching from the SOA website is currently SUSPENDED.
- * This page will automatically redirect users to the dashboard.
+ * TEMPORARILY DISABLED — DO NOT REMOVE
+ * Portal data fetching from the SOA website is currently SUSPENDED.
+ * This page will show a suspended message and redirect users to the dashboard.
  * 
  * The portal fetching functionality has been temporarily disabled as per requirement.
- * Users will be redirected directly to the dashboard after login.
+ * Users will be shown a message and can continue with demo data.
  */
 
 (function() {
@@ -13,7 +14,8 @@
 
     /**
      * Initialize the connect portal page
-     * Portal fetching is suspended - redirect directly to dashboard
+     * TEMPORARILY DISABLED — DO NOT REMOVE
+     * Portal fetching is suspended - show message and provide demo data option
      */
     function init() {
         // Check if user is logged in
@@ -23,17 +25,52 @@
             return;
         }
 
-        // PORTAL FETCHING SUSPENDED
-        // Automatically redirect to dashboard without showing portal connection options
-        console.log('Portal fetching is suspended. Redirecting to dashboard...');
-        window.location.href = '/dashboard/student.html';
+        // TEMPORARILY DISABLED — DO NOT REMOVE
+        // Portal fetching is suspended - log this and set up demo data button
+        console.log('Portal fetching is suspended. Showing suspended message...');
+        
+        // Set up the demo data button
+        const demoBtn = document.getElementById('demoBtn');
+        if (demoBtn) {
+            demoBtn.addEventListener('click', async function() {
+                console.log('Loading demo data...');
+                
+                // Update button state
+                demoBtn.disabled = true;
+                demoBtn.textContent = 'Loading...';
+                
+                // Update user storage with demo data flag
+                if (user) {
+                    user.portalConnected = false;
+                    user.isVerified = false;
+                    user.dataSource = 'demo';
+                    APP.Storage.set('user', user);
+                }
+                
+                // Show toast if available
+                if (typeof APP.showToast === 'function') {
+                    APP.showToast('Demo data loaded successfully!', 'success');
+                }
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = '/dashboard/student.html';
+                }, 500);
+            });
+        }
     }
 
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', init);
 })();
 
-/* COMMENTED OUT - Portal fetching functionality suspended
+/* COMMENTED OUT — TEMPORARILY DISABLED — DO NOT REMOVE
+ * The following code contains the original portal fetching functionality.
+ * It has been disabled but preserved for future re-enablement.
+ * To re-enable: Set PORTAL_FEATURES_ENABLED=true in environment and uncomment this code.
+ */
+
+/* ORIGINAL PORTAL FETCHING CODE - TEMPORARILY DISABLED — DO NOT REMOVE
 
 (function() {
     'use strict';
@@ -458,4 +495,4 @@
     document.addEventListener('DOMContentLoaded', init);
 })();
 
-*/ // END COMMENTED OUT - Portal fetching functionality suspended
+*/ // END COMMENTED OUT — TEMPORARILY DISABLED — DO NOT REMOVE

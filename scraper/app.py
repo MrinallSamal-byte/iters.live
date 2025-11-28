@@ -1,6 +1,10 @@
 """
 Flask Application for Student Portal Scraper Microservice
 Exposes POST /api/scrape endpoint with proper error handling
+
+TEMPORARILY DISABLED — DO NOT REMOVE
+All scraping functionality has been temporarily suspended.
+The /api/scrape endpoint will return a disabled response.
 """
 import os
 from flask import Flask, request, jsonify
@@ -10,7 +14,22 @@ import time
 from collections import defaultdict
 
 from config import get_config
-from scraper import create_scraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE
+
+# TEMPORARILY DISABLED — DO NOT REMOVE
+# Import scraper components only if needed (not used while disabled)
+# from scraper import create_scraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE
+
+# Status constants
+STATUS_SUCCESS = 'SUCCESS'
+STATUS_AUTH_FAILED = 'AUTH_FAILED'
+STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR'
+STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE'
+STATUS_PORTAL_DISABLED = 'PORTAL_DISABLED'
+
+# TEMPORARILY DISABLED — DO NOT REMOVE
+# Feature flag to control portal scraping
+PORTAL_FEATURES_ENABLED = os.getenv('PORTAL_FEATURES_ENABLED', 'false').lower() == 'true'
+PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily suspended. Please try again later.'
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -91,16 +110,36 @@ def scrape_portal():
     """
     Scrape student portal data
     
+    TEMPORARILY DISABLED — DO NOT REMOVE
+    This endpoint is disabled and will return a disabled response.
+    
     Request body:
     {
         "reg_number": "string",
         "password": "string"
     }
     
-    Response:
+    Response (when disabled):
+    { "status": "PORTAL_DISABLED", "message": "..." }
+    
+    Response (when enabled):
     - Success: { "status": "SUCCESS", "data": {...} }
     - Auth Failed: { "status": "AUTH_FAILED", "message": "..." }
     - Scrape Error: { "status": "SCRAPE_ERROR", "message": "..." }
+    """
+    # TEMPORARILY DISABLED — DO NOT REMOVE
+    # Return disabled response when portal features are suspended
+    if not PORTAL_FEATURES_ENABLED:
+        print('Portal scrape request received but feature is disabled')
+        return jsonify({
+            'status': STATUS_PORTAL_DISABLED,
+            'message': PORTAL_DISABLED_MESSAGE,
+            'portalEnabled': False
+        }), 503
+    
+    # TEMPORARILY DISABLED — DO NOT REMOVE
+    # The following code is disabled but preserved for future re-enablement
+    # To re-enable: Set PORTAL_FEATURES_ENABLED=true in environment
     """
     try:
         # Get JSON data
@@ -121,6 +160,7 @@ def scrape_portal():
         print(f'Scrape request received for: {reg_number}')
         
         # Create scraper and run
+        from scraper import create_scraper
         scraper = create_scraper()
         result = scraper.scrape(reg_number, password)
         
@@ -153,12 +193,22 @@ def scrape_portal():
             'status': STATUS_SCRAPE_ERROR,
             'message': 'Internal server error'
         }), 500
+    """
+    # Return disabled message (this code path is reached if somehow the check above is bypassed)
+    return jsonify({
+        'status': STATUS_PORTAL_DISABLED,
+        'message': PORTAL_DISABLED_MESSAGE,
+        'portalEnabled': False
+    }), 503
 
 
 @app.route('/api/test-captcha', methods=['POST'])
 def test_captcha():
     """
     Test CAPTCHA solving capability
+    
+    TEMPORARILY DISABLED — DO NOT REMOVE
+    This endpoint is disabled when portal features are suspended.
     
     Request body (optional):
     {
@@ -171,6 +221,18 @@ def test_captcha():
         "api_key_configured": true/false,
         "captcha_text": "string" (if image provided)
     }
+    """
+    # TEMPORARILY DISABLED — DO NOT REMOVE
+    # Return disabled response when portal features are suspended
+    if not PORTAL_FEATURES_ENABLED:
+        return jsonify({
+            'status': STATUS_PORTAL_DISABLED,
+            'message': PORTAL_DISABLED_MESSAGE,
+            'portalEnabled': False
+        }), 503
+    
+    # TEMPORARILY DISABLED — DO NOT REMOVE
+    # The following code is disabled but preserved for future re-enablement
     """
     try:
         from captcha_solver import get_captcha_solver
@@ -196,6 +258,12 @@ def test_captcha():
             'status': 'error',
             'message': str(e)
         }), 500
+    """
+    return jsonify({
+        'status': STATUS_PORTAL_DISABLED,
+        'message': PORTAL_DISABLED_MESSAGE,
+        'portalEnabled': False
+    }), 503
 
 
 @app.errorhandler(404)

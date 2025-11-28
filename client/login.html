@@ -161,20 +161,17 @@
                         APP.Storage.set('accessToken', idToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // Check if portal connection is needed (Case B - new user)
-                        if (response.data.needsPortalConnection) {
-                            // Redirect to connect-portal page
-                            window.location.href = '/connect-portal.html';
-                        } else {
-                            // Case A - existing user with portal connected
-                            const dashboards = {
-                                student: '/dashboard/student.html',
-                                teacher: '/dashboard/teacher.html',
-                                admin: '/dashboard/admin.html'
-                            };
-                            const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
-                            window.location.href = redirectUrl;
-                        }
+                        // TEMPORARILY DISABLED — DO NOT REMOVE
+                        // Portal sync is suspended - all users go directly to dashboard
+                        // Previously: New users (needsPortalConnection) were redirected to connect-portal
+                        // Now: All users go directly to their respective dashboards
+                        const dashboards = {
+                            student: '/dashboard/student.html',
+                            teacher: '/dashboard/teacher.html',
+                            admin: '/dashboard/admin.html'
+                        };
+                        const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                        window.location.href = redirectUrl;
                     } else {
                         alert('Login failed: ' + response.message);
                     }
@@ -269,22 +266,24 @@
                         let redirectUrl;
                         const userRole = response.data.user.role;
                         
-                        // ALWAYS redirect students to connect-portal page for data fetching
-                        // This ensures they can choose to pull fresh data from SOA Portal
+                        // TEMPORARILY DISABLED — DO NOT REMOVE
+                        // Portal sync is suspended - redirect students directly to dashboard
+                        // Previously: Students were redirected to connect-portal.html for data fetching
+                        // Now: All users go directly to their respective dashboards
                         if (userRole === 'student') {
-                            // Store credentials for the portal sync page
-                            sessionStorage.setItem('pendingPortalSync', JSON.stringify({
-                                reg_number: registration_number,
-                                timestamp: Date.now()
-                            }));
+                            // Clear any pending portal sync data since portal is disabled
+                            sessionStorage.removeItem('pendingPortalSync');
+                            sessionStorage.removeItem('portalPassword');
                             
                             if (typeof APP.showToast === 'function') {
-                                APP.showToast('Login successful! Redirecting to data sync...', 'success');
+                                APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting to fetch your data...');
+                            showError('✅ Login successful! Redirecting to dashboard...');
                             errorMessage.style.color = '#10b981';
                             
-                            redirectUrl = '/connect-portal.html';
+                            // TEMPORARILY DISABLED — DO NOT REMOVE
+                            // Portal sync suspended - go directly to student dashboard
+                            redirectUrl = '/dashboard/student.html';
                         } else {
                             // Teachers and Admins go directly to dashboard
                             if (typeof APP.showToast === 'function') {
