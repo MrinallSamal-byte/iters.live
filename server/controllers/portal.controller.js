@@ -74,7 +74,9 @@ try {
 }
 
 // In-memory attempt tracking (for session-based tracking)
-// In production, consider using Redis or database
+// NOTE: This is a simple implementation for single-server deployments.
+// For production multi-instance deployments, replace with Redis or database storage.
+// The 15-minute expiry provides reasonable UX without permanent lockouts.
 const loginAttempts = new Map();
 
 /**

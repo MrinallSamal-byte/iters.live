@@ -80,6 +80,17 @@ router.post('/backup', optionalAuth, portalController.saveBackup);
 router.get('/recover', optionalAuth, portalController.recoverPortalData);
 
 /**
+ * POST /api/portal/load-backup
+ * Load backup data from available sources (Drive, Sheets, Firestore)
+ * 
+ * Request body:
+ * {
+ *   "reg_number": "string"
+ * }
+ */
+router.post('/load-backup', optionalAuth, portalController.loadBackupData);
+
+/**
  * GET /api/portal/status
  * Get portal connection status for authenticated user
  */

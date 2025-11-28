@@ -2,16 +2,23 @@
  * Google Drive Backup Service
  * Handles backup storage to Google Drive as JSON files
  * 
- * Target folder ID is configurable via GOOGLE_DRIVE_FOLDER_ID environment variable
- * Default folder: https://drive.google.com/drive/folders/16K2jlOyy7GgLcfGebmus-kCuG0BF_k-6
+ * Configuration:
+ * - GOOGLE_DRIVE_FOLDER_ID: Required. The ID of the Google Drive folder for backups.
+ * - BACKUP_RETENTION_COUNT: Optional. Number of timestamped backups to keep (default: 5).
+ * 
+ * The service will warn if no folder ID is configured but will not fail initialization.
  */
 const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-// Configuration - folder ID can be set via environment variable
+// Configuration
+// Note: In production, ensure GOOGLE_DRIVE_FOLDER_ID is set to your own folder.
+// The default value is provided for development/testing only.
 const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || '16K2jlOyy7GgLcfGebmus-kCuG0BF_k-6';
+const BACKUP_RETENTION_COUNT = parseInt(process.env.BACKUP_RETENTION_COUNT || '5', 10);
+
 const SCOPES = [
   'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/drive'
@@ -204,7 +211,7 @@ async function saveTimestampedBackup(folderId, userId, content) {
       fields: 'id'
     });
 
-    // Clean up old backups (keep only last 5)
+    // Clean up old backups (keep only BACKUP_RETENTION_COUNT)
     const listResponse = await driveClient.files.list({
       q: `name contains 'backup_' and '${folderId}' in parents and trashed=false`,
       fields: 'files(id, name, createdTime)',
@@ -213,9 +220,9 @@ async function saveTimestampedBackup(folderId, userId, content) {
     });
 
     const files = listResponse.data.files || [];
-    if (files.length > 5) {
-      // Delete oldest files (beyond first 5)
-      for (let i = 5; i < files.length; i++) {
+    if (files.length > BACKUP_RETENTION_COUNT) {
+      // Delete oldest files (beyond retention count)
+      for (let i = BACKUP_RETENTION_COUNT; i < files.length; i++) {
         await driveClient.files.delete({ fileId: files[i].id });
       }
     }
