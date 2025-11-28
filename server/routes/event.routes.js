@@ -5,6 +5,8 @@ const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const { emitToRole, broadcast } = require('../socket/socket');
 
 // Helper function to get demo events
+// Constants for demo data generation
+const DEMO_EVENT_DATE_RANGE_DAYS = 90;
 const getDemoEvents = () => {
   const eventNames = ['TechFest 2025', 'Code Sprint', 'Cultural Night', 'Sports Championship', 
     'AI Workshop', 'Hackathon', 'Career Fair', 'Music Fest', 'Science Exhibition', 'Startup Weekend'];
@@ -14,7 +16,7 @@ const getDemoEvents = () => {
   const today = new Date();
   return eventNames.map((title, idx) => {
     const eventDate = new Date(today);
-    eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 90) + 1);
+    eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * DEMO_EVENT_DATE_RANGE_DAYS) + 1);
     
     return {
       id: idx + 1,

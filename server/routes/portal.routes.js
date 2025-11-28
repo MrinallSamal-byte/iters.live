@@ -9,6 +9,9 @@ const portalController = require('../controllers/portal.controller');
 const googleSheetsService = require('../services/googleSheets.service');
 const { db } = require('../database/firebase');
 
+// Constants for cache duration
+const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+
 /**
  * POST /api/portal/sync
  * Sync portal data - forwards credentials to Flask scraper
@@ -77,10 +80,10 @@ router.get('/student/:regNo/live', optionalAuth, async (req, res) => {
       
       // If synced within last hour, return cached data
       if (lastSync) {
-        const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const cacheExpiry = new Date(Date.now() - CACHE_DURATION_MS);
         const syncDate = lastSync.toDate ? lastSync.toDate() : new Date(lastSync);
         
-        if (syncDate > hourAgo) {
+        if (syncDate > cacheExpiry) {
           return res.json({
             success: true,
             data: {

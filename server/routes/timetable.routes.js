@@ -4,6 +4,8 @@ const { db } = require('../database/firebase');
 const { authMiddleware } = require('../middleware/auth');
 
 // Helper function to get demo timetable
+// Constants for timetable generation
+const WEDNESDAY_HALF_DAY_MAX_SLOTS = 3;
 const getDemoTimetable = (department, year, section) => {
   const subjects = ['Data Structures', 'Algorithms', 'Database Management', 'Operating Systems', 'Computer Networks'];
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -15,7 +17,7 @@ const getDemoTimetable = (department, year, section) => {
   days.forEach(day => {
     timeSlots.forEach((timeSlot, idx) => {
       // Half day Wednesday
-      if (day === 'Wednesday' && idx > 3) return;
+      if (day === 'Wednesday' && idx > WEDNESDAY_HALF_DAY_MAX_SLOTS) return;
       // Skip lunch break slot
       if (idx === 3) return;
       
