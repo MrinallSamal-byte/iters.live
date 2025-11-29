@@ -1,15 +1,22 @@
 name: Build Android APK
 
 on:
+  # Trigger on push to main branch or new tags
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'android-app/**'
-  pull_request:
     branches: [ main ]
-    paths:
-      - 'android-app/**'
+    tags:
+      - 'v*'
+  # Manual dispatch for on-demand builds
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a new release with the built APK'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   build:
@@ -49,35 +56,72 @@ jobs:
         path: client/releases/ITER.apk
         retention-days: 90
 
-    - name: Create Release (on main branch)
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    - name: Determine release tag
+      id: release_tag
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          # Use short SHA for more unique versioning
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "tag=v1.0.${{ github.run_number }}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check if should create release
+      id: should_release
+      run: |
+        SHOULD_RELEASE="false"
+        if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+          SHOULD_RELEASE="true"
+        fi
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          SHOULD_RELEASE="true"
+        fi
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.create_release }}" == "true" ]]; then
+          SHOULD_RELEASE="true"
+        fi
+        echo "value=${SHOULD_RELEASE}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      if: steps.should_release.outputs.value == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        name: Release v${{ github.run_number }}
+        tag_name: ${{ steps.release_tag.outputs.tag }}
+        name: ITER EduHub ${{ steps.release_tag.outputs.tag }}
         body: |
           ## ITER EduHub Android App
           
-          ### Features
+          **Version**: ${{ steps.release_tag.outputs.tag }}
+          **Build**: #${{ github.run_number }}
+          
+          ### 📱 Features
           - Full website experience in native Android app
           - All pages and features from the website
           - Offline caching support
           - File download capability
           - Back button navigation
           - Pull to refresh
+          - Swipe to refresh
           
-          ### Installation
-          1. Download ITER.apk below
+          ### 📥 Installation
+          1. Download **ITER.apk** below
           2. Enable "Install from Unknown Sources" on your device
-          3. Open the downloaded APK
-          4. Follow installation prompts
+             - Go to Settings → Security → Install Unknown Apps
+             - Enable for your browser or file manager
+          3. Open the downloaded APK file
+          4. Tap **Install** when prompted
+          5. Open the app and enjoy!
           
-          ### Requirements
-          - Android 9.0 (Pie) or higher
-          - ~5 MB storage space
+          ### 📋 Requirements
+          - Android 9.0 (Pie) or higher (API 28+)
+          - ~3-5 MB storage space
           - Internet connection for content
+          
+          ### 🔗 Direct Download
+          Click on `ITER.apk` in the Assets section below to download.
         files: client/releases/ITER.apk
         draft: false
         prerelease: false
+        make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
