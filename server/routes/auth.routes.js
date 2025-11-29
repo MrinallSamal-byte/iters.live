@@ -331,5 +331,93 @@ router.get('/me', authMiddleware, async (req, res, next) => {
   }
 });
 
+/**
+ * POST /api/auth/validate-session
+ * Validates the current session and updates activity
+ */
+router.post('/validate-session', authMiddleware, async (req, res) => {
+  try {
+    const { sessionId, lastActivity } = req.body;
+    const userId = req.user.id;
+
+    // Import session module
+    const sessionModule = require('../middleware/session');
+    
+    // Validate session
+    const validation = sessionModule.validateSession(
+      userId, 
+      sessionId, 
+      lastActivity ? parseInt(lastActivity, 10) : null
+    );
+
+    if (!validation.valid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired or invalid',
+        code: 'SESSION_EXPIRED',
+        reason: validation.reason
+      });
+    }
+
+    // Update session activity
+    sessionModule.updateSessionActivity(userId, sessionId, Date.now());
+
+    res.json({
+      success: true,
+      message: 'Session is valid',
+      data: {
+        serverLastActivity: validation.serverLastActivity,
+        remainingTime: validation.remainingTime
+      }
+    });
+  } catch (error) {
+    console.error('Session validation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate session'
+    });
+  }
+});
+
+/**
+ * POST /api/auth/refresh-session
+ * Refreshes the session activity timestamp
+ */
+router.post('/refresh-session', authMiddleware, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    const userId = req.user.id;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Session ID is required'
+      });
+    }
+
+    // Import session module
+    const sessionModule = require('../middleware/session');
+    
+    // Update session activity
+    const now = Date.now();
+    sessionModule.updateSessionActivity(userId, sessionId, now);
+
+    res.json({
+      success: true,
+      message: 'Session refreshed',
+      data: {
+        serverLastActivity: now,
+        remainingTime: sessionModule.SESSION_TIMEOUT_MS
+      }
+    });
+  } catch (error) {
+    console.error('Session refresh error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to refresh session'
+    });
+  }
+});
+
 module.exports = router;
 
