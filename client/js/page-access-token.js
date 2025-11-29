@@ -257,7 +257,7 @@
         
         // Check role-based access
         if (!hasRoleAccess(userRole, targetType)) {
-            console.error('Access denied: User role does not have access to this dashboard');
+            // Access denied - silently return without navigating
             return;
         }
         
@@ -340,9 +340,7 @@
         const validation = validatePageAccessToken();
         
         if (!validation.valid) {
-            console.log('Page access validation failed:', validation.reason);
-            
-            // Redirect to login with message
+            // Redirect to login
             redirectToLogin(validation.message);
             return;
         }
