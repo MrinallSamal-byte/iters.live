@@ -2,6 +2,7 @@
  * AI Chatbot Widget - Smart Role-Aware Assistant
  * Intelligent AI-powered assistant that adapts to user role (student, teacher, admin, guest)
  * Part of ITER EduHub Enhancement Suite
+ * Memory-optimized with lazy FAQ loading and cleanup
  */
 
 class Chatbot {
@@ -15,9 +16,14 @@ class Chatbot {
         this.input = null;
         this.userRole = this.detectUserRole();
         this.pageContext = this.detectPageContext();
+        this.faqLoaded = false;
+        this.eventListeners = [];
         
-        // Initialize role-specific configurations
-        this.initRoleConfig();
+        // Lazy initialize - don't load FAQ until chatbot is opened
+        this.faqDatabases = null;
+        this.quickActionsConfig = null;
+        this.quickActions = null;
+        
         this.init();
     }
 
@@ -82,19 +88,17 @@ class Chatbot {
     }
 
     /**
-     * Initialize role-specific configurations
+     * Initialize role-specific configurations - Lazy loaded
      */
     initRoleConfig() {
-        // Role-specific FAQ databases
-        this.faqDatabases = {
-            student: this.getStudentFAQ(),
-            teacher: this.getTeacherFAQ(),
-            admin: this.getAdminFAQ(),
-            guest: this.getGuestFAQ()
-        };
+        if (this.faqLoaded) return;
+        
+        // Role-specific FAQ databases - Only load for current role to save memory
+        this.faqDatabases = {};
+        this.faqDatabases[this.userRole] = this.getFAQForRole(this.userRole);
 
-        // Role-specific quick actions
-        this.quickActionsConfig = {
+        // Role-specific quick actions - Only load current role
+        const quickActionsMap = {
             student: [
                 { text: '📊 Attendance', query: 'Check my attendance' },
                 { text: '📈 Marks', query: 'View my marks' },
@@ -120,9 +124,29 @@ class Chatbot {
                 { text: '🔐 Login Help', query: 'How to login?' }
             ]
         };
+        
+        this.quickActionsConfig = {};
+        this.quickActionsConfig[this.userRole] = quickActionsMap[this.userRole] || quickActionsMap.guest;
 
         // Set current quick actions based on role
-        this.quickActions = this.quickActionsConfig[this.userRole] || this.quickActionsConfig.guest;
+        this.quickActions = this.quickActionsConfig[this.userRole] || quickActionsMap.guest;
+        this.faqLoaded = true;
+    }
+    
+    /**
+     * Get FAQ for a specific role - lazy loaded
+     */
+    getFAQForRole(role) {
+        switch (role) {
+            case 'student':
+                return this.getStudentFAQ();
+            case 'teacher':
+                return this.getTeacherFAQ();
+            case 'admin':
+                return this.getAdminFAQ();
+            default:
+                return this.getGuestFAQ();
+        }
     }
 
     /**
@@ -338,7 +362,18 @@ class Chatbot {
     init() {
         this.createChatbotUI();
         this.attachEventListeners();
-        this.addWelcomeMessage();
+        // Don't add welcome message until chatbot is opened
+    }
+    
+    /**
+     * Lazy initialize FAQ and welcome message when chatbot is first opened
+     */
+    lazyInit() {
+        if (!this.faqLoaded) {
+            this.initRoleConfig();
+            this.renderQuickActions();
+            this.addWelcomeMessage();
+        }
     }
 
     createChatbotUI() {
@@ -451,13 +486,17 @@ class Chatbot {
         this.isOpen = !this.isOpen;
         this.container.classList.toggle('active', this.isOpen);
         this.toggleBtn.classList.toggle('active', this.isOpen);
-        if (this.isOpen) this.input.focus();
+        if (this.isOpen) {
+            this.lazyInit();
+            this.input.focus();
+        }
     }
 
     open() {
         this.isOpen = true;
         this.container.classList.add('active');
         this.toggleBtn.classList.add('active');
+        this.lazyInit();
         this.input.focus();
     }
 
@@ -465,6 +504,32 @@ class Chatbot {
         this.isOpen = false;
         this.container.classList.remove('active');
         this.toggleBtn.classList.remove('active');
+    }
+    
+    /**
+     * Cleanup and destroy chatbot
+     */
+    destroy() {
+        // Remove event listeners
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners = [];
+        
+        // Remove DOM elements
+        if (this.container && this.container.parentNode) {
+            this.container.parentNode.removeChild(this.container);
+        }
+        if (this.toggleBtn && this.toggleBtn.parentNode) {
+            this.toggleBtn.parentNode.removeChild(this.toggleBtn);
+        }
+        
+        // Clear messages
+        this.messages = [];
+        this.faqDatabases = null;
+        this.quickActionsConfig = null;
+        
+        console.log('Chatbot destroyed');
     }
 
     addWelcomeMessage() {

@@ -1,6 +1,7 @@
 /**
  * Futuristic Dashboard Animations
  * Advanced GSAP-powered animations matching landing page aesthetics
+ * Memory-optimized with cleanup functionality
  */
 
 (function() {
@@ -8,6 +9,8 @@
 
     class FuturisticAnimations {
         constructor() {
+            this.eventListeners = [];
+            this.observers = [];
             this.init();
         }
 
@@ -20,8 +23,14 @@
         }
 
         initializeAll() {
-            this.setupMagneticButtons();
-            this.setup3DCardTilt();
+            // Skip heavy animations on mobile
+            const isMobile = window.innerWidth < 768;
+            
+            if (!isMobile) {
+                this.setupMagneticButtons();
+                this.setup3DCardTilt();
+            }
+            
             this.setupScrollReveal();
             this.setupParallaxCards();
             this.setupHolographicEffects();
@@ -29,6 +38,23 @@
             this.setupRippleEffects();
             this.enhanceNavigationAnimations();
             this.initPageTransitions();
+            this.setupVisibilityHandler();
+        }
+        
+        /**
+         * Handle page visibility to pause animations
+         */
+        setupVisibilityHandler() {
+            const handler = () => {
+                if (document.hidden && typeof gsap !== 'undefined') {
+                    gsap.globalTimeline.pause();
+                } else if (typeof gsap !== 'undefined') {
+                    gsap.globalTimeline.resume();
+                }
+            };
+            
+            document.addEventListener('visibilitychange', handler);
+            this.eventListeners.push({ element: document, event: 'visibilitychange', handler });
         }
 
         /**
@@ -352,6 +378,28 @@
             primaryBtns.forEach(btn => {
                 btn.classList.add('liquid-fill', 'liquid-applied');
             });
+        }
+        
+        /**
+         * Cleanup and destroy all animations
+         */
+        destroy() {
+            // Remove event listeners
+            this.eventListeners.forEach(({ element, event, handler }) => {
+                element.removeEventListener(event, handler);
+            });
+            this.eventListeners = [];
+            
+            // Disconnect observers
+            this.observers.forEach(observer => observer.disconnect());
+            this.observers = [];
+            
+            // Kill GSAP animations
+            if (typeof gsap !== 'undefined') {
+                gsap.killTweensOf('*');
+            }
+            
+            console.log('FuturisticAnimations destroyed');
         }
     }
 

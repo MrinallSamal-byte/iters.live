@@ -1,6 +1,7 @@
 /**
  * Advanced Particle System for ITER College Management System
  * Creates dynamic, interactive particle backgrounds
+ * Memory-optimized with cleanup and lazy initialization
  */
 
 class ParticleSystem {
@@ -14,17 +15,29 @@ class ParticleSystem {
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
         this.mouse = { x: null, y: null, radius: 150 };
+        this.animationId = null;
+        this.isRunning = false;
+        this.isVisible = true;
         
-        // Configuration
+        // Bound event handlers for proper cleanup
+        this._boundResize = this.resize.bind(this);
+        this._boundMouseMove = this.handleMouseMove.bind(this);
+        this._boundMouseLeave = this.handleMouseLeave.bind(this);
+        this._boundVisibilityChange = this.handleVisibilityChange.bind(this);
+        
+        // Configuration - reduce particle count for better performance
+        const isMobile = window.innerWidth < 768;
+        const defaultParticleCount = isMobile ? 30 : 50; // Reduced from 80
+        
         this.config = {
-            particleCount: options.particleCount || 80,
+            particleCount: options.particleCount || defaultParticleCount,
             particleColor: options.particleColor || 'rgba(99, 102, 241, 0.5)',
             lineColor: options.lineColor || 'rgba(99, 102, 241, 0.2)',
             particleSize: options.particleSize || 2,
-            maxDistance: options.maxDistance || 120,
+            maxDistance: options.maxDistance || 100, // Reduced from 120
             speed: options.speed || 0.5,
             interactive: options.interactive !== false,
-            glow: options.glow !== false
+            glow: options.glow !== false && !isMobile // Disable glow on mobile
         };
         
         this.init();
@@ -37,16 +50,58 @@ class ParticleSystem {
         // Create particles
         this.createParticles();
         
-        // Event listeners
-        window.addEventListener('resize', () => this.resize());
+        // Event listeners with proper references for cleanup
+        window.addEventListener('resize', this._boundResize, { passive: true });
+        document.addEventListener('visibilitychange', this._boundVisibilityChange);
         
         if (this.config.interactive) {
-            this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-            this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
+            this.canvas.addEventListener('mousemove', this._boundMouseMove, { passive: true });
+            this.canvas.addEventListener('mouseleave', this._boundMouseLeave, { passive: true });
         }
         
         // Start animation
-        this.animate();
+        this.start();
+    }
+    
+    /**
+     * Handle visibility change to pause animation when tab is hidden
+     */
+    handleVisibilityChange() {
+        if (document.hidden) {
+            this.pause();
+        } else {
+            this.resume();
+        }
+    }
+    
+    /**
+     * Start the animation
+     */
+    start() {
+        if (!this.isRunning) {
+            this.isRunning = true;
+            this.animate();
+        }
+    }
+    
+    /**
+     * Pause the animation
+     */
+    pause() {
+        this.isRunning = false;
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+    
+    /**
+     * Resume the animation
+     */
+    resume() {
+        if (!this.isRunning && this.isVisible) {
+            this.start();
+        }
     }
     
     resize() {
@@ -73,15 +128,21 @@ class ParticleSystem {
     }
     
     connectParticles() {
-        for (let i = 0; i < this.particles.length; i++) {
-            for (let j = i + 1; j < this.particles.length; j++) {
+        const len = this.particles.length;
+        const maxDist = this.config.maxDistance;
+        const maxDistSquared = maxDist * maxDist;
+        
+        for (let i = 0; i < len; i++) {
+            for (let j = i + 1; j < len; j++) {
                 const dx = this.particles[i].x - this.particles[j].x;
                 const dy = this.particles[i].y - this.particles[j].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                const distanceSquared = dx * dx + dy * dy;
                 
-                if (distance < this.config.maxDistance) {
-                    const opacity = 1 - (distance / this.config.maxDistance);
-                    this.ctx.strokeStyle = this.config.lineColor.replace('0.2', opacity * 0.2);
+                // Use squared distance to avoid expensive sqrt
+                if (distanceSquared < maxDistSquared) {
+                    const distance = Math.sqrt(distanceSquared);
+                    const opacity = 1 - (distance / maxDist);
+                    this.ctx.strokeStyle = this.config.lineColor.replace('0.2', (opacity * 0.2).toFixed(2));
                     this.ctx.lineWidth = 1;
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
@@ -93,25 +154,48 @@ class ParticleSystem {
     }
     
     animate() {
+        if (!this.isRunning) return;
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Update and draw particles
-        this.particles.forEach(particle => {
-            particle.update(this.mouse);
-            particle.draw(this.ctx, this.config);
-        });
+        const len = this.particles.length;
+        for (let i = 0; i < len; i++) {
+            this.particles[i].update(this.mouse);
+            this.particles[i].draw(this.ctx, this.config);
+        }
         
         // Connect nearby particles
         this.connectParticles();
         
-        requestAnimationFrame(() => this.animate());
+        this.animationId = requestAnimationFrame(() => this.animate());
     }
     
+    /**
+     * Cleanup and destroy the particle system
+     */
     destroy() {
+        // Stop animation
+        this.pause();
+        
+        // Remove event listeners
+        window.removeEventListener('resize', this._boundResize);
+        document.removeEventListener('visibilitychange', this._boundVisibilityChange);
+        
+        if (this.config.interactive && this.canvas) {
+            this.canvas.removeEventListener('mousemove', this._boundMouseMove);
+            this.canvas.removeEventListener('mouseleave', this._boundMouseLeave);
+        }
+        
+        // Clear particles array
         this.particles = [];
-        if (this.canvas) {
+        
+        // Clear canvas
+        if (this.canvas && this.ctx) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
+        
+        console.log('ParticleSystem destroyed');
     }
 }
 

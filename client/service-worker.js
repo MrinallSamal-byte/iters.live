@@ -1,18 +1,27 @@
-// Service Worker for PWA
-const CACHE_NAME = 'iter-edu-v1';
-const RUNTIME_CACHE = 'iter-runtime-v1';
+// Service Worker for PWA - Memory Optimized
+const CACHE_NAME = 'iter-edu-v2';
+const RUNTIME_CACHE = 'iter-runtime-v2';
 
+// Only precache essential files
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/login.html',
   '/css/style.css',
-  '/css/animations.css',
   '/js/main.js',
-  '/js/landing.js',
-  '/manifest.json',
-  '/assets/icon-192.png',
-  '/assets/icon-512.png'
+  '/js/performance-utils.js',
+  '/manifest.json'
+];
+
+// Assets to cache on first request (lazy cache)
+const LAZY_CACHE_PATTERNS = [
+  /\.css$/,
+  /\.js$/,
+  /\.png$/,
+  /\.jpg$/,
+  /\.jpeg$/,
+  /\.svg$/,
+  /\.woff2?$/
 ];
 
 // Install event - cache static assets
@@ -72,9 +81,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets - cache first, fallback to network
-  if (PRECACHE_URLS.includes(url.pathname) || 
-      url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff|woff2)$/)) {
+  // Static assets - cache first with lazy caching, fallback to network
+  if (LAZY_CACHE_PATTERNS.some(pattern => pattern.test(url.pathname))) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
@@ -83,6 +91,7 @@ self.addEventListener('fetch', (event) => {
         return caches.open(RUNTIME_CACHE).then((cache) => {
           return fetch(request).then((response) => {
             if (response.status === 200) {
+              // Clone before caching
               cache.put(request, response.clone());
             }
             return response;

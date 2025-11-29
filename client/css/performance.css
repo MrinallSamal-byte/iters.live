@@ -1,0 +1,153 @@
+/**
+ * Lazy Loading and Performance Optimization Styles
+ * Memory-efficient image loading with placeholder support
+ */
+
+/* Lazy loading image placeholder */
+img.lazy,
+img[data-src] {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+}
+
+img.lazy-loaded {
+    opacity: 1;
+}
+
+/* Placeholder background for lazy images */
+img.lazy::before,
+img[data-src]::before {
+    content: '';
+    display: block;
+    background: linear-gradient(
+        90deg,
+        var(--glass-bg, rgba(255, 255, 255, 0.1)) 0%,
+        var(--glass-border, rgba(255, 255, 255, 0.2)) 50%,
+        var(--glass-bg, rgba(255, 255, 255, 0.1)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    img.lazy,
+    img[data-src] {
+        transition: none;
+    }
+    
+    img.lazy::before,
+    img[data-src]::before {
+        animation: none;
+    }
+    
+    .float-animation,
+    .scroll-reveal,
+    .stagger-animation > * {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .gradient-orb {
+        animation: none !important;
+    }
+    
+    /* Disable parallax for reduced motion */
+    .parallax-element {
+        transform: none !important;
+    }
+}
+
+/* Performance optimizations */
+.will-change-transform {
+    will-change: transform;
+}
+
+.will-change-opacity {
+    will-change: opacity;
+}
+
+/* GPU acceleration hints */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Content visibility for off-screen sections */
+.content-visibility-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize animations that are off-screen */
+.animation-paused {
+    animation-play-state: paused !important;
+}
+
+/* Hide visual elements that don't affect layout */
+[hidden],
+.visually-hidden {
+    display: none !important;
+}
+
+/* Skip animations on initial page load */
+.no-transition {
+    transition: none !important;
+}
+
+/* Lazy section loading */
+.lazy-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lazy-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Optimize background animations on mobile */
+@media (max-width: 768px) {
+    .bg-animation {
+        display: none;
+    }
+    
+    .gradient-orb {
+        display: none;
+    }
+    
+    /* Reduce particle effects on mobile */
+    .particle-canvas {
+        display: none;
+    }
+    
+    /* Disable 3D transforms on mobile */
+    .hover-tilt,
+    .card-3d {
+        transform: none !important;
+    }
+}
+
+/* Print styles - remove animations */
+@media print {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .bg-animation,
+    .gradient-orb,
+    .particle-canvas {
+        display: none !important;
+    }
+}
