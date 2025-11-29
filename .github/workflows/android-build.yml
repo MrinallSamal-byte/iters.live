@@ -18,6 +18,9 @@ on:
           - 'true'
           - 'false'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -122,6 +125,5 @@ jobs:
         files: client/releases/ITER.apk
         draft: false
         prerelease: false
-        make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
