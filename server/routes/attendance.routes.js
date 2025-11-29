@@ -4,6 +4,7 @@ const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const { emitToClass } = require('../socket/socket');
 const { varyStudentSnapshot } = require('../services/demoData.service');
+const cacheService = require('../services/cache.service');
 
 // Mark attendance
 router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
@@ -21,6 +22,9 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
       );
     }
 
+    // Invalidate cache for this student
+    cacheService.invalidateAttendance(student_id);
+
     const students = await query('SELECT department, year, section FROM users WHERE id = $1', [student_id]);
     if (students.length > 0) {
       const s = students[0];
@@ -36,21 +40,32 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
 // Get student attendance
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
-    const attendance = await query('SELECT * FROM attendance WHERE student_id = $1 ORDER BY date DESC', [req.params.id]
-    );
+    const studentId = req.params.id;
+    
+    // Check cache first
+    const cached = cacheService.getAttendance(studentId);
+    if (cached && !req.variationSeed) {
+      return res.json({ success: true, data: cached });
+    }
+    
+    const attendance = await query('SELECT * FROM attendance WHERE student_id = $1 ORDER BY date DESC', [studentId]);
     
     const summary = await query(`SELECT subject, 
        COUNT(*) as total_classes,
        SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
        ROUND(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as percentage
-       FROM attendance WHERE student_id = $1 GROUP BY subject`, [req.params.id]
-    );
+       FROM attendance WHERE student_id = $1 GROUP BY subject`, [studentId]);
+
+    const data = { records: attendance, summary };
+    
+    // Cache the result (5 minutes TTL)
+    cacheService.setAttendance(studentId, data, null, 300);
 
     if (req.variationSeed) {
       const varied = varyStudentSnapshot({ summary }, req.variationSeed);
       return res.json({ success: true, data: { records: attendance, summary: varied.summary } });
     }
-    res.json({ success: true, data: { records: attendance, summary } });
+    res.json({ success: true, data });
   } catch (error) {
     next(error);
   }

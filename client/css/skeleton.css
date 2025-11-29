@@ -4,7 +4,8 @@
  */
 
 /* Base skeleton styles */
-.skeleton {
+.skeleton,
+.loading-skeleton {
   background: linear-gradient(90deg, 
     rgba(255, 255, 255, 0.05) 0%, 
     rgba(255, 255, 255, 0.1) 50%, 
@@ -14,6 +15,12 @@
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 4px;
   display: inline-block;
+}
+
+/* Inline number loading state */
+.loading-skeleton {
+  min-width: 40px;
+  color: transparent !important;
 }
 
 @keyframes shimmer {
