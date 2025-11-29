@@ -644,7 +644,7 @@ class Chatbot {
     solveMath(message) {
         try {
             // Extract mathematical expression
-            const match = message.match(/(\d+\.?\d*)\s*([\+\-\*\/\^])\s*(\d+\.?\d*)/);
+            const match = message.match(/(\d+(?:\.\d+)?)\s*([\+\-\*\/\^])\s*(\d+(?:\.\d+)?)/);
             if (!match) return null;
             
             const [, num1, operator, num2] = match;
@@ -671,23 +671,54 @@ class Chatbot {
     }
 
     /**
+     * Get role-appropriate forum and notes links
+     */
+    getRoleLinks() {
+        const links = {
+            student: {
+                forum: '/dashboard/student-forum.html',
+                notes: '/dashboard/student-notes.html',
+                pyqs: '/dashboard/student-notes.html?type=pyqs'
+            },
+            teacher: {
+                forum: '/dashboard/teacher-forum.html',
+                notes: '/dashboard/teacher-notes.html',
+                pyqs: '/dashboard/teacher-notes.html'
+            },
+            admin: {
+                forum: '/dashboard/admin-forum.html',
+                notes: '/dashboard/admin.html',
+                pyqs: '/dashboard/admin.html'
+            },
+            guest: {
+                forum: '/register.html',
+                notes: '/register.html',
+                pyqs: '/register.html'
+            }
+        };
+        return links[this.userRole] || links.guest;
+    }
+
+    /**
      * Get response for mathematical questions
      */
     getMathResponse(message) {
         const solution = this.solveMath(message);
+        const links = this.getRoleLinks();
         
         if (solution) {
-            return `${solution}\n\n💡 <strong>Need help with complex math?</strong>\n• <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Ask in Forum</a>\n• <a href="/dashboard/student-notes.html" class="nav-suggestion">📚 Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
+            return `${solution}\n\n💡 <strong>Need help with complex math?</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>\n• <a href="${links.notes}" class="nav-suggestion">📚 Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
         }
         
-        return `🧮 <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Post in Forum</a> for peer/faculty help\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📝 Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
+        return `🧮 <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for peer/faculty help\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
     }
 
     /**
      * Get response for general questions
      */
     getGeneralResponse(message) {
-        return `🤔 <strong>Interesting question!</strong>\n\nFor detailed answers to general questions, I need the AI service which is currently unavailable.\n\n<strong>How I can help instead:</strong>\n• Answer questions about ITER EduHub features\n• Help you navigate attendance, marks, notes, etc.\n• Guide you to the right resources\n\n<strong>Try asking:</strong>\n• "How do I check my attendance?"\n• "Where can I find study materials?"\n• "How to view my marks?"\n\nOr <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Post in Forum</a> for academic questions!`;
+        const links = this.getRoleLinks();
+        return `🤔 <strong>Interesting question!</strong>\n\nFor detailed answers to general questions, I need the AI service which is currently unavailable.\n\n<strong>How I can help instead:</strong>\n• Answer questions about ITER EduHub features\n• Help you navigate attendance, marks, notes, etc.\n• Guide you to the right resources\n\n<strong>Try asking:</strong>\n• "How do I check my attendance?"\n• "Where can I find study materials?"\n• "How to view my marks?"\n\nOr <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for academic questions!`;
     }
 
     getGreetingResponse() {
