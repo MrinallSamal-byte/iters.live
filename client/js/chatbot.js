@@ -528,30 +528,30 @@ class Chatbot {
     async getResponse(message) {
         const lowerMessage = message.toLowerCase();
 
-        // Check role-specific FAQ first
-        const roleFAQ = this.faqDatabases[this.userRole] || this.faqDatabases.guest;
-        for (const [key, faq] of Object.entries(roleFAQ)) {
-            if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
-                return faq.answer;
-            }
-        }
+        // Classify the question first
+        const questionType = this.classifyQuestion(message);
 
-        // Check common FAQ
-        const commonFAQ = this.getCommonFAQ();
-        for (const [key, faq] of Object.entries(commonFAQ)) {
-            if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
-                return faq.answer;
-            }
-        }
-
-        // Greeting responses
-        if (this.isGreeting(lowerMessage)) {
+        // Handle greetings
+        if (questionType === 'greeting') {
             return this.getGreetingResponse();
         }
 
-        // Check for question-solving intent (student only)
-        if (this.userRole === 'student' && this.isQuestionSolvingIntent(lowerMessage)) {
-            return this.getQuestionSolvingResponse(message);
+        // Check role-specific FAQ first (for website questions)
+        if (questionType === 'website') {
+            const roleFAQ = this.faqDatabases[this.userRole] || this.faqDatabases.guest;
+            for (const [key, faq] of Object.entries(roleFAQ)) {
+                if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
+                    return faq.answer;
+                }
+            }
+
+            // Check common FAQ
+            const commonFAQ = this.getCommonFAQ();
+            for (const [key, faq] of Object.entries(commonFAQ)) {
+                if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
+                    return faq.answer;
+                }
+            }
         }
 
         // Try API call if available
@@ -575,16 +575,150 @@ class Chatbot {
                 }
             }
         } catch (error) {
-            console.log('AI API not available, using smart fallback');
+            console.log('AI API not available, using smart classification');
         }
 
-        // Smart fallback based on role
-        return this.getSmartFallback(message);
+        // Intelligent fallback based on question type
+        switch (questionType) {
+            case 'math':
+                return this.getMathResponse(message);
+            case 'general':
+                return this.getGeneralResponse(message);
+            case 'website':
+            default:
+                return this.getSmartFallback(message);
+        }
     }
 
     isGreeting(message) {
         const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'howdy', 'hola', 'namaste'];
         return greetings.some(g => message.includes(g) || message === g);
+    }
+
+    /**
+     * Classify question type
+     * @param {string} message - User's question
+     * @returns {string} - Type: 'math', 'website', 'general', 'greeting'
+     */
+    classifyQuestion(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Math patterns
+        const mathPatterns = [
+            /what('?s|\s+is)?\s+\d+\s*[\+\-\*\/\^]\s*\d+/i,
+            /calculate/i,
+            /solve.*\d+/i,
+            /\d+\s*[\+\-\*\/\^]\s*\d+/,
+            /(square|cube) (of|root)/i,
+            /factorial/i
+        ];
+        
+        // Website feature patterns (from existing FAQ keywords)
+        const websitePatterns = [
+            /attendance|marks|grades|notes|assignment|timetable|exam|admit card/i,
+            /hostel|mess|forum|event|club|fee|dashboard/i,
+            /register|login|password|account/i
+        ];
+        
+        // Check patterns
+        if (mathPatterns.some(pattern => pattern.test(message))) {
+            return 'math';
+        }
+        
+        if (websitePatterns.some(pattern => pattern.test(message))) {
+            return 'website';
+        }
+        
+        if (this.isGreeting(lowerMessage)) {
+            return 'greeting';
+        }
+        
+        return 'general';
+    }
+
+    /**
+     * Attempt to solve simple math
+     * @param {string} message - Math question
+     * @returns {string|null} - Answer or null if can't solve
+     */
+    solveMath(message) {
+        try {
+            // Extract mathematical expression
+            const match = message.match(/(\d+(?:\.\d+)?)\s*([\+\-\*\/\^])\s*(\d+(?:\.\d+)?)/);
+            if (!match) return null;
+            
+            const [, num1, operator, num2] = match;
+            const a = parseFloat(num1);
+            const b = parseFloat(num2);
+            
+            let result;
+            switch (operator) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': 
+                    if (b === 0) return '❌ Cannot divide by zero!';
+                    result = a / b; 
+                    break;
+                case '^': result = Math.pow(a, b); break;
+                default: return null;
+            }
+            
+            return `✅ <strong>${a} ${operator} ${b} = ${result}</strong>`;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Get role-appropriate forum and notes links
+     */
+    getRoleLinks() {
+        const links = {
+            student: {
+                forum: '/dashboard/student-forum.html',
+                notes: '/dashboard/student-notes.html',
+                pyqs: '/dashboard/student-notes.html?type=pyqs'
+            },
+            teacher: {
+                forum: '/dashboard/teacher-forum.html',
+                notes: '/dashboard/teacher-notes.html',
+                pyqs: '/dashboard/teacher-notes.html'
+            },
+            admin: {
+                forum: '/dashboard/admin-forum.html',
+                notes: '/dashboard/admin.html',
+                pyqs: '/dashboard/admin.html'
+            },
+            guest: {
+                forum: '/register.html',
+                notes: '/register.html',
+                pyqs: '/register.html'
+            }
+        };
+        return links[this.userRole] || links.guest;
+    }
+
+    /**
+     * Get response for mathematical questions
+     */
+    getMathResponse(message) {
+        const solution = this.solveMath(message);
+        const links = this.getRoleLinks();
+        
+        if (solution) {
+            return `${solution}\n\n💡 <strong>Need help with complex math?</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>\n• <a href="${links.notes}" class="nav-suggestion">📚 Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
+        }
+        
+        return `🧮 <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for peer/faculty help\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
+    }
+
+    /**
+     * Get response for general questions
+     */
+    getGeneralResponse(message) {
+        const links = this.getRoleLinks();
+        return `🤔 <strong>Interesting question!</strong>\n\nFor detailed answers to general questions, I need the AI service which is currently unavailable.\n\n<strong>How I can help instead:</strong>\n• Answer questions about ITER EduHub features\n• Help you navigate attendance, marks, notes, etc.\n• Guide you to the right resources\n\n<strong>Try asking:</strong>\n• "How do I check my attendance?"\n• "Where can I find study materials?"\n• "How to view my marks?"\n\nOr <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for academic questions!`;
     }
 
     getGreetingResponse() {
@@ -613,15 +747,6 @@ class Chatbot {
 
         const roleResponses = responses[this.userRole] || responses.guest;
         return roleResponses[Math.floor(Math.random() * roleResponses.length)];
-    }
-
-    isQuestionSolvingIntent(message) {
-        const patterns = ['solve', 'help me with', 'calculate', 'what is', 'how to', 'explain', 'find', 'derive', 'prove'];
-        return patterns.some(p => message.includes(p));
-    }
-
-    getQuestionSolvingResponse(question) {
-        return `💡 <strong>I'd love to help you!</strong>\n\nI see you're asking: "${question}"\n\n<strong>To help you better:</strong>\n1. 📝 Could you specify the subject? (Math, Physics, Chemistry, Programming, etc.)\n2. 🎯 Share the complete question or problem\n3. ✏️ Tell me where you're stuck\n\n<strong>Meanwhile, check these resources:</strong>\n• <a href="/dashboard/student-notes.html" class="nav-suggestion">📚 Study Notes</a> - Find related materials\n• <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a> - Ask peers for help\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📝 PYQs</a> - Similar solved problems\n\nShare more details and I'll guide you through! 🚀`;
     }
 
     getSmartFallback(message) {
