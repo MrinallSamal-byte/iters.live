@@ -57,14 +57,44 @@ class TestChatbot {
     classifyQuestion(message) {
         const lowerMessage = message.toLowerCase();
         
-        // Math patterns
+        // Math patterns - includes arithmetic and academic math concepts
         const mathPatterns = [
             /what('?s|\s+is)?\s+\d+\s*[\+\-\*\/\^]\s*\d+/i,
             /calculate/i,
             /solve.*\d+/i,
             /\d+\s*[\+\-\*\/\^]\s*\d+/,
             /(square|cube) (of|root)/i,
-            /factorial/i
+            /factorial/i,
+            // Academic math patterns
+            /integra(te|tion|l)/i,
+            /derivat(ive|ion|e)/i,
+            /differenti(ate|ation|al)/i,
+            /trigonometr(y|ic)/i,
+            /algebra(ic)?/i,
+            /equat(ion|e)/i,
+            /formula/i,
+            /theorem/i,
+            /logarithm/i,
+            /exponent(ial)?/i,
+            /polynomial/i,
+            /matrix|matrices/i,
+            /vector/i,
+            /calculus/i,
+            /geometry/i,
+            /probability/i,
+            /statistics/i,
+            /limit/i,
+            /series/i,
+            /sequence/i,
+            /function/i,
+            /graph.*(equation|function|curve)/i,
+            /quadratic/i,
+            /linear/i,
+            /simultaneous/i,
+            /binomial/i,
+            /permutation|combination/i,
+            /sin|cos|tan|cosec|sec|cot/i,
+            /arithmetic|geometric/i
         ];
         
         // Website feature patterns (from existing FAQ keywords)
@@ -317,5 +347,73 @@ describe('Math Pattern Detection', () => {
 
     test('should not classify "what is AI" as math', () => {
         expect(chatbot.classifyQuestion("what is AI")).toBe('general');
+    });
+});
+
+describe('Academic Math Pattern Detection', () => {
+    let chatbot;
+
+    beforeEach(() => {
+        chatbot = new TestChatbot();
+    });
+
+    test('should classify "what is integration of n square" as math', () => {
+        expect(chatbot.classifyQuestion("what is integration of n square")).toBe('math');
+    });
+
+    test('should classify "integrate x squared" as math', () => {
+        expect(chatbot.classifyQuestion("integrate x squared")).toBe('math');
+    });
+
+    test('should classify "derivative of sin x" as math', () => {
+        expect(chatbot.classifyQuestion("derivative of sin x")).toBe('math');
+    });
+
+    test('should classify "differentiation of x^2" as math', () => {
+        expect(chatbot.classifyQuestion("differentiation of x^2")).toBe('math');
+    });
+
+    test('should classify "solve quadratic equation" as math', () => {
+        expect(chatbot.classifyQuestion("solve quadratic equation")).toBe('math');
+    });
+
+    test('should classify "trigonometry help" as math', () => {
+        expect(chatbot.classifyQuestion("trigonometry help")).toBe('math');
+    });
+
+    test('should classify "what is the limit of x" as math', () => {
+        expect(chatbot.classifyQuestion("what is the limit of x")).toBe('math');
+    });
+
+    test('should classify "calculus problem" as math', () => {
+        expect(chatbot.classifyQuestion("calculus problem")).toBe('math');
+    });
+
+    test('should classify "matrix multiplication" as math', () => {
+        expect(chatbot.classifyQuestion("matrix multiplication")).toBe('math');
+    });
+
+    test('should classify "probability of event" as math', () => {
+        expect(chatbot.classifyQuestion("probability of event")).toBe('math');
+    });
+
+    test('should classify "polynomial equation" as math', () => {
+        expect(chatbot.classifyQuestion("polynomial equation")).toBe('math');
+    });
+
+    test('should classify "logarithm of 10" as math', () => {
+        expect(chatbot.classifyQuestion("logarithm of 10")).toBe('math');
+    });
+
+    test('should classify "what is sin 45" as math', () => {
+        expect(chatbot.classifyQuestion("what is sin 45")).toBe('math');
+    });
+
+    test('should classify "binomial theorem" as math', () => {
+        expect(chatbot.classifyQuestion("binomial theorem")).toBe('math');
+    });
+
+    test('should classify "permutation and combination" as math', () => {
+        expect(chatbot.classifyQuestion("permutation and combination")).toBe('math');
     });
 });

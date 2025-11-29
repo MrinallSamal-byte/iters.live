@@ -603,14 +603,44 @@ class Chatbot {
     classifyQuestion(message) {
         const lowerMessage = message.toLowerCase();
         
-        // Math patterns
+        // Math patterns - includes arithmetic and academic math concepts
         const mathPatterns = [
             /what('?s|\s+is)?\s+\d+\s*[\+\-\*\/\^]\s*\d+/i,
             /calculate/i,
             /solve.*\d+/i,
             /\d+\s*[\+\-\*\/\^]\s*\d+/,
             /(square|cube) (of|root)/i,
-            /factorial/i
+            /factorial/i,
+            // Academic math patterns
+            /integra(te|tion|l)/i,
+            /derivat(ive|ion|e)/i,
+            /differenti(ate|ation|al)/i,
+            /trigonometr(y|ic)/i,
+            /algebra(ic)?/i,
+            /equat(ion|e)/i,
+            /formula/i,
+            /theorem/i,
+            /logarithm/i,
+            /exponent(ial)?/i,
+            /polynomial/i,
+            /matrix|matrices/i,
+            /vector/i,
+            /calculus/i,
+            /geometry/i,
+            /probability/i,
+            /statistics/i,
+            /limit/i,
+            /series/i,
+            /sequence/i,
+            /function/i,
+            /graph.*(equation|function|curve)/i,
+            /quadratic/i,
+            /linear/i,
+            /simultaneous/i,
+            /binomial/i,
+            /permutation|combination/i,
+            /sin|cos|tan|cosec|sec|cot/i,
+            /arithmetic|geometric/i
         ];
         
         // Website feature patterns (from existing FAQ keywords)
@@ -710,7 +740,43 @@ class Chatbot {
             return `${solution}\n\n💡 <strong>Need help with complex math?</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>\n• <a href="${links.notes}" class="nav-suggestion">📚 Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
         }
         
+        // Check if it's an advanced/academic math question
+        const academicPatterns = /integra|derivat|differenti|calculus|trigonometr|equation|theorem|logarithm|polynomial|matrix|vector|geometry|probability|statistics|algebra|quadratic|linear|binomial|permutation|combination|sin|cos|tan|limit|series|sequence|function/i;
+        
+        if (academicPatterns.test(message)) {
+            return this.getAcademicMathResponse(message, links);
+        }
+        
         return `🧮 <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for peer/faculty help\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
+    }
+
+    /**
+     * Get response for academic math questions (calculus, algebra, etc.)
+     */
+    getAcademicMathResponse(message, links) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Specific responses for common academic math topics
+        if (/integra(te|tion|l)/i.test(message)) {
+            // Check for common integration patterns
+            if (/n\s*(square|²|squared|\^2)/i.test(message) || /n\^2/i.test(message)) {
+                return `📐 <strong>Integration of n²</strong>\n\n<strong>Formula:</strong>\n∫n² dn = <strong>n³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫n² dn = n²⁺¹/(2+1) = n³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+            }
+            if (/x\s*(square|²|squared|\^2)/i.test(message) || /x\^2/i.test(message)) {
+                return `📐 <strong>Integration of x²</strong>\n\n<strong>Formula:</strong>\n∫x² dx = <strong>x³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫x² dx = x²⁺¹/(2+1) = x³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+            }
+            return `📐 <strong>Integration Help</strong>\n\n<strong>Common Integration Formulas:</strong>\n• ∫xⁿ dx = xⁿ⁺¹/(n+1) + C (Power Rule)\n• ∫sin(x) dx = -cos(x) + C\n• ∫cos(x) dx = sin(x) + C\n• ∫eˣ dx = eˣ + C\n• ∫1/x dx = ln|x| + C\n\n<strong>Share your specific problem</strong> and I'll try to help you step by step!\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Previous Year Questions</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+        }
+        
+        if (/derivat(ive|ion|e)|differenti(ate|ation|al)/i.test(message)) {
+            if (/n\s*(square|²|squared|\^2)/i.test(message) || /n\^2/i.test(message)) {
+                return `📐 <strong>Derivative of n²</strong>\n\n<strong>Formula:</strong>\nd/dn(n²) = <strong>2n</strong>\n\n<strong>Using the power rule:</strong>\nd/dx(xⁿ) = n·xⁿ⁻¹\n\nSo: d/dn(n²) = 2·n²⁻¹ = 2n\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+            }
+            return `📐 <strong>Differentiation Help</strong>\n\n<strong>Common Derivative Formulas:</strong>\n• d/dx(xⁿ) = n·xⁿ⁻¹ (Power Rule)\n• d/dx(sin x) = cos x\n• d/dx(cos x) = -sin x\n• d/dx(eˣ) = eˣ\n• d/dx(ln x) = 1/x\n\n<strong>Share your specific problem</strong> and I'll help you solve it!\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+        }
+        
+        // Generic academic math response
+        return `📐 <strong>Academic Math Question</strong>\n\nI've detected a math-related question. While I can handle basic calculations directly, for advanced topics like calculus, algebra, and trigonometry, I can guide you to helpful resources.\n\n<strong>How to get help:</strong>\n• Type out your specific problem for step-by-step guidance\n• Include the formula or equation you're working with\n• Mention if it's from a specific chapter or topic\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a> - Reference notes\n• <a href="${links.pyqs}" class="nav-suggestion">📝 PYQs</a> - Similar solved problems\n• <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> - Ask peers & faculty\n\n💡 <strong>Tip:</strong> Try asking "integrate x squared" or "derivative of sin x" for specific formulas!`;
     }
 
     /**
