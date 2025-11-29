@@ -171,6 +171,12 @@
                             admin: '/dashboard/admin.html'
                         };
                         const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                        
+                        // Create page access token for the dashboard
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken(redirectUrl);
+                            console.log('Created page access token for Google login:', redirectUrl);
+                        }
                         window.location.href = redirectUrl;
                     } else {
                         alert('Login failed: ' + response.message);
@@ -302,6 +308,11 @@
                         console.log('Redirecting to:', redirectUrl);
 
                         setTimeout(() => {
+                            // Create page access token for the dashboard
+                            if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                                window.PageAccessToken.createPageAccessToken(redirectUrl);
+                                console.log('Created page access token for:', redirectUrl);
+                            }
                             window.location.href = redirectUrl;
                         }, 1500);
                     } else {
@@ -378,6 +389,7 @@
                 });
         }
     </script>
+    <script src="/js/page-access-token.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/chatbot.js"></script>
 </body>
