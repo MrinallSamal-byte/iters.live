@@ -368,24 +368,44 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbarScroll();
     checkDownloadFiles();
 
-    // Add typing effect to hero title - only if visible
+    // Add typing effect to hero title using IntersectionObserver for consistency
     const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle && isElementInViewport(heroTitle)) {
+    if (heroTitle) {
         const text = heroTitle.textContent;
-        heroTitle.textContent = '';
-        let index = 0;
+        let typingStarted = false;
         
-        function type() {
-            if (index < text.length) {
-                heroTitle.textContent += text.charAt(index);
-                index++;
-                const timeout = setTimeout(type, 50);
-                LandingCleanup.timeouts.push(timeout);
+        const startTyping = () => {
+            if (typingStarted) return;
+            typingStarted = true;
+            
+            heroTitle.textContent = '';
+            let index = 0;
+            
+            function type() {
+                if (index < text.length) {
+                    heroTitle.textContent += text.charAt(index);
+                    index++;
+                    const timeout = setTimeout(type, 50);
+                    LandingCleanup.timeouts.push(timeout);
+                }
             }
-        }
+            
+            const startTimeout = setTimeout(type, 500);
+            LandingCleanup.timeouts.push(startTimeout);
+        };
         
-        const startTimeout = setTimeout(type, 500);
-        LandingCleanup.timeouts.push(startTimeout);
+        // Use IntersectionObserver for consistent lazy initialization
+        const typingObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startTyping();
+                    typingObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        typingObserver.observe(heroTitle);
+        LandingCleanup.observers.push(typingObserver);
     }
 });
 

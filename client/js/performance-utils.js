@@ -46,7 +46,9 @@
 
             element.addEventListener(event, handler, options);
 
-            const key = `${event}_${Math.random().toString(36).substr(2, 9)}`;
+            // Use incrementing counter for reliable unique keys
+            if (!this._listenerCounter) this._listenerCounter = 0;
+            const key = `${event}_${++this._listenerCounter}`;
             this.eventListeners.set(key, { element, event, handler, options });
 
             return key;

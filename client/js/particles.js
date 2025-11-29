@@ -141,8 +141,9 @@ class ParticleSystem {
                 // Use squared distance to avoid expensive sqrt
                 if (distanceSquared < maxDistSquared) {
                     const distance = Math.sqrt(distanceSquared);
-                    const opacity = 1 - (distance / maxDist);
-                    this.ctx.strokeStyle = this.config.lineColor.replace('0.2', (opacity * 0.2).toFixed(2));
+                    const opacity = (1 - (distance / maxDist)) * 0.2;
+                    // Use RGBA directly for more robust color handling
+                    this.ctx.strokeStyle = `rgba(99, 102, 241, ${opacity.toFixed(3)})`;
                     this.ctx.lineWidth = 1;
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.particles[i].x, this.particles[i].y);

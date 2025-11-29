@@ -93,11 +93,11 @@ class Chatbot {
     initRoleConfig() {
         if (this.faqLoaded) return;
         
-        // Role-specific FAQ databases - Only load for current role to save memory
-        this.faqDatabases = {};
-        this.faqDatabases[this.userRole] = this.getFAQForRole(this.userRole);
+        // Load FAQ only for the current user's role to save memory
+        // This is intentionally a single FAQ, not a collection of all roles
+        this.currentRoleFAQ = this.getFAQForRole(this.userRole);
 
-        // Role-specific quick actions - Only load current role
+        // Role-specific quick actions - Only get for current role
         const quickActionsMap = {
             student: [
                 { text: '📊 Attendance', query: 'Check my attendance' },
@@ -125,11 +125,8 @@ class Chatbot {
             ]
         };
         
-        this.quickActionsConfig = {};
-        this.quickActionsConfig[this.userRole] = quickActionsMap[this.userRole] || quickActionsMap.guest;
-
-        // Set current quick actions based on role
-        this.quickActions = this.quickActionsConfig[this.userRole] || quickActionsMap.guest;
+        // Get quick actions for current role only
+        this.quickActions = quickActionsMap[this.userRole] || quickActionsMap.guest;
         this.faqLoaded = true;
     }
     
@@ -526,8 +523,8 @@ class Chatbot {
         
         // Clear messages
         this.messages = [];
-        this.faqDatabases = null;
-        this.quickActionsConfig = null;
+        this.currentRoleFAQ = null;
+        this.quickActions = null;
         
         console.log('Chatbot destroyed');
     }
@@ -603,7 +600,7 @@ class Chatbot {
 
         // Check role-specific FAQ first (for website questions)
         if (questionType === 'website') {
-            const roleFAQ = this.faqDatabases[this.userRole] || this.faqDatabases.guest;
+            const roleFAQ = this.currentRoleFAQ || {};
             for (const [key, faq] of Object.entries(roleFAQ)) {
                 if (faq.keywords.some(keyword => lowerMessage.includes(keyword))) {
                     return faq.answer;
