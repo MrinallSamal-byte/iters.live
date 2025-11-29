@@ -97,7 +97,7 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - 📚 **Notes & PYQs Repository** - Download notes, previous year questions, and study materials
 - ✍️ **Assignment Submission** - Upload assignments, track deadlines, and receive feedback
 - 📅 **Interactive Timetable** - Highlight current/next class with color-coded subjects
-- 🍽️ **Hostel Menu** - Weekly meal schedules with calendar view
+- 🍽️ **Mess Menu System** - View daily menus for any date (past, present, future), hostel-specific menus, quick navigation
 - 🎉 **Events & Clubs** - Register for events and join clubs with real-time counters
 - 💰 **Fee Management** - View ledger, download receipts (mock)
 - 🏆 **Achievements & Badges** - Track academic and extracurricular achievements
@@ -133,6 +133,7 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - 🆕 **Advanced Analytics** - System-wide performance metrics and insights
 - 🆕 **Template Management** - Generate and download import templates
 - 📈 **Advanced Analytics** - Chart.js visualizations for attendance, performance, and usage
+- 🍽️ **Menu Management** - Create, edit, delete hostel menus; calendar view; bulk CSV upload; copy menus between dates
 
 ### Technical Highlights
 - 🎨 **Unmatched UI/UX** - Glassmorphism theme with Lottie animations and smooth transitions
@@ -376,6 +377,17 @@ All_In_One_College_Website/
 - `PUT /api/admin/users/:id/toggle-active` - Toggle user active status
 - `GET /api/admin/approvals/files` - Get pending file approvals
 - `GET /api/admin/logs` - Get activity logs
+
+### Menu System
+- `GET /api/menu/date/:date` - Get menu for specific date (optional hostel filter)
+- `GET /api/menu/range` - Get menus for date range (startDate, endDate, hostel params)
+- `GET /api/menu/hostels` - Get list of available hostels
+- `POST /api/menu` - Create new menu (admin only)
+- `PUT /api/menu/:id` - Update menu (admin only)
+- `DELETE /api/menu/:id` - Delete menu (admin only)
+- `POST /api/menu/copy` - Copy menu from one date to another (admin only)
+- `POST /api/menu/bulk` - Bulk upload menus via CSV (admin only)
+- `GET /api/menu/all` - Get all menus with pagination (admin only)
 
 ### Analytics
 - `GET /api/analytics/overview` - System overview stats (admin)
