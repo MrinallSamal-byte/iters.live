@@ -47,6 +47,7 @@
   "author": "ITER Development Team",
   "license": "MIT",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@vercel/postgres": "^0.10.0",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.1",
