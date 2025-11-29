@@ -29,6 +29,9 @@
 
     // Load pending submissions
     loadPendingSubmissions();
+
+    // Load today's menu
+    loadTodayMenu();
   }
 
   function setText(id, txt){ 
@@ -213,5 +216,67 @@
       alert('Grade submission feature coming soon');
     }
   };
+
+  // Load today's menu for the widget
+  async function loadTodayMenu() {
+    const container = document.getElementById('todayMenuMeals');
+    if (!container) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const savedHostel = localStorage.getItem('preferredHostel') || '';
+      
+      let url = `/api/menu/date/${today}`;
+      if (savedHostel) {
+        url += `?hostel=${encodeURIComponent(savedHostel)}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success && data.data && data.data.length > 0) {
+        const menu = data.data[0];
+        const mealTypes = {
+          breakfast: { icon: '🌅', title: 'Breakfast' },
+          lunch: { icon: '🍛', title: 'Lunch' },
+          snacks: { icon: '☕', title: 'Snacks' },
+          dinner: { icon: '🌙', title: 'Dinner' }
+        };
+
+        let html = '';
+        Object.keys(mealTypes).forEach(type => {
+          const items = menu[type];
+          if (items && items.trim()) {
+            const displayItems = items.split(',').slice(0, 3).map(i => i.trim()).join(', ');
+            html += `
+              <div class="menu-widget-meal ${type}">
+                <div class="menu-widget-meal-title">
+                  ${mealTypes[type].icon} ${mealTypes[type].title}
+                </div>
+                <div class="menu-widget-meal-items">${escapeHtml(displayItems)}${items.split(',').length > 3 ? '...' : ''}</div>
+              </div>
+            `;
+          }
+        });
+
+        if (html) {
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = '<div class="menu-widget-empty">No menu items available for today</div>';
+        }
+      } else {
+        container.innerHTML = '<div class="menu-widget-empty">No menu available for today. <a href="/menu.html" style="color: var(--primary);">Check other dates</a></div>';
+      }
+    } catch (error) {
+      console.error('Error loading menu:', error);
+      container.innerHTML = '<div class="menu-widget-empty">Unable to load menu</div>';
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
 })();

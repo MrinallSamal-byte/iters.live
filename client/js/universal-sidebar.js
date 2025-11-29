@@ -42,6 +42,7 @@
                 { icon: '📊', text: 'Analytics', href: '/dashboard/admin-analytics.html', page: 'analytics' },
                 { icon: '📢', text: 'Announcements', href: '/dashboard/admin-announcements.html', page: 'announcements' },
                 { icon: '🎓', text: 'Departments', href: '/dashboard/admin-departments.html', page: 'departments' },
+                { icon: '🍽️', text: 'Menu Management', href: '/dashboard/admin/menu-management.html', page: 'menu-management' },
                 { icon: '⚙️', text: 'Settings', href: '/dashboard/admin-settings.html', page: 'settings' },
                 { icon: '🚪', text: 'Logout', href: '#', page: 'logout' }
             ]

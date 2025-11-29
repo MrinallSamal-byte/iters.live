@@ -1,0 +1,756 @@
+/* Menu System Styles */
+
+/* Date picker and navigation */
+.menu-date-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.menu-date-input {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.menu-date-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.menu-quick-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.menu-nav-btn {
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.menu-nav-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.menu-nav-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-color: var(--primary);
+    color: white;
+}
+
+.menu-nav-btn.prev,
+.menu-nav-btn.next {
+    padding: 0.75rem 1rem;
+}
+
+/* Hostel Selection */
+.hostel-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.hostel-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hostel-group-title {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hostel-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.hostel-btn {
+    padding: 0.75rem 1.25rem;
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.hostel-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.hostel-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-color: var(--primary);
+    color: white;
+}
+
+.hostel-select {
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.hostel-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Menu Display */
+.menu-display {
+    margin-top: 1.5rem;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.meal-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.meal-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+}
+
+.meal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.meal-icon {
+    font-size: 2rem;
+}
+
+.meal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.meal-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.meal-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.meal-item {
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    transition: all 0.2s ease;
+}
+
+.meal-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+/* Meal type specific colors */
+.meal-card.breakfast {
+    border-left: 4px solid #f59e0b;
+}
+
+.meal-card.breakfast .meal-title {
+    color: #f59e0b;
+}
+
+.meal-card.lunch {
+    border-left: 4px solid #10b981;
+}
+
+.meal-card.lunch .meal-title {
+    color: #10b981;
+}
+
+.meal-card.snacks {
+    border-left: 4px solid #8b5cf6;
+}
+
+.meal-card.snacks .meal-title {
+    color: #8b5cf6;
+}
+
+.meal-card.dinner {
+    border-left: 4px solid #3b82f6;
+}
+
+.meal-card.dinner .meal-title {
+    color: #3b82f6;
+}
+
+/* Empty State */
+.menu-empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+
+.menu-empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.menu-empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.menu-empty-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Loading State */
+.menu-loading {
+    text-align: center;
+    padding: 3rem;
+}
+
+.menu-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--glass-border);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Menu Widget for Dashboard */
+.menu-widget {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.menu-widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.menu-widget-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menu-widget-link {
+    font-size: 0.875rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.menu-widget-link:hover {
+    text-decoration: underline;
+}
+
+.menu-widget-meals {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.menu-widget-meal {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary);
+}
+
+.menu-widget-meal-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.menu-widget-meal-items {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* Admin Menu Management Styles */
+.menu-admin-container {
+    margin-top: 1.5rem;
+}
+
+.menu-admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--glass-border);
+    padding-bottom: 1rem;
+}
+
+.menu-admin-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    border-radius: var(--radius-md);
+}
+
+.menu-admin-tab:hover {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.menu-admin-tab.active {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.menu-admin-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+}
+
+/* Menu Form */
+.menu-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.menu-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.menu-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.menu-form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.menu-form-input,
+.menu-form-select,
+.menu-form-textarea {
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.menu-form-input:focus,
+.menu-form-select:focus,
+.menu-form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.menu-form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.menu-form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.menu-form-btn {
+    padding: 0.875rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.menu-form-btn.primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+}
+
+.menu-form-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.menu-form-btn.secondary {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    color: var(--text-primary);
+}
+
+.menu-form-btn.secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.menu-form-btn.danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.menu-form-btn.danger:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Menu List */
+.menu-list {
+    margin-top: 1.5rem;
+}
+
+.menu-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.menu-list-item:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.menu-list-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.menu-list-date {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.menu-list-hostel {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.menu-list-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.menu-list-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.menu-list-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.menu-list-btn.edit:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.menu-list-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Calendar View */
+.menu-calendar {
+    margin-top: 1.5rem;
+}
+
+.menu-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.menu-calendar-header {
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.menu-calendar-day {
+    padding: 1rem;
+    text-align: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 80px;
+}
+
+.menu-calendar-day:hover {
+    border-color: var(--primary);
+    transform: scale(1.02);
+}
+
+.menu-calendar-day.has-menu {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.menu-calendar-day.today {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.menu-calendar-day.selected {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    border-color: var(--primary);
+}
+
+.menu-calendar-day-number {
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+
+.menu-calendar-day-indicator {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}
+
+/* Bulk Upload Section */
+.bulk-upload-section {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.bulk-upload-section:hover {
+    border-color: var(--primary);
+}
+
+.bulk-upload-section.drag-over {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+}
+
+.bulk-upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.bulk-upload-text {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.bulk-upload-text strong {
+    color: var(--text-primary);
+}
+
+.bulk-upload-input {
+    display: none;
+}
+
+.bulk-upload-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.bulk-upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .menu-date-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .menu-date-input {
+        max-width: none;
+    }
+
+    .menu-quick-nav {
+        justify-content: center;
+    }
+
+    .hostel-selector {
+        flex-direction: column;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-widget-meals {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-admin-tabs {
+        overflow-x: auto;
+        padding-bottom: 1.5rem;
+    }
+
+    .menu-calendar-grid {
+        gap: 0.25rem;
+    }
+
+    .menu-calendar-day {
+        padding: 0.5rem;
+        min-height: 60px;
+    }
+
+    .menu-calendar-day-number {
+        font-size: 0.875rem;
+    }
+
+    .menu-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .menu-list-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .menu-form-input,
+[data-theme="dark"] .menu-form-select,
+[data-theme="dark"] .menu-form-textarea,
+[data-theme="dark"] .menu-date-input,
+[data-theme="dark"] .hostel-select {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* Light theme adjustments */
+body.light-theme .meal-item {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.15);
+}
+
+body.light-theme .menu-widget-meal {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .menu-calendar-day.has-menu {
+    background: rgba(16, 185, 129, 0.08);
+}
