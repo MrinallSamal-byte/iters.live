@@ -364,8 +364,10 @@ async function loadTimetable() {
 }
 
 // Initial load with parallel execution for faster data loading
+// Using Promise.allSettled() instead of Promise.all() to ensure all data loading
+// completes regardless of individual failures - this provides error isolation
+// so one failed API call doesn't block the entire dashboard from loading
 (async function initializeDashboard() {
-    // Load all functions in parallel for maximum speed
     await Promise.allSettled([
         loadAttendance(),
         loadMarks(),
