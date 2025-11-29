@@ -37,6 +37,7 @@ const pyqRoutes = require('./routes/pyq.routes');
 const webRoutes = require('./routes/web.routes');
 const portalRoutes = require('./routes/portal.routes');
 const redirectRoutes = require('./routes/redirect.routes');
+const menuRoutes = require('./routes/menu.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -207,6 +208,7 @@ app.use('/api/notes', notesRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 app.use('/api/portal', portalRoutes);
+app.use('/api/menu', menuRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
@@ -254,6 +256,49 @@ app.get('/academics', (req, res) => {
 app.get('/contact', (req, res) => {
   const obfuscatedUrl = urlRouter.getObfuscatedUrl('contact');
   res.redirect(obfuscatedUrl);
+});
+
+// Serve menu page directly
+app.get('/menu.html', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/menu.html'));
+});
+
+app.get('/menu', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/menu.html'));
+});
+
+// Serve dashboard admin subdirectory pages
+app.get('/dashboard/admin/:page', staticFileLimiter, (req, res) => {
+  const page = req.params.page;
+  
+  // Validate page parameter to prevent path traversal attacks
+  if (!/^[a-zA-Z0-9-]+\.html$/.test(page)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid page name'
+    });
+  }
+  
+  const adminDir = path.resolve(__dirname, '../client/dashboard/admin');
+  const filePath = path.join(adminDir, page);
+  
+  // Ensure the resolved path is within the admin directory
+  const resolvedPath = path.resolve(filePath);
+  if (!resolvedPath.startsWith(adminDir)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied'
+    });
+  }
+  
+  res.sendFile(resolvedPath, (err) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({
+        success: false,
+        message: 'Admin page not found'
+      });
+    }
+  });
 });
 
 // Serve dashboard pages directly (needed for login redirects)

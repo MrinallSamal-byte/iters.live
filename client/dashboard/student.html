@@ -213,6 +213,22 @@
             </div>
         </section>
 
+        <!-- Today's Menu Widget -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">🍽️</span>
+                    Today's Menu
+                </h3>
+                <a href="/menu.html" class="section-link" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">View Full Menu →</a>
+            </div>
+            <div id="menuWidget" class="menu-widget-content">
+                <div class="menu-widget-meals" id="todayMenuMeals">
+                    <div class="loading-text">Loading today's menu...</div>
+                </div>
+            </div>
+        </section>
+
         <!-- Quick Links -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
@@ -276,6 +292,13 @@
                     <div class="quick-link-content">
                         <h4>Student Forum</h4>
                         <p>Ask & discuss with peers</p>
+                    </div>
+                </a>
+                <a href="/menu.html" class="quick-link-card">
+                    <div class="quick-link-icon">🍽️</div>
+                    <div class="quick-link-content">
+                        <h4>Mess Menu</h4>
+                        <p>View hostel meal schedule</p>
                     </div>
                 </a>
             </div>
@@ -429,6 +452,66 @@
             text-align: center;
             padding: 2rem;
             color: var(--text-secondary);
+        }
+
+        /* Menu Widget Styles */
+        .menu-widget-content {
+            margin-top: 1rem;
+        }
+
+        .menu-widget-meals {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .menu-widget-meal {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--primary);
+        }
+
+        .menu-widget-meal-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-widget-meal-items {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .menu-widget-meal.breakfast { border-left-color: #f59e0b; }
+        .menu-widget-meal.lunch { border-left-color: #10b981; }
+        .menu-widget-meal.snacks { border-left-color: #8b5cf6; }
+        .menu-widget-meal.dinner { border-left-color: #3b82f6; }
+
+        .section-link {
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .section-link:hover {
+            text-decoration: underline !important;
+        }
+
+        .menu-widget-empty {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .menu-widget-meals {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </body>
