@@ -5,7 +5,7 @@ test.describe('Landing Page', () => {
     await page.goto('http://localhost:3000');
     
     await expect(page).toHaveTitle(/ITER College Management/);
-    await expect(page.locator('.hero-title')).toContainText('ITER EduHub');
+    await expect(page.locator('.hero-title')).toContainText('Institute of Technical Education & Research');
   });
 
   test('should navigate to login page', async ({ page }) => {
