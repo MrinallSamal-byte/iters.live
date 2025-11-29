@@ -4,6 +4,7 @@ const { db, auth } = require('../database/firebase');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const axios = require('axios');
+const sessionModule = require('../middleware/session');
 
 // Flask Scraper Service URL
 const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
@@ -339,9 +340,6 @@ router.post('/validate-session', authMiddleware, async (req, res) => {
   try {
     const { sessionId, lastActivity } = req.body;
     const userId = req.user.id;
-
-    // Import session module
-    const sessionModule = require('../middleware/session');
     
     // Validate session
     const validation = sessionModule.validateSession(
@@ -394,9 +392,6 @@ router.post('/refresh-session', authMiddleware, async (req, res) => {
         message: 'Session ID is required'
       });
     }
-
-    // Import session module
-    const sessionModule = require('../middleware/session');
     
     // Update session activity
     const now = Date.now();

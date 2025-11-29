@@ -79,7 +79,8 @@ function validateSession(userId, sessionId, clientLastActivity) {
     
     // Use the most recent activity (server or client)
     const serverLastActivity = sessionData.lastActivity;
-    const mostRecentActivity = Math.max(serverLastActivity, clientLastActivity || 0);
+    const safeClientActivity = clientLastActivity ?? 0;
+    const mostRecentActivity = Math.max(serverLastActivity, safeClientActivity);
     const elapsed = Date.now() - mostRecentActivity;
     
     if (elapsed >= SESSION_TIMEOUT_MS) {

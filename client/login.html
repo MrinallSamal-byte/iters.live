@@ -175,7 +175,6 @@
                         // Create page access token for the dashboard
                         if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                             window.PageAccessToken.createPageAccessToken(redirectUrl);
-                            console.log('Created page access token for Google login:', redirectUrl);
                         }
                         window.location.href = redirectUrl;
                     } else {
@@ -325,13 +324,10 @@
                             redirectUrl = dashboards[userRole] || '/dashboard/teacher.html';
                         }
 
-                        console.log('Redirecting to:', redirectUrl);
-
                         setTimeout(() => {
                             // Create page access token for the dashboard
                             if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                                 window.PageAccessToken.createPageAccessToken(redirectUrl);
-                                console.log('Created page access token for:', redirectUrl);
                             }
                             window.location.href = redirectUrl;
                         }, 1500);

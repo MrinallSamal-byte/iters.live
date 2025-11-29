@@ -466,7 +466,12 @@
             
             return true;
         } catch (error) {
-            // Network error - allow offline usage but continue tracking
+            // Network error - still enforce client-side timeout
+            // Check if session would be timed out based on local data
+            if (isSessionTimedOut()) {
+                return false;
+            }
+            // Allow offline usage with grace period, but log for monitoring
             return true;
         }
     }
