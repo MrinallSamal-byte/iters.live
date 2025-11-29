@@ -705,10 +705,19 @@
         },
 
         downloadTemplate() {
+            // Use dynamic dates (today and tomorrow) for the template
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const formatDate = (d) => d.toISOString().split('T')[0];
+            const todayStr = formatDate(today);
+            const tomorrowStr = formatDate(tomorrow);
+
             const template = `menu_date,hostel_type,hostel_name,breakfast,lunch,snacks,dinner
-2025-11-29,boys,BH1,"Bread,Butter,Jam,Milk,Banana","Rice,Dal,Aloo Gobi,Chapati,Salad","Samosa,Tea","Rice,Dal Tadka,Paneer Butter Masala,Chapati"
-2025-11-29,girls,LH1,"Bread,Butter,Jam,Milk,Banana","Rice,Dal,Aloo Gobi,Chapati,Salad","Samosa,Tea","Rice,Dal Tadka,Paneer Butter Masala,Chapati"
-2025-11-30,boys,BH1,"Poha,Jalebi,Milk,Apple","Rice,Rajma,Jeera Aloo,Chapati,Pickle","Pakoda,Coffee","Rice,Yellow Dal,Egg Curry,Chapati,Curd"`;
+${todayStr},boys,BH1,"Bread,Butter,Jam,Milk,Banana","Rice,Dal,Aloo Gobi,Chapati,Salad","Samosa,Tea","Rice,Dal Tadka,Paneer Butter Masala,Chapati"
+${todayStr},girls,LH1,"Bread,Butter,Jam,Milk,Banana","Rice,Dal,Aloo Gobi,Chapati,Salad","Samosa,Tea","Rice,Dal Tadka,Paneer Butter Masala,Chapati"
+${tomorrowStr},boys,BH1,"Poha,Jalebi,Milk,Apple","Rice,Rajma,Jeera Aloo,Chapati,Pickle","Pakoda,Coffee","Rice,Yellow Dal,Egg Curry,Chapati,Curd"`;
 
             const blob = new Blob([template], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);

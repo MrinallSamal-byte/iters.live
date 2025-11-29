@@ -106,6 +106,10 @@ router.get('/range', async (req, res, next) => {
     
     const snapshot = await query.get();
     
+    // Note: Firestore doesn't support compound queries with range conditions on
+    // different fields. Hostel filtering is done client-side after the date range
+    // query. This is an acceptable trade-off since date range typically limits
+    // results to a small set (usually 7-30 days of menu data).
     let menus = [];
     snapshot.forEach(doc => {
       const data = doc.data();
