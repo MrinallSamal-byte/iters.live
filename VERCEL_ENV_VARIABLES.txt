@@ -1,0 +1,23 @@
+# ============================================
+# VERCEL ENVIRONMENT VARIABLES
+# ============================================
+# Add these variables to your Vercel project settings:
+# Vercel Dashboard > Your Project > Settings > Environment Variables
+
+# ============================================
+# Google Gemini AI Configuration
+# ============================================
+# For Smart Chatbot and AI-powered features
+# Get your API key from: https://makersuite.google.com/app/apikey
+
+GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+GEMINI_MODEL=gemini-1.5-flash
+
+# ============================================
+# Features enabled by Gemini AI
+# ============================================
+# - /api/ai/chat - AI-powered chatbot responses
+# - /api/ai/study-plan - Personalized study plan generation
+# - /api/ai/recommendations - AI-driven learning recommendations
+# - Smart answers for student questions
+# - Context-aware educational responses
