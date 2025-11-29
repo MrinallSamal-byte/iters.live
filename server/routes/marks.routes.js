@@ -3,6 +3,7 @@ const router = express.Router();
 const { query } = require('../database/db');
 const { varyStudentSnapshot } = require('../services/demoData.service');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const cacheService = require('../services/cache.service');
 
 // Upload marks
 router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
@@ -11,6 +12,9 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
     
     const result = await query('INSERT INTO marks (student_id, subject, exam_type, marks_obtained, total_marks, exam_date, uploaded_by, remarks) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id', [student_id, subject, exam_type, marks_obtained, total_marks, exam_date, req.user.id, remarks]
     );
+
+    // Invalidate cache for this student
+    cacheService.invalidateMarks(student_id);
 
     res.json({ success: true, message: 'Marks uploaded successfully', data: { id: result[0].id } });
   } catch (error) {
@@ -21,18 +25,29 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
 // Get student marks
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
-    const marks = await query('SELECT * FROM marks WHERE student_id = $1 ORDER BY exam_date DESC', [req.params.id]
-    );
+    const studentId = req.params.id;
+    
+    // Check cache first
+    const cached = cacheService.getMarks(studentId);
+    if (cached && !req.variationSeed) {
+      return res.json({ success: true, data: cached });
+    }
+    
+    const marks = await query('SELECT * FROM marks WHERE student_id = $1 ORDER BY exam_date DESC', [studentId]);
     
     const summary = await query(`SELECT subject, exam_type, AVG(marks_obtained) as avg_marks, AVG(total_marks) as avg_total
-       FROM marks WHERE student_id = $1 GROUP BY subject, exam_type`, [req.params.id]
-    );
+       FROM marks WHERE student_id = $1 GROUP BY subject, exam_type`, [studentId]);
+
+    const data = { marks, summary };
+    
+    // Cache the result (5 minutes TTL)
+    cacheService.setMarks(studentId, data, null, 300);
 
     if (req.variationSeed) {
       const varied = varyStudentSnapshot({ marks, summary }, req.variationSeed);
       return res.json({ success: true, data: { marks: varied.marks, summary: varied.summary || summary } });
     }
-    res.json({ success: true, data: { marks, summary } });
+    res.json({ success: true, data });
   } catch (error) {
     next(error);
   }

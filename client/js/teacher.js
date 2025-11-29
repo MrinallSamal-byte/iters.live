@@ -9,26 +9,54 @@
   
   const user = APP.Storage.get('user') || {};
 
+  // Client-side cache with TTL (5 minutes)
+  const CACHE_TTL = 5 * 60 * 1000;
+  const dataCache = {
+    get(key) {
+      try {
+        const cached = sessionStorage.getItem(`teacher_${key}`);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            return data;
+          }
+          sessionStorage.removeItem(`teacher_${key}`);
+        }
+      } catch (_) {}
+      return null;
+    },
+    set(key, data) {
+      try {
+        sessionStorage.setItem(`teacher_${key}`, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (_) {}
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 
   async function init(){
-    // Welcome name
+    // Welcome name - immediate
     const nameEl = document.getElementById('teacherName');
     if (nameEl) nameEl.textContent = user.name || 'Teacher';
 
-    // Load stats
-    const stats = await getTeacherStats();
+    // Render charts immediately (they use static data)
+    renderAttendanceChart();
+    renderPerformanceChart();
+
+    // Load all data in parallel for faster loading
+    const [stats, _] = await Promise.all([
+      getTeacherStats(),
+      loadPendingSubmissions()
+    ]);
+    
+    // Update stats as soon as data is available
     setText('totalStudents', stats.totalStudents || 120);
     setText('avgAttendance', (stats.avgAttendance || 87) + '%');
     setText('pendingSubmissions', stats.pendingSubmissions || 15);
     setText('classAverage', (stats.classAverage || 78) + '%');
-
-    // Load charts
-    renderAttendanceChart();
-    renderPerformanceChart();
-
-    // Load pending submissions
-    loadPendingSubmissions();
   }
 
   function setText(id, txt){ 
@@ -37,13 +65,21 @@
   }
 
   async function getTeacherStats(){
+    // Check cache first
+    const cached = dataCache.get('stats');
+    if (cached) return cached;
+    
     try { 
-      const r = await APP.API.get('/teacher/stats'); 
-      return r.data || {};
+      const r = await APP.API.get('/teacher/stats');
+      const stats = r.data || {};
+      dataCache.set('stats', stats);
+      return stats;
     } catch(_) { 
       if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getTeacherStats(); 
-        return r.data || {};
+        const r = DummyData.getTeacherStats();
+        const stats = r.data || {};
+        dataCache.set('stats', stats);
+        return stats;
       }
       return {
         totalStudents: 120,

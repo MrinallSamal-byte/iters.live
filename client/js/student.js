@@ -363,19 +363,19 @@ async function loadTimetable() {
     }
 }
 
-// Initial load with error isolation
+// Initial load with parallel execution for faster data loading
+// Using Promise.allSettled() instead of Promise.all() to ensure all data loading
+// completes regardless of individual failures - this provides error isolation
+// so one failed API call doesn't block the entire dashboard from loading
 (async function initializeDashboard() {
-    console.log('🚀 Initializing dashboard...');
-
-    // Load all functions independently so one failure doesn't break others
-    try { await loadAttendance(); } catch (e) { console.error('Attendance load failed:', e); }
-    try { await loadMarks(); } catch (e) { console.error('Marks load failed:', e); }
-    try { await loadEvents(); } catch (e) { console.error('Events load failed:', e); }
-    try { await loadAssignments(); } catch (e) { console.error('Assignments load failed:', e); }
-    try { await loadDownloads(); } catch (e) { console.error('Downloads load failed:', e); }
-    try { await loadTimetable(); } catch (e) { console.error('Timetable load failed:', e); }
-
-    console.log('✅ Dashboard initialization complete');
+    await Promise.allSettled([
+        loadAttendance(),
+        loadMarks(),
+        loadEvents(),
+        loadAssignments(),
+        loadDownloads(),
+        loadTimetable()
+    ]);
 })();
 
 // Optionally, set up Socket.IO for real-time updates

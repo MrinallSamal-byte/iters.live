@@ -8,48 +8,100 @@
   }
   const user = APP.Storage.get('user') || {};
 
+  // Client-side cache with TTL (5 minutes)
+  const CACHE_TTL = 5 * 60 * 1000;
+  const dataCache = {
+    get(key) {
+      try {
+        const cached = sessionStorage.getItem(`dashboard_${key}`);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            return data;
+          }
+          sessionStorage.removeItem(`dashboard_${key}`);
+        }
+      } catch (_) {}
+      return null;
+    },
+    set(key, data) {
+      try {
+        sessionStorage.setItem(`dashboard_${key}`, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (_) {}
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
-    // Welcome name
+    // Welcome name - immediate
     const w = document.getElementById('studentWelcomeName');
     if (w) w.textContent = user.name || 'Student';
 
-    // Stats
-    const attendance = await getAttendance();
+    // Show loading states immediately
+    showLoadingStates();
+
+    // Render static content immediately
+    renderTodaySchedule();
+    renderRecentActivity();
+
+    // Fetch all data in parallel for faster loading
+    const [attendance, marks, assignments, events] = await Promise.all([
+      getAttendance(),
+      getMarks(),
+      getAssignments(),
+      getEvents()
+    ]);
+
+    // Update stats as soon as data is available
     setText('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '85%');
-
-    const marks = await getMarks();
     setText('currentCGPA', marks.gpa != null ? String(marks.gpa) : '8.5');
-
-    const assignments = await getAssignments();
     setText('pendingAssignments', String(assignments.pendingCount || 5));
-
-    const events = await getEvents();
     setText('upcomingEvents', String(events.count || 8));
 
     // Charts
     renderAttendanceChart(attendance.present || 320, attendance.absent || 45);
     renderPerformanceChart(marks.summary || []);
-
-    // Today schedule
-    renderTodaySchedule();
-
-    // Recent activity
-    renderRecentActivity();
   }
 
-  function setText(id, txt) { const el = document.getElementById(id); if (el) el.textContent = txt; }
+  function showLoadingStates() {
+    // Show skeleton loading for stats
+    const statElements = ['overallAttendance', 'currentCGPA', 'pendingAssignments', 'upcomingEvents'];
+    statElements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.textContent === '--') {
+        el.classList.add('loading-skeleton');
+      }
+    });
+  }
+
+  function setText(id, txt) { 
+    const el = document.getElementById(id); 
+    if (el) {
+      el.textContent = txt;
+      el.classList.remove('loading-skeleton');
+    }
+  }
 
   async function getAttendance() {
+    // Check cache first
+    const cached = dataCache.get('attendance');
+    if (cached) return cached;
+    
     try {
       const r = await APP.API.get(`/attendance/student/${user.id}`);
-      return normalizeAttendance(r.data);
+      const result = normalizeAttendance(r.data);
+      dataCache.set('attendance', result);
+      return result;
     } catch (_) {
       if (typeof DummyData !== 'undefined') {
         const r = DummyData.getStudentAttendance();
-        console.log('Dummy Attendance Data:', r);
-        return normalizeAttendance(r.data);
+        const result = normalizeAttendance(r.data);
+        dataCache.set('attendance', result);
+        return result;
       }
       return { present: 320, absent: 45, total: 365, percent: 88, summary: [] };
     }
@@ -64,19 +116,25 @@
     });
     const absent = Math.max(0, total - present);
     const percent = total ? Math.round((present / total) * 100) : 88;
-    console.log('Normalized Attendance:', { present, total, absent, percent });
     return { present: present || 320, total: total || 365, absent: absent || 45, percent, summary };
   }
 
   async function getMarks() {
+    // Check cache first
+    const cached = dataCache.get('marks');
+    if (cached) return cached;
+    
     try {
       const r = await APP.API.get(`/marks/student/${user.id}`);
-      return normalizeMarks(r.data);
+      const result = normalizeMarks(r.data);
+      dataCache.set('marks', result);
+      return result;
     } catch (_) {
       if (typeof DummyData !== 'undefined') {
         const r = DummyData.getStudentMarks();
-        console.log('Dummy Marks Data:', r);
-        return normalizeMarks(r.data);
+        const result = normalizeMarks(r.data);
+        dataCache.set('marks', result);
+        return result;
       }
       return { gpa: 8.5, summary: [] };
     }
@@ -84,7 +142,6 @@
 
   function normalizeMarks(data) {
     const summary = data?.summary || [];
-    console.log('Marks Summary:', summary);
     if (!summary.length) {
       // Return dummy data if no summary
       return {
@@ -109,13 +166,21 @@
   }
 
   async function getAssignments() {
+    // Check cache first
+    const cached = dataCache.get('assignments');
+    if (cached) return cached;
+    
     try {
       const r = await APP.API.get('/assignments/student');
-      return normalizeAssignments(r.data);
+      const result = normalizeAssignments(r.data);
+      dataCache.set('assignments', result);
+      return result;
     } catch (_) {
       if (typeof DummyData !== 'undefined') {
         const r = DummyData.getAssignments();
-        return normalizeAssignments(r.data);
+        const result = normalizeAssignments(r.data);
+        dataCache.set('assignments', result);
+        return result;
       }
       return { pendingCount: 5 };
     }
@@ -128,13 +193,21 @@
   }
 
   async function getEvents() {
+    // Check cache first
+    const cached = dataCache.get('events');
+    if (cached) return cached;
+    
     try {
       const r = await APP.API.get('/events');
-      return { count: (r.data || []).length || 8 };
+      const result = { count: (r.data || []).length || 8 };
+      dataCache.set('events', result);
+      return result;
     } catch (_) {
       if (typeof DummyData !== 'undefined') {
         const r = DummyData.getEvents();
-        return { count: (r.data || []).length || 8 };
+        const result = { count: (r.data || []).length || 8 };
+        dataCache.set('events', result);
+        return result;
       }
       return { count: 8 };
     }
@@ -229,8 +302,6 @@
       const total = Number(s.avg_total || 100);
       return Number(((marks / total) * 100).toFixed(1));
     });
-
-    console.log('Performance Chart Data:', { labels, data });
 
     try {
       performanceChartInstance = new Chart(el, {

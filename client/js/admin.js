@@ -9,15 +9,49 @@
   
   const user = APP.Storage.get('user') || {};
 
+  // Client-side cache with TTL (5 minutes)
+  const CACHE_TTL = 5 * 60 * 1000;
+  const dataCache = {
+    get(key) {
+      try {
+        const cached = sessionStorage.getItem(`admin_${key}`);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            return data;
+          }
+          sessionStorage.removeItem(`admin_${key}`);
+        }
+      } catch (_) {}
+      return null;
+    },
+    set(key, data) {
+      try {
+        sessionStorage.setItem(`admin_${key}`, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (_) {}
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 
   async function init(){
-    // Welcome name
+    // Welcome name - immediate
     const nameEl = document.getElementById('adminName');
     if (nameEl) nameEl.textContent = user.name || 'Admin';
 
-    // Load stats
-    const stats = await getAdminStats();
+    // Render static content immediately
+    loadRecentActivity();
+
+    // Load all data in parallel for faster loading
+    const [stats, approvals] = await Promise.all([
+      getAdminStats(),
+      loadPendingApprovals()
+    ]);
+    
+    // Update stats as soon as data is available
     setText('totalUsers', stats.totalUsers || 1435);
     setText('totalStudents', stats.totalStudents || 1250);
     setText('totalTeachers', stats.totalTeachers || 95);
@@ -30,12 +64,6 @@
     // Load charts
     renderUserChart(stats);
     renderDepartmentChart(stats);
-
-    // Load approvals
-    loadPendingApprovals();
-    
-    // Load recent activity
-    loadRecentActivity();
   }
 
   function setText(id, txt){ 
@@ -44,13 +72,21 @@
   }
 
   async function getAdminStats(){
+    // Check cache first
+    const cached = dataCache.get('stats');
+    if (cached) return cached;
+    
     try { 
-      const r = await APP.API.get('/admin/stats'); 
-      return r.data || {};
+      const r = await APP.API.get('/admin/stats');
+      const stats = r.data || {};
+      dataCache.set('stats', stats);
+      return stats;
     } catch(_) { 
       if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getAdminStats(); 
-        return r.data || {};
+        const r = DummyData.getAdminStats();
+        const stats = r.data || {};
+        dataCache.set('stats', stats);
+        return stats;
       }
       return {
         totalUsers: 1435,
