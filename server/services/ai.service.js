@@ -128,7 +128,7 @@ Please provide a thorough and helpful response:`;
 
         try {
             if (!this.genAI) {
-                return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your administrator.";
+                return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your instructor.";
             }
 
             const model = this.genAI.getGenerativeModel({ model: this.model });
