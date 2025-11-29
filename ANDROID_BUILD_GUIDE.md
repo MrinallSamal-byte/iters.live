@@ -13,8 +13,9 @@ The Android app is a WebView-based native application that provides the complete
 
 **Don't want to build? Download the ready-to-install APK:**
 
-### Latest Release: v1.0.0
-- **File**: [ITER-EduHub-v1.0.0.apk](releases/ITER-EduHub-v1.0.0.apk)
+### Latest Release
+- **Direct Download**: [ITER.apk](https://github.com/MrinallSamal-byte/updated_iters.live/releases/latest/download/ITER.apk)
+- **Releases Page**: [All Releases](https://github.com/MrinallSamal-byte/updated_iters.live/releases)
 - **Size**: ~3-5 MB
 - **Android**: 9+ (API 28+)
 
@@ -25,6 +26,42 @@ The Android app is a WebView-based native application that provides the complete
 4. Open the downloaded APK file
 5. Tap **Install**
 6. Open the app and enjoy!
+
+## 🔄 GitHub Actions - Automated Build
+
+The APK is automatically built and released using GitHub Actions.
+
+### When Does the Build Run?
+1. **Push to main branch** - Creates a new release automatically
+2. **On new tags** (e.g., `v1.0.0`) - Creates a versioned release
+3. **Manual trigger** - On-demand builds via workflow dispatch
+
+### How to Trigger a Manual Build
+
+1. Go to the **Actions** tab in the GitHub repository
+2. Click on **"Build Android APK"** workflow
+3. Click **"Run workflow"** dropdown on the right
+4. Select the branch (usually `main`)
+5. Choose whether to create a release
+6. Click **"Run workflow"**
+
+The workflow will:
+- Build the Android APK
+- Upload it as an artifact
+- Create a GitHub release with the APK named `ITER.apk`
+- Mark it as the latest release
+
+### How to Create a Versioned Release
+
+1. Create and push a new tag:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+2. The workflow will automatically run and create a release with that tag
+
+### Workflow File Location
+- `.github/workflows/android-build.yml`
 
 ## 🔨 Building from Source
 
