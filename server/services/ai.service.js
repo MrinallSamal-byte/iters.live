@@ -1,15 +1,20 @@
-const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 /**
  * AI Service for Educational Assistance
  * Provides personalized study plans, recommendations, and Q&A
+ * Uses Google Gemini AI for intelligent responses
  * Part of ITER EduHub Enhancement Suite
  */
 class AIService {
     constructor() {
-        this.openaiKey = process.env.OPENAI_API_KEY;
-        this.baseURL = 'https://api.openai.com/v1/chat/completions';
-        this.model = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+        this.geminiKey = process.env.GEMINI_API_KEY;
+        this.model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+        this.genAI = null;
+        
+        if (this.geminiKey) {
+            this.genAI = new GoogleGenerativeAI(this.geminiKey);
+        }
     }
 
     /**
@@ -58,29 +63,16 @@ Format as JSON with structure:
 }`;
 
         try {
-            if (!this.openaiKey) {
-                console.log('OpenAI API key not configured, using fallback study plan');
+            if (!this.genAI) {
+                console.log('Gemini API key not configured, using fallback study plan');
                 return this.getFallbackStudyPlan(studentData);
             }
 
-            const response = await axios.post(
-                this.baseURL,
-                {
-                    model: this.model,
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.7,
-                    max_tokens: 2000
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${this.openaiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 30000
-                }
-            );
-
-            const content = response.data.choices[0].message.content;
+            const model = this.genAI.getGenerativeModel({ model: this.model });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const content = response.text();
+            
             // Try to extract JSON from response
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -117,38 +109,32 @@ Format as JSON with structure:
 
     /**
      * Answer student questions using AI
+     * Handles both study-related and general questions
      */
     async answerQuestion(question, context) {
-        const prompt = `You are a helpful college professor. Answer this student question clearly and concisely:
+        const prompt = `You are a helpful and knowledgeable educational assistant for college students. Your primary focus is helping with study-related questions, but you can also help with general questions.
 
 Question: ${question}
 ${context ? `Context: ${context}` : ''}
 
-Provide a detailed but easy-to-understand answer. Include examples if relevant.`;
+Instructions:
+- If this is a study-related question (academics, homework, concepts, problems, etc.), provide a detailed, clear, and educational answer with examples where helpful.
+- If this is a general question, still provide a helpful and accurate answer.
+- Always aim to be educational and help the student learn.
+- Include step-by-step explanations for complex problems.
+- Provide examples when they would help understanding.
+
+Please provide a thorough and helpful response:`;
 
         try {
-            if (!this.openaiKey) {
-                return "I'm currently unable to process questions. Please try again later or contact your instructor.";
+            if (!this.genAI) {
+                return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your administrator.";
             }
 
-            const response = await axios.post(
-                this.baseURL,
-                {
-                    model: this.model,
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.7,
-                    max_tokens: 500
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${this.openaiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 20000
-                }
-            );
-
-            return response.data.choices[0].message.content;
+            const model = this.genAI.getGenerativeModel({ model: this.model });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
         } catch (error) {
             console.error('AI chat error:', error.message);
             return "I'm sorry, I'm having trouble processing your question right now. Please try again later.";
@@ -173,28 +159,15 @@ Provide:
 Format as JSON.`;
 
         try {
-            if (!this.openaiKey) {
+            if (!this.genAI) {
                 return this.getBasicFeedback();
             }
 
-            const response = await axios.post(
-                this.baseURL,
-                {
-                    model: this.model,
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.6,
-                    max_tokens: 600
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${this.openaiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 30000
-                }
-            );
-
-            const content = response.data.choices[0].message.content;
+            const model = this.genAI.getGenerativeModel({ model: this.model });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const content = response.text();
+            
             const jsonMatch = content.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
