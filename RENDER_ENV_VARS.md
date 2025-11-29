@@ -17,6 +17,23 @@ JWT_EXPIRE=24h
 JWT_REFRESH_EXPIRE=7d
 ```
 
+### Google Gemini AI Configuration (for Smart Chatbot)
+
+```
+# Google Gemini AI API Key for Smart Chatbot
+GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+**Features enabled by Gemini AI:**
+- `/api/ai/chat` - AI-powered chatbot responses
+- `/api/ai/study-plan` - Personalized study plan generation
+- `/api/ai/recommendations` - AI-driven learning recommendations
+- Smart answers for student questions
+- Context-aware educational responses
+
+**Get your own API key:** https://makersuite.google.com/app/apikey
+
 ### Update After First Deploy
 
 Once you get your Render URL (e.g., `https://iter-aio-abc123.onrender.com`), add:
