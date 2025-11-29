@@ -1,9 +1,47 @@
 // Landing Page Specific JavaScript
+// Memory-optimized with cleanup functionality
 
-// Load Lottie Animation
+// Store references for cleanup
+const LandingCleanup = {
+    observers: [],
+    intervals: [],
+    timeouts: [],
+    eventListeners: []
+};
+
+// Load Lottie Animation - Lazy loaded
 function loadHeroAnimation() {
     const container = document.getElementById('heroAnimation');
     if (!container) return;
+
+    // Only load Lottie if container is visible
+    if (!isElementInViewport(container)) {
+        // Defer loading until visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    initHeroAnimation(container);
+                    observer.disconnect();
+                }
+            });
+        });
+        observer.observe(container);
+        LandingCleanup.observers.push(observer);
+        return;
+    }
+    
+    initHeroAnimation(container);
+}
+
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top < window.innerHeight &&
+        rect.bottom > 0
+    );
+}
+
+function initHeroAnimation(container) {
 
     // Simple fallback animation data (minimal Lottie JSON)
     const animationData = {
@@ -140,9 +178,10 @@ function initParallax() {
     }, { passive: true });
 }
 
-// Animate Stats on Scroll
+// Animate Stats on Scroll - Optimized
 function animateStats() {
     const stats = document.querySelectorAll('.stat-number');
+    if (stats.length === 0) return;
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -171,30 +210,40 @@ function animateStats() {
                     if (current >= targetValue) {
                         target.textContent = targetValue + (target.textContent.includes('+') ? '+' : '');
                         clearInterval(timer);
+                        // Remove from tracked intervals
+                        const idx = LandingCleanup.intervals.indexOf(timer);
+                        if (idx > -1) LandingCleanup.intervals.splice(idx, 1);
                     } else {
                         target.textContent = Math.floor(current) + (target.textContent.includes('+') ? '+' : '');
                     }
                 }, 30);
                 
+                LandingCleanup.intervals.push(timer);
                 observer.unobserve(target);
             }
         });
     }, { threshold: 0.5 });
 
     stats.forEach(stat => observer.observe(stat));
+    LandingCleanup.observers.push(observer);
 }
 
-// Feature Cards Stagger Animation
+// Feature Cards Stagger Animation - Optimized
 function initFeatureCards() {
     const cards = document.querySelectorAll('.feature-card');
+    if (cards.length === 0) return;
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                setTimeout(() => {
+                const timeout = setTimeout(() => {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
+                    // Remove from tracked timeouts
+                    const idx = LandingCleanup.timeouts.indexOf(timeout);
+                    if (idx > -1) LandingCleanup.timeouts.splice(idx, 1);
                 }, index * 100);
+                LandingCleanup.timeouts.push(timeout);
                 observer.unobserve(entry.target);
             }
         });
@@ -206,6 +255,8 @@ function initFeatureCards() {
         card.style.transition = 'all 0.6s ease';
         observer.observe(card);
     });
+    
+    LandingCleanup.observers.push(observer);
 }
 
 // Scroll Progress Indicator
@@ -281,6 +332,31 @@ function checkDownloadFiles() {
     });
 }
 
+/**
+ * Cleanup function - call when navigating away from landing page
+ */
+function cleanupLanding() {
+    // Clear all intervals
+    LandingCleanup.intervals.forEach(id => clearInterval(id));
+    LandingCleanup.intervals = [];
+    
+    // Clear all timeouts
+    LandingCleanup.timeouts.forEach(id => clearTimeout(id));
+    LandingCleanup.timeouts = [];
+    
+    // Disconnect all observers
+    LandingCleanup.observers.forEach(observer => observer.disconnect());
+    LandingCleanup.observers = [];
+    
+    // Remove all event listeners
+    LandingCleanup.eventListeners.forEach(({ element, event, handler, options }) => {
+        element.removeEventListener(event, handler, options);
+    });
+    LandingCleanup.eventListeners = [];
+    
+    console.log('Landing page cleanup complete');
+}
+
 // Initialize all landing page features
 document.addEventListener('DOMContentLoaded', () => {
     loadHeroAnimation();
@@ -292,27 +368,54 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbarScroll();
     checkDownloadFiles();
 
-    // Add typing effect to hero title
+    // Add typing effect to hero title using IntersectionObserver for consistency
     const heroTitle = document.querySelector('.hero-title');
     if (heroTitle) {
         const text = heroTitle.textContent;
-        heroTitle.textContent = '';
-        let index = 0;
+        let typingStarted = false;
         
-        function type() {
-            if (index < text.length) {
-                heroTitle.textContent += text.charAt(index);
-                index++;
-                setTimeout(type, 50);
+        const startTyping = () => {
+            if (typingStarted) return;
+            typingStarted = true;
+            
+            heroTitle.textContent = '';
+            let index = 0;
+            
+            function type() {
+                if (index < text.length) {
+                    heroTitle.textContent += text.charAt(index);
+                    index++;
+                    const timeout = setTimeout(type, 50);
+                    LandingCleanup.timeouts.push(timeout);
+                }
             }
-        }
+            
+            const startTimeout = setTimeout(type, 500);
+            LandingCleanup.timeouts.push(startTimeout);
+        };
         
-        setTimeout(type, 500);
+        // Use IntersectionObserver for consistent lazy initialization
+        const typingObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startTyping();
+                    typingObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        typingObserver.observe(heroTitle);
+        LandingCleanup.observers.push(typingObserver);
     }
 });
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', cleanupLanding);
+window.addEventListener('pagehide', cleanupLanding);
 
 // Export for use in other scripts
 window.Landing = {
     loadHeroAnimation,
-    animateStats
+    animateStats,
+    cleanup: cleanupLanding
 };

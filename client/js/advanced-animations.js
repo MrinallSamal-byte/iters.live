@@ -1,12 +1,15 @@
 /**
  * Advanced Animations System for ITER EduHub
  * Implements GSAP-based scroll animations, counter animations, hover effects, and particles
- * Version: 1.0.0
+ * Version: 1.1.0 - Memory Optimized
  */
 
 class AdvancedAnimations {
     constructor() {
         this.initialized = false;
+        this.scrollTriggers = [];
+        this.eventListeners = [];
+        this.animationTimelines = [];
         this.init();
     }
 
@@ -19,6 +22,9 @@ class AdvancedAnimations {
             return;
         }
 
+        // Skip on mobile for better performance
+        const isMobile = window.innerWidth < 768;
+
         console.log('🎨 Initializing Advanced Animations...');
 
         this.initScrollAnimations();
@@ -26,11 +32,51 @@ class AdvancedAnimations {
         this.initCounters();
         this.initProgressBars();
         this.initRippleEffects();
-        this.initFloatingAnimations();
+        
+        // Only init floating animations on desktop
+        if (!isMobile) {
+            this.initFloatingAnimations();
+        }
+        
         this.initNavbarScroll();
+        this.initVisibilityHandler();
         
         this.initialized = true;
         console.log('✓ Advanced Animations initialized successfully');
+    }
+    
+    /**
+     * Pause animations when page is hidden
+     */
+    initVisibilityHandler() {
+        const handler = () => {
+            if (document.hidden) {
+                this.pauseAnimations();
+            } else {
+                this.resumeAnimations();
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handler);
+        this.eventListeners.push({ element: document, event: 'visibilitychange', handler });
+    }
+    
+    /**
+     * Pause all GSAP animations
+     */
+    pauseAnimations() {
+        if (typeof gsap !== 'undefined') {
+            gsap.globalTimeline.pause();
+        }
+    }
+    
+    /**
+     * Resume all GSAP animations
+     */
+    resumeAnimations() {
+        if (typeof gsap !== 'undefined') {
+            gsap.globalTimeline.resume();
+        }
     }
 
     /**
@@ -472,6 +518,30 @@ class AdvancedAnimations {
                 ease: 'back.out(2)'
             }
         );
+    }
+    
+    /**
+     * Cleanup and destroy all animations
+     */
+    destroy() {
+        // Kill all ScrollTriggers
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.getAll().forEach(st => st.kill());
+        }
+        
+        // Kill all GSAP tweens
+        if (typeof gsap !== 'undefined') {
+            gsap.killTweensOf('*');
+        }
+        
+        // Remove event listeners
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners = [];
+        
+        this.initialized = false;
+        console.log('AdvancedAnimations destroyed');
     }
 }
 

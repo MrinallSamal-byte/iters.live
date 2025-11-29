@@ -2,14 +2,20 @@
  * Advanced Animation Controller
  * Handles all UI animations and micro-interactions
  * Part of ITER EduHub Enhancement Suite
+ * Memory-optimized with cleanup functionality
  */
 class AnimationController {
     constructor() {
         this.observers = [];
+        this.eventListeners = [];
+        this.animationFrames = [];
+        this.initialized = false;
         this.init();
     }
 
     init() {
+        if (this.initialized) return;
+        
         this.setupCounterAnimations();
         this.setupScrollReveal();
         this.setupParallax();
@@ -17,11 +23,49 @@ class AnimationController {
         this.setupRippleEffect();
         this.setupPageTransitions();
         this.setupSkeletonLoaders();
+        this.setupVisibilityHandler();
+        
+        this.initialized = true;
+    }
+    
+    /**
+     * Handle visibility changes to pause animations when hidden
+     */
+    setupVisibilityHandler() {
+        const handler = () => {
+            if (document.hidden) {
+                this.pauseAnimations();
+            } else {
+                this.resumeAnimations();
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handler);
+        this.eventListeners.push({ element: document, event: 'visibilitychange', handler });
+    }
+    
+    /**
+     * Pause expensive animations
+     */
+    pauseAnimations() {
+        this.animationFrames.forEach(id => cancelAnimationFrame(id));
+        this.animationFrames = [];
+    }
+    
+    /**
+     * Resume animations when visible
+     */
+    resumeAnimations() {
+        // Re-initialize parallax if needed
+        if (document.querySelectorAll('.parallax-element').length > 0) {
+            this.setupParallax();
+        }
     }
 
     // Animate numbers counting up
     setupCounterAnimations() {
         const counters = document.querySelectorAll('.counter');
+        if (counters.length === 0) return;
         
         const observerOptions = {
             threshold: 0.5,
@@ -42,7 +86,8 @@ class AnimationController {
                         current += increment;
                         if (current < target) {
                             counter.textContent = current.toFixed(decimals);
-                            requestAnimationFrame(updateCounter);
+                            const frameId = requestAnimationFrame(updateCounter);
+                            this.animationFrames.push(frameId);
                         } else {
                             counter.textContent = target.toFixed(decimals);
                         }
@@ -95,22 +140,28 @@ class AnimationController {
             ticking = false;
         };
 
-        window.addEventListener('scroll', () => {
+        const scrollHandler = () => {
             if (!ticking) {
-                window.requestAnimationFrame(updateParallax);
+                const frameId = window.requestAnimationFrame(updateParallax);
+                this.animationFrames.push(frameId);
                 ticking = true;
             }
-        });
+        };
+
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+        this.eventListeners.push({ element: window, event: 'scroll', handler: scrollHandler });
     }
 
-    // 3D card hover effects
+    // 3D card hover effects - Optimized with event delegation
     setupCardHoverEffects() {
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) return; // Disable on mobile for performance
+        
         const cards = document.querySelectorAll('.glass-card, .widget, .stat-card');
+        if (cards.length === 0) return;
         
         cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                if (window.innerWidth < 768) return; // Disable on mobile
-                
+            const mouseMoveHandler = (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -123,12 +174,18 @@ class AnimationController {
                 
                 card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
                 card.style.transition = 'transform 0.1s ease-out';
-            });
+            };
             
-            card.addEventListener('mouseleave', () => {
+            const mouseLeaveHandler = () => {
                 card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
                 card.style.transition = 'transform 0.3s ease-out';
-            });
+            };
+            
+            card.addEventListener('mousemove', mouseMoveHandler, { passive: true });
+            card.addEventListener('mouseleave', mouseLeaveHandler, { passive: true });
+            
+            this.eventListeners.push({ element: card, event: 'mousemove', handler: mouseMoveHandler });
+            this.eventListeners.push({ element: card, event: 'mouseleave', handler: mouseLeaveHandler });
         });
     }
 
@@ -280,9 +337,24 @@ class AnimationController {
         }, 10);
     }
 
-    // Cleanup
+    // Cleanup - properly remove all event listeners and observers
     destroy() {
+        // Cancel all animation frames
+        this.animationFrames.forEach(id => cancelAnimationFrame(id));
+        this.animationFrames = [];
+        
+        // Remove all event listeners
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners = [];
+        
+        // Disconnect all observers
         this.observers.forEach(observer => observer.disconnect());
+        this.observers = [];
+        
+        this.initialized = false;
+        console.log('AnimationController destroyed');
     }
 }
 
