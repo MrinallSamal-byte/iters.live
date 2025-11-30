@@ -176,7 +176,13 @@
                         if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                             window.PageAccessToken.createPageAccessToken(redirectUrl);
                         }
-                        window.location.href = redirectUrl;
+                        
+                        // Use encoded URL for navigation
+                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                            window.LinkEncoding.navigateTo(redirectUrl);
+                        } else {
+                            window.location.href = redirectUrl;
+                        }
                     } else {
                         alert('Login failed: ' + response.message);
                     }
@@ -329,7 +335,12 @@
                             if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                                 window.PageAccessToken.createPageAccessToken(redirectUrl);
                             }
-                            window.location.href = redirectUrl;
+                            // Use encoded URL for navigation
+                            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                                window.LinkEncoding.navigateTo(redirectUrl);
+                            } else {
+                                window.location.href = redirectUrl;
+                            }
                         }, 1500);
                     } else {
                         showError(response.message || 'Login failed');
@@ -354,11 +365,21 @@
                 el.parentNode.replaceChild(clone, el);
                 clone.addEventListener('click', (ev) => {
                     ev.preventDefault();
-                    window.location.href = href;
+                    // Use encoded URL for navigation
+                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                        window.LinkEncoding.navigateTo(href);
+                    } else {
+                        window.location.href = href;
+                    }
                 }, { passive: false });
                 clone.addEventListener('touchend', (ev) => {
                     ev.preventDefault();
-                    window.location.href = href;
+                    // Use encoded URL for navigation
+                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                        window.LinkEncoding.navigateTo(href);
+                    } else {
+                        window.location.href = href;
+                    }
                 }, { passive: false });
             }
             ensureNav(registerLink, '/register.html');

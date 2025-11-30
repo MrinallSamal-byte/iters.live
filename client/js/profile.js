@@ -197,7 +197,12 @@ class ProfileControl {
         
         this.settingsBtn?.addEventListener('click', () => {
             this.closeDropdown();
-            window.location.href = '/settings.html';
+            // Use encoded URL for navigation
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo('/settings.html');
+            } else {
+                window.location.href = '/settings.html';
+            }
         });
         
         this.logoutBtn?.addEventListener('click', () => {
@@ -909,17 +914,26 @@ class ProfileControl {
                 this.socket.disconnect();
             }
             
-            // Animate and redirect
+            // Animate and redirect using encoded URL
             document.body.style.animation = 'fadeOut 0.3s ease';
             setTimeout(() => {
-                window.location.href = '/login.html';
+                if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                    window.LinkEncoding.navigateTo('/login.html');
+                } else {
+                    window.location.href = '/login.html';
+                }
             }, 300);
             
         } catch (error) {
             console.error('Logout error:', error);
             // Clear token anyway
             localStorage.removeItem('token');
-            window.location.href = '/login.html';
+            // Use encoded URL for navigation
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo('/login.html');
+            } else {
+                window.location.href = '/login.html';
+            }
         }
     }
     

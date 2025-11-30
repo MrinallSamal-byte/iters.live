@@ -118,7 +118,8 @@ function isValidRedirectUrl(url) {
 
 /**
  * GET /r/:encoded
- * Decodes the encoded link and redirects to the original URL
+ * Decodes the encoded link and serves the file directly
+ * This keeps the encoded URL in the browser address bar
  */
 router.get('/:encoded', (req, res) => {
     try {
@@ -142,8 +143,53 @@ router.get('/:encoded', (req, res) => {
             return res.redirect('/');
         }
         
-        // Redirect to the decoded URL
-        res.redirect(decoded);
+        // Extract path without hash and query for file serving
+        let filePath = decoded;
+        let hashFragment = '';
+        
+        const hashIndex = decoded.indexOf('#');
+        if (hashIndex !== -1) {
+            filePath = decoded.substring(0, hashIndex);
+            hashFragment = decoded.substring(hashIndex);
+        }
+        
+        const queryIndex = filePath.indexOf('?');
+        if (queryIndex !== -1) {
+            filePath = filePath.substring(0, queryIndex);
+        }
+        
+        // Determine the actual file to serve
+        const path = require('path');
+        const clientDir = path.join(__dirname, '../../client');
+        
+        // Handle root path
+        if (filePath === '/') {
+            filePath = '/index.html';
+        }
+        
+        // Construct full file path
+        const fullPath = path.join(clientDir, filePath);
+        
+        // Security check: ensure the resolved path is within client directory
+        const resolvedPath = path.resolve(fullPath);
+        const resolvedClientDir = path.resolve(clientDir);
+        
+        if (!resolvedPath.startsWith(resolvedClientDir)) {
+            console.warn('Path traversal attempt blocked:', decoded);
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied'
+            });
+        }
+        
+        // Serve the file directly (keeps encoded URL in browser)
+        res.sendFile(resolvedPath, (err) => {
+            if (err && !res.headersSent) {
+                console.error('Error serving file:', err);
+                // Fallback: redirect to home
+                res.redirect('/');
+            }
+        });
         
     } catch (error) {
         console.error('Error in redirect handler:', error);
