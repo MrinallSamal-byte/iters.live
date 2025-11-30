@@ -451,7 +451,14 @@ document.addEventListener('DOMContentLoaded', () => {
             teacher: '/dashboard/teacher.html',
             admin: '/dashboard/admin.html'
         };
-        window.location.href = dashboardUrls[user.role] || '/dashboard/student.html';
+        const redirectUrl = dashboardUrls[user.role] || '/dashboard/student.html';
+        
+        // Create page access token before redirecting
+        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+            window.PageAccessToken.createPageAccessToken(redirectUrl);
+        }
+        
+        window.location.href = redirectUrl;
     }
 });
 
@@ -492,5 +499,13 @@ window.APP = {
             // Navigate to settings as fallback
             window.location.href = '/settings.html';
         }
+    },
+    // Secure navigation to dashboard pages
+    navigateToDashboard: function (path) {
+        // Create page access token before navigating
+        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+            window.PageAccessToken.createPageAccessToken(path);
+        }
+        window.location.href = path;
     }
 };

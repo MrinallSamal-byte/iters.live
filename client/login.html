@@ -171,6 +171,11 @@
                             admin: '/dashboard/admin.html'
                         };
                         const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                        
+                        // Create page access token for the dashboard
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken(redirectUrl);
+                        }
                         window.location.href = redirectUrl;
                     } else {
                         alert('Login failed: ' + response.message);
@@ -189,6 +194,26 @@
             const loginForm = document.getElementById('loginForm');
             const errorMessage = document.getElementById('errorMessage');
             const loginBtn = document.getElementById('loginBtn');
+
+            // Check for logout reason and display appropriate message
+            const logoutReason = sessionStorage.getItem('logoutReason');
+            if (logoutReason) {
+                sessionStorage.removeItem('logoutReason');
+                const messages = {
+                    'session_timeout': '⏰ Your session has expired due to inactivity. Please log in again.',
+                    'session_invalid': '⚠️ Your session is no longer valid. Please log in again.',
+                    'not_authenticated': '🔒 Please log in to access the dashboard.',
+                    'logged_out_other_tab': '📱 You were logged out from another tab.',
+                    'user_initiated': '👋 You have been logged out successfully.'
+                };
+                const message = messages[logoutReason] || 'Please log in to continue.';
+                showError(message);
+                if (logoutReason === 'user_initiated') {
+                    errorMessage.style.color = '#10b981'; // Green for voluntary logout
+                } else {
+                    errorMessage.style.color = '#f59e0b'; // Amber for session issues
+                }
+            }
 
             // Check if APP is loaded
             if (typeof APP === 'undefined') {
@@ -299,9 +324,11 @@
                             redirectUrl = dashboards[userRole] || '/dashboard/teacher.html';
                         }
 
-                        console.log('Redirecting to:', redirectUrl);
-
                         setTimeout(() => {
+                            // Create page access token for the dashboard
+                            if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                                window.PageAccessToken.createPageAccessToken(redirectUrl);
+                            }
                             window.location.href = redirectUrl;
                         }, 1500);
                     } else {
@@ -378,6 +405,7 @@
                 });
         }
     </script>
+    <script src="/js/page-access-token.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/chatbot.js"></script>
 </body>
