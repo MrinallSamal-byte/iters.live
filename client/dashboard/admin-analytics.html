@@ -4,6 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - Admin Dashboard</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            // Check if user is authenticated before showing any content
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'admin';
+                } catch (e) {
+                    return false;
+                }
+            }
+            // If not authenticated, redirect immediately
+            if (!checkAuth()) {
+                // Store intended destination
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access the Admin Analytics.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                // Stop script execution and prevent any content from loading
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/universal-sidebar.css">
