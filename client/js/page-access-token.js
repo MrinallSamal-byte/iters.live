@@ -22,6 +22,7 @@
      */
     function hidePageContent() {
         // Add a style to hide the body immediately
+        // Use body-level rule only (avoids performance impact of universal selector)
         const style = document.createElement('style');
         style.id = 'page-access-guard-style';
         style.textContent = `
@@ -29,7 +30,12 @@
                 visibility: hidden !important;
                 opacity: 0 !important;
             }
-            body.page-access-checking * {
+            body.page-access-checking .dashboard-main,
+            body.page-access-checking .dashboard-sidebar,
+            body.page-access-checking main,
+            body.page-access-checking nav,
+            body.page-access-checking header,
+            body.page-access-checking footer {
                 visibility: hidden !important;
                 opacity: 0 !important;
             }

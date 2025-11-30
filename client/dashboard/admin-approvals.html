@@ -30,7 +30,7 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                throw new Error('Redirecting to login');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
             }
         })();
     </script>

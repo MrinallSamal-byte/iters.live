@@ -65,9 +65,9 @@ class Chatbot {
         const demoRole = localStorage.getItem('demoRole');
         if (demoRole) return demoRole.toLowerCase();
 
-        // If authenticated but no role found, default to student
-        // This shouldn't happen in practice but provides a fallback
-        return 'student';
+        // SECURITY: If authenticated but no role found, treat as guest
+        // This prevents any unauthorized access when user data is corrupted
+        return 'guest';
     }
 
     /**
