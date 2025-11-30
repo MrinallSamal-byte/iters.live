@@ -199,25 +199,6 @@
     }
 
     /**
-     * Navigate to a raw encoded URL (decode first then navigate with encoding)
-     * Use this when you have an already-encoded URL that you want to decode and re-encode
-     * @param {string} url - URL to navigate to (possibly already encoded)
-     */
-    function navigateToEncoded(url) {
-        if (!url) return;
-        
-        // If it's already an encoded redirect URL, use it directly
-        if (url.startsWith('/r/')) {
-            window.location.href = url;
-            return;
-        }
-        
-        // Decode first (if encoded), then navigate with encoding
-        const decoded = decodeLink(url);
-        navigateTo(decoded);
-    }
-
-    /**
      * Open an encoded link in a new window/tab
      * @param {string} url - URL to open (possibly encoded)
      * @param {string} target - Window target (default '_blank')
@@ -451,7 +432,6 @@
         isStaticAsset,
         getEncodedRedirectUrl,
         navigateTo,
-        navigateToEncoded,
         openLink,
         encodeAllLinks,
         setupLinkObserver,

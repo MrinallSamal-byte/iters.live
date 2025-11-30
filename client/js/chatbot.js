@@ -357,6 +357,18 @@ class Chatbot {
         };
     }
 
+    /**
+     * Navigate to a URL using encoded navigation
+     * @param {string} url - URL to navigate to
+     */
+    navigateToUrl(url) {
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo(url);
+        } else {
+            window.location.href = url;
+        }
+    }
+
     init() {
         this.createChatbotUI();
         this.attachEventListeners();
@@ -480,31 +492,19 @@ class Chatbot {
                             // Ignore storage errors
                         }
                         // Redirect to login using encoded URL
-                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                            window.LinkEncoding.navigateTo('/login.html');
-                        } else {
-                            window.location.href = '/login.html';
-                        }
+                        this.navigateToUrl('/login.html');
                         return;
                     }
                     // User is authenticated - navigate with encoded URL
                     e.preventDefault();
                     e.stopPropagation();
-                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                        window.LinkEncoding.navigateTo(href);
-                    } else {
-                        window.location.href = href;
-                    }
+                    this.navigateToUrl(href);
                     return;
                 }
                 // For non-dashboard links, use encoded navigation
                 if (!href.startsWith('#') && !href.startsWith('http') && !href.startsWith('mailto') && !href.startsWith('tel')) {
                     e.preventDefault();
-                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                        window.LinkEncoding.navigateTo(href);
-                    } else {
-                        window.location.href = href;
-                    }
+                    this.navigateToUrl(href);
                 }
             }
         });
