@@ -22,10 +22,37 @@ class Chatbot {
     }
 
     /**
+     * Check if the user is truly authenticated (has valid access token and user data)
+     * @returns {boolean} True if user is authenticated
+     */
+    isAuthenticated() {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const userData = localStorage.getItem('user');
+            
+            if (!accessToken || !userData) {
+                return false;
+            }
+            
+            const user = JSON.parse(userData);
+            return user && user.role;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
      * Detect user role from localStorage, URL, or page context
+     * SECURITY: Only return authenticated roles if user is actually logged in
      */
     detectUserRole() {
-        // Check localStorage for user data
+        // SECURITY CHECK: First verify user is authenticated
+        if (!this.isAuthenticated()) {
+            // Not authenticated - always return guest regardless of URL
+            return 'guest';
+        }
+        
+        // Check localStorage for user data (already verified in isAuthenticated)
         const userData = localStorage.getItem('user');
         if (userData) {
             try {
@@ -34,18 +61,13 @@ class Chatbot {
             } catch (e) {}
         }
 
-        // Check for demo role in localStorage
+        // Check for demo role in localStorage (only if authenticated)
         const demoRole = localStorage.getItem('demoRole');
         if (demoRole) return demoRole.toLowerCase();
 
-        // Detect from URL path
-        const path = window.location.pathname.toLowerCase();
-        if (path.includes('/dashboard/student') || path.includes('student.html')) return 'student';
-        if (path.includes('/dashboard/teacher') || path.includes('teacher.html')) return 'teacher';
-        if (path.includes('/dashboard/admin') || path.includes('admin.html')) return 'admin';
-        
-        // Default to guest for public pages
-        return 'guest';
+        // If authenticated but no role found, default to student
+        // This shouldn't happen in practice but provides a fallback
+        return 'student';
     }
 
     /**
@@ -438,6 +460,33 @@ class Chatbot {
             }
         });
 
+        // SECURITY: Intercept clicks on dashboard links within chatbot
+        // Redirect unauthenticated users to login page instead
+        this.messagesContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.getAttribute('href')) {
+                const href = link.getAttribute('href');
+                // Check if this is a dashboard link
+                if (href.startsWith('/dashboard/') || href.includes('/dashboard/')) {
+                    // Verify user is authenticated before allowing navigation
+                    if (!this.isAuthenticated()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Store intended destination for post-login redirect
+                        try {
+                            sessionStorage.setItem('loginRedirect', href);
+                            sessionStorage.setItem('loginMessage', 'Please log in to access this feature.');
+                        } catch (err) {
+                            // Ignore storage errors
+                        }
+                        // Redirect to login
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                }
+            }
+        });
+
         document.addEventListener('click', (e) => {
             if (this.isOpen && 
                 !this.container.contains(e.target) && 
@@ -702,8 +751,18 @@ class Chatbot {
 
     /**
      * Get role-appropriate forum and notes links
+     * SECURITY: Unauthenticated users get redirected to login page
      */
     getRoleLinks() {
+        // SECURITY: If not authenticated, always return login page links
+        if (!this.isAuthenticated()) {
+            return {
+                forum: '/login.html',
+                notes: '/login.html',
+                pyqs: '/login.html'
+            };
+        }
+        
         const links = {
             student: {
                 forum: '/dashboard/student-forum.html',
@@ -721,9 +780,9 @@ class Chatbot {
                 pyqs: '/dashboard/admin.html'
             },
             guest: {
-                forum: '/register.html',
-                notes: '/register.html',
-                pyqs: '/register.html'
+                forum: '/login.html',
+                notes: '/login.html',
+                pyqs: '/login.html'
             }
         };
         return links[this.userRole] || links.guest;

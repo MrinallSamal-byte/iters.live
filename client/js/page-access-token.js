@@ -2,6 +2,9 @@
  * Page Access Token System
  * Generates and validates unique tokens for dashboard page access.
  * Each page load generates a new token, preventing direct URL access.
+ * 
+ * SECURITY: This module implements strict session validation to ensure
+ * no protected page can be accessed without proper authentication.
  */
 
 (function() {
@@ -12,6 +15,39 @@
     const TOKEN_STORAGE_KEY = 'pageAccessToken';
     const TOKEN_TIMESTAMP_KEY = 'pageAccessTokenTimestamp';
     const TOKEN_PATH_KEY = 'pageAccessTokenPath';
+
+    /**
+     * SECURITY: Immediately hide the page body while checking authentication
+     * This prevents any flash of protected content for unauthenticated users
+     */
+    function hidePageContent() {
+        // Add a style to hide the body immediately
+        const style = document.createElement('style');
+        style.id = 'page-access-guard-style';
+        style.textContent = `
+            body.page-access-checking {
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+            body.page-access-checking * {
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.classList.add('page-access-checking');
+    }
+
+    /**
+     * SECURITY: Show the page content after authentication is verified
+     */
+    function showPageContent() {
+        document.body.classList.remove('page-access-checking');
+        const style = document.getElementById('page-access-guard-style');
+        if (style) {
+            style.remove();
+        }
+    }
 
     /**
      * Generate a cryptographically secure random token
@@ -327,6 +363,9 @@
     /**
      * Initialize page access token validation on page load
      * This is the main entry point for dashboard pages
+     * 
+     * SECURITY: This function immediately hides page content while
+     * verifying authentication to prevent any flash of protected content.
      */
     function initPageAccessGuard() {
         const currentPath = window.location.pathname;
@@ -336,14 +375,34 @@
             return;
         }
         
-        // Validate the token
+        // SECURITY: Immediately hide the page content while checking auth
+        // This runs synchronously before any content renders
+        hidePageContent();
+        
+        // Perform authentication check
         const validation = validatePageAccessToken();
         
         if (!validation.valid) {
-            // Redirect to login
+            // Clear any stored tokens to ensure clean state
+            clearPageAccessToken();
+            // Redirect to login immediately - don't show any content
             redirectToLogin(validation.message);
             return;
         }
+        
+        // SECURITY: Additional role-based access check
+        // Verify user has permission to access this specific dashboard type
+        const userRole = getUserRole();
+        const dashboardType = getDashboardType(currentPath);
+        
+        if (!userRole || !hasRoleAccess(userRole, dashboardType)) {
+            clearPageAccessToken();
+            redirectToLogin('Access denied. Please log in with an authorized account.');
+            return;
+        }
+        
+        // Authentication verified - show the page content
+        showPageContent();
         
         // Token is valid - regenerate for this page load
         regenerateToken(currentPath);
@@ -369,6 +428,8 @@
         hasRoleAccess,
         redirectToLogin,
         initPageAccessGuard,
+        hidePageContent,
+        showPageContent,
         TOKEN_EXPIRY_MS
     };
 
