@@ -3,7 +3,14 @@
 
   // Auth check
   if (typeof APP === 'undefined' || !APP.isAuthenticated() || APP.getUserRole() !== 'teacher') {
-    try { window.location.href = '/login.html'; } catch(_) {}
+    try { 
+      // Use encoded URL for navigation
+      if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+        window.LinkEncoding.navigateTo('/login.html');
+      } else {
+        window.location.href = '/login.html';
+      }
+    } catch(_) {}
     return;
   }
   

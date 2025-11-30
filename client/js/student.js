@@ -6,7 +6,12 @@ if (typeof APP === 'undefined') {
     // Only redirect if not already on login page
     if (!window.location.pathname.includes('login.html')) {
         console.log('Redirecting to login...');
-        window.location.href = '/login.html';
+        // Use encoded URL for navigation
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo('/login.html');
+        } else {
+            window.location.href = '/login.html';
+        }
     }
     throw new Error('APP not loaded');
 }
@@ -21,7 +26,12 @@ if (!APP.isAuthenticated() || APP.getUserRole() !== 'student') {
     // Only redirect if not already on login page and not navigating within dashboard
     if (!window.location.pathname.includes('login.html')) {
         console.log('Redirecting to login...');
-        window.location.href = '/login.html';
+        // Use encoded URL for navigation
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo('/login.html');
+        } else {
+            window.location.href = '/login.html';
+        }
     }
     throw new Error('Not authenticated');
 }

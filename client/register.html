@@ -467,7 +467,12 @@
                 if (response.success) {
                     APP.showToast('Registration successful! Redirecting to login...', 'success');
                     setTimeout(() => {
-                        window.location.href = '/login.html';
+                        // Use encoded URL for navigation
+                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                            window.LinkEncoding.navigateTo('/login.html');
+                        } else {
+                            window.location.href = '/login.html';
+                        }
                     }, 1500);
                 } else {
                     showError(response.message || 'Registration failed');

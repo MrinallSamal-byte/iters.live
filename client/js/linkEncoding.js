@@ -176,14 +176,26 @@
     }
 
     /**
-     * Navigate to an encoded link (decode and navigate)
-     * @param {string} url - URL to navigate to (possibly encoded)
+     * Navigate to a page using encoded URL (preserves encoded URL in browser)
+     * @param {string} rawUrl - Raw URL to navigate to
      */
-    function navigateTo(url) {
-        if (!url) return;
+    function navigateTo(rawUrl) {
+        if (!rawUrl) return;
         
-        const decoded = decodeLink(url);
-        window.location.href = decoded;
+        if (!ENABLE_LINK_ENCODING) {
+            window.location.href = rawUrl;
+            return;
+        }
+        
+        // If the URL is already encoded (starts with /r/), use it directly
+        if (rawUrl.startsWith('/r/')) {
+            window.location.href = rawUrl;
+            return;
+        }
+        
+        // Get the encoded URL
+        const encodedUrl = getEncodedRedirectUrl(rawUrl);
+        window.location.href = encodedUrl;
     }
 
     /**

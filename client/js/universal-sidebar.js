@@ -624,7 +624,13 @@
             };
 
             const target = byRole[this.currentRole] || '/settings.html';
-            window.location.href = target;
+            
+            // Use encoded URL for navigation
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo(target);
+            } else {
+                window.location.href = target;
+            }
         },
 
         logout() {
@@ -632,14 +638,20 @@
             if (dropdown) dropdown.classList.remove('show');
 
             if (confirm('Are you sure you want to logout?')) {
-                // Use APP.logout if available
+                // Use APP.logout if available (already uses encoded URLs)
                 if (typeof APP !== 'undefined' && typeof APP.logout === 'function') {
                     APP.logout();
                 } else {
                     // Fallback logout
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    window.location.href = '../login.html';
+                    
+                    // Use encoded URL for navigation
+                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                        window.LinkEncoding.navigateTo('/login.html');
+                    } else {
+                        window.location.href = '../login.html';
+                    }
                 }
             }
         }

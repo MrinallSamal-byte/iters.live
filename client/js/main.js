@@ -430,7 +430,13 @@ function logout() {
 
     Storage.clear();
     Socket.disconnect();
-    window.location.href = '/';
+    
+    // Use encoded URL for navigation
+    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+        window.LinkEncoding.navigateTo('/');
+    } else {
+        window.location.href = '/';
+    }
 }
 
 // Initialize
@@ -458,7 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
             window.PageAccessToken.createPageAccessToken(redirectUrl);
         }
         
-        window.location.href = redirectUrl;
+        // Use encoded URL for navigation
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo(redirectUrl);
+        } else {
+            window.location.href = redirectUrl;
+        }
     }
 });
 
@@ -496,8 +507,12 @@ window.APP = {
         if (window.profileControl && typeof window.profileControl.openEditPanel === 'function') {
             window.profileControl.openEditPanel();
         } else {
-            // Navigate to settings as fallback
-            window.location.href = '/settings.html';
+            // Navigate to settings as fallback with encoded URL
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo('/settings.html');
+            } else {
+                window.location.href = '/settings.html';
+            }
         }
     },
     // Secure navigation to dashboard pages
@@ -506,6 +521,11 @@ window.APP = {
         if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
             window.PageAccessToken.createPageAccessToken(path);
         }
-        window.location.href = path;
+        // Use encoded URL for navigation
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo(path);
+        } else {
+            window.location.href = path;
+        }
     }
 };

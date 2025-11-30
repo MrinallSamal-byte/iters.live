@@ -357,6 +357,18 @@ class Chatbot {
         };
     }
 
+    /**
+     * Navigate to a URL using encoded navigation
+     * @param {string} url - URL to navigate to
+     */
+    navigateToUrl(url) {
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo(url);
+        } else {
+            window.location.href = url;
+        }
+    }
+
     init() {
         this.createChatbotUI();
         this.attachEventListeners();
@@ -479,10 +491,20 @@ class Chatbot {
                         } catch (err) {
                             // Ignore storage errors
                         }
-                        // Redirect to login
-                        window.location.href = '/login.html';
+                        // Redirect to login using encoded URL
+                        this.navigateToUrl('/login.html');
                         return;
                     }
+                    // User is authenticated - navigate with encoded URL
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.navigateToUrl(href);
+                    return;
+                }
+                // For non-dashboard links, use encoded navigation
+                if (!href.startsWith('#') && !href.startsWith('http') && !href.startsWith('mailto') && !href.startsWith('tel')) {
+                    e.preventDefault();
+                    this.navigateToUrl(href);
                 }
             }
         });

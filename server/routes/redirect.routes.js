@@ -1,12 +1,13 @@
 /**
  * Link Redirect Routes
  * Handles the /r/:encoded redirect mechanism for encoded links
- * Decodes Base64 URL-safe encoded links and redirects to the original URL
+ * Decodes Base64 URL-safe encoded links and serves files directly
  */
 
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 // Rate limiter for redirect routes
 const redirectLimiter = rateLimit({
@@ -118,7 +119,8 @@ function isValidRedirectUrl(url) {
 
 /**
  * GET /r/:encoded
- * Decodes the encoded link and redirects to the original URL
+ * Decodes the encoded link and serves the file directly
+ * This keeps the encoded URL in the browser address bar
  */
 router.get('/:encoded', (req, res) => {
     try {
@@ -142,8 +144,66 @@ router.get('/:encoded', (req, res) => {
             return res.redirect('/');
         }
         
-        // Redirect to the decoded URL
-        res.redirect(decoded);
+        // Extract path without hash and query for file serving
+        let filePath = decoded;
+        let hashFragment = '';
+        
+        const hashIndex = decoded.indexOf('#');
+        if (hashIndex !== -1) {
+            filePath = decoded.substring(0, hashIndex);
+            hashFragment = decoded.substring(hashIndex);
+        }
+        
+        const queryIndex = filePath.indexOf('?');
+        if (queryIndex !== -1) {
+            filePath = filePath.substring(0, queryIndex);
+        }
+        
+        // Determine the actual file to serve
+        const clientDir = path.join(__dirname, '../../client');
+        
+        // Handle root path
+        if (filePath === '/') {
+            filePath = '/index.html';
+        }
+        
+        // Construct full file path
+        const fullPath = path.join(clientDir, filePath);
+        
+        // Security check: ensure the resolved path is within client directory
+        const resolvedPath = path.resolve(fullPath);
+        const resolvedClientDir = path.resolve(clientDir);
+        
+        if (!resolvedPath.startsWith(resolvedClientDir)) {
+            console.warn('Path traversal attempt blocked:', decoded);
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied'
+            });
+        }
+        
+        // Serve the file directly (keeps encoded URL in browser)
+        res.sendFile(resolvedPath, (err) => {
+            if (err && !res.headersSent) {
+                if (err.code === 'ENOENT') {
+                    // File not found - serve a 404 page or redirect
+                    console.error('File not found:', decoded);
+                    return res.status(404).send(`
+                        <!DOCTYPE html>
+                        <html><head><title>Page Not Found</title>
+                        <meta http-equiv="refresh" content="3;url=/">
+                        <style>body{font-family:system-ui;text-align:center;padding:50px;}</style>
+                        </head><body>
+                        <h1>Page Not Found</h1>
+                        <p>Redirecting to home...</p>
+                        </body></html>
+                    `);
+                }
+                console.error('Error serving file:', err);
+                // Fallback: redirect to home
+                res.redirect('/');
+            }
+        });
         
     } catch (error) {
         console.error('Error in redirect handler:', error);
