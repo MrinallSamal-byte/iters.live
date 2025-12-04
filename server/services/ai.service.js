@@ -333,8 +333,8 @@ Format as JSON.`;
     }
 
     calculatePriorityLevel(marks, attendance) {
-        const avgMarks = marks.reduce((sum, m) => sum + m.percentage, 0) / marks.length;
-        const avgAttendance = attendance.reduce((sum, a) => sum + a.percentage, 0) / attendance.length;
+        const avgMarks = marks.reduce((sum, m) => sum + m.percentage, 0) / (marks.length || 1);
+        const avgAttendance = attendance.reduce((sum, a) => sum + a.percentage, 0) / (attendance.length || 1);
         
         if (avgMarks < 50 || avgAttendance < 70) return 'critical';
         if (avgMarks < 65 || avgAttendance < 80) return 'high';

@@ -232,6 +232,90 @@
         .session-item:last-child {
             border-bottom: none;
         }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-body input[type="number"],
+        .modal-body select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .modal-body input[type="number"]:focus,
+        .modal-body select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
     </style>
 </head>
 <body>
@@ -326,6 +410,27 @@
         </main>
     </div>
 
+    <!-- Study Hours Input Modal -->
+    <div class="modal-overlay" id="studyHoursModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Performance Prediction</h3>
+                <p>Help us predict your performance by providing some information</p>
+            </div>
+            <div class="modal-body">
+                <label for="studyHoursInput">How many hours do you study per day on average?</label>
+                <input type="number" id="studyHoursInput" min="0" max="24" step="0.5" value="4" placeholder="Enter hours (e.g., 4)">
+                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                    💡 Be honest - this helps us give you accurate predictions!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeStudyHoursModal()">Cancel</button>
+                <button class="btn-primary" onclick="submitStudyHours()">Generate Prediction</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/main.js"></script>
     <script src="/js/chatbot.js"></script>
     <script>
@@ -343,22 +448,36 @@
             }
         });
 
-        // Show Performance Prediction
-        async function showPrediction() {
+        // Show Performance Prediction - Open modal first
+        function showPrediction() {
+            document.getElementById('studyHoursModal').classList.add('active');
+        }
+
+        // Close study hours modal
+        function closeStudyHoursModal() {
+            document.getElementById('studyHoursModal').classList.remove('active');
+        }
+
+        // Submit study hours and generate prediction
+        async function submitStudyHours() {
+            const studyHours = parseFloat(document.getElementById('studyHoursInput').value) || 4;
+            
+            // Close modal
+            closeStudyHoursModal();
+
+            // Show loading
             const resultsDiv = document.getElementById('predictionResults');
             resultsDiv.style.display = 'block';
             resultsDiv.innerHTML = '<div class="loading">Analyzing your performance data</div>';
 
             try {
-                const studyHours = prompt('How many hours do you study per day on average?', '4') || '4';
-                
                 const response = await fetch('/api/ai/predict-performance', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
                     },
-                    body: JSON.stringify({ studyHours: parseFloat(studyHours) })
+                    body: JSON.stringify({ studyHours })
                 });
 
                 const data = await response.json();

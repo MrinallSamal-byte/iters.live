@@ -12,6 +12,16 @@ const { db } = require('../database/firebase');
  */
 
 /**
+ * Helper function to calculate percentage from marks data
+ * @param {Object} marksItem - Marks data object
+ * @returns {number} Calculated percentage
+ */
+function calculatePercentage(marksItem) {
+    if (!marksItem.marks || !marksItem.total_marks) return 0;
+    return (parseFloat(marksItem.marks) / parseFloat(marksItem.total_marks)) * 100;
+}
+
+/**
  * @route   POST /api/ai/study-plan
  * @desc    Generate personalized study plan
  * @access  Private
@@ -234,16 +244,13 @@ router.post('/predict-performance', verifyToken, async (req, res) => {
         
         // Calculate weak subjects
         const weakSubjects = marksData
-            .filter(m => {
-                const percentage = m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0;
-                return percentage < 60;
-            })
+            .filter(m => calculatePercentage(m) < 60)
             .map(m => m.subject);
         
         const studentData = {
             marks: marksData.map(m => ({
                 subject: m.subject,
-                percentage: m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0
+                percentage: calculatePercentage(m)
             })),
             attendance: attendanceData.map(a => ({
                 subject: a.subject,
@@ -299,10 +306,7 @@ router.post('/tutor-recommendations', verifyToken, async (req, res) => {
         
         // Calculate averages and identify weak/strong subjects
         const avgMarks = marksData.length > 0 
-            ? marksData.reduce((sum, m) => {
-                const pct = m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0;
-                return sum + pct;
-            }, 0) / marksData.length 
+            ? marksData.reduce((sum, m) => sum + calculatePercentage(m), 0) / marksData.length 
             : 0;
             
         const avgAttendance = attendanceData.length > 0
@@ -310,17 +314,11 @@ router.post('/tutor-recommendations', verifyToken, async (req, res) => {
             : 0;
         
         const weakSubjects = marksData
-            .filter(m => {
-                const pct = m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0;
-                return pct < 60;
-            })
+            .filter(m => calculatePercentage(m) < 60)
             .map(m => m.subject);
             
         const strongSubjects = marksData
-            .filter(m => {
-                const pct = m.marks ? (parseFloat(m.marks) / (parseFloat(m.total_marks) || 100)) * 100 : 0;
-                return pct >= 80;
-            })
+            .filter(m => calculatePercentage(m) >= 80)
             .map(m => m.subject);
         
         const studentProfile = {
