@@ -158,7 +158,7 @@ const DummyData = {
         const marks = [];
         const summary = [];
 
-        subjectList.forEach(subject => {
+        subjectList.forEach((subject, index) => {
             const basePerformance = getRandomInt(65, 95);
             
             // Internal marks
@@ -187,11 +187,19 @@ const DummyData = {
             const avgMarks = Math.round((internal1 + internal2 + internal3 + assignment + quiz + external) / 6);
             const avgTotal = Math.round((30 + 30 + 30 + 20 + 10 + 100) / 6);
             
+            // Generate subject code based on department and index
+            const subjectCode = `${dept}${(index + 301)}`;
+            
+            // Assign random credits (3 or 4)
+            const credits = getRandomInt(3, 4);
+            
             summary.push({
                 subject,
+                subject_code: subjectCode,
                 avg_marks: avgMarks,
                 avg_total: avgTotal,
-                percentage: Math.round((avgMarks / avgTotal) * 100)
+                percentage: Math.round((avgMarks / avgTotal) * 100),
+                credits
             });
         });
 
