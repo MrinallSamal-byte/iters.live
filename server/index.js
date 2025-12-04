@@ -37,6 +37,7 @@ const pyqRoutes = require('./routes/pyq.routes');
 const webRoutes = require('./routes/web.routes');
 const portalRoutes = require('./routes/portal.routes');
 const redirectRoutes = require('./routes/redirect.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -207,6 +208,7 @@ app.use('/api/notes', notesRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 app.use('/api/portal', portalRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);

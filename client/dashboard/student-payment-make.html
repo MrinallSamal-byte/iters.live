@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Payment - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payment page.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>');
+                return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Header -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        💳 Make Payment
+                    </h1>
+                    <p class="page-subtitle">Pay your fees securely online</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Form -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">💰</span>
+                    Payment Details
+                </h3>
+            </div>
+
+            <form id="paymentForm" class="payment-form">
+                <div class="form-grid">
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label for="amount">Amount (₹) *</label>
+                        <input type="number" id="amount" name="amount" min="1" step="0.01" required 
+                               placeholder="Enter amount">
+                        <small class="form-text">Enter the amount you wish to pay</small>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group">
+                        <label for="category">Payment Category *</label>
+                        <select id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="tuition">Tuition Fees</option>
+                            <option value="hostel">Hostel Fees</option>
+                            <option value="library">Library Fees</option>
+                            <option value="exam">Examination Fees</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Semester -->
+                    <div class="form-group">
+                        <label for="semester">Semester *</label>
+                        <select id="semester" name="semester" required>
+                            <option value="">Select Semester</option>
+                            <option value="Semester 1">Semester 1</option>
+                            <option value="Semester 2">Semester 2</option>
+                            <option value="Semester 3">Semester 3</option>
+                            <option value="Semester 4">Semester 4</option>
+                            <option value="Semester 5">Semester 5</option>
+                            <option value="Semester 6">Semester 6</option>
+                            <option value="Semester 7">Semester 7</option>
+                            <option value="Semester 8">Semester 8</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method *</label>
+                        <select id="payment_method" name="payment_method" required>
+                            <option value="">Select Method</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="upi">UPI</option>
+                            <option value="netbanking">Net Banking</option>
+                            <option value="wallet">Wallet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="3" 
+                              placeholder="Add any additional notes about this payment"></textarea>
+                </div>
+
+                <!-- Payment Summary -->
+                <div id="paymentSummary" class="payment-summary" style="display: none;">
+                    <h4>Payment Summary</h4>
+                    <div class="summary-row">
+                        <span>Amount:</span>
+                        <span id="summaryAmount">₹0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Processing Fee:</span>
+                        <span id="summaryFee">₹0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="summaryTotal">₹0.00</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span class="btn-text">Proceed to Pay</span>
+                        <span class="btn-loader" style="display: none;">
+                            <span class="spinner"></span> Processing...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Payment Gateway Notice -->
+        <section class="dashboard-section glass-card scroll-reveal">
+            <div class="notice-box info">
+                <div class="notice-icon">ℹ️</div>
+                <div class="notice-content">
+                    <h4>Payment Information</h4>
+                    <ul>
+                        <li>All transactions are secure and encrypted</li>
+                        <li>You will receive a receipt upon successful payment</li>
+                        <li>Payment may take 2-3 business days to reflect in your account</li>
+                        <li>For any queries, contact: finance@iter.edu</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Include Common JavaScript -->
+    <script src="/js/main.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io(window.location.origin);
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.id) {
+            socket.emit('join_room', user.id);
+        }
+
+        // Listen for payment status updates
+        socket.on('payment_status_update', (data) => {
+            console.log('Payment status update:', data);
+            if (data.status === 'success') {
+                showNotification('Payment Successful!', `Your payment of ₹${data.amount} has been processed successfully.`, 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard/student-payment-history.html';
+                }, 2000);
+            } else if (data.status === 'failed') {
+                showNotification('Payment Failed', 'Your payment could not be processed. Please try again.', 'error');
+            }
+        });
+
+        // Form validation and submission
+        const form = document.getElementById('paymentForm');
+        const amountInput = document.getElementById('amount');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Update payment summary
+        amountInput.addEventListener('input', () => {
+            const amount = parseFloat(amountInput.value) || 0;
+            const fee = amount * 0.02; // 2% processing fee
+            const total = amount + fee;
+
+            if (amount > 0) {
+                document.getElementById('paymentSummary').style.display = 'block';
+                document.getElementById('summaryAmount').textContent = `₹${amount.toFixed(2)}`;
+                document.getElementById('summaryFee').textContent = `₹${fee.toFixed(2)}`;
+                document.getElementById('summaryTotal').textContent = `₹${total.toFixed(2)}`;
+            } else {
+                document.getElementById('paymentSummary').style.display = 'none';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data
+            const formData = {
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                semester: document.getElementById('semester').value,
+                payment_method: document.getElementById('payment_method').value,
+                description: document.getElementById('description').value
+            };
+
+            // Validate
+            if (formData.amount <= 0) {
+                showNotification('Error', 'Please enter a valid amount', 'error');
+                return;
+            }
+
+            // Show loading state
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-flex';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/payments/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Payment Initiated', 'Your payment is being processed. Please wait...', 'success');
+                    
+                    // Show processing message
+                    form.innerHTML = `
+                        <div class="processing-message">
+                            <div class="lottie-container">
+                                <div class="spinner-large"></div>
+                            </div>
+                            <h3>Processing Payment...</h3>
+                            <p>Please do not close this window or press the back button.</p>
+                            <p>Payment ID: <strong>${data.data.payment_id}</strong></p>
+                            <p>Transaction ID: <strong>${data.data.transaction_id}</strong></p>
+                        </div>
+                    `;
+
+                    // Wait for Socket.IO update or timeout after 30 seconds
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/student-payment-history.html';
+                    }, 30000);
+
+                } else {
+                    throw new Error(data.message || 'Payment failed');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showNotification('Error', error.message || 'Failed to process payment', 'error');
+                
+                // Reset button
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Notification helper
+        function showNotification(title, message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <strong>${title}</strong>
+                <p>${message}</p>
+            `;
+            document.body.appendChild(notification);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-base);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .payment-summary {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .payment-summary h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .summary-row.total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: none;
+            margin-top: 0.5rem;
+            color: var(--primary);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-loader {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .notice-box {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+
+        .notice-box.info {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .notice-icon {
+            font-size: 2rem;
+        }
+
+        .notice-content h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .notice-content ul {
+            margin-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .notice-content ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .processing-message {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .spinner-large {
+            width: 64px;
+            height: 64px;
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        .processing-message h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .processing-message p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .notification strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .notification p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
