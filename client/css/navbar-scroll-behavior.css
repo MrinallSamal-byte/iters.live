@@ -3,7 +3,7 @@
    Hide on scroll down, show on scroll up
    ============================================ */
 
-/* Base navbar styling - ensure smooth transitions */
+/* Base navbar styling - ensure smooth transitions with natural feel */
 .navbar {
     position: fixed;
     top: var(--spacing-lg);
@@ -13,33 +13,34 @@
     max-width: 1200px;
     z-index: 1000;
     padding: var(--spacing-md) var(--spacing-lg);
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s, 
-                opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
-                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform, opacity;
 }
 
-/* Hidden state - slides up and fades out with smooth delay */
+/* Hidden state - slides up and fades out with natural animation curve */
 .navbar.navbar-hidden {
-    transform: translateX(-50%) translateY(-120%);
+    transform: translateX(-50%) translateY(-110%);
     opacity: 0;
     pointer-events: none;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.6, 1), 
+                opacity 0.35s cubic-bezier(0.4, 0.0, 0.6, 1);
 }
 
-/* Visible state - ensures navbar is always visible when needed with instant response */
+/* Visible state - smooth slide down with fade in */
 .navbar.navbar-visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
     pointer-events: auto;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                opacity 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Add shadow when scrolled for better visibility */
+/* Add enhanced shadow when scrolled for better visibility and depth */
 .navbar.navbar-scrolled {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 
+                0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Ensure navbar doesn't interfere with page content */

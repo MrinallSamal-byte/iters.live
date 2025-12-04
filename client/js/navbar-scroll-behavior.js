@@ -4,13 +4,13 @@
 (function() {
     'use strict';
 
-    // Configuration
+    // Configuration - optimized for smooth, natural behavior
     const CONFIG = {
-        scrollThreshold: 10,        // Minimum scroll distance to trigger hide/show
-        scrollUpThreshold: 5,       // Minimum scroll up to show navbar
+        scrollThreshold: 8,         // Minimum scroll distance to trigger hide/show
+        scrollUpThreshold: 3,       // Minimum scroll up to show navbar (more responsive)
         debounceDelay: 10,          // Debounce delay for scroll events (in ms)
-        hideDelay: 150,             // Delay before hiding navbar (in ms)
-        showDelay: 0,               // Delay before showing navbar (in ms)
+        hideDelay: 100,             // Delay before hiding navbar (in ms)
+        showDelay: 0,               // Instant show for better UX
     };
 
     // State
@@ -91,7 +91,7 @@
     }
 
     /**
-     * Update scroll direction
+     * Update scroll direction with improved sensitivity
      */
     function updateScrollDirection() {
         const scrollDifference = state.currentScrollY - state.lastScrollY;
@@ -102,7 +102,7 @@
         }
 
         state.isScrollingDown = scrollDifference > 0;
-        state.isAtTop = state.currentScrollY <= CONFIG.scrollThreshold;
+        state.isAtTop = state.currentScrollY <= CONFIG.scrollThreshold * 2;
         state.lastScrollY = state.currentScrollY;
     }
 
