@@ -3,8 +3,10 @@ const router = express.Router();
 const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const advancedAnalyticsService = require('../services/advanced-analytics.service');
+const { analyticsCacheMiddleware } = require('../middleware/cache.middleware');
 
-router.get('/overview', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+// Apply analytics caching middleware to GET routes (10 minute cache)
+router.get('/overview', authMiddleware, roleMiddleware('admin'), analyticsCacheMiddleware(600), async (req, res, next) => {
   try {
     const stats = await query(`
       SELECT 
@@ -26,7 +28,7 @@ router.get('/overview', authMiddleware, roleMiddleware('admin'), async (req, res
   }
 });
 
-router.get('/attendance-stats', authMiddleware, roleMiddleware('admin', 'teacher'), async (req, res, next) => {
+router.get('/attendance-stats', authMiddleware, roleMiddleware('admin', 'teacher'), analyticsCacheMiddleware(600), async (req, res, next) => {
   try {
     const stats = await query(`
       SELECT 
@@ -50,7 +52,7 @@ router.get('/attendance-stats', authMiddleware, roleMiddleware('admin', 'teacher
  * GET /api/analytics/student-performance/:studentId
  * Get comprehensive student performance analytics
  */
-router.get('/student-performance/:studentId', authMiddleware, async (req, res, next) => {
+router.get('/student-performance/:studentId', authMiddleware, analyticsCacheMiddleware(600), async (req, res, next) => {
   try {
     const studentId = parseInt(req.params.studentId);
     
@@ -81,7 +83,7 @@ router.get('/student-performance/:studentId', authMiddleware, async (req, res, n
  * GET /api/analytics/attendance-patterns
  * Detect attendance patterns and anomalies
  */
-router.get('/attendance-patterns', authMiddleware, roleMiddleware('admin', 'teacher'), async (req, res, next) => {
+router.get('/attendance-patterns', authMiddleware, roleMiddleware('admin', 'teacher'), analyticsCacheMiddleware(600), async (req, res, next) => {
   try {
     const filters = {
       department: req.query.department,
@@ -108,7 +110,7 @@ router.get('/attendance-patterns', authMiddleware, roleMiddleware('admin', 'teac
  * GET /api/analytics/teacher/:teacherId
  * Get teacher performance analytics
  */
-router.get('/teacher/:teacherId', authMiddleware, roleMiddleware('admin', 'teacher'), async (req, res, next) => {
+router.get('/teacher/:teacherId', authMiddleware, roleMiddleware('admin', 'teacher'), analyticsCacheMiddleware(600), async (req, res, next) => {
   try {
     const teacherId = parseInt(req.params.teacherId);
     
@@ -139,7 +141,7 @@ router.get('/teacher/:teacherId', authMiddleware, roleMiddleware('admin', 'teach
  * GET /api/analytics/performance-trend
  * Returns student performance trends over time for Chart.js
  */
-router.get('/performance-trend', authMiddleware, async (req, res) => {
+router.get('/performance-trend', authMiddleware, analyticsCacheMiddleware(600), async (req, res) => {
   try {
     const userId = req.user.role === 'student' ? req.user.id : parseInt(req.query.studentId);
     const months = parseInt(req.query.months) || 6;
@@ -196,7 +198,7 @@ router.get('/performance-trend', authMiddleware, async (req, res) => {
  * GET /api/analytics/attendance-calendar
  * Returns attendance data for heatmap calendar
  */
-router.get('/attendance-calendar', authMiddleware, async (req, res) => {
+router.get('/attendance-calendar', authMiddleware, analyticsCacheMiddleware(300), async (req, res) => {
   try {
     const userId = req.user.role === 'student' ? req.user.id : parseInt(req.query.studentId);
     const weeks = parseInt(req.query.weeks) || 12;
@@ -246,7 +248,7 @@ router.get('/attendance-calendar', authMiddleware, async (req, res) => {
  * GET /api/analytics/subject-comparison
  * Returns performance comparison across subjects (radar chart)
  */
-router.get('/subject-comparison', authMiddleware, async (req, res) => {
+router.get('/subject-comparison', authMiddleware, analyticsCacheMiddleware(600), async (req, res) => {
   try {
     const userId = req.user.role === 'student' ? req.user.id : parseInt(req.query.studentId);
 
@@ -290,7 +292,7 @@ router.get('/subject-comparison', authMiddleware, async (req, res) => {
  * GET /api/analytics/grade-distribution
  * Returns grade distribution (bar chart)
  */
-router.get('/grade-distribution', authMiddleware, async (req, res) => {
+router.get('/grade-distribution', authMiddleware, analyticsCacheMiddleware(600), async (req, res) => {
   try {
     const userId = req.user.role === 'student' ? req.user.id : parseInt(req.query.studentId);
 
@@ -337,7 +339,7 @@ router.get('/grade-distribution', authMiddleware, async (req, res) => {
  * GET /api/analytics/monthly-progress
  * Returns current month's progress breakdown (doughnut chart)
  */
-router.get('/monthly-progress', authMiddleware, async (req, res) => {
+router.get('/monthly-progress', authMiddleware, analyticsCacheMiddleware(300), async (req, res) => {
   try {
     const userId = req.user.role === 'student' ? req.user.id : parseInt(req.query.studentId);
 
