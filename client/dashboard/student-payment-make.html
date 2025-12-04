@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Payment - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payments.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">💳</span>
+                        Make Payment
+                    </h1>
+                    <p class="page-subtitle">Securely pay your semester fees and other charges</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Form -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📝</span>
+                    Payment Details
+                </h3>
+            </div>
+
+            <form id="paymentForm" class="payment-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="amount" class="form-label">Amount (₹) *</label>
+                        <input type="number" id="amount" name="amount" class="form-input" 
+                               placeholder="Enter amount" min="1" step="0.01" required>
+                        <span class="form-hint">Enter the payment amount</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="semester" class="form-label">Semester *</label>
+                        <select id="semester" name="semester" class="form-select" required>
+                            <option value="">Select semester</option>
+                            <option value="Semester 1">Semester 1</option>
+                            <option value="Semester 2">Semester 2</option>
+                            <option value="Semester 3">Semester 3</option>
+                            <option value="Semester 4">Semester 4</option>
+                            <option value="Semester 5">Semester 5</option>
+                            <option value="Semester 6">Semester 6</option>
+                            <option value="Semester 7">Semester 7</option>
+                            <option value="Semester 8">Semester 8</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category" class="form-label">Payment Category *</label>
+                        <select id="category" name="category" class="form-select" required>
+                            <option value="">Select category</option>
+                            <option value="Tuition Fee">Tuition Fee</option>
+                            <option value="Exam Fee">Exam Fee</option>
+                            <option value="Lab Fee">Lab Fee</option>
+                            <option value="Library Fee">Library Fee</option>
+                            <option value="Hostel Fee">Hostel Fee</option>
+                            <option value="Transport Fee">Transport Fee</option>
+                            <option value="Other Fee">Other Fee</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentMethod" class="form-label">Payment Method *</label>
+                        <select id="paymentMethod" name="paymentMethod" class="form-select" required>
+                            <option value="">Select payment method</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Debit Card">Debit Card</option>
+                            <option value="Net Banking">Net Banking</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Wallet">Digital Wallet</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <textarea id="description" name="description" class="form-textarea" 
+                                  rows="3" placeholder="Add any additional notes"></textarea>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="payment-summary">
+                    <h4>Payment Summary</h4>
+                    <div class="summary-row">
+                        <span>Amount:</span>
+                        <span id="summaryAmount">₹ 0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Processing Fee:</span>
+                        <span>₹ 0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount:</span>
+                        <span id="summaryTotal">₹ 0.00</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitPayment">
+                        <span class="btn-text">Proceed to Pay</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner"></span> Processing...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Payment Info -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">ℹ️</span>
+                    Important Information
+                </h3>
+            </div>
+            <div class="info-content">
+                <ul class="info-list">
+                    <li>✓ All payments are secure and encrypted</li>
+                    <li>✓ You will receive a payment receipt via email</li>
+                    <li>✓ Payment confirmation may take 2-3 business days</li>
+                    <li>✓ Keep your transaction ID for future reference</li>
+                    <li>✓ For payment issues, contact the finance department</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/pages/student-payment-make.js"></script>
+    <script src="/js/chatbot.js"></script>
+
+    <style>
+        .payment-form {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-hint {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .payment-summary {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .payment-summary h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
