@@ -190,8 +190,8 @@ const DummyData = {
             // Generate subject code based on department and index
             const subjectCode = `${dept}${(index + 301)}`;
             
-            // Assign random credits (3 or 4)
-            const credits = getRandomInt(3, 4);
+            // Assign random credits (3 or 4 - typical for most courses)
+            const credits = getRandomElement([3, 4]);
             
             summary.push({
                 subject,
