@@ -1,225 +1,123 @@
-const NodeCache = require('node-cache');
-
 /**
  * Caching service for frequently accessed data
- * Uses in-memory cache with TTL support
+ * Uses Redis in production with node-cache fallback
+ * This is a compatibility wrapper that maintains the same API
  */
+
+const redisCacheService = require('./redis-cache.service');
 
 class CacheService {
   constructor() {
-    // Main cache with 10 minute TTL
-    this.cache = new NodeCache({
-      stdTTL: 600, // 10 minutes
-      checkperiod: 120, // Check for expired keys every 2 minutes
-      useClones: false // Don't clone objects (better performance)
-    });
-
-    // Short-lived cache for API responses (1 minute)
-    this.apiCache = new NodeCache({
-      stdTTL: 60,
-      checkperiod: 20
-    });
-
-    // Long-lived cache for static data (1 hour)
-    this.staticCache = new NodeCache({
-      stdTTL: 3600,
-      checkperiod: 600
-    });
-
-    // Session cache
-    this.sessionCache = new NodeCache({
-      stdTTL: 1800, // 30 minutes
-      checkperiod: 300
-    });
-
-    this.setupEventListeners();
-  }
-
-  setupEventListeners() {
-    // Log cache statistics
-    this.cache.on('expired', (key, value) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Cache expired: ${key}`);
-      }
-    });
-
-    this.cache.on('flush', () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Cache flushed');
-      }
-    });
+    // Delegate to Redis cache service
+    this.delegate = redisCacheService;
   }
 
   /**
    * Get value from cache
    */
-  get(key) {
-    try {
-      return this.cache.get(key);
-    } catch (error) {
-      console.error('Cache get error:', error);
-      return undefined;
-    }
+  async get(key) {
+    return await this.delegate.get(key);
   }
 
   /**
    * Set value in cache
    */
-  set(key, value, ttl = null) {
-    try {
-      if (ttl) {
-        return this.cache.set(key, value, ttl);
-      }
-      return this.cache.set(key, value);
-    } catch (error) {
-      console.error('Cache set error:', error);
-      return false;
-    }
+  async set(key, value, ttl = null) {
+    return await this.delegate.set(key, value, ttl);
   }
 
   /**
    * Delete value from cache
    */
-  del(key) {
-    try {
-      return this.cache.del(key);
-    } catch (error) {
-      console.error('Cache delete error:', error);
-      return 0;
-    }
+  async del(key) {
+    return await this.delegate.del(key);
   }
 
   /**
    * Delete multiple keys
    */
-  delMultiple(keys) {
-    try {
-      return this.cache.del(keys);
-    } catch (error) {
-      console.error('Cache delete multiple error:', error);
-      return 0;
-    }
+  async delMultiple(keys) {
+    return await this.delegate.delMultiple(keys);
   }
 
   /**
    * Check if key exists
    */
-  has(key) {
-    return this.cache.has(key);
+  async has(key) {
+    return await this.delegate.has(key);
   }
 
   /**
    * Get or set pattern: Get from cache, or execute function and cache result
    */
   async getOrSet(key, fetchFunction, ttl = null) {
-    const cached = this.get(key);
-    
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    try {
-      const value = await fetchFunction();
-      this.set(key, value, ttl);
-      return value;
-    } catch (error) {
-      console.error('Cache getOrSet error:', error);
-      throw error;
-    }
+    return await this.delegate.getOrSet(key, fetchFunction, ttl);
   }
 
   /**
    * Invalidate cache by pattern
    */
-  invalidatePattern(pattern) {
-    try {
-      const keys = this.cache.keys();
-      const matchingKeys = keys.filter(key => {
-        if (typeof pattern === 'string') {
-          return key.includes(pattern);
-        } else if (pattern instanceof RegExp) {
-          return pattern.test(key);
-        }
-        return false;
-      });
-
-      return this.cache.del(matchingKeys);
-    } catch (error) {
-      console.error('Cache invalidate pattern error:', error);
-      return 0;
-    }
+  async invalidatePattern(pattern) {
+    return await this.delegate.invalidatePattern(pattern);
   }
 
   /**
    * Flush all cache
    */
-  flush() {
-    try {
-      this.cache.flushAll();
-      this.apiCache.flushAll();
-      this.staticCache.flushAll();
-      return true;
-    } catch (error) {
-      console.error('Cache flush error:', error);
-      return false;
-    }
+  async flush() {
+    return await this.delegate.flush();
   }
 
   /**
    * Get cache statistics
    */
   getStats() {
-    return {
-      main: this.cache.getStats(),
-      api: this.apiCache.getStats(),
-      static: this.staticCache.getStats(),
-      session: this.sessionCache.getStats()
-    };
+    return this.delegate.getStats();
   }
 
   /**
    * API response caching methods
    */
-  getApi(key) {
-    return this.apiCache.get(key);
+  async getApi(key) {
+    return await this.delegate.getApi(key);
   }
 
-  setApi(key, value, ttl = 60) {
-    return this.apiCache.set(key, value, ttl);
+  async setApi(key, value, ttl = 60) {
+    return await this.delegate.setApi(key, value, ttl);
   }
 
-  delApi(key) {
-    return this.apiCache.del(key);
+  async delApi(key) {
+    return await this.delegate.delApi(key);
   }
 
   /**
    * Static data caching methods
    */
-  getStatic(key) {
-    return this.staticCache.get(key);
+  async getStatic(key) {
+    return await this.delegate.getStatic(key);
   }
 
-  setStatic(key, value, ttl = 3600) {
-    return this.staticCache.set(key, value, ttl);
+  async setStatic(key, value, ttl = 3600) {
+    return await this.delegate.setStatic(key, value, ttl);
   }
 
-  delStatic(key) {
-    return this.staticCache.del(key);
+  async delStatic(key) {
+    return await this.delegate.delStatic(key);
   }
 
   /**
    * Session caching methods
    */
-  getSession(key) {
-    return this.sessionCache.get(key);
+  async getSession(key) {
+    return await this.delegate.getSession(key);
   }
 
-  setSession(key, value, ttl = 1800) {
-    return this.sessionCache.set(key, value, ttl);
+  async setSession(key, value, ttl = 1800) {
+    return await this.delegate.setSession(key, value, ttl);
   }
 
-  delSession(key) {
-    return this.sessionCache.del(key);
+  async delSession(key) {
+    return await this.delegate.delSession(key);
   }
 
   /**
@@ -227,115 +125,113 @@ class CacheService {
    */
   
   // User data caching
-  getUserData(userId) {
-    return this.get(`user:${userId}`);
+  async getUserData(userId) {
+    return await this.delegate.getUserData(userId);
   }
 
-  setUserData(userId, data, ttl = 600) {
-    return this.set(`user:${userId}`, data, ttl);
+  async setUserData(userId, data, ttl = 600) {
+    return await this.delegate.setUserData(userId, data, ttl);
   }
 
-  invalidateUserData(userId) {
-    return this.del(`user:${userId}`);
+  async invalidateUserData(userId) {
+    return await this.delegate.invalidateUserData(userId);
   }
 
   // Attendance caching
-  getAttendance(studentId, subject = null) {
+  async getAttendance(studentId, subject = null) {
     const key = subject 
       ? `attendance:${studentId}:${subject}`
       : `attendance:${studentId}`;
-    return this.get(key);
+    return await this.get(key);
   }
 
-  setAttendance(studentId, data, subject = null, ttl = 300) {
+  async setAttendance(studentId, data, subject = null, ttl = 300) {
     const key = subject 
       ? `attendance:${studentId}:${subject}`
       : `attendance:${studentId}`;
-    return this.set(key, data, ttl);
+    return await this.set(key, data, ttl);
   }
 
-  invalidateAttendance(studentId, subject = null) {
+  async invalidateAttendance(studentId, subject = null) {
     if (subject) {
-      return this.del(`attendance:${studentId}:${subject}`);
+      return await this.del(`attendance:${studentId}:${subject}`);
     } else {
-      return this.invalidatePattern(`attendance:${studentId}`);
+      return await this.invalidatePattern(`attendance:${studentId}`);
     }
   }
 
   // Marks caching
-  getMarks(studentId, subject = null) {
+  async getMarks(studentId, subject = null) {
     const key = subject 
       ? `marks:${studentId}:${subject}`
       : `marks:${studentId}`;
-    return this.get(key);
+    return await this.get(key);
   }
 
-  setMarks(studentId, data, subject = null, ttl = 300) {
+  async setMarks(studentId, data, subject = null, ttl = 300) {
     const key = subject 
       ? `marks:${studentId}:${subject}`
       : `marks:${studentId}`;
-    return this.set(key, data, ttl);
+    return await this.set(key, data, ttl);
   }
 
-  invalidateMarks(studentId, subject = null) {
+  async invalidateMarks(studentId, subject = null) {
     if (subject) {
-      return this.del(`marks:${studentId}:${subject}`);
+      return await this.del(`marks:${studentId}:${subject}`);
     } else {
-      return this.invalidatePattern(`marks:${studentId}`);
+      return await this.invalidatePattern(`marks:${studentId}`);
     }
   }
 
   // Timetable caching
-  getTimetable(department, year, section) {
-    return this.getStatic(`timetable:${department}:${year}:${section}`);
+  async getTimetable(department, year, section) {
+    return await this.getStatic(`timetable:${department}:${year}:${section}`);
   }
 
-  setTimetable(department, year, section, data) {
-    return this.setStatic(`timetable:${department}:${year}:${section}`, data);
+  async setTimetable(department, year, section, data) {
+    return await this.setStatic(`timetable:${department}:${year}:${section}`, data);
   }
 
-  invalidateTimetable(department = null, year = null, section = null) {
+  async invalidateTimetable(department = null, year = null, section = null) {
     if (department && year && section) {
-      return this.delStatic(`timetable:${department}:${year}:${section}`);
+      return await this.delStatic(`timetable:${department}:${year}:${section}`);
     } else if (department) {
-      return this.invalidatePattern(`timetable:${department}`);
+      return await this.invalidatePattern(`timetable:${department}`);
     } else {
-      return this.invalidatePattern('timetable:');
+      return await this.invalidatePattern('timetable:');
     }
   }
 
   // Files caching
-  getFilesList(category = null) {
+  async getFilesList(category = null) {
     const key = category ? `files:${category}` : 'files:all';
-    return this.get(key);
+    return await this.get(key);
   }
 
-  setFilesList(data, category = null, ttl = 300) {
+  async setFilesList(data, category = null, ttl = 300) {
     const key = category ? `files:${category}` : 'files:all';
-    return this.set(key, data, ttl);
+    return await this.set(key, data, ttl);
   }
 
-  invalidateFiles(category = null) {
+  async invalidateFiles(category = null) {
     if (category) {
-      return this.del(`files:${category}`);
+      return await this.del(`files:${category}`);
     } else {
-      return this.invalidatePattern('files:');
+      return await this.invalidatePattern('files:');
     }
   }
 
   // Analytics caching
-  getAnalytics(type, params = {}) {
-    const key = `analytics:${type}:${JSON.stringify(params)}`;
-    return this.get(key);
+  async getAnalytics(type, params = {}) {
+    return await this.delegate.getAnalytics(type, params);
   }
 
-  setAnalytics(type, params, data, ttl = 600) {
-    const key = `analytics:${type}:${JSON.stringify(params)}`;
-    return this.set(key, data, ttl);
+  async setAnalytics(type, params, data, ttl = 600) {
+    return await this.delegate.setAnalytics(type, params, data, ttl);
   }
 
-  invalidateAnalytics() {
-    return this.invalidatePattern('analytics:');
+  async invalidateAnalytics() {
+    return await this.delegate.invalidateAnalytics();
   }
 }
 

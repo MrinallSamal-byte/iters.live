@@ -1,7 +1,10 @@
-// Service Worker for PWA
-const CACHE_NAME = 'iter-edu-v1';
-const RUNTIME_CACHE = 'iter-runtime-v1';
+// Enhanced Service Worker for PWA with Advanced Caching Strategies
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `iter-edu-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `iter-runtime-${CACHE_VERSION}`;
+const API_CACHE = `iter-api-${CACHE_VERSION}`;
 
+// Static assets to precache
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -14,6 +17,22 @@ const PRECACHE_URLS = [
   '/assets/icon-192.png',
   '/assets/icon-512.png'
 ];
+
+// API endpoints that can be cached with stale-while-revalidate
+const CACHEABLE_API_PATTERNS = [
+  /\/api\/analytics\//,
+  /\/api\/user\/profile/,
+  /\/api\/timetable/,
+  /\/api\/files\/list/,
+  /\/api\/hostel\/menu/
+];
+
+// Max age for different cache types (in milliseconds)
+const CACHE_MAX_AGE = {
+  static: 7 * 24 * 60 * 60 * 1000,  // 7 days
+  api: 5 * 60 * 1000,                 // 5 minutes
+  runtime: 24 * 60 * 60 * 1000        // 1 day
+};
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -31,7 +50,7 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
-  const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
+  const currentCaches = [CACHE_NAME, RUNTIME_CACHE, API_CACHE];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -46,7 +65,70 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - network first, fallback to cache
+// Helper function to check if API endpoint should be cached
+function shouldCacheAPI(url) {
+  return CACHEABLE_API_PATTERNS.some(pattern => pattern.test(url.pathname));
+}
+
+// Helper function to check cache freshness
+async function isCacheFresh(request, cacheName, maxAge) {
+  const cache = await caches.open(cacheName);
+  const cachedResponse = await cache.match(request);
+  
+  if (!cachedResponse) return false;
+  
+  const cachedDate = cachedResponse.headers.get('sw-cache-date');
+  if (!cachedDate) return false;
+  
+  const cacheAge = Date.now() - parseInt(cachedDate);
+  return cacheAge < maxAge;
+}
+
+// Stale-while-revalidate strategy
+async function staleWhileRevalidate(request, cacheName, maxAge) {
+  const cache = await caches.open(cacheName);
+  
+  // Try to get from cache first
+  const cachedResponse = await cache.match(request);
+  
+  // Fetch from network in background
+  const fetchPromise = fetch(request).then(async (response) => {
+    if (response.status === 200) {
+      // Clone the response and add cache timestamp
+      const responseToCache = response.clone();
+      const headers = new Headers(responseToCache.headers);
+      headers.set('sw-cache-date', Date.now().toString());
+      
+      const responseWithTimestamp = new Response(responseToCache.body, {
+        status: responseToCache.status,
+        statusText: responseToCache.statusText,
+        headers: headers
+      });
+      
+      await cache.put(request, responseWithTimestamp);
+    }
+    return response;
+  }).catch(() => null);
+  
+  // Return cached response immediately if fresh, otherwise wait for network
+  if (cachedResponse && await isCacheFresh(request, cacheName, maxAge)) {
+    // Return cached and update in background
+    fetchPromise; // Don't await, let it update in background
+    return cachedResponse;
+  }
+  
+  // Wait for network response
+  const networkResponse = await fetchPromise;
+  return networkResponse || cachedResponse || new Response(JSON.stringify({
+    success: false,
+    message: 'Network error - you are offline'
+  }), {
+    headers: { 'Content-Type': 'application/json' },
+    status: 503
+  });
+}
+
+// Fetch event - enhanced with multiple caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -56,36 +138,59 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // API requests - network only
+  // API requests - stale-while-revalidate for cacheable endpoints
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(JSON.stringify({
-          success: false,
-          message: 'Network error - you are offline'
-        }), {
-          headers: { 'Content-Type': 'application/json' },
-          status: 503
-        });
-      })
-    );
+    if (shouldCacheAPI(url)) {
+      // Use stale-while-revalidate for cacheable API endpoints
+      event.respondWith(
+        staleWhileRevalidate(request, API_CACHE, CACHE_MAX_AGE.api)
+      );
+    } else {
+      // Network only for other API requests (auth, mutations, etc.)
+      event.respondWith(
+        fetch(request).catch(() => {
+          return new Response(JSON.stringify({
+            success: false,
+            message: 'Network error - you are offline'
+          }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 503
+          });
+        })
+      );
+    }
     return;
   }
 
-  // Static assets - cache first, fallback to network
+  // Static assets - cache first with network fallback
   if (PRECACHE_URLS.includes(url.pathname) || 
-      url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff|woff2)$/)) {
+      url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff|woff2|ico|webp)$/)) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
+          // Check if cache is stale and update in background
+          if (!isCacheFresh(request, CACHE_NAME, CACHE_MAX_AGE.static)) {
+            fetch(request).then((response) => {
+              if (response.status === 200) {
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(request, response);
+                });
+              }
+            }).catch(() => {});
+          }
           return cachedResponse;
         }
+        
+        // Not in cache, fetch from network
         return caches.open(RUNTIME_CACHE).then((cache) => {
           return fetch(request).then((response) => {
             if (response.status === 200) {
               cache.put(request, response.clone());
             }
             return response;
+          }).catch(() => {
+            // Return offline page for failed requests
+            return caches.match('/index.html');
           });
         });
       })
@@ -93,7 +198,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML pages - network first, fallback to cache
+  // HTML pages - network first with cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {

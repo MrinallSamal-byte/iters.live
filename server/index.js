@@ -313,23 +313,51 @@ app.use((err, req, res, next) => {
   }
 });
 
+// Initialize Redis cache
+const { initRedis, closeRedis, isRedisConnected } = require('./config/redis.config');
+
 // Start server
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`
+async function startServer() {
+  try {
+    // Initialize Redis connection (only in production)
+    await initRedis();
+    
+    server.listen(PORT, () => {
+      const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
+      console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║   ITER College Management System                     ║
 ║   Server running on port ${PORT}                        ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                      ║
 ║   Socket.IO: Enabled                                  ║
+║   Cache: ${cacheType}                                        ║
 ╚═══════════════════════════════════════════════════════╝
-  `);
-});
+      `);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM received, closing server gracefully...');
+  await closeRedis();
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, closing server gracefully...');
+  await closeRedis();
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
