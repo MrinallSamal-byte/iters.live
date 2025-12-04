@@ -12,6 +12,16 @@ const { db } = require('../database/firebase');
  */
 
 /**
+ * Helper function to calculate percentage from marks data
+ * @param {Object} marksItem - Marks data object
+ * @returns {number} Calculated percentage
+ */
+function calculatePercentage(marksItem) {
+    if (!marksItem.marks || !marksItem.total_marks) return 0;
+    return (parseFloat(marksItem.marks) / parseFloat(marksItem.total_marks)) * 100;
+}
+
+/**
  * @route   POST /api/ai/study-plan
  * @desc    Generate personalized study plan
  * @access  Private
@@ -210,6 +220,171 @@ router.get('/study-plans/history', verifyToken, async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch study plan history'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/ai/predict-performance
+ * @desc    ML-based exam performance prediction
+ * @access  Private
+ */
+router.post('/predict-performance', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id || req.user.uid;
+        const { studyHours, customData } = req.body;
+        
+        // Fetch student data from Firestore
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        
+        const marksData = userData.marks_data || [];
+        const attendanceData = userData.attendance_data || [];
+        const assignmentsData = userData.assignments_data || {};
+        
+        // Calculate weak subjects
+        const weakSubjects = marksData
+            .filter(m => calculatePercentage(m) < 60)
+            .map(m => m.subject);
+        
+        const studentData = {
+            marks: marksData.map(m => ({
+                subject: m.subject,
+                percentage: calculatePercentage(m)
+            })),
+            attendance: attendanceData.map(a => ({
+                subject: a.subject,
+                percentage: parseFloat(a.percentage) || 0
+            })),
+            assignments: assignmentsData,
+            studyHours: studyHours || 4,
+            weakSubjects,
+            ...customData
+        };
+        
+        const prediction = await aiService.predictExamPerformance(studentData);
+        
+        // Log prediction to Firestore
+        await db.collection('performance_predictions').add({
+            user_id: userId,
+            prediction,
+            input_data: studentData,
+            created_at: new Date()
+        }).catch(err => console.error('Failed to log prediction:', err));
+        
+        res.json({
+            success: true,
+            prediction,
+            message: 'Performance prediction generated successfully'
+        });
+    } catch (error) {
+        console.error('Performance prediction error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to predict performance',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+/**
+ * @route   POST /api/ai/tutor-recommendations
+ * @desc    Get personalized AI tutor recommendations
+ * @access  Private
+ */
+router.post('/tutor-recommendations', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id || req.user.uid;
+        const { learningStyle, goals } = req.body;
+        
+        // Fetch student data from Firestore
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        
+        const marksData = userData.marks_data || [];
+        const attendanceData = userData.attendance_data || [];
+        
+        // Calculate averages and identify weak/strong subjects
+        const avgMarks = marksData.length > 0 
+            ? marksData.reduce((sum, m) => sum + calculatePercentage(m), 0) / marksData.length 
+            : 0;
+            
+        const avgAttendance = attendanceData.length > 0
+            ? attendanceData.reduce((sum, a) => sum + parseFloat(a.percentage || 0), 0) / attendanceData.length
+            : 0;
+        
+        const weakSubjects = marksData
+            .filter(m => calculatePercentage(m) < 60)
+            .map(m => m.subject);
+            
+        const strongSubjects = marksData
+            .filter(m => calculatePercentage(m) >= 80)
+            .map(m => m.subject);
+        
+        const studentProfile = {
+            marks: { average: avgMarks },
+            attendance: { average: avgAttendance },
+            weakSubjects,
+            strongSubjects,
+            learningStyle: learningStyle || 'visual',
+            goals: goals || 'Improve overall academic performance'
+        };
+        
+        const recommendations = await aiService.getPersonalizedTutorRecommendations(studentProfile);
+        
+        // Save recommendations to Firestore
+        await db.collection('tutor_recommendations').add({
+            user_id: userId,
+            recommendations,
+            profile: studentProfile,
+            created_at: new Date()
+        }).catch(err => console.error('Failed to save recommendations:', err));
+        
+        res.json({
+            success: true,
+            recommendations,
+            message: 'Personalized recommendations generated successfully'
+        });
+    } catch (error) {
+        console.error('Tutor recommendations error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to generate recommendations',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+/**
+ * @route   GET /api/ai/predictions/history
+ * @desc    Get user's prediction history
+ * @access  Private
+ */
+router.get('/predictions/history', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id || req.user.uid;
+        
+        const predictionsSnapshot = await db.collection('performance_predictions')
+            .where('user_id', '==', userId)
+            .orderBy('created_at', 'desc')
+            .limit(10)
+            .get();
+        
+        const predictions = predictionsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            prediction: doc.data().prediction,
+            createdAt: doc.data().created_at
+        }));
+        
+        res.json({
+            success: true,
+            predictions
+        });
+    } catch (error) {
+        console.error('Prediction history error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch prediction history'
         });
     }
 });

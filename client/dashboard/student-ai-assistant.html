@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - ITER EduHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <style>
+        .ai-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .ai-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .ai-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .prediction-card, .recommendations-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .prediction-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .prediction-grade {
+            font-size: 2rem;
+            color: #764ba2;
+        }
+
+        .confidence-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .factor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .factor-item {
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .factor-item.positive {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+        }
+
+        .factor-item.neutral {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #FFC107;
+        }
+
+        .factor-item.negative {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid #F44336;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .risk-low { background: #4CAF50; color: white; }
+        .risk-medium { background: #FFC107; color: #333; }
+        .risk-high { background: #F44336; color: white; }
+
+        .study-plan-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .week-container {
+            margin: 1.5rem 0;
+        }
+
+        .day-schedule {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .session-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-body input[type="number"],
+        .modal-body select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .modal-body input[type="number"]:focus,
+        .modal-body select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navigation will be injected here -->
+        <div id="nav-placeholder"></div>
+
+        <main class="main-content">
+            <div class="ai-container">
+                <!-- Header -->
+                <div class="ai-header">
+                    <h1>🤖 AI Assistant</h1>
+                    <p>Your personal AI-powered study companion with smart recommendations</p>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="showPrediction()">
+                        <div class="feature-icon">📊</div>
+                        <h3>Performance Predictor</h3>
+                        <p>ML-powered prediction of your exam results based on multiple factors</p>
+                    </div>
+
+                    <div class="feature-card" onclick="showTutorRecommendations()">
+                        <div class="feature-icon">📚</div>
+                        <h3>AI Tutor</h3>
+                        <p>Personalized study recommendations based on your marks and attendance</p>
+                    </div>
+
+                    <div class="feature-card" onclick="generateStudyPlan()">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Smart Study Plan</h3>
+                        <p>Auto-generated study schedules focused on your weak subjects</p>
+                    </div>
+
+                    <div class="feature-card" onclick="openChatbot()">
+                        <div class="feature-icon">🤖</div>
+                        <h3>24/7 Chatbot</h3>
+                        <p>Get instant answers to your doubts with Gemini AI integration</p>
+                    </div>
+                </div>
+
+                <!-- Prediction Results -->
+                <div id="predictionResults" class="prediction-card" style="display: none;">
+                    <h2>📊 Performance Prediction</h2>
+                    <div class="prediction-header">
+                        <div>
+                            <div class="prediction-score" id="predictedScore">--</div>
+                            <div class="prediction-grade" id="predictedGrade">Grade: --</div>
+                        </div>
+                        <div>
+                            <h4>Category: <span id="predictionCategory">--</span></h4>
+                            <span id="riskBadge" class="risk-badge">--</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4>Confidence Level</h4>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                        </div>
+                        <p id="confidenceText">--</p>
+                    </div>
+
+                    <div>
+                        <h4>Contributing Factors</h4>
+                        <div class="factor-grid" id="factorGrid"></div>
+                    </div>
+
+                    <div>
+                        <h4>Recommendations</h4>
+                        <ul class="recommendations-list" id="predictionRecommendations"></ul>
+                    </div>
+
+                    <div>
+                        <h4>Improvement Potential: <span id="improvementPotential">--</span> points</h4>
+                    </div>
+                </div>
+
+                <!-- Tutor Recommendations -->
+                <div id="tutorResults" class="recommendations-card" style="display: none;">
+                    <h2>📚 AI Tutor Recommendations</h2>
+                    <div id="tutorContent"></div>
+                </div>
+
+                <!-- Study Plan -->
+                <div id="studyPlanResults" class="study-plan-section" style="display: none;">
+                    <h2>🎯 Smart Study Plan</h2>
+                    <div id="studyPlanContent"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Study Hours Input Modal -->
+    <div class="modal-overlay" id="studyHoursModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Performance Prediction</h3>
+                <p>Help us predict your performance by providing some information</p>
+            </div>
+            <div class="modal-body">
+                <label for="studyHoursInput">How many hours do you study per day on average?</label>
+                <input type="number" id="studyHoursInput" min="0" max="24" step="0.5" value="4" placeholder="Enter hours (e.g., 4)">
+                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                    💡 Be honest - this helps us give you accurate predictions!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeStudyHoursModal()">Cancel</button>
+                <button class="btn-primary" onclick="submitStudyHours()">Generate Prediction</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/chatbot.js"></script>
+    <script>
+        // Load navigation
+        loadDashboardNav('student');
+
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = await checkAuth();
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+        });
+
+        // Show Performance Prediction - Open modal first
+        function showPrediction() {
+            document.getElementById('studyHoursModal').classList.add('active');
+        }
+
+        // Close study hours modal
+        function closeStudyHoursModal() {
+            document.getElementById('studyHoursModal').classList.remove('active');
+        }
+
+        // Submit study hours and generate prediction
+        async function submitStudyHours() {
+            const studyHours = parseFloat(document.getElementById('studyHoursInput').value) || 4;
+            
+            // Close modal
+            closeStudyHoursModal();
+
+            // Show loading
+            const resultsDiv = document.getElementById('predictionResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">Analyzing your performance data</div>';
+
+            try {
+                const response = await fetch('/api/ai/predict-performance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({ studyHours })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayPrediction(data.prediction);
+                } else {
+                    throw new Error(data.message || 'Failed to get prediction');
+                }
+            } catch (error) {
+                console.error('Prediction error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayPrediction(prediction) {
+            const resultsDiv = document.getElementById('predictionResults');
+            resultsDiv.style.display = 'block';
+
+            // Update scores
+            document.getElementById('predictedScore').textContent = prediction.predictedScore.toFixed(1) + '%';
+            document.getElementById('predictedGrade').textContent = 'Grade: ' + prediction.predictedGrade;
+            document.getElementById('predictionCategory').textContent = prediction.category;
+            
+            // Risk badge
+            const riskBadge = document.getElementById('riskBadge');
+            riskBadge.textContent = prediction.riskLevel.toUpperCase() + ' RISK';
+            riskBadge.className = 'risk-badge risk-' + prediction.riskLevel;
+
+            // Confidence
+            document.getElementById('confidenceFill').style.width = prediction.confidence + '%';
+            document.getElementById('confidenceText').textContent = `${prediction.confidence}% confidence based on available data`;
+
+            // Factors
+            const factorGrid = document.getElementById('factorGrid');
+            factorGrid.innerHTML = '';
+            Object.keys(prediction.factors).forEach(key => {
+                const factor = prediction.factors[key];
+                const factorDiv = document.createElement('div');
+                factorDiv.className = 'factor-item ' + factor.status;
+                factorDiv.innerHTML = `
+                    <h4>${key}</h4>
+                    <p><strong>${factor.score}%</strong></p>
+                    <p>Impact: ${factor.impact}</p>
+                `;
+                factorGrid.appendChild(factorDiv);
+            });
+
+            // Recommendations
+            const recommendationsList = document.getElementById('predictionRecommendations');
+            recommendationsList.innerHTML = '';
+            prediction.recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                recommendationsList.appendChild(li);
+            });
+
+            // Improvement potential
+            document.getElementById('improvementPotential').textContent = prediction.improvementPotential;
+
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show Tutor Recommendations
+        async function showTutorRecommendations() {
+            const resultsDiv = document.getElementById('tutorResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">Generating personalized recommendations</div>';
+
+            try {
+                const response = await fetch('/api/ai/tutor-recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        learningStyle: 'visual',
+                        goals: 'Improve overall academic performance'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayTutorRecommendations(data.recommendations);
+                } else {
+                    throw new Error(data.message || 'Failed to get recommendations');
+                }
+            } catch (error) {
+                console.error('Tutor recommendations error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayTutorRecommendations(recommendations) {
+            const contentDiv = document.getElementById('tutorContent');
+            let html = '';
+
+            // Action Plan
+            if (recommendations.actionPlan) {
+                html += '<h3>📅 Two-Week Action Plan</h3>';
+                html += '<div class="week-container">';
+                html += '<h4>Week 1</h4><ul>';
+                recommendations.actionPlan.week1.forEach(item => {
+                    html += `<li>${item}</li>`;
+                });
+                html += '</ul><h4>Week 2</h4><ul>';
+                recommendations.actionPlan.week2.forEach(item => {
+                    html += `<li>${item}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            // Time Allocation
+            if (recommendations.timeAllocation && recommendations.timeAllocation.length > 0) {
+                html += '<h3>⏰ Time Allocation</h3>';
+                html += '<div class="factor-grid">';
+                recommendations.timeAllocation.forEach(alloc => {
+                    html += `
+                        <div class="factor-item ${alloc.priority === 'high' ? 'negative' : 'neutral'}">
+                            <h4>${alloc.subject}</h4>
+                            <p><strong>${alloc.hoursPerWeek} hours/week</strong></p>
+                            <p>Priority: ${alloc.priority}</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Motivation
+            if (recommendations.motivation) {
+                html += '<h3>💪 Motivation Tips</h3><ul class="recommendations-list">';
+                recommendations.motivation.forEach(tip => {
+                    html += `<li>${tip}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // Resources
+            if (recommendations.resources && recommendations.resources.length > 0) {
+                html += '<h3>📖 Recommended Resources</h3>';
+                recommendations.resources.forEach(resource => {
+                    html += `<h4>${resource.subject}</h4><ul>`;
+                    resource.resources.forEach(res => {
+                        html += `<li>${res}</li>`;
+                    });
+                    html += '</ul>';
+                });
+            }
+
+            contentDiv.innerHTML = html;
+            document.getElementById('tutorResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Generate Study Plan
+        async function generateStudyPlan() {
+            const resultsDiv = document.getElementById('studyPlanResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">Creating your personalized study plan</div>';
+
+            try {
+                const response = await fetch('/api/ai/study-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        preferences: {
+                            studyHours: 4,
+                            preferredTime: 'morning'
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayStudyPlan(data.studyPlan);
+                } else {
+                    throw new Error(data.message || 'Failed to generate study plan');
+                }
+            } catch (error) {
+                console.error('Study plan error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayStudyPlan(plan) {
+            const contentDiv = document.getElementById('studyPlanContent');
+            let html = '';
+
+            // Overall Strategy
+            if (plan.overallStrategy) {
+                html += `<div style="background: rgba(102, 126, 234, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4>🎯 Overall Strategy</h4>
+                    <p>${plan.overallStrategy}</p>
+                </div>`;
+            }
+
+            // Weekly Goals
+            if (plan.weeklyGoals) {
+                html += '<h3>🎯 Weekly Goals</h3><ul class="recommendations-list">';
+                plan.weeklyGoals.forEach(goal => {
+                    html += `<li>${goal}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            // Weeks
+            if (plan.weeks) {
+                plan.weeks.forEach(week => {
+                    html += `<div class="week-container">
+                        <h3>Week ${week.weekNumber}</h3>`;
+                    
+                    week.days.forEach(day => {
+                        html += `<div class="day-schedule">
+                            <h4>${day.day}</h4>`;
+                        
+                        if (day.sessions) {
+                            day.sessions.forEach(session => {
+                                html += `<div class="session-item">
+                                    <div>
+                                        <strong>${session.time}</strong> - ${session.subject}
+                                        <br><small>${session.technique || ''}</small>
+                                    </div>
+                                </div>`;
+                            });
+                        }
+
+                        if (day.goals) {
+                            html += '<h5>Daily Goals:</h5><ul>';
+                            day.goals.forEach(goal => {
+                                html += `<li>${goal}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+
+                        html += '</div>';
+                    });
+
+                    html += '</div>';
+                });
+            }
+
+            contentDiv.innerHTML = html;
+            document.getElementById('studyPlanResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Open Chatbot
+        function openChatbot() {
+            // The chatbot should be loaded via chatbot.js
+            // This function triggers the chatbot to open
+            if (window.chatbot) {
+                window.chatbot.toggle();
+            } else {
+                alert('Chatbot is loading... Please wait a moment and try again.');
+            }
+        }
+    </script>
+</body>
+</html>
