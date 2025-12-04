@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payment details.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">🔍</span>
+                        Payment Details
+                    </h1>
+                    <p class="page-subtitle">Complete information about your transaction</p>
+                </div>
+                <a href="/dashboard/student-payment-history.html" class="btn btn-secondary">
+                    ← Back to History
+                </a>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="spinner-large"></div>
+            <p>Loading payment details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h3>Payment Not Found</h3>
+            <p id="errorMessage">Unable to load payment details.</p>
+            <a href="/dashboard/student-payment-history.html" class="btn btn-primary">Go to Payment History</a>
+        </div>
+
+        <!-- Payment Details Content -->
+        <div id="paymentContent" style="display: none;">
+            <!-- Payment Status Card -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="payment-status-header">
+                    <div class="status-icon" id="statusIcon">✓</div>
+                    <div>
+                        <h2 id="statusTitle">Payment Successful</h2>
+                        <p id="statusSubtitle">Your payment has been processed successfully</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Information -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📋</span>
+                        Payment Information
+                    </h3>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Payment ID</label>
+                        <span id="paymentId">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Transaction ID</label>
+                        <span id="transactionId">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Payment Date</label>
+                        <span id="paymentDate">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status</label>
+                        <span id="paymentStatus" class="status-badge">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Information -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">👤</span>
+                        Student Information
+                    </h3>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Name</label>
+                        <span id="studentName">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Registration Number</label>
+                        <span id="studentRegNo">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <span id="studentEmail">--</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Details -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">💳</span>
+                        Payment Details
+                    </h3>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Semester</label>
+                        <span id="semester">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Category</label>
+                        <span id="category">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Payment Method</label>
+                        <span id="paymentMethod">--</span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <label>Description</label>
+                        <span id="description">--</span>
+                    </div>
+                    <div class="detail-item amount-item">
+                        <label>Amount Paid</label>
+                        <span id="amount" class="amount-value">₹ --</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="actions-container">
+                    <button class="btn btn-primary" id="downloadReceipt">
+                        <span>📄</span> Download Receipt
+                    </button>
+                    <button class="btn btn-secondary" id="printReceipt">
+                        <span>🖨️</span> Print Receipt
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/pages/student-payment-details.js"></script>
+    <script src="/js/chatbot.js"></script>
+
+    <style>
+        .loading-state,
+        .error-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner-large {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-status-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 50%;
+        }
+
+        .payment-status-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .payment-status-header p {
+            margin: 0.5rem 0 0;
+            color: var(--text-secondary);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-item.amount-item {
+            grid-column: 1 / -1;
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .detail-item label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item span {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .amount-value {
+            font-size: 2rem !important;
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .status-completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .status-pending {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .status-refunded {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+        }
+
+        .actions-container {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .payment-status-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
