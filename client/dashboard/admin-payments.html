@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Management - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && (userData.role === 'admin' || userData.role === 'teacher');
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payment management.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>');
+                return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Header -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        💰 Payment Management
+                    </h1>
+                    <p class="page-subtitle">Monitor and manage all student payments</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">💰</div>
+                <div class="stat-number" id="totalAmount">₹0</div>
+                <div class="stat-text">Total Collected</div>
+                <div class="stat-subtext">Successful payments</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="totalPayments">0</div>
+                <div class="stat-text">Total Payments</div>
+                <div class="stat-subtext">All transactions</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏳</div>
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-text">Pending</div>
+                <div class="stat-subtext">Awaiting processing</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="successCount">0</div>
+                <div class="stat-text">Successful</div>
+                <div class="stat-subtext">Completed</div>
+            </div>
+        </section>
+
+        <!-- Charts -->
+        <div class="dashboard-grid">
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📊</span>
+                        Payment Status Distribution
+                    </h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📈</span>
+                        Payment Categories
+                    </h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart" height="250"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Filters -->
+        <section class="dashboard-section glass-card scroll-reveal">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="success">Success</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="tuition">Tuition Fees</option>
+                        <option value="hostel">Hostel Fees</option>
+                        <option value="library">Library Fees</option>
+                        <option value="exam">Examination Fees</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                <button class="btn btn-primary" onclick="exportPayments()">📥 Export CSV</button>
+            </div>
+        </section>
+
+        <!-- Payments Table -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    All Transactions
+                </h3>
+            </div>
+
+            <div id="loadingState" class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading payments...</p>
+            </div>
+
+            <div id="tableContainer" style="display: none;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Student</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Update Status Modal -->
+    <div id="statusModal" class="modal" style="display: none;">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Update Payment Status</h3>
+                <button class="modal-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newStatus">Status</label>
+                    <select id="newStatus" class="filter-select">
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adminNotes">Admin Notes</label>
+                    <textarea id="adminNotes" rows="4" class="filter-select" placeholder="Add notes about this status update..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeStatusModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updatePaymentStatus()">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Common JavaScript -->
+    <script src="/js/main.js"></script>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        let allPayments = [];
+        let filteredPayments = [];
+        let currentPaymentId = null;
+
+        // Load all payments
+        async function loadPayments() {
+            try {
+                const response = await fetch(`${API_URL}/payments/admin/all?limit=100`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    allPayments = data.data.payments;
+                    filteredPayments = allPayments;
+                    updateSummary(data.data.summary);
+                    displayPayments();
+                    createCharts();
+                } else {
+                    throw new Error(data.message || 'Failed to load payments');
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load payments. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update summary statistics
+        function updateSummary(summary) {
+            document.getElementById('totalAmount').textContent = `₹${summary.total_amount.toFixed(2)}`;
+            document.getElementById('totalPayments').textContent = summary.total_payments;
+            document.getElementById('pendingCount').textContent = summary.pending_count;
+            document.getElementById('successCount').textContent = summary.success_count;
+        }
+
+        // Display payments in table
+        function displayPayments() {
+            const loadingState = document.getElementById('loadingState');
+            const tableContainer = document.getElementById('tableContainer');
+            const tbody = document.getElementById('paymentsTableBody');
+
+            loadingState.style.display = 'none';
+            tableContainer.style.display = 'block';
+
+            tbody.innerHTML = filteredPayments.map(payment => `
+                <tr>
+                    <td data-label="Payment ID">
+                        <code class="payment-id">${payment.payment_id}</code>
+                    </td>
+                    <td data-label="Student">
+                        <div class="student-info">
+                            <div>${payment.student_id.substring(0, 8)}...</div>
+                        </div>
+                    </td>
+                    <td data-label="Date">
+                        ${new Date(payment.created_at).toLocaleDateString('en-IN', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        })}
+                    </td>
+                    <td data-label="Category">
+                        <span class="category-badge">${formatCategory(payment.category)}</span>
+                    </td>
+                    <td data-label="Amount">
+                        <strong>₹${payment.amount.toFixed(2)}</strong>
+                    </td>
+                    <td data-label="Status">
+                        <span class="status-badge status-${payment.status}">${formatStatus(payment.status)}</span>
+                    </td>
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            ${user.role === 'admin' ? `
+                                <button class="btn-icon" onclick="openStatusModal('${payment.id}')" title="Update Status">
+                                    ⚙️
+                                </button>
+                            ` : ''}
+                            <button class="btn-icon" onclick="viewPaymentDetails('${payment.id}')" title="View Details">
+                                👁️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Create charts
+        function createCharts() {
+            // Status distribution chart
+            const statusCounts = {
+                pending: 0,
+                processing: 0,
+                success: 0,
+                failed: 0
+            };
+
+            allPayments.forEach(p => {
+                statusCounts[p.status] = (statusCounts[p.status] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Success', 'Pending', 'Processing', 'Failed'],
+                    datasets: [{
+                        data: [
+                            statusCounts.success,
+                            statusCounts.pending,
+                            statusCounts.processing,
+                            statusCounts.failed
+                        ],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(99, 102, 241, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Category distribution chart
+            const categoryCounts = {};
+            allPayments.forEach(p => {
+                categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(categoryCounts).map(c => formatCategory(c)),
+                    datasets: [{
+                        label: 'Payments',
+                        data: Object.values(categoryCounts),
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter payments
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            filteredPayments = allPayments.filter(payment => {
+                const statusMatch = !statusFilter || payment.status === statusFilter;
+                const categoryMatch = !categoryFilter || payment.category === categoryFilter;
+                return statusMatch && categoryMatch;
+            });
+
+            displayPayments();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredPayments = allPayments;
+            displayPayments();
+        }
+
+        // Export payments to CSV
+        function exportPayments() {
+            const csvRows = [
+                ['Payment ID', 'Transaction ID', 'Student ID', 'Date', 'Category', 'Semester', 'Amount', 'Status', 'Payment Method']
+            ];
+
+            filteredPayments.forEach(p => {
+                csvRows.push([
+                    p.payment_id,
+                    p.transaction_id,
+                    p.student_id,
+                    new Date(p.created_at).toISOString(),
+                    p.category,
+                    p.semester,
+                    p.amount,
+                    p.status,
+                    p.payment_method
+                ]);
+            });
+
+            const csvContent = csvRows.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `payments-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // Open status update modal
+        function openStatusModal(paymentId) {
+            currentPaymentId = paymentId;
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (payment) {
+                document.getElementById('newStatus').value = payment.status;
+                document.getElementById('adminNotes').value = payment.admin_notes || '';
+                document.getElementById('statusModal').style.display = 'flex';
+            }
+        }
+
+        // Close status modal
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            currentPaymentId = null;
+        }
+
+        // Update payment status
+        async function updatePaymentStatus() {
+            if (!currentPaymentId) return;
+
+            const newStatus = document.getElementById('newStatus').value;
+            const adminNotes = document.getElementById('adminNotes').value;
+
+            try {
+                const response = await fetch(`${API_URL}/payments/${currentPaymentId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({ status: newStatus, admin_notes: adminNotes })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification('Success', 'Payment status updated successfully', 'success');
+                    closeStatusModal();
+                    loadPayments(); // Reload
+                } else {
+                    throw new Error(data.message || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showNotification('Error', 'Failed to update payment status. Please try again.', 'error');
+            }
+        }
+
+        // Notification helper function
+        function showNotification(title, message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: var(--radius-md);
+                background: var(--glass-bg);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                box-shadow: 0 8px 32px var(--glass-shadow);
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            if (type === 'success') {
+                notification.style.borderLeft = '4px solid var(--success)';
+            } else if (type === 'error') {
+                notification.style.borderLeft = '4px solid var(--danger)';
+            }
+            notification.innerHTML = `
+                <strong style="display: block; margin-bottom: 0.25rem; color: var(--text-primary);">${title}</strong>
+                <p style="color: var(--text-secondary); margin: 0;">${message}</p>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+            }
+        }
+
+        // View payment details
+        function viewPaymentDetails(paymentId) {
+            window.location.href = `/dashboard/student-payment-details.html?id=${paymentId}`;
+        }
+
+        // Helper functions
+        function formatCategory(category) {
+            const categories = {
+                tuition: 'Tuition',
+                hostel: 'Hostel',
+                library: 'Library',
+                exam: 'Examination',
+                other: 'Other'
+            };
+            return categories[category] || category;
+        }
+
+        function formatStatus(status) {
+            return status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        // Event listeners
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+
+        // Close modal on outside click
+        document.getElementById('statusModal').addEventListener('click', (e) => {
+            if (e.target.id === 'statusModal') {
+                closeStatusModal();
+            }
+        });
+
+        // Load data on page load
+        loadPayments();
+    </script>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            resize: vertical;
+        }
+
+        .chart-wrapper {
+            padding: 1.5rem;
+            height: 300px;
+        }
+
+        /* Reuse styles from payment history */
+        .filters-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary); }
+        .filter-select { width: 100%; padding: 0.75rem; border: 1px solid var(--glass-border); border-radius: var(--radius-md); background: var(--glass-bg); color: var(--text-primary); font-size: 1rem; }
+        .loading-state { text-align: center; padding: 3rem 2rem; }
+        .spinner-large { width: 64px; height: 64px; border: 4px solid var(--glass-border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 2rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--glass-border); }
+        .data-table th { font-weight: 600; color: var(--text-primary); background: var(--glass-bg); }
+        .data-table td { color: var(--text-secondary); }
+        .data-table tr:hover { background: var(--glass-bg); }
+        .payment-id { font-family: 'Courier New', monospace; padding: 0.25rem 0.5rem; background: var(--glass-bg); border-radius: var(--radius-sm); font-size: 0.875rem; }
+        .category-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); background: var(--glass-bg); border: 1px solid var(--glass-border); font-size: 0.875rem; font-weight: 500; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; }
+        .status-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-pending, .status-processing { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .status-failed { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .action-buttons { display: flex; gap: 0.5rem; }
+        .btn-icon { padding: 0.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); cursor: pointer; font-size: 1.25rem; transition: all var(--transition-base); }
+        .btn-icon:hover { background: var(--primary); transform: translateY(-2px); }
+    </style>
+</body>
+</html>

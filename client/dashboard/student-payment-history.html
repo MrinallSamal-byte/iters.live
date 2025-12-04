@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payment history.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>');
+                return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Header -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        📜 Payment History
+                    </h1>
+                    <p class="page-subtitle">View all your past transactions</p>
+                </div>
+                <a href="/dashboard/student-payment-make.html" class="btn btn-primary">
+                    <span>💳 Make Payment</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Summary Stats -->
+        <section class="quick-stats stagger-animation">
+            <div class="stat-box success hover-lift scroll-reveal">
+                <div class="stat-icon-large">💰</div>
+                <div class="stat-number" id="totalPaid">₹0</div>
+                <div class="stat-text">Total Paid</div>
+                <div class="stat-subtext">Successful payments</div>
+            </div>
+            <div class="stat-box info hover-lift scroll-reveal">
+                <div class="stat-icon-large">📊</div>
+                <div class="stat-number" id="totalTransactions">0</div>
+                <div class="stat-text">Total Transactions</div>
+                <div class="stat-subtext">All payments</div>
+            </div>
+            <div class="stat-box warning hover-lift scroll-reveal">
+                <div class="stat-icon-large">⏳</div>
+                <div class="stat-number" id="pendingPayments">0</div>
+                <div class="stat-text">Pending</div>
+                <div class="stat-subtext">Processing</div>
+            </div>
+            <div class="stat-box hover-lift scroll-reveal">
+                <div class="stat-icon-large">✅</div>
+                <div class="stat-number" id="successfulPayments">0</div>
+                <div class="stat-text">Successful</div>
+                <div class="stat-subtext">Completed</div>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="dashboard-section glass-card scroll-reveal">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="success">Success</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="tuition">Tuition Fees</option>
+                        <option value="hostel">Hostel Fees</option>
+                        <option value="library">Library Fees</option>
+                        <option value="exam">Examination Fees</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+            </div>
+        </section>
+
+        <!-- Payment History Table -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📋</span>
+                    Transaction History
+                </h3>
+            </div>
+
+            <div id="loadingState" class="loading-state">
+                <div class="spinner-large"></div>
+                <p>Loading payment history...</p>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-icon">💳</div>
+                <h3>No Payments Yet</h3>
+                <p>You haven't made any payments yet.</p>
+                <a href="/dashboard/student-payment-make.html" class="btn btn-primary">Make Your First Payment</a>
+            </div>
+
+            <div id="tableContainer" style="display: none;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Semester</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Include Common JavaScript -->
+    <script src="/js/main.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io(window.location.origin);
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.id) {
+            socket.emit('join_room', user.id);
+        }
+
+        // Listen for payment status updates
+        socket.on('payment_status_update', (data) => {
+            console.log('Payment status update received:', data);
+            loadPaymentHistory(); // Reload the history
+        });
+
+        let allPayments = [];
+        let filteredPayments = [];
+
+        // Load payment history
+        async function loadPaymentHistory() {
+            try {
+                const response = await fetch(`${API_URL}/payments/student/${user.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    allPayments = data.data.payments;
+                    filteredPayments = allPayments;
+                    updateSummary(data.data.summary);
+                    displayPayments();
+                } else {
+                    throw new Error(data.message || 'Failed to load payment history');
+                }
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load payment history. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update summary statistics
+        function updateSummary(summary) {
+            document.getElementById('totalPaid').textContent = `₹${summary.total_amount.toFixed(2)}`;
+            document.getElementById('totalTransactions').textContent = summary.total_payments;
+            document.getElementById('pendingPayments').textContent = summary.pending_payments;
+            document.getElementById('successfulPayments').textContent = summary.successful_payments;
+        }
+
+        // Display payments in table
+        function displayPayments() {
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const tableContainer = document.getElementById('tableContainer');
+            const tbody = document.getElementById('paymentsTableBody');
+
+            loadingState.style.display = 'none';
+
+            if (filteredPayments.length === 0) {
+                emptyState.style.display = 'block';
+                tableContainer.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tableContainer.style.display = 'block';
+
+            tbody.innerHTML = filteredPayments.map(payment => `
+                <tr>
+                    <td data-label="Payment ID">
+                        <code class="payment-id">${payment.payment_id}</code>
+                    </td>
+                    <td data-label="Date">
+                        ${new Date(payment.created_at).toLocaleDateString('en-IN', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </td>
+                    <td data-label="Category">
+                        <span class="category-badge">${formatCategory(payment.category)}</span>
+                    </td>
+                    <td data-label="Semester">${payment.semester}</td>
+                    <td data-label="Amount">
+                        <strong>₹${payment.amount.toFixed(2)}</strong>
+                    </td>
+                    <td data-label="Status">
+                        <span class="status-badge status-${payment.status}">${formatStatus(payment.status)}</span>
+                    </td>
+                    <td data-label="Actions">
+                        <div class="action-buttons">
+                            <button class="btn-icon" onclick="viewPayment('${payment.id}')" title="View Details">
+                                👁️
+                            </button>
+                            ${payment.status === 'success' ? `
+                                <button class="btn-icon" onclick="downloadReceipt('${payment.id}')" title="Download Receipt">
+                                    📄
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Filter payments
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            filteredPayments = allPayments.filter(payment => {
+                const statusMatch = !statusFilter || payment.status === statusFilter;
+                const categoryMatch = !categoryFilter || payment.category === categoryFilter;
+                return statusMatch && categoryMatch;
+            });
+
+            displayPayments();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filteredPayments = allPayments;
+            displayPayments();
+        }
+
+        // View payment details
+        function viewPayment(paymentId) {
+            window.location.href = `/dashboard/student-payment-details.html?id=${paymentId}`;
+        }
+
+        // Download receipt
+        async function downloadReceipt(paymentId) {
+            try {
+                const response = await fetch(`${API_URL}/payments/${paymentId}/receipt`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `receipt-${paymentId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to download receipt');
+                }
+            } catch (error) {
+                console.error('Error downloading receipt:', error);
+                alert('Failed to download receipt. Please try again.');
+            }
+        }
+
+        // Helper functions
+        function formatCategory(category) {
+            const categories = {
+                tuition: 'Tuition',
+                hostel: 'Hostel',
+                library: 'Library',
+                exam: 'Examination',
+                other: 'Other'
+            };
+            return categories[category] || category;
+        }
+
+        function formatStatus(status) {
+            return status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        // Event listeners
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+
+        // Load data on page load
+        loadPaymentHistory();
+    </script>
+
+    <style>
+        .filters-row {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .loading-state,
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .spinner-large {
+            width: 64px;
+            height: 64px;
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-primary);
+            background: var(--glass-bg);
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .payment-id {
+            font-family: 'Courier New', monospace;
+            padding: 0.25rem 0.5rem;
+            background: var(--glass-bg);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-pending,
+        .status-processing {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all var(--transition-base);
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .data-table thead {
+                display: none;
+            }
+
+            .data-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                padding: 1rem;
+            }
+
+            .data-table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                border-bottom: none;
+            }
+
+            .data-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .action-buttons {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</body>
+</html>

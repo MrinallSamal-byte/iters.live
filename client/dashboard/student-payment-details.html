@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Details - ITER EduHub</title>
+    <!-- SECURITY: Immediate authentication check -->
+    <script>
+        (function() {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access payment details.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>');
+                return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Background -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Header -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        📄 Payment Details
+                    </h1>
+                    <p class="page-subtitle">Transaction information</p>
+                </div>
+                <a href="/dashboard/student-payment-history.html" class="btn btn-secondary">
+                    <span>← Back to History</span>
+                </a>
+            </div>
+        </section>
+
+        <div id="loadingState" class="loading-state">
+            <div class="spinner-large"></div>
+            <p>Loading payment details...</p>
+        </div>
+
+        <div id="contentContainer" style="display: none;">
+            <!-- Payment Status Card -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="status-header">
+                    <div class="status-icon" id="statusIcon">✓</div>
+                    <div class="status-info">
+                        <h2 id="statusTitle">Payment Successful</h2>
+                        <p id="statusMessage">Your payment has been processed successfully</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Information -->
+            <div class="dashboard-grid">
+                <!-- Transaction Details -->
+                <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                    <div class="section-header-formal">
+                        <h3 class="section-title-formal">
+                            <span class="title-icon">💳</span>
+                            Transaction Details
+                        </h3>
+                    </div>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Payment ID</span>
+                            <span class="detail-value" id="paymentId">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Transaction ID</span>
+                            <span class="detail-value" id="transactionId">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date & Time</span>
+                            <span class="detail-value" id="paymentDate">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Method</span>
+                            <span class="detail-value" id="paymentMethod">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Category</span>
+                            <span class="detail-value" id="paymentCategory">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Semester</span>
+                            <span class="detail-value" id="paymentSemester">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Amount Details -->
+                <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                    <div class="section-header-formal">
+                        <h3 class="section-title-formal">
+                            <span class="title-icon">💰</span>
+                            Amount Details
+                        </h3>
+                    </div>
+                    <div class="amount-breakdown">
+                        <div class="amount-item">
+                            <span>Amount Paid</span>
+                            <span id="paidAmount" class="amount-value">₹0.00</span>
+                        </div>
+                        <div class="amount-item total">
+                            <span>Total</span>
+                            <span id="totalAmount" class="amount-value">₹0.00</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Student Information -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">👤</span>
+                        Student Information
+                    </h3>
+                </div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value" id="studentName">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Registration Number</span>
+                        <span class="detail-value" id="studentRegNo">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value" id="studentEmail">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Additional Information -->
+            <section class="dashboard-section glass-card hover-lift scroll-reveal" id="descriptionSection" style="display: none;">
+                <div class="section-header-formal">
+                    <h3 class="section-title-formal">
+                        <span class="title-icon">📝</span>
+                        Description
+                    </h3>
+                </div>
+                <p id="paymentDescription" class="description-text"></p>
+            </section>
+
+            <!-- Actions -->
+            <section class="dashboard-section glass-card scroll-reveal">
+                <div class="action-row">
+                    <button class="btn btn-primary" id="downloadReceiptBtn" onclick="downloadReceipt()">
+                        📄 Download Receipt
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        🖨️ Print
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <div id="errorState" class="error-state" style="display: none;">
+            <div class="error-icon">❌</div>
+            <h3>Payment Not Found</h3>
+            <p>The payment you're looking for doesn't exist or you don't have permission to view it.</p>
+            <a href="/dashboard/student-payment-history.html" class="btn btn-primary">Back to History</a>
+        </div>
+    </main>
+
+    <!-- Include Common JavaScript -->
+    <script src="/js/main.js"></script>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId = urlParams.get('id');
+
+        if (!paymentId) {
+            showError();
+        } else {
+            loadPaymentDetails();
+        }
+
+        async function loadPaymentDetails() {
+            try {
+                const response = await fetch(`${API_URL}/payments/${paymentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPaymentDetails(result.data);
+                } else {
+                    throw new Error(result.message || 'Failed to load payment details');
+                }
+            } catch (error) {
+                console.error('Error loading payment details:', error);
+                showError();
+            }
+        }
+
+        function displayPaymentDetails(payment) {
+            // Hide loading, show content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'block';
+
+            // Update status card
+            const statusConfig = {
+                success: {
+                    icon: '✓',
+                    title: 'Payment Successful',
+                    message: 'Your payment has been processed successfully',
+                    class: 'success'
+                },
+                pending: {
+                    icon: '⏳',
+                    title: 'Payment Pending',
+                    message: 'Your payment is being processed',
+                    class: 'pending'
+                },
+                processing: {
+                    icon: '⚙️',
+                    title: 'Payment Processing',
+                    message: 'Your payment is currently being processed',
+                    class: 'processing'
+                },
+                failed: {
+                    icon: '❌',
+                    title: 'Payment Failed',
+                    message: 'Your payment could not be processed',
+                    class: 'failed'
+                }
+            };
+
+            const status = statusConfig[payment.status] || statusConfig.pending;
+            document.getElementById('statusIcon').textContent = status.icon;
+            document.getElementById('statusTitle').textContent = status.title;
+            document.getElementById('statusMessage').textContent = status.message;
+            document.querySelector('.status-header').classList.add(`status-${status.class}`);
+
+            // Transaction details
+            document.getElementById('paymentId').textContent = payment.payment_id;
+            document.getElementById('transactionId').textContent = payment.transaction_id;
+            document.getElementById('paymentDate').textContent = new Date(payment.created_at).toLocaleString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('paymentMethod').textContent = formatPaymentMethod(payment.payment_method);
+            document.getElementById('paymentCategory').textContent = formatCategory(payment.category);
+            document.getElementById('paymentSemester').textContent = payment.semester;
+
+            // Amount details
+            document.getElementById('paidAmount').textContent = `₹${payment.amount.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `₹${payment.amount.toFixed(2)}`;
+
+            // Student information
+            if (payment.student_info) {
+                document.getElementById('studentName').textContent = payment.student_info.name || 'N/A';
+                document.getElementById('studentRegNo').textContent = payment.student_info.registration_number || 'N/A';
+                document.getElementById('studentEmail').textContent = payment.student_info.email || 'N/A';
+            }
+
+            // Description
+            if (payment.description) {
+                document.getElementById('descriptionSection').style.display = 'block';
+                document.getElementById('paymentDescription').textContent = payment.description;
+            }
+
+            // Hide download button if payment not successful
+            if (payment.status !== 'success') {
+                document.getElementById('downloadReceiptBtn').style.display = 'none';
+            }
+        }
+
+        function showError() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        }
+
+        async function downloadReceipt() {
+            try {
+                const response = await fetch(`${API_URL}/payments/${paymentId}/receipt`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `receipt-${paymentId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Failed to download receipt');
+                }
+            } catch (error) {
+                console.error('Error downloading receipt:', error);
+                alert('Failed to download receipt. Please try again.');
+            }
+        }
+
+        function formatPaymentMethod(method) {
+            const methods = {
+                card: 'Credit/Debit Card',
+                upi: 'UPI',
+                netbanking: 'Net Banking',
+                wallet: 'Wallet'
+            };
+            return methods[method] || method;
+        }
+
+        function formatCategory(category) {
+            const categories = {
+                tuition: 'Tuition Fees',
+                hostel: 'Hostel Fees',
+                library: 'Library Fees',
+                exam: 'Examination Fees',
+                other: 'Other'
+            };
+            return categories[category] || category;
+        }
+    </script>
+
+    <style>
+        .loading-state,
+        .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .spinner-large {
+            width: 64px;
+            height: 64px;
+            border: 4px solid var(--glass-border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 2.5rem;
+            background: var(--glass-bg);
+            border: 3px solid var(--glass-border);
+        }
+
+        .status-header.status-success .status-icon {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-header.status-pending .status-icon,
+        .status-header.status-processing .status-icon {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .status-header.status-failed .status-icon {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .status-info h2 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-info p {
+            color: var(--text-secondary);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .amount-breakdown {
+            padding: 1.5rem;
+        }
+
+        .amount-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .amount-item.total {
+            border-bottom: none;
+            margin-top: 0.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--glass-border);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .amount-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .description-text {
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media print {
+            .page-hero,
+            .action-row,
+            .bg-animation {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            .glass-card {
+                border: 1px solid #ddd;
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .status-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-row {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
