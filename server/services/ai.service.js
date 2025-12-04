@@ -360,6 +360,264 @@ Format as JSON.`;
             gradeRange: "60-75%"
         };
     }
+
+    /**
+     * Enhanced ML-based Performance Predictor
+     * Predicts exam results using multiple factors
+     * @param {Object} studentData - Historical performance data
+     * @returns {Object} Prediction with confidence and recommendations
+     */
+    async predictExamPerformance(studentData) {
+        const { marks, attendance, assignments, studyHours, weakSubjects } = studentData;
+        
+        try {
+            // Calculate feature scores
+            const avgMarks = marks.reduce((sum, m) => sum + parseFloat(m.percentage), 0) / (marks.length || 1);
+            const avgAttendance = attendance.reduce((sum, a) => sum + parseFloat(a.percentage), 0) / (attendance.length || 1);
+            const assignmentScore = (assignments?.completed || 0) / (assignments?.total || 1) * 100;
+            const studyScore = Math.min((studyHours || 0) / 4 * 100, 100); // Normalize to 4 hours/day
+            
+            // Weighted prediction model
+            const weights = {
+                previousMarks: 0.40,    // 40% weight on past performance
+                attendance: 0.25,        // 25% weight on attendance
+                assignments: 0.20,       // 20% weight on assignment completion
+                studyHours: 0.15        // 15% weight on study hours
+            };
+            
+            const predictedScore = (
+                avgMarks * weights.previousMarks +
+                avgAttendance * weights.attendance +
+                assignmentScore * weights.assignments +
+                studyScore * weights.studyHours
+            );
+            
+            // Calculate confidence based on data availability
+            const dataCompleteness = [
+                marks.length > 0,
+                attendance.length > 0,
+                assignments && assignments.total > 0,
+                studyHours > 0
+            ].filter(Boolean).length / 4;
+            
+            const confidence = dataCompleteness * 100;
+            
+            // Determine performance category
+            let category, grade, recommendations;
+            if (predictedScore >= 90) {
+                category = 'Excellent';
+                grade = 'A+';
+                recommendations = [
+                    'Maintain your excellent study routine',
+                    'Help peers who need assistance',
+                    'Explore advanced topics for deeper understanding',
+                    'Consider participating in academic competitions'
+                ];
+            } else if (predictedScore >= 80) {
+                category = 'Very Good';
+                grade = 'A';
+                recommendations = [
+                    'Keep up the good work',
+                    'Focus on consistency across all subjects',
+                    'Aim for excellence in weak areas',
+                    'Participate in group study sessions'
+                ];
+            } else if (predictedScore >= 70) {
+                category = 'Good';
+                grade = 'B+';
+                recommendations = [
+                    'Increase study hours by 1-2 hours per day',
+                    'Focus extra time on weak subjects: ' + (weakSubjects?.join(', ') || 'identified subjects'),
+                    'Attend doubt-clearing sessions regularly',
+                    'Practice more previous year questions'
+                ];
+            } else if (predictedScore >= 60) {
+                category = 'Satisfactory';
+                grade = 'B';
+                recommendations = [
+                    'Significant improvement needed',
+                    'Increase daily study time to at least 4 hours',
+                    'Seek one-on-one help from teachers',
+                    'Form study groups with high-performing peers',
+                    'Focus intensively on: ' + (weakSubjects?.join(', ') || 'weak areas')
+                ];
+            } else if (predictedScore >= 50) {
+                category = 'Needs Improvement';
+                grade = 'C';
+                recommendations = [
+                    'Urgent action required to improve performance',
+                    'Attend all classes without exception',
+                    'Schedule daily study sessions of 5+ hours',
+                    'Get tutoring support for weak subjects',
+                    'Create and follow a strict study timetable',
+                    'Eliminate distractions during study time'
+                ];
+            } else {
+                category = 'At Risk';
+                grade = 'D/F';
+                recommendations = [
+                    'Critical: Immediate intervention needed',
+                    'Meet with academic advisor urgently',
+                    'Attend all remedial classes',
+                    'Dedicate 6+ hours daily to focused study',
+                    'Consider peer tutoring or coaching',
+                    'Prioritize attendance and participation',
+                    'Start with basic concepts before advanced topics'
+                ];
+            }
+            
+            // Factor analysis
+            const factors = {
+                previousMarks: {
+                    score: avgMarks.toFixed(2),
+                    impact: weights.previousMarks * 100 + '%',
+                    status: avgMarks >= 70 ? 'positive' : avgMarks >= 50 ? 'neutral' : 'negative'
+                },
+                attendance: {
+                    score: avgAttendance.toFixed(2),
+                    impact: weights.attendance * 100 + '%',
+                    status: avgAttendance >= 85 ? 'positive' : avgAttendance >= 75 ? 'neutral' : 'negative'
+                },
+                assignments: {
+                    score: assignmentScore.toFixed(2),
+                    impact: weights.assignments * 100 + '%',
+                    status: assignmentScore >= 80 ? 'positive' : assignmentScore >= 60 ? 'neutral' : 'negative'
+                },
+                studyHours: {
+                    score: studyScore.toFixed(2),
+                    impact: weights.studyHours * 100 + '%',
+                    status: studyScore >= 75 ? 'positive' : studyScore >= 50 ? 'neutral' : 'negative'
+                }
+            };
+            
+            return {
+                predictedScore: parseFloat(predictedScore.toFixed(2)),
+                predictedGrade: grade,
+                category,
+                confidence: parseFloat(confidence.toFixed(2)),
+                factors,
+                recommendations,
+                improvementPotential: Math.max(0, 90 - predictedScore).toFixed(2),
+                riskLevel: predictedScore < 50 ? 'high' : predictedScore < 70 ? 'medium' : 'low'
+            };
+        } catch (error) {
+            console.error('Prediction error:', error.message);
+            return {
+                predictedScore: 0,
+                predictedGrade: 'N/A',
+                category: 'Insufficient Data',
+                confidence: 0,
+                factors: {},
+                recommendations: ['Not enough data available for prediction. Continue studying and tracking your progress.'],
+                improvementPotential: 0,
+                riskLevel: 'unknown'
+            };
+        }
+    }
+
+    /**
+     * Generate personalized AI tutor recommendations
+     * Based on comprehensive analysis of student performance
+     * @param {Object} studentProfile - Complete student profile
+     * @returns {Object} Personalized recommendations
+     */
+    async getPersonalizedTutorRecommendations(studentProfile) {
+        const { marks, attendance, weakSubjects, strongSubjects, learningStyle, goals } = studentProfile;
+        
+        const prompt = `As an AI tutor for a college student, provide personalized study recommendations based on:
+
+Academic Performance:
+- Average Marks: ${marks?.average || 'N/A'}%
+- Weak Subjects: ${weakSubjects?.join(', ') || 'None identified'}
+- Strong Subjects: ${strongSubjects?.join(', ') || 'None identified'}
+- Attendance: ${attendance?.average || 'N/A'}%
+
+Student Goals: ${goals || 'Improve overall performance'}
+Learning Style: ${learningStyle || 'Not specified'}
+
+Provide:
+1. Specific action plan for the next 2 weeks
+2. Time allocation per subject (in hours per week)
+3. Recommended study techniques for each weak subject
+4. Motivation tips and mental health advice
+5. Resources (books, videos, websites) for weak subjects
+
+Format as JSON with clear structure.`;
+
+        try {
+            if (!this.genAI) {
+                return this.getFallbackTutorRecommendations(studentProfile);
+            }
+
+            const model = this.genAI.getGenerativeModel({ model: this.model });
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const content = response.text();
+            
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            
+            return this.getFallbackTutorRecommendations(studentProfile);
+        } catch (error) {
+            console.error('AI Tutor error:', error.message);
+            return this.getFallbackTutorRecommendations(studentProfile);
+        }
+    }
+
+    /**
+     * Fallback tutor recommendations when AI is unavailable
+     * @private
+     */
+    getFallbackTutorRecommendations(studentProfile) {
+        const { marks, weakSubjects } = studentProfile;
+        const avgMarks = marks?.average || 0;
+        
+        return {
+            actionPlan: {
+                week1: [
+                    'Review fundamentals in weak subjects',
+                    'Complete all pending assignments',
+                    'Create summary notes for each subject',
+                    'Practice 10 problems per weak subject daily'
+                ],
+                week2: [
+                    'Take practice tests for weak subjects',
+                    'Review and analyze mistakes',
+                    'Attend doubt-clearing sessions',
+                    'Revise all topics systematically'
+                ]
+            },
+            timeAllocation: weakSubjects?.map(subject => ({
+                subject,
+                hoursPerWeek: avgMarks < 50 ? 8 : avgMarks < 70 ? 6 : 4,
+                priority: 'high'
+            })) || [],
+            studyTechniques: {
+                Mathematics: ['Practice problem-solving daily', 'Create formula sheets', 'Solve previous papers'],
+                Programming: ['Code daily', 'Debug step by step', 'Build mini projects'],
+                default: ['Active recall', 'Spaced repetition', 'Pomodoro technique']
+            },
+            motivation: [
+                'Set small, achievable daily goals',
+                'Reward yourself after completing study sessions',
+                'Track your progress visually',
+                'Remember your long-term goals',
+                'Take regular breaks to avoid burnout'
+            ],
+            resources: weakSubjects?.map(subject => ({
+                subject,
+                resources: [
+                    'Khan Academy (free video tutorials)',
+                    'Course textbook chapters',
+                    'YouTube subject-specific channels',
+                    'Stack Overflow / subject forums',
+                    'Previous year question papers'
+                ]
+            })) || []
+        };
+    }
 }
 
 module.exports = new AIService();
