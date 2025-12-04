@@ -108,17 +108,27 @@ const optionalAuth = async (req, res, next) => {
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decodedToken = await auth.verifyIdToken(token);
-      const uid = decodedToken.uid;
+      
+      // Check if Firebase auth is initialized before attempting verification
+      if (auth && typeof auth.verifyIdToken === 'function') {
+        try {
+          const decodedToken = await auth.verifyIdToken(token);
+          const uid = decodedToken.uid;
 
-      const userDoc = await db.collection('users').doc(uid).get();
-      if (userDoc.exists) {
-        req.user = userDoc.data();
-        req.user.id = userDoc.id;
+          const userDoc = await db.collection('users').doc(uid).get();
+          if (userDoc.exists) {
+            req.user = userDoc.data();
+            req.user.id = userDoc.id;
+          }
+        } catch (authError) {
+          // Ignore auth errors for optional auth (e.g., expired token, invalid token)
+          console.log('Optional auth verification failed (this is ok):', authError.message);
+        }
       }
     }
   } catch (error) {
-    // Ignore errors for optional auth
+    // Ignore all errors for optional auth
+    console.log('Optional auth error (this is ok):', error.message);
   }
 
   next();

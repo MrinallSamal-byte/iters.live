@@ -625,28 +625,32 @@ class Chatbot {
             }
         }
 
-        // Try API call if available
+        // Try API call (no authentication required for chatbot)
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Include auth token if available (optional, for logging purposes)
             if (token) {
-                const response = await fetch('/api/ai/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ question: message, role: this.userRole })
-                });
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ question: message, context: this.pageContext })
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.answer) {
-                        return data.answer;
-                    }
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.answer) {
+                    return data.answer;
                 }
             }
         } catch (error) {
-            console.log('AI API not available, using smart classification');
+            console.log('AI API not available, using smart classification:', error.message);
         }
 
         // Intelligent fallback based on question type

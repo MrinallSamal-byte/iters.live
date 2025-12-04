@@ -326,6 +326,10 @@ async function startServer() {
     // Initialize Redis connection (only in production)
     await initRedis();
     
+    // Check AI Service status
+    const aiService = require('./services/ai.service');
+    const aiStatus = aiService.genAI ? '✅ Enabled' : '⚠️  Disabled (No API Key)';
+    
     server.listen(PORT, () => {
       const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
       console.log(`
@@ -335,6 +339,7 @@ async function startServer() {
 ║   Environment: ${process.env.NODE_ENV || 'development'}                      ║
 ║   Socket.IO: Enabled                                  ║
 ║   Cache: ${cacheType}                                        ║
+║   AI Service: ${aiStatus}                           ║
 ╚═══════════════════════════════════════════════════════╝
       `);
     });
