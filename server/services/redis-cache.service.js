@@ -216,10 +216,26 @@ class RedisCacheService {
       const redis = this._getRedis();
       
       if (redis) {
-        // Redis pattern matching
+        // Redis pattern matching (only supports glob patterns, not regex)
         let cursor = '0';
         let deletedCount = 0;
-        const matchPattern = typeof pattern === 'string' ? `*${pattern}*` : pattern.source;
+        
+        // Convert pattern to glob pattern
+        let matchPattern;
+        if (typeof pattern === 'string') {
+          matchPattern = `*${pattern}*`;
+        } else if (pattern instanceof RegExp) {
+          // For RegExp, fall back to client-side filtering
+          // Get all keys and filter them
+          const allKeys = await redis.keys('*');
+          const matchingKeys = allKeys.filter(key => pattern.test(key));
+          if (matchingKeys.length > 0) {
+            await redis.del(...matchingKeys);
+          }
+          return matchingKeys.length;
+        } else {
+          matchPattern = '*';
+        }
         
         do {
           const [newCursor, keys] = await redis.scan(cursor, 'MATCH', matchPattern, 'COUNT', 100);

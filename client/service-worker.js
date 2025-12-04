@@ -112,8 +112,9 @@ async function staleWhileRevalidate(request, cacheName, maxAge) {
   
   // Return cached response immediately if fresh, otherwise wait for network
   if (cachedResponse && await isCacheFresh(request, cacheName, maxAge)) {
-    // Return cached and update in background
-    fetchPromise; // Don't await, let it update in background
+    // Return cached and update in background (fire-and-forget)
+    // Intentionally not awaiting to allow background update
+    fetchPromise.catch(() => {}); // Handle promise rejection silently
     return cachedResponse;
   }
   
