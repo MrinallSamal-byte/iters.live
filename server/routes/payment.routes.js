@@ -29,9 +29,9 @@ router.post('/create',
       const { amount, semester, category, payment_method, description } = req.body;
       const studentId = req.user.id;
 
-      // Generate unique payment ID and transaction ID
-      const paymentId = 'PAY' + Date.now() + crypto.randomBytes(4).toString('hex').toUpperCase();
-      const transactionId = 'TXN' + Date.now() + crypto.randomBytes(6).toString('hex').toUpperCase();
+      // Generate unique payment ID and transaction ID using crypto for better security
+      const paymentId = 'PAY' + Date.now() + crypto.randomBytes(8).toString('hex').toUpperCase();
+      const transactionId = 'TXN' + Date.now() + crypto.randomBytes(10).toString('hex').toUpperCase();
 
       // Create payment document
       const paymentData = {
@@ -53,8 +53,13 @@ router.post('/create',
       await db.collection('payments').doc(paymentId).set(paymentData);
 
       // Simulate payment processing (in production, integrate with real gateway)
-      setTimeout(async () => {
+      // Note: This is async and not awaited intentionally - the payment status will update in background
+      // and client will be notified via Socket.IO. Initial status is 'pending'.
+      (async () => {
         try {
+          // Wait for simulated processing time
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
           // Mock payment success (80% success rate)
           const isSuccess = Math.random() > 0.2;
           const newStatus = isSuccess ? 'success' : 'failed';
@@ -82,7 +87,7 @@ router.post('/create',
         } catch (error) {
           console.error('Error updating payment status:', error);
         }
-      }, 3000); // Simulate 3 second processing time
+      })();
 
       res.json({
         success: true,
@@ -253,9 +258,10 @@ router.get('/:id/receipt', authMiddleware, async (req, res, next) => {
       margin: 50
     });
 
-    // Set response headers
+    // Set response headers with sanitized filename
+    const safePaymentId = paymentId.replace(/[^a-zA-Z0-9]/g, '');
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=receipt-${paymentId}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename="receipt-${safePaymentId}.pdf"`);
 
     // Pipe PDF to response
     doc.pipe(res);
@@ -444,19 +450,27 @@ router.get('/admin/all',
         });
       });
 
-      // Get summary stats
-      const allPaymentsSnapshot = await db.collection('payments').get();
-      const allPayments = [];
-      allPaymentsSnapshot.forEach(doc => {
-        allPayments.push(doc.data());
+      // Get summary stats (optimized - only fetch counts, not full documents)
+      // Note: For better performance in production, consider maintaining these stats
+      // in a separate summary document that gets updated on each payment change
+      const successSnapshot = await db.collection('payments').where('status', '==', 'success').count().get();
+      const pendingSnapshot = await db.collection('payments').where('status', '==', 'pending').count().get();
+      const processingSnapshot = await db.collection('payments').where('status', '==', 'processing').count().get();
+      const failedSnapshot = await db.collection('payments').where('status', '==', 'failed').count().get();
+      
+      // Calculate total amount (still requires reading documents, but only successful ones)
+      const successPaymentsSnapshot = await db.collection('payments').where('status', '==', 'success').select('amount').get();
+      let totalAmount = 0;
+      successPaymentsSnapshot.forEach(doc => {
+        totalAmount += doc.data().amount || 0;
       });
 
       const summary = {
-        total_payments: allPayments.length,
-        total_amount: allPayments.filter(p => p.status === 'success').reduce((sum, p) => sum + p.amount, 0),
-        pending_count: allPayments.filter(p => p.status === 'pending' || p.status === 'processing').length,
-        success_count: allPayments.filter(p => p.status === 'success').length,
-        failed_count: allPayments.filter(p => p.status === 'failed').length
+        total_payments: successSnapshot.data().count + pendingSnapshot.data().count + processingSnapshot.data().count + failedSnapshot.data().count,
+        total_amount: totalAmount,
+        pending_count: pendingSnapshot.data().count + processingSnapshot.data().count,
+        success_count: successSnapshot.data().count,
+        failed_count: failedSnapshot.data().count
       };
 
       res.json({

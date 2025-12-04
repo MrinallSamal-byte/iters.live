@@ -210,10 +210,13 @@
         const amountInput = document.getElementById('amount');
         const submitBtn = document.getElementById('submitBtn');
 
+        // Payment configuration
+        const PROCESSING_FEE_RATE = 0.02; // 2% processing fee (configurable)
+
         // Update payment summary
         amountInput.addEventListener('input', () => {
             const amount = parseFloat(amountInput.value) || 0;
-            const fee = amount * 0.02; // 2% processing fee
+            const fee = amount * PROCESSING_FEE_RATE;
             const total = amount + fee;
 
             if (amount > 0) {

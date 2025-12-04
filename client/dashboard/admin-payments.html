@@ -483,7 +483,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('Payment status updated successfully');
+                    showNotification('Success', 'Payment status updated successfully', 'success');
                     closeStatusModal();
                     loadPayments(); // Reload
                 } else {
@@ -491,7 +491,39 @@
                 }
             } catch (error) {
                 console.error('Error updating status:', error);
-                alert('Failed to update payment status. Please try again.');
+                showNotification('Error', 'Failed to update payment status. Please try again.', 'error');
+            }
+        }
+
+        // Notification helper function
+        function showNotification(title, message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: var(--radius-md);
+                background: var(--glass-bg);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--glass-border);
+                box-shadow: 0 8px 32px var(--glass-shadow);
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            if (type === 'success') {
+                notification.style.borderLeft = '4px solid var(--success)';
+            } else if (type === 'error') {
+                notification.style.borderLeft = '4px solid var(--danger)';
+            }
+            notification.innerHTML = `
+                <strong style="display: block; margin-bottom: 0.25rem; color: var(--text-primary);">${title}</strong>
+                <p style="color: var(--text-secondary); margin: 0;">${message}</p>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
             }
         }
 
