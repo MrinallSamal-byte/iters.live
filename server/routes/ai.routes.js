@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, optionalAuth } = require('../middleware/auth');
 const aiService = require('../services/ai.service');
 const { db } = require('../database/firebase');
 
@@ -122,9 +122,9 @@ router.get('/recommendations', verifyToken, async (req, res) => {
 /**
  * @route   POST /api/ai/chat
  * @desc    AI chatbot for student questions
- * @access  Private
+ * @access  Public (No authentication required)
  */
-router.post('/chat', verifyToken, async (req, res) => {
+router.post('/chat', async (req, res) => {
     try {
         const { question, context } = req.body;
         
@@ -137,13 +137,8 @@ router.post('/chat', verifyToken, async (req, res) => {
         
         const answer = await aiService.answerQuestion(question, context || '');
         
-        // Log chat interaction to Firestore
-        await db.collection('ai_chat_logs').add({
-            user_id: req.user.id || req.user.uid,
-            question,
-            answer,
-            created_at: new Date()
-        }).catch(err => console.error('Failed to log chat:', err));
+        // Skip logging to Firestore since we don't have authentication
+        // This makes the endpoint fully public and doesn't require Firebase
         
         res.json({
             success: true,
