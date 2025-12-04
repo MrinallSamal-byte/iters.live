@@ -5,8 +5,6 @@
 
 const { db, admin } = require('../database/firebase');
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
 
 /**
  * POST /api/payments
@@ -91,10 +89,9 @@ const getPaymentHistory = async (req, res) => {
         const userId = req.user.id;
         const { page = 1, limit = 20, status, category } = req.query;
 
-        // Build query
+        // Build base query
         let query = db.collection('payments')
-            .where('userId', '==', userId)
-            .orderBy('paymentDate', 'desc');
+            .where('userId', '==', userId);
 
         // Apply filters
         if (status) {
@@ -104,7 +101,29 @@ const getPaymentHistory = async (req, res) => {
             query = query.where('category', '==', category);
         }
 
-        // Get data
+        // Get total count (for pagination)
+        const countSnapshot = await query.get();
+        const total = countSnapshot.size;
+
+        // Apply ordering and pagination
+        query = query.orderBy('paymentDate', 'desc');
+        
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const offset = (pageNum - 1) * limitNum;
+        
+        if (offset > 0) {
+            // Get documents for pagination offset
+            const offsetSnapshot = await query.limit(offset).get();
+            if (!offsetSnapshot.empty) {
+                const lastVisible = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
+                query = query.startAfter(lastVisible);
+            }
+        }
+        
+        query = query.limit(limitNum);
+
+        // Get paginated data
         const snapshot = await query.get();
         
         const payments = [];
@@ -121,9 +140,10 @@ const getPaymentHistory = async (req, res) => {
             success: true,
             data: payments,
             pagination: {
-                total: payments.length,
-                page: parseInt(page),
-                limit: parseInt(limit)
+                total: total,
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum)
             }
         });
 

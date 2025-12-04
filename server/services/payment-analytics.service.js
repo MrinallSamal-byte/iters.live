@@ -22,13 +22,16 @@ const getUserPaymentAnalytics = async (userId, timeRange = 'all') => {
 
             switch (timeRange) {
                 case 'week':
-                    startDate = new Date(now.setDate(now.getDate() - 7));
+                    startDate = new Date(now.getTime());
+                    startDate.setDate(startDate.getDate() - 7);
                     break;
                 case 'month':
-                    startDate = new Date(now.setMonth(now.getMonth() - 1));
+                    startDate = new Date(now.getTime());
+                    startDate.setMonth(startDate.getMonth() - 1);
                     break;
                 case 'year':
-                    startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                    startDate = new Date(now.getTime());
+                    startDate.setFullYear(startDate.getFullYear() - 1);
                     break;
                 default:
                     startDate = new Date(0); // Beginning of time
@@ -144,13 +147,16 @@ const getSystemPaymentAnalytics = async (timeRange = 'all') => {
 
             switch (timeRange) {
                 case 'week':
-                    startDate = new Date(now.setDate(now.getDate() - 7));
+                    startDate = new Date(now.getTime());
+                    startDate.setDate(startDate.getDate() - 7);
                     break;
                 case 'month':
-                    startDate = new Date(now.setMonth(now.getMonth() - 1));
+                    startDate = new Date(now.getTime());
+                    startDate.setMonth(startDate.getMonth() - 1);
                     break;
                 case 'year':
-                    startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                    startDate = new Date(now.getTime());
+                    startDate.setFullYear(startDate.getFullYear() - 1);
                     break;
                 default:
                     startDate = new Date(0);

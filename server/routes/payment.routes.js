@@ -5,9 +5,21 @@
 
 const express = require('express');
 const router = express.Router();
-const { body, param, query } = require('express-validator');
+const { body, param, query, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const paymentController = require('../controllers/payment.controller');
+
+// Middleware to check validation results
+const validate = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            errors: errors.array()
+        });
+    }
+    next();
+};
 
 // Apply auth middleware to all routes
 router.use(authMiddleware);
@@ -24,6 +36,7 @@ router.post('/',
         body('paymentMethod').notEmpty().withMessage('Payment method is required'),
         body('description').optional().isString()
     ],
+    validate,
     paymentController.createPayment
 );
 
@@ -55,6 +68,7 @@ router.get('/:paymentId',
     [
         param('paymentId').notEmpty().withMessage('Payment ID is required')
     ],
+    validate,
     paymentController.getPaymentDetails
 );
 
@@ -66,6 +80,7 @@ router.get('/:paymentId/receipt',
     [
         param('paymentId').notEmpty().withMessage('Payment ID is required')
     ],
+    validate,
     paymentController.downloadReceipt
 );
 

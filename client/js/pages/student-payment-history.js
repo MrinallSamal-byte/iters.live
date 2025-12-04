@@ -125,10 +125,10 @@
                 <td><span class="status-badge ${statusClass}">${payment.status}</span></td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-small btn-view" onclick="window.viewPayment('${payment.id}')">
+                        <button class="btn-small btn-view" data-payment-id="${payment.id}">
                             View
                         </button>
-                        <button class="btn-small btn-download" onclick="window.downloadReceipt('${payment.id}')">
+                        <button class="btn-small btn-download" data-payment-id="${payment.id}">
                             Receipt
                         </button>
                     </div>
@@ -187,12 +187,11 @@
         if (el) el.textContent = text;
     }
 
-    // Global functions for button actions
-    window.viewPayment = function(paymentId) {
+    function viewPayment(paymentId) {
         window.location.href = `/dashboard/student-payment-details.html?id=${paymentId}`;
-    };
+    }
 
-    window.downloadReceipt = async function(paymentId) {
+    async function downloadReceipt(paymentId) {
         try {
             APP.Toast.info('Downloading receipt...');
             
@@ -232,6 +231,29 @@
             console.error('Download receipt error:', error);
             APP.Toast.error('Failed to download receipt');
         }
-    };
+    }
+
+    // Use event delegation for button clicks instead of inline handlers
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // Handle view payment button
+        if (target.classList.contains('btn-view') || target.closest('.btn-view')) {
+            const btn = target.classList.contains('btn-view') ? target : target.closest('.btn-view');
+            const paymentId = btn.getAttribute('data-payment-id');
+            if (paymentId) {
+                viewPayment(paymentId);
+            }
+        }
+        
+        // Handle download receipt button
+        if (target.classList.contains('btn-download') || target.closest('.btn-download')) {
+            const btn = target.classList.contains('btn-download') ? target : target.closest('.btn-download');
+            const paymentId = btn.getAttribute('data-payment-id');
+            if (paymentId) {
+                downloadReceipt(paymentId);
+            }
+        }
+    });
 
 })();
