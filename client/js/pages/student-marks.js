@@ -7,6 +7,19 @@ if (typeof APP === 'undefined' || !APP.isAuthenticated() || APP.getUserRole() !=
 
 const user = APP.Storage.get('user') || {};
 
+// Fallback marks data constant
+const FALLBACK_MARKS_DATA = {
+    summary: [
+        { subject: 'Data Structures', subject_code: 'CS301', avg_marks: 85, avg_total: 100, credits: 4 },
+        { subject: 'Algorithms', subject_code: 'CS302', avg_marks: 88, avg_total: 100, credits: 4 },
+        { subject: 'Database Systems', subject_code: 'CS303', avg_marks: 82, avg_total: 100, credits: 3 },
+        { subject: 'Operating Systems', subject_code: 'CS304', avg_marks: 90, avg_total: 100, credits: 4 },
+        { subject: 'Computer Networks', subject_code: 'CS305', avg_marks: 78, avg_total: 100, credits: 3 },
+        { subject: 'Software Engineering', subject_code: 'CS306', avg_marks: 92, avg_total: 100, credits: 3 }
+    ],
+    marks: []
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     if (typeof NavLoader !== 'undefined') {
         await NavLoader.load('student', 'marks');
@@ -50,22 +63,12 @@ async function loadMarksData() {
         // Use dummy data if needed
         if (useDummyData) {
             if (typeof DummyData !== 'undefined') {
-                response = DummyData.getStudentMarks(user.id);
+                response = DummyData.getStudentMarks();
             } else {
-                // Hardcoded fallback
+                // Use hardcoded fallback
                 response = {
                     success: true,
-                    data: {
-                        summary: [
-                            { subject: 'Data Structures', subject_code: 'CS301', avg_marks: 85, avg_total: 100, credits: 4 },
-                            { subject: 'Algorithms', subject_code: 'CS302', avg_marks: 88, avg_total: 100, credits: 4 },
-                            { subject: 'Database Systems', subject_code: 'CS303', avg_marks: 82, avg_total: 100, credits: 3 },
-                            { subject: 'Operating Systems', subject_code: 'CS304', avg_marks: 90, avg_total: 100, credits: 4 },
-                            { subject: 'Computer Networks', subject_code: 'CS305', avg_marks: 78, avg_total: 100, credits: 3 },
-                            { subject: 'Software Engineering', subject_code: 'CS306', avg_marks: 92, avg_total: 100, credits: 3 }
-                        ],
-                        marks: []
-                    }
+                    data: FALLBACK_MARKS_DATA
                 };
             }
         }
@@ -81,16 +84,7 @@ async function loadMarksData() {
             Toast.error('Failed to load marks data', 'Error');
         }
         // Display fallback data
-        displayMarks({
-            summary: [
-                { subject: 'Data Structures', subject_code: 'CS301', avg_marks: 85, avg_total: 100, credits: 4 },
-                { subject: 'Algorithms', subject_code: 'CS302', avg_marks: 88, avg_total: 100, credits: 4 },
-                { subject: 'Database Systems', subject_code: 'CS303', avg_marks: 82, avg_total: 100, credits: 3 },
-                { subject: 'Operating Systems', subject_code: 'CS304', avg_marks: 90, avg_total: 100, credits: 4 },
-                { subject: 'Computer Networks', subject_code: 'CS305', avg_marks: 78, avg_total: 100, credits: 3 },
-                { subject: 'Software Engineering', subject_code: 'CS306', avg_marks: 92, avg_total: 100, credits: 3 }
-            ]
-        });
+        displayMarks(FALLBACK_MARKS_DATA);
     }
 }
 
