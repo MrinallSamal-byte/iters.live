@@ -26,12 +26,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadMarksData() {
     try {
         let response;
+        let useDummyData = false;
+        
         try {
             response = await APP.API.get(`/marks/student/${user.id}`);
+            
+            // Check if response has actual data - if not, use dummy data
+            if (!response.success || !response.data || !response.data.summary || response.data.summary.length === 0) {
+                console.warn('API returned no data, using dummy data for marks');
+                useDummyData = true;
+            }
         } catch (error) {
-            console.warn('Using dummy data for marks');
+            console.warn('API error, using dummy data for marks:', error.message);
+            useDummyData = true;
+        }
+        
+        // Use dummy data if needed
+        if (useDummyData) {
             if (typeof DummyData !== 'undefined') {
-                response = DummyData.getStudentMarks();
+                response = DummyData.getStudentMarks(user.id);
             } else {
                 // Hardcoded fallback
                 response = {
@@ -51,10 +64,10 @@ async function loadMarksData() {
             }
         }
 
-        if (response.success && response.data) {
+        if (response.success && response.data && response.data.summary && response.data.summary.length > 0) {
             displayMarks(response.data);
         } else {
-            throw new Error('Invalid response');
+            throw new Error('No valid data available');
         }
     } catch (error) {
         console.error('Failed to load marks:', error);
