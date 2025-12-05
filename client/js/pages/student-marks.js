@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Helper function to validate marks data
 function hasValidMarksData(response) {
-    return response && response.success && response.data && 
-           response.data.summary && response.data.summary.length > 0;
+    return !!(response && response.success && response.data && 
+              response.data.summary && response.data.summary.length > 0);
 }
 
 async function loadMarksData() {
