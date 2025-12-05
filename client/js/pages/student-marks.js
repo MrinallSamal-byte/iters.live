@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadMarksData();
 });
 
+// Helper function to validate marks data
+function hasValidMarksData(response) {
+    return response && response.success && response.data && 
+           response.data.summary && response.data.summary.length > 0;
+}
+
 async function loadMarksData() {
     try {
         let response;
@@ -32,7 +38,7 @@ async function loadMarksData() {
             response = await APP.API.get(`/marks/student/${user.id}`);
             
             // Check if response has actual data - if not, use dummy data
-            if (!response.success || !response.data || !response.data.summary || response.data.summary.length === 0) {
+            if (!hasValidMarksData(response)) {
                 console.warn('API returned no data, using dummy data for marks');
                 useDummyData = true;
             }
@@ -64,7 +70,7 @@ async function loadMarksData() {
             }
         }
 
-        if (response.success && response.data && response.data.summary && response.data.summary.length > 0) {
+        if (hasValidMarksData(response)) {
             displayMarks(response.data);
         } else {
             throw new Error('No valid data available');
