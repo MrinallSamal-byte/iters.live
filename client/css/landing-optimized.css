@@ -708,3 +708,37 @@ body.light-theme .footer {
         page-break-inside: avoid;
     }
 }
+
+/* Scroll Progress Bar */
+#scroll-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    z-index: 10000;
+    transition: width 0.1s ease;
+    pointer-events: none;
+}
+
+/* Scroll Reveal Styles */
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Navbar Scroll Behavior */
+.navbar {
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.navbar-hidden {
+    transform: translateX(-50%) translateY(-100%);
+}
+
+.navbar-scrolled {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}

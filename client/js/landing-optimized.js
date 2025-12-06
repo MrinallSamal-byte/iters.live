@@ -10,8 +10,10 @@
     const CONFIG = {
         observerThreshold: 0.1,
         counterSpeed: 30,
+        counterSteps: 50,
         scrollProgressDebounce: 16,
-        parallaxThrottle: 16
+        parallaxThrottle: 16,
+        typingSpeed: 50
     };
 
     // State
@@ -61,9 +63,9 @@
         }
         
         let current = 0;
-        const increment = Math.ceil(target / 50);
+        const increment = Math.ceil(target / CONFIG.counterSteps);
         const duration = 1500; // 1.5 seconds
-        const stepTime = duration / 50;
+        const stepTime = duration / CONFIG.counterSteps;
         
         const timer = setInterval(() => {
             current += increment;
@@ -129,19 +131,6 @@
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
         });
-        
-        // Add CSS for revealed state
-        if (!document.getElementById('reveal-styles')) {
-            const style = document.createElement('style');
-            style.id = 'reveal-styles';
-            style.textContent = `
-                .scroll-reveal.revealed {
-                    opacity: 1 !important;
-                    transform: translateY(0) !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
     }
 
     /**
@@ -215,17 +204,6 @@
         if (!progressBar) {
             progressBar = document.createElement('div');
             progressBar.id = 'scroll-progress-bar';
-            progressBar.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 3px;
-                width: 0%;
-                background: linear-gradient(90deg, var(--primary), var(--secondary));
-                z-index: 10000;
-                transition: width 0.1s ease;
-                pointer-events: none;
-            `;
             document.body.appendChild(progressBar);
         }
         
@@ -276,26 +254,6 @@
             
             lastScroll = currentScroll;
         }, { passive: true });
-        
-        // Add styles for navbar scroll behavior
-        if (!document.getElementById('navbar-scroll-styles')) {
-            const style = document.createElement('style');
-            style.id = 'navbar-scroll-styles';
-            style.textContent = `
-                .navbar {
-                    transition: transform 0.3s ease, background 0.3s ease;
-                }
-                .navbar-hidden {
-                    transform: translateX(-50%) translateY(-100%);
-                }
-                .navbar-scrolled {
-                    background: var(--glass-bg);
-                    backdrop-filter: blur(20px);
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                }
-            `;
-            document.head.appendChild(style);
-        }
     }
 
     /**
@@ -364,7 +322,7 @@
             } else {
                 clearInterval(typeInterval);
             }
-        }, 50);
+        }, CONFIG.typingSpeed);
     }
 
     /**
