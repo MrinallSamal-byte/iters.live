@@ -3,6 +3,13 @@
    Minimal, professional, text-focused layouts without heavy cards
    ==================================================================== */
 
+/* Custom Properties for Icon Sizing */
+:root {
+    --icon-size-sm: 1.5rem;
+    --icon-size-md: 1.8rem;
+    --icon-size-lg: 2rem;
+}
+
 /* Features Section - Clean Point-wise Layout */
 .features-section .features-grid {
     display: block;
@@ -15,7 +22,7 @@
     backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-xl) 0;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
@@ -32,7 +39,7 @@
 
 .features-section .feature-card .feature-icon {
     display: inline-block;
-    font-size: 1.5rem;
+    font-size: var(--icon-size-sm);
     margin-right: var(--spacing-md);
     margin-bottom: 0;
     vertical-align: middle;
@@ -47,7 +54,7 @@
 }
 
 .features-section .feature-card p {
-    margin-left: calc(1.5rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;
@@ -65,7 +72,7 @@
     backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-xl) 0;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -81,7 +88,7 @@
 
 .why-choose-section .why-icon {
     display: inline-block;
-    font-size: 1.5rem;
+    font-size: var(--icon-size-sm);
     margin-right: var(--spacing-md);
     margin-bottom: 0;
     vertical-align: middle;
@@ -96,7 +103,7 @@
 }
 
 .why-choose-section .why-card p {
-    margin-left: calc(1.5rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;
@@ -114,7 +121,7 @@
     backdrop-filter: none !important;
     border: none !important;
     box-shadow: none !important;
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-xl) 0;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -130,7 +137,7 @@
 
 .tech-stack-section .tech-icon {
     display: inline-block;
-    font-size: 1.5rem;
+    font-size: var(--icon-size-sm);
     margin-right: var(--spacing-md);
     margin-bottom: 0;
     vertical-align: middle;
@@ -145,7 +152,7 @@
 }
 
 .tech-stack-section .tech-feature-item p {
-    margin-left: calc(1.5rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;
@@ -213,7 +220,7 @@
 
 .academics-section .academic-icon {
     display: inline-block;
-    font-size: 1.8rem;
+    font-size: var(--icon-size-md);
     margin-right: var(--spacing-md);
     margin-bottom: 0;
     vertical-align: middle;
@@ -227,13 +234,13 @@
 }
 
 .academics-section .academic-card > p {
-    margin-left: calc(1.8rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-md) + var(--spacing-md));
     margin-bottom: var(--spacing-sm);
     font-size: 0.9rem;
 }
 
 .academics-section .academic-features {
-    margin-left: calc(1.8rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-md) + var(--spacing-md));
     padding-left: var(--spacing-lg);
 }
 
@@ -264,7 +271,7 @@
 
 .facilities-section .facility-icon {
     display: inline-block;
-    font-size: 1.5rem;
+    font-size: var(--icon-size-sm);
     margin-right: var(--spacing-md);
     margin-bottom: 0;
     vertical-align: middle;
@@ -279,7 +286,7 @@
 }
 
 .facilities-section .facility-card p {
-    margin-left: calc(1.5rem + var(--spacing-md));
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.5;
@@ -537,14 +544,10 @@
     }
 }
 
-/* Smooth Animations */
+/* Smooth Animations - Only for elements without existing transitions */
 @media (prefers-reduced-motion: no-preference) {
-    .feature-card,
-    .why-card,
-    .tech-feature-item,
     .academic-card,
-    .facility-card,
-    .recruiter-tag {
+    .facility-card {
         transition: all 0.3s ease;
     }
 }
