@@ -1,0 +1,167 @@
+/* ============================================
+   NAVBAR BUTTON FIX
+   Prevent navigation bar size changes on button interactions
+   ============================================ */
+
+/* Define navbar height constants for consistency */
+:root {
+    --navbar-height-desktop: 70px;
+    --navbar-height-tablet: 60px;
+    --navbar-height-mobile: 56px;
+    --navbar-button-height-desktop: 44px;
+    --navbar-button-height-tablet: 40px;
+    --navbar-button-height-mobile: 38px;
+}
+
+/* Ensure navbar has a fixed height and won't expand/contract */
+.navbar {
+    min-height: var(--navbar-height-desktop);
+    max-height: var(--navbar-height-desktop);
+    height: var(--navbar-height-desktop);
+    overflow: visible;
+}
+
+/* Fix nav-container to prevent expansion */
+.nav-container {
+    height: 100%;
+    min-height: var(--navbar-height-desktop);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Fix nav-links container to maintain consistent height */
+.nav-links {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl, 2rem);
+}
+
+/* Prevent button transforms from affecting navbar layout */
+.navbar .btn,
+.navbar a.btn,
+.navbar button.btn {
+    /* Use fixed dimensions to prevent size changes */
+    min-height: var(--navbar-button-height-desktop);
+    max-height: var(--navbar-button-height-desktop);
+    height: var(--navbar-button-height-desktop);
+    /* Prevent transform from affecting parent container */
+    position: relative;
+    /* Add small bottom margin to accommodate upward transform */
+    margin-bottom: 0;
+    /* Ensure consistent vertical alignment */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Override hover effects to not affect layout */
+.navbar .btn:hover,
+.navbar a.btn:hover,
+.navbar button.btn:hover,
+.navbar .btn-primary:hover,
+.navbar .btn-outline:hover {
+    /* Keep the transform but compensate with margin to prevent layout shift */
+    transform: translateY(-2px);
+    /* Add margin-bottom to compensate for the upward movement */
+    margin-bottom: 2px;
+}
+
+/* Ensure nav links don't shift on hover */
+.navbar .nav-link {
+    display: inline-flex;
+    align-items: center;
+    height: var(--navbar-button-height-desktop);
+    /* Prevent transform from affecting parent */
+    position: relative;
+}
+
+.navbar .nav-link:hover {
+    /* Override the translateY to prevent layout shift */
+    transform: none;
+}
+
+/* Keep the underline animation but remove vertical movement */
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary, #6366f1), var(--accent, #8b5cf6));
+    transition: width var(--transition-base, 0.25s ease);
+    border-radius: 2px;
+}
+
+.navbar .nav-link:hover::after {
+    width: 100%;
+}
+
+/* Ensure logo doesn't shift */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md, 1rem);
+    height: 100%;
+}
+
+/* Mobile adjustments - maintain fixed height */
+@media (max-width: 768px) {
+    .navbar {
+        min-height: var(--navbar-height-tablet);
+        max-height: var(--navbar-height-tablet);
+        height: var(--navbar-height-tablet);
+    }
+    
+    .nav-container {
+        min-height: var(--navbar-height-tablet);
+    }
+    
+    .navbar .btn,
+    .navbar a.btn,
+    .navbar button.btn {
+        min-height: var(--navbar-button-height-tablet);
+        max-height: var(--navbar-button-height-tablet);
+        height: var(--navbar-button-height-tablet);
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        min-height: var(--navbar-height-mobile);
+        max-height: var(--navbar-height-mobile);
+        height: var(--navbar-height-mobile);
+    }
+    
+    .nav-container {
+        min-height: var(--navbar-height-mobile);
+    }
+    
+    .navbar .btn,
+    .navbar a.btn,
+    .navbar button.btn {
+        min-height: var(--navbar-button-height-mobile);
+        max-height: var(--navbar-button-height-mobile);
+        height: var(--navbar-button-height-mobile);
+        font-size: 0.9rem;
+        padding: 0 1rem;
+    }
+}
+
+/* Prevent button shadow from being cut off while maintaining navbar size */
+.navbar .btn,
+.navbar a.btn {
+    /* Allow box-shadow to extend beyond bounds without affecting layout */
+    overflow: visible;
+}
+
+/* Allow specific elements that need to overflow (dropdowns, tooltips, etc.) */
+.navbar .dropdown-menu,
+.navbar .tooltip,
+.navbar [role="menu"],
+.navbar [role="tooltip"] {
+    max-height: none;
+}
