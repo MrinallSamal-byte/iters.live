@@ -7,7 +7,7 @@ console.log('🧪 Testing AI Service Configuration...\n');
 
 // Check environment variables
 console.log('Environment Variables:');
-console.log('- GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? '✅ Set (' + process.env.GEMINI_API_KEY.substring(0, 20) + '...)' : '❌ Not set');
+console.log('- GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? '✅ Set (' + process.env.GEMINI_API_KEY.substring(0, 6) + '...)' : '❌ Not set');
 console.log('- GEMINI_MODEL:', process.env.GEMINI_MODEL || 'gemini-1.5-flash (default)');
 console.log();
 
@@ -26,10 +26,11 @@ try {
     
     // Test a simple question
     console.log('Testing AI response with a simple question...');
+    const RESPONSE_PREVIEW_LENGTH = 100;
     (async () => {
         try {
             const answer = await aiService.answerQuestion('What is 2+2?', '');
-            console.log('Response:', answer.substring(0, 100) + (answer.length > 100 ? '...' : ''));
+            console.log('Response:', answer.substring(0, RESPONSE_PREVIEW_LENGTH) + (answer.length > RESPONSE_PREVIEW_LENGTH ? '...' : ''));
             console.log();
             
             if (answer.includes("currently unable")) {

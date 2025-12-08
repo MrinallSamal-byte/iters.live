@@ -27,7 +27,7 @@ Sign in with your Google account if you haven't already.
 
 ### 4. Copy Your API Key
 
-Copy the generated API key. It should look like: `AIzaSy...` (39 characters)
+Copy the generated API key that starts with `AIza...`
 
 ⚠️ **Important**: Keep this key secure and never share it publicly!
 
@@ -125,7 +125,7 @@ Once configured, the following features will use the Gemini API:
 
 **Solutions**:
 1. Verify your `.env` file has the correct `GEMINI_API_KEY`
-2. Check that the API key is valid (39 characters, starts with "AIza")
+2. Check that the API key is valid (starts with "AIza")
 3. Restart your server after setting the environment variable
 4. Make sure you're logged in when using the chatbot
 
