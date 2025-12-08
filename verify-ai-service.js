@@ -23,7 +23,7 @@ const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
 console.log('📋 Configuration Check:');
 console.log('─────────────────────────────────────────────────────');
-console.log(`✓ GEMINI_API_KEY: ${geminiKey ? 'Set (' + geminiKey.substring(0, 15) + '...)' : '❌ NOT SET'}`);
+console.log(`✓ GEMINI_API_KEY: ${geminiKey ? '✓ Set (length: ' + geminiKey.length + ' characters)' : '❌ NOT SET'}`);
 console.log(`✓ GEMINI_MODEL: ${geminiModel}`);
 console.log('');
 
