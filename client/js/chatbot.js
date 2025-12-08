@@ -627,7 +627,8 @@ class Chatbot {
 
         // Try API call if available
         try {
-            const token = localStorage.getItem('token');
+            // Use 'accessToken' which is what the login system stores
+            const token = localStorage.getItem('accessToken');
             if (token) {
                 const response = await fetch('/api/ai/chat', {
                     method: 'POST',
