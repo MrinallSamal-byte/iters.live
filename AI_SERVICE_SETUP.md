@@ -53,7 +53,24 @@ If the AI service is unavailable (no API key or network issues), the chatbot wil
 
 ## Verification
 
-To verify the AI service is configured correctly:
+To verify the AI service is configured correctly, use the included verification script:
+
+```bash
+# Run the AI service verification script
+npm run verify:ai
+
+# Or directly:
+node verify-ai-service.js
+```
+
+This script will:
+- ✅ Check if GEMINI_API_KEY is set
+- ✅ Verify the API key format
+- ✅ Initialize the GoogleGenerativeAI service
+- ✅ Test connectivity with a sample API call
+- ✅ Display helpful error messages if something is wrong
+
+You can also manually check:
 
 ```bash
 # Check if .env file exists and has the API key

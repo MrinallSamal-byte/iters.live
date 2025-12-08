@@ -27,6 +27,7 @@
     "render:setup": "npm run render:schema && npm run render:seed",
     "test": "jest --coverage",
     "test:e2e": "playwright test",
+    "verify:ai": "node verify-ai-service.js",
     "build:client": "echo 'Client is vanilla HTML/CSS/JS - no build needed'",
     "build:electron": "electron-builder",
     "build:android": "node scripts/build-android.js",
