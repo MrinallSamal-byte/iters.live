@@ -14,6 +14,9 @@ class AIService {
         
         if (this.geminiKey) {
             this.genAI = new GoogleGenerativeAI(this.geminiKey);
+            console.log('✅ AI Service initialized with Gemini API');
+        } else {
+            console.log('⚠️ AI Service initialized without Gemini API key - AI features will use fallback responses');
         }
     }
 
