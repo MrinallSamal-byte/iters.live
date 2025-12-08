@@ -3,18 +3,28 @@
    Prevent navigation bar size changes on button interactions
    ============================================ */
 
+/* Define navbar height constants for consistency */
+:root {
+    --navbar-height-desktop: 70px;
+    --navbar-height-tablet: 60px;
+    --navbar-height-mobile: 56px;
+    --navbar-button-height-desktop: 44px;
+    --navbar-button-height-tablet: 40px;
+    --navbar-button-height-mobile: 38px;
+}
+
 /* Ensure navbar has a fixed height and won't expand/contract */
 .navbar {
-    min-height: 70px;
-    max-height: 70px;
-    height: 70px;
+    min-height: var(--navbar-height-desktop);
+    max-height: var(--navbar-height-desktop);
+    height: var(--navbar-height-desktop);
     overflow: visible;
 }
 
 /* Fix nav-container to prevent expansion */
 .nav-container {
     height: 100%;
-    min-height: 70px;
+    min-height: var(--navbar-height-desktop);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -33,9 +43,9 @@
 .navbar a.btn,
 .navbar button.btn {
     /* Use fixed dimensions to prevent size changes */
-    min-height: 44px;
-    max-height: 44px;
-    height: 44px;
+    min-height: var(--navbar-button-height-desktop);
+    max-height: var(--navbar-button-height-desktop);
+    height: var(--navbar-button-height-desktop);
     /* Prevent transform from affecting parent container */
     position: relative;
     /* Add small bottom margin to accommodate upward transform */
@@ -62,7 +72,7 @@
 .navbar .nav-link {
     display: inline-flex;
     align-items: center;
-    height: 44px;
+    height: var(--navbar-button-height-desktop);
     /* Prevent transform from affecting parent */
     position: relative;
 }
@@ -101,50 +111,44 @@
 /* Mobile adjustments - maintain fixed height */
 @media (max-width: 768px) {
     .navbar {
-        min-height: 60px;
-        max-height: 60px;
-        height: 60px;
+        min-height: var(--navbar-height-tablet);
+        max-height: var(--navbar-height-tablet);
+        height: var(--navbar-height-tablet);
     }
     
     .nav-container {
-        min-height: 60px;
+        min-height: var(--navbar-height-tablet);
     }
     
     .navbar .btn,
     .navbar a.btn,
     .navbar button.btn {
-        min-height: 40px;
-        max-height: 40px;
-        height: 40px;
+        min-height: var(--navbar-button-height-tablet);
+        max-height: var(--navbar-button-height-tablet);
+        height: var(--navbar-button-height-tablet);
     }
 }
 
 @media (max-width: 480px) {
     .navbar {
-        min-height: 56px;
-        max-height: 56px;
-        height: 56px;
+        min-height: var(--navbar-height-mobile);
+        max-height: var(--navbar-height-mobile);
+        height: var(--navbar-height-mobile);
     }
     
     .nav-container {
-        min-height: 56px;
+        min-height: var(--navbar-height-mobile);
     }
     
     .navbar .btn,
     .navbar a.btn,
     .navbar button.btn {
-        min-height: 38px;
-        max-height: 38px;
-        height: 38px;
+        min-height: var(--navbar-button-height-mobile);
+        max-height: var(--navbar-button-height-mobile);
+        height: var(--navbar-button-height-mobile);
         font-size: 0.9rem;
         padding: 0 1rem;
     }
-}
-
-/* Additional safeguard: prevent any child from affecting navbar height */
-.navbar * {
-    /* Ensure no element can expand beyond navbar boundaries */
-    max-height: 100%;
 }
 
 /* Prevent button shadow from being cut off while maintaining navbar size */
@@ -152,4 +156,12 @@
 .navbar a.btn {
     /* Allow box-shadow to extend beyond bounds without affecting layout */
     overflow: visible;
+}
+
+/* Allow specific elements that need to overflow (dropdowns, tooltips, etc.) */
+.navbar .dropdown-menu,
+.navbar .tooltip,
+.navbar [role="menu"],
+.navbar [role="tooltip"] {
+    max-height: none;
 }
