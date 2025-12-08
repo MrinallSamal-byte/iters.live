@@ -6,12 +6,14 @@ The ITER EduHub platform includes an AI-powered chatbot that uses Google's Gemin
 ## Configuration
 
 ### API Key Setup
-The AI service requires a Google Gemini API key to function. This has been configured in the `.env` file:
+The AI service requires a Google Gemini API key to function. This is configured in the `.env` file:
 
 ```
-GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+GEMINI_API_KEY=your_google_gemini_api_key_here
 GEMINI_MODEL=gemini-1.5-flash
 ```
+
+**Note**: The actual API key is provided in `.env.example` and should be copied to `.env` during setup.
 
 ### How It Works
 
@@ -110,7 +112,9 @@ If setting up a new environment:
    cp .env.example .env
    ```
 
-2. The `.env` file will already have the correct API key configured
+2. The `.env` file will already have the API key configured from `.env.example`
+   - If you need a different API key, get one from [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Update the `GEMINI_API_KEY` value in `.env`
 
 3. Install dependencies:
    ```bash

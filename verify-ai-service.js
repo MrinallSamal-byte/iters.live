@@ -35,7 +35,7 @@ if (!geminiKey) {
     console.log('   cp .env.example .env');
     console.log('');
     console.log('2. Ensure GEMINI_API_KEY is set in .env:');
-    console.log('   GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A');
+    console.log('   GEMINI_API_KEY=your_google_gemini_api_key_here');
     console.log('');
     console.log('See AI_SERVICE_SETUP.md for more details.');
     process.exit(1);
@@ -57,8 +57,10 @@ try {
     console.log('─────────────────────────────────────────────────────');
     console.log('Sending test query to Google Gemini API...');
     
-    model.generateContent('Say "Hello!" in one word only.')
-        .then(result => {
+    // Use async IIFE to properly handle the promise
+    (async () => {
+        try {
+            const result = await model.generateContent('Say "Hello!" in one word only.');
             const response = result.response;
             const text = response.text();
             
@@ -79,8 +81,8 @@ try {
             console.log('');
             console.log('🤖 The chatbot is ready to use on your platform!');
             console.log('');
-        })
-        .catch(error => {
+            process.exit(0);
+        } catch (error) {
             console.error('❌ API Test Failed!');
             console.error('Error:', error.message);
             console.log('');
@@ -98,7 +100,8 @@ try {
             console.log('');
             console.log('📖 For more help, see AI_SERVICE_SETUP.md');
             process.exit(1);
-        });
+        }
+    })();
 
 } catch (error) {
     console.error('❌ Failed to initialize AI service!');
