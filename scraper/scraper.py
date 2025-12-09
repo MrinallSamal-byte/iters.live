@@ -495,6 +495,8 @@ class StudentPortalScraper:
         """
         Attempt to login with credentials
         
+        COMMENTED OUT - Portal scraping disabled
+        
         Args:
             reg_number: Student registration number
             password: Student password (NOT LOGGED)
@@ -502,533 +504,356 @@ class StudentPortalScraper:
         Returns:
             tuple: (success: bool, error_type: str or None)
         """
-        try:
-            # Verify and get working portal URL
-            if not self.portal_url:
-                self.portal_url = self._find_working_portal_url()
-            
-            if not self.portal_url:
-                return False, 'Portal is currently unreachable. Please try again later.'
-            
-            # Navigate to portal
-            print(f'Navigating to portal: {self.portal_url}')
-            self.driver.get(self.portal_url)
-            self._wait_for_page_load(timeout=20)
-            self._random_delay(2, 3)
-            
-            # Wait for Angular/React to initialize (SOA portal uses Angular)
-            try:
-                WebDriverWait(self.driver, 15).until(
-                    lambda d: d.execute_script('return typeof angular !== "undefined" || typeof React !== "undefined" || document.readyState === "complete"')
-                )
-            except TimeoutException:
-                print('Warning: Framework detection timeout, continuing anyway')
-            
-            self._random_delay(1, 2)
-            
-            # Check if the page loaded correctly
-            page_source = self.driver.page_source.lower()
-            if 'error' in page_source and ('not found' in page_source or '404' in page_source):
-                return False, 'Portal page not found. The portal may have moved.'
-            
-            # Find USER ID field
-            user_id_field = self._find_user_id_field()
-            if not user_id_field:
-                # Take a screenshot for debugging
-                print(f'Current URL: {self.driver.current_url}')
-                print(f'Page title: {self.driver.title}')
-                return False, 'Could not find USER ID field. Portal structure may have changed.'
-            
-            # Clear and fill USER ID
-            self._human_click(user_id_field)
-            user_id_field.clear()
-            self._random_delay(0.2, 0.5)
-            self._human_type(user_id_field, reg_number)
-            self._random_delay(0.5, 1.0)
-            
-            # Check if there's a password field (some portals use single-step login)
-            password_field = self._find_password_field()
-            if password_field:
-                self._human_click(password_field)
-                password_field.clear()
-                self._random_delay(0.2, 0.5)
-                self._human_type(password_field, password)
-                self._random_delay(0.5, 1.0)
-            else:
-                print('Warning: No password field found. Portal may use different authentication flow.')
-            
-            # Try to find and solve CAPTCHA (not all portals have CAPTCHA)
-            captcha_img = self._find_captcha_image()
-            if captcha_img:
-                # Solve CAPTCHA
-                success, captcha_text, error = self._solve_captcha_with_retry()
-                if not success:
-                    return False, 'CAPTCHA_FAILED'
-                
-                # Find and fill CAPTCHA input
-                captcha_input = self._find_captcha_input()
-                if not captcha_input:
-                    return False, 'CAPTCHA input field not found'
-                
-                self._human_click(captcha_input)
-                captcha_input.clear()
-                self._random_delay(0.2, 0.5)
-                self._human_type(captcha_input, captcha_text)
-                self._random_delay(0.5, 1.0)
-            else:
-                print('No CAPTCHA detected on this portal')
-            
-            # Find and click login button
-            login_button = self._find_login_button()
-            if login_button:
-                # Wait for button to be enabled
-                try:
-                    WebDriverWait(self.driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, '//button[@type="submit"]'))
-                    )
-                except TimeoutException:
-                    pass
-                
-                self._random_delay(0.3, 0.7)
-                self._human_click(login_button)
-            else:
-                # Try pressing Enter as fallback on the last focused field
-                if password_field:
-                    password_field.send_keys(Keys.RETURN)
-                elif user_id_field:
-                    user_id_field.send_keys(Keys.RETURN)
-            
-            # Wait for response
-            self._random_delay(3, 5)
-            self._wait_for_page_load()
-            
-            # Check login result
-            return self._check_login_success()
-            
-        except TimeoutException:
-            return False, 'Page load timeout. Portal may be slow or unreachable.'
-        except WebDriverException as e:
-            return False, f'Browser error: {str(e)}'
-        except Exception as e:
-            print(f'Login error: {str(e)}')
-            return False, f'Login error: {str(e)}'
+        # COMMENTED OUT - Login functionality disabled
+        return False, 'Portal scraping is disabled'
+        
+        # try:
+        #     # Verify and get working portal URL
+        #     if not self.portal_url:
+        #         self.portal_url = self._find_working_portal_url()
+        #     
+        #     if not self.portal_url:
+        #         return False, 'Portal is currently unreachable. Please try again later.'
+        #     
+        #     # Navigate to portal
+        #     print(f'Navigating to portal: {self.portal_url}')
+        #     self.driver.get(self.portal_url)
+        #     self._wait_for_page_load(timeout=20)
+        #     self._random_delay(2, 3)
+        #     
+        #     # Wait for Angular/React to initialize (SOA portal uses Angular)
+        #     try:
+        #         WebDriverWait(self.driver, 15).until(
+        #             lambda d: d.execute_script('return typeof angular !== "undefined" || typeof React !== "undefined" || document.readyState === "complete"')
+        #         )
+        #     except TimeoutException:
+        #         print('Warning: Framework detection timeout, continuing anyway')
+        #     
+        #     self._random_delay(1, 2)
+        #     
+        #     # Check if the page loaded correctly
+        #     page_source = self.driver.page_source.lower()
+        #     if 'error' in page_source and ('not found' in page_source or '404' in page_source):
+        #         return False, 'Portal page not found. The portal may have moved.'
+        #     
+        #     # Find USER ID field
+        #     user_id_field = self._find_user_id_field()
+        #     if not user_id_field:
+        #         # Take a screenshot for debugging
+        #         print(f'Current URL: {self.driver.current_url}')
+        #         print(f'Page title: {self.driver.title}')
+        #         return False, 'Could not find USER ID field. Portal structure may have changed.'
+        #     
+        #     # Clear and fill USER ID
+        #     self._human_click(user_id_field)
+        #     user_id_field.clear()
+        #     self._random_delay(0.2, 0.5)
+        #     self._human_type(user_id_field, reg_number)
+        #     self._random_delay(0.5, 1.0)
+        #     
+        #     # Check if there's a password field (some portals use single-step login)
+        #     password_field = self._find_password_field()
+        #     if password_field:
+        #         self._human_click(password_field)
+        #         password_field.clear()
+        #         self._random_delay(0.2, 0.5)
+        #         self._human_type(password_field, password)
+        #         self._random_delay(0.5, 1.0)
+        #     else:
+        #         print('Warning: No password field found. Portal may use different authentication flow.')
+        #     
+        #     # Try to find and solve CAPTCHA (not all portals have CAPTCHA)
+        #     captcha_img = self._find_captcha_image()
+        #     if captcha_img:
+        #         # Solve CAPTCHA
+        #         success, captcha_text, error = self._solve_captcha_with_retry()
+        #         if not success:
+        #             return False, 'CAPTCHA_FAILED'
+        #         
+        #         # Find and fill CAPTCHA input
+        #         captcha_input = self._find_captcha_input()
+        #         if not captcha_input:
+        #             return False, 'CAPTCHA input field not found'
+        #         
+        #         self._human_click(captcha_input)
+        #         captcha_input.clear()
+        #         self._random_delay(0.2, 0.5)
+        #         self._human_type(captcha_input, captcha_text)
+        #         self._random_delay(0.5, 1.0)
+        #     else:
+        #         print('No CAPTCHA detected on this portal')
+        #     
+        #     # Find and click login button
+        #     login_button = self._find_login_button()
+        #     if login_button:
+        #         # Wait for button to be enabled
+        #         try:
+        #             WebDriverWait(self.driver, 5).until(
+        #                 EC.element_to_be_clickable((By.XPATH, '//button[@type="submit"]'))
+        #             )
+        #         except TimeoutException:
+        #             pass
+        #         
+        #         self._random_delay(0.3, 0.7)
+        #         self._human_click(login_button)
+        #     else:
+        #         # Try pressing Enter as fallback on the last focused field
+        #         if password_field:
+        #             password_field.send_keys(Keys.RETURN)
+        #         elif user_id_field:
+        #             user_id_field.send_keys(Keys.RETURN)
+        #     
+        #     # Wait for response
+        #     self._random_delay(3, 5)
+        #     self._wait_for_page_load()
+        #     
+        #     # Check login result
+        #     return self._check_login_success()
+        #     
+        # except TimeoutException:
+        #     return False, 'Page load timeout. Portal may be slow or unreachable.'
+        # except WebDriverException as e:
+        #     return False, f'Browser error: {str(e)}'
+        # except Exception as e:
+        #     print(f'Login error: {str(e)}')
+        #     return False, f'Login error: {str(e)}'
     
     def _scrape_profile(self):
         """
         Scrape student profile information from the dashboard
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        profile = {}
+        # COMMENTED OUT - Profile scraping disabled
+        return {}
         
-        try:
-            self._random_delay(0.5, 1.0)
-            
-            # Common profile field patterns
-            profile_fields = {
-                'name': [
-                    '#studentName', '.student-name', '[data-field="name"]', '.name',
-                    '//*[contains(@class,"name")]', '//span[contains(@id,"name")]'
-                ],
-                'registration_number': [
-                    '#regNo', '.reg-no', '#registrationNumber', '.registration-number',
-                    '[data-field="regNo"]', '//*[contains(@class,"reg")]'
-                ],
-                'email': [
-                    '#email', '.email', '[data-field="email"]', 'a[href^="mailto:"]'
-                ],
-                'department': [
-                    '#department', '.department', '#branch', '.branch',
-                    '[data-field="department"]', '[data-field="branch"]'
-                ],
-                'year': [
-                    '#year', '.year', '[data-field="year"]'
-                ],
-                'section': [
-                    '#section', '.section', '[data-field="section"]'
-                ],
-                'semester': [
-                    '#semester', '.semester', '[data-field="semester"]'
-                ],
-                'phone': [
-                    '#phone', '.phone', '#mobile', '.mobile', '[data-field="phone"]'
-                ],
-                'father_name': [
-                    '#fatherName', '.father-name', '[data-field="fatherName"]'
-                ],
-                'dob': [
-                    '#dob', '.dob', '#dateOfBirth', '[data-field="dob"]'
-                ]
-            }
-            
-            for field_name, selectors in profile_fields.items():
-                for selector in selectors:
-                    try:
-                        if selector.startswith('//'):
-                            element = self.driver.find_element(By.XPATH, selector)
-                        else:
-                            element = self.driver.find_element(By.CSS_SELECTOR, selector)
-                        
-                        if element.is_displayed():
-                            text = element.text.strip()
-                            if text:
-                                profile[field_name] = text
-                                break
-                    except (NoSuchElementException, StaleElementReferenceException):
-                        continue
-            
-        except Exception as e:
-            print(f'Profile scraping error: {str(e)}')
-        
-        return profile
+        # profile = {}
+        # 
+        # try:
+        #     self._random_delay(0.5, 1.0)
+        #     
+        #     # Common profile field patterns
+        #     profile_fields = {
+        #         'name': [
+        #             '#studentName', '.student-name', '[data-field="name"]', '.name',
+        #             '//*[contains(@class,"name")]', '//span[contains(@id,"name")]'
+        #         ],
+        #         'registration_number': [
+        #             '#regNo', '.reg-no', '#registrationNumber', '.registration-number',
+        #             '[data-field="regNo"]', '//*[contains(@class,"reg")]'
+        #         ],
+        #         'email': [
+        #             '#email', '.email', '[data-field="email"]', 'a[href^="mailto:"]'
+        #         ],
+        #         'department': [
+        #             '#department', '.department', '#branch', '.branch',
+        #             '[data-field="department"]', '[data-field="branch"]'
+        #         ],
+        #         'year': [
+        #             '#year', '.year', '[data-field="year"]'
+        #         ],
+        #         'section': [
+        #             '#section', '.section', '[data-field="section"]'
+        #         ],
+        #         'semester': [
+        #             '#semester', '.semester', '[data-field="semester"]'
+        #         ],
+        #         'phone': [
+        #             '#phone', '.phone', '#mobile', '.mobile', '[data-field="phone"]'
+        #         ],
+        #         'father_name': [
+        #             '#fatherName', '.father-name', '[data-field="fatherName"]'
+        #         ],
+        #         'dob': [
+        #             '#dob', '.dob', '#dateOfBirth', '[data-field="dob"]'
+        #         ]
+        #     }
+        #     
+        #     for field_name, selectors in profile_fields.items():
+        #         for selector in selectors:
+        #             try:
+        #                 if selector.startswith('//'):
+        #                     element = self.driver.find_element(By.XPATH, selector)
+        #                 else:
+        #                     element = self.driver.find_element(By.CSS_SELECTOR, selector)
+        #                 
+        #                 if element.is_displayed():
+        #                     text = element.text.strip()
+        #                     if text:
+        #                         profile[field_name] = text
+        #                         break
+        #             except (NoSuchElementException, StaleElementReferenceException):
+        #                 continue
+        #     
+        # except Exception as e:
+        #     print(f'Profile scraping error: {str(e)}')
+        # 
+        # return profile
     
     def _scrape_marks(self):
         """
         Scrape student marks/grades
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        marks = []
+        # COMMENTED OUT - Marks scraping disabled
+        return []
         
-        try:
-            # Navigate to marks/results page if needed
-            marks_links = [
-                'a[href*="marks"]', 'a[href*="result"]', 'a[href*="grade"]',
-                '#marksLink', '.marks-link', '//*[contains(text(),"Marks")]',
-                '//*[contains(text(),"Result")]', '//*[contains(text(),"Grade")]'
-            ]
-            
-            for selector in marks_links:
-                try:
-                    if selector.startswith('//'):
-                        link = self.driver.find_element(By.XPATH, selector)
-                    else:
-                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    
-                    if link.is_displayed():
-                        self._human_click(link)
-                        self._random_delay(1, 2)
-                        self._wait_for_page_load()
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-            
-            # Scrape marks table
-            table_selectors = ['table', '#marksTable', '.marks-table', 'table.grades']
-            
-            for selector in table_selectors:
-                try:
-                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
-                    
-                    for row in rows:
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 2:
-                            mark_entry = {
-                                'subject': cells[0].text.strip() if len(cells) > 0 else '',
-                                'marks': cells[1].text.strip() if len(cells) > 1 else '',
-                                'grade': cells[2].text.strip() if len(cells) > 2 else '',
-                            }
-                            if mark_entry['subject']:  # Only add if subject exists
-                                marks.append(mark_entry)
-                    
-                    if marks:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Marks scraping error: {str(e)}')
-        
-        return marks
+        # marks = []
+        # 
+        # try:
+        #     # Navigate to marks/results page if needed
+        #     marks_links = [
+        #         'a[href*="marks"]', 'a[href*="result"]', 'a[href*="grade"]',
+        #         '#marksLink', '.marks-link', '//*[contains(text(),"Marks")]',
+        #         '//*[contains(text(),"Result")]', '//*[contains(text(),"Grade")]'
+        #     ]
+        #     
+        #     for selector in marks_links:
+        #         try:
+        #             if selector.startswith('//'):
+        #                 link = self.driver.find_element(By.XPATH, selector)
+        #             else:
+        #                 link = self.driver.find_element(By.CSS_SELECTOR, selector)
+        #             
+        #             if link.is_displayed():
+        #                 self._human_click(link)
+        #                 self._random_delay(1, 2)
+        #                 self._wait_for_page_load()
+        #                 break
+        #         except (NoSuchElementException, StaleElementReferenceException):
+        #             continue
+        #     
+        #     # Scrape marks table
+        #     table_selectors = ['table', '#marksTable', '.marks-table', 'table.grades']
+        #     
+        #     for selector in table_selectors:
+        #         try:
+        #             table = self.driver.find_element(By.CSS_SELECTOR, selector)
+        #             rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
+        #             
+        #             for row in rows:
+        #                 cells = row.find_elements(By.TAG_NAME, 'td')
+        #                 if len(cells) >= 2:
+        #                     mark_entry = {
+        #                         'subject': cells[0].text.strip() if len(cells) > 0 else '',
+        #                         'marks': cells[1].text.strip() if len(cells) > 1 else '',
+        #                         'grade': cells[2].text.strip() if len(cells) > 2 else '',
+        #                     }
+        #                     if mark_entry['subject']:  # Only add if subject exists
+        #                         marks.append(mark_entry)
+        #             
+        #             if marks:
+        #                 break
+        #         except (NoSuchElementException, StaleElementReferenceException):
+        #             continue
+        #             
+        # except Exception as e:
+        #     print(f'Marks scraping error: {str(e)}')
+        # 
+        # return marks
     
     def _scrape_attendance(self):
         """
         Scrape student attendance data
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        attendance = []
+        # COMMENTED OUT - Attendance scraping disabled
+        return []
         
-        try:
-            # Navigate to attendance page if needed
-            attendance_links = [
-                'a[href*="attendance"]', '#attendanceLink', '.attendance-link',
-                '//*[contains(text(),"Attendance")]'
-            ]
-            
-            for selector in attendance_links:
-                try:
-                    if selector.startswith('//'):
-                        link = self.driver.find_element(By.XPATH, selector)
-                    else:
-                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    
-                    if link.is_displayed():
-                        self._human_click(link)
-                        self._random_delay(1, 2)
-                        self._wait_for_page_load()
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-            
-            # Scrape attendance table
-            table_selectors = ['table', '#attendanceTable', '.attendance-table']
-            
-            for selector in table_selectors:
-                try:
-                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
-                    
-                    for row in rows:
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 2:
-                            attendance_entry = {
-                                'subject': cells[0].text.strip() if len(cells) > 0 else '',
-                                'attended': cells[1].text.strip() if len(cells) > 1 else '',
-                                'total': cells[2].text.strip() if len(cells) > 2 else '',
-                                'percentage': cells[3].text.strip() if len(cells) > 3 else '',
-                            }
-                            if attendance_entry['subject']:  # Only add if subject exists
-                                attendance.append(attendance_entry)
-                    
-                    if attendance:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Attendance scraping error: {str(e)}')
-        
-        return attendance
+        # attendance = []
+        # 
+        # try:
+        # # Navigate to attendance page if needed
+        #     attendance_links = [
+        #         'a[href*="attendance"]', '#attendanceLink', '.attendance-link',
+        #         '//*[contains(text(),"Attendance")]'
+        #     ]
+        #     
+        #     for selector in attendance_links:
+        #         try:
+        #             if selector.startswith('//'):
+        #                 link = self.driver.find_element(By.XPATH, selector)
+        #             else:
+        #                 link = self.driver.find_element(By.CSS_SELECTOR, selector)
+        #             
+        #             if link.is_displayed():
+        #                 self._human_click(link)
+        #                 self._random_delay(1, 2)
+        #                 self._wait_for_page_load()
+        #                 break
+        #         except (NoSuchElementException, StaleElementReferenceException):
+        #             continue
+        #     
+        #     # Scrape attendance table
+        #     table_selectors = ['table', '#attendanceTable', '.attendance-table']
+        #     
+        #     for selector in table_selectors:
+        #         try:
+        #             table = self.driver.find_element(By.CSS_SELECTOR, selector)
+        #             rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
+        #             
+        #             for row in rows:
+        #                 cells = row.find_elements(By.TAG_NAME, 'td')
+        #                 if len(cells) >= 2:
+        #                     attendance_entry = {
+        #                         'subject': cells[0].text.strip() if len(cells) > 0 else '',
+        #                         'attended': cells[1].text.strip() if len(cells) > 1 else '',
+        #                         'total': cells[2].text.strip() if len(cells) > 2 else '',
+        #                         'percentage': cells[3].text.strip() if len(cells) > 3 else '',
+        #                     }
+        #                     if attendance_entry['subject']:  # Only add if subject exists
+        #                         attendance.append(attendance_entry)
+        #             
+        #             if attendance:
+        #                 break
+        #         except (NoSuchElementException, StaleElementReferenceException):
+        #             continue
+        #             
+        # except Exception as e:
+        #     print(f'Attendance scraping error: {str(e)}')
+        # 
+        # return attendance
     
     def _scrape_timetable(self):
         """
         Scrape student timetable
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        timetable = []
-        
-        try:
-            # Navigate to timetable page if needed
-            timetable_links = [
-                'a[href*="timetable"]', 'a[href*="schedule"]', '#timetableLink',
-                '.timetable-link', '//*[contains(text(),"Timetable")]',
-                '//*[contains(text(),"Schedule")]', '//*[contains(text(),"Time Table")]'
-            ]
-            
-            for selector in timetable_links:
-                try:
-                    if selector.startswith('//'):
-                        link = self.driver.find_element(By.XPATH, selector)
-                    else:
-                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    
-                    if link.is_displayed():
-                        self._human_click(link)
-                        self._random_delay(1, 2)
-                        self._wait_for_page_load()
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-            
-            # Scrape timetable table
-            table_selectors = ['table', '#timetableTable', '.timetable-table', 'table.schedule']
-            
-            for selector in table_selectors:
-                try:
-                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    rows = table.find_elements(By.CSS_SELECTOR, 'tr')
-                    
-                    # Get headers
-                    headers = []
-                    header_row = rows[0] if rows else None
-                    if header_row:
-                        headers = [th.text.strip() for th in header_row.find_elements(By.TAG_NAME, 'th')]
-                    
-                    for row in rows[1:]:
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 2:
-                            day = cells[0].text.strip() if len(cells) > 0 else ''
-                            # Parse each time slot
-                            for i, cell in enumerate(cells[1:], 1):
-                                text = cell.text.strip()
-                                if text:
-                                    time_slot = headers[i] if i < len(headers) else f'Period {i}'
-                                    timetable.append({
-                                        'day': day,
-                                        'time_slot': time_slot,
-                                        'subject': text,
-                                        'teacher': '',
-                                        'room': ''
-                                    })
-                    
-                    if timetable:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Timetable scraping error: {str(e)}')
-        
-        return timetable
+        # COMMENTED OUT - Timetable scraping disabled
+        return []
     
     def _scrape_courses(self):
         """
         Scrape enrolled courses
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        courses = []
-        
-        try:
-            # Navigate to courses page if needed
-            course_links = [
-                'a[href*="course"]', 'a[href*="subject"]', '#coursesLink',
-                '.courses-link', '//*[contains(text(),"Courses")]',
-                '//*[contains(text(),"Subjects")]', '//*[contains(text(),"Enrollment")]'
-            ]
-            
-            for selector in course_links:
-                try:
-                    if selector.startswith('//'):
-                        link = self.driver.find_element(By.XPATH, selector)
-                    else:
-                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    
-                    if link.is_displayed():
-                        self._human_click(link)
-                        self._random_delay(1, 2)
-                        self._wait_for_page_load()
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-            
-            # Scrape courses table
-            table_selectors = ['table', '#coursesTable', '.courses-table']
-            
-            for selector in table_selectors:
-                try:
-                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
-                    
-                    for row in rows:
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 2:
-                            course = {
-                                'code': cells[0].text.strip() if len(cells) > 0 else '',
-                                'name': cells[1].text.strip() if len(cells) > 1 else '',
-                                'credits': cells[2].text.strip() if len(cells) > 2 else '',
-                                'instructor': cells[3].text.strip() if len(cells) > 3 else ''
-                            }
-                            if course['name']:
-                                courses.append(course)
-                    
-                    if courses:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Courses scraping error: {str(e)}')
-        
-        return courses
-    
+        # COMMENTED OUT - Scraping disabled
+        return []
     def _scrape_results(self):
         """
         Scrape semester results
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        results = []
-        
-        try:
-            # Navigate to results page if needed
-            result_links = [
-                'a[href*="result"]', 'a[href*="cgpa"]', 'a[href*="sgpa"]',
-                '#resultsLink', '.results-link', '//*[contains(text(),"Result")]',
-                '//*[contains(text(),"CGPA")]', '//*[contains(text(),"Semester Result")]'
-            ]
-            
-            for selector in result_links:
-                try:
-                    if selector.startswith('//'):
-                        link = self.driver.find_element(By.XPATH, selector)
-                    else:
-                        link = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    
-                    if link.is_displayed():
-                        self._human_click(link)
-                        self._random_delay(1, 2)
-                        self._wait_for_page_load()
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-            
-            # Scrape results table
-            table_selectors = ['table', '#resultsTable', '.results-table']
-            
-            for selector in table_selectors:
-                try:
-                    table = self.driver.find_element(By.CSS_SELECTOR, selector)
-                    rows = table.find_elements(By.CSS_SELECTOR, 'tbody tr')
-                    
-                    for row in rows:
-                        cells = row.find_elements(By.TAG_NAME, 'td')
-                        if len(cells) >= 2:
-                            result = {
-                                'semester': cells[0].text.strip() if len(cells) > 0 else '',
-                                'sgpa': cells[1].text.strip() if len(cells) > 1 else '',
-                                'cgpa': cells[2].text.strip() if len(cells) > 2 else '',
-                                'credits_earned': cells[3].text.strip() if len(cells) > 3 else '',
-                                'total_credits': cells[4].text.strip() if len(cells) > 4 else ''
-                            }
-                            if result['semester']:
-                                results.append(result)
-                    
-                    if results:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Results scraping error: {str(e)}')
-        
-        return results
-    
+        # COMMENTED OUT - Scraping disabled
+        return []
     def _scrape_notifications(self):
         """
         Scrape notifications/announcements
+        
+        COMMENTED OUT - Portal scraping disabled
         """
-        notifications = []
-        
-        try:
-            # Look for notifications on the page
-            notification_selectors = [
-                '.notification', '.announcement', '.notice', '.alert',
-                '#notifications', '#announcements', '[class*="notification"]',
-                '[class*="announcement"]', '//*[contains(@class,"notice")]'
-            ]
-            
-            for selector in notification_selectors:
-                try:
-                    if selector.startswith('//'):
-                        elements = self.driver.find_elements(By.XPATH, selector)
-                    else:
-                        elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
-                    
-                    for elem in elements[:MAX_NOTIFICATIONS_TO_SCRAPE]:  # Limit notifications
-                        text = elem.text.strip()
-                        if text and len(text) > 10:
-                            notifications.append({
-                                'title': text[:100],
-                                'message': text,
-                                'date': '',
-                                'type': 'general'
-                            })
-                    
-                    if notifications:
-                        break
-                except (NoSuchElementException, StaleElementReferenceException):
-                    continue
-                    
-        except Exception as e:
-            print(f'Notifications scraping error: {str(e)}')
-        
-        return notifications
-    
+        # COMMENTED OUT - Scraping disabled
+        return []
     def scrape(self, reg_number, password):
         """
         Main scraping method
+        
+        COMMENTED OUT - Portal scraping disabled
         
         Args:
             reg_number: Student registration number
@@ -1038,91 +863,98 @@ class StudentPortalScraper:
             dict: Response with status and data
         """
         # Log action without password
-        print(f'Starting scrape for registration: {reg_number}')
+        print(f'Scrape request for registration: {reg_number} - SCRAPING DISABLED')
         
-        try:
-            # First verify portal is reachable before launching browser
-            self.portal_url = self._find_working_portal_url()
-            if not self.portal_url:
-                print('Portal unreachable - all URLs failed verification')
-                return {
-                    'status': STATUS_PORTAL_UNREACHABLE,
-                    'message': 'Student portal is currently unreachable. Please try again later or use demo data.'
-                }
-            
-            # Create a fresh driver for this session
-            self.driver = self.browser_manager.create_fresh_driver()
-            
-            # Attempt login
-            success, error = self._attempt_login(reg_number, password)
-            
-            if not success:
-                self.browser_manager.quit_driver(self.driver)
-                self.driver = None
-                
-                # Return appropriate status based on error type
-                if error == 'AUTH_FAILED' or error == 'Invalid credentials':
-                    return {
-                        'status': STATUS_AUTH_FAILED,
-                        'message': 'Invalid registration number or password'
-                    }
-                elif 'captcha' in (error or '').lower():
-                    return {
-                        'status': STATUS_SCRAPE_ERROR,
-                        'message': 'Failed to solve CAPTCHA. Please try again.'
-                    }
-                elif 'unreachable' in (error or '').lower():
-                    return {
-                        'status': STATUS_PORTAL_UNREACHABLE,
-                        'message': error
-                    }
-                else:
-                    return {
-                        'status': STATUS_SCRAPE_ERROR,
-                        'message': error or 'Login failed'
-                    }
-            
-            # Login successful, scrape data
-            print('Login successful, scraping data...')
-            self._random_delay(1, 2)
-            
-            # Scrape all modules
-            profile = self._scrape_profile()
-            marks = self._scrape_marks()
-            attendance = self._scrape_attendance()
-            timetable = self._scrape_timetable()
-            courses = self._scrape_courses()
-            results = self._scrape_results()
-            notifications = self._scrape_notifications()
-            
-            # Cleanup
-            self.browser_manager.quit_driver(self.driver)
-            self.driver = None
-            
-            return {
-                'status': STATUS_SUCCESS,
-                'data': {
-                    'profile': profile,
-                    'marks': marks,
-                    'attendance': attendance,
-                    'timetable': timetable,
-                    'courses': courses,
-                    'results': results,
-                    'notifications': notifications
-                }
-            }
-            
-        except Exception as e:
-            print(f'Scrape error: {str(e)}')
-            
-            if self.driver:
-                self.browser_manager.quit_driver(self.driver)
-                self.driver = None
-            
-            return {
-                'status': STATUS_SCRAPE_ERROR,
-                'message': str(e)
-            }
+        # COMMENTED OUT - All portal scraping functionality is disabled
+        # Return disabled status immediately
+        return {
+            'status': STATUS_PORTAL_UNREACHABLE,
+            'message': 'Portal scraping is currently disabled. Please try again later or use demo data.'
+        }
+        
+        # try:
+        #     # First verify portal is reachable before launching browser
+        #     self.portal_url = self._find_working_portal_url()
+        #     if not self.portal_url:
+        #         print('Portal unreachable - all URLs failed verification')
+        #         return {
+        #             'status': STATUS_PORTAL_UNREACHABLE,
+        #             'message': 'Student portal is currently unreachable. Please try again later or use demo data.'
+        #         }
+        #     
+        #     # Create a fresh driver for this session
+        #     self.driver = self.browser_manager.create_fresh_driver()
+        #     
+        #     # Attempt login
+        #     success, error = self._attempt_login(reg_number, password)
+        #     
+        #     if not success:
+        #         self.browser_manager.quit_driver(self.driver)
+        #         self.driver = None
+        #         
+        #         # Return appropriate status based on error type
+        #         if error == 'AUTH_FAILED' or error == 'Invalid credentials':
+        #             return {
+        #                 'status': STATUS_AUTH_FAILED,
+        #                 'message': 'Invalid registration number or password'
+        #             }
+        #         elif 'captcha' in (error or '').lower():
+        #             return {
+        #                 'status': STATUS_SCRAPE_ERROR,
+        #                 'message': 'Failed to solve CAPTCHA. Please try again.'
+        #             }
+        #         elif 'unreachable' in (error or '').lower():
+        #             return {
+        #                 'status': STATUS_PORTAL_UNREACHABLE,
+        #                 'message': error
+        #             }
+        #         else:
+        #             return {
+        #                 'status': STATUS_SCRAPE_ERROR,
+        #                 'message': error or 'Login failed'
+        #             }
+        #     
+        #     # Login successful, scrape data
+        #     print('Login successful, scraping data...')
+        #     self._random_delay(1, 2)
+        #     
+        #     # Scrape all modules
+        #     profile = self._scrape_profile()
+        #     marks = self._scrape_marks()
+        #     attendance = self._scrape_attendance()
+        #     timetable = self._scrape_timetable()
+        #     courses = self._scrape_courses()
+        #     results = self._scrape_results()
+        #     notifications = self._scrape_notifications()
+        #     
+        #     # Cleanup
+        #     self.browser_manager.quit_driver(self.driver)
+        #     self.driver = None
+        #     
+        #     return {
+        #         'status': STATUS_SUCCESS,
+        #         'data': {
+        #             'profile': profile,
+        #             'marks': marks,
+        #             'attendance': attendance,
+        #             'timetable': timetable,
+        #             'courses': courses,
+        #             'results': results,
+        #             'notifications': notifications
+        #         }
+        #     }
+        #     
+        # except Exception as e:
+        #     print(f'Scrape error: {str(e)}')
+        #     
+        #     if self.driver:
+        #         self.browser_manager.quit_driver(self.driver)
+        #         self.driver = None
+        #     
+        #     return {
+        #         'status': STATUS_SCRAPE_ERROR,
+        #         'message': str(e)
+        #     }
 
 
 # Factory function
