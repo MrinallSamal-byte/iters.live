@@ -752,18 +752,15 @@ class PortalScraper {
         }
 
         return data;
+        */
     }
 
     /**
      * Main scrape method
      * 
      * COMMENTED OUT - Portal scraping disabled
-     * /
      */
-    }
-
-    /**
-     async scrape(regNumber, password) {
+    async scrape(regNumber, password) {
         console.log(`Scrape request for: ${regNumber} - SCRAPING DISABLED`);
 
         // COMMENTED OUT - All portal scraping functionality is disabled
