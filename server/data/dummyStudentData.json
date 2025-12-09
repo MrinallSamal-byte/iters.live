@@ -1,7 +1,8 @@
 {
   "mode": "demo",
-  "version": "1.0.0",
-  "lastUpdated": "2025-11-28T00:00:00.000Z",
+  "version": "2.0.0",
+  "lastUpdated": "2025-12-09T00:00:00.000Z",
+  "dataSource": "demo",
   "profile": {
     "name": "Demo Student",
     "registration_number": "2101234567",
@@ -12,11 +13,16 @@
     "semester": 5,
     "phone": "9876543210",
     "father_name": "Demo Parent",
+    "mother_name": "Demo Mother",
     "dob": "2003-05-15",
     "address": "Bhubaneswar, Odisha",
     "blood_group": "O+",
     "admission_year": 2021,
-    "hostel": "Block A, Room 203"
+    "hostel": "Block A, Room 203",
+    "category": "General",
+    "gender": "Male",
+    "nationality": "Indian",
+    "photo_url": "/assets/default-avatar.png"
   },
   "marks": [
     { "subject": "Data Structures & Algorithms", "subject_code": "CSE2001", "marks": "85", "grade": "A", "exam_type": "Mid-1", "total_marks": "100", "credits": 4 },
@@ -110,9 +116,50 @@
       { "date": "2025-09-10", "amount": 50000, "mode": "Online", "transaction_id": "TXN987654321" }
     ]
   },
+  "admit_card": {
+    "exam_name": "End Semester Examination - 5th Semester",
+    "exam_session": "December 2025",
+    "exam_start_date": "2025-12-15",
+    "exam_end_date": "2025-12-30",
+    "center_name": "ITER Campus, Bhubaneswar",
+    "center_code": "ITER-001",
+    "roll_number": "2101234567",
+    "student_name": "Demo Student",
+    "father_name": "Demo Parent",
+    "course": "B.Tech Computer Science & Engineering",
+    "semester": 5,
+    "photo_url": "/assets/default-avatar.png",
+    "signature_url": "/assets/default-signature.png",
+    "subjects": [
+      { "code": "CSE2001", "name": "Data Structures & Algorithms", "date": "2025-12-15", "time": "10:00 AM - 1:00 PM", "room": "Hall A" },
+      { "code": "CSE2002", "name": "Database Management Systems", "date": "2025-12-17", "time": "10:00 AM - 1:00 PM", "room": "Hall B" },
+      { "code": "CSE2003", "name": "Operating Systems", "date": "2025-12-19", "time": "10:00 AM - 1:00 PM", "room": "Hall A" },
+      { "code": "CSE2004", "name": "Computer Networks", "date": "2025-12-22", "time": "10:00 AM - 1:00 PM", "room": "Hall C" },
+      { "code": "CSE2005", "name": "Software Engineering", "date": "2025-12-24", "time": "10:00 AM - 1:00 PM", "room": "Hall B" },
+      { "code": "CSE2006", "name": "Web Technologies", "date": "2025-12-27", "time": "10:00 AM - 1:00 PM", "room": "Hall A" }
+    ],
+    "instructions": [
+      "Students must carry this admit card along with their college ID card.",
+      "Electronic devices including mobile phones are strictly prohibited.",
+      "Students should report to the examination center 30 minutes before the scheduled time.",
+      "No candidate will be allowed to enter the examination hall after 15 minutes from the start of the exam.",
+      "Any form of malpractice will lead to immediate disqualification."
+    ],
+    "verification_code": "DEMO-ADM-2025-001",
+    "generated_date": "2025-12-01",
+    "valid_until": "2025-12-30"
+  },
+  "registered_subjects": [
+    { "code": "CSE2001", "name": "Data Structures & Algorithms", "credits": 4, "type": "Core", "status": "Registered" },
+    { "code": "CSE2002", "name": "Database Management Systems", "credits": 4, "type": "Core", "status": "Registered" },
+    { "code": "CSE2003", "name": "Operating Systems", "credits": 4, "type": "Core", "status": "Registered" },
+    { "code": "CSE2004", "name": "Computer Networks", "credits": 3, "type": "Core", "status": "Registered" },
+    { "code": "CSE2005", "name": "Software Engineering", "credits": 3, "type": "Core", "status": "Registered" },
+    { "code": "CSE2006", "name": "Web Technologies", "credits": 3, "type": "Elective", "status": "Registered" }
+  ],
   "raw_api_data": {
     "portal_version": "2.1.0",
-    "last_login": "2025-11-27T10:30:00.000Z",
+    "last_login": "2025-12-09T10:30:00.000Z",
     "session_id": "DEMO_SESSION_12345"
   }
 }
