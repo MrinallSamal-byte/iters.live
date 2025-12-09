@@ -10,18 +10,19 @@ ITER EduHub now uses **OpenRouter API** as the primary AI service provider, with
 
 ### CAPTCHA Solving
 The system uses vision-capable models for CAPTCHA text extraction:
-- `amazon/nova-2-lite-v1:free`
-- `nvidia/nemotron-nano-12b-v2-vl:free`
-- `mistralai/mistral-small-3.1-24b-instruct:free`
-- `google/gemma-3-4b-it:free`
-- `google/gemma-3-12b-it:free`
+- `amazon/nova-2-lite-v1:free` - Vision model for image understanding
+- `nvidia/nemotron-nano-12b-v2-vl:free` - Vision-language model
+
+Note: Only models with vision capabilities are used for CAPTCHA solving.
 
 ### Chatbot Features
 The system uses powerful language models for educational assistance:
-- `allenai/olmo-3-32b-think:free`
-- `nvidia/nemotron-nano-12b-v2-vl:free`
-- `openai/gpt-oss-120b:free`
-- `openai/gpt-oss-20b:free`
+- `mistralai/mistral-small-3.1-24b-instruct:free` - Fast instruction-following model
+- `google/gemma-3-4b-it:free` - Compact instruction-tuned model
+- `google/gemma-3-12b-it:free` - Larger instruction-tuned model
+- `allenai/olmo-3-32b-think:free` - Large reasoning model
+- `openai/gpt-oss-120b:free` - Very large open-source model
+- `openai/gpt-oss-20b:free` - Medium open-source model
 
 ## Setup Instructions
 

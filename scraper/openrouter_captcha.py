@@ -22,12 +22,10 @@ class OpenRouterCaptchaSolver:
         self.api_endpoint = 'https://openrouter.ai/api/v1/chat/completions'
         
         # Models for CAPTCHA solving (vision + text understanding)
+        # Only vision-capable models are included
         self.models = [
             'amazon/nova-2-lite-v1:free',
-            'nvidia/nemotron-nano-12b-v2-vl:free',
-            'mistralai/mistral-small-3.1-24b-instruct:free',
-            'google/gemma-3-4b-it:free',
-            'google/gemma-3-12b-it:free'
+            'nvidia/nemotron-nano-12b-v2-vl:free'
         ]
         
         self.max_retries = 2  # Retry with different models

@@ -12,17 +12,17 @@ class OpenRouterService {
         // Model configurations for different use cases
         this.models = {
             // Models for captcha solving (vision + text understanding)
+            // Only vision-capable models are included
             captcha: [
                 'amazon/nova-2-lite-v1:free',
-                'nvidia/nemotron-nano-12b-v2-vl:free',
-                'mistralai/mistral-small-3.1-24b-instruct:free',
-                'google/gemma-3-4b-it:free',
-                'google/gemma-3-12b-it:free'
+                'nvidia/nemotron-nano-12b-v2-vl:free'
             ],
             // Models for chatbot (general text understanding and generation)
             chatbot: [
+                'mistralai/mistral-small-3.1-24b-instruct:free',
+                'google/gemma-3-4b-it:free',
+                'google/gemma-3-12b-it:free',
                 'allenai/olmo-3-32b-think:free',
-                'nvidia/nemotron-nano-12b-v2-vl:free',
                 'openai/gpt-oss-120b:free',
                 'openai/gpt-oss-20b:free'
             ]
