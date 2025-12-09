@@ -36,15 +36,24 @@ if (!openRouterKey && !geminiKey) {
     console.log('  • OPENROUTER_API_KEY (recommended, primary)');
     console.log('  • GEMINI_API_KEY (fallback)');
     console.log('');
-    console.log('📝 To fix this:');
-    console.log('1. Copy .env.example to .env:');
+    console.log('📝 Quick Fix (3 steps):');
+    console.log('');
+    console.log('1. Create .env file:');
     console.log('   cp .env.example .env');
     console.log('');
-    console.log('2. Add at least one API key to .env:');
-    console.log('   OPENROUTER_API_KEY=sk-or-v1-your-key-here  (get from https://openrouter.ai/keys)');
-    console.log('   GEMINI_API_KEY=your-gemini-key-here  (get from https://makersuite.google.com/app/apikey)');
+    console.log('2. Get FREE API keys:');
+    console.log('   • OpenRouter: https://openrouter.ai/keys (sign up → create key)');
+    console.log('   • Gemini: https://makersuite.google.com/app/apikey (sign in → get key)');
     console.log('');
-    console.log('See RENDER_AI_SERVICE_SETUP.md for detailed instructions.');
+    console.log('3. Add keys to .env file:');
+    console.log('   OPENROUTER_API_KEY=sk-or-v1-your-actual-key');
+    console.log('   GEMINI_API_KEY=AIza-your-actual-key');
+    console.log('');
+    console.log('4. Run this script again to verify:');
+    console.log('   node verify-ai-service.js');
+    console.log('');
+    console.log('📖 Full guide: See RENDER_AI_SERVICE_SETUP.md for detailed instructions');
+    console.log('🚀 For Render deployment: See AI_CHATBOT_RENDER_QUICKFIX.md');
     process.exit(1);
 }
 

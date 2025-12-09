@@ -21,10 +21,10 @@ JWT_REFRESH_EXPIRE=7d
 
 ```
 # OpenRouter API Key (PRIMARY) - For AI Chatbot and Educational Features
-OPENROUTER_API_KEY=sk-or-v1-YOUR_ACTUAL_OPENROUTER_KEY_HERE
+OPENROUTER_API_KEY=sk-or-v1-REPLACE_WITH_YOUR_ACTUAL_OPENROUTER_KEY
 
 # Google Gemini AI API Key (FALLBACK) - Backup AI Service
-GEMINI_API_KEY=AIzaYOUR_ACTUAL_GEMINI_KEY_HERE
+GEMINI_API_KEY=AIza_REPLACE_WITH_YOUR_ACTUAL_GEMINI_KEY
 GEMINI_MODEL=gemini-1.5-flash
 ```
 
@@ -37,12 +37,13 @@ GEMINI_MODEL=gemini-1.5-flash
 - Smart answers for student questions
 - Context-aware educational responses
 
-**Get your OpenRouter API key:** https://openrouter.ai/keys
-**Get your Gemini API key:** https://makersuite.google.com/app/apikey
+**Get your API keys (FREE):**
+- **OpenRouter:** https://openrouter.ai/keys (Sign up → Create API Key)
+- **Gemini:** https://makersuite.google.com/app/apikey (Sign in with Google → Get API Key)
 
 > **Note:** OpenRouter is the PRIMARY AI service. The system automatically falls back to Gemini if OpenRouter is unavailable. For best results, configure both keys.
 
-> **For Repository Maintainers:** The actual working API keys are stored in `.env.example` for reference. For production deployment, you should use these keys or obtain your own from the providers above.
+> **Security:** Never commit actual API keys to version control. Always use environment variables on your deployment platform.
 
 ### Update After First Deploy
 

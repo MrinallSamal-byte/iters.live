@@ -18,12 +18,12 @@ The OpenRouter API key (and optionally Gemini API key) are not configured in you
 
 ```
 Variable Name: OPENROUTER_API_KEY
-Value: sk-or-v1-YOUR_ACTUAL_OPENROUTER_KEY_HERE
+Value: sk-or-v1-REPLACE_WITH_YOUR_ACTUAL_OPENROUTER_KEY
 ```
 
 ```
 Variable Name: GEMINI_API_KEY  
-Value: AIzaYOUR_ACTUAL_GEMINI_KEY_HERE
+Value: AIza_REPLACE_WITH_YOUR_ACTUAL_GEMINI_KEY
 ```
 
 ```
@@ -31,10 +31,10 @@ Variable Name: GEMINI_MODEL
 Value: gemini-1.5-flash
 ```
 
-> **Note:** Replace the placeholder values with your actual API keys.
-> - Get OpenRouter key from: https://openrouter.ai/keys
-> - Get Gemini key from: https://makersuite.google.com/app/apikey
-> - **For Repository Maintainers:** Actual working keys are in `.env.example`
+> **Important:** Replace the placeholder values with your actual API keys:
+> - Get FREE OpenRouter key: https://openrouter.ai/keys (Sign up → Create Key)
+> - Get FREE Gemini key: https://makersuite.google.com/app/apikey (Sign in → Get Key)
+> - **Never commit API keys to Git** - use environment variables only
 
 5. **Click "Save Changes"**
 6. **Wait 2-3 minutes** for automatic redeployment
