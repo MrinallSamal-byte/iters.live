@@ -397,8 +397,11 @@ class PortalScraper {
                     '--disable-dev-shm-usage',
                     '--disable-accelerated-2d-canvas',
                     '--disable-gpu',
-                    '--single-process', // Use single process to reduce memory usage
-                    '--no-zygote' // Reduce memory overhead
+                    // Memory optimization flags (trade-off: may reduce stability)
+                    // Note: --single-process can make Puppeteer less stable but uses less memory
+                    // Only use in memory-constrained environments (512MB RAM)
+                    '--single-process',
+                    '--no-zygote'
                 ],
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
             });

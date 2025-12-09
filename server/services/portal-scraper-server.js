@@ -113,7 +113,7 @@ app.post('/api/scrape', rateLimit, async (req, res) => {
         if (!SCRAPING_AVAILABLE) {
             return res.status(503).json({
                 status: 'SCRAPER_UNAVAILABLE',
-                message: 'Portal scraping is currently unavailable. Puppeteer is not installed (optional dependency). Please use demo data or enable PORTAL_FEATURES_ENABLED flag.'
+                message: 'Portal scraping is currently unavailable. Puppeteer is not installed (optional dependency). Please use demo data instead.'
             });
         }
         
