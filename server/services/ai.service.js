@@ -152,20 +152,26 @@ Please provide a thorough and helpful response:`;
             // Try OpenRouter first
             if (this.useOpenRouter) {
                 try {
-                    return await openRouterService.answerQuestion(question, context);
+                    const response = await openRouterService.answerQuestion(question, context);
+                    console.log('✅ OpenRouter successfully answered question');
+                    return response;
                 } catch (openRouterError) {
-                    console.log('OpenRouter failed, falling back to Gemini:', openRouterError.message);
+                    console.log('⚠️ OpenRouter failed, falling back to Gemini:', openRouterError.message);
                 }
+            } else {
+                console.log('⚠️ OpenRouter not available (API key not configured)');
             }
 
             // Fallback to Gemini
             if (this.genAI) {
+                console.log('Using Gemini as fallback AI service');
                 const model = this.genAI.getGenerativeModel({ model: this.model });
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 return response.text();
             }
             
+            console.error('❌ No AI service available - both OpenRouter and Gemini are not configured');
             return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your instructor.";
         } catch (error) {
             console.error('AI chat error:', error.message);

@@ -17,22 +17,33 @@ JWT_EXPIRE=24h
 JWT_REFRESH_EXPIRE=7d
 ```
 
-### Google Gemini AI Configuration (for Smart Chatbot)
+### AI Service Configuration (for Smart Chatbot)
 
 ```
-# Google Gemini AI API Key for Smart Chatbot
-GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+# OpenRouter API Key (PRIMARY) - For AI Chatbot and Educational Features
+OPENROUTER_API_KEY=sk-or-v1-REPLACE_WITH_YOUR_ACTUAL_OPENROUTER_KEY
+
+# Google Gemini AI API Key (FALLBACK) - Backup AI Service
+GEMINI_API_KEY=AIza_REPLACE_WITH_YOUR_ACTUAL_GEMINI_KEY
 GEMINI_MODEL=gemini-1.5-flash
 ```
 
-**Features enabled by Gemini AI:**
-- `/api/ai/chat` - AI-powered chatbot responses
+**Features enabled by AI Services:**
+- `/api/ai/chat` - AI-powered chatbot responses (uses OpenRouter primary, Gemini fallback)
 - `/api/ai/study-plan` - Personalized study plan generation
 - `/api/ai/recommendations` - AI-driven learning recommendations
+- `/api/ai/predict-performance` - ML-based exam performance prediction
+- `/api/ai/tutor-recommendations` - Personalized AI tutor recommendations
 - Smart answers for student questions
 - Context-aware educational responses
 
-**Get your own API key:** https://makersuite.google.com/app/apikey
+**Get your API keys (FREE):**
+- **OpenRouter:** https://openrouter.ai/keys (Sign up → Create API Key)
+- **Gemini:** https://makersuite.google.com/app/apikey (Sign in with Google → Get API Key)
+
+> **Note:** OpenRouter is the PRIMARY AI service. The system automatically falls back to Gemini if OpenRouter is unavailable. For best results, configure both keys.
+
+> **Security:** Never commit actual API keys to version control. Always use environment variables on your deployment platform.
 
 ### Update After First Deploy
 
