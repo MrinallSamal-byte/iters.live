@@ -475,214 +475,231 @@ class PortalScraper {
 
     /**
      * Attempt login
+     * 
+     * COMMENTED OUT - Portal scraping disabled
      */
     async attemptLogin(regNumber, password) {
-        try {
-            // Check portal reachability first
-            const reachable = await this.isPortalReachable();
-            if (!reachable) {
-                return { success: false, error: 'Portal is currently unreachable', type: STATUS_PORTAL_UNREACHABLE };
-            }
-
-            // Launch browser
-            const launched = await this.launchBrowser();
-            if (!launched) {
-                return { success: false, error: 'Failed to launch browser', type: STATUS_SCRAPE_ERROR };
-            }
-
-            // Navigate to portal
-            console.log(`Navigating to ${PORTAL_URL}`);
-            await this.page.goto(PORTAL_URL, {
-                waitUntil: 'networkidle2',
-                timeout: 30000
-            });
-            await this.randomDelay(2000, 3000);
-
-            // Wait for Angular to load
-            await this.page.waitForTimeout(2000);
-
-            // Find USER ID field
-            const userIdSelectors = [
-                'input[formcontrolname="userid"]',
-                'input[formcontrolname="userId"]',
-                'input[name="userid"]',
-                'input[name="userId"]',
-                '#userId',
-                '#username',
-                'input[placeholder*="User"]',
-                'input[placeholder*="ID"]'
-            ];
-
-            const userIdField = await this.findElement(userIdSelectors);
-            if (!userIdField) {
-                return { success: false, error: 'USER ID field not found', type: STATUS_SCRAPE_ERROR };
-            }
-
-            // Fill USER ID
-            await this.humanType(userIdField, regNumber);
-            await this.randomDelay(500, 1000);
-
-            // Check for CAPTCHA
-            const captchaText = await this.solveCaptcha();
-            if (captchaText) {
-                // Find CAPTCHA input
-                const captchaInputSelectors = [
-                    'input[formcontrolname="captcha"]',
-                    'input[name="captcha"]',
-                    '#captcha',
-                    'input[placeholder*="Captcha"]',
-                    'input[placeholder*="Enter"]'
-                ];
-
-                const captchaInput = await this.findElement(captchaInputSelectors);
-                if (captchaInput) {
-                    await this.humanType(captchaInput, captchaText);
-                    await this.randomDelay(500, 1000);
-                }
-            }
-
-            // Click submit/next button
-            const submitSelectors = [
-                'button[type="submit"]',
-                '.btn-submit',
-                '.login-btn'
-            ];
-
-            let submitBtn = await this.findElement(submitSelectors);
-            
-            // If not found by class/type, try finding by text using XPath
-            if (!submitBtn) {
-                const xpathSelectors = [
-                    '//button[contains(text(), "LOGIN")]',
-                    '//button[contains(text(), "SUBMIT")]',
-                    '//button[contains(text(), "Next")]'
-                ];
-                
-                for (const xpath of xpathSelectors) {
-                    try {
-                        const elements = await this.page.$x(xpath);
-                        if (elements.length > 0) {
-                            submitBtn = elements[0];
-                            break;
-                        }
-                    } catch (e) {
-                        continue;
-                    }
-                }
-            }
-            
-            if (submitBtn) {
-                await submitBtn.click();
-                await this.randomDelay(3000, 5000);
-            }
-
-            // Check for password field (two-step login)
-            const passwordSelectors = [
-                'input[formcontrolname="password"]',
-                'input[name="password"]',
-                'input[type="password"]',
-                '#password'
-            ];
-
-            const passwordField = await this.findElement(passwordSelectors, 5000);
-            if (passwordField) {
-                await this.humanType(passwordField, password);
-                await this.randomDelay(500, 1000);
-
-                // Click final login button
-                let loginBtn = await this.findElement([
-                    'button[type="submit"]',
-                    '.btn-login'
-                ]);
-                
-                // Try finding by text using XPath if not found
-                if (!loginBtn) {
-                    try {
-                        const elements = await this.page.$x('//button[contains(text(), "LOGIN")]');
-                        if (elements.length > 0) {
-                            loginBtn = elements[0];
-                        }
-                    } catch (e) {
-                        // Ignore
-                    }
-                }
-                
-                if (loginBtn) {
-                    await loginBtn.click();
-                    await this.randomDelay(3000, 5000);
-                }
-            }
-
-            // Check login success
-            const currentUrl = this.page.url();
-            
-            // Check for error messages
-            const errorSelectors = [
-                '.error-message',
-                '.alert-danger',
-                '.login-error',
-                '[class*="error"]'
-            ];
-
-            for (const selector of errorSelectors) {
-                try {
-                    const errorEl = await this.page.$(selector);
-                    if (errorEl) {
-                        const errorText = await this.page.evaluate(el => el.textContent, errorEl);
-                        if (errorText && errorText.toLowerCase().includes('invalid')) {
-                            return { success: false, error: 'Invalid credentials', type: STATUS_AUTH_FAILED };
-                        }
-                    }
-                } catch (e) {
-                    // Ignore
-                }
-            }
-
-            // Check for success indicators
-            const successSelectors = [
-                '.dashboard',
-                '.student-dashboard',
-                '.profile',
-                '[class*="dashboard"]'
-            ];
-
-            for (const selector of successSelectors) {
-                try {
-                    const element = await this.page.$(selector);
-                    if (element) {
-                        console.log('Login successful');
-                        return { success: true };
-                    }
-                } catch (e) {
-                    // Ignore
-                }
-            }
-
-            // Check URL for success
-            if (currentUrl.toLowerCase().includes('dashboard') || 
-                currentUrl.toLowerCase().includes('home') ||
-                currentUrl.toLowerCase().includes('profile')) {
-                console.log('Login successful (URL check)');
-                return { success: true };
-            }
-
-            // If still on login page, assume failure
-            if (currentUrl.toLowerCase().includes('login') || currentUrl === PORTAL_URL) {
-                return { success: false, error: 'Login failed', type: STATUS_AUTH_FAILED };
-            }
-
-            return { success: true };
-
-        } catch (error) {
-            console.error('Login attempt error:', error.message);
-            return { success: false, error: error.message, type: STATUS_SCRAPE_ERROR };
-        }
+        // COMMENTED OUT - Login functionality disabled
+        return { success: false, error: 'Portal scraping is disabled', type: STATUS_PORTAL_UNREACHABLE };
+        
+        // try {
+        //     // Check portal reachability first
+        //     const reachable = await this.isPortalReachable();
+        //     if (!reachable) {
+        //         return { success: false, error: 'Portal is currently unreachable', type: STATUS_PORTAL_UNREACHABLE };
+        //     }
+        //
+        //     // Launch browser
+        //     const launched = await this.launchBrowser();
+        //     if (!launched) {
+        //         return { success: false, error: 'Failed to launch browser', type: STATUS_SCRAPE_ERROR };
+        //     }
+        //
+        //     // Navigate to portal
+        //     console.log(`Navigating to ${PORTAL_URL}`);
+        //     await this.page.goto(PORTAL_URL, {
+        //         waitUntil: 'networkidle2',
+        //         timeout: 30000
+        //     });
+        //     await this.randomDelay(2000, 3000);
+        //
+        //     // Wait for Angular to load
+        //     await this.page.waitForTimeout(2000);
+        //
+        //     // Find USER ID field
+        //     const userIdSelectors = [
+        //         'input[formcontrolname="userid"]',
+        //         'input[formcontrolname="userId"]',
+        //         'input[name="userid"]',
+        //         'input[name="userId"]',
+        //         '#userId',
+        //         '#username',
+        //         'input[placeholder*="User"]',
+        //         'input[placeholder*="ID"]'
+        //     ];
+        //
+        //     const userIdField = await this.findElement(userIdSelectors);
+        //     if (!userIdField) {
+        //         return { success: false, error: 'USER ID field not found', type: STATUS_SCRAPE_ERROR };
+        //     }
+        //
+        //     // Fill USER ID
+        //     await this.humanType(userIdField, regNumber);
+        //     await this.randomDelay(500, 1000);
+        //
+        //     // Check for CAPTCHA
+        //     const captchaText = await this.solveCaptcha();
+        //     if (captchaText) {
+        //         // Find CAPTCHA input
+        //         const captchaInputSelectors = [
+        //             'input[formcontrolname="captcha"]',
+        //             'input[name="captcha"]',
+        //             '#captcha',
+        //             'input[placeholder*="Captcha"]',
+        //             'input[placeholder*="Enter"]'
+        //         ];
+        //
+        //         const captchaInput = await this.findElement(captchaInputSelectors);
+        //         if (captchaInput) {
+        //             await this.humanType(captchaInput, captchaText);
+        //             await this.randomDelay(500, 1000);
+        //         }
+        //     }
+        //
+        //     // Click submit/next button
+        //     const submitSelectors = [
+        //         'button[type="submit"]',
+        //         '.btn-submit',
+        //         '.login-btn'
+        //     ];
+        //
+        //     let submitBtn = await this.findElement(submitSelectors);
+        //     
+        //     // If not found by class/type, try finding by text using XPath
+        //     if (!submitBtn) {
+        //         const xpathSelectors = [
+        //             '//button[contains(text(), "LOGIN")]',
+        //             '//button[contains(text(), "SUBMIT")]',
+        //             '//button[contains(text(), "Next")]'
+        //         ];
+        //         
+        //         for (const xpath of xpathSelectors) {
+        //             try {
+        //                 const elements = await this.page.$x(xpath);
+        //                 if (elements.length > 0) {
+        //                     submitBtn = elements[0];
+        //                     break;
+        //                 }
+        //             } catch (e) {
+        //                 continue;
+        //             }
+        //         }
+        //     }
+        //     
+        //     if (submitBtn) {
+        //         await submitBtn.click();
+        //         await this.randomDelay(3000, 5000);
+        //     }
+        //
+        //     // Check for password field (two-step login)
+        //     const passwordSelectors = [
+        //         'input[formcontrolname="password"]',
+        //         'input[name="password"]',
+        //         'input[type="password"]',
+        //         '#password'
+        //     ];
+        //
+        //     const passwordField = await this.findElement(passwordSelectors, 5000);
+        //     if (passwordField) {
+        //         await this.humanType(passwordField, password);
+        //         await this.randomDelay(500, 1000);
+        //
+        //         // Click final login button
+        //         let loginBtn = await this.findElement([
+        //             'button[type="submit"]',
+        //             '.btn-login'
+        //         ]);
+        //         
+        //         // Try finding by text using XPath if not found
+        //         if (!loginBtn) {
+        //             try {
+        //                 const elements = await this.page.$x('//button[contains(text(), "LOGIN")]');
+        //                 if (elements.length > 0) {
+        //                     loginBtn = elements[0];
+        //                 }
+        //             } catch (e) {
+        //                 // Ignore
+        //             }
+        //         }
+        //         
+        //         if (loginBtn) {
+        //             await loginBtn.click();
+        //             await this.randomDelay(3000, 5000);
+        //         }
+        //     }
+        //
+        //     // Check login success
+        //     const currentUrl = this.page.url();
+        //     
+        //     // Check for error messages
+        //     const errorSelectors = [
+        //         '.error-message',
+        //         '.alert-danger',
+        //         '.login-error',
+        //         '[class*="error"]'
+        //     ];
+        //
+        //     for (const selector of errorSelectors) {
+        //         try {
+        //             const errorEl = await this.page.$(selector);
+        //             if (errorEl) {
+        //                 const errorText = await this.page.evaluate(el => el.textContent, errorEl);
+        //                 if (errorText && errorText.toLowerCase().includes('invalid')) {
+        //                     return { success: false, error: 'Invalid credentials', type: STATUS_AUTH_FAILED };
+        //                 }
+        //             }
+        //         } catch (e) {
+        //             // Ignore
+        //         }
+        //     }
+        //
+        //     // Check for success indicators
+        //     const successSelectors = [
+        //         '.dashboard',
+        //         '.student-dashboard',
+        //         '.profile',
+        //         '[class*="dashboard"]'
+        //     ];
+        //
+        //     for (const selector of successSelectors) {
+        //         try {
+        //             const element = await this.page.$(selector);
+        //             if (element) {
+        //                 console.log('Login successful');
+        //                 return { success: true };
+        //             }
+        //         } catch (e) {
+        //             // Ignore
+        //         }
+        //     }
+        //
+        //     // Check URL for success
+        //     if (currentUrl.toLowerCase().includes('dashboard') || 
+        //         currentUrl.toLowerCase().includes('home') ||
+        //         currentUrl.toLowerCase().includes('profile')) {
+        //         console.log('Login successful (URL check)');
+        //         return { success: true };
+        //     }
+        //
+        //     // If still on login page, assume failure
+        //     if (currentUrl.toLowerCase().includes('login') || currentUrl === PORTAL_URL) {
+        //         return { success: false, error: 'Login failed', type: STATUS_AUTH_FAILED };
+        //     }
+        //
+        //     return { success: true };
+        //
+        // } catch (error) {
+        //     console.error('Login attempt error:', error.message);
+        //     return { success: false, error: error.message, type: STATUS_SCRAPE_ERROR };
+        // }
     }
 
     /**
      * Scrape student data
      */
     async scrapeData() {
+        // COMMENTED OUT - Data scraping disabled
+        return {
+            profile: {},
+            marks: [],
+            attendance: [],
+            timetable: [],
+            courses: [],
+            results: [],
+            notifications: []
+        };
+        
+        /* 
         const data = {
             profile: {},
             marks: [],
@@ -739,39 +756,52 @@ class PortalScraper {
 
     /**
      * Main scrape method
+     * 
+     * COMMENTED OUT - Portal scraping disabled
+     * /
      */
-    async scrape(regNumber, password) {
-        console.log(`Starting scrape for: ${regNumber}`);
+    }
 
-        try {
-            // Attempt login
-            const loginResult = await this.attemptLogin(regNumber, password);
+    /**
+     async scrape(regNumber, password) {
+        console.log(`Scrape request for: ${regNumber} - SCRAPING DISABLED`);
 
-            if (!loginResult.success) {
-                return {
-                    status: loginResult.type || STATUS_SCRAPE_ERROR,
-                    message: loginResult.error || 'Login failed'
-                };
-            }
+        // COMMENTED OUT - All portal scraping functionality is disabled
+        // Return disabled status immediately
+        return {
+            status: STATUS_PORTAL_UNREACHABLE,
+            message: 'Portal scraping is currently disabled. Please try again later or use demo data.'
+        };
 
-            // Scrape data
-            const scrapedData = await this.scrapeData();
-
-            return {
-                status: STATUS_SUCCESS,
-                data: scrapedData
-            };
-
-        } catch (error) {
-            console.error('Scrape error:', error.message);
-            return {
-                status: STATUS_SCRAPE_ERROR,
-                message: error.message
-            };
-        } finally {
-            // Cleanup
-            await this.cleanup();
-        }
+        // try {
+        //     // Attempt login
+        //     const loginResult = await this.attemptLogin(regNumber, password);
+        //
+        //     if (!loginResult.success) {
+        //         return {
+        //             status: loginResult.type || STATUS_SCRAPE_ERROR,
+        //             message: loginResult.error || 'Login failed'
+        //         };
+        //     }
+        //
+        //     // Scrape data
+        //     const scrapedData = await this.scrapeData();
+        //
+        //     return {
+        //         status: STATUS_SUCCESS,
+        //         data: scrapedData
+        //     };
+        //
+        // } catch (error) {
+        //     console.error('Scrape error:', error.message);
+        //     return {
+        //         status: STATUS_SCRAPE_ERROR,
+        //         message: error.message
+        //     };
+        // } finally {
+        //     // Cleanup
+        //     await this.cleanup();
+        // }
     }
 
     /**
