@@ -93,27 +93,97 @@ class CaptchaSolver {
      */
     async solveWithTesseract(imageBuffer) {
         try {
-            // Preprocess image for better OCR
-            const processedBuffer = await sharp(imageBuffer)
-                .grayscale()
-                .normalize()
-                .threshold(128)
-                .toBuffer();
-
-            const { data: { text } } = await Tesseract.recognize(
-                processedBuffer,
-                'eng',
-                {
-                    logger: () => {} // Suppress logs
+            // Try multiple preprocessing strategies for better accuracy
+            const strategies = [
+                // Strategy 1: Basic grayscale + threshold
+                async () => {
+                    return await sharp(imageBuffer)
+                        .grayscale()
+                        .normalize()
+                        .threshold(128)
+                        .toBuffer();
+                },
+                // Strategy 2: Enhanced contrast
+                async () => {
+                    return await sharp(imageBuffer)
+                        .grayscale()
+                        .normalize()
+                        .linear(1.5, -(128 * 1.5) + 128) // Increase contrast
+                        .toBuffer();
+                },
+                // Strategy 3: Sharpen and threshold
+                async () => {
+                    return await sharp(imageBuffer)
+                        .grayscale()
+                        .sharpen()
+                        .normalize()
+                        .threshold(140)
+                        .toBuffer();
+                },
+                // Strategy 4: Median filter + threshold (reduce noise)
+                async () => {
+                    return await sharp(imageBuffer)
+                        .grayscale()
+                        .median(3)
+                        .normalize()
+                        .threshold(120)
+                        .toBuffer();
                 }
-            );
+            ];
 
-            const cleaned = this.cleanCaptchaText(text);
-            console.log(`Tesseract OCR: ${cleaned}`);
-            return cleaned;
+            // Try each strategy until we get a good result
+            for (let i = 0; i < strategies.length; i++) {
+                try {
+                    const processedBuffer = await strategies[i]();
+                    
+                    const { data: { text } } = await Tesseract.recognize(
+                        processedBuffer,
+                        'eng',
+                        {
+                            logger: () => {}, // Suppress logs
+                            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', // Only alphanumeric
+                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_LINE
+                        }
+                    );
+
+                    const cleaned = this.cleanCaptchaText(text);
+                    if (cleaned && cleaned.length >= 4) {
+                        console.log(`Tesseract OCR (strategy ${i + 1}): ${cleaned}`);
+                        return cleaned;
+                    }
+                } catch (err) {
+                    console.warn(`Strategy ${i + 1} failed:`, err.message);
+                    continue;
+                }
+            }
+
+            console.log('All Tesseract strategies failed');
+            return null;
         } catch (error) {
             console.error('Tesseract OCR error:', error.message);
             return null;
+        }
+    }
+
+    /**
+     * Preprocess image for better OCR accuracy
+     */
+    async preprocessImage(imageBuffer) {
+        try {
+            // Apply multiple preprocessing techniques
+            return await sharp(imageBuffer)
+                .resize(200, 100, { // Upscale for better recognition
+                    kernel: sharp.kernel.mitchell,
+                    fit: 'fill'
+                })
+                .grayscale()
+                .normalize() // Auto-adjust contrast
+                .sharpen() // Sharpen edges
+                .threshold(128) // Binary threshold
+                .toBuffer();
+        } catch (error) {
+            console.error('Image preprocessing error:', error.message);
+            return imageBuffer; // Return original if preprocessing fails
         }
     }
 
@@ -122,14 +192,24 @@ class CaptchaSolver {
      */
     async solve(imageBuffer) {
         try {
+            // Preprocess image first
+            const preprocessedBuffer = await this.preprocessImage(imageBuffer);
+            
             // Convert to base64
-            const imageBase64 = imageBuffer.toString('base64');
+            const imageBase64 = preprocessedBuffer.toString('base64');
 
-            // Try Google Vision first (more accurate)
+            // Try Google Vision first (most accurate)
             let captchaText = await this.solveWithGoogleVision(imageBase64);
             
-            // Fallback to Tesseract if Google Vision fails
+            // Fallback to Tesseract with original image if Google Vision fails
             if (!captchaText || captchaText.length < 4) {
+                console.log('Google Vision failed, trying Tesseract with preprocessed image');
+                captchaText = await this.solveWithTesseract(preprocessedBuffer);
+            }
+            
+            // Final fallback: Try Tesseract with original unprocessed image
+            if (!captchaText || captchaText.length < 4) {
+                console.log('Trying Tesseract with original image');
                 captchaText = await this.solveWithTesseract(imageBuffer);
             }
 
@@ -150,6 +230,8 @@ class PortalScraper {
         this.page = null;
         this.captchaSolver = new CaptchaSolver();
         this.maxCaptchaRetries = 3;
+        this.bearerToken = null;
+        this.networkRequests = [];
     }
 
     /**
@@ -176,6 +258,49 @@ class PortalScraper {
             // Set user agent to avoid detection (configurable via env)
             const userAgent = process.env.USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
             await this.page.setUserAgent(userAgent);
+            
+            // Enable request interception to capture network traffic
+            await this.page.setRequestInterception(true);
+            
+            // Listen to network requests to capture Authorization headers
+            this.page.on('request', request => {
+                const headers = request.headers();
+                const url = request.url();
+                
+                // Capture requests with Authorization header
+                if (headers['authorization']) {
+                    const authHeader = headers['authorization'];
+                    if (authHeader.startsWith('Bearer') && authHeader.length > 20) {
+                        console.log('Bearer token found in request');
+                        this.bearerToken = authHeader;
+                    }
+                }
+                
+                // Store request info for debugging
+                this.networkRequests.push({
+                    url,
+                    method: request.method(),
+                    headers: headers,
+                    timestamp: Date.now()
+                });
+                
+                // Continue the request
+                request.continue();
+            });
+            
+            // Also listen to responses to capture tokens from response headers
+            this.page.on('response', async response => {
+                const headers = response.headers();
+                
+                // Check for Authorization in response headers
+                if (headers['authorization']) {
+                    const authHeader = headers['authorization'];
+                    if (authHeader.startsWith('Bearer') && authHeader.length > 20) {
+                        console.log('Bearer token found in response');
+                        this.bearerToken = authHeader;
+                    }
+                }
+            });
             
             return true;
         } catch (error) {
@@ -347,12 +472,16 @@ class PortalScraper {
             // Check for CAPTCHA
             const captchaText = await this.solveCaptcha();
             if (captchaText) {
-                // Find CAPTCHA input
+                console.log(`Entering CAPTCHA: ${captchaText}`);
+                // Find CAPTCHA input - matching Python selectors
                 const captchaInputSelectors = [
                     'input[formcontrolname="captcha"]',
                     'input[name="captcha"]',
                     '#captcha',
+                    '#captchaText',
+                    '#txtCaptcha',
                     'input[placeholder*="Captcha"]',
+                    'input[placeholder*="captcha"]',
                     'input[placeholder*="Enter"]'
                 ];
 
@@ -360,7 +489,11 @@ class PortalScraper {
                 if (captchaInput) {
                     await this.humanType(captchaInput, captchaText);
                     await this.randomDelay(500, 1000);
+                } else {
+                    console.warn('CAPTCHA input field not found, but CAPTCHA was solved');
                 }
+            } else {
+                console.warn('CAPTCHA not solved or not found');
             }
 
             // Click submit/next button
@@ -512,7 +645,10 @@ class PortalScraper {
             timetable: [],
             courses: [],
             results: [],
-            notifications: []
+            notifications: [],
+            backlogs: [],
+            internal_assessments: [],
+            fees: {}
         };
 
         try {
@@ -524,30 +660,107 @@ class PortalScraper {
             // Try to extract any visible student data
             try {
                 const pageData = await this.page.evaluate(() => {
-                    const result = { profile: {}, tables: [] };
+                    const result = { 
+                        profile: {}, 
+                        tables: [],
+                        marks: [],
+                        attendance: []
+                    };
                     
-                    // Extract text content from common elements
-                    const nameEl = document.querySelector('.student-name, #studentName, [class*="name"]');
-                    if (nameEl) result.profile.name = nameEl.textContent.trim();
+                    // Extract text content from common profile elements
+                    const selectors = {
+                        name: ['.student-name', '#studentName', '[class*="name"]', '[data-field="name"]'],
+                        registration_number: ['.reg-no', '#regNo', '[class*="reg"]', '#registrationNumber'],
+                        email: ['#email', '.email', 'a[href^="mailto:"]'],
+                        department: ['#department', '.department', '#branch', '.branch'],
+                        year: ['#year', '.year'],
+                        section: ['#section', '.section'],
+                        semester: ['#semester', '.semester'],
+                        phone: ['#phone', '.phone', '#mobile', '.mobile']
+                    };
                     
-                    const regEl = document.querySelector('.reg-no, #regNo, [class*="reg"]');
-                    if (regEl) result.profile.registration_number = regEl.textContent.trim();
+                    // Try to find and extract profile fields
+                    Object.keys(selectors).forEach(field => {
+                        for (const selector of selectors[field]) {
+                            const el = document.querySelector(selector);
+                            if (el && el.textContent.trim()) {
+                                result.profile[field] = el.textContent.trim();
+                                break;
+                            }
+                        }
+                    });
                     
-                    // Extract tables
+                    // Extract tables - try to identify which table is which
                     const tables = document.querySelectorAll('table');
-                    tables.forEach(table => {
-                        const rows = Array.from(table.querySelectorAll('tr')).map(row => {
+                    tables.forEach((table, index) => {
+                        const tableData = {
+                            index,
+                            headers: [],
+                            rows: []
+                        };
+                        
+                        // Extract headers
+                        const headerRow = table.querySelector('thead tr, tr:first-child');
+                        if (headerRow) {
+                            tableData.headers = Array.from(headerRow.querySelectorAll('th, td')).map(cell => 
+                                cell.textContent.trim().toLowerCase()
+                            );
+                        }
+                        
+                        // Extract rows
+                        const bodyRows = table.querySelectorAll('tbody tr, tr');
+                        tableData.rows = Array.from(bodyRows).slice(headerRow ? 1 : 0).map(row => {
                             return Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim());
                         });
-                        if (rows.length > 0) result.tables.push(rows);
+                        
+                        if (tableData.rows.length > 0) {
+                            result.tables.push(tableData);
+                            
+                            // Try to identify table type by headers
+                            const headerText = tableData.headers.join(' ');
+                            if (headerText.includes('mark') || headerText.includes('grade') || headerText.includes('score')) {
+                                // This is likely a marks table
+                                tableData.rows.forEach(row => {
+                                    if (row.length >= 2 && row[0]) {
+                                        result.marks.push({
+                                            subject: row[0],
+                                            marks: row[1] || '',
+                                            grade: row[2] || ''
+                                        });
+                                    }
+                                });
+                            } else if (headerText.includes('attendance') || headerText.includes('present') || headerText.includes('absent')) {
+                                // This is likely an attendance table
+                                tableData.rows.forEach(row => {
+                                    if (row.length >= 2 && row[0]) {
+                                        result.attendance.push({
+                                            subject: row[0],
+                                            attended: row[1] || '',
+                                            total: row[2] || '',
+                                            percentage: row[3] || ''
+                                        });
+                                    }
+                                });
+                            }
+                        }
                     });
                     
                     return result;
                 });
 
-                if (pageData.profile) {
+                if (pageData.profile && Object.keys(pageData.profile).length > 0) {
                     data.profile = { ...data.profile, ...pageData.profile };
                 }
+                
+                if (pageData.marks && pageData.marks.length > 0) {
+                    data.marks = pageData.marks;
+                }
+                
+                if (pageData.attendance && pageData.attendance.length > 0) {
+                    data.attendance = pageData.attendance;
+                }
+                
+                console.log(`Extracted ${pageData.tables.length} tables from page`);
             } catch (error) {
                 console.error('Data extraction error:', error.message);
             }
@@ -576,12 +789,30 @@ class PortalScraper {
                 };
             }
 
+            // Wait a bit more to ensure all network requests complete
+            await this.randomDelay(2000, 3000);
+
             // Scrape data
             const scrapedData = await this.scrapeData();
 
+            // Add bearer token to the response if found
+            if (this.bearerToken) {
+                scrapedData.bearer_token = this.bearerToken;
+                console.log('Bearer token extracted and included in response');
+            } else {
+                console.warn('No bearer token found in network requests');
+            }
+
+            // Add raw API data if available
+            scrapedData.raw_api_data = {
+                bearer_token: this.bearerToken,
+                network_requests_count: this.networkRequests.length
+            };
+
             return {
                 status: STATUS_SUCCESS,
-                data: scrapedData
+                data: scrapedData,
+                message: 'Successfully scraped portal data'
             };
 
         } catch (error) {
