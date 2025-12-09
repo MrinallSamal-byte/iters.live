@@ -176,27 +176,59 @@ Test CAPTCHA solving capability.
 
 ## CAPTCHA Solving
 
-The scraper uses a dual-approach for CAPTCHA solving:
+The scraper uses a **triple-approach** for CAPTCHA solving with cascading fallback:
 
-1. **Google Vision API** (Primary): More accurate, cloud-based OCR
-2. **Tesseract.js** (Fallback): Local OCR processing
+1. **Google Vision API** (Primary): Cloud-based OCR with TEXT_DETECTION and DOCUMENT_TEXT_DETECTION
+2. **Gemini AI Vision** (Secondary): AI-powered multimodal recognition for complex/distorted CAPTCHAs
+3. **Tesseract.js** (Fallback): Local OCR processing with multiple threshold attempts
+
+### CAPTCHA Solving Methods
+
+#### Google Vision API
+- Uses Google Cloud's Vision API for OCR
+- Best for standard, clear text CAPTCHAs
+- Requires `GOOGLE_VISION_API_KEY` environment variable
+
+#### Gemini AI Vision (NEW)
+- Uses Google's Gemini 1.5 Flash model with vision capabilities
+- Better for distorted, rotated, or noisy CAPTCHAs
+- Uses AI understanding rather than just OCR
+- Requires `GEMINI_API_KEY` environment variable
+
+#### Tesseract.js
+- Local OCR processing (no API key needed)
+- Tries multiple threshold values (100, 128, 150, 180) for better results
+- Always available as fallback
+
+### Image Preprocessing
+
+The service applies advanced preprocessing automatically:
+
+1. **Resizing**: Enlarges small images for better recognition
+2. **Grayscale Conversion**: Removes color noise
+3. **Contrast Enhancement**: Linear contrast with 1.5x multiplier
+4. **Sharpening**: Sigma-based sharpening for clearer edges
+5. **Multiple Thresholding**: Tries various threshold values
 
 ### Improving CAPTCHA Accuracy
 
-To improve CAPTCHA solving accuracy:
+To maximize CAPTCHA solving accuracy:
 
-1. **Get a Google Vision API Key**:
+1. **Set up Google Vision API** (Recommended):
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Enable Vision API
    - Create an API key
    - Set `GOOGLE_VISION_API_KEY` environment variable
 
-2. **Image Preprocessing**: The service automatically:
-   - Converts to grayscale
-   - Normalizes contrast
-   - Applies threshold filtering
+2. **Set up Gemini API** (Highly Recommended):
+   - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Create an API key
+   - Set `GEMINI_API_KEY` environment variable
+   - The service will use `gemini-1.5-flash` model for vision
 
-3. **Multiple Retries**: The scraper automatically retries CAPTCHA solving up to 3 times
+3. **Both APIs**: Having both Google Vision and Gemini configured provides the best success rate
+
+4. **Multiple Retries**: The scraper automatically retries CAPTCHA solving up to 3 times
 
 ## Integration with Main Application
 
