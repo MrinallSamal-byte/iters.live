@@ -10,10 +10,17 @@
 
 const express = require('express');
 const cors = require('cors');
-const { createScraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE } = require('./portal-scraper.service');
+const { createScraper, isScrapingAvailable, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE } = require('./portal-scraper.service');
 
 const app = express();
 const PORT = process.env.SCRAPER_PORT || 5001;
+
+// Check if scraping is available
+const SCRAPING_AVAILABLE = isScrapingAvailable();
+if (!SCRAPING_AVAILABLE) {
+    console.warn('⚠️  Portal scraping unavailable: Puppeteer not installed (optional dependency)');
+    console.warn('⚠️  Server will run in limited mode - scraping endpoints will return errors');
+}
 
 // Middleware
 app.use(cors());
@@ -88,7 +95,12 @@ app.get('/health', (req, res) => {
         status: 'ok',
         service: 'student-portal-scraper-nodejs',
         timestamp: new Date().toISOString(),
-        version: '2.0.0'
+        version: '2.0.0',
+        scrapingAvailable: SCRAPING_AVAILABLE,
+        features: {
+            puppeteer: SCRAPING_AVAILABLE,
+            apiBasedCaptcha: true // Google Vision and Gemini AI are always available if API keys are set
+        }
     });
 });
 
@@ -97,6 +109,14 @@ app.get('/health', (req, res) => {
  */
 app.post('/api/scrape', rateLimit, async (req, res) => {
     try {
+        // Check if scraping is available
+        if (!SCRAPING_AVAILABLE) {
+            return res.status(503).json({
+                status: 'SCRAPER_UNAVAILABLE',
+                message: 'Portal scraping is currently unavailable. Puppeteer is not installed (optional dependency). Please use demo data or enable PORTAL_FEATURES_ENABLED flag.'
+            });
+        }
+        
         // Validate request
         const validation = validateScrapeRequest(req.body);
         if (!validation.valid) {
@@ -113,6 +133,13 @@ app.post('/api/scrape', rateLimit, async (req, res) => {
         
         // Create scraper and run
         const scraper = createScraper();
+        if (!scraper) {
+            return res.status(503).json({
+                status: 'SCRAPER_UNAVAILABLE',
+                message: 'Could not create scraper instance'
+            });
+        }
+        
         const result = await scraper.scrape(reg_number, password);
         
         // Return appropriate response

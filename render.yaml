@@ -3,7 +3,7 @@ services:
     name: iter-aio
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --no-optional
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
@@ -26,6 +26,10 @@ services:
         sync: false
       - key: GEMINI_MODEL
         value: gemini-1.5-flash
+      - key: PUPPETEER_SKIP_DOWNLOAD
+        value: "true"
+      - key: PORTAL_FEATURES_ENABLED
+        value: "false"
     disk:
       name: uploads
       mountPath: /opt/render/project/src/uploads

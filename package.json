@@ -80,12 +80,10 @@
     "openai": "^4.20.1",
     "pdfkit": "^0.13.0",
     "pg": "^8.16.3",
-    "puppeteer": "^24.32.1",
     "qrcode": "^1.5.3",
     "redis": "^5.10.0",
     "sharp": "^0.34.5",
     "socket.io": "^4.6.0",
-    "tesseract.js": "^6.0.1",
     "uuid": "^9.0.1",
     "validator": "^13.11.0",
     "winston": "^3.11.0"
@@ -99,6 +97,10 @@
     "jest-environment-jsdom": "^30.2.0",
     "nodemon": "^3.0.2",
     "pm2": "^5.3.0"
+  },
+  "optionalDependencies": {
+    "puppeteer": "^24.32.1",
+    "tesseract.js": "^6.0.1"
   },
   "build": {
     "appId": "com.iter.collegemanagement",

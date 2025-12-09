@@ -3,18 +3,34 @@
  * Replaces Python/Selenium scraper with native Node.js solution
  * 
  * Features:
- * - Uses Puppeteer for browser automation
+ * - Uses Puppeteer for browser automation (optional dependency)
  * - Implements CAPTCHA solving using multiple methods:
  *   1. Google Vision API (primary OCR)
  *   2. Gemini AI Vision (AI-powered recognition)
- *   3. Tesseract.js (local fallback)
+ *   3. Tesseract.js (local fallback, optional)
  * - Enhanced image preprocessing for better OCR accuracy
  * - Scrapes student data from SOA Portal
  * - Falls back to dummy data on failure
+ * - Gracefully handles missing optional dependencies for memory-constrained environments
  */
 
-const puppeteer = require('puppeteer');
-const Tesseract = require('tesseract.js');
+// Optional dependencies - handle gracefully if not installed
+let puppeteer;
+let Tesseract;
+try {
+    puppeteer = require('puppeteer');
+} catch (e) {
+    console.warn('Puppeteer not installed (optional dependency). Portal scraping will be unavailable.');
+    puppeteer = null;
+}
+
+try {
+    Tesseract = require('tesseract.js');
+} catch (e) {
+    console.warn('Tesseract.js not installed (optional dependency). Local CAPTCHA solving will be unavailable.');
+    Tesseract = null;
+}
+
 const sharp = require('sharp');
 const axios = require('axios');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -228,6 +244,11 @@ What are the exact characters in this CAPTCHA image?`;
      * Enhanced with multiple preprocessing attempts
      */
     async solveWithTesseract(imageBuffer) {
+        if (!Tesseract) {
+            console.warn('Tesseract.js not available (optional dependency not installed)');
+            return null;
+        }
+        
         try {
             // Try multiple threshold values for better results
             const thresholds = [100, 128, 150, 180];
@@ -334,6 +355,11 @@ class PortalScraper {
      * Launch browser
      */
     async launchBrowser() {
+        if (!puppeteer) {
+            console.error('Puppeteer not available (optional dependency not installed). Portal scraping is disabled.');
+            return false;
+        }
+        
         try {
             this.browser = await puppeteer.launch({
                 headless: true,
@@ -342,7 +368,9 @@ class PortalScraper {
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
                     '--disable-accelerated-2d-canvas',
-                    '--disable-gpu'
+                    '--disable-gpu',
+                    '--single-process', // Use single process to reduce memory usage
+                    '--no-zygote' // Reduce memory overhead
                 ],
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
             });
@@ -795,13 +823,26 @@ class PortalScraper {
 
 /**
  * Factory function to create scraper
+ * Returns null if Puppeteer is not available
  */
 function createScraper() {
+    if (!puppeteer) {
+        console.warn('Cannot create scraper: Puppeteer not available (optional dependency not installed)');
+        return null;
+    }
     return new PortalScraper();
+}
+
+/**
+ * Check if scraping is available
+ */
+function isScrapingAvailable() {
+    return puppeteer !== null;
 }
 
 module.exports = {
     createScraper,
+    isScrapingAvailable,
     PortalScraper,
     CaptchaSolver,
     STATUS_SUCCESS,
