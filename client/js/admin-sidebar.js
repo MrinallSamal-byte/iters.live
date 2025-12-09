@@ -266,10 +266,14 @@
             try {
                 const savedScrollPosition = sessionStorage.getItem('adminSidebarScrollPosition');
                 if (savedScrollPosition !== null) {
-                    // Restore scroll position after a short delay to ensure DOM is ready
-                    requestAnimationFrame(() => {
-                        nav.scrollTop = parseInt(savedScrollPosition, 10);
-                    });
+                    const scrollPos = parseInt(savedScrollPosition, 10);
+                    // Only restore if we got a valid number
+                    if (!isNaN(scrollPos) && scrollPos >= 0) {
+                        // Restore scroll position after a short delay to ensure DOM is ready
+                        requestAnimationFrame(() => {
+                            nav.scrollTop = scrollPos;
+                        });
+                    }
                 }
             } catch (e) {
                 // Silently fail if sessionStorage is not available
