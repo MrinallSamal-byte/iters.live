@@ -1,5 +1,5 @@
 """
-CAPTCHA Solver using Google Vision API (REST API with API Key)
+CAPTCHA Solver using OpenRouter API (primary) and Google Vision API (fallback)
 Handles CAPTCHA detection and solving for the SOA Student Portal
 """
 import base64
@@ -7,19 +7,28 @@ import requests
 import re
 import os
 from config import get_config
+from openrouter_captcha import OpenRouterCaptchaSolver
 
-# Default Google Vision API Key for CAPTCHA solving
+# Default Google Vision API Key for CAPTCHA solving (fallback)
 DEFAULT_VISION_API_KEY = 'AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A'
 
 
 class CaptchaSolver:
     """
-    CAPTCHA solver using Google Vision API REST endpoint with API key
+    CAPTCHA solver using OpenRouter API (primary) with Google Vision API fallback
     """
     
     def __init__(self):
         self.config = get_config()
-        # Get API key: prioritize environment variable, then config, then default
+        
+        # Initialize OpenRouter solver (primary)
+        self.openrouter_solver = None
+        openrouter_key = os.getenv('OPENROUTER_API_KEY', '')
+        if openrouter_key:
+            self.openrouter_solver = OpenRouterCaptchaSolver()
+            print('✅ Using OpenRouter API for CAPTCHA solving (primary)')
+        
+        # Get Google Vision API key (fallback)
         self.api_key = (
             os.getenv('GOOGLE_VISION_API_KEY') or 
             getattr(self.config, 'GOOGLE_VISION_API_KEY', '') or 
@@ -27,10 +36,16 @@ class CaptchaSolver:
         )
         self.api_endpoint = 'https://vision.googleapis.com/v1/images:annotate'
         self.max_retries = 2  # Retry OCR at least once if it fails
+        
+        if self.api_key:
+            print('✅ Using Google Vision API for CAPTCHA solving (fallback)')
+        
+        if not self.openrouter_solver and not self.api_key:
+            print('⚠️ No CAPTCHA solver API configured')
     
     def solve_captcha(self, image_data, retry_count=0):
         """
-        Solve CAPTCHA from image data using Google Vision API REST endpoint
+        Solve CAPTCHA from image data using OpenRouter API (primary) or Google Vision API (fallback)
         
         Args:
             image_data: Base64 encoded image data or raw bytes
@@ -39,8 +54,19 @@ class CaptchaSolver:
         Returns:
             str: Extracted CAPTCHA text or None if failed
         """
+        # Try OpenRouter first
+        if self.openrouter_solver:
+            try:
+                result = self.openrouter_solver.solve_captcha(image_data, retry_count)
+                if result:
+                    return result
+                print('OpenRouter failed, falling back to Google Vision')
+            except Exception as e:
+                print(f'OpenRouter error: {str(e)}, falling back to Google Vision')
+        
+        # Fallback to Google Vision API
         if not self.api_key:
-            print('Warning: Google Vision API key not configured')
+            print('Warning: No CAPTCHA solver API configured')
             return None
         
         try:
