@@ -21,10 +21,10 @@ JWT_REFRESH_EXPIRE=7d
 
 ```
 # OpenRouter API Key (PRIMARY) - For AI Chatbot and Educational Features
-OPENROUTER_API_KEY=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
+OPENROUTER_API_KEY=sk-or-v1-YOUR_ACTUAL_OPENROUTER_KEY_HERE
 
 # Google Gemini AI API Key (FALLBACK) - Backup AI Service
-GEMINI_API_KEY=AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+GEMINI_API_KEY=AIzaYOUR_ACTUAL_GEMINI_KEY_HERE
 GEMINI_MODEL=gemini-1.5-flash
 ```
 
@@ -41,6 +41,8 @@ GEMINI_MODEL=gemini-1.5-flash
 **Get your Gemini API key:** https://makersuite.google.com/app/apikey
 
 > **Note:** OpenRouter is the PRIMARY AI service. The system automatically falls back to Gemini if OpenRouter is unavailable. For best results, configure both keys.
+
+> **For Repository Maintainers:** The actual working API keys are stored in `.env.example` for reference. For production deployment, you should use these keys or obtain your own from the providers above.
 
 ### Update After First Deploy
 

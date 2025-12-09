@@ -14,22 +14,27 @@ The OpenRouter API key (and optionally Gemini API key) are not configured in you
 1. **Go to Render Dashboard**: https://dashboard.render.com
 2. **Click on your service** (e.g., `iter-aio`)
 3. **Click "Environment"** in the left menu
-4. **Add these two variables:**
+4. **Add these three variables:**
 
 ```
 Variable Name: OPENROUTER_API_KEY
-Value: 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
+Value: sk-or-v1-YOUR_ACTUAL_OPENROUTER_KEY_HERE
 ```
 
 ```
 Variable Name: GEMINI_API_KEY  
-Value: AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A
+Value: AIzaYOUR_ACTUAL_GEMINI_KEY_HERE
 ```
 
 ```
 Variable Name: GEMINI_MODEL
 Value: gemini-1.5-flash
 ```
+
+> **Note:** Replace the placeholder values with your actual API keys.
+> - Get OpenRouter key from: https://openrouter.ai/keys
+> - Get Gemini key from: https://makersuite.google.com/app/apikey
+> - **For Repository Maintainers:** Actual working keys are in `.env.example`
 
 5. **Click "Save Changes"**
 6. **Wait 2-3 minutes** for automatic redeployment
