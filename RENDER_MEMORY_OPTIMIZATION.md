@@ -30,7 +30,7 @@ This allows the application to run without installing these heavy dependencies w
 Updated `render.yaml` to skip optional dependencies:
 
 ```yaml
-buildCommand: npm install --no-optional
+buildCommand: npm install --omit=optional
 ```
 
 Additional environment variables:
@@ -71,7 +71,7 @@ PORTAL_FEATURES_ENABLED=false
 PUPPETEER_SKIP_DOWNLOAD=true
 
 # Install dependencies (skips Puppeteer)
-npm install --no-optional
+npm install --omit=optional
 
 # Start server
 npm start
@@ -106,7 +106,7 @@ Portal scraping features are controlled by the `PORTAL_FEATURES_ENABLED` environ
 #### For Render Free Tier (512MB RAM)
 - [ ] Set `PORTAL_FEATURES_ENABLED=false`
 - [ ] Set `PUPPETEER_SKIP_DOWNLOAD=true`
-- [ ] Use `buildCommand: npm install --no-optional`
+- [ ] Use `buildCommand: npm install --omit=optional`
 - [ ] Use `startCommand: node server/index.js` (not auto-start.js)
 
 #### For Render Paid Tier or Local Development (1GB+ RAM)
@@ -152,7 +152,7 @@ Test the application without Puppeteer:
 
 ```bash
 # Install without optional dependencies
-npm install --no-optional
+npm install --omit=optional
 
 # Verify Puppeteer is not installed
 node -e "try { require('puppeteer'); console.log('FAIL'); } catch(e) { console.log('PASS - Puppeteer not available'); }"
