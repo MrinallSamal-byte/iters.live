@@ -615,13 +615,16 @@ const getPortalStatus = async (req, res) => {
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
+      // User is authenticated but document doesn't exist yet
+      // Return default unconnected status (user doc will be created on first sync)
       return res.json({
         success: true,
         data: {
           portalConnected: false,
           isVerified: false,
           lastSynced: null,
-          portalEnabled: true
+          portalEnabled: true,
+          message: 'User profile not yet created. Portal data will be stored on first sync.'
         }
       });
     }

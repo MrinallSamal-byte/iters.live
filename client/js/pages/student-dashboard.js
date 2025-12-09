@@ -10,8 +10,8 @@
 
   // Client-side cache with TTL (5 minutes)
   const CACHE_TTL = 5 * 60 * 1000;
-  // Auto-refresh interval (4 seconds)
-  const AUTO_REFRESH_INTERVAL = 4000;
+  // Auto-refresh interval (30 seconds - balances freshness with performance)
+  const AUTO_REFRESH_INTERVAL = 30000;
   let autoRefreshTimer = null;
   
   const dataCache = {
@@ -81,7 +81,7 @@
         await refreshChartsData();
       }
     }, AUTO_REFRESH_INTERVAL);
-    console.log('Dashboard auto-refresh started (every 4 seconds)');
+    console.log('Dashboard auto-refresh started (every 30 seconds)');
   }
 
   /**
@@ -356,7 +356,9 @@
    */
   function updateAttendanceChart(present, absent) {
     if (attendanceChartInstance) {
-      attendanceChartInstance.data.datasets[0].data = [present, absent];
+      // Use proper Chart.js data update - splice and push for proper reactivity
+      attendanceChartInstance.data.datasets[0].data.splice(0, attendanceChartInstance.data.datasets[0].data.length);
+      attendanceChartInstance.data.datasets[0].data.push(present, absent);
       attendanceChartInstance.update('none'); // Update without animation for smooth refresh
     } else {
       renderAttendanceChart(present, absent);
@@ -466,7 +468,9 @@
     });
 
     if (performanceChartInstance) {
-      performanceChartInstance.data.datasets[0].data = data;
+      // Use proper Chart.js data update - splice and push for proper reactivity
+      performanceChartInstance.data.datasets[0].data.splice(0, performanceChartInstance.data.datasets[0].data.length);
+      data.forEach(val => performanceChartInstance.data.datasets[0].data.push(val));
       performanceChartInstance.update('none'); // Update without animation for smooth refresh
     } else {
       renderPerformanceChart(summary);

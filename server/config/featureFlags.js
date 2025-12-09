@@ -14,9 +14,18 @@
 // Check if running on a memory-constrained environment
 const isMemoryConstrained = () => {
   // Render free tier has 512MB limit
-  const maxOldSpaceSize = process.env.NODE_OPTIONS?.includes('--max-old-space-size=');
+  // Check if max-old-space-size is set to 400MB or less
+  const nodeOptions = process.env.NODE_OPTIONS || '';
+  const maxOldSpaceMatch = nodeOptions.match(/--max-old-space-size=(\d+)/);
+  if (maxOldSpaceMatch) {
+    const maxOldSpaceSize = parseInt(maxOldSpaceMatch[1], 10);
+    if (maxOldSpaceSize <= 400) {
+      return true;
+    }
+  }
+  // Check for Render environment
   const isRenderFreeTier = process.env.RENDER === 'true' && !process.env.RENDER_PAID;
-  return maxOldSpaceSize || isRenderFreeTier;
+  return isRenderFreeTier;
 };
 
 // Portal features - disabled by default on memory-constrained environments

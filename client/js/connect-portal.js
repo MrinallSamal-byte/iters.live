@@ -358,7 +358,7 @@
         }
 
         const regNumber = regNumberInput ? regNumberInput.value.trim() : '';
-        const password = portalPasswordInput ? portalPasswordInput.value : '';
+        const password = portalPasswordInput ? portalPasswordInput.value.trim() : '';
 
         if (!regNumber || !password) {
             showStatus('Please fill in all fields', 'error');
