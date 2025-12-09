@@ -644,10 +644,13 @@ class Chatbot {
                     if (data.success && data.answer) {
                         return data.answer;
                     }
+                } else {
+                    // Log the error for debugging
+                    console.log('AI API returned error:', response.status);
                 }
             }
         } catch (error) {
-            console.log('AI API not available, using smart classification');
+            console.log('AI API not available, using smart classification:', error.message);
         }
 
         // Intelligent fallback based on question type
