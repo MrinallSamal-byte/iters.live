@@ -156,9 +156,20 @@ app.post('/api/test-captcha', async (req, res) => {
         
         const response = {
             status: 'ok',
-            api_key_configured: !!solver.apiKey,
-            api_key_length: solver.apiKey ? solver.apiKey.length : 0
+            // Google Vision API status
+            api_key_configured: !!solver.visionApiKey,
+            api_key_length: solver.visionApiKey ? solver.visionApiKey.length : 0,
+            // Gemini AI Vision status
+            gemini_api_configured: !!solver.geminiApiKey,
+            gemini_api_length: solver.geminiApiKey ? solver.geminiApiKey.length : 0,
+            // Available methods
+            available_methods: []
         };
+        
+        // List available CAPTCHA solving methods
+        if (solver.visionApiKey) response.available_methods.push('Google Vision API');
+        if (solver.genAI) response.available_methods.push('Gemini AI Vision');
+        response.available_methods.push('Tesseract.js (local)');
         
         // If image URL provided, test it
         if (req.body.image_url) {

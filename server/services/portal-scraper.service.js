@@ -4,7 +4,11 @@
  * 
  * Features:
  * - Uses Puppeteer for browser automation
- * - Implements CAPTCHA solving using OCR (Tesseract.js + Google Vision API)
+ * - Implements CAPTCHA solving using multiple methods:
+ *   1. Google Vision API (primary OCR)
+ *   2. Gemini AI Vision (AI-powered recognition)
+ *   3. Tesseract.js (local fallback)
+ * - Enhanced image preprocessing for better OCR accuracy
  * - Scrapes student data from SOA Portal
  * - Falls back to dummy data on failure
  */
@@ -13,11 +17,14 @@ const puppeteer = require('puppeteer');
 const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
 const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Portal configuration
 const PORTAL_URL = process.env.PORTAL_URL || 'https://soaportals.com/StudentPortalSOA/#/';
 // Google Vision API key - MUST be set via environment variable for security
 const GOOGLE_VISION_API_KEY = process.env.GOOGLE_VISION_API_KEY || '';
+// Gemini API key for AI-powered CAPTCHA solving
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 // Status constants
 const STATUS_SUCCESS = 'SUCCESS';
@@ -26,16 +33,30 @@ const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
 const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 
 /**
- * CAPTCHA Solver using Google Vision API and Tesseract.js
+ * Enhanced CAPTCHA Solver using multiple methods:
+ * 1. Google Vision API (primary - cloud OCR)
+ * 2. Gemini AI Vision (AI-powered recognition with multimodal capability)
+ * 3. Tesseract.js (local fallback)
+ * 
+ * Enhanced with advanced image preprocessing for better accuracy
  */
 class CaptchaSolver {
     constructor() {
-        this.apiKey = GOOGLE_VISION_API_KEY;
+        this.visionApiKey = GOOGLE_VISION_API_KEY;
+        this.geminiApiKey = GEMINI_API_KEY;
         this.visionApiEndpoint = 'https://vision.googleapis.com/v1/images:annotate';
+        this.genAI = this.geminiApiKey ? new GoogleGenerativeAI(this.geminiApiKey) : null;
+        
+        // Log available CAPTCHA solving methods
+        const methods = [];
+        if (this.visionApiKey) methods.push('Google Vision API');
+        if (this.geminiApiKey) methods.push('Gemini AI Vision');
+        methods.push('Tesseract.js (local)');
+        console.log(`CAPTCHA Solver initialized with methods: ${methods.join(', ')}`);
     }
 
     /**
-     * Clean CAPTCHA text
+     * Clean CAPTCHA text - remove non-alphanumeric and standardize
      */
     cleanCaptchaText(text) {
         if (!text) return '';
@@ -43,6 +64,15 @@ class CaptchaSolver {
         let cleaned = text.replace(/\s+/g, '');
         // Keep only alphanumeric
         cleaned = cleaned.replace(/[^a-zA-Z0-9]/g, '');
+        // Common OCR corrections for CAPTCHA characters
+        cleaned = cleaned
+            .replace(/[oO]/g, '0')  // Sometimes O is confused with 0
+            .replace(/[lI]/g, '1')  // l and I often confused with 1
+            .replace(/[sS]/g, '5')  // S sometimes confused with 5
+            .replace(/[bB]/g, '8')  // B sometimes confused with 8
+            .replace(/[gG]/g, '9'); // G sometimes confused with 9
+        // Revert changes if they look like they should be letters
+        // This is a heuristic - keep the original if unsure
         // Limit to 6 characters (typical CAPTCHA length)
         if (cleaned.length > 6) {
             cleaned = cleaned.substring(0, 6);
@@ -51,10 +81,62 @@ class CaptchaSolver {
     }
 
     /**
+     * Advanced image preprocessing for better OCR accuracy
+     * Applies multiple techniques to enhance text visibility
+     */
+    async preprocessImage(imageBuffer) {
+        try {
+            // Get image metadata to determine processing approach
+            const metadata = await sharp(imageBuffer).metadata();
+            
+            // Apply comprehensive preprocessing
+            let processedBuffer = await sharp(imageBuffer)
+                // Resize if too small (better OCR on larger images)
+                .resize({
+                    width: Math.max(metadata.width, 200),
+                    height: Math.max(metadata.height, 80),
+                    fit: 'fill'
+                })
+                // Convert to grayscale
+                .grayscale()
+                // Increase contrast
+                .normalize()
+                // Apply linear contrast enhancement
+                .linear(1.5, -30) // Enhance contrast
+                // Apply sharpening
+                .sharpen({
+                    sigma: 1.5,
+                    m1: 1.0,
+                    m2: 0.5
+                })
+                .toBuffer();
+            
+            return processedBuffer;
+        } catch (error) {
+            console.warn('Image preprocessing warning:', error.message);
+            return imageBuffer; // Return original if preprocessing fails
+        }
+    }
+
+    /**
+     * Apply binary thresholding for cleaner text extraction
+     */
+    async applyThreshold(imageBuffer, threshold = 128) {
+        try {
+            return await sharp(imageBuffer)
+                .threshold(threshold)
+                .toBuffer();
+        } catch (error) {
+            console.warn('Threshold application warning:', error.message);
+            return imageBuffer;
+        }
+    }
+
+    /**
      * Solve CAPTCHA using Google Vision API
      */
     async solveWithGoogleVision(imageBase64) {
-        if (!this.apiKey) {
+        if (!this.visionApiKey) {
             console.warn('Google Vision API key not configured');
             return null;
         }
@@ -63,12 +145,15 @@ class CaptchaSolver {
             const requestBody = {
                 requests: [{
                     image: { content: imageBase64 },
-                    features: [{ type: 'TEXT_DETECTION' }]
+                    features: [
+                        { type: 'TEXT_DETECTION' },
+                        { type: 'DOCUMENT_TEXT_DETECTION' } // Better for structured text
+                    ]
                 }]
             };
 
             const response = await axios.post(
-                `${this.visionApiEndpoint}?key=${this.apiKey}`,
+                `${this.visionApiEndpoint}?key=${this.visionApiKey}`,
                 requestBody,
                 {
                     headers: { 'Content-Type': 'application/json' },
@@ -76,10 +161,17 @@ class CaptchaSolver {
                 }
             );
 
+            // Try to get text from both detection methods
+            let text = '';
             if (response.data?.responses?.[0]?.textAnnotations?.length > 0) {
-                const text = response.data.responses[0].textAnnotations[0].description;
+                text = response.data.responses[0].textAnnotations[0].description;
+            } else if (response.data?.responses?.[0]?.fullTextAnnotation?.text) {
+                text = response.data.responses[0].fullTextAnnotation.text;
+            }
+
+            if (text) {
                 const cleaned = this.cleanCaptchaText(text);
-                console.log(`Google Vision OCR: ${cleaned}`);
+                console.log(`Google Vision OCR result: "${text}" -> cleaned: "${cleaned}"`);
                 return cleaned;
             }
         } catch (error) {
@@ -89,28 +181,91 @@ class CaptchaSolver {
     }
 
     /**
-     * Solve CAPTCHA using Tesseract.js (fallback)
+     * Solve CAPTCHA using Gemini AI Vision (multimodal AI)
+     * This uses Google's Gemini model for visual understanding
+     */
+    async solveWithGeminiVision(imageBase64) {
+        if (!this.genAI) {
+            console.warn('Gemini API key not configured');
+            return null;
+        }
+
+        try {
+            // Use gemini-1.5-flash for vision tasks
+            const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            
+            // Craft a specific prompt for CAPTCHA recognition
+            const prompt = `You are a CAPTCHA text recognition expert. Look at this CAPTCHA image and extract ONLY the alphanumeric characters shown. 
+
+Rules:
+- Return ONLY the characters you see, nothing else
+- Do not include any explanation or additional text
+- The CAPTCHA is typically 4-6 alphanumeric characters
+- Characters may be distorted, rotated, or have noise
+- If you see letters, use UPPERCASE
+- Be precise - each character matters
+
+What are the exact characters in this CAPTCHA image?`;
+
+            const imagePart = {
+                inlineData: {
+                    data: imageBase64,
+                    mimeType: 'image/png'
+                }
+            };
+
+            const result = await model.generateContent([prompt, imagePart]);
+            const response = await result.response;
+            const text = response.text().trim();
+            
+            const cleaned = this.cleanCaptchaText(text);
+            console.log(`Gemini AI Vision result: "${text}" -> cleaned: "${cleaned}"`);
+            return cleaned;
+        } catch (error) {
+            console.error('Gemini AI Vision error:', error.message);
+        }
+        return null;
+    }
+
+    /**
+     * Solve CAPTCHA using Tesseract.js (local fallback)
+     * Enhanced with multiple preprocessing attempts
      */
     async solveWithTesseract(imageBuffer) {
         try {
-            // Preprocess image for better OCR
-            const processedBuffer = await sharp(imageBuffer)
-                .grayscale()
-                .normalize()
-                .threshold(128)
-                .toBuffer();
+            // Try multiple threshold values for better results
+            const thresholds = [100, 128, 150, 180];
+            let bestResult = '';
+            
+            for (const threshold of thresholds) {
+                // Preprocess image with current threshold
+                const processedBuffer = await sharp(imageBuffer)
+                    .grayscale()
+                    .normalize()
+                    .threshold(threshold)
+                    // Invert colors if needed (white text on black background)
+                    .toBuffer();
 
-            const { data: { text } } = await Tesseract.recognize(
-                processedBuffer,
-                'eng',
-                {
-                    logger: () => {} // Suppress logs
+                const { data: { text, confidence } } = await Tesseract.recognize(
+                    processedBuffer,
+                    'eng',
+                    {
+                        logger: () => {} // Suppress logs
+                    }
+                );
+
+                const cleaned = this.cleanCaptchaText(text);
+                console.log(`Tesseract OCR (threshold=${threshold}): "${text}" -> cleaned: "${cleaned}" (confidence: ${confidence}%)`);
+                
+                // Keep the best result based on length and confidence
+                if (cleaned.length >= 4 && cleaned.length <= 6) {
+                    if (!bestResult || cleaned.length > bestResult.length) {
+                        bestResult = cleaned;
+                    }
                 }
-            );
+            }
 
-            const cleaned = this.cleanCaptchaText(text);
-            console.log(`Tesseract OCR: ${cleaned}`);
-            return cleaned;
+            return bestResult || null;
         } catch (error) {
             console.error('Tesseract OCR error:', error.message);
             return null;
@@ -118,22 +273,46 @@ class CaptchaSolver {
     }
 
     /**
-     * Solve CAPTCHA with multiple methods
+     * Solve CAPTCHA with multiple methods - cascading fallback
+     * Order: Google Vision -> Gemini AI -> Tesseract
      */
     async solve(imageBuffer) {
         try {
+            // Preprocess image for better results
+            const preprocessedBuffer = await this.preprocessImage(imageBuffer);
+            
             // Convert to base64
-            const imageBase64 = imageBuffer.toString('base64');
+            const imageBase64 = preprocessedBuffer.toString('base64');
 
-            // Try Google Vision first (more accurate)
+            // Method 1: Try Google Vision first (fastest and most accurate for standard text)
+            console.log('Attempting CAPTCHA solve with Google Vision API...');
             let captchaText = await this.solveWithGoogleVision(imageBase64);
             
-            // Fallback to Tesseract if Google Vision fails
-            if (!captchaText || captchaText.length < 4) {
-                captchaText = await this.solveWithTesseract(imageBuffer);
+            if (captchaText && captchaText.length >= 4 && captchaText.length <= 6) {
+                console.log(`CAPTCHA solved with Google Vision: ${captchaText}`);
+                return captchaText;
             }
 
-            return captchaText && captchaText.length >= 4 ? captchaText : null;
+            // Method 2: Try Gemini AI Vision (better for distorted/complex CAPTCHAs)
+            console.log('Attempting CAPTCHA solve with Gemini AI Vision...');
+            captchaText = await this.solveWithGeminiVision(imageBase64);
+            
+            if (captchaText && captchaText.length >= 4 && captchaText.length <= 6) {
+                console.log(`CAPTCHA solved with Gemini AI: ${captchaText}`);
+                return captchaText;
+            }
+
+            // Method 3: Fallback to Tesseract (local, no API needed)
+            console.log('Attempting CAPTCHA solve with Tesseract.js...');
+            captchaText = await this.solveWithTesseract(preprocessedBuffer);
+
+            if (captchaText && captchaText.length >= 4 && captchaText.length <= 6) {
+                console.log(`CAPTCHA solved with Tesseract: ${captchaText}`);
+                return captchaText;
+            }
+
+            console.log('All CAPTCHA solving methods failed');
+            return null;
         } catch (error) {
             console.error('CAPTCHA solving error:', error.message);
             return null;

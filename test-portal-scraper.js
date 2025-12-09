@@ -55,12 +55,19 @@ async function testCaptcha() {
         
         if (response.status === 200) {
             console.log('✅ CAPTCHA test endpoint working');
-            console.log('   API Key Configured:', response.data.api_key_configured);
-            console.log('   API Key Length:', response.data.api_key_length);
+            console.log('   Google Vision API Configured:', response.data.api_key_configured);
+            console.log('   Google Vision API Key Length:', response.data.api_key_length);
             
-            if (!response.data.api_key_configured) {
-                console.log('   ⚠️  Warning: Google Vision API key not configured');
-                console.log('   Set GOOGLE_VISION_API_KEY environment variable for better accuracy');
+            // Check for Gemini API key as well
+            const geminiConfigured = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 10;
+            console.log('   Gemini AI API Configured:', geminiConfigured ? 'Yes' : 'No');
+            
+            if (!response.data.api_key_configured && !geminiConfigured) {
+                console.log('   ⚠️  Warning: Neither Google Vision nor Gemini API key configured');
+                console.log('   Set GOOGLE_VISION_API_KEY and/or GEMINI_API_KEY for better CAPTCHA accuracy');
+                console.log('   The scraper will fall back to Tesseract.js (local OCR)');
+            } else if (geminiConfigured) {
+                console.log('   ✅ Gemini AI Vision available for advanced CAPTCHA solving');
             }
             return true;
         } else {
