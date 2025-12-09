@@ -1,22 +1,33 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const openRouterService = require('./openrouter.service');
 
 /**
  * AI Service for Educational Assistance
  * Provides personalized study plans, recommendations, and Q&A
- * Uses Google Gemini AI for intelligent responses
+ * Uses OpenRouter API (primary) and Google Gemini AI (fallback) for intelligent responses
  * Part of ITER EduHub Enhancement Suite
  */
 class AIService {
     constructor() {
+        // OpenRouter configuration (primary)
+        this.useOpenRouter = openRouterService.isAvailable();
+        
+        // Gemini configuration (fallback)
         this.geminiKey = process.env.GEMINI_API_KEY;
         this.model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
         this.genAI = null;
         
         if (this.geminiKey) {
             this.genAI = new GoogleGenerativeAI(this.geminiKey);
-            console.log('✅ AI Service initialized with Gemini API');
+            console.log('✅ AI Service initialized with Gemini API (fallback)');
         } else {
-            console.log('⚠️ AI Service initialized without Gemini API key - AI features will use fallback responses');
+            console.log('⚠️ AI Service initialized without Gemini API key');
+        }
+        
+        if (this.useOpenRouter) {
+            console.log('✅ AI Service using OpenRouter API (primary)');
+        } else if (!this.genAI) {
+            console.log('⚠️ AI Service initialized without any AI provider - using fallback responses');
         }
     }
 
@@ -66,22 +77,30 @@ Format as JSON with structure:
 }`;
 
         try {
-            if (!this.genAI) {
-                console.log('Gemini API key not configured, using fallback study plan');
-                return this.getFallbackStudyPlan(studentData);
-            }
-
-            const model = this.genAI.getGenerativeModel({ model: this.model });
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const content = response.text();
-            
-            // Try to extract JSON from response
-            const jsonMatch = content.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
+            // Try OpenRouter first
+            if (this.useOpenRouter) {
+                try {
+                    return await openRouterService.generateStudyPlan(studentData);
+                } catch (openRouterError) {
+                    console.log('OpenRouter failed, falling back to Gemini:', openRouterError.message);
+                }
             }
             
+            // Fallback to Gemini
+            if (this.genAI) {
+                const model = this.genAI.getGenerativeModel({ model: this.model });
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const content = response.text();
+                
+                // Try to extract JSON from response
+                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+            }
+            
+            console.log('No AI provider available, using fallback study plan');
             return this.getFallbackStudyPlan(studentData);
         } catch (error) {
             console.error('AI Service Error:', error.message);
@@ -130,14 +149,24 @@ Instructions:
 Please provide a thorough and helpful response:`;
 
         try {
-            if (!this.genAI) {
-                return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your instructor.";
+            // Try OpenRouter first
+            if (this.useOpenRouter) {
+                try {
+                    return await openRouterService.answerQuestion(question, context);
+                } catch (openRouterError) {
+                    console.log('OpenRouter failed, falling back to Gemini:', openRouterError.message);
+                }
             }
 
-            const model = this.genAI.getGenerativeModel({ model: this.model });
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            return response.text();
+            // Fallback to Gemini
+            if (this.genAI) {
+                const model = this.genAI.getGenerativeModel({ model: this.model });
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                return response.text();
+            }
+            
+            return "I'm currently unable to process questions. Please make sure the AI service is configured correctly or contact your instructor.";
         } catch (error) {
             console.error('AI chat error:', error.message);
             return "I'm sorry, I'm having trouble processing your question right now. Please try again later.";
