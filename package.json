@@ -29,6 +29,7 @@
     "render:setup": "npm run render:schema && npm run render:seed",
     "test": "jest --coverage",
     "test:e2e": "playwright test",
+    "test:scraper": "node test-portal-scraper.js",
     "verify:ai": "node verify-ai-service.js",
     "build:client": "echo 'Client is vanilla HTML/CSS/JS - no build needed'",
     "build:electron": "electron-builder",
