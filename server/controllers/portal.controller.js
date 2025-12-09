@@ -25,8 +25,9 @@ const googleDriveBackup = require('../services/googleDriveBackup.service');
 // Import feature flags to check if portal features are enabled
 const { isPortalEnabled, getPortalDisabledResponse, PORTAL_DISABLED_MESSAGE } = require('../config/featureFlags');
 
-// Flask Scraper Service URL (configurable via environment)
-const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
+// Scraper Service URL (Node.js/Puppeteer or Flask/Selenium)
+// Defaults to Node.js service on port 5001
+const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
 
 // Maximum login attempts before fallback
 const MAX_LOGIN_ATTEMPTS = 3;
@@ -186,7 +187,7 @@ const portalLogin = async (req, res) => {
 
     try {
       const scraperResponse = await axios.post(
-        `${FLASK_SERVICE_URL}/api/scrape`,
+        `${SCRAPER_SERVICE_URL}/api/scrape`,
         { reg_number, password },
         {
           timeout: 90000,
@@ -1126,7 +1127,7 @@ const fetchPortalData = async (req, res) => {
     // Use it when you specifically want to refresh data
     try {
       const scraperResponse = await axios.post(
-        `${FLASK_SERVICE_URL}/api/scrape`,
+        `${SCRAPER_SERVICE_URL}/api/scrape`,
         { reg_number, password },
         {
           timeout: 120000, // 2 minute timeout for comprehensive data fetch
