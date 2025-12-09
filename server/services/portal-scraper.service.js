@@ -16,7 +16,8 @@ const axios = require('axios');
 
 // Portal configuration
 const PORTAL_URL = process.env.PORTAL_URL || 'https://soaportals.com/StudentPortalSOA/#/';
-const GOOGLE_VISION_API_KEY = process.env.GOOGLE_VISION_API_KEY || 'AIzaSyB5aszVVX1UQuv0MEJOt0QumbnSa4x5z5A';
+// Google Vision API key - MUST be set via environment variable for security
+const GOOGLE_VISION_API_KEY = process.env.GOOGLE_VISION_API_KEY || '';
 
 // Status constants
 const STATUS_SUCCESS = 'SUCCESS';
@@ -172,10 +173,9 @@ class PortalScraper {
             // Set viewport
             await this.page.setViewport({ width: 1366, height: 768 });
             
-            // Set user agent to avoid detection
-            await this.page.setUserAgent(
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            );
+            // Set user agent to avoid detection (configurable via env)
+            const userAgent = process.env.USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+            await this.page.setUserAgent(userAgent);
             
             return true;
         } catch (error) {
@@ -366,14 +366,33 @@ class PortalScraper {
             // Click submit/next button
             const submitSelectors = [
                 'button[type="submit"]',
-                'button:has-text("LOGIN")',
-                'button:has-text("SUBMIT")',
-                'button:has-text("Next")',
                 '.btn-submit',
                 '.login-btn'
             ];
 
-            const submitBtn = await this.findElement(submitSelectors);
+            let submitBtn = await this.findElement(submitSelectors);
+            
+            // If not found by class/type, try finding by text using XPath
+            if (!submitBtn) {
+                const xpathSelectors = [
+                    '//button[contains(text(), "LOGIN")]',
+                    '//button[contains(text(), "SUBMIT")]',
+                    '//button[contains(text(), "Next")]'
+                ];
+                
+                for (const xpath of xpathSelectors) {
+                    try {
+                        const elements = await this.page.$x(xpath);
+                        if (elements.length > 0) {
+                            submitBtn = elements[0];
+                            break;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+            
             if (submitBtn) {
                 await submitBtn.click();
                 await this.randomDelay(3000, 5000);
@@ -393,11 +412,23 @@ class PortalScraper {
                 await this.randomDelay(500, 1000);
 
                 // Click final login button
-                const loginBtn = await this.findElement([
-                    'button:has-text("LOGIN")',
+                let loginBtn = await this.findElement([
                     'button[type="submit"]',
                     '.btn-login'
                 ]);
+                
+                // Try finding by text using XPath if not found
+                if (!loginBtn) {
+                    try {
+                        const elements = await this.page.$x('//button[contains(text(), "LOGIN")]');
+                        if (elements.length > 0) {
+                            loginBtn = elements[0];
+                        }
+                    } catch (e) {
+                        // Ignore
+                    }
+                }
+                
                 if (loginBtn) {
                     await loginBtn.click();
                     await this.randomDelay(3000, 5000);

@@ -6,8 +6,9 @@
 const axios = require('axios');
 
 const SCRAPER_URL = process.env.SCRAPER_SERVICE_URL || 'http://localhost:5001';
-const TEST_REG_NUMBER = process.env.TEST_REG_NUMBER || '25E111A45';
-const TEST_PASSWORD = process.env.TEST_PASSWORD || 'test123';
+// Test credentials - use environment variables for real credentials
+const TEST_REG_NUMBER = process.env.TEST_REG_NUMBER || 'DEMO_USER';
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'demo_password';
 
 console.log('========================================');
 console.log('Portal Scraper Service Test');

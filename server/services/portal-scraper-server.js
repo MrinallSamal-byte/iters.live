@@ -28,7 +28,7 @@ const RATE_LIMIT_MAX = 5; // 5 requests per minute
  * Rate limiting middleware
  */
 function rateLimit(req, res, next) {
-    const clientIp = req.ip || req.connection.remoteAddress;
+    const clientIp = req.ip || req.socket.remoteAddress;
     const now = Date.now();
     
     if (!rateLimitStorage.has(clientIp)) {
