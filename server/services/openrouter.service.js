@@ -48,8 +48,6 @@ class OpenRouterService {
         }
 
         try {
-            const fetch = (await import('node-fetch')).default;
-            
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
