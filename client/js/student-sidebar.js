@@ -9,6 +9,8 @@
             this.loadUserInfo();
             this.setActivePage();
             this.initMobileMenu();
+            this.restoreScrollPosition();
+            this.setupScrollTracking();
         },
 
         createSidebar() {
@@ -232,6 +234,45 @@
                         window.location.href = '../login.html';
                     }
                 }
+            }
+        },
+
+        setupScrollTracking() {
+            const sidebar = document.getElementById('studentSidebar');
+            const nav = sidebar ? sidebar.querySelector('.sidebar-nav') : null;
+            
+            if (!nav) return;
+
+            // Save scroll position when user scrolls
+            let scrollTimeout;
+            nav.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    try {
+                        sessionStorage.setItem('studentSidebarScrollPosition', nav.scrollTop);
+                    } catch (e) {
+                        // Silently fail if sessionStorage is not available
+                    }
+                }, 100);
+            }, { passive: true });
+        },
+
+        restoreScrollPosition() {
+            const sidebar = document.getElementById('studentSidebar');
+            const nav = sidebar ? sidebar.querySelector('.sidebar-nav') : null;
+            
+            if (!nav) return;
+
+            try {
+                const savedScrollPosition = sessionStorage.getItem('studentSidebarScrollPosition');
+                if (savedScrollPosition !== null) {
+                    // Restore scroll position after a short delay to ensure DOM is ready
+                    requestAnimationFrame(() => {
+                        nav.scrollTop = parseInt(savedScrollPosition, 10);
+                    });
+                }
+            } catch (e) {
+                // Silently fail if sessionStorage is not available
             }
         }
     };
