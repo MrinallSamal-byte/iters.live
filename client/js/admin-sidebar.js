@@ -9,6 +9,8 @@
             this.loadUserInfo();
             this.setActivePage();
             this.initMobileMenu();
+            this.restoreScrollPosition();
+            this.setupScrollTracking();
         },
 
         createSidebar() {
@@ -232,6 +234,49 @@
                     localStorage.removeItem('user');
                     window.location.href = '../login.html';
                 }
+            }
+        },
+
+        setupScrollTracking() {
+            const sidebar = document.getElementById('adminSidebar');
+            const nav = sidebar ? sidebar.querySelector('.sidebar-nav') : null;
+            
+            if (!nav) return;
+
+            // Save scroll position when user scrolls
+            let scrollTimeout;
+            nav.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    try {
+                        sessionStorage.setItem('adminSidebarScrollPosition', nav.scrollTop);
+                    } catch (e) {
+                        // Silently fail if sessionStorage is not available
+                    }
+                }, 100);
+            }, { passive: true });
+        },
+
+        restoreScrollPosition() {
+            const sidebar = document.getElementById('adminSidebar');
+            const nav = sidebar ? sidebar.querySelector('.sidebar-nav') : null;
+            
+            if (!nav) return;
+
+            try {
+                const savedScrollPosition = sessionStorage.getItem('adminSidebarScrollPosition');
+                if (savedScrollPosition !== null) {
+                    const scrollPos = parseInt(savedScrollPosition, 10);
+                    // Only restore if we got a valid number
+                    if (!isNaN(scrollPos) && scrollPos >= 0) {
+                        // Restore scroll position after a short delay to ensure DOM is ready
+                        requestAnimationFrame(() => {
+                            nav.scrollTop = scrollPos;
+                        });
+                    }
+                }
+            } catch (e) {
+                // Silently fail if sessionStorage is not available
             }
         }
     };

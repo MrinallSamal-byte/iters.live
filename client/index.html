@@ -34,6 +34,48 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/assets/icon.png">
+    <!-- Auto-redirect logged-in users to their dashboard -->
+    <script>
+        (function() {
+            'use strict';
+            // Check if user is already logged in
+            function checkAuthAndRedirect() {
+                try {
+                    const accessToken = localStorage.getItem('accessToken');
+                    const user = localStorage.getItem('user');
+                    
+                    if (accessToken && user) {
+                        const userData = JSON.parse(user);
+                        
+                        // Redirect based on role
+                        if (userData && userData.role) {
+                            const dashboards = {
+                                'student': '/dashboard/student.html',
+                                'teacher': '/dashboard/teacher.html',
+                                'admin': '/dashboard/admin.html'
+                            };
+                            
+                            const dashboardUrl = dashboards[userData.role];
+                            if (dashboardUrl) {
+                                // Redirect immediately
+                                window.location.replace(dashboardUrl);
+                                return true;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // If there's an error parsing user data, clear invalid data
+                    console.warn('Invalid auth data, clearing storage');
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('user');
+                }
+                return false;
+            }
+            
+            // Execute redirect check immediately
+            checkAuthAndRedirect();
+        })();
+    </script>
 </head>
 
 <body class="landing-page">
