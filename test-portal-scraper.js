@@ -58,9 +58,15 @@ async function testCaptcha() {
             console.log('   Google Vision API Configured:', response.data.api_key_configured);
             console.log('   Google Vision API Key Length:', response.data.api_key_length);
             
-            // Check for Gemini API key as well
-            const geminiConfigured = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 10;
+            // Use response data for Gemini configuration if available
+            const geminiConfigured = response.data.gemini_api_configured || 
+                (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
             console.log('   Gemini AI API Configured:', geminiConfigured ? 'Yes' : 'No');
+            
+            // Show available methods if returned by the endpoint
+            if (response.data.available_methods && response.data.available_methods.length > 0) {
+                console.log('   Available Methods:', response.data.available_methods.join(', '));
+            }
             
             if (!response.data.api_key_configured && !geminiConfigured) {
                 console.log('   ⚠️  Warning: Neither Google Vision nor Gemini API key configured');

@@ -64,15 +64,6 @@ class CaptchaSolver {
         let cleaned = text.replace(/\s+/g, '');
         // Keep only alphanumeric
         cleaned = cleaned.replace(/[^a-zA-Z0-9]/g, '');
-        // Common OCR corrections for CAPTCHA characters
-        cleaned = cleaned
-            .replace(/[oO]/g, '0')  // Sometimes O is confused with 0
-            .replace(/[lI]/g, '1')  // l and I often confused with 1
-            .replace(/[sS]/g, '5')  // S sometimes confused with 5
-            .replace(/[bB]/g, '8')  // B sometimes confused with 8
-            .replace(/[gG]/g, '9'); // G sometimes confused with 9
-        // Revert changes if they look like they should be letters
-        // This is a heuristic - keep the original if unsure
         // Limit to 6 characters (typical CAPTCHA length)
         if (cleaned.length > 6) {
             cleaned = cleaned.substring(0, 6);
@@ -115,20 +106,6 @@ class CaptchaSolver {
         } catch (error) {
             console.warn('Image preprocessing warning:', error.message);
             return imageBuffer; // Return original if preprocessing fails
-        }
-    }
-
-    /**
-     * Apply binary thresholding for cleaner text extraction
-     */
-    async applyThreshold(imageBuffer, threshold = 128) {
-        try {
-            return await sharp(imageBuffer)
-                .threshold(threshold)
-                .toBuffer();
-        } catch (error) {
-            console.warn('Threshold application warning:', error.message);
-            return imageBuffer;
         }
     }
 
@@ -181,10 +158,29 @@ class CaptchaSolver {
     }
 
     /**
+     * Detect MIME type from image buffer
+     */
+    detectMimeType(imageBuffer) {
+        // Check magic bytes for common image formats
+        if (imageBuffer[0] === 0x89 && imageBuffer[1] === 0x50) {
+            return 'image/png';
+        } else if (imageBuffer[0] === 0xff && imageBuffer[1] === 0xd8) {
+            return 'image/jpeg';
+        } else if (imageBuffer[0] === 0x47 && imageBuffer[1] === 0x49) {
+            return 'image/gif';
+        } else if (imageBuffer[0] === 0x52 && imageBuffer[1] === 0x49 && 
+                   imageBuffer[8] === 0x57 && imageBuffer[9] === 0x45) {
+            return 'image/webp';
+        }
+        // Default to PNG as it's most common for screenshots
+        return 'image/png';
+    }
+
+    /**
      * Solve CAPTCHA using Gemini AI Vision (multimodal AI)
      * This uses Google's Gemini model for visual understanding
      */
-    async solveWithGeminiVision(imageBase64) {
+    async solveWithGeminiVision(imageBase64, mimeType = 'image/png') {
         if (!this.genAI) {
             console.warn('Gemini API key not configured');
             return null;
@@ -210,7 +206,7 @@ What are the exact characters in this CAPTCHA image?`;
             const imagePart = {
                 inlineData: {
                     data: imageBase64,
-                    mimeType: 'image/png'
+                    mimeType: mimeType
                 }
             };
 
@@ -278,6 +274,9 @@ What are the exact characters in this CAPTCHA image?`;
      */
     async solve(imageBuffer) {
         try {
+            // Detect MIME type from original buffer
+            const mimeType = this.detectMimeType(imageBuffer);
+            
             // Preprocess image for better results
             const preprocessedBuffer = await this.preprocessImage(imageBuffer);
             
@@ -295,7 +294,7 @@ What are the exact characters in this CAPTCHA image?`;
 
             // Method 2: Try Gemini AI Vision (better for distorted/complex CAPTCHAs)
             console.log('Attempting CAPTCHA solve with Gemini AI Vision...');
-            captchaText = await this.solveWithGeminiVision(imageBase64);
+            captchaText = await this.solveWithGeminiVision(imageBase64, mimeType);
             
             if (captchaText && captchaText.length >= 4 && captchaText.length <= 6) {
                 console.log(`CAPTCHA solved with Gemini AI: ${captchaText}`);
