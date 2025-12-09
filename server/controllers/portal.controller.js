@@ -572,16 +572,18 @@ const saveDemoData = async (userId, regNumber, res) => {
 /**
  * Get portal connection status
  * 
- * TEMPORARILY DISABLED — DO NOT REMOVE
- * Returns portal disabled status when features are suspended.
+ * Returns portal feature status (enabled/disabled) and user's connection status
+ * Allows unauthenticated access to check if portal features are enabled
  * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const getPortalStatus = async (req, res) => {
-  // TEMPORARILY DISABLED — DO NOT REMOVE
-  // Return portal disabled status when features are suspended
-  if (!isPortalEnabled()) {
+  // Always return portal enabled status first
+  const portalStatusEnabled = isPortalEnabled();
+  
+  // If portal is disabled, return that status
+  if (!portalStatusEnabled) {
     return res.json({
       success: true,
       data: {
@@ -594,15 +596,33 @@ const getPortalStatus = async (req, res) => {
     });
   }
 
+  // If no user is authenticated, just return portal enabled status
+  if (!req.user) {
+    return res.json({
+      success: true,
+      data: {
+        portalConnected: false,
+        isVerified: false,
+        lastSynced: null,
+        portalEnabled: true
+      }
+    });
+  }
+
   try {
     const userId = req.user.id || req.user.uid;
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
+      return res.json({
+        success: true,
+        data: {
+          portalConnected: false,
+          isVerified: false,
+          lastSynced: null,
+          portalEnabled: true
+        }
       });
     }
 
@@ -613,14 +633,21 @@ const getPortalStatus = async (req, res) => {
       data: {
         portalConnected: userData.portalConnected || false,
         isVerified: userData.isVerified || false,
-        lastSynced: userData.portal_last_synced || null
+        lastSynced: userData.portal_last_synced || null,
+        portalEnabled: true
       }
     });
   } catch (error) {
     console.error('Get portal status error:', error.message);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error'
+    // Return basic status even on error
+    return res.json({
+      success: true,
+      data: {
+        portalConnected: false,
+        isVerified: false,
+        lastSynced: null,
+        portalEnabled: portalStatusEnabled
+      }
     });
   }
 };

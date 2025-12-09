@@ -92,9 +92,10 @@ router.post('/load-backup', optionalAuth, portalController.loadBackupData);
 
 /**
  * GET /api/portal/status
- * Get portal connection status for authenticated user
+ * Get portal connection status
+ * Uses optionalAuth to allow checking portal availability without authentication
  */
-router.get('/status', authMiddleware, portalController.getPortalStatus);
+router.get('/status', optionalAuth, portalController.getPortalStatus);
 
 /**
  * GET /api/portal/data

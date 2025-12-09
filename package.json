@@ -6,7 +6,8 @@
   "scripts": {
     "setup": "node setup.js",
     "init:db": "node -e \"require('./server/database/db'); console.log('DB initialized')\"",
-    "start": "node server/scripts/auto-start.js",
+    "start": "node server/index.js",
+    "start:dev": "node server/scripts/auto-start.js",
     "start:server": "node server/index.js",
     "start:scraper": "node server/services/portal-scraper-server.js",
     "dev": "concurrently \"nodemon server/index.js\" \"npm run dev:client\"",

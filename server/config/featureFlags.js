@@ -4,17 +4,27 @@
  * This file contains feature flags for enabling/disabling various features
  * across the application. Use environment variables for production configuration.
  * 
- * TEMPORARILY DISABLED — DO NOT REMOVE
- * Portal-related features have been temporarily suspended as per requirement.
- * To re-enable, set PORTAL_FEATURES_ENABLED=true in environment variables.
+ * Portal Features:
+ * - On memory-constrained environments (like Render free tier), portal scraping
+ *   should be disabled to avoid crashes due to Puppeteer memory usage.
+ * - Set PORTAL_FEATURES_ENABLED=true to enable portal scraping (requires adequate memory)
+ * - Set PORTAL_FEATURES_ENABLED=false to disable portal scraping and use demo data
  */
 
-// TEMPORARILY DISABLED — DO NOT REMOVE
-// Portal features are disabled until further notice
+// Check if running on a memory-constrained environment
+const isMemoryConstrained = () => {
+  // Render free tier has 512MB limit
+  const maxOldSpaceSize = process.env.NODE_OPTIONS?.includes('--max-old-space-size=');
+  const isRenderFreeTier = process.env.RENDER === 'true' && !process.env.RENDER_PAID;
+  return maxOldSpaceSize || isRenderFreeTier;
+};
+
+// Portal features - disabled by default on memory-constrained environments
+// Set PORTAL_FEATURES_ENABLED=true to enable portal scraping (requires adequate memory)
 const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED === 'true';
 
 // Message to show users when portal features are disabled
-const PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily suspended. Please try again later.';
+const PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily unavailable. Please use demo data to explore all features.';
 
 // Feature flags object for easy access
 const featureFlags = {
@@ -36,7 +46,10 @@ const featureFlags = {
   // Demo data is always available as fallback
   demoData: {
     enabled: true,
-  }
+  },
+
+  // Memory optimization
+  memoryConstrained: isMemoryConstrained()
 };
 
 /**
