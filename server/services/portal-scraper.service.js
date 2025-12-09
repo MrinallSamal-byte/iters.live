@@ -17,6 +17,8 @@
 // Optional dependencies - handle gracefully if not installed
 let puppeteer;
 let Tesseract;
+let sharp;
+
 try {
     puppeteer = require('puppeteer');
 } catch (e) {
@@ -31,7 +33,13 @@ try {
     Tesseract = null;
 }
 
-const sharp = require('sharp');
+try {
+    sharp = require('sharp');
+} catch (e) {
+    console.warn('Sharp not available. Image preprocessing will be limited.');
+    sharp = null;
+}
+
 const axios = require('axios');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
@@ -92,6 +100,11 @@ class CaptchaSolver {
      * Applies multiple techniques to enhance text visibility
      */
     async preprocessImage(imageBuffer) {
+        if (!sharp) {
+            console.warn('Sharp not available, skipping image preprocessing');
+            return imageBuffer;
+        }
+        
         try {
             // Get image metadata to determine processing approach
             const metadata = await sharp(imageBuffer).metadata();
@@ -250,6 +263,21 @@ What are the exact characters in this CAPTCHA image?`;
         }
         
         try {
+            if (!sharp) {
+                console.warn('Sharp not available, attempting Tesseract without preprocessing');
+                // Try without preprocessing
+                const { data: { text, confidence } } = await Tesseract.recognize(
+                    imageBuffer,
+                    'eng',
+                    {
+                        logger: () => {} // Suppress logs
+                    }
+                );
+                const cleaned = this.cleanCaptchaText(text);
+                console.log(`Tesseract OCR (no preprocessing): "${text}" -> cleaned: "${cleaned}" (confidence: ${confidence}%)`);
+                return cleaned || null;
+            }
+            
             // Try multiple threshold values for better results
             const thresholds = [100, 128, 150, 180];
             let bestResult = '';

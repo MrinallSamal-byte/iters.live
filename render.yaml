@@ -3,7 +3,7 @@ services:
     name: iter-aio
     env: node
     plan: free
-    buildCommand: npm install --no-optional
+    buildCommand: npm install --omit=optional
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
