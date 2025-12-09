@@ -10,6 +10,10 @@
 
   // Client-side cache with TTL (5 minutes)
   const CACHE_TTL = 5 * 60 * 1000;
+  // Auto-refresh interval (4 seconds)
+  const AUTO_REFRESH_INTERVAL = 4000;
+  let autoRefreshTimer = null;
+  
   const dataCache = {
     get(key) {
       try {
@@ -31,6 +35,11 @@
           timestamp: Date.now()
         }));
       } catch (_) {}
+    },
+    clear(key) {
+      try {
+        sessionStorage.removeItem(`dashboard_${key}`);
+      } catch (_) {}
     }
   };
 
@@ -49,6 +58,59 @@
     renderRecentActivity();
 
     // Fetch all data in parallel for faster loading
+    await refreshDashboardData();
+
+    // Start auto-refresh for charts
+    startAutoRefresh();
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', stopAutoRefresh);
+    
+    // Handle visibility change to pause/resume refresh
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  }
+
+  /**
+   * Start auto-refresh timer for charts
+   */
+  function startAutoRefresh() {
+    stopAutoRefresh(); // Clear any existing timer
+    autoRefreshTimer = setInterval(async () => {
+      // Only refresh if page is visible
+      if (!document.hidden) {
+        await refreshChartsData();
+      }
+    }, AUTO_REFRESH_INTERVAL);
+    console.log('Dashboard auto-refresh started (every 4 seconds)');
+  }
+
+  /**
+   * Stop auto-refresh timer
+   */
+  function stopAutoRefresh() {
+    if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+  }
+
+  /**
+   * Handle page visibility change
+   */
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      // Pause refresh when page is hidden
+      stopAutoRefresh();
+    } else {
+      // Resume refresh when page is visible
+      startAutoRefresh();
+    }
+  }
+
+  /**
+   * Refresh all dashboard data
+   */
+  async function refreshDashboardData() {
     const [attendance, marks, assignments, events] = await Promise.all([
       getAttendance(),
       getMarks(),
@@ -65,6 +127,28 @@
     // Charts
     renderAttendanceChart(attendance.present || 320, attendance.absent || 45);
     renderPerformanceChart(marks.summary || []);
+  }
+
+  /**
+   * Refresh only charts data (for auto-refresh)
+   */
+  async function refreshChartsData() {
+    // Clear cache to get fresh data
+    dataCache.clear('attendance');
+    dataCache.clear('marks');
+    
+    const [attendance, marks] = await Promise.all([
+      getAttendance(true), // Force fresh data
+      getMarks(true)
+    ]);
+
+    // Update charts with new data
+    updateAttendanceChart(attendance.present || 320, attendance.absent || 45);
+    updatePerformanceChart(marks.summary || []);
+    
+    // Also update stats
+    setText('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '85%');
+    setText('currentCGPA', marks.gpa != null ? String(marks.gpa) : '8.5');
   }
 
   function showLoadingStates() {
@@ -86,10 +170,12 @@
     }
   }
 
-  async function getAttendance() {
-    // Check cache first
-    const cached = dataCache.get('attendance');
-    if (cached) return cached;
+  async function getAttendance(forceFresh = false) {
+    // Check cache first (unless forcing fresh)
+    if (!forceFresh) {
+      const cached = dataCache.get('attendance');
+      if (cached) return cached;
+    }
     
     try {
       const r = await APP.API.get(`/attendance/student/${user.id}`);
@@ -119,10 +205,12 @@
     return { present: present || 320, total: total || 365, absent: absent || 45, percent, summary };
   }
 
-  async function getMarks() {
-    // Check cache first
-    const cached = dataCache.get('marks');
-    if (cached) return cached;
+  async function getMarks(forceFresh = false) {
+    // Check cache first (unless forcing fresh)
+    if (!forceFresh) {
+      const cached = dataCache.get('marks');
+      if (cached) return cached;
+    }
     
     try {
       const r = await APP.API.get(`/marks/student/${user.id}`);
@@ -252,11 +340,26 @@
               position: 'bottom',
               labels: { color: '#fff' }
             }
+          },
+          animation: {
+            duration: 300 // Faster animation for smooth updates
           }
         }
       });
     } catch (err) {
       console.error('Chart error:', err);
+    }
+  }
+
+  /**
+   * Update attendance chart data without destroying it
+   */
+  function updateAttendanceChart(present, absent) {
+    if (attendanceChartInstance) {
+      attendanceChartInstance.data.datasets[0].data = [present, absent];
+      attendanceChartInstance.update('none'); // Update without animation for smooth refresh
+    } else {
+      renderAttendanceChart(present, absent);
     }
   }
 
@@ -330,11 +433,43 @@
               ticks: { color: '#fff' },
               grid: { display: false }
             }
+          },
+          animation: {
+            duration: 300 // Faster animation for smooth updates
           }
         }
       });
     } catch (err) {
       console.error('Chart error:', err);
+    }
+  }
+
+  /**
+   * Update performance chart data without destroying it
+   */
+  function updatePerformanceChart(summary) {
+    if (!summary || !summary.length) {
+      summary = [
+        { subject: 'Structural Analysis', avg_marks: 78, avg_total: 100 },
+        { subject: 'Concrete Technology', avg_marks: 85, avg_total: 100 },
+        { subject: 'Surveying', avg_marks: 88, avg_total: 100 },
+        { subject: 'Fluid Mechanics', avg_marks: 82, avg_total: 100 },
+        { subject: 'Geotechnical Eng', avg_marks: 80, avg_total: 100 },
+        { subject: 'Computer Aided Design', avg_marks: 75, avg_total: 100 }
+      ];
+    }
+
+    const data = summary.map(s => {
+      const marks = Number(s.avg_marks || 0);
+      const total = Number(s.avg_total || 100);
+      return Number(((marks / total) * 100).toFixed(1));
+    });
+
+    if (performanceChartInstance) {
+      performanceChartInstance.data.datasets[0].data = data;
+      performanceChartInstance.update('none'); // Update without animation for smooth refresh
+    } else {
+      renderPerformanceChart(summary);
     }
   }
 

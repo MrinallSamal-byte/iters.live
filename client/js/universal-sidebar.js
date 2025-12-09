@@ -68,6 +68,66 @@
             this.loadUserInfo();
             this.setActivePage();
             this.initMobileMenu();
+            // Restore sidebar scroll position
+            this.restoreScrollPosition();
+            // Save scroll position on navigation
+            this.setupScrollPositionSaving();
+        },
+
+        /**
+         * Restore sidebar scroll position from sessionStorage
+         */
+        restoreScrollPosition() {
+            const sidebar = document.getElementById('universalSidebar');
+            if (sidebar) {
+                const savedScrollPosition = sessionStorage.getItem('sidebarScrollPosition');
+                if (savedScrollPosition) {
+                    const sidebarNav = sidebar.querySelector('.sidebar-nav');
+                    if (sidebarNav) {
+                        sidebarNav.scrollTop = parseInt(savedScrollPosition, 10);
+                    }
+                }
+            }
+        },
+
+        /**
+         * Setup scroll position saving for sidebar navigation
+         */
+        setupScrollPositionSaving() {
+            const sidebar = document.getElementById('universalSidebar');
+            if (sidebar) {
+                const sidebarNav = sidebar.querySelector('.sidebar-nav');
+                if (sidebarNav) {
+                    // Save scroll position on scroll
+                    sidebarNav.addEventListener('scroll', () => {
+                        sessionStorage.setItem('sidebarScrollPosition', sidebarNav.scrollTop.toString());
+                    });
+                }
+            }
+
+            // Save scroll position before navigating away
+            window.addEventListener('beforeunload', () => {
+                const sidebar = document.getElementById('universalSidebar');
+                if (sidebar) {
+                    const sidebarNav = sidebar.querySelector('.sidebar-nav');
+                    if (sidebarNav) {
+                        sessionStorage.setItem('sidebarScrollPosition', sidebarNav.scrollTop.toString());
+                    }
+                }
+            });
+
+            // Also save on link click
+            document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    const sidebar = document.getElementById('universalSidebar');
+                    if (sidebar) {
+                        const sidebarNav = sidebar.querySelector('.sidebar-nav');
+                        if (sidebarNav) {
+                            sessionStorage.setItem('sidebarScrollPosition', sidebarNav.scrollTop.toString());
+                        }
+                    }
+                });
+            });
         },
 
         /**
