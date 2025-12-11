@@ -90,3 +90,9 @@ scraper/.env
 
 # Backup files
 *.backup
+
+# SOA Student Scraper specific
+soa-student-scraper/backend/.env
+soa-student-scraper/backend/venv/
+soa-student-scraper/frontend/node_modules/
+soa-student-scraper/frontend/dist/
