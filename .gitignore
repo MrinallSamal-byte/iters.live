@@ -41,6 +41,8 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+test-demo-*.js
+test-demo-*.html
 
 # Electron
 electron-builder.yml
