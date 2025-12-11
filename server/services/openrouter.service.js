@@ -4,6 +4,8 @@
  * Supports multiple free models for different use cases
  */
 
+const { getSecureKeyPreview, isValidOpenRouterKey } = require('../utils/security.util');
+
 class OpenRouterService {
     constructor() {
         this.apiKey = process.env.OPENROUTER_API_KEY || '';
@@ -29,9 +31,17 @@ class OpenRouterService {
         };
         
         if (this.apiKey) {
-            console.log('✅ OpenRouter Service initialized with API key');
+            if (isValidOpenRouterKey(this.apiKey)) {
+                const keyPreview = getSecureKeyPreview(this.apiKey);
+                console.log(`✅ OpenRouter Service initialized with API key (${keyPreview})`);
+            } else {
+                console.log('⚠️ OpenRouter API key format appears invalid');
+                console.log('   Expected format: sk-or-v1-... with minimum 30 characters');
+                console.log('   Get a valid key from: https://openrouter.ai/keys');
+            }
         } else {
             console.log('⚠️ OpenRouter Service initialized without API key - features will use fallback');
+            console.log('💡 Set OPENROUTER_API_KEY environment variable to enable AI features');
         }
     }
 
@@ -44,9 +54,12 @@ class OpenRouterService {
      */
     async makeRequest(model, messages, options = {}) {
         if (!this.apiKey) {
+            console.error('❌ OpenRouter API key not configured - check OPENROUTER_API_KEY environment variable');
             throw new Error('OpenRouter API key not configured');
         }
 
+        console.log(`🔄 Making OpenRouter API request with model: ${model}`);
+        
         try {
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
@@ -67,13 +80,16 @@ class OpenRouterService {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                console.error(`❌ OpenRouter API error: ${response.status}`, errorData);
                 throw new Error(`OpenRouter API error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
 
             const data = await response.json();
-            return data.choices?.[0]?.message?.content || '';
+            const content = data.choices?.[0]?.message?.content || '';
+            console.log(`✅ OpenRouter API request successful (${content.length} chars)`);
+            return content;
         } catch (error) {
-            console.error('OpenRouter API request error:', error.message);
+            console.error('❌ OpenRouter API request error:', error.message);
             throw error;
         }
     }

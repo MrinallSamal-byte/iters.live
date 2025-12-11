@@ -251,4 +251,49 @@ router.get('/cache-stats', auth, async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/health/ai-service
+ * @desc    Check AI service configuration and availability
+ * @access  Public (with rate limiting for security)
+ */
+router.get('/ai-service', async (req, res) => {
+  try {
+    // Lazy load service to avoid startup issues
+    const openRouterService = require('../services/openrouter.service');
+    
+    // Check environment variables (without exposing actual keys)
+    const openRouterConfigured = Boolean(process.env.OPENROUTER_API_KEY);
+    const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+    
+    // Check service availability
+    const openRouterAvailable = openRouterService.isAvailable();
+    
+    res.json({
+      status: openRouterAvailable || geminiConfigured ? 'available' : 'unavailable',
+      timestamp: new Date().toISOString(),
+      services: {
+        openRouter: {
+          configured: openRouterConfigured,
+          available: openRouterAvailable
+        },
+        gemini: {
+          configured: geminiConfigured
+        }
+      },
+      recommendations: openRouterAvailable || geminiConfigured ? 
+        [] : [
+          'Set OPENROUTER_API_KEY environment variable (recommended)',
+          'Or set GEMINI_API_KEY environment variable (fallback)',
+          'See AI_SERVICE_RENDER_SETUP_GUIDE.md for details'
+        ]
+    });
+  } catch (error) {
+    console.error('AI service check error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
