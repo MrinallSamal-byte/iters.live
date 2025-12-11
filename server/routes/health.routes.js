@@ -11,6 +11,9 @@ const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Pre-load services to avoid repeated requires
+const openRouterService = require('../services/openrouter.service');
+
 /**
  * @route   GET /api/health
  * @desc    System health check (public)
@@ -258,8 +261,6 @@ router.get('/cache-stats', auth, async (req, res) => {
  */
 router.get('/ai-service', async (req, res) => {
   try {
-    const openRouterService = require('../services/openrouter.service');
-    
     // Check environment variables (without exposing actual keys)
     const openRouterConfigured = Boolean(process.env.OPENROUTER_API_KEY);
     const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);

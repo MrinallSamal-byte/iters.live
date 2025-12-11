@@ -31,7 +31,8 @@ function isValidOpenRouterKey(key) {
         return false;
     }
     
-    // OpenRouter keys start with 'sk-or-v1-' and are typically 70+ characters
+    // OpenRouter keys start with 'sk-or-v1-' and should be at least 30 characters
+    // Note: Typical keys are around 70+ characters
     return key.startsWith('sk-or-v1-') && key.length >= 30;
 }
 
@@ -45,7 +46,8 @@ function isValidGeminiKey(key) {
         return false;
     }
     
-    // Gemini keys start with 'AIza' and are typically 39 characters
+    // Gemini keys start with 'AIza' and should be at least 30 characters
+    // Note: Typical keys are exactly 39 characters
     return key.startsWith('AIza') && key.length >= 30;
 }
 

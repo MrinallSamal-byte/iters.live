@@ -48,7 +48,7 @@ if (openRouterKey) {
     const isValid = isValidOpenRouterKey(openRouterKey);
     
     console.log(`${isValid ? '✅' : '⚠️'} OPENROUTER_API_KEY configured (${keyPreview})`);
-    console.log(`   Length: ${openRouterKey.length} characters`);
+    console.log(`   Status: ${isValid ? 'Valid format' : 'Invalid format'}`);
     
     if (!isValid) {
         console.log('   ⚠️ Warning: Key format may be invalid');
@@ -70,7 +70,7 @@ if (geminiKey) {
     const isValid = isValidGeminiKey(geminiKey);
     
     console.log(`${isValid ? '✅' : '⚠️'} GEMINI_API_KEY configured (${keyPreview})`);
-    console.log(`   Length: ${geminiKey.length} characters`);
+    console.log(`   Status: ${isValid ? 'Valid format' : 'Invalid format'}`);
     console.log(`   Model: ${process.env.GEMINI_MODEL || 'not-set'}`);
     
     if (!isValid) {
