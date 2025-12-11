@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, optionalAuth } = require('../middleware/auth');
 const aiService = require('../services/ai.service');
 const { db } = require('../database/firebase');
 
@@ -122,38 +122,60 @@ router.get('/recommendations', verifyToken, async (req, res) => {
 /**
  * @route   POST /api/ai/chat
  * @desc    AI chatbot for student questions
- * @access  Private
+ * @access  Public (authentication optional)
  */
-router.post('/chat', verifyToken, async (req, res) => {
+router.post('/chat', optionalAuth, async (req, res) => {
     try {
-        const { question, context } = req.body;
+        // Accept both 'message' (primary) and 'question' (fallback for backward compatibility)
+        const { message, question, context, systemPrompt } = req.body;
+        const userMessage = message || question;
         
-        if (!question) {
+        // Validate input - check for empty/whitespace-only strings
+        if (!userMessage || typeof userMessage !== 'string' || userMessage.trim() === '') {
             return res.status(400).json({
                 success: false,
-                message: 'Question is required'
+                message: 'Message is required'
             });
         }
         
-        const answer = await aiService.answerQuestion(question, context || '');
+        // Check if OpenRouter service is available
+        const openRouterService = require('../services/openrouter.service');
+        if (!openRouterService.isAvailable()) {
+            return res.status(503).json({
+                success: false,
+                message: 'AI service is currently unavailable. Please check if OPENROUTER_API_KEY is configured.'
+            });
+        }
         
-        // Log chat interaction to Firestore
-        await db.collection('ai_chat_logs').add({
-            user_id: req.user.id || req.user.uid,
-            question,
-            answer,
-            created_at: new Date()
-        }).catch(err => console.error('Failed to log chat:', err));
+        // Call OpenRouter service directly
+        const response = await openRouterService.answerQuestion(
+            userMessage,
+            context || '',
+            systemPrompt || null
+        );
         
+        // Log chat interaction to Firestore (optional, only if user is authenticated)
+        if (req.user && (req.user.id || req.user.uid)) {
+            await db.collection('ai_chat_logs').add({
+                user_id: req.user.id || req.user.uid,
+                question: userMessage,
+                answer: response,
+                created_at: new Date()
+            }).catch(err => console.error('Failed to log chat:', err));
+        }
+        
+        // Return response in expected format
         res.json({
             success: true,
-            answer
+            response: response,
+            timestamp: new Date().toISOString()
         });
     } catch (error) {
         console.error('AI chat error:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to process question'
+            message: 'Failed to process your request. Please try again.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 });
