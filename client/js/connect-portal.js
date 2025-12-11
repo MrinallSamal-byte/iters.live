@@ -493,7 +493,7 @@
                     showToast('Live data synced successfully!', 'success');
                     updateUserStorage(true, true, response.data);
                     setTimeout(() => {
-                        window.location.href = '/dashboard/student.html';
+                        APP.navigateToDashboard('/dashboard/student.html');
                     }, 1500);
                 } else if (response.status === 'BACKUP_LOADED') {
                     clearRetryAttempts();
@@ -502,7 +502,7 @@
                     showToast('Loaded backup data', 'warning');
                     updateUserStorage(false, false, response.data);
                     setTimeout(() => {
-                        window.location.href = '/dashboard/student.html';
+                        APP.navigateToDashboard('/dashboard/student.html');
                     }, 2000);
                 } else if (response.status === 'DEMO_LOADED') {
                     clearRetryAttempts();
@@ -510,7 +510,7 @@
                     showToast('Demo data loaded', 'warning');
                     updateUserStorage(false, false, response.data);
                     setTimeout(() => {
-                        window.location.href = '/dashboard/student.html';
+                        APP.navigateToDashboard('/dashboard/student.html');
                     }, 2000);
                 }
             } else {
@@ -593,7 +593,7 @@
                 showToast('Backup data loaded successfully', 'success');
                 clearRetryAttempts();
                 setTimeout(() => {
-                    window.location.href = '/dashboard/student.html';
+                    APP.navigateToDashboard('/dashboard/student.html');
                 }, 1500);
                 return;
             }
@@ -612,7 +612,7 @@
         clearRetryAttempts();
         setLoading(false);
         setTimeout(() => {
-            window.location.href = '/dashboard/student.html';
+            APP.navigateToDashboard('/dashboard/student.html');
         }, 2000);
     }
 
@@ -629,7 +629,7 @@
                 showStatus('✅ Backup data loaded successfully!', 'success');
                 showToast('Backup data loaded', 'success');
                 setTimeout(() => {
-                    window.location.href = '/dashboard/student.html';
+                    APP.navigateToDashboard('/dashboard/student.html');
                 }, 1000);
             } else {
                 showStatus('❌ No backup data found. Try syncing from portal or use demo data.', 'error');
@@ -656,7 +656,7 @@
             showStatus('✅ Demo data loaded successfully!', 'success');
             showToast('Demo data loaded successfully', 'success');
             setTimeout(() => {
-                window.location.href = '/dashboard/student.html';
+                APP.navigateToDashboard('/dashboard/student.html');
             }, 1000);
         } catch (error) {
             console.error('Demo data error:', error);

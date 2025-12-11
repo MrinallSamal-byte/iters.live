@@ -96,7 +96,7 @@
 
                 // Redirect to payment history after a delay
                 setTimeout(() => {
-                    window.location.href = '/dashboard/student-payment-history.html';
+                    APP.navigateToDashboard('/dashboard/student-payment-history.html');
                 }, 3000);
             } else {
                 throw new Error(response.error || 'Payment failed');

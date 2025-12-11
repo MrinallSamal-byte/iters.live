@@ -188,7 +188,7 @@
     }
 
     function viewPayment(paymentId) {
-        window.location.href = `/dashboard/student-payment-details.html?id=${paymentId}`;
+        APP.navigateToDashboard(`/dashboard/student-payment-details.html?id=${paymentId}`);
     }
 
     async function downloadReceipt(paymentId) {
