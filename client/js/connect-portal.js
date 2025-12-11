@@ -351,6 +351,14 @@
 
     /**
      * Handle portal sync submission
+     * 
+     * ============================================================================
+     * NOTE: Portal scraping functionality has been disabled on the server
+     * ============================================================================
+     * This function calls backend API endpoints that attempt to scrape data
+     * from external student portals. The actual scraping code has been commented
+     * out on the server side, so these API calls will return disabled responses.
+     * ============================================================================
      */
     async function handleSyncSubmit(e) {
         if (e && e.preventDefault) {
@@ -370,6 +378,7 @@
         hideRetryInfo();
 
         try {
+            // NOTE: This API call will return a disabled response as scraping is disabled
             const response = await APP.API.post('/portal/login', {
                 reg_number: regNumber,
                 password: password
