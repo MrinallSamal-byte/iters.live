@@ -1,0 +1,19 @@
+# FastAPI and server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.5.0
+
+# Playwright for browser automation
+playwright>=1.40.0
+
+# CAPTCHA solving with OCR
+pytesseract>=0.3.10
+Pillow>=10.1.0
+
+# Utilities
+python-dotenv>=1.0.0
+httpx>=0.25.0
+
+# Production ASGI server
+gunicorn>=21.2.0
