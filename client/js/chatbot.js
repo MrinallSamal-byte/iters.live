@@ -636,15 +636,29 @@ class Chatbot {
             if (token) {
                 // Simple expiration check (JWT tokens have exp claim)
                 try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const isExpired = payload.exp * 1000 < Date.now();
+                    // Validate JWT structure (3 parts separated by dots)
+                    const parts = token.split('.');
+                    if (parts.length !== 3) {
+                        throw new Error('Invalid JWT structure');
+                    }
                     
-                    if (!isExpired) {
-                        headers['Authorization'] = `Bearer ${token}`;
+                    const payload = JSON.parse(atob(parts[1]));
+                    
+                    // Check if exp claim exists and token is not expired
+                    if (payload.exp && typeof payload.exp === 'number') {
+                        const isExpired = payload.exp * 1000 < Date.now();
+                        
+                        if (!isExpired) {
+                            headers['Authorization'] = `Bearer ${token}`;
+                        } else {
+                            // Remove expired token
+                            localStorage.removeItem('accessToken');
+                            console.log('Removed expired token');
+                        }
                     } else {
-                        // Remove expired token
+                        // Token missing exp claim - remove it
                         localStorage.removeItem('accessToken');
-                        console.log('Removed expired token');
+                        console.log('Removed token without expiration claim');
                     }
                 } catch (e) {
                     // Invalid token format - remove it

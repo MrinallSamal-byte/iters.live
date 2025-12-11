@@ -33,8 +33,8 @@ describe('optionalAuth Middleware', () => {
     
     // Re-require the middleware to get fresh instance
     jest.resetModules();
-    const authMiddleware = require('../server/middleware/auth');
-    optionalAuth = authMiddleware.optionalAuth;
+    const authModule = require('../server/middleware/auth');
+    optionalAuth = authModule.optionalAuth;
 
     // Mock request, response, and next
     req = {
