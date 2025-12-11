@@ -110,6 +110,7 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - 🎉 **Events & Clubs** - Register for events and join clubs with real-time counters
 - 💰 **Fee Management** - View ledger, download receipts (mock)
 - 🏆 **Achievements & Badges** - Track academic and extracurricular achievements
+- 🤖 **AI Chatbot Assistant** - Intelligent bot answering questions, explaining concepts, solving problems
 - 🆕 **AI Study Planner** - Personalized 2-week study schedule with priority-based task allocation
 - 🆕 **Flashcard System** - Create decks, study mode with spaced repetition, progress tracking
 - 🆕 **Performance Analytics** - Comprehensive analytics with weak/strong subject identification
@@ -242,6 +243,58 @@ python app.py
 The scraper service will run at `http://localhost:5001`
 
 **Note:** The main application works without the scraper - students can use demo data if the scraper is unavailable.
+
+### AI Chatbot Setup (Recommended)
+
+The application includes an intelligent AI-powered chatbot that answers questions, generates study plans, and provides educational assistance.
+
+#### For Local Development:
+
+1. **Get Free API Keys** (choose at least one):
+   - **OpenRouter** (Primary): https://openrouter.ai/keys
+   - **Gemini** (Fallback): https://makersuite.google.com/app/apikey
+
+2. **Configure in .env file**:
+   ```bash
+   # OpenRouter API (Primary - Recommended)
+   OPENROUTER_API_KEY=sk-or-v1-your-actual-key-here
+   
+   # Google Gemini AI (Fallback - Optional but recommended)
+   GEMINI_API_KEY=AIza-your-actual-key-here
+   GEMINI_MODEL=gemini-1.5-flash
+   ```
+
+3. **Verify setup**:
+   ```bash
+   node verify-ai-service.js
+   ```
+   
+   You should see:
+   ```
+   ✅ OpenRouter Service initialized with API key
+   ✅ AI Service using OpenRouter API (primary)
+   ```
+
+#### For Render Deployment:
+
+1. Go to your Render dashboard
+2. Click on your service → Environment
+3. Add these environment variables:
+   - `OPENROUTER_API_KEY` = your OpenRouter key
+   - `GEMINI_API_KEY` = your Gemini key (optional)
+   - `GEMINI_MODEL` = gemini-1.5-flash
+4. Save and wait for redeployment
+
+**See detailed guide:** [AI_SERVICE_RENDER_SETUP_GUIDE.md](./AI_SERVICE_RENDER_SETUP_GUIDE.md)
+
+**AI Features Enabled:**
+- 🤖 Intelligent chatbot with context-aware responses
+- 📚 Personalized study plan generation
+- 📊 Performance prediction and recommendations
+- 💡 Subject-specific tutoring suggestions
+- ✨ General and academic question answering
+
+**Note:** The chatbot works without API keys using smart fallback responses, but AI features provide much better educational assistance.
 
 ---
 
