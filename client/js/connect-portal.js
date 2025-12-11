@@ -67,6 +67,7 @@
 
     /**
      * Load saved credentials from localStorage
+     * Includes error handling for corrupted/invalid base64 data
      */
     function loadSavedCredentials() {
         try {
@@ -77,14 +78,23 @@
                     regNumberInput.value = credentials.regNumber;
                 }
                 if (portalPasswordInput && credentials.password) {
-                    // Decode the password
-                    portalPasswordInput.value = atob(credentials.password);
+                    try {
+                        // Decode the password - may throw if corrupted
+                        const decodedPassword = atob(credentials.password);
+                        portalPasswordInput.value = decodedPassword;
+                    } catch (decodeError) {
+                        console.warn('Failed to decode saved password - clearing credentials');
+                        clearSavedCredentials();
+                        return;
+                    }
                 }
                 console.log('Loaded saved credentials');
                 updateCredentialStatus(true);
             }
         } catch (error) {
             console.warn('Failed to load saved credentials:', error);
+            // Clear corrupted data
+            clearSavedCredentials();
         }
     }
 

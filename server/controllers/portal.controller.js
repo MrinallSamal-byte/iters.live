@@ -476,11 +476,13 @@ const getDemoData = async (req, res) => {
     });
   } catch (error) {
     console.error('Error loading demo data:', error.message);
-    // Even on error, return minimal demo data
+    // INTENTIONAL: Return minimal demo data even on error
+    // This ensures users can always access the system for exploration
+    // even if the demo data file is corrupted or missing
     return res.json({
       success: true,
       status: STATUS_DEMO_LOADED,
-      message: 'Demo data loaded successfully',
+      message: 'Demo data loaded successfully (minimal fallback)',
       data: {
         mode: 'demo',
         profile: {
@@ -497,8 +499,9 @@ const getDemoData = async (req, res) => {
         courses: [],
         isVerified: false,
         portalConnected: false,
-        dataSource: 'demo',
-        portalEnabled: isPortalEnabled()
+        dataSource: 'demo_fallback',
+        portalEnabled: isPortalEnabled(),
+        warning: 'Using minimal demo data due to data loading error'
       }
     });
   }
