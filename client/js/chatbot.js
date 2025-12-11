@@ -637,12 +637,17 @@ class Chatbot {
                 headers['Authorization'] = `Bearer ${token}`;
             }
             
+            // Build context string safely
+            const userRole = this.userRole || 'guest';
+            const pageContext = this.pageContext || 'general';
+            const contextStr = `User role: ${userRole}, Page context: ${pageContext}`;
+            
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({ 
                     message: message,
-                    context: `User role: ${this.userRole}, Page context: ${this.pageContext}`
+                    context: contextStr
                 })
             });
 

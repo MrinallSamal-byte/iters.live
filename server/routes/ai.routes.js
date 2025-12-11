@@ -130,8 +130,8 @@ router.post('/chat', optionalAuth, async (req, res) => {
         const { message, question, context, systemPrompt } = req.body;
         const userMessage = message || question;
         
-        // Validate input
-        if (!userMessage) {
+        // Validate input - check for empty/whitespace-only strings
+        if (!userMessage || typeof userMessage !== 'string' || userMessage.trim() === '') {
             return res.status(400).json({
                 success: false,
                 message: 'Message is required'
