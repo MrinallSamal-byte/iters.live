@@ -632,9 +632,39 @@ class Chatbot {
                 'Content-Type': 'application/json'
             };
             
-            // Add authorization header if token exists
+            // Only add authorization header if token exists AND is valid
             if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+                // Simple expiration check (JWT tokens have exp claim)
+                try {
+                    // Validate JWT structure (3 parts separated by dots)
+                    const parts = token.split('.');
+                    if (parts.length !== 3) {
+                        throw new Error('Invalid JWT structure');
+                    }
+                    
+                    const payload = JSON.parse(atob(parts[1]));
+                    
+                    // Check if exp claim exists and token is not expired
+                    if (payload.exp && typeof payload.exp === 'number') {
+                        const isExpired = payload.exp * 1000 < Date.now();
+                        
+                        if (!isExpired) {
+                            headers['Authorization'] = `Bearer ${token}`;
+                        } else {
+                            // Remove expired token
+                            localStorage.removeItem('accessToken');
+                            console.log('Removed expired token');
+                        }
+                    } else {
+                        // Token missing exp claim - remove it
+                        localStorage.removeItem('accessToken');
+                        console.log('Removed token without expiration claim');
+                    }
+                } catch (e) {
+                    // Invalid token format - remove it
+                    localStorage.removeItem('accessToken');
+                    console.log('Removed invalid token');
+                }
             }
             
             // Build context string safely

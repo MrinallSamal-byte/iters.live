@@ -108,20 +108,27 @@ const optionalAuth = async (req, res, next) => {
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      const decodedToken = await auth.verifyIdToken(token);
-      const uid = decodedToken.uid;
+      
+      try {
+        const decodedToken = await auth.verifyIdToken(token);
+        const uid = decodedToken.uid;
 
-      const userDoc = await db.collection('users').doc(uid).get();
-      if (userDoc.exists) {
-        req.user = userDoc.data();
-        req.user.id = userDoc.id;
+        const userDoc = await db.collection('users').doc(uid).get();
+        if (userDoc.exists) {
+          req.user = userDoc.data();
+          req.user.id = userDoc.id;
+        }
+      } catch (tokenError) {
+        // Token is invalid/expired - silently ignore for optional auth
+        console.log('Optional auth: Invalid token, proceeding as guest');
       }
     }
   } catch (error) {
-    // Ignore errors for optional auth
+    // Ignore all errors for optional auth
+    console.log('Optional auth error:', error.message);
   }
 
-  next();
+  next(); // Always proceed, even with errors
 };
 
 module.exports = {
