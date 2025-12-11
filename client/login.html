@@ -161,18 +161,29 @@
                         APP.Storage.set('accessToken', idToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // TEMPORARILY DISABLED — DO NOT REMOVE
-                        // Portal sync is suspended - all users go directly to dashboard
-                        // Previously: New users (needsPortalConnection) were redirected to connect-portal
-                        // Now: All users go directly to their respective dashboards
-                        const dashboards = {
-                            student: '/dashboard/student.html',
-                            teacher: '/dashboard/teacher.html',
-                            admin: '/dashboard/admin.html'
-                        };
-                        const redirectUrl = dashboards[response.data.user.role] || '/dashboard/student.html';
+                        // Portal sync flow: Students go to connect-portal page first
+                        // Teachers and Admins go directly to their dashboards
+                        let redirectUrl;
+                        if (response.data.user.role === 'student') {
+                            // Students need to sync portal data first
+                            redirectUrl = '/connect-portal.html';
+                        } else if (response.data.user.role === 'teacher') {
+                            redirectUrl = '/dashboard/teacher.html';
+                        } else if (response.data.user.role === 'admin') {
+                            redirectUrl = '/dashboard/admin.html';
+                        } else {
+                            // Unknown role - clear storage and show error
+                            console.error('Unknown user role:', response.data.user.role);
+                            if (typeof APP.Storage !== 'undefined') {
+                                APP.Storage.clear();
+                            }
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Invalid user role. Please contact support.', 'error');
+                            }
+                            return;
+                        }
                         
-                        // Create page access token for the dashboard
+                        // Create page access token for the next page
                         if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                             window.PageAccessToken.createPageAccessToken(redirectUrl);
                         }
@@ -184,11 +195,15 @@
                             window.location.href = redirectUrl;
                         }
                     } else {
-                        alert('Login failed: ' + response.message);
+                        if (typeof APP.showToast === 'function') {
+                            APP.showToast('Login failed: ' + response.message, 'error');
+                        }
                     }
                 } catch (error) {
                     console.error('Google Sign-In Error:', error);
-                    alert('Google Sign-In failed. Please try again.');
+                    if (typeof APP.showToast === 'function') {
+                        APP.showToast('Google Sign-In failed. Please try again.', 'error');
+                    }
                 }
             });
         }
@@ -297,41 +312,53 @@
                         let redirectUrl;
                         const userRole = response.data.user.role;
                         
-                        // TEMPORARILY DISABLED — DO NOT REMOVE
-                        // Portal sync is suspended - redirect students directly to dashboard
-                        // Previously: Students were redirected to connect-portal.html for data fetching
-                        // Now: All users go directly to their respective dashboards
+                        // Portal sync flow: Students go to connect-portal page first
+                        // Teachers and Admins go directly to their dashboards
                         if (userRole === 'student') {
-                            // Clear any pending portal sync data since portal is disabled
-                            sessionStorage.removeItem('pendingPortalSync');
-                            sessionStorage.removeItem('portalPassword');
-                            
+                            // Students are redirected to connect-portal.html for data fetching
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting to dashboard...');
+                            showError('✅ Login successful! Redirecting to portal sync...');
                             errorMessage.style.color = '#10b981';
                             
-                            // TEMPORARILY DISABLED — DO NOT REMOVE
-                            // Portal sync suspended - go directly to student dashboard
-                            redirectUrl = '/dashboard/student.html';
-                        } else {
-                            // Teachers and Admins go directly to dashboard
+                            // Redirect to connect-portal page
+                            redirectUrl = '/connect-portal.html';
+                        } else if (userRole === 'teacher') {
+                            // Teachers go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
                             showError('✅ Login successful! Redirecting...');
                             errorMessage.style.color = '#10b981';
                             
-                            const dashboards = {
-                                teacher: '/dashboard/teacher.html',
-                                admin: '/dashboard/admin.html'
-                            };
-                            redirectUrl = dashboards[userRole] || '/dashboard/teacher.html';
+                            redirectUrl = '/dashboard/teacher.html';
+                        } else if (userRole === 'admin') {
+                            // Admins go directly to dashboard
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Login successful!', 'success');
+                            }
+                            showError('✅ Login successful! Redirecting...');
+                            errorMessage.style.color = '#10b981';
+                            
+                            redirectUrl = '/dashboard/admin.html';
+                        } else {
+                            // Unknown role - clear storage and show error
+                            console.error('Unknown user role:', userRole);
+                            if (typeof APP.Storage !== 'undefined') {
+                                APP.Storage.clear();
+                            }
+                            showError('Invalid user role. Please contact support.');
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Invalid user role. Please contact support.', 'error');
+                            }
+                            loginBtn.textContent = 'Login';
+                            loginBtn.disabled = false;
+                            return;
                         }
 
                         setTimeout(() => {
-                            // Create page access token for the dashboard
+                            // Create page access token for the next page
                             if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
                                 window.PageAccessToken.createPageAccessToken(redirectUrl);
                             }
