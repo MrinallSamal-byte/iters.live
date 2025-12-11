@@ -96,11 +96,7 @@
 
                 // Redirect to payment history after a delay
                 setTimeout(() => {
-                    // Create page access token before redirecting
-                    if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
-                        window.PageAccessToken.createPageAccessToken('/dashboard/student-payment-history.html');
-                    }
-                    window.location.href = '/dashboard/student-payment-history.html';
+                    APP.navigateToDashboard('/dashboard/student-payment-history.html');
                 }, 3000);
             } else {
                 throw new Error(response.error || 'Payment failed');

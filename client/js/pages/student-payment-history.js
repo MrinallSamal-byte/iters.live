@@ -188,11 +188,7 @@
     }
 
     function viewPayment(paymentId) {
-        // Create page access token before redirecting
-        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
-            window.PageAccessToken.createPageAccessToken(`/dashboard/student-payment-details.html?id=${paymentId}`);
-        }
-        window.location.href = `/dashboard/student-payment-details.html?id=${paymentId}`;
+        APP.navigateToDashboard(`/dashboard/student-payment-details.html?id=${paymentId}`);
     }
 
     async function downloadReceipt(paymentId) {
