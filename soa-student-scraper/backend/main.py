@@ -261,6 +261,74 @@ async def scrape_portal(request: Request, scrape_request: ScrapeRequest):
     )
 
 
+@app.post("/api/scrape")
+async def scrape_portal_legacy(request: Request, body: dict):
+    """
+    Legacy endpoint for compatibility with existing Node.js controller.
+    
+    This endpoint matches the API contract expected by the Node.js backend
+    at server/controllers/portal.controller.js
+    
+    Expected request:
+    {
+      "reg_number": "string",
+      "password": "string"
+    }
+    
+    Response format:
+    {
+      "status": "SUCCESS" | "AUTH_FAILED" | "SCRAPE_ERROR" | "PORTAL_UNREACHABLE",
+      "data": { ... } | null,
+      "message": "string"
+    }
+    """
+    try:
+        # Map request fields to our format
+        reg_number = body.get('reg_number') or body.get('registration_number')
+        password = body.get('password')
+        
+        if not reg_number or not password:
+            return {
+                "status": "SCRAPE_ERROR",
+                "data": None,
+                "message": "Registration number and password are required"
+            }
+        
+        # Create scraper and perform scraping
+        scraper = create_scraper()
+        result: ScrapeResult = scraper.scrape_portal(
+            registration_number=reg_number,
+            password=password,
+            attempt=1
+        )
+        
+        # SECURITY: Clear password from memory
+        del password
+        
+        # Map our response to legacy format
+        if result.success:
+            return {
+                "status": result.status,
+                "data": result.data,
+                "message": result.message or "Portal login successful"
+            }
+        else:
+            return {
+                "status": result.status,
+                "data": None,
+                "message": result.message or "Failed to fetch portal data"
+            }
+            
+    except Exception as e:
+        print(f"Legacy scrape error: {str(e)}")
+        return {
+            "status": "SCRAPE_ERROR",
+            "data": None,
+            "message": f"Internal error: {str(e)}"
+        }
+
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions."""

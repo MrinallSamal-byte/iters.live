@@ -298,6 +298,8 @@ This tool is designed for SOA University students to access their **own** academ
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide for Render, Vercel, Railway, and Docker
 - **[TESTING.md](./TESTING.md)** - Comprehensive testing guide with examples
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Guidelines for contributors
+- **[FIREBASE_INTEGRATION.md](./FIREBASE_INTEGRATION.md)** - Integration with existing Firebase/Render deployment
+- **[PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md)** - Complete project overview and statistics
 
 ## 🔧 Configuration
 
