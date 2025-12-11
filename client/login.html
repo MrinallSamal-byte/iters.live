@@ -167,13 +167,20 @@
                         if (response.data.user.role === 'student') {
                             // Students need to sync portal data first
                             redirectUrl = '/connect-portal.html';
+                        } else if (response.data.user.role === 'teacher') {
+                            redirectUrl = '/dashboard/teacher.html';
+                        } else if (response.data.user.role === 'admin') {
+                            redirectUrl = '/dashboard/admin.html';
                         } else {
-                            // Teachers and Admins bypass portal sync
-                            const dashboards = {
-                                teacher: '/dashboard/teacher.html',
-                                admin: '/dashboard/admin.html'
-                            };
-                            redirectUrl = dashboards[response.data.user.role] || '/dashboard/teacher.html';
+                            // Unknown role - clear storage and show error
+                            console.error('Unknown user role:', response.data.user.role);
+                            if (typeof APP.Storage !== 'undefined') {
+                                APP.Storage.clear();
+                            }
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Invalid user role. Please contact support.', 'error');
+                            }
+                            return;
                         }
                         
                         // Create page access token for the next page
@@ -313,19 +320,37 @@
                             
                             // Redirect to connect-portal page
                             redirectUrl = '/connect-portal.html';
-                        } else {
-                            // Teachers and Admins go directly to dashboard
+                        } else if (userRole === 'teacher') {
+                            // Teachers go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
                             showError('✅ Login successful! Redirecting...');
                             errorMessage.style.color = '#10b981';
                             
-                            const dashboards = {
-                                teacher: '/dashboard/teacher.html',
-                                admin: '/dashboard/admin.html'
-                            };
-                            redirectUrl = dashboards[userRole] || '/dashboard/teacher.html';
+                            redirectUrl = '/dashboard/teacher.html';
+                        } else if (userRole === 'admin') {
+                            // Admins go directly to dashboard
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Login successful!', 'success');
+                            }
+                            showError('✅ Login successful! Redirecting...');
+                            errorMessage.style.color = '#10b981';
+                            
+                            redirectUrl = '/dashboard/admin.html';
+                        } else {
+                            // Unknown role - clear storage and show error
+                            console.error('Unknown user role:', userRole);
+                            if (typeof APP.Storage !== 'undefined') {
+                                APP.Storage.clear();
+                            }
+                            showError('Invalid user role. Please contact support.');
+                            if (typeof APP.showToast === 'function') {
+                                APP.showToast('Invalid user role. Please contact support.', 'error');
+                            }
+                            loginBtn.textContent = 'Login';
+                            loginBtn.disabled = false;
+                            return;
                         }
 
                         setTimeout(() => {
