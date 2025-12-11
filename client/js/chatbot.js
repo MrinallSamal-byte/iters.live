@@ -625,29 +625,38 @@ class Chatbot {
             }
         }
 
-        // Try API call if available
+        // Try API call if available (works for both authenticated and guest users)
         try {
-            // Use 'accessToken' which is what the login system stores
             const token = localStorage.getItem('accessToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Add authorization header if token exists
             if (token) {
-                const response = await fetch('/api/ai/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ question: message, role: this.userRole })
-                });
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ 
+                    message: message,
+                    context: `User role: ${this.userRole}, Page context: ${this.pageContext}`
+                })
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.answer) {
-                        return data.answer;
-                    }
-                } else {
-                    // Log the error for debugging
-                    console.log('AI API returned error:', response.status);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.response) {
+                    return data.response;
                 }
+            } else if (response.status === 503) {
+                // AI service unavailable - fall back to FAQ
+                console.log('AI service unavailable (503), using FAQ fallback');
+            } else {
+                // Log other errors for debugging
+                console.log('AI API returned error:', response.status);
             }
         } catch (error) {
             console.log('AI API not available, using smart classification:', error.message);
