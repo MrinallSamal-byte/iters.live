@@ -251,4 +251,57 @@ router.get('/cache-stats', auth, async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /api/health/ai-service
+ * @desc    Check AI service configuration and availability
+ * @access  Public (for debugging)
+ */
+router.get('/ai-service', async (req, res) => {
+  try {
+    const openRouterService = require('../services/openrouter.service');
+    const aiService = require('../services/ai.service');
+    
+    // Check environment variables (without exposing actual keys)
+    const openRouterConfigured = Boolean(process.env.OPENROUTER_API_KEY);
+    const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+    
+    // Check service availability
+    const openRouterAvailable = openRouterService.isAvailable();
+    
+    res.json({
+      status: openRouterAvailable || geminiConfigured ? 'available' : 'unavailable',
+      timestamp: new Date().toISOString(),
+      services: {
+        openRouter: {
+          configured: openRouterConfigured,
+          available: openRouterAvailable,
+          keyLength: process.env.OPENROUTER_API_KEY?.length || 0,
+          models: {
+            chatbot: openRouterService.models.chatbot.length,
+            captcha: openRouterService.models.captcha.length
+          }
+        },
+        gemini: {
+          configured: geminiConfigured,
+          keyLength: process.env.GEMINI_API_KEY?.length || 0,
+          model: process.env.GEMINI_MODEL || 'not-set'
+        }
+      },
+      recommendations: openRouterAvailable || geminiConfigured ? 
+        [] : [
+          'Set OPENROUTER_API_KEY environment variable (recommended)',
+          'Or set GEMINI_API_KEY environment variable (fallback)',
+          'Get OpenRouter key: https://openrouter.ai/keys',
+          'Get Gemini key: https://makersuite.google.com/app/apikey'
+        ]
+    });
+  } catch (error) {
+    console.error('AI service check error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

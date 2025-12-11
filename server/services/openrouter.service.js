@@ -29,9 +29,14 @@ class OpenRouterService {
         };
         
         if (this.apiKey) {
-            console.log('✅ OpenRouter Service initialized with API key');
+            // Log partial key for verification (first 10 and last 4 characters)
+            const keyPreview = this.apiKey.length > 14 
+                ? `${this.apiKey.substring(0, 10)}...${this.apiKey.substring(this.apiKey.length - 4)}`
+                : 'too-short';
+            console.log(`✅ OpenRouter Service initialized with API key (${keyPreview})`);
         } else {
             console.log('⚠️ OpenRouter Service initialized without API key - features will use fallback');
+            console.log('💡 Set OPENROUTER_API_KEY environment variable to enable AI features');
         }
     }
 
@@ -44,9 +49,12 @@ class OpenRouterService {
      */
     async makeRequest(model, messages, options = {}) {
         if (!this.apiKey) {
+            console.error('❌ OpenRouter API key not configured - check OPENROUTER_API_KEY environment variable');
             throw new Error('OpenRouter API key not configured');
         }
 
+        console.log(`🔄 Making OpenRouter API request with model: ${model}`);
+        
         try {
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
@@ -67,13 +75,16 @@ class OpenRouterService {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                console.error(`❌ OpenRouter API error: ${response.status}`, errorData);
                 throw new Error(`OpenRouter API error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
 
             const data = await response.json();
-            return data.choices?.[0]?.message?.content || '';
+            const content = data.choices?.[0]?.message?.content || '';
+            console.log(`✅ OpenRouter API request successful (${content.length} chars)`);
+            return content;
         } catch (error) {
-            console.error('OpenRouter API request error:', error.message);
+            console.error('❌ OpenRouter API request error:', error.message);
             throw error;
         }
     }
