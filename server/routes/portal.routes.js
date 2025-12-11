@@ -39,6 +39,14 @@ const portalController = require('../controllers/portal.controller');
 router.post('/login', optionalAuth, portalController.portalLogin);
 
 /**
+ * GET /api/portal/demo
+ * Get demo/sample data - ALWAYS AVAILABLE
+ * This endpoint works regardless of portal feature status
+ * No authentication required - returns static demo data for exploration
+ */
+router.get('/demo', portalController.getDemoData);
+
+/**
  * POST /api/portal/sync
  * Sync portal data (legacy endpoint, uses login logic)
  * 

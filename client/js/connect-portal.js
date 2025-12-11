@@ -16,6 +16,7 @@
     // Constants
     const MAX_RETRY_ATTEMPTS = 3;
     const RETRY_KEY_PREFIX = 'portalRetryAttempts:';
+    const CREDENTIALS_KEY = 'portal_credentials';
 
     // State
     let selectedSource = null;
@@ -32,6 +33,77 @@
     let portalPasswordInput;
     let dataSourceSelection;
     let backupOption;
+    let credentialStatus;
+    let clearCredentialsBtn;
+
+    /**
+     * Save credentials to localStorage
+     * @param {string} regNumber - Registration number
+     * @param {string} password - Portal password (will be base64 encoded for basic obfuscation)
+     */
+    function saveCredentials(regNumber, password) {
+        try {
+            const credentials = {
+                regNumber: regNumber,
+                // Basic encoding (not real encryption, just obfuscation for storage)
+                password: btoa(password),
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
+            console.log('Credentials saved to localStorage');
+            updateCredentialStatus(true);
+        } catch (error) {
+            console.warn('Failed to save credentials:', error);
+        }
+    }
+
+    /**
+     * Load saved credentials from localStorage
+     */
+    function loadSavedCredentials() {
+        try {
+            const saved = localStorage.getItem(CREDENTIALS_KEY);
+            if (saved) {
+                const credentials = JSON.parse(saved);
+                if (regNumberInput && credentials.regNumber) {
+                    regNumberInput.value = credentials.regNumber;
+                }
+                if (portalPasswordInput && credentials.password) {
+                    // Decode the password
+                    portalPasswordInput.value = atob(credentials.password);
+                }
+                console.log('Loaded saved credentials');
+                updateCredentialStatus(true);
+            }
+        } catch (error) {
+            console.warn('Failed to load saved credentials:', error);
+        }
+    }
+
+    /**
+     * Clear saved credentials
+     */
+    function clearSavedCredentials() {
+        try {
+            localStorage.removeItem(CREDENTIALS_KEY);
+            if (regNumberInput) regNumberInput.value = '';
+            if (portalPasswordInput) portalPasswordInput.value = '';
+            console.log('Cleared saved credentials');
+            updateCredentialStatus(false);
+            showToast('Credentials cleared', 'success');
+        } catch (error) {
+            console.warn('Failed to clear credentials:', error);
+        }
+    }
+
+    /**
+     * Update credential status indicator
+     */
+    function updateCredentialStatus(hasSaved) {
+        if (credentialStatus) {
+            credentialStatus.style.display = hasSaved ? 'block' : 'none';
+        }
+    }
 
     /**
      * Initialize the connect portal page
@@ -48,6 +120,8 @@
         portalPasswordInput = document.getElementById('portalPassword');
         dataSourceSelection = document.getElementById('dataSourceSelection');
         backupOption = document.getElementById('backupOption');
+        credentialStatus = document.getElementById('credentialStatus');
+        clearCredentialsBtn = document.getElementById('clearCredentialsBtn');
 
         // Check if user is logged in
         const user = APP.Storage.get('user');
@@ -58,6 +132,9 @@
 
         // Check if portal features are enabled on the server
         await checkPortalAvailability();
+
+        // Load saved credentials if available
+        loadSavedCredentials();
 
         // Pre-fill registration number if available
         if (user.registration_number && !user.registration_number.startsWith('GOOGLE_')) {
@@ -90,6 +167,11 @@
         const loadBackupBtn = document.getElementById('loadBackupBtn');
         if (loadBackupBtn) {
             loadBackupBtn.addEventListener('click', handleLoadBackup);
+        }
+        
+        // Add clear credentials button handler
+        if (clearCredentialsBtn) {
+            clearCredentialsBtn.addEventListener('click', clearSavedCredentials);
         }
     }
 
@@ -387,6 +469,8 @@
             if (response.success) {
                 if (response.status === 'SUCCESS') {
                     clearRetryAttempts();
+                    // Save credentials on successful sync
+                    saveCredentials(regNumber, password);
                     showStatus('✅ Portal data synced successfully!', 'success');
                     showToast('Live data synced successfully!', 'success');
                     updateUserStorage(true, true, response.data);
@@ -606,10 +690,8 @@
         const user = APP.Storage.get('user');
         const regNumber = (regNumberInput ? regNumberInput.value.trim() : '') || (user ? user.registration_number : '');
 
-        const response = await APP.API.post('/portal/sync', {
-            reg_number: regNumber,
-            useDemoData: true
-        });
+        // Use the dedicated demo endpoint that always works
+        const response = await APP.API.get('/portal/demo');
 
         if (response.success) {
             updateUserStorage(false, false, response.data);

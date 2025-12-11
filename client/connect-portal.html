@@ -382,6 +382,12 @@
                     <label for="portalPassword">SOA Portal Password</label>
                     <input type="password" id="portalPassword" name="portalPassword" placeholder="Enter your portal password" required>
                 </div>
+                <div class="credential-status" id="credentialStatus" style="display: none;">
+                    <small style="color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between;">
+                        <span>✓ Credentials saved</span>
+                        <button type="button" id="clearCredentialsBtn" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.85rem; padding: 0; text-decoration: underline;">Clear</button>
+                    </small>
+                </div>
             </form>
 
             <!-- Status Messages -->
