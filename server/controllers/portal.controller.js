@@ -438,33 +438,98 @@ function formatPortalData(data, isVerified, portalConnected, dataSource) {
 }
 
 /**
+ * Get Demo Data - ALWAYS AVAILABLE
+ * GET /api/portal/demo
+ * 
+ * Returns static demo data for users to explore the system.
+ * This endpoint ALWAYS works regardless of portal feature status.
+ * No authentication required.
+ * 
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ */
+const getDemoData = async (req, res) => {
+  try {
+    console.log('Demo data requested - returning static demo data');
+    
+    return res.json({
+      success: true,
+      status: STATUS_DEMO_LOADED,
+      message: 'Demo data loaded successfully',
+      data: {
+        mode: 'demo',
+        profile: DUMMY_DATA.profile,
+        marks: DUMMY_DATA.marks,
+        attendance: DUMMY_DATA.attendance,
+        timetable: DUMMY_DATA.timetable || [],
+        courses: DUMMY_DATA.courses || [],
+        results: DUMMY_DATA.results || [],
+        notifications: DUMMY_DATA.notifications || [],
+        backlogs: DUMMY_DATA.backlogs || [],
+        internal_assessments: DUMMY_DATA.internal_assessments || [],
+        fees: DUMMY_DATA.fees || {},
+        isVerified: false,
+        portalConnected: false,
+        dataSource: 'demo',
+        portalEnabled: isPortalEnabled()
+      }
+    });
+  } catch (error) {
+    console.error('Error loading demo data:', error.message);
+    // INTENTIONAL: Return minimal demo data even on error
+    // This ensures users can always access the system for exploration
+    // even if the demo data file is corrupted or missing
+    return res.json({
+      success: true,
+      status: STATUS_DEMO_LOADED,
+      message: 'Demo data loaded successfully (minimal fallback)',
+      data: {
+        mode: 'demo',
+        profile: {
+          name: 'Demo Student',
+          email: 'demo.student@iter.ac.in',
+          department: 'Computer Science & Engineering',
+          year: 3,
+          section: 'A',
+          semester: 5
+        },
+        marks: [],
+        attendance: [],
+        timetable: [],
+        courses: [],
+        isVerified: false,
+        portalConnected: false,
+        dataSource: 'demo_fallback',
+        portalEnabled: isPortalEnabled(),
+        warning: 'Using minimal demo data due to data loading error'
+      }
+    });
+  }
+};
+
+/**
  * Sync portal data for a user (legacy endpoint, redirects to login)
  * Enhanced with Google Sheets backup and multi-layer fallback
  * 
- * TEMPORARILY DISABLED — DO NOT REMOVE
- * This endpoint is disabled when portal features are suspended.
+ * MODIFIED: Now handles demo data requests even when portal is disabled
  * 
  * @param {Object} req - Express request
  * @param {Object} res - Express response
  */
 const syncPortalData = async (req, res) => {
-  // TEMPORARILY DISABLED — DO NOT REMOVE
-  // Check if portal features are enabled
-  if (!isPortalEnabled()) {
-    console.log('Portal sync attempted but feature is disabled');
-    return res.status(503).json(getPortalDisabledResponse());
-  }
-
   try {
     const { reg_number, password, useDemoData } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
 
-    // If explicitly requesting demo data
-    if (useDemoData === true) {
+    // If explicitly requesting demo data OR portal is disabled, return demo data
+    if (useDemoData === true || !isPortalEnabled()) {
+      if (!isPortalEnabled()) {
+        console.log('Portal sync attempted but feature is disabled - redirecting to demo data');
+      }
       return await saveDemoData(userId, reg_number, res);
     }
 
-    // Use the new login function with 3-attempt logic
+    // Use the new login function with 3-attempt logic for live portal sync
     return await portalLogin(req, res);
   } catch (error) {
     console.error('Portal sync error:', error.message);
@@ -535,6 +600,8 @@ const savePortalData = async (userId, regNumber, data, isVerified) => {
 
 /**
  * Save demo/dummy data for a user
+ * Returns consistent response format matching getDemoData()
+ * 
  * @param {string} userId - User document ID
  * @param {string} regNumber - Registration number
  * @param {Object} res - Express response
@@ -552,6 +619,13 @@ const saveDemoData = async (userId, regNumber, res) => {
           profile: DUMMY_DATA.profile,
           marks_data: DUMMY_DATA.marks,
           attendance_data: DUMMY_DATA.attendance,
+          timetable_data: DUMMY_DATA.timetable || [],
+          courses_data: DUMMY_DATA.courses || [],
+          results_data: DUMMY_DATA.results || [],
+          notifications_data: DUMMY_DATA.notifications || [],
+          backlogs_data: DUMMY_DATA.backlogs || [],
+          internal_assessments_data: DUMMY_DATA.internal_assessments || [],
+          fees_data: DUMMY_DATA.fees || {},
           isVerified: false,
           portalConnected: false,
           portal_last_synced: new Date(),
@@ -562,14 +636,24 @@ const saveDemoData = async (userId, regNumber, res) => {
 
     return res.json({
       success: true,
-      status: STATUS_SUCCESS,
-      message: 'Demo data loaded',
+      status: STATUS_DEMO_LOADED,
+      message: 'Demo data loaded successfully',
       data: {
+        mode: 'demo',
         profile: DUMMY_DATA.profile,
         marks: DUMMY_DATA.marks,
         attendance: DUMMY_DATA.attendance,
+        timetable: DUMMY_DATA.timetable || [],
+        courses: DUMMY_DATA.courses || [],
+        results: DUMMY_DATA.results || [],
+        notifications: DUMMY_DATA.notifications || [],
+        backlogs: DUMMY_DATA.backlogs || [],
+        internal_assessments: DUMMY_DATA.internal_assessments || [],
+        fees: DUMMY_DATA.fees || {},
         isVerified: false,
-        portalConnected: false
+        portalConnected: false,
+        dataSource: 'demo',
+        portalEnabled: isPortalEnabled()
       }
     });
   } catch (error) {
@@ -1331,6 +1415,7 @@ module.exports = {
   disconnectPortal,
   getPortalData,
   loadBackupData,
+  getDemoData,
   DUMMY_DATA,
   STATUS_SUCCESS,
   STATUS_AUTH_FAILED,
