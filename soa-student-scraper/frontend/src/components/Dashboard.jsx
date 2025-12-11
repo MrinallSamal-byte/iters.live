@@ -163,9 +163,9 @@ const Dashboard = ({ data, isDemo }) => {
           </div>
           
           <div className="stats-grid">
-            {results.cgpa && (
+            {results.cgpa !== null && results.cgpa !== undefined && (
               <div className="stat-card">
-                <div className="value">{results.cgpa.toFixed(2)}</div>
+                <div className="value">{typeof results.cgpa === 'number' ? results.cgpa.toFixed(2) : results.cgpa}</div>
                 <div className="label">CGPA</div>
               </div>
             )}

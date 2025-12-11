@@ -99,12 +99,15 @@ app = FastAPI(
 )
 
 # Configure CORS
+# NOTE: In production, replace "*" with specific trusted domains like:
+# ["https://your-frontend.vercel.app", "https://yourdomain.com"]
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Request attempt tracking (in-memory, resets per session)
@@ -210,8 +213,12 @@ async def scrape_portal(request: Request, scrape_request: ScrapeRequest):
         attempt=current_attempt
     )
     
-    # Clear password from memory immediately after use
-    scrape_request.password = None  # type: ignore
+    # SECURITY: Clear password from memory immediately after API call
+    # Using del to explicitly remove the password from the request object
+    try:
+        del scrape_request.password
+    except AttributeError:
+        pass  # Already cleared
     
     if result.success:
         # Reset attempt count on success

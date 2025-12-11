@@ -137,8 +137,9 @@ class SOAPortalScraper:
                     captcha_text
                 )
                 
-                # Password reference cleared after login attempt
-                password = None  # noqa: F841
+                # SECURITY: Clear password from memory immediately after login attempt
+                # This prevents the password from persisting in local scope
+                del password
                 
                 if not login_success:
                     return ScrapeResult(
