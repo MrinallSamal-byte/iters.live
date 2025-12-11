@@ -276,8 +276,7 @@ router.get('/ai-service', async (req, res) => {
           available: openRouterAvailable
         },
         gemini: {
-          configured: geminiConfigured,
-          model: process.env.GEMINI_MODEL || 'not-set'
+          configured: geminiConfigured
         }
       },
       recommendations: openRouterAvailable || geminiConfigured ? 

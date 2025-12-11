@@ -11,6 +11,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const { getSecureKeyPreview, isValidOpenRouterKey, isValidGeminiKey } = require('./server/utils/security.util');
 
 console.log('╔════════════════════════════════════════════════════════════════╗');
 console.log('║     AI Service Configuration Diagnostic Tool                   ║');
@@ -43,12 +44,18 @@ const geminiKey = process.env.GEMINI_API_KEY;
 let configurationScore = 0;
 
 if (openRouterKey) {
-    const keyPreview = openRouterKey.length > 14 
-        ? `${openRouterKey.substring(0, 6)}...${openRouterKey.substring(openRouterKey.length - 4)}`
-        : 'invalid-length';
-    console.log(`✅ OPENROUTER_API_KEY configured (${keyPreview})`);
+    const keyPreview = getSecureKeyPreview(openRouterKey);
+    const isValid = isValidOpenRouterKey(openRouterKey);
+    
+    console.log(`${isValid ? '✅' : '⚠️'} OPENROUTER_API_KEY configured (${keyPreview})`);
     console.log(`   Length: ${openRouterKey.length} characters`);
-    configurationScore += 50;
+    
+    if (!isValid) {
+        console.log('   ⚠️ Warning: Key format may be invalid');
+        console.log('   Expected: starts with sk-or-v1- and 30+ characters');
+    }
+    
+    configurationScore += isValid ? 50 : 25;
 } else {
     console.log('❌ OPENROUTER_API_KEY not set');
     console.log('');
@@ -59,13 +66,19 @@ if (openRouterKey) {
 }
 
 if (geminiKey) {
-    const keyPreview = geminiKey.length > 14 
-        ? `${geminiKey.substring(0, 6)}...${geminiKey.substring(geminiKey.length - 4)}`
-        : 'invalid-length';
-    console.log(`✅ GEMINI_API_KEY configured (${keyPreview})`);
+    const keyPreview = getSecureKeyPreview(geminiKey);
+    const isValid = isValidGeminiKey(geminiKey);
+    
+    console.log(`${isValid ? '✅' : '⚠️'} GEMINI_API_KEY configured (${keyPreview})`);
     console.log(`   Length: ${geminiKey.length} characters`);
     console.log(`   Model: ${process.env.GEMINI_MODEL || 'not-set'}`);
-    configurationScore += 30;
+    
+    if (!isValid) {
+        console.log('   ⚠️ Warning: Key format may be invalid');
+        console.log('   Expected: starts with AIza and 30+ characters');
+    }
+    
+    configurationScore += isValid ? 30 : 15;
 } else {
     console.log('⚠️  GEMINI_API_KEY not set (optional fallback)');
     console.log('');

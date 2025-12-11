@@ -4,6 +4,8 @@
  * Supports multiple free models for different use cases
  */
 
+const { getSecureKeyPreview, isValidOpenRouterKey } = require('../utils/security.util');
+
 class OpenRouterService {
     constructor() {
         this.apiKey = process.env.OPENROUTER_API_KEY || '';
@@ -29,11 +31,14 @@ class OpenRouterService {
         };
         
         if (this.apiKey) {
-            // Log partial key for verification (first 6 and last 4 characters)
-            const keyPreview = this.apiKey.length > 14 
-                ? `${this.apiKey.substring(0, 6)}...${this.apiKey.substring(this.apiKey.length - 4)}`
-                : 'too-short';
-            console.log(`✅ OpenRouter Service initialized with API key (${keyPreview})`);
+            if (isValidOpenRouterKey(this.apiKey)) {
+                const keyPreview = getSecureKeyPreview(this.apiKey);
+                console.log(`✅ OpenRouter Service initialized with API key (${keyPreview})`);
+            } else {
+                console.log('⚠️ OpenRouter API key format appears invalid');
+                console.log('   Expected format: sk-or-v1-... with minimum 30 characters');
+                console.log('   Get a valid key from: https://openrouter.ai/keys');
+            }
         } else {
             console.log('⚠️ OpenRouter Service initialized without API key - features will use fallback');
             console.log('💡 Set OPENROUTER_API_KEY environment variable to enable AI features');
