@@ -38,6 +38,14 @@
 
     /**
      * Save credentials to localStorage
+     * 
+     * SECURITY NOTE: Credentials are stored with base64 encoding, which provides
+     * only basic obfuscation, NOT encryption. This is acceptable for educational
+     * portal credentials, but users should be aware:
+     * - Credentials can be decoded by anyone with access to browser storage
+     * - Users can clear credentials anytime via the "Clear" button
+     * - For enhanced security, avoid using this on shared/public computers
+     * 
      * @param {string} regNumber - Registration number
      * @param {string} password - Portal password (will be base64 encoded for basic obfuscation)
      */
@@ -45,12 +53,12 @@
         try {
             const credentials = {
                 regNumber: regNumber,
-                // Basic encoding (not real encryption, just obfuscation for storage)
+                // Base64 encoding provides basic obfuscation only (not encryption)
                 password: btoa(password),
                 savedAt: new Date().toISOString()
             };
             localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
-            console.log('Credentials saved to localStorage');
+            console.log('Credentials saved to localStorage (base64 encoded)');
             updateCredentialStatus(true);
         } catch (error) {
             console.warn('Failed to save credentials:', error);

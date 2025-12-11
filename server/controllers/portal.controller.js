@@ -518,18 +518,15 @@ const syncPortalData = async (req, res) => {
     const { reg_number, password, useDemoData } = req.body;
     const userId = req.user ? (req.user.id || req.user.uid) : null;
 
-    // If explicitly requesting demo data, return it regardless of portal status
-    if (useDemoData === true) {
+    // If explicitly requesting demo data OR portal is disabled, return demo data
+    if (useDemoData === true || !isPortalEnabled()) {
+      if (!isPortalEnabled()) {
+        console.log('Portal sync attempted but feature is disabled - redirecting to demo data');
+      }
       return await saveDemoData(userId, reg_number, res);
     }
 
-    // Check if portal features are enabled for live data sync
-    if (!isPortalEnabled()) {
-      console.log('Portal sync attempted but feature is disabled - redirecting to demo data');
-      return await saveDemoData(userId, reg_number, res);
-    }
-
-    // Use the new login function with 3-attempt logic
+    // Use the new login function with 3-attempt logic for live portal sync
     return await portalLogin(req, res);
   } catch (error) {
     console.error('Portal sync error:', error.message);
