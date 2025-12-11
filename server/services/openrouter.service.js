@@ -29,9 +29,9 @@ class OpenRouterService {
         };
         
         if (this.apiKey) {
-            // Log partial key for verification (first 10 and last 4 characters)
+            // Log partial key for verification (first 6 and last 4 characters)
             const keyPreview = this.apiKey.length > 14 
-                ? `${this.apiKey.substring(0, 10)}...${this.apiKey.substring(this.apiKey.length - 4)}`
+                ? `${this.apiKey.substring(0, 6)}...${this.apiKey.substring(this.apiKey.length - 4)}`
                 : 'too-short';
             console.log(`✅ OpenRouter Service initialized with API key (${keyPreview})`);
         } else {

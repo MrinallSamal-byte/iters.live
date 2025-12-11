@@ -44,7 +44,7 @@ let configurationScore = 0;
 
 if (openRouterKey) {
     const keyPreview = openRouterKey.length > 14 
-        ? `${openRouterKey.substring(0, 10)}...${openRouterKey.substring(openRouterKey.length - 4)}`
+        ? `${openRouterKey.substring(0, 6)}...${openRouterKey.substring(openRouterKey.length - 4)}`
         : 'invalid-length';
     console.log(`✅ OPENROUTER_API_KEY configured (${keyPreview})`);
     console.log(`   Length: ${openRouterKey.length} characters`);
