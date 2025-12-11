@@ -493,6 +493,10 @@
                     showToast('Live data synced successfully!', 'success');
                     updateUserStorage(true, true, response.data);
                     setTimeout(() => {
+                        // Create page access token before redirecting
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                        }
                         window.location.href = '/dashboard/student.html';
                     }, 1500);
                 } else if (response.status === 'BACKUP_LOADED') {
@@ -502,6 +506,10 @@
                     showToast('Loaded backup data', 'warning');
                     updateUserStorage(false, false, response.data);
                     setTimeout(() => {
+                        // Create page access token before redirecting
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                        }
                         window.location.href = '/dashboard/student.html';
                     }, 2000);
                 } else if (response.status === 'DEMO_LOADED') {
@@ -510,6 +518,10 @@
                     showToast('Demo data loaded', 'warning');
                     updateUserStorage(false, false, response.data);
                     setTimeout(() => {
+                        // Create page access token before redirecting
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                        }
                         window.location.href = '/dashboard/student.html';
                     }, 2000);
                 }
@@ -593,6 +605,10 @@
                 showToast('Backup data loaded successfully', 'success');
                 clearRetryAttempts();
                 setTimeout(() => {
+                    // Create page access token before redirecting
+                    if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                        window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                    }
                     window.location.href = '/dashboard/student.html';
                 }, 1500);
                 return;
@@ -612,6 +628,10 @@
         clearRetryAttempts();
         setLoading(false);
         setTimeout(() => {
+            // Create page access token before redirecting
+            if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+            }
             window.location.href = '/dashboard/student.html';
         }, 2000);
     }
@@ -629,6 +649,10 @@
                 showStatus('✅ Backup data loaded successfully!', 'success');
                 showToast('Backup data loaded', 'success');
                 setTimeout(() => {
+                    // Create page access token before redirecting
+                    if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                        window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                    }
                     window.location.href = '/dashboard/student.html';
                 }, 1000);
             } else {
@@ -656,6 +680,10 @@
             showStatus('✅ Demo data loaded successfully!', 'success');
             showToast('Demo data loaded successfully', 'success');
             setTimeout(() => {
+                // Create page access token before redirecting
+                if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                    window.PageAccessToken.createPageAccessToken('/dashboard/student.html');
+                }
                 window.location.href = '/dashboard/student.html';
             }, 1000);
         } catch (error) {
