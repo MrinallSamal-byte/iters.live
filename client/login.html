@@ -195,11 +195,15 @@
                             window.location.href = redirectUrl;
                         }
                     } else {
-                        alert('Login failed: ' + response.message);
+                        if (typeof APP.showToast === 'function') {
+                            APP.showToast('Login failed: ' + response.message, 'error');
+                        }
                     }
                 } catch (error) {
                     console.error('Google Sign-In Error:', error);
-                    alert('Google Sign-In failed. Please try again.');
+                    if (typeof APP.showToast === 'function') {
+                        APP.showToast('Google Sign-In failed. Please try again.', 'error');
+                    }
                 }
             });
         }
