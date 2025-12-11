@@ -597,6 +597,8 @@ const savePortalData = async (userId, regNumber, data, isVerified) => {
 
 /**
  * Save demo/dummy data for a user
+ * Returns consistent response format matching getDemoData()
+ * 
  * @param {string} userId - User document ID
  * @param {string} regNumber - Registration number
  * @param {Object} res - Express response
@@ -614,6 +616,13 @@ const saveDemoData = async (userId, regNumber, res) => {
           profile: DUMMY_DATA.profile,
           marks_data: DUMMY_DATA.marks,
           attendance_data: DUMMY_DATA.attendance,
+          timetable_data: DUMMY_DATA.timetable || [],
+          courses_data: DUMMY_DATA.courses || [],
+          results_data: DUMMY_DATA.results || [],
+          notifications_data: DUMMY_DATA.notifications || [],
+          backlogs_data: DUMMY_DATA.backlogs || [],
+          internal_assessments_data: DUMMY_DATA.internal_assessments || [],
+          fees_data: DUMMY_DATA.fees || {},
           isVerified: false,
           portalConnected: false,
           portal_last_synced: new Date(),
@@ -624,14 +633,24 @@ const saveDemoData = async (userId, regNumber, res) => {
 
     return res.json({
       success: true,
-      status: STATUS_SUCCESS,
-      message: 'Demo data loaded',
+      status: STATUS_DEMO_LOADED,
+      message: 'Demo data loaded successfully',
       data: {
+        mode: 'demo',
         profile: DUMMY_DATA.profile,
         marks: DUMMY_DATA.marks,
         attendance: DUMMY_DATA.attendance,
+        timetable: DUMMY_DATA.timetable || [],
+        courses: DUMMY_DATA.courses || [],
+        results: DUMMY_DATA.results || [],
+        notifications: DUMMY_DATA.notifications || [],
+        backlogs: DUMMY_DATA.backlogs || [],
+        internal_assessments: DUMMY_DATA.internal_assessments || [],
+        fees: DUMMY_DATA.fees || {},
         isVerified: false,
-        portalConnected: false
+        portalConnected: false,
+        dataSource: 'demo',
+        portalEnabled: isPortalEnabled()
       }
     });
   } catch (error) {
