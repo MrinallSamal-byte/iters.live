@@ -46,13 +46,27 @@ soa-student-scraper/
 - Node.js 18+
 - Tesseract OCR (`tesseract-ocr` package)
 
-### Backend Setup
+### Installation
+
+**1. Install Tesseract OCR**
+```bash
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
+# macOS
+brew install tesseract
+
+# Windows
+# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+```
+
+**2. Backend Setup**
 
 ```bash
 cd soa-student-scraper/backend
 
 # Create virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
@@ -61,11 +75,15 @@ pip install -r requirements.txt
 # Install Playwright browsers
 playwright install chromium
 
+# Configure environment (optional)
+cp .env.example .env
+# Edit .env if needed
+
 # Run the server
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Frontend Setup
+**3. Frontend Setup**
 
 ```bash
 cd soa-student-scraper/frontend
@@ -73,11 +91,23 @@ cd soa-student-scraper/frontend
 # Install dependencies
 npm install
 
+# Configure environment (optional)
+cp .env.example .env
+# Edit .env if backend is on different URL
+
 # Start development server
 npm run dev
 ```
 
 The frontend will be available at `http://localhost:3000` and will proxy API requests to the backend.
+
+### Quick Test
+
+1. Open `http://localhost:3000` in your browser
+2. Click "Load Dummy Data" to see a sample profile
+3. OR enter your SOA credentials to fetch live data
+
+**Note:** For live data, make sure the SOA portal is accessible.
 
 ## 📡 API Endpoints
 
@@ -263,14 +293,112 @@ This tool is designed for SOA University students to access their **own** academ
 - Do not share your password with anyone
 - Use responsibly and in accordance with SOA University policies
 
+## 📚 Documentation
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide for Render, Vercel, Railway, and Docker
+- **[TESTING.md](./TESTING.md)** - Comprehensive testing guide with examples
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Guidelines for contributors
+
+## 🔧 Configuration
+
+### Backend Environment Variables
+
+Create `backend/.env` from `backend/.env.example`:
+```bash
+HOST=0.0.0.0
+PORT=8000
+ALLOWED_ORIGINS=*  # Update for production
+```
+
+### Frontend Environment Variables
+
+Create `frontend/.env` from `frontend/.env.example`:
+```bash
+VITE_API_URL=  # Leave empty for local dev, set for production
+```
+
+## 🐳 Docker Support
+
+Run the entire stack with Docker:
+```bash
+docker-compose up -d --build
+```
+
+Services will be available at:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+
+## 🧪 Testing
+
+Run backend tests:
+```bash
+cd backend
+source venv/bin/activate
+pytest
+```
+
+Run frontend build test:
+```bash
+cd frontend
+npm run build
+```
+
+See [TESTING.md](./TESTING.md) for comprehensive testing guide.
+
+## 🚨 Important Notes
+
+### For Students
+- **Use ONLY your own credentials** - Never share or use someone else's login
+- Data is fetched in real-time and not stored anywhere
+- This tool is for personal use only
+
+### For Developers
+- Never commit credentials or sensitive data
+- Always use `.env` files for configuration
+- Test thoroughly before deploying
+- Keep dependencies updated
+
+### Security
+- Passwords are NEVER logged or stored
+- Browser sessions are isolated per request
+- All data is transferred over HTTPS in production
+- CORS is enforced to prevent unauthorized access
+
+## 📊 Tech Stack
+
+**Backend:**
+- FastAPI (Python web framework)
+- Playwright (Browser automation)
+- pytesseract + Pillow (CAPTCHA solving)
+- uvicorn (ASGI server)
+
+**Frontend:**
+- React 18 (UI library)
+- Vite (Build tool)
+- Modern CSS with responsive design
+
+**Deployment:**
+- Docker & Docker Compose
+- Render (Backend hosting)
+- Vercel (Frontend hosting)
+- Railway (Full-stack option)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
 ## 📄 License
 
 MIT License - see LICENSE file for details
 
-## 🤝 Contributing
+## 🙏 Acknowledgments
 
-Contributions are welcome! Please read our contributing guidelines before submitting a PR.
+- SOA University for the inspiration
+- Open-source community for amazing tools
+- All contributors and testers
 
 ---
 
 Built with ❤️ for SOA University Students
+
+**Star ⭐ this project if you find it helpful!**
