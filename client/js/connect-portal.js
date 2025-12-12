@@ -17,6 +17,12 @@
     const MAX_RETRY_ATTEMPTS = 3;
     const RETRY_KEY_PREFIX = 'portalRetryAttempts:';
     const CREDENTIALS_KEY = 'portal_credentials';
+    
+    // Configuration for retry messaging
+    const RETRY_DELAYS = [500, 1000, 2000]; // milliseconds
+    const TOTAL_RETRY_TIME_ESTIMATE = Math.ceil(
+        (RETRY_DELAYS.reduce((a, b) => a + b, 0) + (30000 * MAX_RETRY_ATTEMPTS)) / 1000 / 60
+    ); // Total time in minutes including processing
 
     // State
     let selectedSource = null;
@@ -477,11 +483,15 @@
         }
 
         setLoading(true);
-        showStatus('🔄 Connecting to SOA Portal... This may take up to 90 seconds while we solve the CAPTCHA.', 'loading');
+        showStatus(
+            `🔄 Connecting to SOA Portal... This may take up to ${TOTAL_RETRY_TIME_ESTIMATE} minutes as the scraper will retry up to ${MAX_RETRY_ATTEMPTS} times with delays.`,
+            'loading'
+        );
         hideRetryInfo();
 
         try {
-            // NOTE: This API call will return a disabled response as scraping is disabled
+            // NOTE: The backend will perform 3 retry attempts with incremental delays
+            // The scraper now handles: attempt 1 (immediate), attempt 2 (after 0.5s), attempt 3 (after 1s)
             const response = await APP.API.post('/portal/login', {
                 reg_number: regNumber,
                 password: password
@@ -526,12 +536,19 @@
             const errorMessage = errorData.message || error.message || 'Unknown error';
             const attempt = errorData.attempt;
             const attemptsRemaining = errorData.attemptsRemaining;
+            const failureReasons = errorData.failureReasons || [];
+            
+            // Log failure reasons for debugging
+            if (failureReasons.length > 0) {
+                console.error('Scraper failure reasons:', failureReasons);
+            }
             
             handleSyncFailure({
                 status: errorStatus,
                 message: errorMessage,
                 attempt: attempt,
-                attemptsRemaining: attemptsRemaining
+                attemptsRemaining: attemptsRemaining,
+                failureReasons: failureReasons
             });
         } finally {
             setLoading(false);
@@ -556,9 +573,9 @@
         if (response.status === 'AUTH_FAILED') {
             showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
         } else if (response.status === 'PORTAL_UNREACHABLE') {
-            showStatus('⚠️ Student portal is currently unreachable. The university portal may be down for maintenance.', 'error');
+            showStatus('⚠️ Cannot fetch data from college website. The portal was unreachable after 3 attempts.', 'error');
             showRetryInfo(
-                'The student portal appears to be offline. Click "Load Previously Saved Data" to use your backup, or select "Demo Data" to explore the system.'
+                'The student portal appears to be offline or under maintenance. Click "Load Previously Saved Data" to use your backup, or select "Demo Data" to explore the system.'
             );
             return;
         } else if (response.status === 'PORTAL_DISABLED') {
@@ -567,6 +584,17 @@
             return;
         } else if (response.message && response.message.toLowerCase().includes('captcha')) {
             showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
+        } else if (response.message && response.message.includes('after 3 attempts')) {
+            // This is the final error after all retries exhausted
+            showStatus(`❌ ${response.message}`, 'error');
+            showRetryInfo(
+                `The scraper attempted ${MAX_RETRY_ATTEMPTS} times with delays but could not fetch data. Try again later or use backup/demo data.`
+            );
+            // Show detailed failure reasons in console for debugging
+            if (response.failureReasons && response.failureReasons.length > 0) {
+                console.error('Detailed failure reasons:', response.failureReasons);
+            }
+            return;
         } else {
             const msg = response.message || 'Failed to fetch portal data';
             showStatus(`❌ ${msg}`, 'error');
