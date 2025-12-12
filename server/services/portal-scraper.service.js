@@ -28,6 +28,7 @@ const PORTAL_BASE_URL = process.env.PORTAL_URL || 'https://soaportals.com';
 const API_BASE_URL = `${PORTAL_BASE_URL}/api`;
 const TIMEOUT = 30000; // 30 seconds
 const CAPTCHA_MAX_ATTEMPTS = 3;
+const MIN_CAPTCHA_LENGTH = 4;
 
 /**
  * CAPTCHA Solver using Tesseract.js
@@ -43,8 +44,9 @@ class CaptchaSolver {
     async initialize() {
         if (!this.worker) {
             try {
+                const isDevelopment = process.env.NODE_ENV === 'development';
                 this.worker = await Tesseract.createWorker({
-                    logger: m => console.log('[Tesseract]', m.status, m.progress)
+                    logger: isDevelopment ? (m => console.log('[Tesseract]', m.status, m.progress)) : undefined
                 });
                 await this.worker.loadLanguage('eng');
                 await this.worker.initialize('eng');
@@ -96,7 +98,8 @@ class CaptchaSolver {
             // Perform OCR
             const { data: { text } } = await this.worker.recognize(processedImage);
             
-            // Clean up the text
+            // Clean up the text - removes non-alphanumeric characters
+            // Note: Assumes CAPTCHA only contains letters and numbers (A-Z, a-z, 0-9)
             const captchaText = text.replace(/[^a-zA-Z0-9]/g, '').trim();
             
             console.log('[CAPTCHA] Detected text:', captchaText);
@@ -190,7 +193,7 @@ class PortalScraper {
                 
                 const captchaText = await this.captchaSolver.solve(imageBuffer);
                 
-                if (captchaText && captchaText.length >= 4) {
+                if (captchaText && captchaText.length >= MIN_CAPTCHA_LENGTH) {
                     console.log(`[CAPTCHA] Solved: ${captchaText}`);
                     return captchaText;
                 }
@@ -212,7 +215,12 @@ class PortalScraper {
             // Solve CAPTCHA
             const captchaText = await this.solveCaptcha();
             if (!captchaText) {
-                console.warn('[Login] Could not solve CAPTCHA, attempting login without it');
+                // CAPTCHA solving failed - return error to avoid potential account lockout
+                return {
+                    success: false,
+                    status: STATUS_SCRAPE_ERROR,
+                    message: 'Failed to solve CAPTCHA after multiple attempts. Please try again later.'
+                };
             }
             
             // Prepare login payload
