@@ -38,6 +38,7 @@ const webRoutes = require('./routes/web.routes');
 const portalRoutes = require('./routes/portal.routes');
 const redirectRoutes = require('./routes/redirect.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const soaRoutes = require('./routes/soa.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -209,6 +210,7 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/soa', soaRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
