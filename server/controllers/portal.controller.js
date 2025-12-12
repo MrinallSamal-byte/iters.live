@@ -193,9 +193,10 @@ const portalLogin = async (req, res) => {
       // Scrape portal data using Node.js scraper
       const scraperResponse = await scraper.scrape(reg_number, password);
       
-      const { status, data, message } = scraperResponse;
+      const { status, data, message, failureReasons } = scraperResponse;
 
-      if (status === STATUS_SUCCESS) {
+      // Handle success (accept both 'success' and 'SUCCESS' status)
+      if (status === 'success' || status === STATUS_SUCCESS) {
         // Clear attempt count on success
         clearAttemptCount(reg_number, userId);
 
@@ -271,7 +272,28 @@ const portalLogin = async (req, res) => {
         });
       }
 
-      // Other scrape errors
+      // Other scrape errors (including 'error' status from retry exhaustion)
+      if (status === 'error' || status === STATUS_SCRAPE_ERROR) {
+        // Log the failure reasons if available
+        if (failureReasons && failureReasons.length > 0) {
+          console.error('[Portal] Scraper failure reasons:', failureReasons.join('; '));
+        }
+        
+        if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
+          return await handleMaxAttemptsReached(reg_number, userId, res);
+        }
+
+        return res.status(500).json({
+          success: false,
+          status: STATUS_SCRAPE_ERROR,
+          message: message || 'Failed to fetch portal data',
+          attempt: attemptNumber,
+          attemptsRemaining,
+          failureReasons: failureReasons || []
+        });
+      }
+      
+      // Unknown status - treat as error
       if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
         return await handleMaxAttemptsReached(reg_number, userId, res);
       }
@@ -1246,9 +1268,9 @@ const fetchPortalData = async (req, res) => {
       // Scrape portal data using Node.js scraper
       const scraperResponse = await scraper.scrape(reg_number, password);
       
-      const { status, data, message } = scraperResponse;
+      const { status, data, message, failureReasons } = scraperResponse;
 
-      if (status === STATUS_SUCCESS) {
+      if (status === 'success' || status === STATUS_SUCCESS) {
         // Save to Firestore
         await savePortalDataToFirestore(userId, reg_number, data, true);
 
@@ -1266,10 +1288,16 @@ const fetchPortalData = async (req, res) => {
         });
       }
 
+      // Log failure reasons if available
+      if (failureReasons && failureReasons.length > 0) {
+        console.error('[Portal] Fetch failure reasons:', failureReasons.join('; '));
+      }
+
       return res.status(status === STATUS_AUTH_FAILED ? 401 : 500).json({
         success: false,
         status,
-        message: message || 'Failed to fetch portal data'
+        message: message || 'Failed to fetch portal data',
+        failureReasons: failureReasons || []
       });
 
     } catch (scraperError) {

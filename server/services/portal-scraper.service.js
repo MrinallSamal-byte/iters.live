@@ -30,6 +30,10 @@ const TIMEOUT = 30000; // 30 seconds
 const CAPTCHA_MAX_ATTEMPTS = 3;
 const MIN_CAPTCHA_LENGTH = 4;
 
+// Retry configuration
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAYS = [500, 1000, 2000]; // Incremental delays in milliseconds (0.5s, 1s, 2s)
+
 /**
  * CAPTCHA Solver using Tesseract.js
  */
@@ -147,15 +151,35 @@ class PortalScraper {
 
     /**
      * Check if portal is reachable
+     * @returns {Promise<{reachable: boolean, statusCode: number|null, error: string|null}>}
      */
     async checkPortalReachability() {
         try {
+            console.log('[Portal] Checking reachability:', PORTAL_BASE_URL);
             const response = await this.client.get(PORTAL_BASE_URL, { timeout: 10000 });
-            return response.status === 200 || response.status === 302;
+            const reachable = response.status === 200 || response.status === 302;
+            console.log(`[Portal] Reachability check: ${reachable ? 'SUCCESS' : 'FAILED'} (status: ${response.status})`);
+            return {
+                reachable,
+                statusCode: response.status,
+                error: null
+            };
         } catch (error) {
             console.error('[Portal] Reachability check failed:', error.message);
-            return false;
+            return {
+                reachable: false,
+                statusCode: null,
+                error: error.message
+            };
         }
+    }
+    
+    /**
+     * Wait/sleep for specified milliseconds
+     * @param {number} ms - Milliseconds to wait
+     */
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     /**
@@ -302,62 +326,127 @@ class PortalScraper {
     }
 
     /**
-     * Scrape all data from portal
+     * Scrape all data from portal with retry logic
      */
     async scrape(regNo, password) {
-        try {
-            console.log('[Scraper] Starting scrape for:', regNo);
-            
-            // Check portal reachability
-            const isReachable = await this.checkPortalReachability();
-            if (!isReachable) {
-                return {
-                    status: STATUS_PORTAL_UNREACHABLE,
-                    message: 'Student portal is currently unreachable. The portal may be down for maintenance.'
-                };
-            }
-            
-            // Login
-            const loginResult = await this.login(regNo, password);
-            if (!loginResult.success) {
-                return loginResult;
-            }
-            
-            // Fetch all data in parallel
-            console.log('[Scraper] Fetching portal data...');
-            const [profile, attendance, marks, backlogs, internal] = await Promise.all([
-                this.fetchData('/StudentProfile/Get'),
-                this.fetchData('/StudentAttendance/Get'),
-                this.fetchData('/StudentMarks/Get'),
-                this.fetchData('/StudentBacklogs/Get'),
-                this.fetchData('/StudentSubjects/GetInternalMarks')
-            ]);
-            
-            return {
-                status: STATUS_SUCCESS,
-                message: 'Data fetched successfully from SOA portal',
-                data: {
-                    profile: profile || {},
-                    attendance: attendance || [],
-                    marks: marks || [],
-                    backlogs: backlogs || [],
-                    internal_assessments: internal || [],
-                    timetable: [],
-                    courses: [],
-                    results: [],
-                    notifications: [],
-                    fees: {}
+        let lastError = null;
+        const failureReasons = [];
+        
+        console.log('[Scraper] Starting scrape with retry logic for:', regNo);
+        console.log(`[Scraper] Max attempts: ${MAX_RETRY_ATTEMPTS}, Delays: ${RETRY_DELAYS.join('ms, ')}ms`);
+        
+        // Perform retry attempts
+        for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try {
+                console.log(`\n[Scraper] ===== Attempt ${attempt}/${MAX_RETRY_ATTEMPTS} =====`);
+                
+                // Check portal reachability before each attempt
+                const reachabilityCheck = await this.checkPortalReachability();
+                if (!reachabilityCheck.reachable) {
+                    const reason = `Portal unreachable (${reachabilityCheck.error || 'Unknown error'})`;
+                    failureReasons.push(`Attempt ${attempt}: ${reason}`);
+                    console.warn(`[Scraper] ${reason}`);
+                    
+                    // If portal is unreachable, wait before next attempt
+                    if (attempt < MAX_RETRY_ATTEMPTS) {
+                        const delay = RETRY_DELAYS[attempt - 1];
+                        console.log(`[Scraper] Waiting ${delay}ms before retry...`);
+                        await this.sleep(delay);
+                        continue;
+                    }
+                    
+                    // Final attempt failed due to unreachability
+                    return {
+                        status: STATUS_PORTAL_UNREACHABLE,
+                        message: 'Cannot fetch data from college website after 3 attempts. The portal may be down for maintenance.',
+                        failureReasons
+                    };
                 }
-            };
-        } catch (error) {
-            console.error('[Scraper] Error:', error);
-            return {
-                status: STATUS_SCRAPE_ERROR,
-                message: `Scraping failed: ${error.message}`
-            };
-        } finally {
-            await this.cleanup();
+                
+                console.log(`[Scraper] Portal is reachable, proceeding with attempt ${attempt}`);
+                
+                // Login
+                const loginResult = await this.login(regNo, password);
+                if (!loginResult.success) {
+                    const reason = loginResult.message || 'Login failed';
+                    failureReasons.push(`Attempt ${attempt}: ${reason}`);
+                    console.warn(`[Scraper] Login failed: ${reason}`);
+                    
+                    // Don't retry on authentication failures
+                    if (loginResult.status === STATUS_AUTH_FAILED) {
+                        return {
+                            status: STATUS_AUTH_FAILED,
+                            message: loginResult.message,
+                            failureReasons
+                        };
+                    }
+                    
+                    // Retry on other errors
+                    if (attempt < MAX_RETRY_ATTEMPTS) {
+                        const delay = RETRY_DELAYS[attempt - 1];
+                        console.log(`[Scraper] Waiting ${delay}ms before retry...`);
+                        await this.sleep(delay);
+                        continue;
+                    }
+                    
+                    return loginResult;
+                }
+                
+                // Fetch all data in parallel
+                console.log('[Scraper] Fetching portal data...');
+                const [profile, attendance, marks, backlogs, internal] = await Promise.all([
+                    this.fetchData('/StudentProfile/Get'),
+                    this.fetchData('/StudentAttendance/Get'),
+                    this.fetchData('/StudentMarks/Get'),
+                    this.fetchData('/StudentBacklogs/Get'),
+                    this.fetchData('/StudentSubjects/GetInternalMarks')
+                ]);
+                
+                console.log(`[Scraper] ✅ Successfully fetched data on attempt ${attempt}`);
+                
+                return {
+                    status: 'success',
+                    data: {
+                        profile: profile || {},
+                        attendance: attendance || [],
+                        marks: marks || [],
+                        backlogs: backlogs || [],
+                        internal_assessments: internal || [],
+                        timetable: [],
+                        courses: [],
+                        results: [],
+                        notifications: [],
+                        fees: {}
+                    }
+                };
+            } catch (error) {
+                const reason = error.message || 'Unknown error';
+                failureReasons.push(`Attempt ${attempt}: ${reason}`);
+                console.error(`[Scraper] Attempt ${attempt} failed:`, reason);
+                lastError = error;
+                
+                // Wait before retry (except on last attempt)
+                if (attempt < MAX_RETRY_ATTEMPTS) {
+                    const delay = RETRY_DELAYS[attempt - 1];
+                    console.log(`[Scraper] Waiting ${delay}ms before retry...`);
+                    await this.sleep(delay);
+                }
+            } finally {
+                // Cleanup after each attempt
+                await this.cleanup();
+            }
         }
+        
+        // All retry attempts exhausted
+        console.error(`[Scraper] ❌ All ${MAX_RETRY_ATTEMPTS} attempts failed`);
+        console.error('[Scraper] Failure reasons:', failureReasons);
+        
+        return {
+            status: 'error',
+            message: `Cannot fetch data from college website after ${MAX_RETRY_ATTEMPTS} attempts`,
+            failureReasons,
+            lastError: lastError?.message
+        };
     }
 
     /**
