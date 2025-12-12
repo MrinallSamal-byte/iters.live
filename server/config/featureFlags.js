@@ -28,9 +28,9 @@ const isMemoryConstrained = () => {
   return isRenderFreeTier;
 };
 
-// Portal features - disabled by default on memory-constrained environments
-// Set PORTAL_FEATURES_ENABLED=true to enable portal scraping (requires adequate memory)
-const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED === 'true';
+// Portal features - enabled by default, can be disabled via environment variable
+// Set PORTAL_FEATURES_ENABLED=false to disable portal scraping
+const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED !== 'false';
 
 // Message to show users when portal features are disabled
 const PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily unavailable. Please use demo data to explore all features.';
