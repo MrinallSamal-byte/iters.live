@@ -1,16 +1,21 @@
 /**
- * Portal Scraper Service - Node.js/Puppeteer Implementation
+ * Portal Scraper Service - Axios/HTTP Implementation
  * 
  * Features:
- * - Puppeteer-based web scraping
+ * - HTTP-based scraping using axios
  * - CAPTCHA solving using Tesseract.js OCR
- * - Session cookie management
- * - Comprehensive data extraction from SOA portal
+ * - Session cookie management with tough-cookie
+ * - Comprehensive data extraction from SOA portal API
+ * 
+ * This implementation uses direct HTTP requests instead of Puppeteer
+ * for better performance and lower memory usage.
  */
 
-const puppeteer = require('puppeteer');
+const axios = require('axios');
 const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
+const { CookieJar } = require('tough-cookie');
+const { wrapper } = require('axios-cookiejar-support');
 
 // Status constants
 const STATUS_SUCCESS = 'SUCCESS';
@@ -19,9 +24,9 @@ const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
 const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 
 // Portal configuration
-const PORTAL_URL = process.env.PORTAL_URL || 'https://soaportals.com/StudentPortalSOA/#/';
-const LOGIN_TIMEOUT = 60000; // 60 seconds
-const PAGE_TIMEOUT = 30000; // 30 seconds
+const PORTAL_BASE_URL = process.env.PORTAL_URL || 'https://soaportals.com';
+const API_BASE_URL = `${PORTAL_BASE_URL}/api`;
+const TIMEOUT = 30000; // 30 seconds
 const CAPTCHA_MAX_ATTEMPTS = 3;
 
 /**
@@ -37,14 +42,20 @@ class CaptchaSolver {
      */
     async initialize() {
         if (!this.worker) {
-            this.worker = await Tesseract.createWorker({
-                logger: m => console.log('[Tesseract]', m)
-            });
-            await this.worker.loadLanguage('eng');
-            await this.worker.initialize('eng');
-            await this.worker.setParameters({
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-            });
+            try {
+                this.worker = await Tesseract.createWorker({
+                    logger: m => console.log('[Tesseract]', m.status, m.progress)
+                });
+                await this.worker.loadLanguage('eng');
+                await this.worker.initialize('eng');
+                await this.worker.setParameters({
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+                });
+                console.log('[CAPTCHA] Tesseract initialized successfully');
+            } catch (error) {
+                console.error('[CAPTCHA] Failed to initialize Tesseract:', error);
+                this.worker = null;
+            }
         }
     }
 
@@ -57,9 +68,10 @@ class CaptchaSolver {
                 .greyscale()
                 .normalize()
                 .threshold(128)
+                .sharpen()
                 .toBuffer();
         } catch (error) {
-            console.error('Image preprocessing error:', error);
+            console.error('[CAPTCHA] Image preprocessing error:', error);
             return imageBuffer;
         }
     }
@@ -69,7 +81,14 @@ class CaptchaSolver {
      */
     async solve(imageBuffer) {
         try {
-            await this.initialize();
+            if (!this.worker) {
+                await this.initialize();
+            }
+            
+            if (!this.worker) {
+                console.error('[CAPTCHA] Worker not available');
+                return null;
+            }
             
             // Preprocess image
             const processedImage = await this.preprocessImage(imageBuffer);
@@ -83,7 +102,7 @@ class CaptchaSolver {
             console.log('[CAPTCHA] Detected text:', captchaText);
             return captchaText;
         } catch (error) {
-            console.error('CAPTCHA solving error:', error);
+            console.error('[CAPTCHA] Solving error:', error);
             return null;
         }
     }
@@ -93,40 +112,34 @@ class CaptchaSolver {
      */
     async cleanup() {
         if (this.worker) {
-            await this.worker.terminate();
+            try {
+                await this.worker.terminate();
+            } catch (e) {
+                // Ignore cleanup errors
+            }
             this.worker = null;
         }
     }
 }
 
 /**
- * Portal Scraper using Puppeteer
+ * Portal Scraper using Axios
  */
 class PortalScraper {
     constructor() {
-        this.browser = null;
-        this.page = null;
+        this.jar = new CookieJar();
+        this.client = wrapper(axios.create({
+            jar: this.jar,
+            timeout: TIMEOUT,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+            },
+            validateStatus: () => true // Don't throw on any status
+        }));
         this.captchaSolver = new CaptchaSolver();
-        this.sessionCookies = null;
-    }
-
-    /**
-     * Initialize browser
-     */
-    async initBrowser() {
-        if (!this.browser) {
-            this.browser = await puppeteer.launch({
-                headless: 'new',
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process'
-                ]
-            });
-        }
+        this.sessionToken = null;
     }
 
     /**
@@ -134,57 +147,52 @@ class PortalScraper {
      */
     async checkPortalReachability() {
         try {
-            await this.initBrowser();
-            this.page = await this.browser.newPage();
-            
-            await this.page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-            
-            const response = await this.page.goto(PORTAL_URL, {
-                waitUntil: 'networkidle2',
-                timeout: PAGE_TIMEOUT
-            });
-            
-            return response && response.ok();
+            const response = await this.client.get(PORTAL_BASE_URL, { timeout: 10000 });
+            return response.status === 200 || response.status === 302;
         } catch (error) {
-            console.error('Portal reachability check failed:', error);
+            console.error('[Portal] Reachability check failed:', error.message);
             return false;
         }
     }
 
     /**
-     * Solve CAPTCHA on the login page
+     * Get CAPTCHA image
+     */
+    async getCaptchaImage() {
+        try {
+            const response = await this.client.get(`${API_BASE_URL}/captcha`, {
+                responseType: 'arraybuffer'
+            });
+            
+            if (response.status === 200 && response.data) {
+                return Buffer.from(response.data);
+            }
+            return null;
+        } catch (error) {
+            console.error('[CAPTCHA] Failed to get captcha image:', error.message);
+            return null;
+        }
+    }
+
+    /**
+     * Solve CAPTCHA
      */
     async solveCaptcha() {
         for (let attempt = 1; attempt <= CAPTCHA_MAX_ATTEMPTS; attempt++) {
             try {
                 console.log(`[CAPTCHA] Solving attempt ${attempt}/${CAPTCHA_MAX_ATTEMPTS}`);
                 
-                // Wait for CAPTCHA image to load
-                await this.page.waitForSelector('img[id*="captcha"], img[alt*="captcha"], img.captcha', { timeout: 5000 });
-                
-                // Find CAPTCHA image
-                const captchaElement = await this.page.$('img[id*="captcha"], img[alt*="captcha"], img.captcha');
-                if (!captchaElement) {
-                    console.warn('[CAPTCHA] CAPTCHA image not found');
+                const imageBuffer = await this.getCaptchaImage();
+                if (!imageBuffer) {
+                    console.warn('[CAPTCHA] No image received');
                     continue;
                 }
                 
-                // Get CAPTCHA image as buffer
-                const imageBuffer = await captchaElement.screenshot();
-                
-                // Solve CAPTCHA
                 const captchaText = await this.captchaSolver.solve(imageBuffer);
                 
                 if (captchaText && captchaText.length >= 4) {
                     console.log(`[CAPTCHA] Solved: ${captchaText}`);
                     return captchaText;
-                }
-                
-                // Refresh CAPTCHA if available
-                const refreshButton = await this.page.$('button[id*="refresh"], a[id*="refresh"], .captcha-refresh');
-                if (refreshButton) {
-                    await refreshButton.click();
-                    await this.page.waitForTimeout(1000);
                 }
             } catch (error) {
                 console.error(`[CAPTCHA] Attempt ${attempt} failed:`, error.message);
@@ -199,151 +207,89 @@ class PortalScraper {
      */
     async login(regNo, password) {
         try {
-            console.log('[Login] Starting login process...');
-            
-            // Navigate to portal
-            await this.page.goto(PORTAL_URL, {
-                waitUntil: 'networkidle2',
-                timeout: PAGE_TIMEOUT
-            });
-            
-            // Wait for login form
-            await this.page.waitForSelector('input[name="username"], input[id*="user"], input[type="text"]', { timeout: 10000 });
-            
-            // Fill in registration number
-            await this.page.type('input[name="username"], input[id*="user"], input[type="text"]', regNo, { delay: 100 });
-            
-            // Fill in password
-            await this.page.type('input[name="password"], input[id*="pass"], input[type="password"]', password, { delay: 100 });
+            console.log('[Login] Starting login process for:', regNo);
             
             // Solve CAPTCHA
             const captchaText = await this.solveCaptcha();
             if (!captchaText) {
-                throw new Error('Failed to solve CAPTCHA after multiple attempts');
+                console.warn('[Login] Could not solve CAPTCHA, attempting login without it');
             }
             
-            // Enter CAPTCHA
-            await this.page.type('input[name="captcha"], input[id*="captcha"], input.captcha-input', captchaText, { delay: 100 });
+            // Prepare login payload
+            const loginData = {
+                username: regNo,
+                password: password,
+                captcha: captchaText || '',
+                rememberMe: false
+            };
             
-            // Click login button
-            await this.page.click('button[type="submit"], input[type="submit"], .login-btn');
+            // Attempt login
+            const response = await this.client.post(`${API_BASE_URL}/login`, loginData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Origin': PORTAL_BASE_URL,
+                    'Referer': `${PORTAL_BASE_URL}/login`
+                }
+            });
             
-            // Wait for navigation or error
-            await Promise.race([
-                this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: LOGIN_TIMEOUT }),
-                this.page.waitForSelector('.dashboard, .home, #dashboard', { timeout: LOGIN_TIMEOUT })
-            ]);
+            console.log('[Login] Response status:', response.status);
             
-            // Check for login errors
-            const errorElement = await this.page.$('.error-message, .alert-danger, .login-error');
-            if (errorElement) {
-                const errorText = await this.page.evaluate(el => el.textContent, errorElement);
-                console.error('[Login] Error:', errorText);
+            // Check for successful login
+            if (response.status === 200 && response.data) {
+                if (response.data.token || response.data.success) {
+                    this.sessionToken = response.data.token;
+                    console.log('[Login] Login successful');
+                    return { success: true, status: STATUS_SUCCESS };
+                }
                 
-                if (errorText.toLowerCase().includes('invalid') || errorText.toLowerCase().includes('incorrect')) {
-                    return { success: false, status: STATUS_AUTH_FAILED, message: 'Invalid credentials' };
+                if (response.data.error || response.data.message) {
+                    const errorMsg = response.data.error || response.data.message;
+                    if (errorMsg.toLowerCase().includes('invalid') || 
+                        errorMsg.toLowerCase().includes('incorrect') ||
+                        errorMsg.toLowerCase().includes('wrong')) {
+                        return { success: false, status: STATUS_AUTH_FAILED, message: 'Invalid credentials' };
+                    }
+                    if (errorMsg.toLowerCase().includes('captcha')) {
+                        return { success: false, status: STATUS_SCRAPE_ERROR, message: 'CAPTCHA verification failed' };
+                    }
                 }
             }
             
-            // Store session cookies
-            this.sessionCookies = await this.page.cookies();
-            console.log('[Login] Login successful, session cookies stored');
+            if (response.status === 401 || response.status === 403) {
+                return { success: false, status: STATUS_AUTH_FAILED, message: 'Invalid credentials' };
+            }
             
-            return { success: true, status: STATUS_SUCCESS };
+            return { success: false, status: STATUS_SCRAPE_ERROR, message: 'Login failed - unexpected response' };
         } catch (error) {
-            console.error('[Login] Login error:', error);
+            console.error('[Login] Error:', error.message);
+            
+            if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+                return { success: false, status: STATUS_PORTAL_UNREACHABLE, message: 'Portal is unreachable' };
+            }
+            
             return { success: false, status: STATUS_SCRAPE_ERROR, message: error.message };
         }
     }
 
     /**
-     * Fetch profile data
+     * Fetch data from portal API
      */
-    async fetchProfile() {
+    async fetchData(endpoint) {
         try {
-            await this.page.goto(PORTAL_URL + 'profile', { waitUntil: 'networkidle2', timeout: PAGE_TIMEOUT });
+            const headers = {
+                'Authorization': this.sessionToken ? `Bearer ${this.sessionToken}` : undefined
+            };
             
-            const profile = await this.page.evaluate(() => {
-                const getTextContent = (selector) => {
-                    const element = document.querySelector(selector);
-                    return element ? element.textContent.trim() : '';
-                };
-                
-                return {
-                    name: getTextContent('.student-name, .profile-name, #studentName'),
-                    email: getTextContent('.student-email, .profile-email, #studentEmail'),
-                    regNo: getTextContent('.student-regno, .profile-regno, #regNo'),
-                    department: getTextContent('.student-dept, .profile-dept, #department'),
-                    year: getTextContent('.student-year, .profile-year, #year'),
-                    section: getTextContent('.student-section, .profile-section, #section'),
-                    semester: getTextContent('.student-semester, .profile-semester, #semester'),
-                    phone: getTextContent('.student-phone, .profile-phone, #phone')
-                };
-            });
+            const response = await this.client.get(`${API_BASE_URL}${endpoint}`, { headers });
             
-            return profile;
-        } catch (error) {
-            console.error('[Profile] Fetch error:', error);
+            if (response.status === 200 && response.data) {
+                return response.data;
+            }
+            
             return null;
-        }
-    }
-
-    /**
-     * Fetch attendance data
-     */
-    async fetchAttendance() {
-        try {
-            await this.page.goto(PORTAL_URL + 'attendance', { waitUntil: 'networkidle2', timeout: PAGE_TIMEOUT });
-            
-            const attendance = await this.page.evaluate(() => {
-                const rows = Array.from(document.querySelectorAll('.attendance-table tbody tr, table tbody tr'));
-                return rows.map(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 3) {
-                        return {
-                            subject: cells[0]?.textContent.trim() || '',
-                            attended: cells[1]?.textContent.trim() || '0',
-                            total: cells[2]?.textContent.trim() || '0',
-                            percentage: cells[3]?.textContent.trim() || '0%'
-                        };
-                    }
-                    return null;
-                }).filter(Boolean);
-            });
-            
-            return attendance;
         } catch (error) {
-            console.error('[Attendance] Fetch error:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Fetch marks data
-     */
-    async fetchMarks() {
-        try {
-            await this.page.goto(PORTAL_URL + 'marks', { waitUntil: 'networkidle2', timeout: PAGE_TIMEOUT });
-            
-            const marks = await this.page.evaluate(() => {
-                const rows = Array.from(document.querySelectorAll('.marks-table tbody tr, table tbody tr'));
-                return rows.map(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 2) {
-                        return {
-                            subject: cells[0]?.textContent.trim() || '',
-                            marks: cells[1]?.textContent.trim() || '0',
-                            grade: cells[2]?.textContent.trim() || 'N/A'
-                        };
-                    }
-                    return null;
-                }).filter(Boolean);
-            });
-            
-            return marks;
-        } catch (error) {
-            console.error('[Marks] Fetch error:', error);
-            return [];
+            console.error(`[Fetch] Error fetching ${endpoint}:`, error.message);
+            return null;
         }
     }
 
@@ -354,19 +300,12 @@ class PortalScraper {
         try {
             console.log('[Scraper] Starting scrape for:', regNo);
             
-            // Initialize browser
-            await this.initBrowser();
-            this.page = await this.browser.newPage();
-            
-            // Set viewport
-            await this.page.setViewport({ width: 1366, height: 768 });
-            
             // Check portal reachability
             const isReachable = await this.checkPortalReachability();
             if (!isReachable) {
                 return {
                     status: STATUS_PORTAL_UNREACHABLE,
-                    message: 'Student portal is currently unreachable'
+                    message: 'Student portal is currently unreachable. The portal may be down for maintenance.'
                 };
             }
             
@@ -376,26 +315,29 @@ class PortalScraper {
                 return loginResult;
             }
             
-            // Fetch all data
-            const [profile, attendance, marks] = await Promise.all([
-                this.fetchProfile(),
-                this.fetchAttendance(),
-                this.fetchMarks()
+            // Fetch all data in parallel
+            console.log('[Scraper] Fetching portal data...');
+            const [profile, attendance, marks, backlogs, internal] = await Promise.all([
+                this.fetchData('/StudentProfile/Get'),
+                this.fetchData('/StudentAttendance/Get'),
+                this.fetchData('/StudentMarks/Get'),
+                this.fetchData('/StudentBacklogs/Get'),
+                this.fetchData('/StudentSubjects/GetInternalMarks')
             ]);
             
             return {
                 status: STATUS_SUCCESS,
-                message: 'Data fetched successfully',
+                message: 'Data fetched successfully from SOA portal',
                 data: {
                     profile: profile || {},
                     attendance: attendance || [],
                     marks: marks || [],
+                    backlogs: backlogs || [],
+                    internal_assessments: internal || [],
                     timetable: [],
                     courses: [],
                     results: [],
                     notifications: [],
-                    backlogs: [],
-                    internal_assessments: [],
                     fees: {}
                 }
             };
@@ -403,7 +345,7 @@ class PortalScraper {
             console.error('[Scraper] Error:', error);
             return {
                 status: STATUS_SCRAPE_ERROR,
-                message: error.message
+                message: `Scraping failed: ${error.message}`
             };
         } finally {
             await this.cleanup();
@@ -415,14 +357,6 @@ class PortalScraper {
      */
     async cleanup() {
         try {
-            if (this.page) {
-                await this.page.close();
-                this.page = null;
-            }
-            if (this.browser) {
-                await this.browser.close();
-                this.browser = null;
-            }
             await this.captchaSolver.cleanup();
         } catch (error) {
             console.error('[Cleanup] Error:', error);
