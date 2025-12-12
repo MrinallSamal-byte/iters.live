@@ -1,7 +1,20 @@
 FROM node:18-alpine
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Install build dependencies and Playwright system dependencies for Chromium
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Tell Playwright to use the installed Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Create app directory
 WORKDIR /usr/src/app
