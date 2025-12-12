@@ -184,6 +184,8 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+// Note: SOA routes are mounted first to avoid being caught by profile routes auth middleware
+app.use('/api/soa', soaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', profileRoutes); // Profile routes (includes /api/users/me and /api/profile/*)
 app.use('/api/admitcard', admitCardRoutes);
@@ -210,7 +212,6 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/payments', paymentRoutes);
-app.use('/api/soa', soaRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
@@ -237,6 +238,15 @@ app.get('/connect-portal', staticFileLimiter, (req, res) => {
 
 app.get('/connect-portal.html', staticFileLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+});
+
+// Serve SOA portal scraper page directly
+app.get('/soa-scraper', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/soa-scraper.html'));
+});
+
+app.get('/soa-scraper.html', staticFileLimiter, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/soa-scraper.html'));
 });
 
 // Serve static HTML pages - redirect to obfuscated URLs

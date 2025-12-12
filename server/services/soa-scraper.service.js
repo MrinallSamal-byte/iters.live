@@ -566,8 +566,10 @@ async function performLogin(page, regNo, password, captcha) {
             return { success: true };
         }
 
-        // If we can't determine, assume it might have worked
-        return { success: true };
+        // If we can't determine login status, return uncertain result
+        // The scraper will attempt to extract data and validate success from that
+        console.log('[SOA Scraper] Login status uncertain, proceeding to check data extraction');
+        return { success: true, uncertain: true };
 
     } catch (error) {
         console.error(`[SOA Scraper] Login error:`, error.message);
@@ -581,7 +583,7 @@ async function performLogin(page, regNo, password, captcha) {
 
 /**
  * Scrape all available student data from the portal
- * @param {Page} page Puppeteer page
+ * @param {Page} page Playwright page
  * @returns {Promise<Object>} Scraped data
  */
 async function scrapeAllData(page) {
