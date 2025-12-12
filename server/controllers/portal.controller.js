@@ -185,30 +185,15 @@ const portalLogin = async (req, res) => {
 
     console.log(`Portal login attempt ${attemptNumber}/${MAX_LOGIN_ATTEMPTS} for: ${reg_number}`);
 
-    // ============================================================================
-    // SCRAPING CODE COMMENTED OUT - Portal data pulling is disabled
-    // ============================================================================
-    // The following code makes HTTP requests to external scraper services
-    // which pull data from student portals. This has been permanently disabled.
-    // 
-    // try {
-    //   const scraperResponse = await axios.post(
-    //     `${SCRAPER_SERVICE_URL}/api/scrape`,
-    //     { reg_number, password },
-    //     {
-    //       timeout: 90000,
-    //       headers: { 'Content-Type': 'application/json' }
-    //     }
-    //   );
-    // 
-    //   const { status, data, message } = scraperResponse.data;
-    // ============================================================================
-
-    // Return disabled response instead of actually scraping
+    // Use Node.js scraper service directly
+    const { createScraper } = require('../services/portal-scraper.service');
+    const scraper = createScraper();
+    
     try {
-      const status = STATUS_SCRAPE_ERROR;
-      const data = null;
-      const message = 'Portal scraping is permanently disabled';
+      // Scrape portal data using Node.js scraper
+      const scraperResponse = await scraper.scrape(reg_number, password);
+      
+      const { status, data, message } = scraperResponse;
 
       if (status === STATUS_SUCCESS) {
         // Clear attempt count on success
@@ -1253,27 +1238,15 @@ const fetchPortalData = async (req, res) => {
     // This endpoint directly calls the scraper without attempt tracking
     // Use it when you specifically want to refresh data
     
-    // ============================================================================
-    // SCRAPING CODE COMMENTED OUT - Portal data pulling is disabled
-    // ============================================================================
-    // try {
-    //   const scraperResponse = await axios.post(
-    //     `${SCRAPER_SERVICE_URL}/api/scrape`,
-    //     { reg_number, password },
-    //     {
-    //       timeout: 120000, // 2 minute timeout for comprehensive data fetch
-    //       headers: { 'Content-Type': 'application/json' }
-    //     }
-    //   );
-    // 
-    //   const { status, data, message } = scraperResponse.data;
-    // ============================================================================
-
-    // Return disabled response instead of actually scraping
+    // Use Node.js scraper service directly
+    const { createScraper } = require('../services/portal-scraper.service');
+    const scraper = createScraper();
+    
     try {
-      const status = STATUS_SCRAPE_ERROR;
-      const data = null;
-      const message = 'Portal scraping is permanently disabled';
+      // Scrape portal data using Node.js scraper
+      const scraperResponse = await scraper.scrape(reg_number, password);
+      
+      const { status, data, message } = scraperResponse;
 
       if (status === STATUS_SUCCESS) {
         // Save to Firestore

@@ -201,11 +201,14 @@
             const response = await APP.API.get('/portal/status');
             if (response.success && response.data) {
                 portalEnabled = response.data.portalEnabled !== false;
+            } else {
+                // Default to enabled if we can get a response but no explicit status
+                portalEnabled = true;
             }
         } catch (error) {
-            // If we can't check, assume portal is disabled to be safe
-            console.log('Could not check portal status, defaulting to demo mode');
-            portalEnabled = false;
+            // If we can't check, assume portal is enabled and let the user try
+            console.log('Could not check portal status, defaulting to enabled');
+            portalEnabled = true;
         }
 
         // If portal is disabled, update UI to reflect that
