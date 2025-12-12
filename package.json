@@ -83,6 +83,7 @@
     "openai": "^4.20.1",
     "pdfkit": "^0.13.0",
     "pg": "^8.16.3",
+    "playwright": "^1.55.1",
     "puppeteer": "^24.32.1",
     "qrcode": "^1.5.3",
     "redis": "^5.10.0",
@@ -95,7 +96,7 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.40.1",
+    "@playwright/test": "^1.55.1",
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
