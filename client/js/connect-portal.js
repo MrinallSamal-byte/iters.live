@@ -17,6 +17,12 @@
     const MAX_RETRY_ATTEMPTS = 3;
     const RETRY_KEY_PREFIX = 'portalRetryAttempts:';
     const CREDENTIALS_KEY = 'portal_credentials';
+    
+    // Configuration for retry messaging
+    const RETRY_DELAYS = [500, 1000, 2000]; // milliseconds
+    const TOTAL_RETRY_TIME_ESTIMATE = Math.ceil(
+        (RETRY_DELAYS.reduce((a, b) => a + b, 0) + (30000 * MAX_RETRY_ATTEMPTS)) / 1000 / 60
+    ); // Total time in minutes including processing
 
     // State
     let selectedSource = null;
@@ -477,7 +483,10 @@
         }
 
         setLoading(true);
-        showStatus('🔄 Connecting to SOA Portal... This may take up to 2 minutes as the scraper will retry up to 3 times with delays.', 'loading');
+        showStatus(
+            `🔄 Connecting to SOA Portal... This may take up to ${TOTAL_RETRY_TIME_ESTIMATE} minutes as the scraper will retry up to ${MAX_RETRY_ATTEMPTS} times with delays.`,
+            'loading'
+        );
         hideRetryInfo();
 
         try {
@@ -579,7 +588,7 @@
             // This is the final error after all retries exhausted
             showStatus(`❌ ${response.message}`, 'error');
             showRetryInfo(
-                'The scraper attempted 3 times with delays but could not fetch data. Try again later or use backup/demo data.'
+                `The scraper attempted ${MAX_RETRY_ATTEMPTS} times with delays but could not fetch data. Try again later or use backup/demo data.`
             );
             // Show detailed failure reasons in console for debugging
             if (response.failureReasons && response.failureReasons.length > 0) {

@@ -115,7 +115,7 @@ describe('Portal Scraper Service', () => {
             
             const result = await scraper.scrape('TEST123', 'password');
             
-            expect(result.status).toBe('success');
+            expect(result.status).toBe(STATUS_SUCCESS);
             expect(result.data).toBeDefined();
             expect(result.data.profile).toBeDefined();
         });
@@ -201,7 +201,7 @@ describe('Portal Scraper Service', () => {
             const result = await scraper.scrape('TEST123', 'password');
             
             expect(result).toHaveProperty('status');
-            expect(result.status).toBe('success');
+            expect(result.status).toBe(STATUS_SUCCESS);
             expect(result).toHaveProperty('data');
             expect(result.data).toHaveProperty('profile');
             expect(result.data).toHaveProperty('attendance');

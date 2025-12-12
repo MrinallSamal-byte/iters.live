@@ -349,7 +349,8 @@ class PortalScraper {
                     
                     // If portal is unreachable, wait before next attempt
                     if (attempt < MAX_RETRY_ATTEMPTS) {
-                        const delay = RETRY_DELAYS[attempt - 1];
+                        // Safely get delay with fallback
+                        const delay = RETRY_DELAYS[attempt - 1] || 1000;
                         console.log(`[Scraper] Waiting ${delay}ms before retry...`);
                         await this.sleep(delay);
                         continue;
@@ -383,7 +384,8 @@ class PortalScraper {
                     
                     // Retry on other errors
                     if (attempt < MAX_RETRY_ATTEMPTS) {
-                        const delay = RETRY_DELAYS[attempt - 1];
+                        // Safely get delay with fallback
+                        const delay = RETRY_DELAYS[attempt - 1] || 1000;
                         console.log(`[Scraper] Waiting ${delay}ms before retry...`);
                         await this.sleep(delay);
                         continue;
@@ -405,7 +407,7 @@ class PortalScraper {
                 console.log(`[Scraper] ✅ Successfully fetched data on attempt ${attempt}`);
                 
                 return {
-                    status: 'success',
+                    status: STATUS_SUCCESS,
                     data: {
                         profile: profile || {},
                         attendance: attendance || [],
@@ -427,7 +429,8 @@ class PortalScraper {
                 
                 // Wait before retry (except on last attempt)
                 if (attempt < MAX_RETRY_ATTEMPTS) {
-                    const delay = RETRY_DELAYS[attempt - 1];
+                    // Safely get delay with fallback
+                    const delay = RETRY_DELAYS[attempt - 1] || 1000;
                     console.log(`[Scraper] Waiting ${delay}ms before retry...`);
                     await this.sleep(delay);
                 }

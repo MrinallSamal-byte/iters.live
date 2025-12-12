@@ -195,8 +195,8 @@ const portalLogin = async (req, res) => {
       
       const { status, data, message, failureReasons } = scraperResponse;
 
-      // Handle success (accept both 'success' and 'SUCCESS' status)
-      if (status === 'success' || status === STATUS_SUCCESS) {
+      // Handle success
+      if (status === STATUS_SUCCESS) {
         // Clear attempt count on success
         clearAttemptCount(reg_number, userId);
 
@@ -272,38 +272,23 @@ const portalLogin = async (req, res) => {
         });
       }
 
-      // Other scrape errors (including 'error' status from retry exhaustion)
-      if (status === 'error' || status === STATUS_SCRAPE_ERROR) {
-        // Log the failure reasons if available
-        if (failureReasons && failureReasons.length > 0) {
-          console.error('[Portal] Scraper failure reasons:', failureReasons.join('; '));
-        }
-        
-        if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
-          return await handleMaxAttemptsReached(reg_number, userId, res);
-        }
-
-        return res.status(500).json({
-          success: false,
-          status: STATUS_SCRAPE_ERROR,
-          message: message || 'Failed to fetch portal data',
-          attempt: attemptNumber,
-          attemptsRemaining,
-          failureReasons: failureReasons || []
-        });
+      // All other scrape errors (including 'error' status from retry exhaustion and unknown statuses)
+      // Log the failure reasons if available
+      if (failureReasons && failureReasons.length > 0) {
+        console.error('[Portal] Scraper failure reasons:', failureReasons.join('; '));
       }
       
-      // Unknown status - treat as error
       if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
         return await handleMaxAttemptsReached(reg_number, userId, res);
       }
 
       return res.status(500).json({
         success: false,
-        status: STATUS_SCRAPE_ERROR,
+        status: status === 'error' ? STATUS_SCRAPE_ERROR : status,
         message: message || 'Failed to fetch portal data',
         attempt: attemptNumber,
-        attemptsRemaining
+        attemptsRemaining,
+        failureReasons: failureReasons || []
       });
 
     } catch (scraperError) {
@@ -1270,7 +1255,7 @@ const fetchPortalData = async (req, res) => {
       
       const { status, data, message, failureReasons } = scraperResponse;
 
-      if (status === 'success' || status === STATUS_SUCCESS) {
+      if (status === STATUS_SUCCESS) {
         // Save to Firestore
         await savePortalDataToFirestore(userId, reg_number, data, true);
 
