@@ -1,6 +1,6 @@
 /**
  * Portal Controller
- * Handles portal sync operations with the Flask scraper microservice
+ * Handles portal sync operations with the unified Playwright-based scraper
  * Includes Google Sheets/Drive backup integration and multi-layer fallback
  * 
  * Features:
@@ -9,12 +9,15 @@
  * - Recovery system (Drive backup → Dummy data)
  * - Comprehensive error handling
  * 
+ * UNIFIED SCRAPER ARCHITECTURE:
+ * This controller now uses ONLY the Playwright-based soa-scraper.service.js
+ * All legacy scrapers (Selenium, Axios, Puppeteer) have been removed.
+ * 
  * TEMPORARILY DISABLED — DO NOT REMOVE
  * All portal-related functionality has been temporarily suspended.
  * The feature flag check at the start of each function will return
  * a disabled response until PORTAL_FEATURES_ENABLED=true is set.
  */
-const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 const { db } = require('../database/firebase');
@@ -25,9 +28,8 @@ const googleDriveBackup = require('../services/googleDriveBackup.service');
 // Import feature flags to check if portal features are enabled
 const { isPortalEnabled, getPortalDisabledResponse, PORTAL_DISABLED_MESSAGE } = require('../config/featureFlags');
 
-// Scraper Service URL (Node.js/Puppeteer or Flask/Selenium)
-// Defaults to Node.js service on port 5001
-const SCRAPER_SERVICE_URL = process.env.SCRAPER_SERVICE_URL || process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
+// Import unified scraper service (Playwright-based)
+const soaScraperService = require('../services/soa-scraper.service');
 
 // Maximum login attempts before fallback
 const MAX_LOGIN_ATTEMPTS = 3;
@@ -185,103 +187,65 @@ const portalLogin = async (req, res) => {
 
     console.log(`Portal login attempt ${attemptNumber}/${MAX_LOGIN_ATTEMPTS} for: ${reg_number}`);
 
-    // Use Node.js scraper service directly
-    const { createScraper } = require('../services/portal-scraper.service');
-    const scraper = createScraper();
+    // Use unified Playwright-based scraper service
+    // Note: For user-provided CAPTCHA flow, use /api/soa/captcha and /api/soa/login endpoints
+    // This endpoint attempts auto-login which may fail if CAPTCHA cannot be auto-solved
     
     try {
-      // Scrape portal data using Node.js scraper
-      const scraperResponse = await scraper.scrape(reg_number, password);
+      // Step 1: Create session and get CAPTCHA
+      const sessionResult = await soaScraperService.createSessionAndGetCaptcha();
       
-      const { status, data, message } = scraperResponse;
+      if (!sessionResult.success) {
+        const status = sessionResult.status === 'PORTAL_UNREACHABLE' 
+          ? STATUS_PORTAL_UNREACHABLE 
+          : STATUS_SCRAPE_ERROR;
+          
+        if (status === STATUS_PORTAL_UNREACHABLE) {
+          // Portal unreachable doesn't count against attempts
+          const key = getAttemptKey(reg_number, userId);
+          const attemptData = loginAttempts.get(key);
+          if (attemptData && attemptData.count > 0) {
+            attemptData.count--;
+            loginAttempts.set(key, attemptData);
+          }
 
-      if (status === STATUS_SUCCESS) {
-        // Clear attempt count on success
-        clearAttemptCount(reg_number, userId);
-
-        // Save to Firestore
-        await savePortalDataToFirestore(userId, reg_number, data, true);
-
-        // Save to Google Drive as backup (non-blocking)
-        saveToGoogleDriveBackup(reg_number, data).catch(err => {
-          console.warn('Google Drive backup failed (non-critical)');
-        });
-
-        // Also save to Google Sheets for compatibility
-        saveToGoogleSheetsBackup(reg_number, data).catch(err => {
-          console.warn('Google Sheets backup failed (non-critical)');
-        });
-
-        return res.json({
-          success: true,
-          status: STATUS_SUCCESS,
-          message: 'Portal login successful',
-          attempt: attemptNumber,
-          attemptsRemaining: MAX_LOGIN_ATTEMPTS,
-          data: formatPortalData(data, true, true, 'live_portal')
-        });
-      }
-
-      // Handle failure cases
-      if (status === STATUS_AUTH_FAILED) {
-        // Check if this was the final attempt
-        if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
-          return await handleMaxAttemptsReached(reg_number, userId, res);
+          // Try to load backup data
+          const backupData = await tryLoadBackupData(reg_number, userId);
+          if (backupData) {
+            return res.json({
+              success: true,
+              status: STATUS_BACKUP_LOADED,
+              message: 'Portal unreachable. Showing previously saved data.',
+              data: {
+                ...backupData,
+                isVerified: false,
+                portalConnected: false,
+                warning: 'Student portal is currently unreachable.'
+              }
+            });
+          }
         }
-
-        return res.status(401).json({
+        
+        return res.status(status === STATUS_PORTAL_UNREACHABLE ? 503 : 500).json({
           success: false,
-          status: STATUS_AUTH_FAILED,
-          message: message || 'Invalid portal credentials',
+          status,
+          message: sessionResult.message || 'Failed to connect to portal',
           attempt: attemptNumber,
           attemptsRemaining
         });
       }
-
-      if (status === STATUS_PORTAL_UNREACHABLE) {
-        // Portal unreachable doesn't count against attempts
-        // Decrement the attempt since it's not the user's fault
-        const key = getAttemptKey(reg_number, userId);
-        const attemptData = loginAttempts.get(key);
-        if (attemptData && attemptData.count > 0) {
-          attemptData.count--;
-          loginAttempts.set(key, attemptData);
-        }
-
-        // Try to load backup data
-        const backupData = await tryLoadBackupData(reg_number, userId);
-        if (backupData) {
-          return res.json({
-            success: true,
-            status: STATUS_BACKUP_LOADED,
-            message: 'Portal unreachable. Showing previously saved data.',
-            data: {
-              ...backupData,
-              isVerified: false,
-              portalConnected: false,
-              warning: 'Student portal is currently unreachable.'
-            }
-          });
-        }
-
-        return res.status(503).json({
-          success: false,
-          status: STATUS_PORTAL_UNREACHABLE,
-          message: message || 'Student portal is currently unreachable'
-        });
-      }
-
-      // Other scrape errors
-      if (attemptNumber >= MAX_LOGIN_ATTEMPTS) {
-        return await handleMaxAttemptsReached(reg_number, userId, res);
-      }
-
-      return res.status(500).json({
-        success: false,
-        status: STATUS_SCRAPE_ERROR,
-        message: message || 'Failed to fetch portal data',
+      
+      // Portal is reachable - return response with session info for CAPTCHA flow
+      // The frontend should now display the CAPTCHA and use /api/soa/login endpoint
+      return res.json({
+        success: true,
+        status: 'CAPTCHA_REQUIRED',
+        message: 'CAPTCHA verification required. Please use the portal connection page.',
+        sessionId: sessionResult.sessionId,
+        captchaImage: sessionResult.captchaImage,
         attempt: attemptNumber,
-        attemptsRemaining
+        attemptsRemaining,
+        useEndpoint: '/api/soa/login'
       });
 
     } catch (scraperError) {
@@ -292,25 +256,10 @@ const portalLogin = async (req, res) => {
         return await handleMaxAttemptsReached(reg_number, userId, res);
       }
 
-      const errorData = scraperError.response?.data;
-      const errorStatus = scraperError.response?.status;
-
-      if (errorStatus === 401 || errorData?.status === STATUS_AUTH_FAILED) {
-        return res.status(401).json({
-          success: false,
-          status: STATUS_AUTH_FAILED,
-          message: errorData?.message || 'Invalid portal credentials',
-          attempt: attemptNumber,
-          attemptsRemaining
-        });
-      }
-
       return res.status(500).json({
         success: false,
         status: STATUS_SCRAPE_ERROR,
-        message: scraperError.code === 'ECONNREFUSED' 
-          ? 'Portal scraper service unavailable' 
-          : 'Failed to connect to portal scraper service',
+        message: 'Failed to connect to portal scraper service',
         attempt: attemptNumber,
         attemptsRemaining
       });
@@ -1237,39 +1186,31 @@ const fetchPortalData = async (req, res) => {
 
     // This endpoint directly calls the scraper without attempt tracking
     // Use it when you specifically want to refresh data
-    
-    // Use Node.js scraper service directly
-    const { createScraper } = require('../services/portal-scraper.service');
-    const scraper = createScraper();
+    // Note: Without user-provided CAPTCHA, this redirects to the CAPTCHA flow
     
     try {
-      // Scrape portal data using Node.js scraper
-      const scraperResponse = await scraper.scrape(reg_number, password);
+      // Step 1: Create session and get CAPTCHA
+      const sessionResult = await soaScraperService.createSessionAndGetCaptcha();
       
-      const { status, data, message } = scraperResponse;
-
-      if (status === STATUS_SUCCESS) {
-        // Save to Firestore
-        await savePortalDataToFirestore(userId, reg_number, data, true);
-
-        // Save to Google Drive backup
-        await saveToGoogleDriveBackup(reg_number, data);
-
-        // Save to Google Sheets backup
-        await saveToGoogleSheetsBackup(reg_number, data);
-
-        return res.json({
-          success: true,
-          status: STATUS_SUCCESS,
-          message: 'All portal data fetched and saved successfully',
-          data: formatPortalData(data, true, true, 'live_portal')
+      if (!sessionResult.success) {
+        const status = sessionResult.status === 'PORTAL_UNREACHABLE' 
+          ? STATUS_PORTAL_UNREACHABLE 
+          : STATUS_SCRAPE_ERROR;
+        return res.status(status === STATUS_PORTAL_UNREACHABLE ? 503 : 500).json({
+          success: false,
+          status,
+          message: sessionResult.message || 'Failed to connect to portal'
         });
       }
-
-      return res.status(status === STATUS_AUTH_FAILED ? 401 : 500).json({
-        success: false,
-        status,
-        message: message || 'Failed to fetch portal data'
+      
+      // Portal is reachable - return response with session info for CAPTCHA flow
+      return res.json({
+        success: true,
+        status: 'CAPTCHA_REQUIRED',
+        message: 'CAPTCHA verification required. Please use /api/soa/login endpoint with the session ID and CAPTCHA.',
+        sessionId: sessionResult.sessionId,
+        captchaImage: sessionResult.captchaImage,
+        useEndpoint: '/api/soa/login'
       });
 
     } catch (scraperError) {
@@ -1277,7 +1218,7 @@ const fetchPortalData = async (req, res) => {
       return res.status(500).json({
         success: false,
         status: STATUS_SCRAPE_ERROR,
-        message: scraperError.response?.data?.message || 'Failed to fetch portal data'
+        message: 'Failed to fetch portal data'
       });
     }
   } catch (error) {

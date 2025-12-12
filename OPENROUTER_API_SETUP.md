@@ -1,19 +1,16 @@
 # OpenRouter API Setup Guide
 
-This guide explains how to configure and use the OpenRouter API for CAPTCHA solving and chatbot features in ITER EduHub.
+This guide explains how to configure and use the OpenRouter API for AI chatbot features in ITER EduHub.
 
 ## Overview
 
-ITER EduHub now uses **OpenRouter API** as the primary AI service provider, with Google Vision API (for CAPTCHA) and Google Gemini (for chatbot) as fallback options. OpenRouter provides access to multiple free AI models through a single API, offering better reliability through automatic model fallback.
+ITER EduHub now uses **OpenRouter API** as the primary AI service provider, with Google Gemini as a fallback option. OpenRouter provides access to multiple free AI models through a single API, offering better reliability through automatic model fallback.
+
+## Note on Scraper Architecture
+
+**Important**: This project now uses a unified Playwright-based scraper. The Python scraper has been removed. CAPTCHA solving is now handled via user-provided input, not automatic AI solving. See `UNIFIED_SCRAPER_ARCHITECTURE.md` for details.
 
 ## Features
-
-### CAPTCHA Solving
-The system uses vision-capable models for CAPTCHA text extraction:
-- `amazon/nova-2-lite-v1:free` - Vision model for image understanding
-- `nvidia/nemotron-nano-12b-v2-vl:free` - Vision-language model
-
-Note: Only models with vision capabilities are used for CAPTCHA solving.
 
 ### Chatbot Features
 The system uses powerful language models for educational assistance:
@@ -36,8 +33,6 @@ The system uses powerful language models for educational assistance:
 
 ### 2. Configure Environment Variables
 
-#### For the Node.js Server
-
 Edit your `.env` file in the project root:
 
 ```bash
@@ -48,30 +43,10 @@ OPENROUTER_API_KEY=sk-or-v1-your-api-key-here
 GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
-#### For the Python Scraper
-
-Edit your `scraper/.env` file:
-
-```bash
-# OpenRouter API Configuration (PRIMARY for CAPTCHA)
-OPENROUTER_API_KEY=sk-or-v1-your-api-key-here
-
-# Google Vision API (FALLBACK - Optional)
-GOOGLE_VISION_API_KEY=your-google-vision-api-key-here
-```
-
 ### 3. Verify Configuration
-
-#### Test the Node.js AI Service
 
 ```bash
 npm run verify:ai
-```
-
-#### Test the Python CAPTCHA Solver
-
-```bash
-npm run test:scraper
 ```
 
 ## How It Works
@@ -80,12 +55,6 @@ npm run test:scraper
 
 The system implements a robust fallback mechanism:
 
-#### For CAPTCHA Solving
-1. **Primary**: Tries OpenRouter models in sequence
-2. **Fallback**: Uses Google Vision API if OpenRouter fails
-3. **Error Handling**: Returns None if all methods fail
-
-#### For Chatbot Features
 1. **Primary**: Tries OpenRouter models in sequence
 2. **Fallback**: Uses Google Gemini API if OpenRouter fails
 3. **Error Handling**: Returns helpful error message if all methods fail
@@ -125,14 +94,7 @@ Models are tried in the order listed above. If one model fails (due to rate limi
 1. Verify your API key is correct
 2. Wait a few minutes and try again
 3. Check your internet connection
-4. Verify fallback APIs (Gemini/Vision) are configured
-
-### Issue: CAPTCHA solving fails
-
-**Solution**: 
-1. Check if OpenRouter API key is valid
-2. Ensure Google Vision API is configured as fallback
-3. Check scraper logs for detailed error messages
+4. Verify fallback API (Gemini) is configured
 
 ### Issue: Chatbot not responding
 
@@ -168,16 +130,7 @@ Models are tried in the order listed above. If one model fails (due to rate limi
 server/services/
 ├── openrouter.service.js    # OpenRouter API integration
 ├── ai.service.js             # Main AI service with fallback logic
-└── ...
-```
-
-### Python Components
-
-```
-scraper/
-├── openrouter_captcha.py    # OpenRouter CAPTCHA solver
-├── captcha_solver.py         # Main CAPTCHA solver with fallback
-└── ...
+└── soa-scraper.service.js   # Unified Playwright-based scraper
 ```
 
 ## Support
@@ -193,9 +146,9 @@ For issues related to:
 - [OpenRouter Models](https://openrouter.ai/models)
 - [OpenRouter API Keys](https://openrouter.ai/keys)
 - [Google Gemini API](https://ai.google.dev/)
-- [Google Vision API](https://cloud.google.com/vision)
 
 ## Version History
 
-- **v3.2.0** (Current): Added OpenRouter API integration with automatic fallback
+- **v3.3.0**: Unified scraper architecture, removed Python scraper components
+- **v3.2.0**: Added OpenRouter API integration with automatic fallback
 - Previous versions used Google APIs exclusively

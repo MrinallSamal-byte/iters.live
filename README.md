@@ -154,7 +154,7 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - 🐳 **Docker Ready** - docker-compose for easy deployment
 - 🧪 **Testing** - Jest unit tests and Playwright E2E test skeletons
 - 🚀 **CI/CD** - GitHub Actions workflow for automated builds
-- 🔗 **Portal Scraper** - Python Flask microservice for SOA student portal integration
+- 🔗 **Portal Scraper** - Unified Playwright-based scraper for SOA student portal integration
 
 ---
 
@@ -164,8 +164,6 @@ Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + 
 - **Node.js** >= 18.0.0
 - **MySQL** >= 8.0
 - **npm** >= 9.0.0
-- **Python** >= 3.9 (for portal scraper, optional)
-- **Chrome** (for Selenium-based scraping, optional)
 
 ### Installation
 
@@ -209,40 +207,40 @@ npm run dev
 Server will start at `http://localhost:5000`  
 Frontend served at `http://localhost:3000` (if using serve)
 
-### Portal Scraper Setup (Optional)
+### Portal Scraper (Unified Architecture)
 
-The portal scraper is a separate Python Flask microservice that integrates with the SOA student portal. To set it up:
+**This project now uses a single unified scraping architecture based on Playwright.**
 
-1. **Navigate to scraper directory**
-```bash
-cd scraper
+All legacy scrapers (Python Flask/Selenium, Node.js Puppeteer, Axios-based) have been removed.
+
+The unified scraper provides:
+- **Playwright-based browser automation** - Modern, reliable, and well-maintained
+- **User-provided CAPTCHA flow** - Secure, no auto-solving required
+- **Standardized JSON responses** - Consistent API format
+- **Session management** - Secure session handling with automatic cleanup
+
+**API Endpoints:**
+- `GET /api/soa/captcha` - Get CAPTCHA image and session ID
+- `POST /api/soa/login` - Submit credentials with CAPTCHA
+- `GET /api/soa/status` - Check scraper availability
+- `POST /api/soa/refresh-captcha` - Refresh CAPTCHA for existing session
+
+**Frontend Integration:**
+```javascript
+// Step 1: Request CAPTCHA
+const captchaResponse = await fetch('/api/soa/captcha');
+const { sessionId, captchaImage } = await captchaResponse.json();
+
+// Step 2: Display CAPTCHA to user and collect input
+// Step 3: Submit login with user-provided CAPTCHA
+const loginResponse = await fetch('/api/soa/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ sessionId, regNo, password, captcha })
+});
 ```
 
-2. **Create virtual environment**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install Python dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Configure environment**
-```bash
-cp .env.example .env
-# Edit .env with your Google Vision API key (for CAPTCHA solving)
-```
-
-5. **Start the scraper service**
-```bash
-python app.py
-```
-
-The scraper service will run at `http://localhost:5001`
-
-**Note:** The main application works without the scraper - students can use demo data if the scraper is unavailable.
+**Note:** The main application works without the scraper - students can use demo data if portal scraping is disabled.
 
 ### AI Chatbot Setup (Recommended)
 
