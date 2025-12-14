@@ -161,12 +161,30 @@
                         APP.Storage.set('accessToken', idToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // Portal sync flow: Students go to connect-portal page first
-                        // Teachers and Admins go directly to their dashboards
+                        // All roles go directly to their dashboards
+                        // Students automatically get dummy data loaded
                         let redirectUrl;
                         if (response.data.user.role === 'student') {
-                            // Students need to sync portal data first
-                            redirectUrl = '/connect-portal.html';
+                            // Load demo data automatically for students
+                            try {
+                                const demoResponse = await APP.API.get('/portal/demo');
+                                if (demoResponse.success) {
+                                    // Update user storage with demo data
+                                    const user = APP.Storage.get('user');
+                                    if (user) {
+                                        user.portalConnected = false;
+                                        user.isVerified = false;
+                                        user.portalData = demoResponse.data;
+                                        user.dataSource = 'demo';
+                                        APP.Storage.set('user', user);
+                                    }
+                                    console.log('Demo data loaded successfully via Google login');
+                                }
+                            } catch (demoError) {
+                                console.error('Failed to load demo data:', demoError);
+                                // Continue anyway - dashboard will handle missing data
+                            }
+                            redirectUrl = '/dashboard/student.html';
                         } else if (response.data.user.role === 'teacher') {
                             redirectUrl = '/dashboard/teacher.html';
                         } else if (response.data.user.role === 'admin') {
@@ -298,9 +316,6 @@
 
                         APP.Storage.set('refreshToken', response.data.refreshToken);
                         APP.Storage.set('user', response.data.user);
-                        
-                        // Store the portal password temporarily for the sync page
-                        sessionStorage.setItem('portalPassword', password);
 
                         // Verify storage
                         console.log('Verifying stored data...');
@@ -312,18 +327,37 @@
                         let redirectUrl;
                         const userRole = response.data.user.role;
                         
-                        // Portal sync flow: Students go to connect-portal page first
-                        // Teachers and Admins go directly to their dashboards
+                        // All roles go directly to their respective dashboards
+                        // Students automatically get dummy data loaded
                         if (userRole === 'student') {
-                            // Students are redirected to connect-portal.html for data fetching
+                            // Load demo data automatically for students
                             if (typeof APP.showToast === 'function') {
-                                APP.showToast('Login successful!', 'success');
+                                APP.showToast('Login successful! Loading dashboard...', 'success');
                             }
-                            showError('✅ Login successful! Redirecting to portal sync...');
+                            showError('✅ Login successful! Loading dashboard with demo data...');
                             errorMessage.style.color = '#10b981';
                             
-                            // Redirect to connect-portal page
-                            redirectUrl = '/connect-portal.html';
+                            try {
+                                // Load demo data from backend
+                                const demoResponse = await APP.API.get('/portal/demo');
+                                if (demoResponse.success) {
+                                    // Update user storage with demo data
+                                    const user = APP.Storage.get('user');
+                                    if (user) {
+                                        user.portalConnected = false;
+                                        user.isVerified = false;
+                                        user.portalData = demoResponse.data;
+                                        user.dataSource = 'demo';
+                                        APP.Storage.set('user', user);
+                                    }
+                                    console.log('Demo data loaded successfully');
+                                }
+                            } catch (demoError) {
+                                console.error('Failed to load demo data:', demoError);
+                                // Continue anyway - dashboard will handle missing data
+                            }
+                            
+                            redirectUrl = '/dashboard/student.html';
                         } else if (userRole === 'teacher') {
                             // Teachers go directly to dashboard
                             if (typeof APP.showToast === 'function') {
