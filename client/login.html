@@ -166,24 +166,7 @@
                         let redirectUrl;
                         if (response.data.user.role === 'student') {
                             // Load demo data automatically for students
-                            try {
-                                const demoResponse = await APP.API.get('/portal/demo');
-                                if (demoResponse.success) {
-                                    // Update user storage with demo data
-                                    const user = APP.Storage.get('user');
-                                    if (user) {
-                                        user.portalConnected = false;
-                                        user.isVerified = false;
-                                        user.portalData = demoResponse.data;
-                                        user.dataSource = 'demo';
-                                        APP.Storage.set('user', user);
-                                    }
-                                    console.log('Demo data loaded successfully via Google login');
-                                }
-                            } catch (demoError) {
-                                console.error('Failed to load demo data:', demoError);
-                                // Continue anyway - dashboard will handle missing data
-                            }
+                            await loadDemoDataForStudent();
                             redirectUrl = '/dashboard/student.html';
                         } else if (response.data.user.role === 'teacher') {
                             redirectUrl = '/dashboard/teacher.html';
@@ -228,6 +211,30 @@
     </script>
 
     <script>
+        // Helper function to load demo data for students
+        async function loadDemoDataForStudent() {
+            try {
+                const demoResponse = await APP.API.get('/portal/demo');
+                if (demoResponse.success) {
+                    // Update user storage with demo data
+                    const user = APP.Storage.get('user');
+                    if (user) {
+                        user.portalConnected = false;
+                        user.isVerified = false;
+                        user.portalData = demoResponse.data;
+                        user.dataSource = 'demo';
+                        APP.Storage.set('user', user);
+                    }
+                    console.log('Demo data loaded successfully');
+                    return true;
+                }
+            } catch (demoError) {
+                console.error('Failed to load demo data:', demoError);
+                // Continue anyway - dashboard will handle missing data
+            }
+            return false;
+        }
+
         // Wait for DOM and APP to be ready
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
@@ -289,7 +296,7 @@
                     const response = await APP.API.post('/auth/login', {
                         registration_number,
                         password,
-                        skipPortalSync: true  // Skip auto-sync, redirect to portal page instead
+                        skipPortalSync: true  // Skip portal sync, load demo data instead
                     });
 
                     console.log('Login response:', response);
@@ -337,25 +344,7 @@
                             showError('✅ Login successful! Loading dashboard with demo data...');
                             errorMessage.style.color = '#10b981';
                             
-                            try {
-                                // Load demo data from backend
-                                const demoResponse = await APP.API.get('/portal/demo');
-                                if (demoResponse.success) {
-                                    // Update user storage with demo data
-                                    const user = APP.Storage.get('user');
-                                    if (user) {
-                                        user.portalConnected = false;
-                                        user.isVerified = false;
-                                        user.portalData = demoResponse.data;
-                                        user.dataSource = 'demo';
-                                        APP.Storage.set('user', user);
-                                    }
-                                    console.log('Demo data loaded successfully');
-                                }
-                            } catch (demoError) {
-                                console.error('Failed to load demo data:', demoError);
-                                // Continue anyway - dashboard will handle missing data
-                            }
+                            await loadDemoDataForStudent();
                             
                             redirectUrl = '/dashboard/student.html';
                         } else if (userRole === 'teacher') {
