@@ -66,77 +66,74 @@
       ]
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js",
-      "headers": {
-        "Content-Type": "application/json"
-      }
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/web/(.*)",
-      "dest": "/api/index.js"
+      "source": "/web/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/css/(.*)",
-      "dest": "/client/css/$1"
+      "source": "/css/(.*)",
+      "destination": "/client/css/$1"
     },
     {
-      "src": "/js/(.*)",
-      "dest": "/client/js/$1"
+      "source": "/js/(.*)",
+      "destination": "/client/js/$1"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/client/assets/$1"
+      "source": "/assets/(.*)",
+      "destination": "/client/assets/$1"
     },
     {
-      "src": "/partials/(.*)",
-      "dest": "/client/partials/$1"
+      "source": "/partials/(.*)",
+      "destination": "/client/partials/$1"
     },
     {
-      "src": "/dashboard/(.*)",
-      "dest": "/client/dashboard/$1"
+      "source": "/dashboard/(.*)",
+      "destination": "/client/dashboard/$1"
     },
     {
-      "src": "/client/(.*)",
-      "dest": "/client/$1"
+      "source": "/client/(.*)",
+      "destination": "/client/$1"
     },
     {
-      "src": "/connect-portal$",
-      "dest": "/client/connect-portal.html"
+      "source": "/connect-portal",
+      "destination": "/client/connect-portal.html"
     },
     {
-      "src": "/connect-portal.html$",
-      "dest": "/client/connect-portal.html"
+      "source": "/connect-portal.html",
+      "destination": "/client/connect-portal.html"
     },
     {
-      "src": "/login$",
-      "dest": "/client/login.html"
+      "source": "/login",
+      "destination": "/client/login.html"
     },
     {
-      "src": "/register$",
-      "dest": "/client/register.html"
+      "source": "/register",
+      "destination": "/client/register.html"
     },
     {
-      "src": "/creator$",
-      "dest": "/client/creator.html"
+      "source": "/creator",
+      "destination": "/client/creator.html"
     },
     {
-      "src": "/manifest.json$",
-      "dest": "/client/manifest.json"
+      "source": "/manifest.json",
+      "destination": "/client/manifest.json"
     },
     {
-      "src": "/service-worker.js$",
-      "dest": "/client/service-worker.js"
+      "source": "/service-worker.js",
+      "destination": "/client/service-worker.js"
     },
     {
-      "src": "/(.*)\\.html$",
-      "dest": "/client/$1.html"
+      "source": "/(.*)\\.html",
+      "destination": "/client/$1.html"
     },
     {
-      "src": "/(.*)",
-      "dest": "/client/$1"
+      "source": "/(.*)",
+      "destination": "/client/$1"
     }
   ]
 }
