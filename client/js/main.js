@@ -428,14 +428,27 @@ function logout() {
         API.post('/auth/logout', { refreshToken }).catch(() => { });
     }
 
-    Storage.clear();
-    Socket.disconnect();
-    
-    // Use encoded URL for navigation
-    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-        window.LinkEncoding.navigateTo('/');
+    // Use SessionTimeout.logout if available (ensures proper cleanup)
+    if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
+        window.SessionTimeout.logout('user_initiated');
     } else {
-        window.location.href = '/';
+        // Fallback: manual cleanup and redirect
+        Storage.clear();
+        Socket.disconnect();
+        
+        // Store logout reason
+        try {
+            sessionStorage.setItem('logoutReason', 'user_initiated');
+        } catch (e) {
+            // Ignore
+        }
+        
+        // Use encoded URL for navigation to landing page
+        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+            window.LinkEncoding.navigateTo('/index.html');
+        } else {
+            window.location.href = '/index.html';
+        }
     }
 }
 
