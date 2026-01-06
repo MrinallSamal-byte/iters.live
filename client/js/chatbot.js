@@ -685,13 +685,26 @@ class Chatbot {
                 const data = await response.json();
                 if (data.success && data.response) {
                     return data.response;
+                } else {
+                    console.warn('AI API returned success:false or no response', data);
                 }
             } else if (response.status === 503) {
                 // AI service unavailable - fall back to FAQ
                 console.log('AI service unavailable (503), using FAQ fallback');
+                const errorData = await response.json().catch(() => ({}));
+                console.log('503 error details:', errorData);
+            } else if (response.status === 401) {
+                // Token issues - fall back gracefully
+                console.log('AI API authentication issue (401), using FAQ fallback');
             } else {
                 // Log other errors for debugging
                 console.log('AI API returned error:', response.status);
+                try {
+                    const errorData = await response.json();
+                    console.log('Error details:', errorData);
+                } catch (e) {
+                    console.log('Could not parse error response');
+                }
             }
         } catch (error) {
             console.log('AI API not available, using smart classification:', error.message);
