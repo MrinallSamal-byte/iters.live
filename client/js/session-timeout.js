@@ -139,9 +139,19 @@
      * @param {string} reason - Reason for logout
      */
     function logout(reason) {
-        // Clear ALL sessionStorage data
+        // Store logout reason FIRST before clearing (for landing page to display)
+        const logoutReason = reason || 'session_timeout';
         try {
-            sessionStorage.clear();
+            sessionStorage.setItem('logoutReason', logoutReason);
+        } catch (e) {
+            // Ignore - will still work without the notification
+        }
+        
+        // Clear ALL sessionStorage data (except logoutReason which we just set)
+        try {
+            // Get all keys except logoutReason
+            const keysToRemove = Object.keys(sessionStorage).filter(key => key !== 'logoutReason');
+            keysToRemove.forEach(key => sessionStorage.removeItem(key));
         } catch (e) {
             // Fallback: manually remove known keys
             sessionStorage.removeItem(LAST_ACTIVITY_KEY);
@@ -175,13 +185,6 @@
         // Disconnect any active socket/bot connections
         if (window.socket && typeof window.socket.disconnect === 'function') {
             window.socket.disconnect();
-        }
-        
-        // Store logout reason for landing page to display
-        try {
-            sessionStorage.setItem('logoutReason', reason || 'session_timeout');
-        } catch (e) {
-            // Ignore
         }
         
         // Redirect to landing page (index.html) instead of login page
