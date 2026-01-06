@@ -719,16 +719,29 @@
                 // Use APP.logout if available (already uses encoded URLs)
                 if (typeof APP !== 'undefined' && typeof APP.logout === 'function') {
                     APP.logout();
+                } else if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
+                    // Use SessionTimeout.logout for proper cleanup
+                    window.SessionTimeout.logout('user_initiated');
                 } else {
-                    // Fallback logout
+                    // Fallback logout - redirect to landing page
                     localStorage.removeItem('token');
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
                     localStorage.removeItem('user');
+                    sessionStorage.clear();
                     
-                    // Use encoded URL for navigation
+                    // Store logout reason
+                    try {
+                        sessionStorage.setItem('logoutReason', 'user_initiated');
+                    } catch (e) {
+                        // Ignore
+                    }
+                    
+                    // Use encoded URL for navigation to landing page
                     if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                        window.LinkEncoding.navigateTo('/login.html');
+                        window.LinkEncoding.navigateTo('/index.html');
                     } else {
-                        window.location.href = '../login.html';
+                        window.location.href = '/index.html';
                     }
                 }
             }

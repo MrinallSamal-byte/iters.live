@@ -135,23 +135,40 @@
     }
 
     /**
-     * Clear session data and redirect to login
+     * Clear ALL session data and redirect to landing page
      * @param {string} reason - Reason for logout
      */
     function logout(reason) {
-        // Clear session storage
-        sessionStorage.removeItem(LAST_ACTIVITY_KEY);
-        sessionStorage.removeItem(SESSION_ID_KEY);
-        sessionStorage.removeItem(SESSION_START_KEY);
-        sessionStorage.removeItem('pageAccessToken');
-        sessionStorage.removeItem('pageAccessTokenTimestamp');
-        sessionStorage.removeItem('pageAccessTokenPath');
+        // Clear ALL sessionStorage data
+        try {
+            sessionStorage.clear();
+        } catch (e) {
+            // Fallback: manually remove known keys
+            sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+            sessionStorage.removeItem(SESSION_ID_KEY);
+            sessionStorage.removeItem(SESSION_START_KEY);
+            sessionStorage.removeItem('pageAccessToken');
+            sessionStorage.removeItem('pageAccessTokenTimestamp');
+            sessionStorage.removeItem('pageAccessTokenPath');
+        }
         
-        // Clear local storage auth data
+        // Clear ALL localStorage auth and user data
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         localStorage.removeItem(LAST_ACTIVITY_KEY);
+        localStorage.removeItem('demoRole');
+        localStorage.removeItem('rememberedUser');
+        
+        // Clear any portal-related data
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('portal') || key.startsWith('soa') || key.includes('retry'))) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
         
         // Stop the session check interval
         if (sessionCheckInterval) {
@@ -159,18 +176,23 @@
             sessionCheckInterval = null;
         }
         
-        // Store logout reason for login page to display
+        // Disconnect any active socket/bot connections
+        if (window.socket && typeof window.socket.disconnect === 'function') {
+            window.socket.disconnect();
+        }
+        
+        // Store logout reason for landing page to display
         try {
             sessionStorage.setItem('logoutReason', reason || 'session_timeout');
         } catch (e) {
             // Ignore
         }
         
-        // Redirect to login using encoded URL
+        // Redirect to landing page (index.html) instead of login page
         if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-            window.LinkEncoding.navigateTo('/login.html');
+            window.LinkEncoding.navigateTo('/index.html');
         } else {
-            window.location.href = '/login.html';
+            window.location.href = '/index.html';
         }
     }
 

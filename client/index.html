@@ -79,6 +79,11 @@
 </head>
 
 <body class="landing-page">
+    <!-- Logout notification toast (shown when user is logged out) -->
+    <div id="logoutNotification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: rgba(30, 30, 46, 0.95); color: white; padding: 1rem 2rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); animation: slideDown 0.3s ease;">
+        <span id="logoutMessage"></span>
+    </div>
+
     <!-- Background Animation -->
     <div class="bg-animation">
         <div class="gradient-orb orb-1"></div>
@@ -693,6 +698,54 @@
     <script src="/js/navbar-active-links.js"></script>
     <script src="/js/landing.js"></script>
     <script src="/js/chatbot.js"></script>
+
+    <!-- Logout notification handler -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // Add slideDown animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideDown {
+                    from { top: -100px; opacity: 0; }
+                    to { top: 20px; opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Check for logout reason on landing page
+            const logoutReason = sessionStorage.getItem('logoutReason');
+            if (logoutReason) {
+                sessionStorage.removeItem('logoutReason');
+                
+                const messages = {
+                    'session_timeout': '⏰ Your session has expired due to inactivity. Please log in again to continue.',
+                    'session_invalid': '⚠️ Your session is no longer valid. Please log in again.',
+                    'not_authenticated': '🔒 Please log in to access the dashboard.',
+                    'logged_out_other_tab': '📱 You were logged out from another tab.',
+                    'user_initiated': '👋 You have been logged out successfully.'
+                };
+                
+                const message = messages[logoutReason] || 'Please log in to continue.';
+                const notification = document.getElementById('logoutNotification');
+                const messageEl = document.getElementById('logoutMessage');
+                
+                if (notification && messageEl) {
+                    messageEl.textContent = message;
+                    notification.style.display = 'block';
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        notification.style.animation = 'slideDown 0.3s ease reverse';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 300);
+                    }, 5000);
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>
