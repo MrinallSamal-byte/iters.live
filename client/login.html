@@ -161,8 +161,7 @@
                         APP.Storage.set('accessToken', idToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // Portal sync flow: Students go to connect-portal page first
-                        // Teachers and Admins go directly to their dashboards
+                        // All users go directly to their respective dashboards
                         let redirectUrl;
                         if (response.data.user.role === 'student') {
                             // Students go directly to dashboard
@@ -298,9 +297,6 @@
 
                         APP.Storage.set('refreshToken', response.data.refreshToken);
                         APP.Storage.set('user', response.data.user);
-                        
-                        // Store the portal password temporarily for the sync page
-                        sessionStorage.setItem('portalPassword', password);
 
                         // Verify storage
                         console.log('Verifying stored data...');
@@ -312,8 +308,7 @@
                         let redirectUrl;
                         const userRole = response.data.user.role;
                         
-                        // Portal sync flow: Students go to connect-portal page first
-                        // Teachers and Admins go directly to their dashboards
+                        // All users go directly to their respective dashboards
                         if (userRole === 'student') {
                             // Students go directly to dashboard
                             if (typeof APP.showToast === 'function') {
