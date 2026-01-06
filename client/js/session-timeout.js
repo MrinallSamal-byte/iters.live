@@ -160,14 +160,10 @@
         localStorage.removeItem('demoRole');
         localStorage.removeItem('rememberedUser');
         
-        // Clear any portal-related data
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.startsWith('portal') || key.startsWith('soa') || key.includes('retry'))) {
-                keysToRemove.push(key);
-            }
-        }
+        // Clear any portal-related data efficiently
+        const keysToRemove = Object.keys(localStorage).filter(key => 
+            key.startsWith('portal') || key.startsWith('soa') || key.includes('retry')
+        );
         keysToRemove.forEach(key => localStorage.removeItem(key));
         
         // Stop the session check interval

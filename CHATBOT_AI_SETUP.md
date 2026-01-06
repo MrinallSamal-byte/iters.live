@@ -20,10 +20,20 @@ The ITER EduHub chatbot now has AI-powered features using OpenRouter API for ans
 
 ## OpenRouter API Configuration
 
-The `.env` file has been created with the OpenRouter API key from the example:
+The `.env` file has been created from the example template. **IMPORTANT: The API key in the example is for demonstration only.**
 
+### Setting Up Your Own API Key
+
+1. **Get a free API key** from https://openrouter.ai/keys
+2. **Update the `.env` file** with your own key:
+   ```
+   OPENROUTER_API_KEY=sk-or-v1-YOUR-ACTUAL-API-KEY-HERE
+   ```
+3. **DO NOT commit** the `.env` file to version control (it's already in `.gitignore`)
+
+**Example format (DO NOT USE THIS KEY - IT MAY BE INVALID):**
 ```
-OPENROUTER_API_KEY=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
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Verify API Key is Working

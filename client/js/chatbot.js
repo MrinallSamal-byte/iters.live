@@ -685,8 +685,10 @@ class Chatbot {
                 const data = await response.json();
                 if (data.success && data.response) {
                     return data.response;
+                } else if (!data.success) {
+                    console.warn('AI API returned success:false', { message: data.message, error: data.error });
                 } else {
-                    console.warn('AI API returned success:false or no response', data);
+                    console.warn('AI API missing response in data', data);
                 }
             } else if (response.status === 503) {
                 // AI service unavailable - fall back to FAQ
