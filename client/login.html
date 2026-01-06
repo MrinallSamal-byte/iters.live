@@ -165,8 +165,8 @@
                         // Teachers and Admins go directly to their dashboards
                         let redirectUrl;
                         if (response.data.user.role === 'student') {
-                            // Students need to sync portal data first
-                            redirectUrl = '/connect-portal.html';
+                            // Students go directly to dashboard
+                            redirectUrl = '/dashboard/student.html';
                         } else if (response.data.user.role === 'teacher') {
                             redirectUrl = '/dashboard/teacher.html';
                         } else if (response.data.user.role === 'admin') {
@@ -315,15 +315,15 @@
                         // Portal sync flow: Students go to connect-portal page first
                         // Teachers and Admins go directly to their dashboards
                         if (userRole === 'student') {
-                            // Students are redirected to connect-portal.html for data fetching
+                            // Students go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting to portal sync...');
+                            showError('✅ Login successful! Redirecting to dashboard...');
                             errorMessage.style.color = '#10b981';
                             
-                            // Redirect to connect-portal page
-                            redirectUrl = '/connect-portal.html';
+                            // Redirect to student dashboard
+                            redirectUrl = '/dashboard/student.html';
                         } else if (userRole === 'teacher') {
                             // Teachers go directly to dashboard
                             if (typeof APP.showToast === 'function') {
