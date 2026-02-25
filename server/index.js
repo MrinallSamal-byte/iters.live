@@ -77,8 +77,10 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin || corsWhitelist.includes(origin)) {
       callback(null, true);
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
       callback(null, true); // Allow all in development
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true
@@ -315,17 +317,6 @@ app.use('/api/*', (req, res) => {
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
-
-// Catch-all error handler to ensure JSON responses
-app.use((err, req, res, next) => {
-  if (!res.headersSent) {
-    res.setHeader('Content-Type', 'application/json');
-    res.status(err.statusCode || 500).json({
-      success: false,
-      message: err.message || 'Internal Server Error'
-    });
-  }
-});
 
 // Initialize Redis cache
 const { initRedis, closeRedis, isRedisConnected } = require('./config/redis.config');

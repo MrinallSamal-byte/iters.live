@@ -152,8 +152,8 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res, n
     // Public URL
     const publicUrl = `/static/uploads/${req.file.filename}`;
 
-    // Determine approval status (teacher uploads need approval)
-    const approved = req.user.role === 'student' ? true : false;
+    // Determine approval status (student uploads need approval, teacher/admin auto-approved)
+    const approved = req.user.role === 'teacher' || req.user.role === 'admin' ? true : false;
 
     // Save to Firestore
     const fileData = {

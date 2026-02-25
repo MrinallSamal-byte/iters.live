@@ -296,7 +296,7 @@ router.post('/register-student', [
 router.get('/me', authMiddleware, async (req, res, next) => {
   try {
     // authMiddleware should now populate req.user from Firebase Token
-    const userId = req.user.uid; // or user_id
+    const userId = req.user.id;
 
     // If it's a google login, uid is the doc id (maybe). 
     // If it's a dummy login, uid is the registration number.
