@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const profileController = require('../controllers/profile.controller');
-const { verifyToken } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 const { avatarUpload, handleMulterError } = require('../config/multer');
 const rateLimit = require('express-rate-limit');
 
@@ -23,7 +23,7 @@ const uploadLimiter = rateLimit({
 });
 
 // All routes require authentication
-router.use(verifyToken);
+router.use(authMiddleware);
 
 // GET /api/users/me - Get current user profile
 router.get('/users/me', profileController.getCurrentUser);

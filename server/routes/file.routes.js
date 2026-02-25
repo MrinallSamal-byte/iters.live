@@ -304,6 +304,83 @@ router.get('/', authMiddleware, async (req, res, next) => {
 });
 
 /**
+ * GET /api/files/stats
+ * Get file statistics
+ */
+router.get('/stats/overview', authMiddleware, async (req, res, next) => {
+  try {
+    // Return default stats
+    let stats = {
+      total_files: 45,
+      total_size: 125000000,
+      total_downloads: 1250,
+      approved_files: 42,
+      pending_files: 3
+    };
+    
+    let byCategory = [
+      { category: 'note', count: 20, size: 50000000 },
+      { category: 'pyq', count: 15, size: 40000000 },
+      { category: 'assignment', count: 10, size: 35000000 }
+    ];
+
+    try {
+      const filesSnapshot = await db.collection('files').get();
+      
+      if (filesSnapshot.size > 0) {
+        let totalSize = 0;
+        let totalDownloads = 0;
+        let approved = 0;
+        let pending = 0;
+        const categoryMap = {};
+        
+        filesSnapshot.docs.forEach(doc => {
+          const file = doc.data();
+          totalSize += file.file_size || 0;
+          totalDownloads += file.download_count || 0;
+          if (file.approved) approved++;
+          else pending++;
+          
+          if (file.category) {
+            if (!categoryMap[file.category]) {
+              categoryMap[file.category] = { count: 0, size: 0 };
+            }
+            categoryMap[file.category].count++;
+            categoryMap[file.category].size += file.file_size || 0;
+          }
+        });
+        
+        stats = {
+          total_files: filesSnapshot.size,
+          total_size: totalSize,
+          total_downloads: totalDownloads,
+          approved_files: approved,
+          pending_files: pending
+        };
+        
+        byCategory = Object.entries(categoryMap).map(([category, data]) => ({
+          category,
+          count: data.count,
+          size: data.size
+        }));
+      }
+    } catch (firestoreError) {
+      console.warn('Firestore error:', firestoreError.message);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        overview: stats,
+        byCategory
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/files/download/:id
  * Download a file
  */
@@ -481,82 +558,4 @@ router.delete('/:id', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
-/**
- * GET /api/files/stats
- * Get file statistics
- */
-router.get('/stats/overview', authMiddleware, async (req, res, next) => {
-  try {
-    // Return default stats
-    let stats = {
-      total_files: 45,
-      total_size: 125000000,
-      total_downloads: 1250,
-      approved_files: 42,
-      pending_files: 3
-    };
-    
-    let byCategory = [
-      { category: 'note', count: 20, size: 50000000 },
-      { category: 'pyq', count: 15, size: 40000000 },
-      { category: 'assignment', count: 10, size: 35000000 }
-    ];
-
-    try {
-      const filesSnapshot = await db.collection('files').get();
-      
-      if (filesSnapshot.size > 0) {
-        let totalSize = 0;
-        let totalDownloads = 0;
-        let approved = 0;
-        let pending = 0;
-        const categoryMap = {};
-        
-        filesSnapshot.docs.forEach(doc => {
-          const file = doc.data();
-          totalSize += file.file_size || 0;
-          totalDownloads += file.download_count || 0;
-          if (file.approved) approved++;
-          else pending++;
-          
-          if (file.category) {
-            if (!categoryMap[file.category]) {
-              categoryMap[file.category] = { count: 0, size: 0 };
-            }
-            categoryMap[file.category].count++;
-            categoryMap[file.category].size += file.file_size || 0;
-          }
-        });
-        
-        stats = {
-          total_files: filesSnapshot.size,
-          total_size: totalSize,
-          total_downloads: totalDownloads,
-          approved_files: approved,
-          pending_files: pending
-        };
-        
-        byCategory = Object.entries(categoryMap).map(([category, data]) => ({
-          category,
-          count: data.count,
-          size: data.size
-        }));
-      }
-    } catch (firestoreError) {
-      console.warn('Firestore error:', firestoreError.message);
-    }
-
-    res.json({
-      success: true,
-      data: {
-        overview: stats,
-        byCategory
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 module.exports = router;

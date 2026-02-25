@@ -16,6 +16,13 @@ const getCurrentUser = async (req, res) => {
         // req.user is already populated by authMiddleware from Firestore
         const user = req.user;
 
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+
         // Remove sensitive data
         const safeUser = { ...user };
         delete safeUser.password;
