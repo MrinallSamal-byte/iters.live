@@ -145,12 +145,23 @@ class RiskDetectionMock {
 class PomodoroTimerMock { constructor(id) { this.container = document.getElementById(id); } }
 class ResumeBuilderMock { constructor(id) { this.container = document.getElementById(id); } }
 
-// Expose to both window and global for convenience
-global.GPACalculator = window.GPACalculator = GPACalculatorMock;
-global.AssignmentCalendar = window.AssignmentCalendar = AssignmentCalendarMock;
-global.QuestionBank = window.QuestionBank = QuestionBankMock;
-global.AutoGrader = window.AutoGrader = AutoGraderMock;
-global.RubricCreator = window.RubricCreator = RubricCreatorMock;
-global.RiskDetection = window.RiskDetection = RiskDetectionMock;
-global.PomodoroTimer = window.PomodoroTimer = PomodoroTimerMock;
-global.ResumeBuilder = window.ResumeBuilder = ResumeBuilderMock;
+// Expose to global (always available) and window (when running in jsdom)
+global.GPACalculator = GPACalculatorMock;
+global.AssignmentCalendar = AssignmentCalendarMock;
+global.QuestionBank = QuestionBankMock;
+global.AutoGrader = AutoGraderMock;
+global.RubricCreator = RubricCreatorMock;
+global.RiskDetection = RiskDetectionMock;
+global.PomodoroTimer = PomodoroTimerMock;
+global.ResumeBuilder = ResumeBuilderMock;
+
+if (typeof window !== 'undefined') {
+    window.GPACalculator = GPACalculatorMock;
+    window.AssignmentCalendar = AssignmentCalendarMock;
+    window.QuestionBank = QuestionBankMock;
+    window.AutoGrader = AutoGraderMock;
+    window.RubricCreator = RubricCreatorMock;
+    window.RiskDetection = RiskDetectionMock;
+    window.PomodoroTimer = PomodoroTimerMock;
+    window.ResumeBuilder = ResumeBuilderMock;
+}
