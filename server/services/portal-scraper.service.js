@@ -391,7 +391,11 @@ class PortalScraper {
                         continue;
                     }
                     
-                    return loginResult;
+                    return {
+                        status: loginResult.status || STATUS_SCRAPE_ERROR,
+                        message: `Cannot fetch data from college website after ${MAX_RETRY_ATTEMPTS} attempts`,
+                        failureReasons
+                    };
                 }
                 
                 // Fetch all data in parallel
@@ -445,7 +449,7 @@ class PortalScraper {
         console.error('[Scraper] Failure reasons:', failureReasons);
         
         return {
-            status: 'error',
+            status: STATUS_SCRAPE_ERROR,
             message: `Cannot fetch data from college website after ${MAX_RETRY_ATTEMPTS} attempts`,
             failureReasons,
             lastError: lastError?.message

@@ -33,19 +33,19 @@ jest.mock('sharp', () => {
 });
 
 const axios = require('axios');
-const { createScraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_PORTAL_UNREACHABLE } = require('../server/services/portal-scraper.service');
+const { createScraper, STATUS_SUCCESS, STATUS_AUTH_FAILED, STATUS_SCRAPE_ERROR, STATUS_PORTAL_UNREACHABLE } = require('../server/services/portal-scraper.service');
 
 describe('Portal Scraper Service', () => {
     let scraper;
     
     beforeEach(() => {
         jest.clearAllMocks();
-        scraper = createScraper();
-        // Mock axios.create to return a mock client
+        // Mock axios.create BEFORE creating the scraper so this.client.get/post === axios.get/post
         axios.create = jest.fn().mockReturnValue({
             get: axios.get,
             post: axios.post
         });
+        scraper = createScraper();
     });
     
     afterEach(async () => {
@@ -175,15 +175,25 @@ describe('Portal Scraper Service', () => {
         });
         
         it('should return error status after all retries exhausted', async () => {
-            // Portal reachable but login fails with network error
-            axios.get.mockResolvedValue({ status: 200 });
-            
-            // CAPTCHA fails
-            axios.get.mockResolvedValue({ status: 500 });
+            // Portal reachable but CAPTCHA always fails (returns non-200)
+            // Each scrape attempt: 1 reachability GET (200) + 3 CAPTCHA GETs (500)
+            axios.get
+                .mockResolvedValueOnce({ status: 200 })   // attempt 1 reachability
+                .mockResolvedValueOnce({ status: 500 })    // attempt 1 captcha 1
+                .mockResolvedValueOnce({ status: 500 })    // attempt 1 captcha 2
+                .mockResolvedValueOnce({ status: 500 })    // attempt 1 captcha 3
+                .mockResolvedValueOnce({ status: 200 })    // attempt 2 reachability
+                .mockResolvedValueOnce({ status: 500 })    // attempt 2 captcha 1
+                .mockResolvedValueOnce({ status: 500 })    // attempt 2 captcha 2
+                .mockResolvedValueOnce({ status: 500 })    // attempt 2 captcha 3
+                .mockResolvedValueOnce({ status: 200 })    // attempt 3 reachability
+                .mockResolvedValueOnce({ status: 500 })    // attempt 3 captcha 1
+                .mockResolvedValueOnce({ status: 500 })    // attempt 3 captcha 2
+                .mockResolvedValueOnce({ status: 500 });   // attempt 3 captcha 3
             
             const result = await scraper.scrape('TEST123', 'password');
             
-            expect(result.status).toBe('error');
+            expect(result.status).toBe(STATUS_SCRAPE_ERROR);
             expect(result.message).toContain('after 3 attempts');
             expect(result.failureReasons).toHaveLength(3);
         });
@@ -191,9 +201,12 @@ describe('Portal Scraper Service', () => {
     
     describe('response format standardization', () => {
         it('should return standardized success response', async () => {
-            // Mock successful flow
-            axios.get.mockResolvedValue({ status: 200, data: {} });
-            axios.post.mockResolvedValue({ 
+            // Mock successful flow with correct call sequence
+            axios.get
+                .mockResolvedValueOnce({ status: 200 })                              // reachability check
+                .mockResolvedValueOnce({ status: 200, data: Buffer.from('captcha') }) // CAPTCHA image
+                .mockResolvedValue({ status: 200, data: {} });                        // data fetches
+            axios.post.mockResolvedValueOnce({ 
                 status: 200, 
                 data: { success: true, token: 'test-token' } 
             });
