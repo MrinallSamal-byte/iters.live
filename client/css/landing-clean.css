@@ -1,0 +1,589 @@
+/* ====================================================================
+   CLEAN LANDING PAGE REDESIGN
+   Minimal, professional, text-focused layouts without heavy cards
+   ==================================================================== */
+
+/* Custom Properties for Icon Sizing */
+:root {
+    --icon-size-sm: 1.5rem;
+    --icon-size-md: 1.8rem;
+    --icon-size-lg: 2rem;
+}
+
+/* Features Section - Clean Point-wise Layout */
+.features-section .features-grid {
+    display: block;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.features-section .feature-card {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl) 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.features-section .feature-card:last-child {
+    border-bottom: none;
+}
+
+.features-section .feature-card:hover {
+    transform: translateX(10px);
+    padding-left: var(--spacing-md);
+}
+
+.features-section .feature-card .feature-icon {
+    display: inline-block;
+    font-size: var(--icon-size-sm);
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.features-section .feature-card h3 {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.features-section .feature-card p {
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Why Choose Section - Minimal Text Layout */
+.why-choose-section .why-choose-grid {
+    display: block;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.why-choose-section .why-card {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl) 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.why-choose-section .why-card:last-child {
+    border-bottom: none;
+}
+
+.why-choose-section .why-card:hover {
+    transform: translateX(10px);
+    padding-left: var(--spacing-md);
+}
+
+.why-choose-section .why-icon {
+    display: inline-block;
+    font-size: var(--icon-size-sm);
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.why-choose-section .why-card h3 {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--primary);
+}
+
+.why-choose-section .why-card p {
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Technology Stack Section - Bullet Point Style */
+.tech-stack-section .tech-features {
+    display: block;
+    max-width: 900px;
+    margin: var(--spacing-2xl) auto;
+}
+
+.tech-stack-section .tech-feature-item {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl) 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tech-stack-section .tech-feature-item:last-child {
+    border-bottom: none;
+}
+
+.tech-stack-section .tech-feature-item:hover {
+    transform: translateX(10px);
+    padding-left: var(--spacing-md);
+}
+
+.tech-stack-section .tech-icon {
+    display: inline-block;
+    font-size: var(--icon-size-sm);
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.tech-stack-section .tech-feature-item h3 {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--primary);
+}
+
+.tech-stack-section .tech-feature-item p {
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Download Section - Simplified */
+.download-section .download-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.download-section .download-card {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl) 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.download-section .download-card:last-child {
+    border-bottom: none;
+}
+
+.download-section .download-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.download-section .download-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Academic Programs - Clean List Format */
+.academics-section .academics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xl);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.academics-section .academic-card {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.academics-section .academic-card:last-child {
+    border-bottom: none;
+}
+
+.academics-section .academic-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.academics-section .academic-icon {
+    display: inline-block;
+    font-size: var(--icon-size-md);
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.academics-section .academic-card h3 {
+    display: inline-block;
+    font-size: 1.3rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--primary);
+}
+
+.academics-section .academic-card > p {
+    margin-left: calc(var(--icon-size-md) + var(--spacing-md));
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+.academics-section .academic-features {
+    margin-left: calc(var(--icon-size-md) + var(--spacing-md));
+    padding-left: var(--spacing-lg);
+}
+
+.academics-section .academic-features li {
+    padding: var(--spacing-xs) 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Facilities Section - Simple Text Layout */
+.facilities-section .facilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-xl);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.facilities-section .facility-card {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--spacing-md) 0;
+    text-align: left;
+}
+
+.facilities-section .facility-icon {
+    display: inline-block;
+    font-size: var(--icon-size-sm);
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.facilities-section .facility-card h3 {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.facilities-section .facility-card p {
+    margin-left: calc(var(--icon-size-sm) + var(--spacing-md));
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Placement Section - Simplified Stats */
+.placement-section .placement-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-2xl);
+    margin: var(--spacing-2xl) 0;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.placement-section .placement-stat {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    text-align: center;
+    min-width: 150px;
+}
+
+.placement-section .placement-stat h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.placement-section .placement-stat p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* Recruiters - Clean Tag Display */
+.placement-section .recruiters-section {
+    margin-top: var(--spacing-2xl);
+}
+
+.placement-section .recruiters-section h3 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-xl);
+    color: var(--text-primary);
+}
+
+.placement-section .recruiters-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-md);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.placement-section .recruiter-tag {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.placement-section .recruiter-tag:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* About Section Highlights - Keep Clean Style */
+.about-section .about-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin: var(--spacing-2xl) 0;
+}
+
+.about-section .highlight-item {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.about-section .highlight-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.about-section .highlight-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.about-section .highlight-item h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--primary);
+}
+
+.about-section .highlight-item p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Vision & Mission - Keep Clean Cards */
+.about-section .vision-mission .vm-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl);
+}
+
+.about-section .vision-mission .vm-card:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Achievements - Simplified */
+.about-section .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.about-section .achievement-item {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.about-section .achievement-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Contact Section - Clean Layout */
+.contact-section .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-xl);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.contact-section .contact-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    backdrop-filter: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.contact-section .contact-card:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.contact-section .contact-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.contact-section .contact-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--primary);
+}
+
+.contact-section .contact-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .features-section .feature-card p,
+    .why-choose-section .why-card p,
+    .tech-stack-section .tech-feature-item p {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+
+    .features-section .feature-card .feature-icon,
+    .why-choose-section .why-icon,
+    .tech-stack-section .tech-icon {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .features-section .feature-card h3,
+    .why-choose-section .why-card h3,
+    .tech-stack-section .tech-feature-item h3 {
+        display: block;
+    }
+
+    .academics-section .academic-icon {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .academics-section .academic-card h3 {
+        display: block;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .academics-section .academic-card > p,
+    .academics-section .academic-features {
+        margin-left: 0;
+    }
+
+    .facilities-section .facilities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .facilities-section .facility-icon {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .facilities-section .facility-card h3 {
+        display: block;
+    }
+
+    .facilities-section .facility-card p {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+
+    .placement-section .placement-stats {
+        gap: var(--spacing-lg);
+    }
+
+    .about-section .about-highlights {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Smooth Animations - Only for elements without existing transitions */
+@media (prefers-reduced-motion: no-preference) {
+    .academic-card,
+    .facility-card {
+        transition: all 0.3s ease;
+    }
+}
+
+/* Light Theme Adjustments */
+body.light-theme .features-section .feature-card,
+body.light-theme .why-choose-section .why-card,
+body.light-theme .tech-stack-section .tech-feature-item,
+body.light-theme .academics-section .academic-card,
+body.light-theme .facilities-section .facility-card,
+body.light-theme .download-section .download-card {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .about-section .highlight-item,
+body.light-theme .about-section .vm-card,
+body.light-theme .about-section .achievement-item,
+body.light-theme .contact-section .contact-card {
+    background: rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .about-section .highlight-item:hover,
+body.light-theme .about-section .vm-card:hover,
+body.light-theme .about-section .achievement-item:hover,
+body.light-theme .contact-section .contact-card:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+body.light-theme .placement-section .recruiter-tag {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: rgba(99, 102, 241, 0.15);
+}
+
+body.light-theme .placement-section .recruiter-tag:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
