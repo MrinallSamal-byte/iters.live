@@ -14,55 +14,55 @@
         '4:00 - 5:00'
     ];
 
-    // Sample timetable data
+    // Sample timetable data with realistic Indian faculty names
     const sampleTimetable = {
         'Monday': [
-            { subject: 'Data Structures', room: 'Room 301', faculty: 'Dr. Smith' },
-            { subject: 'Database Systems', room: 'Room 205', faculty: 'Prof. Johnson' },
-            { subject: 'Computer Networks', room: 'Lab 1', faculty: 'Dr. Williams' },
+            { subject: 'Data Structures',       room: 'CSE-301', faculty: 'Dr. Priya Verma' },
+            { subject: 'Database Systems',       room: 'CSE-205', faculty: 'Prof. Arun Kumar' },
+            { subject: 'Computer Networks',      room: 'Lab-1',   faculty: 'Dr. Meera Nair' },
             { type: 'break', label: 'Lunch Break' },
-            { subject: 'Software Engineering', room: 'Room 401', faculty: 'Prof. Brown' },
-            { subject: 'Lab - Data Structures', room: 'Lab 2', faculty: 'Dr. Smith' },
-            { subject: 'Lab - Data Structures', room: 'Lab 2', faculty: 'Dr. Smith' },
+            { subject: 'Software Engineering',   room: 'CSE-401', faculty: 'Dr. Ramesh Patel' },
+            { subject: 'Lab - Data Structures',  room: 'Lab-2',   faculty: 'Dr. Priya Verma' },
+            { subject: 'Lab - Data Structures',  room: 'Lab-2',   faculty: 'Dr. Priya Verma' },
             { type: 'free' }
         ],
         'Tuesday': [
-            { subject: 'Database Systems', room: 'Room 205', faculty: 'Prof. Johnson' },
-            { subject: 'Software Engineering', room: 'Room 401', faculty: 'Prof. Brown' },
-            { subject: 'Computer Networks', room: 'Room 303', faculty: 'Dr. Williams' },
+            { subject: 'Database Systems',       room: 'CSE-205', faculty: 'Prof. Arun Kumar' },
+            { subject: 'Software Engineering',   room: 'CSE-401', faculty: 'Dr. Ramesh Patel' },
+            { subject: 'Computer Networks',      room: 'CSE-303', faculty: 'Dr. Meera Nair' },
             { type: 'break', label: 'Lunch Break' },
-            { subject: 'Data Structures', room: 'Room 301', faculty: 'Dr. Smith' },
-            { subject: 'Lab - Database', room: 'Lab 3', faculty: 'Prof. Johnson' },
-            { subject: 'Lab - Database', room: 'Lab 3', faculty: 'Prof. Johnson' },
+            { subject: 'Data Structures',        room: 'CSE-301', faculty: 'Dr. Priya Verma' },
+            { subject: 'Lab - Database Systems', room: 'Lab-3',   faculty: 'Prof. Arun Kumar' },
+            { subject: 'Lab - Database Systems', room: 'Lab-3',   faculty: 'Prof. Arun Kumar' },
             { type: 'free' }
         ],
         'Wednesday': [
-            { subject: 'Computer Networks', room: 'Room 303', faculty: 'Dr. Williams' },
-            { subject: 'Data Structures', room: 'Room 301', faculty: 'Dr. Smith' },
-            { subject: 'Software Engineering', room: 'Room 401', faculty: 'Prof. Brown' },
+            { subject: 'Computer Networks',      room: 'CSE-303', faculty: 'Dr. Meera Nair' },
+            { subject: 'Data Structures',        room: 'CSE-301', faculty: 'Dr. Priya Verma' },
+            { subject: 'Software Engineering',   room: 'CSE-401', faculty: 'Dr. Ramesh Patel' },
             { type: 'break', label: 'Lunch Break' },
-            { subject: 'Database Systems', room: 'Room 205', faculty: 'Prof. Johnson' },
-            { subject: 'Tutorial - Networks', room: 'Room 102', faculty: 'Dr. Williams' },
+            { subject: 'Database Systems',       room: 'CSE-205', faculty: 'Prof. Arun Kumar' },
+            { subject: 'Tutorial - Networks',    room: 'CSE-102', faculty: 'Dr. Meera Nair' },
             { type: 'free' },
             { type: 'free' }
         ],
         'Thursday': [
-            { subject: 'Software Engineering', room: 'Room 401', faculty: 'Prof. Brown' },
-            { subject: 'Computer Networks', room: 'Room 303', faculty: 'Dr. Williams' },
-            { subject: 'Data Structures', room: 'Room 301', faculty: 'Dr. Smith' },
+            { subject: 'Software Engineering',   room: 'CSE-401', faculty: 'Dr. Ramesh Patel' },
+            { subject: 'Computer Networks',      room: 'CSE-303', faculty: 'Dr. Meera Nair' },
+            { subject: 'Data Structures',        room: 'CSE-301', faculty: 'Dr. Priya Verma' },
             { type: 'break', label: 'Lunch Break' },
-            { subject: 'Database Systems', room: 'Room 205', faculty: 'Prof. Johnson' },
-            { subject: 'Lab - Software Engg', room: 'Lab 4', faculty: 'Prof. Brown' },
-            { subject: 'Lab - Software Engg', room: 'Lab 4', faculty: 'Prof. Brown' },
+            { subject: 'Database Systems',       room: 'CSE-205', faculty: 'Prof. Arun Kumar' },
+            { subject: 'Lab - Software Engg',    room: 'Lab-4',   faculty: 'Dr. Ramesh Patel' },
+            { subject: 'Lab - Software Engg',    room: 'Lab-4',   faculty: 'Dr. Ramesh Patel' },
             { type: 'free' }
         ],
         'Friday': [
-            { subject: 'Database Systems', room: 'Room 205', faculty: 'Prof. Johnson' },
-            { subject: 'Data Structures', room: 'Room 301', faculty: 'Dr. Smith' },
-            { subject: 'Computer Networks', room: 'Room 303', faculty: 'Dr. Williams' },
+            { subject: 'Database Systems',       room: 'CSE-205', faculty: 'Prof. Arun Kumar' },
+            { subject: 'Data Structures',        room: 'CSE-301', faculty: 'Dr. Priya Verma' },
+            { subject: 'Computer Networks',      room: 'CSE-303', faculty: 'Dr. Meera Nair' },
             { type: 'break', label: 'Lunch Break' },
-            { subject: 'Software Engineering', room: 'Room 401', faculty: 'Prof. Brown' },
-            { type: 'seminar', label: 'Department Seminar' },
+            { subject: 'Software Engineering',   room: 'CSE-401', faculty: 'Dr. Ramesh Patel' },
+            { type: 'seminar', label: 'Dept. Seminar' },
             { type: 'free' },
             { type: 'free' }
         ],

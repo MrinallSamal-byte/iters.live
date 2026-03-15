@@ -9,7 +9,7 @@
     <meta name="keywords"
         content="ITER, SOA University, Technical Education, Engineering College, Student Portal, EduHub, NAAC A++, Bhubaneswar, Odisha">
     <meta name="author" content="ITER - Institute of Technical Education & Research">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#000000">
     <meta property="og:type" content="website">
     <meta property="og:title" content="ITER - Institute of Technical Education & Research | SOA University">
     <meta property="og:description"
@@ -93,6 +93,11 @@
             animation: slideUp 0.3s ease;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script>(function(){var s=localStorage.getItem("campusarena-theme");if(s)document.documentElement.setAttribute("data-theme",s);})();</script>
+    <link rel="stylesheet" href="/css/campusarena-design-system.css">
+    <link rel="stylesheet" href="/css/ca-nav-override.css">
 </head>
 
 <body class="landing-page">
@@ -101,35 +106,7 @@
         <span id="logoutMessage"></span>
     </div>
 
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="navbar glass-card">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <img src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)" class="logo-img">
-                <span class="logo-text">ITER</span>
-            </div>
-            <div class="nav-links">
-                <a href="#about" class="nav-link">About</a>
-                <a href="#academics" class="nav-link">Academics</a>
-                <a href="/creator.html" class="nav-link">Creator</a>
-                <a href="#contact" class="nav-link">Contact</a>
-                <a href="/register.html" class="btn btn-outline" style="margin-right: 0.5rem;">Register</a>
-                <a href="/login.html" class="btn btn-primary">Portal Login</a>
-            </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    <!-- Nav injected by ca-nav-inject.js -->
 
     <!-- Hero Section -->
     <section class="hero-section">
@@ -754,6 +731,8 @@
             }
         })();
     </script>
+    <script src="/js/ca-nav-inject.js"></script>
+    <script src="/js/campusarena-components.js"></script>
 </body>
 
 </html>

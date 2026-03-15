@@ -63,24 +63,34 @@
 
     async function loadMenu() {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
             const dateStr = selectedDate.toISOString().split('T')[0];
-            
-            const response = await fetch(`/api/hostel/menu?date=${dateStr}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+
+            const response = await fetch(`/api/hostel/menu?date=${dateStr}&block=${selectedBlock}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to load menu');
-            }
-
+            if (!response.ok) throw new Error('API unavailable');
             const data = await response.json();
             displayMenu(data.data);
         } catch (error) {
-            console.error('Error loading menu:', error);
-            showNoMenuMessage();
+            // DummyData fallback
+            if (typeof DummyData !== 'undefined') {
+                const result = DummyData.getHostelMenu(selectedDate.toISOString().split('T')[0]);
+                if (result.success && result.data) {
+                    const dateStr = selectedDate.toISOString().split('T')[0];
+                    const dayData = result.data.filter(item => item.date === dateStr);
+                    displayMenu(dayData.length ? dayData : result.data.slice(0, 4));
+                    return;
+                }
+            }
+            // Static fallback
+            displayMenu([
+                { meal_type: 'breakfast', menu_items: 'Idli Sambar, Bread Toast & Butter, Tea/Coffee' },
+                { meal_type: 'lunch',     menu_items: 'Rice, Dal Tadka, Aloo Sabji, Roti, Curd, Papad' },
+                { meal_type: 'snacks',    menu_items: 'Samosa, Tea, Biscuits' },
+                { meal_type: 'dinner',    menu_items: 'Roti, Dal Makhani, Paneer Sabji, Rice, Salad' }
+            ]);
         }
     }
 

@@ -231,16 +231,18 @@
   function normalizeMarks(data) {
     const summary = data?.summary || [];
     if (!summary.length) {
-      // Return dummy data if no summary
+      // Return representative CSE dummy data
       return {
-        gpa: 8.14,
+        gpa: 8.75,
         summary: [
-          { subject: 'Data Structures', avg_marks: 85, avg_total: 100 },
-          { subject: 'Algorithms', avg_marks: 88, avg_total: 100 },
+          { subject: 'Data Structures', avg_marks: 88, avg_total: 100 },
+          { subject: 'Algorithms', avg_marks: 85, avg_total: 100 },
           { subject: 'Database Systems', avg_marks: 82, avg_total: 100 },
-          { subject: 'Operating Systems', avg_marks: 90, avg_total: 100 },
-          { subject: 'Computer Networks', avg_marks: 78, avg_total: 100 },
-          { subject: 'Web Development', avg_marks: 92, avg_total: 100 }
+          { subject: 'Operating Systems', avg_marks: 87, avg_total: 100 },
+          { subject: 'Computer Networks', avg_marks: 80, avg_total: 100 },
+          { subject: 'Web Development', avg_marks: 91, avg_total: 100 },
+          { subject: 'Machine Learning', avg_marks: 89, avg_total: 100 },
+          { subject: 'Software Engineering', avg_marks: 84, avg_total: 100 }
         ]
       };
     }
@@ -328,7 +330,7 @@
           labels: ['Present', 'Absent'],
           datasets: [{
             data: [present, absent],
-            backgroundColor: ['#22c55e', '#ef4444'],
+            backgroundColor: ['#00E676', '#FF5252'],
             borderWidth: 0
           }]
         },
@@ -338,7 +340,7 @@
             legend: {
               display: true,
               position: 'bottom',
-              labels: { color: '#fff' }
+              labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') || '#fff' }
             }
           },
           animation: {
@@ -384,20 +386,18 @@
     // Use dummy data if summary is empty
     if (!summary || !summary.length) {
       summary = [
-        { subject: 'Structural Analysis', avg_marks: 78, avg_total: 100 },
-        { subject: 'Concrete Technology', avg_marks: 85, avg_total: 100 },
-        { subject: 'Surveying', avg_marks: 88, avg_total: 100 },
-        { subject: 'Fluid Mechanics', avg_marks: 82, avg_total: 100 },
-        { subject: 'Geotechnical Eng', avg_marks: 80, avg_total: 100 },
-        { subject: 'Computer Aided Design', avg_marks: 75, avg_total: 100 },
-        { subject: 'Const. Management', avg_marks: 92, avg_total: 100 },
-        { subject: 'A.I. & ML', avg_marks: 86, avg_total: 100 },
-        { subject: 'Big Data Analytics', avg_marks: 83, avg_total: 100 },
-        { subject: 'Discrete Mathematics', avg_marks: 89, avg_total: 100 },
-        { subject: 'Database Mgmt Systems', avg_marks: 81, avg_total: 100 },
+        { subject: 'Data Structures', avg_marks: 88, avg_total: 100 },
+        { subject: 'Algorithms', avg_marks: 85, avg_total: 100 },
+        { subject: 'Database Systems', avg_marks: 82, avg_total: 100 },
         { subject: 'Operating Systems', avg_marks: 87, avg_total: 100 },
-        { subject: 'Computer Networks', avg_marks: 84, avg_total: 100 },
-        { subject: 'Machine Learning', avg_marks: 91, avg_total: 100 }
+        { subject: 'Computer Networks', avg_marks: 80, avg_total: 100 },
+        { subject: 'Web Development', avg_marks: 91, avg_total: 100 },
+        { subject: 'Machine Learning', avg_marks: 89, avg_total: 100 },
+        { subject: 'Software Engineering', avg_marks: 84, avg_total: 100 },
+        { subject: 'Discrete Mathematics', avg_marks: 78, avg_total: 100 },
+        { subject: 'Object Oriented Prog', avg_marks: 92, avg_total: 100 },
+        { subject: 'Computer Architecture', avg_marks: 83, avg_total: 100 },
+        { subject: 'Big Data Analytics', avg_marks: 86, avg_total: 100 }
       ];
     }
 
@@ -416,8 +416,9 @@
           datasets: [{
             label: 'Percentage',
             data,
-            backgroundColor: '#6366f1',
-            borderRadius: 6
+            backgroundColor: 'rgba(255,0,0,0.7)',
+            hoverBackgroundColor: '#FF0000',
+            borderRadius: 4
           }]
         },
         options: {
@@ -428,11 +429,11 @@
             y: {
               beginAtZero: true,
               max: 100,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#888', font: { size: 11 } },
+              grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--border') || 'rgba(255,255,255,0.08)' }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#888', maxRotation: 45, font: { size: 10 } },
               grid: { display: false }
             }
           },
@@ -452,12 +453,12 @@
   function updatePerformanceChart(summary) {
     if (!summary || !summary.length) {
       summary = [
-        { subject: 'Structural Analysis', avg_marks: 78, avg_total: 100 },
-        { subject: 'Concrete Technology', avg_marks: 85, avg_total: 100 },
-        { subject: 'Surveying', avg_marks: 88, avg_total: 100 },
-        { subject: 'Fluid Mechanics', avg_marks: 82, avg_total: 100 },
-        { subject: 'Geotechnical Eng', avg_marks: 80, avg_total: 100 },
-        { subject: 'Computer Aided Design', avg_marks: 75, avg_total: 100 }
+        { subject: 'Data Structures', avg_marks: 88, avg_total: 100 },
+        { subject: 'Algorithms', avg_marks: 85, avg_total: 100 },
+        { subject: 'Database Systems', avg_marks: 82, avg_total: 100 },
+        { subject: 'Operating Systems', avg_marks: 87, avg_total: 100 },
+        { subject: 'Computer Networks', avg_marks: 80, avg_total: 100 },
+        { subject: 'Web Development', avg_marks: 91, avg_total: 100 }
       ];
     }
 

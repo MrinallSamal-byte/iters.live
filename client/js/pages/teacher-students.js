@@ -98,10 +98,10 @@ class TeacherStudentsPage {
       return `
       <tr>
         <td>
-          <img src="${s.profile_picture || '../assets/default-avatar.png'}" 
+          <img src="${s.profile_picture || '/assets/soa-logo.png'}" 
                alt="${this.escape(s.name)}" 
                class="student-photo"
-               onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=random'">
+               onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=6B0000&color=fff&bold=true'">
         </td>
         <td>${this.escape(s.roll_no || s.id || '-')}</td>
         <td>${this.escape(s.reg_no || s.registration_number || s.registration_no || '-')}</td>

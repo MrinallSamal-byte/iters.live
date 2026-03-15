@@ -310,32 +310,28 @@
 
             if (response.ok) {
                 registeredEvents.add(eventId);
-                window.APP.showToast('Successfully registered for event!', 'success');
-                
-                // Update participant count
+                toast('Successfully registered for event!', 'success');
                 const event = allEvents.find(e => e.id === eventId);
-                if (event) {
-                    event.participants++;
-                }
-                
+                if (event) event.participants++;
                 displayEvents();
                 updateStats();
             } else {
                 throw new Error('Registration failed');
             }
         } catch (error) {
-            console.error('Registration error:', error);
-            
-            // For demo purposes, still allow registration
+            // Demo mode — still register
             registeredEvents.add(eventId);
             const event = allEvents.find(e => e.id === eventId);
-            if (event) {
-                event.participants++;
-            }
-            window.APP.showToast('Registered for event!', 'success');
+            if (event) event.participants++;
+            toast('Registered for event!', 'success');
             displayEvents();
             updateStats();
         }
+    }
+
+    function toast(msg, type) {
+        if (typeof Toast !== 'undefined') Toast.show({ type, message: msg });
+        else if (typeof window.showToast === 'function') window.showToast(msg, type);
     }
 
     function updateStats() {

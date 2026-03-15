@@ -2,24 +2,25 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --sidebar-bg: rgba(17, 24, 39, 0.95);
-    --sidebar-hover: rgba(99, 102, 241, 0.1);
-    --sidebar-active: rgba(99, 102, 241, 0.2);
-    --sidebar-text: rgba(255, 255, 255, 0.7);
+    --sidebar-bg: rgba(13, 13, 13, 0.97);
+    --sidebar-hover: rgba(255, 0, 0, 0.08);
+    --sidebar-active: rgba(255, 0, 0, 0.15);
+    --sidebar-text: rgba(255, 255, 255, 0.65);
     --sidebar-text-active: #ffffff;
-    --sidebar-border: rgba(255, 255, 255, 0.1);
-    --sidebar-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-scrollbar-thumb: rgba(255, 255, 255, 0.15);
 }
 
 /* Light Theme Sidebar Variables */
-body.light-theme {
-    --sidebar-bg: rgba(255, 255, 255, 0.95);
-    --sidebar-hover: rgba(99, 102, 241, 0.08);
-    --sidebar-active: rgba(99, 102, 241, 0.15);
-    --sidebar-text: rgba(15, 23, 42, 0.7);
-    --sidebar-text-active: #0f172a;
-    --sidebar-border: rgba(0, 0, 0, 0.1);
-    --sidebar-scrollbar-thumb: rgba(0, 0, 0, 0.2);
+body.light-theme,
+[data-theme='light'] {
+    --sidebar-bg: rgba(255, 255, 255, 0.97);
+    --sidebar-hover: rgba(255, 0, 0, 0.06);
+    --sidebar-active: rgba(255, 0, 0, 0.10);
+    --sidebar-text: rgba(10, 10, 10, 0.65);
+    --sidebar-text-active: #0a0a0a;
+    --sidebar-border: rgba(0, 0, 0, 0.08);
+    --sidebar-scrollbar-thumb: rgba(0, 0, 0, 0.15);
 }
 
 /* Sidebar Container */

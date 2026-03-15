@@ -25,7 +25,8 @@
                     sessionStorage.setItem('loginMessage', 'Please log in to access payments.');
                 } catch (e) {}
                 window.location.replace('/login.html');
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.write('<html><body><p>Redirecting to login...</p>    <script src="/js/campusarena-components.js"></script>
+</body></html>'); return;
             }
         })();
     </script>
@@ -37,15 +38,14 @@
     <link rel="stylesheet" href="/css/responsive.css">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script>(function(){var s=localStorage.getItem("campusarena-theme");if(s)document.documentElement.setAttribute("data-theme",s);})();</script>
+    <link rel="stylesheet" href="/css/campusarena-design-system.css">
+    <link rel="stylesheet" href="/css/ca-nav-override.css">
 </head>
 
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
 
     <!-- Main Content -->
     <main class="dashboard-main">
@@ -180,11 +180,6 @@
         </section>
     </main>
 
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
-    </button>
-
     <!-- Scripts -->
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
@@ -235,8 +230,8 @@
         .form-select:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-dim);
         }
 
         .form-hint {
@@ -300,9 +295,9 @@
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: var(--primary-2);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            box-shadow: var(--shadow-red);
         }
 
         .btn-secondary {
@@ -357,5 +352,7 @@
             }
         }
     </style>
+    <script src="/js/ca-nav-inject.js"></script>
+    <script src="/js/campusarena-components.js"></script>
 </body>
 </html>

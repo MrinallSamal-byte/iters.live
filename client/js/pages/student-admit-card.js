@@ -47,30 +47,27 @@
                 }
             }
 
-            // Fallback to demo user
+            // Fallback to realistic demo user
             currentUser = {
-                id: 1001,
-                name: 'Alex Johnson',
-                email: 'alex.johnson@example.edu',
+                id: 10001,
+                name: 'Aarav Sharma',
+                email: 'aarav.sharma@iter.edu',
                 role: 'student',
-                registration_number: '24E112R17',
-                department: 'Computer Science and Engineering',
+                registration_number: 'STU20250001',
+                department: 'Computer Science & Engineering',
                 year: 3,
-                section: 'B',
+                section: 'A',
                 semester: '6'
             };
-            
-            console.log('Using demo user:', currentUser);
             populateStudentInfo();
-            
+
         } catch (error) {
             console.error('Error loading user data:', error);
-            // Use fallback demo user
             currentUser = {
-                id: 1001,
-                name: 'Alex Johnson',
-                registration_number: '24E112R17',
-                department: 'Computer Science and Engineering',
+                id: 10001,
+                name: 'Aarav Sharma',
+                registration_number: 'STU20250001',
+                department: 'Computer Science & Engineering',
                 semester: '6'
             };
             populateStudentInfo();
@@ -171,11 +168,58 @@
     async function simulateDownload() {
         return new Promise((resolve) => {
             setTimeout(() => {
-                // In a real scenario, you would fetch the PDF from the server
-                // For now, we'll just simulate the download
-                console.log('Admit card download simulated');
+                const u = currentUser || {};
+                const regCode   = document.getElementById('registrationCode')?.value || 'REG2025-01';
+                const examDesc  = document.getElementById('examDescription')?.value  || 'End Semester 2025';
+                const examCode  = document.getElementById('examCode')?.value          || 'EXAM-2025-END';
+                const now       = new Date();
+
+                const content = [
+                    ''.padEnd(60, '='),
+                    'SIKSHA \'O\' ANUSANDHAN UNIVERSITY',
+                    'ITER - Institute of Technical Education & Research',
+                    'Jagamara, Khandagiri, Bhubaneswar - 751030',
+                    ''.padEnd(60, '='),
+                    '',
+                    'EXAMINATION ADMIT CARD',
+                    '',
+                    ''.padEnd(60, '-'),
+                    `Student Name        : ${u.name || 'Student'}`,
+                    `Registration Number : ${u.registration_number || 'STU20250001'}`,
+                    `Department          : ${u.department || 'CSE'}`,
+                    `Year / Semester     : Year ${u.year || 3} / Sem ${u.semester || 6}`,
+                    `Section             : ${u.section || 'A'}`,
+                    `Academic Year       : 2024-25`,
+                    ''.padEnd(60, '-'),
+                    '',
+                    `Registration Code   : ${regCode}`,
+                    `Examination         : ${examDesc}`,
+                    `Exam Code           : ${examCode}`,
+                    '',
+                    `Generated On        : ${now.toLocaleString('en-IN')}`,
+                    '',
+                    ''.padEnd(60, '-'),
+                    'IMPORTANT INSTRUCTIONS:',
+                    '1. Carry this admit card to the examination hall.',
+                    '2. Produce a valid photo ID along with this card.',
+                    '3. Mobile phones are strictly prohibited.',
+                    '4. Maintain silence and discipline in the exam hall.',
+                    ''.padEnd(60, '='),
+                    'This is a computer-generated document. No signature required.',
+                    ''.padEnd(60, '='),
+                ].join('\n');
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = `AdmitCard_${u.registration_number || 'STU20250001'}_${examCode}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
                 resolve();
-            }, 1500);
+            }, 800);
         });
     }
 

@@ -153,6 +153,10 @@ function displayMarks(data) {
     const ctx = document.getElementById('performanceChart');
     if (ctx && typeof Chart !== 'undefined') {
         try {
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
+            const tc = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#888';
+            const gc = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(255,255,255,0.08)';
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -160,8 +164,9 @@ function displayMarks(data) {
                     datasets: [{
                         label: 'SGPA',
                         data: [7.8, 8.2, 8.5, parseFloat(sgpa)],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderColor: '#FF0000',
+                        backgroundColor: 'rgba(255,0,0,0.08)',
+                        pointBackgroundColor: '#FF0000',
                         tension: 0.4,
                         fill: true
                     }]
@@ -169,27 +174,14 @@ function displayMarks(data) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: { 
-                            beginAtZero: false,
-                            min: 7,
-                            max: 10,
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#fff' },
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: false, min: 7, max: 10, ticks: { color: tc }, grid: { color: gc } },
+                        x: { ticks: { color: tc }, grid: { display: false } }
                     }
                 }
             });
-        } catch(err) {
-            console.error('Chart error:', err);
-        }
+        } catch(err) { console.error('Chart error:', err); }
     }
 
     // Create grade distribution chart
@@ -207,27 +199,25 @@ function displayMarks(data) {
                 else grades['C']++;
             });
 
+            const existingGradeChart = Chart.getChart(gradeCtx);
+            if (existingGradeChart) existingGradeChart.destroy();
+            const tc2 = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#888';
             new Chart(gradeCtx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(grades),
                     datasets: [{
                         data: Object.values(grades),
-                        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'],
+                        backgroundColor: ['#00E676', '#FF0000', '#FFB300', '#FF5252', '#888888'],
                         borderWidth: 0
                     }]
                 },
                 options: {
+                    cutout: '60%',
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#fff',
-                                font: { size: 12 }
-                            }
-                        }
+                        legend: { position: 'bottom', labels: { color: tc2, font: { size: 12 } } }
                     }
                 }
             });

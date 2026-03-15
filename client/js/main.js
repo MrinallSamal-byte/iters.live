@@ -283,33 +283,29 @@ window.copyToClipboard = function (text) {
     });
 };
 
-// Toast Notification
+// Toast Notification — uses CampusArena design system classes
 function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type} toast-enter`;
-    toast.textContent = message;
-
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg);
-        color: var(--text-primary);
-        z-index: 10000;
-        box-shadow: 0 8px 32px var(--glass-shadow);
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.remove('toast-enter');
-        toast.classList.add('toast-exit');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    // Use the global showToast from campusarena-components if available
+    if (window.showToast && window.showToast !== showToast) {
+        window.showToast(message, type);
+        return;
+    }
+    var container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.innerHTML = '<span>' + String(message).replace(/</g, '&lt;') + '</span>';
+    container.appendChild(toast);
+    setTimeout(function () {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(12px)';
+        toast.style.transition = 'opacity .3s, transform .3s';
+        setTimeout(function () { toast.remove(); }, 300);
+    }, 3500);
 }
 
 // Form Validation

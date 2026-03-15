@@ -161,13 +161,13 @@
 
   // Log demo accounts to console for easy reference
   setTimeout(() => {
-    console.log('%c🎭 DEMO ACCOUNTS AVAILABLE', 'color: #6366f1; font-size: 16px; font-weight: bold;');
-    console.log('%cStudent: STU20250001 / Student@123', 'color: #22c55e; font-size: 14px;');
-    console.log('%cTeacher: TCH2025001 / Teacher@123', 'color: #3b82f6; font-size: 14px;');
-    console.log('%cAdmin: ADM2025001 / Admin@123456', 'color: #f59e0b; font-size: 14px;');
-    console.log('%c' + '='.repeat(50), 'color: #6366f1;');
-    console.log('%cDummy data is automatically loaded and cached!', 'color: #10b981; font-size: 13px;');
-    console.log('%cAll dashboard pages will display data instantly.', 'color: #10b981; font-size: 13px;');
+    console.log('%c🎭 DEMO ACCOUNTS AVAILABLE', 'color: #FF0000; font-size: 16px; font-weight: bold;');
+    console.log('%cStudent: STU20250001 / Student@123', 'color: #00E676; font-size: 14px;');
+    console.log('%cTeacher: TCH2025001 / Teacher@123', 'color: #FFB300; font-size: 14px;');
+    console.log('%cAdmin: ADM2025001 / Admin@123456', 'color: #FF5252; font-size: 14px;');
+    console.log('%c' + '='.repeat(50), 'color: #FF0000;');
+    console.log('%cDummy data is automatically loaded and cached!', 'color: #00E676; font-size: 13px;');
+    console.log('%cAll dashboard pages will display data instantly.', 'color: #00E676; font-size: 13px;');
   }, 500);
 
 })();

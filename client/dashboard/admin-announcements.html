@@ -29,7 +29,8 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.write('<html><body><p>Redirecting to login...</p>    <script src="/js/campusarena-components.js"></script>
+</body></html>'); return;
             }
         })();
     </script>
@@ -40,14 +41,13 @@
   <link rel="stylesheet" href="/css/universal-profile.css" />
     <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script>(function(){var s=localStorage.getItem("campusarena-theme");if(s)document.documentElement.setAttribute("data-theme",s);})();</script>
+    <link rel="stylesheet" href="/css/campusarena-design-system.css">
+    <link rel="stylesheet" href="/css/ca-nav-override.css">
 </head>
 <body>
-  <!-- Background -->
-  <div class="bg-animation">
-    <div class="gradient-orb orb-1"></div>
-    <div class="gradient-orb orb-2"></div>
-    <div class="gradient-orb orb-3"></div>
-  </div>
 
   <main class="dashboard-main">
     <!-- Page Hero -->
@@ -317,11 +317,6 @@
     </div>
   </div>
 
-  <!-- Theme Toggle -->
-  <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-    <span class="theme-icon">🌙</span>
-  </button>
-
   <!-- Scripts -->
   <script src="/js/universal-sidebar.js"></script>
   <script src="/js/universal-profile.js"></script>
@@ -337,5 +332,7 @@
   <script src="/js/chatbot.js"></script>
 
   <link rel="stylesheet" href="/css/admin-pages-enhanced.css">
+    <script src="/js/ca-nav-inject.js"></script>
+    <script src="/js/campusarena-components.js"></script>
 </body>
 </html>

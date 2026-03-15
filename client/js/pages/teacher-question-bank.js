@@ -1,3 +1,11 @@
+// Fallback SkeletonLoader if not defined globally
+if (typeof SkeletonLoader === 'undefined') {
+  window.SkeletonLoader = class SkeletonLoader {
+    show(el, type) { if (el) el.innerHTML = '<div class="loading-text">Loading...</div>'; }
+    hide(el) {}
+  };
+}
+
 class TeacherQuestionBankPage {
   constructor() {
     this.page = 1;

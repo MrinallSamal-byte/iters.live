@@ -115,26 +115,27 @@ function displayAttendance(data) {
     const ctx = document.getElementById('attendanceChart');
     if (ctx && typeof Chart !== 'undefined') {
         try {
+                const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#888888';
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Present', 'Absent'],
                     datasets: [{
                         data: [totalPresent, absentClasses],
-                        backgroundColor: ['#22c55e', '#ef4444'],
+                        backgroundColor: ['#00E676', '#FF5252'],
                         borderWidth: 0
                     }]
                 },
                 options: {
+                    cutout: '70%',
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                color: '#fff',
-                                font: { size: 14 }
-                            }
+                            labels: { color: textColor, font: { size: 13 } }
                         }
                     }
                 }

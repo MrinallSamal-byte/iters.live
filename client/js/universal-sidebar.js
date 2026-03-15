@@ -199,7 +199,7 @@
             const sidebarHTML = `
                 <aside class="universal-sidebar" id="universalSidebar">
                     <div class="sidebar-header">
-                        <img src="../assets/logo.png" alt="ITER Logo" class="sidebar-logo" onerror="this.style.display='none'">
+                        <img src="/assets/soa-logo.png" alt="ITER Logo" class="sidebar-logo" onerror="this.style.display='none'">
                         <div class="sidebar-branding">
                             <span class="sidebar-title">ITER Portal</span>
                             <span class="sidebar-subtitle">${roleTitle} Dashboard</span>
@@ -548,7 +548,7 @@
             const actions = document.createElement('div');
             actions.style.cssText = 'display:flex; gap:10px; justify-content:flex-end; margin-top:12px;';
             actions.innerHTML = `
-                <button id="idCardDownload" class="btn btn-primary" style="padding:10px 14px; border-radius:8px; border:none; background:#6366f1; color:white; cursor:pointer;">Download PNG</button>
+                <button id="idCardDownload" class="btn btn-primary" style="padding:10px 14px; border-radius:8px; border:none; background:#FF0000; color:white; cursor:pointer;">Download PNG</button>
                 <button id="idCardPrint" class="btn" style="padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:inherit; cursor:pointer;">Print</button>
             `;
 
@@ -591,10 +591,10 @@
             roundRect(panelX, panelY, panelW, panelH, radius);
             ctx.fill();
 
-            // Header strip
-            ctx.fillStyle = '#6366f1';
+            // Header strip — Nothing OS red accent
+            ctx.fillStyle = '#FF0000';
             ctx.fillRect(panelX, panelY, panelW, 54);
-            ctx.fillStyle = '#e5e7eb';
+            ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 20px Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
             ctx.fillText('ITER EduHub • ID Card', panelX + 16, panelY + 34);
 
@@ -627,7 +627,7 @@
                 roundRect(photoX, photoY, photoSize, photoSize, 12);
                 ctx.fill();
                 // Border
-                ctx.strokeStyle = 'rgba(99,102,241,0.6)';
+                ctx.strokeStyle = 'rgba(255,0,0,0.5)';
                 ctx.lineWidth = 2;
                 roundRect(photoX, photoY, photoSize, photoSize, 12);
                 ctx.stroke();

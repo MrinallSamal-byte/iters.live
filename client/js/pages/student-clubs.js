@@ -321,7 +321,7 @@
 
             if (response.ok) {
                 myClubs.add(clubId);
-                window.APP.showToast('Successfully joined the club!', 'success');
+                toast('Successfully joined the club!', 'success');
                 
                 // Update member count
                 const club = allClubs.find(c => c.id === clubId);
@@ -341,62 +341,44 @@
             // For demo purposes, still allow joining
             myClubs.add(clubId);
             const club = allClubs.find(c => c.id === clubId);
-            if (club) {
-                club.members++;
-            }
-            window.APP.showToast('Joined the club!', 'success');
-            displayClubs();
-            displayMyClubs();
-            updateStats();
+            if (club) { club.members++; }
+            toast('Joined the club!', 'success');
+            displayClubs(); displayMyClubs(); updateStats();
         }
     };
 
     window.handleLeaveClub = async function(clubId) {
-        if (!confirm('Are you sure you want to leave this club?')) {
-            return;
-        }
+        if (!confirm('Are you sure you want to leave this club?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
             const response = await fetch(`/api/clubs/${clubId}/leave`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
             });
 
             if (response.ok) {
                 myClubs.delete(clubId);
-                window.APP.showToast('Left the club', 'info');
-                
-                // Update member count
+                toast('Left the club', 'info');
                 const club = allClubs.find(c => c.id === clubId);
-                if (club) {
-                    club.members--;
-                }
-                
-                displayClubs();
-                displayMyClubs();
-                updateStats();
-            } else {
-                throw new Error('Failed to leave club');
-            }
+                if (club) club.members--;
+                displayClubs(); displayMyClubs(); updateStats();
+            } else { throw new Error('API error'); }
         } catch (error) {
-            console.error('Leave club error:', error);
-            
-            // For demo purposes, still allow leaving
             myClubs.delete(clubId);
             const club = allClubs.find(c => c.id === clubId);
-            if (club) {
-                club.members--;
-            }
-            window.APP.showToast('Left the club', 'info');
+            if (club) club.members--;
+            toast('Left the club', 'info');
             displayClubs();
             displayMyClubs();
             updateStats();
         }
     };
+
+    function toast(msg, type) {
+        if (typeof Toast !== 'undefined') Toast.show({ type, message: msg });
+        else if (typeof window.showToast === 'function') window.showToast(msg, type);
+    }
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {

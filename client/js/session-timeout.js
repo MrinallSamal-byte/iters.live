@@ -244,14 +244,14 @@
                 }
                 
                 .session-warning-modal {
-                    background: var(--glass-bg, rgba(30, 30, 46, 0.95));
-                    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-                    border-radius: 16px;
+                    background: var(--surface, #0d0d0d);
+                    border: 1px solid var(--border, rgba(255,255,255,0.08));
+                    border-radius: 12px;
                     padding: 2rem;
                     text-align: center;
                     max-width: 400px;
                     width: 90%;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
                     animation: slideUp 0.3s ease;
                 }
                 
@@ -266,61 +266,65 @@
                 }
                 
                 .session-warning-modal h3 {
-                    color: var(--text-primary, #fff);
+                    color: var(--text, #fff);
                     margin-bottom: 1rem;
-                    font-size: 1.5rem;
+                    font-size: 1.25rem;
                 }
                 
                 .session-warning-modal p {
-                    color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+                    color: var(--muted, #888);
                     margin-bottom: 0.5rem;
+                    font-size: .9rem;
                 }
                 
                 .session-warning-subtext {
-                    font-size: 0.875rem;
+                    font-size: 0.8rem;
                     opacity: 0.7;
                 }
                 
                 #sessionCountdown {
-                    font-weight: bold;
-                    color: var(--danger, #ef4444);
+                    font-weight: 700;
+                    color: var(--danger, #FF5252);
                     font-size: 1.25rem;
+                    font-family: 'Space Mono', monospace;
                 }
                 
                 .session-warning-buttons {
                     display: flex;
-                    gap: 1rem;
+                    gap: .75rem;
                     justify-content: center;
                     margin-top: 1.5rem;
                 }
                 
                 .session-warning-buttons .btn {
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 8px;
+                    padding: 0.65rem 1.25rem;
+                    border-radius: 6px;
                     font-weight: 600;
                     cursor: pointer;
-                    border: none;
+                    border: 1px solid;
                     transition: all 0.2s ease;
+                    font-size: .88rem;
                 }
                 
                 .session-warning-buttons .btn-primary {
-                    background: linear-gradient(135deg, var(--primary, #6366f1), var(--accent, #8b5cf6));
+                    background: var(--primary, #FF0000);
+                    border-color: var(--primary, #FF0000);
                     color: white;
                 }
                 
                 .session-warning-buttons .btn-primary:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+                    background: var(--primary-2, #CC0000);
+                    transform: translateY(-1px);
                 }
                 
                 .session-warning-buttons .btn-secondary {
-                    background: rgba(255, 255, 255, 0.1);
-                    color: var(--text-primary, #fff);
-                    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+                    background: var(--surface-2, #141414);
+                    color: var(--text, #fff);
+                    border-color: var(--border, rgba(255,255,255,0.08));
                 }
                 
                 .session-warning-buttons .btn-secondary:hover {
-                    background: rgba(255, 255, 255, 0.2);
+                    border-color: var(--border-hover, rgba(255,255,255,0.18));
                 }
             `;
             document.head.appendChild(style);
