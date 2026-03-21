@@ -133,8 +133,8 @@ Format as JSON with structure:
      * Answer student questions using AI
      * Handles both study-related and general questions
      */
-    async answerQuestion(question, context) {
-        const prompt = `You are a helpful educational assistant for college students.
+    async answerQuestion(question, context, systemPrompt = null) {
+        const defaultPrompt = `You are a helpful educational assistant for college students.
 
 Question: ${question}
 ${context ? `Context: ${context}` : ''}
@@ -147,12 +147,15 @@ Instructions:
 - If unsure, say so briefly.
 
 Please provide a concise and helpful response:`;
+        const prompt = systemPrompt
+            ? `${systemPrompt}\n\n${defaultPrompt}`
+            : defaultPrompt;
 
         try {
             // Try OpenRouter first
             if (this.useOpenRouter) {
                 try {
-                    const response = await openRouterService.answerQuestion(question, context);
+                    const response = await openRouterService.answerQuestion(question, context, systemPrompt);
                     console.log('✅ OpenRouter successfully answered question');
                     return response;
                 } catch (openRouterError) {
@@ -177,6 +180,10 @@ Please provide a concise and helpful response:`;
             console.error('AI chat error:', error.message);
             return "I'm sorry, I'm having trouble processing your question right now. Please try again later.";
         }
+    }
+
+    isAvailable() {
+        return this.useOpenRouter || Boolean(this.genAI);
     }
 
     /**

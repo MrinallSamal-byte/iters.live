@@ -79,8 +79,15 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
     cacheService.setAttendance(studentId, data, null, 300);
 
     if (req.variationSeed) {
-      const varied = varyStudentSnapshot({ summary }, req.variationSeed);
-      return res.json({ success: true, data: { records: attendance, summary: varied.summary } });
+      const varied = varyStudentSnapshot({ summary: data.summary || [] }, req.variationSeed);
+      return res.json({
+        success: true,
+        data: {
+          records: data.records || [],
+          summary: varied.summary || data.summary || [],
+          source: data.source
+        }
+      });
     }
     res.json({ success: true, data });
   } catch (error) {

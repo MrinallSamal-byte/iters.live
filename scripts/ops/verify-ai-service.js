@@ -11,6 +11,7 @@
 
 require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const openRouterService = require('../../server/services/openrouter.service');
 
 console.log('╔════════════════════════════════════════════════════╗');
 console.log('║     AI Service Configuration Verification         ║');
@@ -21,10 +22,12 @@ console.log('');
 const openRouterKey = process.env.OPENROUTER_API_KEY;
 const geminiKey = process.env.GEMINI_API_KEY;
 const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+const openRouterModel = openRouterService.getPreferredModels('chatbot')[0] || 'nvidia/nemotron-3-super-120b-a12b:free';
 
 console.log('📋 Configuration Check:');
 console.log('─────────────────────────────────────────────────────');
 console.log(`✓ OPENROUTER_API_KEY: ${openRouterKey ? '✓ Set (length: ' + openRouterKey.length + ' characters) [PRIMARY]' : '❌ NOT SET [PRIMARY]'}`);
+console.log(`✓ OPENROUTER_CHAT_MODEL: ${openRouterModel}`);
 console.log(`✓ GEMINI_API_KEY: ${geminiKey ? '✓ Set (length: ' + geminiKey.length + ' characters) [FALLBACK]' : '❌ NOT SET [FALLBACK]'}`);
 console.log(`✓ GEMINI_MODEL: ${geminiModel}`);
 console.log('');
@@ -74,35 +77,19 @@ if (!openRouterKey) {
         console.log('─────────────────────────────────────────────────────');
         
         try {
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${openRouterKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://iter.edu',
-                    'X-Title': 'ITER EduHub'
-                },
-                body: JSON.stringify({
-                    model: 'google/gemma-3-4b-it:free',
-                    messages: [
-                        { role: 'user', content: 'Say "Hello!" in one word only.' }
-                    ],
-                    max_tokens: 10
-                })
-            });
+            const text = await openRouterService.answerQuestion(
+                'Say "Hello!" in one short word only.',
+                'Verification check for the production chatbot'
+            );
 
-            if (response.ok) {
-                const data = await response.json();
-                const text = data.choices?.[0]?.message?.content || 'No response';
+            if (text && text.trim()) {
                 console.log('✅ OpenRouter API Test Successful!');
                 console.log(`Response: "${text.trim()}"`);
                 console.log('');
                 openRouterSuccess = true;
             } else {
-                const errorData = await response.json().catch(() => ({}));
                 console.error('❌ OpenRouter API Test Failed!');
-                console.error('Status:', response.status);
-                console.error('Error:', JSON.stringify(errorData, null, 2));
+                console.error('Error: OpenRouter returned an empty response');
                 console.log('');
             }
         } catch (error) {

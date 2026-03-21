@@ -32,9 +32,9 @@ const FIELD_ALIASES = {
   roomNumber: ['roomnumber', 'roomno'],
   email: ['email', 'emailid', 'mailid', 'personalemailid'],
   alternateEmail: ['alternateemail', 'alternateemailid'],
-  phone: ['mobile', 'mobilenumber', 'mobileno', 'phone', 'phonenumber', 'contactnumber', 'cellmobile', 'cell'],
-  alternatePhone: ['alternatemobile', 'alternatecontactnumber', 'secondaryphone', 'alternatephone'],
-  guardianPhone: ['guardianphone', 'parentphone', 'fatherphone', 'motherphone'],
+  phone: ['mobile', 'mobilenumber', 'mobileno', 'phone', 'phonenumber', 'contactnumber', 'cellmobile', 'cell', 'telephoneno', 'telephone', 'landline'],
+  alternatePhone: ['alternatemobile', 'alternatecontactnumber', 'secondaryphone', 'alternatephone', 'telephoneno2', 'telephone2'],
+  guardianPhone: ['guardianphone', 'parentphone', 'fatherphone', 'motherphone', 'parentmobile', 'parentcontact'],
   correspondenceAddress: ['correspondenceaddress', 'currentaddress', 'communicationaddress'],
   permanentAddress: ['permanentaddress', 'address'],
   city: ['city'],
@@ -121,6 +121,11 @@ function isMeaningfulValue(value) {
   return cleanValue(value) !== null;
 }
 
+function isAddressMarkerValue(value) {
+  const cleaned = cleanValue(value);
+  return Boolean(cleaned) && (/^[123]$/.test(cleaned) || /^address\s*:?\s*[123]$/i.test(cleaned));
+}
+
 function pickFirst(...values) {
   for (const value of values) {
     const cleaned = cleanValue(value);
@@ -196,15 +201,170 @@ function inferFieldMapFromText(text) {
     .map((line) => cleanValue(line))
     .filter(Boolean);
 
+  const sectionHeadings = new Set([
+    'studentcontactdetails',
+    'parentcontactdetails',
+    'correspondenceaddress',
+    'permanentaddress',
+    'studentspersonalinfo',
+    'studentscontactinfo',
+    'studentsqualifications',
+    'personalinformation'
+  ]);
+
   lines.forEach((line) => {
     const match = line.match(/^([^:]{2,80}):\s*(.+)$/);
     if (!match) return;
     const label = normalizeLabel(match[1]);
     if (!KNOWN_FIELD_LABELS.has(label)) return;
-    map[label] = cleanValue(match[2]);
+    const value = cleanValue(match[2]);
+    if (!value) return;
+    if (label === 'address' && isAddressMarkerValue(value)) return;
+    map[label] = value;
   });
 
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const labelLine = lines[index];
+    const nextLine = lines[index + 1];
+    const label = normalizeLabel(labelLine);
+    const value = cleanValue(nextLine);
+
+    if (!KNOWN_FIELD_LABELS.has(label) || !value || map[label]) continue;
+
+    const nextLabel = normalizeLabel(nextLine);
+    if (KNOWN_FIELD_LABELS.has(nextLabel) || sectionHeadings.has(nextLabel)) {
+      continue;
+    }
+
+    if ((label === 'correspondenceaddress' || label === 'permanentaddress') && isAddressMarkerValue(value)) {
+      continue;
+    }
+
+    map[label] = value;
+  }
+
   return map;
+}
+
+function getPageTextLines(rawData, sectionKey) {
+  return String(rawData?.rawSections?.[sectionKey]?.pageText || '')
+    .split(/\n+/)
+    .map((line) => cleanValue(line))
+    .filter(Boolean);
+}
+
+function collectBlockLines(lines, headingMatchers = [], stopMatchers = []) {
+  let startIndex = -1;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const normalized = normalizeLabel(lines[index]);
+    if (headingMatchers.includes(normalized)) {
+      startIndex = index + 1;
+      break;
+    }
+  }
+
+  if (startIndex === -1) return [];
+
+  const block = [];
+  for (let index = startIndex; index < lines.length; index += 1) {
+    const normalized = normalizeLabel(lines[index]);
+    if (stopMatchers.includes(normalized)) {
+      break;
+    }
+    block.push(lines[index]);
+  }
+
+  return block;
+}
+
+function extractValueFromBlock(blockLines, aliases = []) {
+  for (let index = 0; index < blockLines.length; index += 1) {
+    const line = blockLines[index];
+    const inlineMatch = line.match(/^([^:]{2,80}):\s*(.+)$/);
+    if (inlineMatch) {
+      const label = normalizeLabel(inlineMatch[1]);
+      if (aliases.includes(label)) {
+        const value = cleanValue(inlineMatch[2]);
+        if (value) return value;
+      }
+      continue;
+    }
+
+    const label = normalizeLabel(line);
+    if (!aliases.includes(label)) continue;
+    const value = cleanValue(blockLines[index + 1]);
+    if (value) return value;
+  }
+
+  return null;
+}
+
+function buildAddressFromBlock(blockLines) {
+  const addressParts = [];
+
+  for (let index = 0; index < blockLines.length; index += 1) {
+    const line = blockLines[index];
+    const normalized = normalizeLabel(line);
+    if (!['address', 'address1', 'address2', 'address3'].includes(normalized)) {
+      continue;
+    }
+
+    const inlineMatch = line.match(/^([^:]{2,80}):\s*(.+)$/);
+    const inlineValue = cleanValue(inlineMatch ? inlineMatch[2] : null);
+    const value = inlineValue && !isAddressMarkerValue(inlineValue)
+      ? inlineValue
+      : cleanValue(blockLines[index + 1]);
+    if (value) {
+      addressParts.push(value);
+    }
+  }
+
+  return dedupeBy(addressParts, (part) => part).join(', ') || null;
+}
+
+function extractGroupedContactInfo(rawData) {
+  const lines = getPageTextLines(rawData, 'contactInfo');
+  if (!lines.length) {
+    return {
+      student: {},
+      parent: {},
+      correspondence: {},
+      permanent: {}
+    };
+  }
+
+  const studentBlock = collectBlockLines(lines, ['studentcontactdetails'], ['parentcontactdetails', 'correspondenceaddress', 'permanentaddress']);
+  const parentBlock = collectBlockLines(lines, ['parentcontactdetails'], ['correspondenceaddress', 'permanentaddress']);
+  const correspondenceBlock = collectBlockLines(lines, ['correspondenceaddress'], ['permanentaddress']);
+  const permanentBlock = collectBlockLines(lines, ['permanentaddress'], []);
+
+  return {
+    student: {
+      phone: extractValueFromBlock(studentBlock, ['cellmobile', 'mobile', 'mobileno', 'mobilenumber']),
+      telephone: extractValueFromBlock(studentBlock, ['telephoneno', 'telephone']),
+      email: extractValueFromBlock(studentBlock, ['personalemailid', 'emailid', 'email'])
+    },
+    parent: {
+      phone: extractValueFromBlock(parentBlock, ['cellmobile', 'mobile', 'mobileno', 'mobilenumber']),
+      telephone: extractValueFromBlock(parentBlock, ['telephoneno', 'telephone']),
+      email: extractValueFromBlock(parentBlock, ['emailid', 'email'])
+    },
+    correspondence: {
+      address: buildAddressFromBlock(correspondenceBlock),
+      city: extractValueFromBlock(correspondenceBlock, ['city']),
+      district: extractValueFromBlock(correspondenceBlock, ['district']),
+      state: extractValueFromBlock(correspondenceBlock, ['state']),
+      postalCode: extractValueFromBlock(correspondenceBlock, ['postalcode', 'pincode', 'zipcode'])
+    },
+    permanent: {
+      address: buildAddressFromBlock(permanentBlock),
+      city: extractValueFromBlock(permanentBlock, ['city']),
+      district: extractValueFromBlock(permanentBlock, ['district']),
+      state: extractValueFromBlock(permanentBlock, ['state']),
+      postalCode: extractValueFromBlock(permanentBlock, ['postalcode', 'pincode', 'zipcode'])
+    }
+  };
 }
 
 function normalizeTable(table) {
@@ -395,7 +555,7 @@ function normalizeAttendanceRecords(rawData) {
       const subjectCode = pickFirst(item.subject_code, item.subjectCode, extractSubjectCode(subject));
       const totalValue = pickFirst(item.total_classes, item.totalClasses, item.total, item.classes);
       const totalFraction = parseFraction(totalValue);
-      const attended = toNumber(pickFirst(item.present_count, item.presentCount, item.attended, item.present)) ?? totalFraction?.first ?? null;
+      const attended = toNumber(pickFirst(item.present_count, item.presentCount, item.attended, item.present, item.attendedClasses)) ?? totalFraction?.first ?? null;
       const total = totalFraction?.second ?? toNumber(totalValue) ?? null;
       const percentage = toPercentage(item.percentage) ?? (
         attended !== null && total ? Number(((attended / total) * 100).toFixed(2)) : null
@@ -518,8 +678,8 @@ function normalizeMarksRecords(rawData, semesterResults = []) {
     list.forEach((item) => {
       const subject = pickFirst(item.subject, item.paper, item.course, item.name);
       const subjectCode = pickFirst(item.subject_code, item.subjectCode, extractSubjectCode(subject));
-      const marksObtained = toNumber(pickFirst(item.marks_obtained, item.marks, item.score, item.total_score));
-      const totalMarks = toNumber(pickFirst(item.total_marks, item.max_marks, item.out_of));
+      const marksObtained = toNumber(pickFirst(item.marks_obtained, item.marks, item.score, item.total_score, item.marksObtained));
+      const totalMarks = toNumber(pickFirst(item.total_marks, item.max_marks, item.out_of, item.totalMarks));
       if (!subjectCode && looksLikeSemesterLabel(subject) && totalMarks === null) return;
       const percentage = toPercentage(item.percentage) ?? (
         marksObtained !== null && totalMarks ? Number(((marksObtained / totalMarks) * 100).toFixed(2)) : null
@@ -537,7 +697,7 @@ function normalizeMarksRecords(rawData, semesterResults = []) {
         grade: pickFirst(item.grade, item.result, item.status),
         credits: toNumber(item.credits),
         semester: pickFirst(item.semester, defaultSemester),
-        publishedAt: serializeDate(item.published_at || item.result_date || item.exam_date)
+        publishedAt: serializeDate(item.published_at || item.result_date || item.exam_date || item.publishedAt)
       });
     });
   });
@@ -631,6 +791,9 @@ function normalizeMarksRecords(rawData, semesterResults = []) {
 }
 
 function buildProfileSummary(rawData) {
+  const groupedContact = extractGroupedContactInfo(rawData);
+  const correspondenceAddressCandidate = findFieldValue(rawData, 'correspondenceAddress');
+  const permanentAddressCandidate = findFieldValue(rawData, 'permanentAddress', rawData?.profile?.address);
   const photoUrl = pickFirst(
     rawData?.profile?.photoUrl,
     rawData?.profile?.photo_url,
@@ -688,17 +851,21 @@ function buildProfileSummary(rawData) {
     motherName: findFieldValue(rawData, 'motherName', rawData?.profile?.mother_name),
     hostelName,
     roomNumber,
-    email: findFieldValue(rawData, 'email', rawData?.profile?.email),
+    email: findFieldValue(rawData, 'email', rawData?.profile?.email, groupedContact.student.email),
     alternateEmail: findFieldValue(rawData, 'alternateEmail'),
-    phone: findFieldValue(rawData, 'phone', rawData?.profile?.phone),
-    alternatePhone: findFieldValue(rawData, 'alternatePhone'),
-    guardianPhone: findFieldValue(rawData, 'guardianPhone'),
-    correspondenceAddress: findFieldValue(rawData, 'correspondenceAddress'),
-    permanentAddress: findFieldValue(rawData, 'permanentAddress', rawData?.profile?.address),
-    city: findFieldValue(rawData, 'city'),
-    district: findFieldValue(rawData, 'district'),
-    state: findFieldValue(rawData, 'state'),
-    postalCode: findFieldValue(rawData, 'postalCode'),
+    phone: findFieldValue(rawData, 'phone', rawData?.profile?.phone, groupedContact.student.phone),
+    alternatePhone: findFieldValue(rawData, 'alternatePhone', groupedContact.student.telephone),
+    guardianPhone: findFieldValue(rawData, 'guardianPhone', groupedContact.parent.phone, groupedContact.parent.telephone),
+    correspondenceAddress: isAddressMarkerValue(correspondenceAddressCandidate)
+      ? groupedContact.correspondence.address
+      : pickFirst(correspondenceAddressCandidate, groupedContact.correspondence.address),
+    permanentAddress: isAddressMarkerValue(permanentAddressCandidate)
+      ? groupedContact.permanent.address
+      : pickFirst(permanentAddressCandidate, groupedContact.permanent.address),
+    city: findFieldValue(rawData, 'city', groupedContact.correspondence.city, groupedContact.permanent.city),
+    district: findFieldValue(rawData, 'district', groupedContact.correspondence.district, groupedContact.permanent.district),
+    state: findFieldValue(rawData, 'state', groupedContact.correspondence.state, groupedContact.permanent.state),
+    postalCode: findFieldValue(rawData, 'postalCode', groupedContact.correspondence.postalCode, groupedContact.permanent.postalCode),
     photoUrl
   };
 }

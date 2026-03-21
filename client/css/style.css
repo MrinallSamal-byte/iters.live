@@ -1076,6 +1076,43 @@ body.light-theme .theme-toggle:hover {
     border-color: var(--primary);
 }
 
+body.app-overlay-open {
+    overflow: hidden;
+}
+
+body.app-overlay-open .theme-toggle,
+body.app-overlay-open .chatbot-toggle,
+body.app-overlay-open .chatbot-container,
+body.app-overlay-open .mobile-bottom-nav,
+body:has(.profile-modal[style*="display: flex"]) .theme-toggle,
+body:has(.profile-modal[style*="display:flex"]) .theme-toggle,
+body:has(.idcard-modal[aria-hidden="false"]) .theme-toggle,
+body:has(.profile-edit-panel[aria-hidden="false"]) .theme-toggle,
+body:has(.modal.active) .theme-toggle,
+body:has(.modal.show) .theme-toggle,
+body:has(.profile-modal[style*="display: flex"]) .chatbot-toggle,
+body:has(.profile-modal[style*="display:flex"]) .chatbot-toggle,
+body:has(.idcard-modal[aria-hidden="false"]) .chatbot-toggle,
+body:has(.profile-edit-panel[aria-hidden="false"]) .chatbot-toggle,
+body:has(.modal.active) .chatbot-toggle,
+body:has(.modal.show) .chatbot-toggle,
+body:has(.profile-modal[style*="display: flex"]) .chatbot-container,
+body:has(.profile-modal[style*="display:flex"]) .chatbot-container,
+body:has(.idcard-modal[aria-hidden="false"]) .chatbot-container,
+body:has(.profile-edit-panel[aria-hidden="false"]) .chatbot-container,
+body:has(.modal.active) .chatbot-container,
+body:has(.modal.show) .chatbot-container,
+body:has(.profile-modal[style*="display: flex"]) .mobile-bottom-nav,
+body:has(.profile-modal[style*="display:flex"]) .mobile-bottom-nav,
+body:has(.idcard-modal[aria-hidden="false"]) .mobile-bottom-nav,
+body:has(.profile-edit-panel[aria-hidden="false"]) .mobile-bottom-nav,
+body:has(.modal.active) .mobile-bottom-nav,
+body:has(.modal.show) .mobile-bottom-nav {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .nav-links {

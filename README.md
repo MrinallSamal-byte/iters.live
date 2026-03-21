@@ -578,10 +578,16 @@ This project contains multiple layers for local testing:
 Set at least one of:
 
 ```env
-OPENROUTER_API_KEY=your-openrouter-key
+OPENROUTER_API_KEY=sk-or-v1-your-openrouter-key
+OPENROUTER_CHAT_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+OPENROUTER_CHAT_FALLBACK_MODELS=google/gemma-3-27b-it:free,arcee-ai/trinity-large-preview:free,google/gemma-3-12b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-4b-it:free
+OPENROUTER_CAPTCHA_MODEL=nvidia/nemotron-nano-12b-v2-vl:free
+OPENROUTER_CAPTCHA_FALLBACK_MODELS=google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-12b-it:free,google/gemma-3-4b-it:free
 GEMINI_API_KEY=your-gemini-key
 GEMINI_MODEL=gemini-1.5-flash
 ```
+
+For Render, keep `OPENROUTER_API_KEY` as a secret env var in the Render dashboard or `render.yaml` sync settings. Do not commit the real key into `.env.example` or tracked files.
 
 ### Validate AI wiring
 
@@ -827,6 +833,8 @@ For production-like auth:
 Check:
 
 - `OPENROUTER_API_KEY`
+- `OPENROUTER_CHAT_MODEL`
+- `OPENROUTER_CHAT_FALLBACK_MODELS`
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL`
 - `npm run verify:ai`

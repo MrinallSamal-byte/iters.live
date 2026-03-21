@@ -10,6 +10,8 @@
             this.createProfileMenu();
             this.loadUserData();
             this.setupEventListeners();
+            window.syncAppOverlayState = this.syncOverlayState.bind(this);
+            this.syncOverlayState();
         },
 
         getInitials(name) {
@@ -199,10 +201,23 @@
             }
         },
 
+        syncOverlayState() {
+            const overlaySelectors = [
+                '.profile-modal[style*="display: flex"]',
+                '.profile-modal[style*="display:flex"]',
+                '.idcard-modal[aria-hidden="false"]',
+                '.profile-edit-panel[aria-hidden="false"]',
+                '#fallbackIdCardOverlay'
+            ];
+            const hasOpenOverlay = overlaySelectors.some((selector) => document.querySelector(selector));
+            document.body.classList.toggle('app-overlay-open', hasOpenOverlay);
+        },
+
         openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.style.display = 'flex';
+                this.syncOverlayState();
             }
         },
 
@@ -210,6 +225,7 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.style.display = 'none';
+                this.syncOverlayState();
             }
         },
 

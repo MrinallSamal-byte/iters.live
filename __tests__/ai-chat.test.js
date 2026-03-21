@@ -74,7 +74,7 @@ describe('AI Chat Endpoint', () => {
         it('should return 503 error when service unavailable', () => {
             const serviceUnavailableResponse = {
                 success: false,
-                message: 'AI service is currently unavailable. Please check if OPENROUTER_API_KEY is configured.'
+                message: 'AI service is currently unavailable. Please configure OPENROUTER_API_KEY or GEMINI_API_KEY.'
             };
             
             expect(serviceUnavailableResponse.success).toBe(false);

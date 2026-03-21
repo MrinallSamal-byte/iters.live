@@ -200,6 +200,104 @@ describe('SOA data service', () => {
     });
   });
 
+  test('extracts stacked contact fields and address blocks from SOA contact-info page text', () => {
+    const normalized = normalizeSoaPortalData({
+      rawSections: {
+        contactInfo: {
+          pageText: [
+            'Student Contact Details',
+            'Cell / Mobile',
+            '6291547509',
+            'Telephone No',
+            '0674123456',
+            'Personal Email Id',
+            'student@example.com',
+            'Parent Contact Details',
+            'Cell / Mobile',
+            '9123456789',
+            'Correspondence Address',
+            'Address : 1',
+            'Plot 10, Lane 4',
+            'Address : 2',
+            'Bhubaneswar',
+            'City',
+            'Bhubaneswar',
+            'District',
+            'Khordha',
+            'Postal Code',
+            '751003',
+            'State',
+            'Odisha',
+            'Permanent Address',
+            'Address : 1',
+            'Village Road 2',
+            'Address : 2',
+            'Kendrapara',
+            'City',
+            'Kendrapara',
+            'District',
+            'Kendrapara',
+            'Postal Code',
+            '754211',
+            'State',
+            'Odisha'
+          ].join('\n')
+        }
+      }
+    });
+
+    expect(normalized.contactInfo).toMatchObject({
+      email: 'student@example.com',
+      phone: '6291547509',
+      alternatePhone: '0674123456',
+      guardianPhone: '9123456789',
+      correspondenceAddress: 'Plot 10, Lane 4, Bhubaneswar',
+      permanentAddress: 'Village Road 2, Kendrapara',
+      city: 'Bhubaneswar',
+      district: 'Khordha',
+      postalCode: '751003',
+      state: 'Odisha'
+    });
+  });
+
+  test('preserves camelCase attendance and marks rows from saved SOA payloads', () => {
+    const normalized = normalizeSoaPortalData({
+      attendance: [
+        {
+          subject: 'Algorithms',
+          subjectCode: 'CSE401',
+          attendedClasses: 42,
+          totalClasses: 45,
+          percentage: 93.33
+        }
+      ],
+      marks: [
+        {
+          subject: 'Algorithms',
+          subjectCode: 'CSE401',
+          examType: 'Mid Sem',
+          marksObtained: 45,
+          totalMarks: 50,
+          publishedAt: '2026-03-21T08:00:00.000Z'
+        }
+      ]
+    });
+
+    expect(normalized.attendance.summary[0]).toMatchObject({
+      subject: 'Algorithms',
+      subject_code: 'CSE401',
+      present_count: 42,
+      total_classes: 45
+    });
+    expect(normalized.marks.records[0]).toMatchObject({
+      subject: 'Algorithms',
+      subjectCode: 'CSE401',
+      examType: 'Mid Sem',
+      marksObtained: 45,
+      totalMarks: 50
+    });
+  });
+
   test('normalizes legacy stored portal data and marks it as reconnectable cache', () => {
     const normalized = normalizeStoredPortalData({
       portalConnected: false,

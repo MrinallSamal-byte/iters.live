@@ -319,6 +319,18 @@ class ProfileControl {
         this.avatarBtn.setAttribute('aria-expanded', 'false');
         this.dropdownOpen = false;
     }
+
+    syncOverlayState() {
+        const overlaySelectors = [
+            '.profile-modal[style*="display: flex"]',
+            '.profile-modal[style*="display:flex"]',
+            '.idcard-modal[aria-hidden="false"]',
+            '.profile-edit-panel[aria-hidden="false"]',
+            '#fallbackIdCardOverlay'
+        ];
+        const hasOpenOverlay = overlaySelectors.some((selector) => document.querySelector(selector));
+        document.body.classList.toggle('app-overlay-open', hasOpenOverlay);
+    }
     
     /**
      * Open profile edit panel
@@ -336,6 +348,8 @@ class ProfileControl {
         // Show panel
         this.editPanel.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        window.syncAppOverlayState = this.syncOverlayState.bind(this);
+        this.syncOverlayState();
         
         // Focus first input
         setTimeout(() => {
@@ -349,6 +363,7 @@ class ProfileControl {
     closeEditPanel() {
         this.editPanel.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        this.syncOverlayState();
     }
     
     /**
@@ -618,6 +633,8 @@ class ProfileControl {
     async openIdCardModal() {
         this.idCardModal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        window.syncAppOverlayState = this.syncOverlayState.bind(this);
+        this.syncOverlayState();
         
         // Load admit card data
         await this.loadAdmitCard();
@@ -629,6 +646,7 @@ class ProfileControl {
     closeIdCardModal() {
         this.idCardModal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        this.syncOverlayState();
     }
     
     /**

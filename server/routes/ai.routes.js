@@ -138,17 +138,14 @@ router.post('/chat', optionalAuth, async (req, res) => {
             });
         }
         
-        // Check if OpenRouter service is available
-        const openRouterService = require('../services/openrouter.service');
-        if (!openRouterService.isAvailable()) {
+        if (!aiService.isAvailable()) {
             return res.status(503).json({
                 success: false,
-                message: 'AI service is currently unavailable. Please check if OPENROUTER_API_KEY is configured.'
+                message: 'AI service is currently unavailable. Please configure OPENROUTER_API_KEY or GEMINI_API_KEY.'
             });
         }
         
-        // Call OpenRouter service directly
-        const response = await openRouterService.answerQuestion(
+        const response = await aiService.answerQuestion(
             userMessage,
             context || '',
             systemPrompt || null

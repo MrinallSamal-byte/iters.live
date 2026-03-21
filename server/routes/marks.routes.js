@@ -61,8 +61,20 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
     cacheService.setMarks(studentId, data, null, 300);
 
     if (req.variationSeed) {
-      const varied = varyStudentSnapshot({ marks, summary }, req.variationSeed);
-      return res.json({ success: true, data: { marks: varied.marks, summary: varied.summary || summary } });
+      const varied = varyStudentSnapshot({
+        marks: data.marks || [],
+        summary: data.summary || []
+      }, req.variationSeed);
+      return res.json({
+        success: true,
+        data: {
+          marks: varied.marks || data.marks || [],
+          summary: varied.summary || data.summary || [],
+          cgpa: data.cgpa ?? null,
+          semesterResults: data.semesterResults || [],
+          source: data.source
+        }
+      });
     }
     res.json({ success: true, data });
   } catch (error) {

@@ -569,7 +569,7 @@
             overlay.setAttribute('aria-modal', 'true');
             overlay.style.cssText = `
                 position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-                display: flex; align-items: center; justify-content: center; z-index: 10000;`;
+                display: flex; align-items: center; justify-content: center; z-index: 10020;`;
 
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -602,6 +602,10 @@
             modal.appendChild(actions);
             overlay.appendChild(modal);
             document.body.appendChild(overlay);
+            document.body.classList.add('app-overlay-open');
+            if (typeof window.syncAppOverlayState === 'function') {
+                window.syncAppOverlayState();
+            }
 
             // Prevent background scroll
             const prevOverflow = document.body.style.overflow;
@@ -610,6 +614,11 @@
             const close = () => {
                 overlay.remove();
                 document.body.style.overflow = prevOverflow || '';
+                if (typeof window.syncAppOverlayState === 'function') {
+                    window.syncAppOverlayState();
+                } else {
+                    document.body.classList.remove('app-overlay-open');
+                }
             };
             overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
             header.querySelector('#fallbackIdCardClose').addEventListener('click', close);
