@@ -156,6 +156,7 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
   }
 
   try {
+    const snapshot = await loadSnapshot(req);
     const result = await soaScraperService.createSessionAndGetCaptcha();
 
     if (!result.success) {
@@ -163,7 +164,17 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
         ...result,
         portalEnabled: true,
         demoAvailable: true,
-        officialPortalUrl: OFFICIAL_PORTAL_URL
+        officialPortalUrl: OFFICIAL_PORTAL_URL,
+        connection: snapshot?.status || {
+          connected: false,
+          isVerified: false,
+          portalProvider: null,
+          lastSynced: null,
+          hasImportedData: false,
+          needsReconnect: false,
+          dataSource: null,
+          profileSummary: null
+        }
       });
     }
 

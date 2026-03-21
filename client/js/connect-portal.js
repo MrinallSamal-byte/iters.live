@@ -229,13 +229,21 @@
         } catch (error) {
             resetSessionUi();
             const payload = error.data || {};
+            if (payload.connection) {
+                currentConnection = payload.connection;
+                renderConnectionStatus();
+            }
             if (payload.status === 'PORTAL_DISABLED') {
                 portalEnabled = false;
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 updateFlowAvailability();
             }
-            setStatus('error', 'Could not fetch a fresh SOA CAPTCHA.', payload.message || error.message || 'Please try again in a moment.');
+            if (payload.status === 'PORTAL_UNREACHABLE' && currentConnection?.hasImportedData) {
+                setStatus('warning', 'Could not fetch a fresh SOA CAPTCHA.', 'The official SOA portal is not responding right now. You can still open the last imported SOA data saved in your account.');
+            } else {
+                setStatus('error', 'Could not fetch a fresh SOA CAPTCHA.', payload.message || error.message || 'Please try again in a moment.');
+            }
         } finally {
             resetButton(startSessionBtn);
         }
