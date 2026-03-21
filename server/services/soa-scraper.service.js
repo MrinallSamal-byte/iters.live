@@ -15,6 +15,7 @@
  */
 
 const { chromium } = require('playwright');
+const dns = require('dns');
 const https = require('https');
 const { normalizeSoaPortalData } = require('./soa-data.service');
 
@@ -33,6 +34,8 @@ const PORTAL_ENTRY_URLS = [
     PORTAL_URL,
     'https://soaportals.com/'
 ];
+const PORTAL_HOSTNAME = 'soaportals.com';
+const PORTAL_DNS_SERVERS = ['1.1.1.1', '8.8.8.8'];
 const TIMEOUT = 60000; // 60 seconds
 const NAVIGATION_TIMEOUT = 30000;
 const PORTAL_READY_TIMEOUT = 15000;
@@ -45,6 +48,10 @@ const activeSessions = new Map();
 const SESSION_CLEANUP_INTERVAL = 5 * 60 * 1000;
 // Session expiry time (10 minutes)
 const SESSION_EXPIRY = 10 * 60 * 1000;
+const resolvedPortalIpCache = {
+    value: null,
+    resolvedAt: 0
+};
 
 const SECTION_NAVIGATION = [
     {
@@ -390,9 +397,12 @@ async function waitForPortalShell(page, timeout = PORTAL_READY_TIMEOUT) {
 }
 
 async function probePortalUrl(url, timeout = 12000) {
+    const portalLookup = await createPortalLookup();
+
     return new Promise((resolve) => {
         const request = https.get(url, {
             timeout,
+            lookup: portalLookup,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
@@ -432,6 +442,47 @@ async function checkPortalReachability() {
         reachable: false,
         url: PORTAL_ENTRY_URLS[0],
         error: 'timeout'
+    };
+}
+
+async function resolvePortalIpAddress() {
+    const cacheAge = Date.now() - resolvedPortalIpCache.resolvedAt;
+    if (resolvedPortalIpCache.value && cacheAge < 15 * 60 * 1000) {
+        return resolvedPortalIpCache.value;
+    }
+
+    const resolver = new dns.Resolver();
+    resolver.setServers(PORTAL_DNS_SERVERS);
+
+    const addresses = await new Promise((resolve, reject) => {
+        resolver.resolve4(PORTAL_HOSTNAME, (error, records) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            resolve(records || []);
+        });
+    }).catch(() => []);
+
+    const address = Array.isArray(addresses) && addresses.length ? addresses[0] : null;
+    if (address) {
+        resolvedPortalIpCache.value = address;
+        resolvedPortalIpCache.resolvedAt = Date.now();
+    }
+
+    return address;
+}
+
+async function createPortalLookup() {
+    const fallbackAddress = await resolvePortalIpAddress();
+    return (hostname, options, callback) => {
+        if (hostname !== PORTAL_HOSTNAME || !fallbackAddress) {
+            return dns.lookup(hostname, options, callback);
+        }
+
+        const family = typeof options === 'number' ? options : options?.family || 4;
+        callback(null, fallbackAddress, family || 4);
     };
 }
 
@@ -887,24 +938,32 @@ async function createSessionAndGetCaptcha() {
         const reachability = await checkPortalReachability();
         if (!reachability.reachable) {
             console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
-            return {
-                success: false,
-                status: STATUS_PORTAL_UNREACHABLE,
-                message: 'SOA portal is not responding right now. Please try again in a few minutes.'
-            };
+            console.warn('[SOA Scraper] Continuing with browser attempt despite failed reachability check');
+        } else {
+            console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
         }
 
-        console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
+        const resolvedPortalIp = await resolvePortalIpAddress();
+        if (resolvedPortalIp) {
+            console.log(`[SOA Scraper] Resolved ${PORTAL_HOSTNAME} via public DNS: ${resolvedPortalIp}`);
+        }
 
         // Launch browser using Playwright
+        const launchArgs = [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+        ];
+
+        if (resolvedPortalIp) {
+            launchArgs.push(`--host-resolver-rules=MAP ${PORTAL_HOSTNAME} ${resolvedPortalIp},EXCLUDE localhost`);
+        }
+
         browser = await chromium.launch({
+            executablePath: chromium.executablePath(),
             headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
+            args: launchArgs
         });
 
         context = await browser.newContext({

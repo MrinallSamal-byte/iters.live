@@ -1,11 +1,15 @@
 // Creator Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     // Mark that animations can run; CSS will only animate when this class exists
-    document.body.classList.add('animations-enabled');
+    if (!prefersReducedMotion) {
+        document.body.classList.add('animations-enabled');
+    }
     console.log('Creator page loaded');
 
     // Initialize scroll reveal animations with GSAP if available
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    if (!prefersReducedMotion && typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
 
         // Animate all scroll-reveal elements with from() to not affect initial state
@@ -232,77 +236,126 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add hover effect to tech tags
-    const techTagPills = document.querySelectorAll('.tech-tag-pill');
-    techTagPills.forEach(tag => {
-        tag.addEventListener('mouseenter', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    scale: 1.1,
-                    duration: 0.3,
-                    ease: 'back.out(1.7)'
-                });
-            }
-        });
+    const sectionLinks = Array.from(document.querySelectorAll('.creator-section-link'));
+    const observedSections = sectionLinks
+        .map(link => {
+            const targetId = link.getAttribute('href');
+            return targetId ? document.querySelector(targetId) : null;
+        })
+        .filter(Boolean);
 
-        tag.addEventListener('mouseleave', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    scale: 1,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
+    const setActiveSectionLink = (sectionId) => {
+        sectionLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            link.classList.toggle('is-active', href === `#${sectionId}`);
+        });
+    };
+
+    sectionLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                setActiveSectionLink(href.slice(1));
             }
         });
     });
+
+    if (sectionLinks.length > 0 && observedSections.length > 0) {
+        const syncActiveSectionLink = () => {
+            let currentSectionId = observedSections[0].id;
+            const offset = 180;
+
+            observedSections.forEach(section => {
+                if (window.scrollY >= section.offsetTop - offset) {
+                    currentSectionId = section.id;
+                }
+            });
+
+            setActiveSectionLink(currentSectionId);
+        };
+
+        syncActiveSectionLink();
+        window.addEventListener('scroll', syncActiveSectionLink, { passive: true });
+        window.addEventListener('resize', syncActiveSectionLink);
+    }
+
+    // Add hover effect to tech tags
+    const techTagPills = document.querySelectorAll('.tech-tag-pill');
+    if (!prefersReducedMotion) {
+        techTagPills.forEach(tag => {
+            tag.addEventListener('mouseenter', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        scale: 1.1,
+                        duration: 0.3,
+                        ease: 'back.out(1.7)'
+                    });
+                }
+            });
+
+            tag.addEventListener('mouseleave', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+        });
+    }
 
     // Add hover effect to project cards
     const projectCards = document.querySelectorAll('.project-card');
-    projectCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    y: -5,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            }
-        });
+    if (!prefersReducedMotion) {
+        projectCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        y: -5,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
 
-        card.addEventListener('mouseleave', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    y: 0,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            }
+            card.addEventListener('mouseleave', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        y: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
         });
-    });
+    }
 
     // Add hover effect to contact cards
     const contactCards = document.querySelectorAll('.contact-card');
-    contactCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    y: -5,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            }
-        });
+    if (!prefersReducedMotion) {
+        contactCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        y: -5,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
 
-        card.addEventListener('mouseleave', function() {
-            if (typeof gsap !== 'undefined') {
-                gsap.to(this, {
-                    y: 0,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            }
+            card.addEventListener('mouseleave', function() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this, {
+                        y: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+            });
         });
-    });
+    }
 
     // Add ripple effect to buttons
     const rippleButtons = document.querySelectorAll('.ripple-effect');
@@ -345,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add parallax effect to background orbs
-    if (window.innerWidth > 768) {
+    if (!prefersReducedMotion && window.innerWidth > 768) {
         window.addEventListener('scroll', function() {
             const scrolled = window.pageYOffset;
             const orbs = document.querySelectorAll('.gradient-orb');
