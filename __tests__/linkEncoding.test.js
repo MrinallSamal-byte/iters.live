@@ -504,8 +504,8 @@ describe('Server-side Redirect Handler', () => {
     // HTML files in root (login.html, register.html, etc.)
     if (/^\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
     
-    // Dashboard pages
-    if (/^\/dashboard\/[a-z0-9\-_]+\.html$/i.test(path)) return true;
+    // Dashboard pages, with or without the legacy .html suffix
+    if (/^\/dashboard\/[a-z0-9\-_]+(?:\.html)?$/i.test(path)) return true;
     
     // Simple paths without extensions (like /login, /register)
     if (/^\/[a-z0-9\-_]+$/i.test(path)) return true;
@@ -546,6 +546,8 @@ describe('Server-side Redirect Handler', () => {
     it('should allow dashboard pages', () => {
       expect(isValidRedirectUrl('/dashboard/student.html')).toBe(true);
       expect(isValidRedirectUrl('/dashboard/teacher.html')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student')).toBe(true);
+      expect(isValidRedirectUrl('/dashboard/student-marks')).toBe(true);
     });
 
     it('should reject external URLs', () => {
