@@ -9,6 +9,7 @@
     const UniversalSidebar = {
         currentRole: '',
         lastSidebarNavTouchAt: 0,
+        sidebarNavClickSuppressedUntil: 0,
 
         // Navigation menus for different roles
         menus: {
@@ -363,9 +364,42 @@
                     return;
                 }
 
+                let touchGesture = null;
+
                 const handleNavigate = (event) => {
                     const href = link.getAttribute('href');
                     if (!href || href === '#') {
+                        return;
+                    }
+
+                    if (event.type === 'touchstart') {
+                        const point = event.touches?.[0];
+                        touchGesture = point ? {
+                            startX: point.clientX,
+                            startY: point.clientY,
+                            moved: false
+                        } : null;
+                        return;
+                    }
+
+                    if (event.type === 'touchmove') {
+                        const point = event.touches?.[0];
+                        if (!touchGesture || !point) {
+                            return;
+                        }
+
+                        const deltaX = Math.abs(point.clientX - touchGesture.startX);
+                        const deltaY = Math.abs(point.clientY - touchGesture.startY);
+                        if (deltaX > 10 || deltaY > 10) {
+                            touchGesture.moved = true;
+                            this.sidebarNavClickSuppressedUntil = Date.now() + 400;
+                        }
+                        return;
+                    }
+
+                    if (event.type === 'touchcancel') {
+                        touchGesture = null;
+                        this.sidebarNavClickSuppressedUntil = Date.now() + 400;
                         return;
                     }
 
@@ -374,23 +408,43 @@
                             return;
                         }
 
+                        if (Date.now() < this.sidebarNavClickSuppressedUntil) {
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                            return;
+                        }
+
                         if (Date.now() - this.lastSidebarNavTouchAt < 500) {
                             event.preventDefault();
+                            event.stopImmediatePropagation();
                             return;
                         }
                     }
 
                     if (event.type === 'touchend') {
+                        const wasDragging = Boolean(touchGesture?.moved);
+                        touchGesture = null;
+
+                        if (wasDragging) {
+                            this.sidebarNavClickSuppressedUntil = Date.now() + 400;
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                            return;
+                        }
+
                         this.lastSidebarNavTouchAt = Date.now();
                     }
 
                     event.preventDefault();
-                    event.stopPropagation();
+                    event.stopImmediatePropagation();
 
                     this.closeMobileSidebar();
                     this.navigateWithinApp(href);
                 };
 
+                link.addEventListener('touchstart', handleNavigate, { passive: true });
+                link.addEventListener('touchmove', handleNavigate, { passive: true });
+                link.addEventListener('touchcancel', handleNavigate, { passive: true });
                 link.addEventListener('click', handleNavigate);
                 link.addEventListener('touchend', handleNavigate, { passive: false });
             });
@@ -454,14 +508,6 @@
                 });
             }
 
-            // Close on navigation
-            document.querySelectorAll('.sidebar-nav-link').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth <= 968) {
-                        this.closeMobileSidebar();
-                    }
-                });
-            });
         },
 
         closeMobileSidebar() {
