@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -39,6 +40,8 @@ const portalRoutes = require('./routes/portal.routes');
 const redirectRoutes = require('./routes/redirect.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const soaRoutes = require('./routes/soa.routes');
+const mobileRoutes = require('./routes/mobile.routes');
+const clubsRoutes = require('./routes/clubs.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -49,6 +52,26 @@ const { initializeSocket } = require('./socket/socket');
 
 const app = express();
 const server = http.createServer(app);
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Surrogate-Control': 'no-store'
+};
+
+function setNoStore(res) {
+  Object.entries(NO_STORE_HEADERS).forEach(([header, value]) => {
+    res.setHeader(header, value);
+  });
+}
+
+function sendHtmlNoStore(res, filePath, callback) {
+  res.sendFile(filePath, {
+    cacheControl: false,
+    lastModified: false,
+    headers: NO_STORE_HEADERS
+  }, callback);
+}
 
 // Initialize Socket.IO
 const io = socketIo(server, {
@@ -212,6 +235,8 @@ app.use('/api/forum', forumRoutes);
 app.use('/api/pyq', pyqRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/mobile', mobileRoutes);
+app.use('/api/clubs', clubsRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
@@ -219,64 +244,86 @@ app.use('/web', webRoutes);
 // Link encoding redirect handler (/r/:encoded)
 app.use('/r', redirectRoutes);
 
-// Serve landing page (index.html) for root path - redirect to obfuscated URL
-app.get('/', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('home');
-  res.redirect(obfuscatedUrl);
+// Public pages now use direct routes for reliable navigation.
+app.get('/', staticFileLimiter, (req, res) => {
+  sendHtmlNoStore(res, path.join(__dirname, '../client/index.html'));
 });
 
-// Redirect /home to landing page
+app.get('/index.html', staticFileLimiter, (req, res) => {
+  sendHtmlNoStore(res, path.join(__dirname, '../client/index.html'));
+});
+
 app.get('/home', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('home');
-  res.redirect(obfuscatedUrl);
+  res.redirect('/index.html');
+});
+
+app.get('/login', (req, res) => {
+  res.redirect('/login.html');
+});
+
+app.get('/register', (req, res) => {
+  res.redirect('/register.html');
+});
+
+app.get('/creator', (req, res) => {
+  res.redirect('/creator.html');
+});
+
+app.get('/login.html', staticFileLimiter, (req, res) => {
+  sendHtmlNoStore(res, path.join(__dirname, '../client/login.html'));
+});
+
+app.get('/register.html', staticFileLimiter, (req, res) => {
+  sendHtmlNoStore(res, path.join(__dirname, '../client/register.html'));
+});
+
+app.get('/creator.html', staticFileLimiter, (req, res) => {
+  sendHtmlNoStore(res, path.join(__dirname, '../client/creator.html'));
 });
 
 // Serve connect-portal page directly (no obfuscation for OAuth redirect)
 app.get('/connect-portal', staticFileLimiter, (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+  sendHtmlNoStore(res, path.join(__dirname, '../client/connect-portal.html'));
 });
 
 app.get('/connect-portal.html', staticFileLimiter, (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/connect-portal.html'));
+  sendHtmlNoStore(res, path.join(__dirname, '../client/connect-portal.html'));
 });
 
 // Serve SOA portal scraper page directly
 app.get('/soa-scraper', staticFileLimiter, (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/soa-scraper.html'));
+  sendHtmlNoStore(res, path.join(__dirname, '../client/soa-scraper.html'));
 });
 
 app.get('/soa-scraper.html', staticFileLimiter, (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/soa-scraper.html'));
+  sendHtmlNoStore(res, path.join(__dirname, '../client/soa-scraper.html'));
 });
 
-// Serve static HTML pages - redirect to obfuscated URLs
+// Public anchor convenience routes
 app.get('/about', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('about');
-  res.redirect(obfuscatedUrl);
+  res.redirect('/index.html#about');
 });
 
 app.get('/features', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('features');
-  res.redirect(obfuscatedUrl);
+  res.redirect('/index.html#features');
 });
 
 app.get('/academics', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('academics');
-  res.redirect(obfuscatedUrl);
+  res.redirect('/index.html#academics');
 });
 
 app.get('/contact', (req, res) => {
-  const obfuscatedUrl = urlRouter.getObfuscatedUrl('contact');
-  res.redirect(obfuscatedUrl);
+  res.redirect('/index.html#contact');
 });
 
 // Serve dashboard pages directly (needed for login redirects)
 app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
   const page = req.params.page;
+  const requestedPage = page.endsWith('.html') ? page : `${page}.html`;
   
   // Validate page parameter to prevent path traversal attacks
-  // Only allow alphanumeric characters, hyphens, and .html extension
-  if (!/^[a-zA-Z0-9-]+\.html$/.test(page)) {
+  // Only allow alphanumeric characters, hyphens, and an optional .html extension
+  if (!/^[a-zA-Z0-9-]+(?:\.html)?$/.test(page)) {
     return res.status(400).json({
       success: false,
       message: 'Invalid page name'
@@ -284,7 +331,7 @@ app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
   }
   
   const dashboardDir = path.resolve(__dirname, '../client/dashboard');
-  const filePath = path.join(dashboardDir, page);
+  const filePath = path.join(dashboardDir, requestedPage);
   
   // Ensure the resolved path is within the dashboard directory
   const resolvedPath = path.resolve(filePath);
@@ -294,8 +341,21 @@ app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
       message: 'Access denied'
     });
   }
+
+  if (!fs.existsSync(resolvedPath)) {
+    return res.status(404).json({
+      success: false,
+      message: 'Dashboard page not found'
+    });
+  }
+
+  if (!page.endsWith('.html')) {
+    const queryIndex = req.originalUrl.indexOf('?');
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+    return res.redirect(`/dashboard/${requestedPage}${query}`);
+  }
   
-  res.sendFile(resolvedPath, (err) => {
+  sendHtmlNoStore(res, resolvedPath, (err) => {
     if (err && !res.headersSent) {
       res.status(404).json({
         success: false,
@@ -342,7 +402,7 @@ async function startServer() {
       const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
       console.log(`
 ╔═══════════════════════════════════════════════════════╗
-║   ITER College Management System                     ║
+║   ITERasn hub                                       ║
 ║   Server running on port ${PORT}                        ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                      ║
 ║   Socket.IO: Enabled                                  ║

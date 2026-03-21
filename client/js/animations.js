@@ -1,7 +1,7 @@
 /**
  * Advanced Animation Controller
  * Handles all UI animations and micro-interactions
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class AnimationController {
     constructor() {

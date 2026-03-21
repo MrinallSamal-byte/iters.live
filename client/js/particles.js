@@ -1,5 +1,5 @@
 /**
- * Advanced Particle System for ITER College Management System
+ * Advanced Particle System for ITERasn hub
  * Creates dynamic, interactive particle backgrounds
  */
 

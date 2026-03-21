@@ -1,7 +1,7 @@
 {
   "name": "ITER",
   "short_name": "ITER",
-  "description": "All-in-One College Management System for Students, Teachers, and Administrators",
+  "description": "ITERasn hub academic workspace for students, teachers, and administrators",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

@@ -6,7 +6,7 @@ const { db } = require('../database/firebase');
 
 /**
  * AI Routes for Educational Assistance
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  * 
  * Note: Migrated from SQL to Firestore
  */
@@ -167,6 +167,10 @@ router.post('/chat', optionalAuth, async (req, res) => {
         // Return response in expected format
         res.json({
             success: true,
+            data: {
+                role: 'assistant',
+                content: response
+            },
             response: response,
             timestamp: new Date().toISOString()
         });

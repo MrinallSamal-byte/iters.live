@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - ITER EduHub</title>
+    <title>AI Assistant - ITERasn hub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/chatbot.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
         .ai-container {
             padding: 2rem;
             max-width: 1400px;
@@ -316,6 +324,79 @@
         .btn-secondary:hover {
             background: #d0d0d0;
         }
+
+        @media (max-width: 1024px) {
+            .ai-container {
+                padding: 1.25rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .ai-container {
+                padding: 1rem;
+            }
+
+            .ai-header,
+            .prediction-card,
+            .recommendations-card,
+            .study-plan-section,
+            .modal-content {
+                padding: 1.25rem;
+            }
+
+            .ai-header {
+                text-align: left;
+            }
+
+            .ai-header h1 {
+                font-size: clamp(1.9rem, 8vw, 2.4rem);
+            }
+
+            .feature-grid,
+            .factor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .prediction-header,
+            .action-buttons,
+            .session-item,
+            .modal-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .prediction-score {
+                font-size: 2.35rem;
+            }
+
+            .prediction-grade {
+                font-size: 1.45rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .modal-content {
+                width: min(100%, calc(100vw - 20px));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ai-container {
+                padding: 0.75rem;
+            }
+
+            .ai-header,
+            .prediction-card,
+            .recommendations-card,
+            .study-plan-section,
+            .modal-content,
+            .feature-card {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -435,7 +516,9 @@
     <script src="/js/chatbot.js"></script>
     <script>
         // Load navigation
-        loadDashboardNav('student');
+        if (typeof loadDashboardNav === 'function') {
+            loadDashboardNav('student');
+        }
 
         let currentUser = null;
 

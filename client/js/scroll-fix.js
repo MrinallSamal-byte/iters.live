@@ -6,6 +6,11 @@
 (function() {
     'use strict';
 
+    function isCompactNavMode(menuButton) {
+        if (!menuButton) return false;
+        return window.getComputedStyle(menuButton).display !== 'none';
+    }
+
     // ===================================
     // FIX: Prevent scroll jump on page load
     // ===================================
@@ -158,7 +163,7 @@
 
         // Ensure mobile menu closes when clicking outside
         document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
+            if (isCompactNavMode(mobileMenuBtn)) {
                 const isMenuBtn = e.target.closest('.mobile-menu-btn');
                 const isNavLinks = e.target.closest('.nav-links');
                 
@@ -167,6 +172,7 @@
                     navLinks.classList.remove('active', 'mobile-open');
                     document.querySelector('.mobile-nav-overlay')?.classList.remove('active');
                     document.body.classList.remove('nav-open');
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
                 }
             }
         });
@@ -178,6 +184,7 @@
                 navLinks.classList.remove('active', 'mobile-open');
                 document.querySelector('.mobile-nav-overlay')?.classList.remove('active');
                 document.body.classList.remove('nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
             }
         });
     }
@@ -232,7 +239,7 @@
         setViewportHeight();
         
         // Close mobile menu on desktop resize
-        if (window.innerWidth > 768) {
+        if (!isCompactNavMode(document.getElementById('mobileMenuBtn') || document.querySelector('.mobile-menu-btn'))) {
             const mobileMenuBtn = document.getElementById('mobileMenuBtn') || document.querySelector('.mobile-menu-btn');
             const navLinks = document.querySelector('.nav-links');
             const overlay = document.querySelector('.mobile-nav-overlay');
@@ -242,6 +249,7 @@
                 navLinks?.classList.remove('active', 'mobile-open');
                 overlay?.classList.remove('active');
                 document.body.classList.remove('nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
             }
         }
     }, 150);

@@ -1,731 +1,897 @@
-# ITER College Management System (EduHub)
+# ITERasn hub
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![Version](https://img.shields.io/badge/version-3.2.0-blue)](https://github.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com)
-[![Production Ready](https://img.shields.io/badge/status-production--ready-success)](https://github.com)
-[![Performance](https://img.shields.io/badge/performance-90%25%20faster-brightgreen)](https://github.com)
+ITERasn hub is a full-stack college portal for students, teachers, and administrators. It combines a vanilla HTML/CSS/JavaScript frontend with a Node.js + Express backend, role-based dashboards, AI-assisted features, demo-mode local login, payment/admit-card flows, real-time notifications, an optional scraper package, and a native Android client under `android-app/`.
 
-> **🏆 A World-Class, Enterprise-Grade College Management System** with Web, Android PWA/TWA (Android 9+), and Desktop (Electron) support.
+This README is the single consolidated project document for the repository. It replaces the old scattered setup notes, deployment guides, fix summaries, UI notes, and feature-specific Markdown files that previously lived across the repo.
 
-Built with **vanilla HTML/CSS/JavaScript** (frontend) and **Node.js + Express + MySQL** (backend), featuring stunning glassmorphism UI, advanced animations, real-time updates via Socket.IO, enterprise security, performance optimization, and comprehensive analytics.
+## Contents
 
-## 🎉 What's New in v3.2.0 - Ultimate Edition
+1. Project Overview
+2. Core Capabilities
+3. System Architecture
+4. Application Workflows
+5. Repository Structure
+6. Frontend Surface Map
+7. Backend Surface Map
+8. Local Development Setup
+9. Demo Accounts for Local Testing
+10. Environment Variables
+11. Database, Seeding, and Demo Data
+12. AI Services
+13. Portal Scraper
+14. Android App
+15. Deployment on Render
+16. Testing and Verification
+17. Troubleshooting
+18. Security Notes
+19. Current Project Status
 
-**🚀 Major enhancements completed! Now with AI-powered student tools, bulk operations, advanced analytics, and enhanced caching:**
+## Project Overview
 
-### 🆕 Phase 7: Advanced Student Tools (NEW - 100%)
-- ✅ **Study Schedule Generator** - AI-powered personalized study plans with Pomodoro technique
-- ✅ **Flashcard System** - Create, manage, and study with digital flashcards
-- ✅ **Advanced File Manager** - Drag-and-drop upload with progress tracking
-- ✅ **Performance Analytics** - Comprehensive student analytics with ML predictions
-- ✅ **Weak Subject Detection** - Automatic identification of subjects needing improvement
-- ✅ **Calendar Export** - Export study schedules to Google Calendar/Outlook
+### What this project is
 
-### 📊 Phase 8: Bulk Operations & Analytics (NEW - 100%)
-- ✅ **Bulk User Import** - CSV/Excel import for users with error reporting
-- ✅ **Bulk Attendance Upload** - Mark attendance for multiple students via CSV
-- ✅ **Bulk Marks Upload** - Upload exam marks via Excel with validation
-- ✅ **Advanced Analytics API** - Student performance, attendance patterns, teacher stats
-- ✅ **Data Export** - Export users, attendance, marks to CSV/Excel
-- ✅ **Template Generation** - Download formatted templates for imports
-- ✅ **Real-time Notifications** - Socket.IO events for bulk operations
+ITERasn hub is an academic operations portal designed around three primary roles:
 
-### 🚀 Phase 9: Enhanced Caching Strategies (NEW - 100%)
-- ✅ **Redis Implementation** - Production-grade caching with automatic fallback to node-cache
-- ✅ **Service Worker Optimization** - Stale-while-revalidate for better offline support
-- ✅ **Query Result Caching** - Intelligent caching for complex analytics queries
-- ✅ **CDN Integration** - Cloudflare-ready with optimal cache headers
-- ✅ **Cache Middleware** - Route-level caching with automatic invalidation
-- ✅ **Multi-tier Caching** - API cache (1 min), Main cache (10 min), Static cache (1 hour)
-- ✅ **Comprehensive Documentation** - Complete guides for setup and usage
+- `Student`: attendance, marks, notes, timetable, payments, events, clubs, hostel menu, admit card, forum, AI assistant
+- `Teacher`: attendance marking, marks upload, assignments, notes, question bank, rubric creation, student management
+- `Admin`: users, approvals, analytics, departments, announcements, settings
 
----
+### Main technical characteristics
 
-**Previous phases completed:**
+- Frontend: vanilla HTML, CSS, and JavaScript
+- Backend: Node.js with Express
+- Real-time layer: Socket.IO
+- Data layer: hybrid SQL + Firebase backend. Academic/admin records come from the active SQL adapter, while auth, files, forum, payments, and stored portal imports use Firebase Admin when configured.
+- Auth: JWT-based app auth plus Firebase-backed flows where configured
+- AI: OpenRouter and Gemini integration
+- Deployment target: Render
+- Extra delivery targets: native Android app and optional scraper package
 
-### 🔐 Phase 1: Security & Infrastructure (100%)
-- ✅ Input validation on all routes (50+ rules)
-- ✅ Rate limiting with account lockout (5 attempts, 30min)
-- ✅ Comprehensive audit logging (database + file backup)
-- ✅ Password strength enforcement
-- ✅ SQL injection & XSS protection
+### Current branding and UX direction
 
-### ⚡ Phase 2: Database Optimization (100%)
-- ✅ 90% faster with multi-tier caching
-- ✅ 60+ database indexes for optimal performance
-- ✅ 7 materialized views (auto-refresh hourly)
-- ✅ Slow query detection (>100ms)
-- ✅ Connection pooling (20 connections)
-- ✅ Health monitoring dashboard
+- Product name: `ITERasn hub`
+- Visual language: minimalist, Nothing-inspired, dark/off-white surfaces with warm coral accents
+- Public routing: direct public routes for home, creator, login, and register
+- Dashboard routing: direct dashboard URLs with protected access and token checks
 
-### 🔔 Phase 3: Notification System (100%)
-- ✅ Real-time Socket.IO notifications
-- ✅ 8 notification types with filtering
-- ✅ Beautiful glassmorphism UI design
-- ✅ Mark as read/delete (single/bulk)
-- ✅ Browser push notification framework
-- ✅ Mobile-responsive design
+## Core Capabilities
 
-### 📊 Phase 4: Charts & Visualizations (100%)
-- ✅ Attendance heatmap calendar (12-week view)
-- ✅ Performance trend charts (student vs class)
-- ✅ Subject-wise attendance bars (color-coded)
-- ✅ Marks comparison radar charts
-- ✅ Grade distribution visualizations
-- ✅ SGPA/CGPA progress tracking
-- ✅ Assignment submission timeline
+### Student experience
 
-### 🔍 Phase 5: Advanced Search (100%)
-- ✅ Global search across 5 resource types
-- ✅ Type-ahead autocomplete
-- ✅ Relevance scoring algorithm
-- ✅ Advanced filters & date ranges
-- ✅ Permission-aware results
-- ✅ Search result caching
+- Student dashboard overview
+- Attendance tracking
+- Marks and academic performance
+- Timetable
+- Study notes and PYQs
+- Admit card view/download
+- Events and clubs
+- Hostel menu
+- Forum
+- AI assistant
+- Payment history, payment details, payment flow
 
-### 📋 Phase 6: Data Tables & Bulk Ops (100%)
-- ✅ Sortable columns with indicators
-- ✅ Pagination controls (first/prev/next/last)
-- ✅ Column visibility toggle
-- ✅ Bulk selection operations
-- ✅ CSV export functionality
-- ✅ Inline search filtering
+### Teacher experience
 
-**📋 [View Complete Summary](COMPLETE_IMPLEMENTATION_SUMMARY.md)** | **🚀 [Deployment Guide](DEPLOYMENT_GUIDE.md)** | **📖 [Enhancement Details](ENHANCEMENT_SUMMARY.md)** | **💾 [Caching Guide](CACHING_GUIDE.md)** | **⚡ [Caching Quick Start](CACHING_QUICKSTART.md)**
+- Teacher dashboard overview
+- Attendance management
+- Marks upload
+- Assignment management
+- Notes/material upload
+- Question bank
+- Rubric creator
+- Student list and related workflows
 
----
+### Admin experience
 
-## 🌟 Features
+- Admin dashboard overview
+- User management
+- Approval queue
+- Announcements
+- Departments
+- Analytics
+- Settings
 
-### For Students
-- 📊 **Real-time Attendance Tracking** - View attendance percentage, subject-wise breakdown, and history
-- 📝 **Marks Management** - Internal/external marks with visual charts and class rankings
-- 🎓 **Admit Card Generation** - Dynamic PDF generation with QR codes and verification
-- 📚 **Notes & PYQs Repository** - Download notes, previous year questions, and study materials
-- ✍️ **Assignment Submission** - Upload assignments, track deadlines, and receive feedback
-- 📅 **Interactive Timetable** - Highlight current/next class with color-coded subjects
-- 🍽️ **Hostel Menu** - Weekly meal schedules with calendar view
-- 🎉 **Events & Clubs** - Register for events and join clubs with real-time counters
-- 💰 **Fee Management** - View ledger, download receipts (mock)
-- 🏆 **Achievements & Badges** - Track academic and extracurricular achievements
-- 🤖 **AI Chatbot Assistant** - Intelligent bot answering questions, explaining concepts, solving problems
-- 🆕 **AI Study Planner** - Personalized 2-week study schedule with priority-based task allocation
-- 🆕 **Flashcard System** - Create decks, study mode with spaced repetition, progress tracking
-- 🆕 **Performance Analytics** - Comprehensive analytics with weak/strong subject identification
-- 🆕 **Advanced File Manager** - Drag-and-drop upload, grid/list views, file preview
-- 🆕 **Smart Insights** - ML-powered recommendations and performance predictions
+### Shared platform features
 
-### For Teachers
-- ✅ **Attendance Management** - Mark attendance with bulk import via CSV
-- 📊 **Marks Upload** - Single and bulk CSV upload with gradebook management
-- 📝 **Assignment Creation** - Create assignments, grade submissions, attach rubrics
-- 📤 **Notes Upload** - Upload lecture notes, slides, and study materials (requires admin approval)
-- 📢 **Announcements** - Post announcements to classes or departments
-- 📆 **Lesson Planner** - Plan and schedule lessons
-- 🕐 **Office Hours** - Schedule and manage office hour slots
-- 🆕 **Bulk Operations** - Import attendance/marks from Excel with detailed error reporting
-- 🆕 **Teaching Analytics** - Class performance stats, attendance rates, marking activity
-- 🆕 **Attendance Patterns** - Detect chronic absenteeism and suspicious patterns
-- 🆕 **Template Downloads** - Pre-formatted CSV/Excel templates for bulk imports
+- Direct public-page navigation
+- Theme toggle with persistence
+- Chatbot widget
+- Universal sidebar and profile system
+- Mobile-friendly responsive shell
+- Demo-mode local login fallback
+- Service worker and manifest for app-like behavior
+- Static asset serving plus role dashboards
 
-### For Administrators
-- 👥 **User Management** - Full CRUD for students, teachers, and admins
-- ✅ **Approvals Queue** - Approve/reject teacher uploads, events, and club requests
-- 📊 **Analytics Dashboard** - User stats, attendance heatmaps, download analytics, storage usage
-- 🔐 **Role & Permissions** - Fine-grained permission management
-- 💾 **Backup & Restore** - Database backup with downloadable snapshots
-- 📜 **Activity Logs** - Complete audit trail of user actions
-- ⚙️ **System Settings** - Configure CORS, storage mode (local/S3), and quotas
-- 🆕 **Bulk Import System** - Import users from CSV/Excel with progress tracking
-- 🆕 **Data Export** - Export all system data to CSV/Excel with filters
-- 🆕 **Advanced Analytics** - System-wide performance metrics and insights
-- 🆕 **Template Management** - Generate and download import templates
-- 📈 **Advanced Analytics** - Chart.js visualizations for attendance, performance, and usage
+## System Architecture
 
-### Technical Highlights
-- 🎨 **Unmatched UI/UX** - Glassmorphism theme with Lottie animations and smooth transitions
-- 🔄 **Real-time Updates** - Socket.IO for live attendance, file approvals, and event registrations
-- 📱 **PWA Support** - Installable web app with offline caching and background sync
-- 🖥️ **Desktop App** - Electron wrapper for Windows, Mac, and Linux
-- 📲 **Android App** - TWA-ready for Android 9+ with native-like experience
-- 🔒 **Security First** - JWT auth, bcrypt passwords, rate limiting, helmet, CORS, input validation
-- 🐳 **Docker Ready** - docker-compose for easy deployment
-- 🧪 **Testing** - Jest unit tests and Playwright E2E test skeletons
-- 🚀 **CI/CD** - GitHub Actions workflow for automated builds
-- 🔗 **Portal Scraper** - Python Flask microservice for SOA student portal integration
+### High-level architecture
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Node.js** >= 18.0.0
-- **MySQL** >= 8.0
-- **npm** >= 9.0.0
-- **Python** >= 3.9 (for portal scraper, optional)
-- **Chrome** (for Selenium-based scraping, optional)
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone <your-repo-url>
-cd All_In_One_College_Website
+```mermaid
+flowchart LR
+    WB[Web Browser] --> P[Public Pages]
+    WB --> D[Role Dashboards]
+    P --> C[Client JS Layer]
+    D --> C
+    ANDROID[Native Android App] --> API[Express API Server]
+    C --> API
+    C --> WS[Socket.IO]
+    API --> AUTH[Auth + Session Logic]
+    API --> ROUTES[Feature Routes]
+    API --> DATA[(DB / Seeded Data / Demo Data)]
+    API --> AI[OpenRouter / Gemini]
+    API --> FB[Firebase Admin When Configured]
+    API --> SCRAPER[Portal Scraper Services]
 ```
 
-2. **Install dependencies**
+### Frontend architecture
+
+```mermaid
+flowchart TD
+    INDEX[index.html] --> PUBLIC[Public UX Layer]
+    LOGIN[login.html] --> PUBLIC
+    REGISTER[register.html] --> PUBLIC
+    CREATOR[creator.html] --> PUBLIC
+
+    PUBLIC --> SHARED_CSS[Shared CSS System]
+    PUBLIC --> SHARED_JS[Shared JS System]
+
+    DASH[Dashboard HTML Pages] --> SHARED_CSS
+    DASH --> SHARED_JS
+
+    SHARED_CSS --> STYLE[style.css]
+    SHARED_CSS --> HOME[home-minimal.css]
+    SHARED_CSS --> RESPONSIVE[responsive-universal.css]
+    SHARED_CSS --> SIDEBAR_CSS[universal-sidebar.css]
+    SHARED_CSS --> PROFILE_CSS[universal-profile.css]
+    SHARED_CSS --> CHATBOT_CSS[chatbot.css]
+
+    SHARED_JS --> MAIN[main.js]
+    SHARED_JS --> NAV[url-navigator.js]
+    SHARED_JS --> ENCODE[linkEncoding.js]
+    SHARED_JS --> SIDEBAR_JS[universal-sidebar.js]
+    SHARED_JS --> PROFILE_JS[universal-profile.js]
+    SHARED_JS --> CHATBOT_JS[chatbot.js]
+```
+
+### Backend architecture
+
+```mermaid
+flowchart TD
+    SERVER[server/index.js] --> MIDDLEWARE[Helmet, CORS, Compression, Rate Limits]
+    SERVER --> STATIC[Public File Serving]
+    SERVER --> ROUTESET[API Routes]
+    SERVER --> WEB[Web / Redirect Routes]
+    SERVER --> SOCKET[Socket.IO Init]
+
+    ROUTESET --> AUTH[auth.routes.js]
+    ROUTESET --> USER[user.routes.js]
+    ROUTESET --> PROFILE[profile.routes.js]
+    ROUTESET --> ATT[attendance.routes.js]
+    ROUTESET --> MARKS[marks.routes.js]
+    ROUTESET --> NOTES[notes.routes.js]
+    ROUTESET --> FORUM[forum.routes.js]
+    ROUTESET --> PAY[payment.routes.js]
+    ROUTESET --> ADMIN[admin.routes.js]
+    ROUTESET --> TEACHER[teacher.routes.js]
+    ROUTESET --> AIROUTES[ai.routes.js]
+    ROUTESET --> PORTAL[portal.routes.js]
+    ROUTESET --> ANALYTICS[analytics.routes.js]
+```
+
+## Application Workflows
+
+### Login and role redirect flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant LoginPage
+    participant Backend
+    participant Storage
+    participant Dashboard
+
+    User->>LoginPage: Submit credentials
+    LoginPage->>Backend: POST /api/auth/login
+    Backend-->>LoginPage: User + token + role
+    LoginPage->>Storage: Save accessToken, token, user
+    LoginPage->>LoginPage: Create page access token
+    LoginPage->>Dashboard: Navigate to role dashboard
+```
+
+### Local demo auth fallback
+
+```mermaid
+flowchart TD
+    A[Login Attempt] --> B{Firebase Admin Ready?}
+    B -- Yes --> C[Normal Auth Flow]
+    B -- No --> D{Local Demo Credentials?}
+    D -- Yes --> E[Return demoMode + local-demo auth]
+    D -- No --> F[Reject Login]
+    E --> G[Store tokens and demo role]
+    G --> H[Open student / teacher / admin dashboard]
+```
+
+### Request lifecycle
+
+```mermaid
+flowchart LR
+    Browser --> StaticPage[HTML + CSS + JS]
+    StaticPage --> APIRequest[fetch / XHR]
+    APIRequest --> Middleware
+    Middleware --> RouteHandler
+    RouteHandler --> ServiceLayer
+    ServiceLayer --> DBorProvider[(DB / AI / Firebase / Scraper)]
+    DBorProvider --> ServiceLayer
+    ServiceLayer --> RouteHandler
+    RouteHandler --> Browser
+```
+
+## Repository Structure
+
+```text
+.
+├── client/
+│   ├── index.html
+│   ├── login.html
+│   ├── register.html
+│   ├── creator.html
+│   ├── dashboard/
+│   ├── css/
+│   ├── js/
+│   ├── assets/
+│   └── partials/
+├── server/
+│   ├── index.js
+│   ├── routes/
+│   ├── services/
+│   ├── middleware/
+│   ├── database/
+│   ├── seed/
+│   └── scripts/
+├── android-app/
+├── soa-student-scraper/
+├── render.yaml
+├── package.json
+└── .env.example
+```
+
+### Important frontend files
+
+- `client/index.html`: redesigned homepage
+- `client/login.html`: login with demo account quick-fill and Google login path
+- `client/register.html`: registration page
+- `client/creator.html`: creator/about page
+- `client/css/style.css`: main shared visual system
+- `client/css/home-minimal.css`: public-facing home/auth/creator styling layer
+- `client/css/responsive-universal.css`: global responsive rescue layer
+- `client/css/universal-sidebar.css`: shared dashboard sidebar shell
+- `client/css/universal-profile.css`: shared profile/dropdown shell
+- `client/css/chatbot.css`: chatbot widget shell
+- `client/js/main.js`: shared application helpers and theme logic
+- `client/js/linkEncoding.js`: URL handling rules
+- `client/js/url-navigator.js`: safe navigation helpers
+- `client/js/universal-sidebar.js`: sidebar rendering and behavior
+- `client/js/universal-profile.js`: profile UI behavior
+- `client/js/chatbot.js`: chatbot behavior and AI request handling
+
+### Important backend files
+
+- `server/index.js`: server bootstrap, middleware, routes, static serving
+- `server/routes/auth.routes.js`: login, role auth, local demo fallback
+- `server/database/firebase.js`: Firebase admin setup and local fallback compatibility
+- `server/services/ai.service.js`: Gemini AI service
+- `server/services/openrouter.service.js`: OpenRouter service
+- `server/routes/redirect.routes.js`: encoded link redirect support
+- `server/routes/web.routes.js`: web session route handling
+- `server/seed/seed.js`: baseline data seeding
+- `server/seed/comprehensive-seed.js`: broader seed flow
+- `server/scripts/*`: DB and utility scripts
+
+## Frontend Surface Map
+
+### Public pages
+
+- `/` or `/index.html`
+- `/login.html`
+- `/register.html`
+- `/creator.html`
+- `/connect-portal.html`
+
+### Student dashboard pages
+
+- `/dashboard/student.html`
+- `/dashboard/student-attendance.html`
+- `/dashboard/student-marks.html`
+- `/dashboard/student-timetable.html`
+- `/dashboard/student-notes.html`
+- `/dashboard/student-admit-card.html`
+- `/dashboard/student-events.html`
+- `/dashboard/student-clubs.html`
+- `/dashboard/student-hostel-menu.html`
+- `/dashboard/student-forum.html`
+- `/dashboard/student-ai-assistant.html`
+- `/dashboard/student-payment-history.html`
+- `/dashboard/student-payment-details.html`
+- `/dashboard/student-payment-make.html`
+
+### Teacher dashboard pages
+
+- `/dashboard/teacher.html`
+- `/dashboard/teacher-attendance.html`
+- `/dashboard/teacher-marks.html`
+- `/dashboard/teacher-assignments.html`
+- `/dashboard/teacher-notes.html`
+- `/dashboard/teacher-question-bank.html`
+- `/dashboard/teacher-rubric-creator.html`
+- `/dashboard/teacher-students.html`
+
+### Admin dashboard pages
+
+- `/dashboard/admin.html`
+- `/dashboard/admin-users.html`
+- `/dashboard/admin-approvals.html`
+- `/dashboard/admin-analytics.html`
+- `/dashboard/admin-announcements.html`
+- `/dashboard/admin-departments.html`
+- `/dashboard/admin-settings.html`
+
+## Backend Surface Map
+
+### Route groups
+
+- `/api/auth`
+- `/api/users`
+- `/api/profile`
+- `/api/admitcard`
+- `/api/attendance`
+- `/api/marks`
+- `/api/files`
+- `/api/events`
+- `/api/assignments`
+- `/api/timetable`
+- `/api/hostel`
+- `/api/admin`
+- `/api/teacher`
+- `/api/analytics`
+- `/api/notifications`
+- `/api/search`
+- `/api/health`
+- `/api/bulk`
+- `/api/ai`
+- `/api/question-bank`
+- `/api/rubrics`
+- `/api/notes`
+- `/api/forum`
+- `/api/pyq`
+- `/api/portal`
+- `/api/payments`
+- `/api/soa`
+
+### Supporting web routes
+
+- `/web/*`: obfuscated web/session routes retained for legacy flows
+- `/r/*`: encoded redirect handler retained for legacy links
+- direct public routes: `/`, `/index.html`, `/login.html`, `/register.html`, `/creator.html`
+
+## Local Development Setup
+
+### Prerequisites
+
+- Node.js `>= 18`
+- npm
+- MySQL if you want full DB-backed local development
+- Optional:
+  - Firebase service account for production-like auth
+  - OpenRouter and/or Gemini keys for AI
+  - Python/portal stack if you plan to use scraper integrations
+
+### Install dependencies
+
 ```bash
 npm install
 ```
 
-3. **Configure environment**
+### Configure environment
+
 ```bash
 cp .env.example .env
-# Edit .env with your MySQL credentials and secrets
 ```
 
-4. **Create and seed database**
-```bash
-npm run seed
-```
+Then update the values you actually want to use. At minimum:
 
-This will:
-- Create database and tables
-- Seed 3 admin accounts
-- Seed 20 teacher accounts
-- Seed 200 student accounts
-- Generate ~36,000 attendance records
-- Generate ~19,200 marks records
-- Create sample files (notes, PYQs, admit cards)
-- Create events, timetables, assignments, and announcements
+- `PORT`
+- `CLIENT_URL`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
 
-5. **Start the server**
+### Start the app
+
 ```bash
 npm run dev
 ```
 
-Server will start at `http://localhost:5000`  
-Frontend served at `http://localhost:3000` (if using serve)
+Expected local endpoints:
 
-### Portal Scraper Setup (Optional)
+- frontend: `http://localhost:3000`
+- backend: `http://localhost:5000`
 
-The portal scraper is a separate Python Flask microservice that integrates with the SOA student portal. To set it up:
+### Useful scripts
 
-1. **Navigate to scraper directory**
 ```bash
-cd scraper
+npm run dev
+npm start
+npm run dev:client
+npm run seed
+npm run seed:comprehensive
+npm run db:verify
+npm run verify:ai
+npm test
+npm run test:e2e
 ```
 
-2. **Create virtual environment**
+## Demo Accounts for Local Testing
+
+If Firebase Admin is not initialized locally, the app supports demo login fallback for all three roles.
+
+### Demo credentials
+
+| Role | Registration Number | Password |
+| --- | --- | --- |
+| Student | `STU20250001` | `Student@123` |
+| Teacher | `TCH2025001` | `Teacher@123` |
+| Admin | `ADM2025001` | `Admin@123456` |
+
+### What happens in local demo mode
+
+- login succeeds without Firebase Admin
+- `accessToken` and legacy `token` keys are stored
+- `demoMode`/prototype mode behavior is enabled where required
+- role-based dashboard redirect still happens
+- many dashboard pages can fall back to dummy/demo data for local testing
+
+## Environment Variables
+
+### Core application
+
+- `NODE_ENV`
+- `PORT`
+- `CLIENT_URL`
+- `CORS_WHITELIST`
+- `SOCKET_CORS_ORIGIN`
+
+### Database
+
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `DATABASE_URL` for hosted environments where used
+
+### JWT and auth
+
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
+- `JWT_EXPIRE`
+- `JWT_REFRESH_EXPIRE`
+
+### Firebase Admin
+
+Use either the single JSON string or split variables:
+
+- `FIREBASE_SERVICE_ACCOUNT`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+
+### AI providers
+
+- `OPENROUTER_API_KEY`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+
+### Optional Google integrations
+
+- `GOOGLE_VISION_API_KEY`
+- `GOOGLE_DRIVE_FOLDER_ID`
+- `GOOGLE_SERVICE_ACCOUNT`
+- `GOOGLE_APPLICATION_CREDENTIALS`
+
+### File and storage
+
+- `UPLOAD_DIR`
+- `MAX_FILE_SIZE`
+- `STORAGE_MODE`
+- `BACKUP_DIR`
+- `BACKUP_RETENTION_COUNT`
+
+### Feature flags and portal integration
+
+- `PORTAL_FEATURES_ENABLED`
+- `FLASK_SCRAPER_URL`
+
+### Redis
+
+- `REDIS_URL`
+- or split host/port/password settings if you use Redis directly
+
+### Important note
+
+Replace any placeholder/example values before deployment. Do not rely on example keys or secrets in committed examples for real environments.
+
+## Database, Seeding, and Demo Data
+
+### Standard seed
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install Python dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Configure environment**
-```bash
-cp .env.example .env
-# Edit .env with your Google Vision API key (for CAPTCHA solving)
-```
-
-5. **Start the scraper service**
-```bash
-python app.py
-```
-
-The scraper service will run at `http://localhost:5001`
-
-**Note:** The main application works without the scraper - students can use demo data if the scraper is unavailable.
-
-### AI Chatbot Setup (Recommended)
-
-The application includes an intelligent AI-powered chatbot that answers questions, generates study plans, and provides educational assistance.
-
-#### For Local Development:
-
-1. **Get Free API Keys** (choose at least one):
-   - **OpenRouter** (Primary): https://openrouter.ai/keys
-   - **Gemini** (Fallback): https://makersuite.google.com/app/apikey
-
-2. **Configure in .env file**:
-   ```bash
-   # OpenRouter API (Primary - Recommended)
-   OPENROUTER_API_KEY=sk-or-v1-your-actual-key-here
-   
-   # Google Gemini AI (Fallback - Optional but recommended)
-   GEMINI_API_KEY=AIza-your-actual-key-here
-   GEMINI_MODEL=gemini-1.5-flash
-   ```
-
-3. **Verify setup**:
-   ```bash
-   node verify-ai-service.js
-   ```
-   
-   You should see:
-   ```
-   ✅ OpenRouter Service initialized with API key
-   ✅ AI Service using OpenRouter API (primary)
-   ```
-
-#### For Render Deployment:
-
-1. Go to your Render dashboard
-2. Click on your service → Environment
-3. Add these environment variables:
-   - `OPENROUTER_API_KEY` = your OpenRouter key
-   - `GEMINI_API_KEY` = your Gemini key (optional)
-   - `GEMINI_MODEL` = gemini-1.5-flash
-4. Save and wait for redeployment
-
-**See detailed guide:** [AI_SERVICE_RENDER_SETUP_GUIDE.md](./AI_SERVICE_RENDER_SETUP_GUIDE.md)
-
-**AI Features Enabled:**
-- 🤖 Intelligent chatbot with context-aware responses
-- 📚 Personalized study plan generation
-- 📊 Performance prediction and recommendations
-- 💡 Subject-specific tutoring suggestions
-- ✨ General and academic question answering
-
-**Note:** The chatbot works without API keys using smart fallback responses, but AI features provide much better educational assistance.
-
----
-
-## 🎭 Demo Credentials
-
-After running `npm run seed`, use these credentials to login:
-
-### Student
-- **Registration Number:** `STU20250001`
-- **Password:** `Student@123`
-
-### Teacher
-- **Registration Number:** `TCH2025001`
-- **Password:** `Teacher@123`
-
-### Admin
-- **Registration Number:** `ADM2025001`
-- **Password:** `Admin@123456`
-
-**Login at:** `http://localhost:3000/login.html`
-
----
-
-## 📁 Project Structure
-
-```
-All_In_One_College_Website/
-├── client/                  # Frontend (vanilla HTML/CSS/JS)
-│   ├── index.html          # Landing page
-│   ├── login.html          # Login page
-│   ├── dashboard/          # Role-based dashboards
-│   ├── css/                # Stylesheets
-│   │   ├── style.css       # Main styles (glassmorphism)
-│   │   └── animations.css  # Animations and transitions
-│   ├── js/                 # JavaScript
-│   │   ├── main.js         # Core utilities, API, Socket.IO
-│   │   └── landing.js      # Landing page specific
-│   ├── assets/             # Images, icons, fonts
-│   ├── manifest.json       # PWA manifest
-│   └── service-worker.js   # Service worker for offline support
-├── server/                 # Backend (Node.js + Express)
-│   ├── index.js            # Main server file
-│   ├── database/           # Database connection and schema
-│   │   ├── db.js           # Connection pool
-│   │   └── init.sql        # Database schema
-│   ├── routes/             # API routes
-│   │   ├── auth.routes.js  # Authentication
-│   │   ├── file.routes.js  # File upload/download
-│   │   ├── attendance.routes.js
-│   │   ├── marks.routes.js
-│   │   ├── event.routes.js
-│   │   ├── assignment.routes.js
-│   │   └── ... (other routes)
-│   ├── middleware/         # Express middleware
-│   │   ├── auth.js         # JWT verification
-│   │   └── errorHandler.js # Error handling
-│   ├── socket/             # Socket.IO setup
-│   │   └── socket.js       # Real-time events
-│   └── seed/               # Database seeding
-│       ├── seed.js         # Seed script
-│       └── uploads/        # Seeded files
-├── uploads/                # User-uploaded files
-├── electron/               # Electron desktop app
-│   ├── main.js             # Electron main process
-│   └── preload.js          # Preload script
-├── scripts/                # Build and utility scripts
-│   └── build-android.js    # Android TWA builder
-├── docs/                   # Documentation
-│   └── brainstorm.md       # 30+ future features
-├── .github/workflows/      # CI/CD pipelines
-│   └── ci.yml              # GitHub Actions
-├── nginx/                  # Nginx config for production
-├── docker-compose.yml      # Docker setup
-├── Dockerfile              # App container
-├── package.json            # Dependencies and scripts
-├── .env.example            # Environment variables template
-└── README.md               # This file
-```
-
----
-
-## 🛠️ Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm start` | Start production server |
-| `npm run dev` | Start development server with hot reload |
-| `npm run seed` | Seed database with demo data |
-| `npm test` | Run unit tests with Jest |
-| `npm run test:e2e` | Run E2E tests with Playwright |
-| `npm run build:electron` | Build desktop app (exe/AppImage) |
-| `npm run build:android` | Generate Android TWA config |
-| `npm run docker:up` | Start with Docker Compose |
-| `npm run docker:down` | Stop Docker containers |
-| `npm run backup` | Backup database |
-| `npm run pm2:start` | Start with PM2 (production) |
-| `npm run pm2:stop` | Stop PM2 processes |
-
----
-
-## 🔌 API Endpoints
-
-### Authentication
-- `POST /api/auth/register-student` - Register student account
-- `POST /api/auth/register-teacher` - Register teacher account
-- `POST /api/auth/login` - Login (uses registration_number + password)
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - Logout
-- `GET /api/auth/me` - Get current user profile
-
-### Files
-- `POST /api/files/upload` - Upload file (notes, assignments, etc.)
-- `GET /api/files` - Get files list (paginated, with filters)
-- `GET /api/files/download/:id` - Download file
-- `POST /api/files/approve/:id` - Approve file (admin only)
-- `DELETE /api/files/:id` - Delete file
-- `GET /api/files/stats/overview` - File statistics
-
-### Attendance
-- `POST /api/attendance/mark` - Mark attendance (teacher/admin)
-- `GET /api/attendance/student/:id` - Get student attendance
-
-### Marks
-- `POST /api/marks/upload` - Upload marks (teacher/admin)
-- `GET /api/marks/student/:id` - Get student marks
-
-### Events
-- `GET /api/events` - Get all events
-- `POST /api/events` - Create event (teacher/admin)
-- `POST /api/events/:id/register` - Register for event
-
-### Assignments
-- `POST /api/assignments` - Create assignment (teacher/admin)
-- `GET /api/assignments/student` - Get student assignments
-- `POST /api/assignments/:id/submit` - Submit assignment (student)
-- `POST /api/assignments/:id/grade` - Grade submission (teacher/admin)
-
-### Admin
-- `GET /api/admin/users` - Get users list
-- `POST /api/admin/users` - Create user
-- `PUT /api/admin/users/:id/toggle-active` - Toggle user active status
-- `GET /api/admin/approvals/files` - Get pending file approvals
-- `GET /api/admin/logs` - Get activity logs
-
-### Analytics
-- `GET /api/analytics/overview` - System overview stats (admin)
-- `GET /api/analytics/attendance-stats` - Attendance statistics
-
-*Full API documentation available in Postman collection (coming soon)*
-
----
-
-## 🌐 Deployment
-
-### Docker Deployment (Recommended)
-
-1. **Configure environment**
-```bash
-cp .env.example .env
-# Edit .env with production values
-```
-
-2. **Build and start containers**
-```bash
-docker-compose up --build -d
-```
-
-Services will be available at:
-- Application: `http://localhost:5000`
-- MySQL: `localhost:3306`
-- Nginx: `http://localhost:80`
-
-3. **Seed the database**
-```bash
-docker-compose exec app npm run seed
-```
-
-### Manual Deployment
-
-1. **Install dependencies**
-```bash
-npm install --production
-```
-
-2. **Set environment variables**
-```bash
-export NODE_ENV=production
-export DB_HOST=your-db-host
-export DB_PASSWORD=your-db-password
-export JWT_SECRET=your-jwt-secret
-# ... other variables from .env.example
-```
-
-3. **Run database migrations**
-```bash
-mysql -u root -p < server/database/init.sql
 npm run seed
 ```
 
-4. **Start with PM2**
+### Comprehensive seed
+
 ```bash
-npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup
+npm run seed:comprehensive
 ```
 
-### Cloud Deployment
+### Profile-oriented seed
 
-#### AWS
-- Deploy backend on EC2 or ECS
-- Use RDS for MySQL
-- Use S3 for file storage (update STORAGE_MODE in .env)
-- Use CloudFront for CDN
+```bash
+npm run seed:profile
+```
 
-#### Azure
-- Deploy on Azure App Service
-- Use Azure Database for MySQL
-- Use Azure Blob Storage
+### Verification
 
-#### Google Cloud
-- Deploy on Cloud Run or Compute Engine
-- Use Cloud SQL for MySQL
-- Use Cloud Storage
+```bash
+npm run db:verify
+```
 
----
+### Local fallback behavior
 
-## 📱 Building Mobile & Desktop Apps
+This project contains multiple layers for local testing:
 
-### Android App (PWA/TWA)
+- regular DB-backed data when configured
+- seeded data after running seed scripts
+- demo auth fallback if Firebase Admin is missing
+- dummy/prototype data in parts of the dashboard when full backends are unavailable
 
-1. **Generate TWA configuration**
+## AI Services
+
+### Available AI providers
+
+- OpenRouter
+- Gemini
+
+### Main AI usage areas
+
+- chatbot responses
+- general Q&A
+- educational assistance
+- some portal/captcha related support paths
+
+### Local AI setup
+
+Set at least one of:
+
+```env
+OPENROUTER_API_KEY=your-openrouter-key
+GEMINI_API_KEY=your-gemini-key
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+### Validate AI wiring
+
+```bash
+npm run verify:ai
+npm run check:ai
+```
+
+## Portal Scraper
+
+The repository includes scraper-related backend services and a separate scraper package under `soa-student-scraper/`.
+
+### Relevant server-side files
+
+- `server/services/portal-scraper.service.js`
+- `server/services/portal-scraper-server.js`
+- `server/routes/portal.routes.js`
+- `server/routes/soa.routes.js`
+
+### Feature-flag behavior
+
+Portal features are disabled by default in example/local setup through:
+
+```env
+PORTAL_FEATURES_ENABLED=false
+```
+
+### Hosted deployment note
+
+`render.yaml` explicitly disables portal features on free-tier Render deploys:
+
+- `PORTAL_FEATURES_ENABLED=false`
+
+That prevents scraper-heavy behavior from breaking lightweight hosted environments.
+
+## Android App
+
+The canonical Android path in this repository is the native app under `android-app/`. Do not use WebView, TWA, Bubblewrap, or browser-shell guidance from older repo history.
+
+### Audit summary of the pre-migration Android state
+
+- `android-app/app/src/main/java/edu/iter/eduhub/MainActivity.java` loaded the hosted site directly in a `WebView`
+- `android-app/app/build.gradle` previously targeted `minSdk 28`, which did not satisfy the Android 10+ requirement
+- `scripts/build-android.js` previously generated Bubblewrap/TWA output under `releases/android`
+- `build-android.ps1` previously patched a website URL into the Android shell before building
+
+That older wrapper approach was not independent from the website frontend and is no longer the supported Android strategy.
+
+### Native Android architecture
+
+The Android app is intended to be a real client for the same backend, not a packaged website. The target architecture is:
+
+- Kotlin
+- Jetpack Compose for all UI
+- Navigation Compose for role-aware navigation
+- ViewModel + unidirectional state flow
+- Retrofit/OkHttp for API access
+- encrypted or otherwise protected session storage for app tokens
+- native Android file pickers, downloads, and document intents for attachments/PDF flows
+
+The detailed Android audit, parity matrix, backend contract notes, and QA checklist are tracked in `android-app/NATIVE_MIGRATION_AUDIT.md`.
+
+### Android and backend data sources
+
+The Android app uses the same backend/API layer as the website. It does not initialize a separate Firebase client SDK or maintain a second mobile-only database.
+
+- SQL-backed data: attendance, marks, timetable, assignments, analytics, departments, and most admin reporting
+- Firebase-backed data: users/auth records, file metadata, forum questions/answers, payments, AI chat logs/study plans, and stored portal imports under the user document
+- Shared portal normalization: `server/services/soa-data.service.js` converts imported portal data into a stable contract used by both website fallbacks and Android snapshot payloads
+
+For Android parity, configure the backend with the same Firebase Admin project the website/server uses. The native app then reaches that shared data through `/api/*`, not by reading Firestore directly.
+
+### Android information architecture
+
+The native app mirrors the website information architecture with native screens for:
+
+- public: home, login, register, creator, connect-portal
+- student: dashboard, attendance, marks, timetable, notes, admit card, events, clubs, hostel menu, forum, AI assistant, payments
+- teacher: dashboard, attendance, marks, assignments, notes, question bank, rubric creator, students
+- admin: dashboard, users, approvals, analytics, announcements, departments, settings
+- shared: profile/session, notifications, search, file handling, loading/error/retry states
+
+### Build the native app
+
+From the repository root:
+
 ```bash
 npm run build:android
 ```
 
-2. **Install Bubblewrap CLI**
+That script now builds the native app in `android-app/` and optionally copies the produced APK into `releases/android/`.
+
+Direct Gradle usage is also supported:
+
 ```bash
-npm install -g @bubblewrap/cli
+cd android-app
+./gradlew testDebugUnitTest assembleDebug
 ```
 
-3. **Initialize and build**
+For a release build:
+
 ```bash
-cd releases/android
-bubblewrap init --manifest=twa-manifest.json
-bubblewrap build
+cd android-app
+./gradlew testDebugUnitTest assembleRelease
 ```
 
-APK will be in `releases/android/app/build/outputs/apk/`
+PowerShell helper:
 
-**Requirements:** Android 9+ (API 28+)
-
-See `releases/android/BUILD_INSTRUCTIONS.md` for detailed steps.
-
-### Desktop App (Electron)
-
-1. **Build for your platform**
-```bash
-npm run build:electron
+```powershell
+./build-android.ps1
+./build-android.ps1 -Release
 ```
 
-Installers will be in `releases/desktop/`
+### Android setup prerequisites
 
-**Platforms:**
-- Windows: `.exe` installer
-- Linux: `.AppImage`
-- macOS: `.dmg` (requires macOS to build)
+- Android Studio Hedgehog or newer, or a recent command-line Android SDK
+- JDK 17
+- Android SDK / emulator for local device testing
+- backend access to a reachable API URL for the environment you are testing against
+- copy `android-app/local.properties.example` to `android-app/local.properties` if your local SDK path is not auto-generated
 
----
+### Android verification expectations
 
-## 🧪 Testing
+Before calling Android parity complete, verify at least:
 
-### Unit Tests
+- fresh install on Android 10+ / API 29+
+- login for student, teacher, and admin roles
+- logout and session restore after app restart
+- role-based navigation to all core screens
+- file upload/download handling
+- admit-card or PDF open/download handling
+- network failure, retry, and slow-loading states
+- back navigation, app resume, and configuration-change behavior
+
+### Parity note
+
+The Android app should use the backend/API layer only. Reusing backend rules is expected; rendering website HTML/CSS/JS inside Android UI is not. If parity gaps remain, document them as backend or Android implementation gaps, not as acceptable wrapper behavior.
+
+## Deployment on Render
+
+### Render service definition
+
+Deployment is configured in `render.yaml`.
+
+### Render defaults in this repo
+
+- service type: `web`
+- environment: `node`
+- start command: `node server/index.js`
+- build command: `npm install --omit=dev`
+- disk mounted for uploads
+
+### Required Render environment variables
+
+At minimum, configure:
+
+- `DATABASE_URL` or equivalent DB connectivity for your environment
+- `JWT_SECRET`
+- `JWT_REFRESH_SECRET`
+- `CORS_WHITELIST`
+- AI vars if you want AI in production
+- Firebase admin variables if you want full production auth flows
+
+### Render deployment flow
+
+```mermaid
+flowchart TD
+    A[Push to GitHub] --> B[Render Build]
+    B --> C[npm install --omit=dev]
+    C --> D[node server/index.js]
+    D --> E[Serve API + Static Client + Dashboards]
+    E --> F[Configured Env Vars Enable DB / AI / Firebase]
+```
+
+### Important Render notes
+
+- uploads volume is mounted through Render disk config
+- portal features are disabled by default in `render.yaml`
+- AI and Firebase require real env vars on Render
+- direct public routes and direct dashboard routes are now important to current navigation behavior
+- the current `render.yaml` uses `plan: free`, so Render can spin the service down after inactivity
+- this repo now includes `.github/workflows/render-keepalive.yml`, which pings the Render `/health` endpoint every 10 minutes as a best-effort warm-up strategy
+- by default the keepalive targets `https://iter-aio.onrender.com/health`; if your Render URL is different, set a GitHub Actions repository variable or secret named `RENDER_HEALTHCHECK_URL`
+- this keepalive reduces cold starts on free tier, but only a paid Render instance can reliably guarantee an always-on service
+
+## Testing and Verification
+
+### Automated commands available
+
 ```bash
 npm test
-```
-
-### E2E Tests
-```bash
 npm run test:e2e
+npm run test:scraper
+npm run db:verify
+npm run verify:ai
+npm run check:ai
+npm run build:android
 ```
 
-### Manual Testing Checklist
-- [ ] Register student/teacher accounts
-- [ ] Login with different roles
-- [ ] Upload a file (teacher)
-- [ ] Approve file (admin)
-- [ ] Download file (student)
-- [ ] Mark attendance (teacher)
-- [ ] View attendance (student)
-- [ ] Upload marks (teacher)
-- [ ] View marks with charts (student)
-- [ ] Create and submit assignment
-- [ ] Register for event (real-time counter update)
-- [ ] Test Socket.IO real-time features
-- [ ] Test PWA installation
-- [ ] Test offline functionality
+### Manual verification checklist
 
----
+- open home page
+- verify creator, login, register links
+- log in with student demo credentials
+- log in with teacher demo credentials
+- log in with admin demo credentials
+- verify role dashboard loads
+- test theme toggle on public pages and dashboards
+- test chatbot open/close and a general question
+- test mobile navigation and sidebar behavior
+- build `android-app/` with Gradle
+- install the APK on an Android 10+ device or emulator
+- log in on Android as student, teacher, and admin
+- verify Android session restore after app restart
+- verify Android file download/upload and admit-card/PDF handling
+- verify Android error, retry, and back-navigation behavior
 
-## 🔒 Security
+## Troubleshooting
 
-- **Authentication:** JWT with access and refresh tokens
-- **Passwords:** Hashed with bcrypt (cost factor: 12)
-- **Authorization:** Role-based access control with middleware
-- **Input Validation:** express-validator for all inputs
-- **Rate Limiting:** 100 requests per 15 minutes per IP
-- **Security Headers:** Helmet middleware
-- **CORS:** Whitelist-based origin validation
-- **SQL Injection Protection:** Prepared statements (mysql2)
-- **File Upload Security:** Type validation, size limits, sanitized filenames
-- **XSS Protection:** Content Security Policy headers
+### Login works but redirects to a broken path
 
----
+Cause:
 
-## 🎨 UI/UX Features
+- dashboard URLs were historically being encoded/rewritten incorrectly
 
-- **Glassmorphism Design** - Modern frosted glass effect with blur
-- **Dark/Light Mode** - Theme toggle with persistence
-- **Lottie Animations** - Smooth vector animations for loading and success states
-- **Skeleton Loading** - Shimmer effect for better perceived performance
-- **Micro-interactions** - Hover effects, transitions, and feedback
-- **Responsive Design** - Mobile-first approach, works on all screen sizes
-- **Accessibility** - ARIA labels, keyboard navigation, high contrast support
-- **Smooth Transitions** - Page transitions, fade-ins, slide animations
-- **Chart Visualizations** - Chart.js for attendance and marks analytics
+Current expectation:
 
----
+- dashboard routes should resolve directly like `/dashboard/student.html`
 
-## 🤝 Contributing
+### Firebase Admin SDK not initialized
 
-Contributions are welcome! Please follow these guidelines:
+For local testing:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- use the demo credentials listed in this README
 
-**Code Style:**
-- Use ESLint and Prettier
-- Follow existing patterns
-- Write meaningful commit messages
-- Add tests for new features
-- Update documentation
+For production-like auth:
 
----
+- provide `FIREBASE_SERVICE_ACCOUNT`
+- or provide split Firebase env vars
 
-## 📚 Documentation
+### AI chatbot gives fallback or unavailable responses
 
-- **Brainstorm Document:** See `docs/brainstorm.md` for 30+ future feature ideas
-- **API Documentation:** Coming soon (Swagger/OpenAPI)
-- **Architecture:** Coming soon
-- **Database Schema:** See `server/database/init.sql`
+Check:
 
----
+- `OPENROUTER_API_KEY`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `npm run verify:ai`
 
-## 🐛 Known Issues
+### Local app starts but pages look broken
 
-- Desktop app requires running backend separately (not bundled)
-- Android TWA requires production HTTPS domain for full functionality
-- Chart.js may have rendering issues on very old browsers
-- Large file uploads (>10MB) may timeout on slow connections
+Check:
 
----
+- run from repo root
+- ensure static frontend is served on `3000`
+- ensure backend is on `5000`
+- hard refresh the browser after major CSS/JS changes
 
-## 📝 License
+### Database issues
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Check:
 
----
+- `.env` DB settings
+- MySQL availability
+- `npm run seed`
+- `npm run db:verify`
 
-## 👥 Team
+## Security Notes
 
-**ITER Development Team**
-- Backend: Node.js + Express + MySQL
-- Frontend: Vanilla HTML/CSS/JavaScript
-- Real-time: Socket.IO
-- Mobile: PWA + TWA
-- Desktop: Electron
+- replace all placeholder/example secrets before deploying
+- keep Firebase admin credentials out of source control
+- keep AI keys out of source control
+- use strong JWT secrets in production
+- review `.env.example` and clean any sample values before using it as a production baseline
 
----
+## Current Project Status
 
-## 🙏 Acknowledgments
+### What is already in place
 
-- **ITER/SOA University** - Inspiration and requirements
-- **Open Source Community** - Libraries and tools used
-- **Contributors** - Everyone who has contributed to this project
+- role-based dashboards
+- direct public routing
+- responsive redesign work across public and dashboard surfaces
+- creator/login/register/home alignment improvements
+- chatbot styling and shorter general-answer behavior
+- local demo auth fallback for all three primary roles
+- Render deployment file
+- native Android app path under `android-app/`
+- scraper-related code and package
 
----
+### Android status rule
 
-## � Documentation
+- the supported Android direction is native-only
+- do not regenerate or reintroduce WebView/TWA/Bubblewrap delivery paths
+- if a screen is not implemented natively yet, record it as a parity gap rather than routing users back into the website frontend
 
-### Enhancement Documentation (v2.0.0)
-- **[Enhancement README](ENHANCEMENT_README.md)** - Quick start guide for new features
-- **[Enhancement Summary](ENHANCEMENT_SUMMARY.md)** - Detailed feature breakdown and statistics
-- **[Installation Guide](ENHANCEMENT_INSTALLATION_GUIDE.md)** - Step-by-step installation instructions
-- **[Implementation Roadmap](IMPLEMENTATION_ROADMAP.md)** - Development timeline and progress
-- **[Developer Quick Reference](DEVELOPER_QUICK_REFERENCE.md)** - API reference and code examples
+### What this README now replaces
 
-### Original Documentation
-- **Architecture:** `ARCHITECTURE.md` - System architecture overview
-- **Profile Feature:** `PROFILE_README.md` - User profile functionality
-- **UI/UX Guide:** `VISUAL_COMPONENT_REFERENCE.md` - UI components reference
-- **Quick Start:** `START_HERE.md` - Getting started guide
+This file supersedes the previous scattered repository docs covering:
 
----
+- setup and quick starts
+- deployment notes
+- UI/UX redesign summaries
+- responsive-fix summaries
+- AI setup notes
+- scraper notes
+- dashboard enhancement summaries
+- dummy-data notes
+- testing checklists
+- architecture references
 
-## �📞 Support
+### Documentation policy going forward
 
-For issues and questions:
-- **GitHub Issues:** [Create an issue](https://github.com)
-- **Documentation:** See files above
-- **Quick Reference:** Check `DEVELOPER_QUICK_REFERENCE.md`
-
----
-
-## 🗺️ Roadmap
-
-See `docs/brainstorm.md` for detailed feature roadmap including:
-- AI-powered study recommendations
-- Two-factor authentication
-- Payment gateway integration
-- Attendance anomaly detection
-- Native mobile app (React Native/Flutter)
-- And 25+ more features...
-
----
-
-**Built with ❤️ for ITER/SOA University**
-
-**Star ⭐ this repo if you find it helpful!**
-#   I T E R _ L i v e  
- 
+Use this root `README.md` as the canonical project document. If the project evolves, update this file instead of creating new standalone summary Markdown files unless there is a very strong reason to keep documentation in a separate location.

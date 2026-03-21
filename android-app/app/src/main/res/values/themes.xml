@@ -1,24 +1,9 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme -->
-    <style name="Theme.ITEREduHub" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="colorPrimary">#6366f1</item>
-        <item name="colorPrimaryVariant">#4f46e5</item>
-        <item name="colorOnPrimary">#ffffff</item>
-        <item name="colorSecondary">#10b981</item>
-        <item name="colorSecondaryVariant">#059669</item>
-        <item name="colorOnSecondary">#ffffff</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-    </style>
-
-    <style name="Theme.ITEREduHub.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowFullscreen">false</item>
-    </style>
-
-    <style name="SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+<resources>
+    <style name="Theme.ITEREduHub" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">#0f172a</item>
-        <item name="android:navigationBarColor">#0f172a</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

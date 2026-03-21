@@ -1,183 +1,105 @@
 #!/usr/bin/env pwsh
-# Build Android APK for ITER EduHub
-# This script automates the Android app build process
 
 param(
     [switch]$Release,
-    [switch]$Debug,
-    [string]$WebsiteUrl = "https://your-domain.com"
+    [switch]$SkipUnitTests,
+    [switch]$SkipCopy
 )
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🤖 ITER EduHub - Android Build Script" -ForegroundColor Cyan
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Check if we're in the right directory
 $androidAppDir = Join-Path $PSScriptRoot "android-app"
+$appBuildGradle = Join-Path $androidAppDir "app\build.gradle"
+
 if (-not (Test-Path $androidAppDir)) {
-    Write-Host "❌ Error: android-app directory not found!" -ForegroundColor Red
-    Write-Host "Please run this script from the project root." -ForegroundColor Yellow
+    Write-Host "android-app directory not found in the repository root." -ForegroundColor Red
     exit 1
 }
 
-# Check for Android Studio / SDK
+if (-not (Test-Path $appBuildGradle)) {
+    Write-Host "Missing Android module file: $appBuildGradle" -ForegroundColor Red
+    exit 1
+}
+
+$gradleText = Get-Content $appBuildGradle -Raw
+$minSdkMatch = [regex]::Match($gradleText, "minSdk(?:Version)?\s+(\d+)")
+if (-not $minSdkMatch.Success) {
+    Write-Host "Unable to determine minSdk from android-app/app/build.gradle." -ForegroundColor Red
+    exit 1
+}
+
+$minSdk = [int]$minSdkMatch.Groups[1].Value
+if ($minSdk -lt 29) {
+    Write-Host "The Android module must target Android 10+ (minSdk 29+). Found minSdk $minSdk." -ForegroundColor Red
+    exit 1
+}
+
 $androidHome = $env:ANDROID_HOME
 if (-not $androidHome) {
     $androidHome = $env:ANDROID_SDK_ROOT
 }
 
 if (-not $androidHome) {
-    Write-Host "⚠️  Warning: ANDROID_HOME not set" -ForegroundColor Yellow
-    Write-Host "Please install Android Studio or set ANDROID_HOME environment variable" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Download Android Studio: https://developer.android.com/studio" -ForegroundColor Cyan
-    
-    $continue = Read-Host "Continue anyway? (y/n)"
-    if ($continue -ne "y") {
-        exit 1
-    }
+    Write-Host "ANDROID_HOME / ANDROID_SDK_ROOT is not set. Android Studio or the Android SDK must be installed." -ForegroundColor Yellow
 }
 
-# Update website URL in MainActivity.java
-Write-Host "📝 Updating website URL to: $WebsiteUrl" -ForegroundColor Green
-$mainActivityPath = Join-Path $androidAppDir "app\src\main\java\edu\iter\eduhub\MainActivity.java"
-
-if (Test-Path $mainActivityPath) {
-    $content = Get-Content $mainActivityPath -Raw
-    $content = $content -replace 'private static final String WEBSITE_URL = ".*";', "private static final String WEBSITE_URL = `"$WebsiteUrl`";"
-    Set-Content -Path $mainActivityPath -Value $content
-    Write-Host "✓ Website URL updated" -ForegroundColor Green
-} else {
-    Write-Host "⚠️  MainActivity.java not found, skipping URL update" -ForegroundColor Yellow
-}
-
-# Navigate to android-app directory
 Set-Location $androidAppDir
 
-# Check for Gradle wrapper
 if (-not (Test-Path "gradlew.bat")) {
-    Write-Host "❌ Error: Gradle wrapper not found!" -ForegroundColor Red
-    Write-Host "Please open the project in Android Studio first to initialize Gradle." -ForegroundColor Yellow
+    Write-Host "Gradle wrapper not found in android-app/." -ForegroundColor Red
     exit 1
 }
 
-# Determine build type
-$buildType = "Debug"
-if ($Release) {
-    $buildType = "Release"
-    Write-Host "🔨 Building RELEASE APK..." -ForegroundColor Yellow
-} else {
-    Write-Host "🔨 Building DEBUG APK..." -ForegroundColor Yellow
+$gradleTasks = @()
+if (-not $SkipUnitTests) {
+    $gradleTasks += "testDebugUnitTest"
 }
 
-Write-Host ""
+$buildTask = if ($Release) { "assembleRelease" } else { "assembleDebug" }
+$gradleTasks += $buildTask
 
-# Clean previous builds
-Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Cyan
-& .\gradlew.bat clean
+Write-Host "Building the native Android client..." -ForegroundColor Cyan
+Write-Host "Gradle tasks: $($gradleTasks -join ' ')" -ForegroundColor White
 
-# Build APK
-Write-Host ""
-Write-Host "⚙️  Building APK (this may take a few minutes)..." -ForegroundColor Cyan
-Write-Host ""
-
-if ($Release) {
-    & .\gradlew.bat assembleRelease
-} else {
-    & .\gradlew.bat assembleDebug
-}
+& .\gradlew.bat @gradleTasks --no-daemon
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "❌ Build failed!" -ForegroundColor Red
+    Write-Host "Native Android build failed." -ForegroundColor Red
     exit 1
 }
 
-# Find the APK
-$apkPath = ""
-if ($Release) {
-    $apkPath = "app\build\outputs\apk\release\app-release-unsigned.apk"
-    if (Test-Path "app\build\outputs\apk\release\app-release.apk") {
-        $apkPath = "app\build\outputs\apk\release\app-release.apk"
-    }
+$artifactPath = if ($Release) {
+    "app\build\outputs\apk\release\app-release.apk"
 } else {
-    $apkPath = "app\build\outputs\apk\debug\app-debug.apk"
+    "app\build\outputs\apk\debug\app-debug.apk"
 }
 
-if (-not (Test-Path $apkPath)) {
-    Write-Host ""
-    Write-Host "❌ APK not found at expected location!" -ForegroundColor Red
-    exit 1
+if (-not (Test-Path $artifactPath)) {
+    Write-Host "Build completed, but no APK was found at $artifactPath." -ForegroundColor Yellow
+    Write-Host "Collect the produced output directly from android-app/app/build/outputs if you built an AAB instead." -ForegroundColor Yellow
+    exit 0
 }
 
-# Get APK size
-$apkSize = (Get-Item $apkPath).Length / 1MB
+$apkSize = (Get-Item $artifactPath).Length / 1MB
 $apkSizeStr = "{0:N2} MB" -f $apkSize
 
-Write-Host ""
-Write-Host "✅ Build successful!" -ForegroundColor Green
-Write-Host ""
-Write-Host "📦 APK Details:" -ForegroundColor Cyan
-Write-Host "   Location: $apkPath" -ForegroundColor White
-Write-Host "   Size: $apkSizeStr" -ForegroundColor White
-Write-Host "   Type: $buildType" -ForegroundColor White
-Write-Host ""
+Write-Host "Native Android build completed." -ForegroundColor Green
+Write-Host "APK: $artifactPath" -ForegroundColor White
+Write-Host "Size: $apkSizeStr" -ForegroundColor White
 
-# Copy to releases folder
-$releasesDir = Join-Path $PSScriptRoot "releases"
-if (-not (Test-Path $releasesDir)) {
-    New-Item -ItemType Directory -Path $releasesDir | Out-Null
-}
-
-$releaseApkName = "ITER-EduHub-v1.0.0-$buildType.apk"
-$releaseApkPath = Join-Path $releasesDir $releaseApkName
-
-Copy-Item $apkPath $releaseApkPath -Force
-Write-Host "📋 Copied to: $releaseApkPath" -ForegroundColor Green
-
-# Installation instructions
-Write-Host ""
-Write-Host "📱 Installation Instructions:" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Method 1 - USB Installation:" -ForegroundColor Yellow
-Write-Host "   1. Connect Android device via USB" -ForegroundColor White
-Write-Host "   2. Enable USB Debugging in Developer Options" -ForegroundColor White
-Write-Host "   3. Run: adb install `"$releaseApkPath`"" -ForegroundColor White
-Write-Host ""
-Write-Host "Method 2 - Direct Installation:" -ForegroundColor Yellow
-Write-Host "   1. Transfer APK to your Android device" -ForegroundColor White
-Write-Host "   2. Open the APK file on device" -ForegroundColor White
-Write-Host "   3. Tap 'Install' (may need to enable 'Unknown Sources')" -ForegroundColor White
-Write-Host ""
-
-# Offer to install via ADB
-if (Get-Command adb -ErrorAction SilentlyContinue) {
-    $devices = & adb devices | Select-Object -Skip 1 | Where-Object { $_ -match "device$" }
-    
-    if ($devices) {
-        Write-Host "🔌 Android device detected!" -ForegroundColor Green
-        $install = Read-Host "Install APK now? (y/n)"
-        
-        if ($install -eq "y") {
-            Write-Host ""
-            Write-Host "📲 Installing APK..." -ForegroundColor Cyan
-            & adb install -r $releaseApkPath
-            
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "✅ Installation successful!" -ForegroundColor Green
-                Write-Host "The app should now appear on your device." -ForegroundColor Green
-            } else {
-                Write-Host "❌ Installation failed!" -ForegroundColor Red
-            }
-        }
+if (-not $SkipCopy) {
+    $releasesDir = Join-Path $PSScriptRoot "releases\android"
+    if (-not (Test-Path $releasesDir)) {
+        New-Item -ItemType Directory -Path $releasesDir -Force | Out-Null
     }
+
+    $releaseApkName = if ($Release) { "ITERasn-hub-native-release.apk" } else { "ITERasn-hub-native-debug.apk" }
+    $releaseApkPath = Join-Path $releasesDir $releaseApkName
+
+    Copy-Item $artifactPath $releaseApkPath -Force
+    Write-Host "Copied APK to: $releaseApkPath" -ForegroundColor Green
 }
 
-Write-Host ""
-Write-Host "✅ All done!" -ForegroundColor Green
-Write-Host ""
+Write-Host "This script now builds the native Android app only. It no longer rewrites WebView URLs or generates TWA/Bubblewrap output." -ForegroundColor Cyan
 
-# Return to original directory
 Set-Location $PSScriptRoot

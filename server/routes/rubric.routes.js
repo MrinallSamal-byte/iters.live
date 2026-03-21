@@ -60,11 +60,18 @@ router.put('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [
   try {
     const fields = [];
     const params = [];
-    if (typeof req.body.name !== 'undefined') { fields.push('name = ?'); params.push(req.body.name); }
-    if (typeof req.body.criteria !== 'undefined') { fields.push('criteria = ?'); params.push(JSON.stringify(req.body.criteria)); }
+    let nextParam = 1;
+    if (typeof req.body.name !== 'undefined') {
+      fields.push(`name = $${nextParam++}`);
+      params.push(req.body.name);
+    }
+    if (typeof req.body.criteria !== 'undefined') {
+      fields.push(`criteria = $${nextParam++}`);
+      params.push(JSON.stringify(req.body.criteria));
+    }
     if (fields.length === 0) return res.json({ success: true, message: 'No changes' });
     params.push(Number(req.params.id));
-    await query(`UPDATE rubrics SET ${fields.join(', ')} WHERE id = ?`, params);
+    await query(`UPDATE rubrics SET ${fields.join(', ')} WHERE id = $${nextParam}`, params);
     res.json({ success: true, message: 'Updated' });
   } catch (error) {
     console.error('Error context:', error);

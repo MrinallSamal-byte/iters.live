@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Native Android App
 
 on:
   # Trigger on push to main branch or new tags
@@ -38,6 +38,11 @@ jobs:
 
     - name: Make gradlew executable
       run: chmod +x ./android-app/gradlew
+
+    - name: Run Android Unit Tests
+      run: |
+        cd android-app
+        ./gradlew testDebugUnitTest --no-daemon
 
     - name: Build Debug APK
       run: |
@@ -87,21 +92,18 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.release_tag.outputs.tag }}
-        name: ITER EduHub ${{ steps.release_tag.outputs.tag }}
+        name: ITERasn hub ${{ steps.release_tag.outputs.tag }}
         body: |
-          ## ITER EduHub Android App
+          ## ITERasn hub Native Android App
           
           **Version**: ${{ steps.release_tag.outputs.tag }}
           **Build**: #${{ github.run_number }}
           
           ### 📱 Features
-          - Full website experience in native Android app
-          - All pages and features from the website
-          - Offline caching support
-          - File download capability
-          - Back button navigation
-          - Pull to refresh
-          - Swipe to refresh
+          - Native Android client built from `android-app/`
+          - Intended API-backed student, teacher, and admin flows
+          - Kotlin/Gradle build artifact generated from the repository Android module
+          - Not a WebView, TWA, or Bubblewrap wrapper
           
           ### 📥 Installation
           1. Download **ITER.apk** below
@@ -113,9 +115,9 @@ jobs:
           5. Open the app and enjoy!
           
           ### 📋 Requirements
-          - Android 9.0 (Pie) or higher (API 28+)
-          - ~3-5 MB storage space
-          - Internet connection for content
+          - Android 10 or higher (API 29+)
+          - Android package installation enabled on the device
+          - Network access to the configured backend/API
           
           ### 🔗 Direct Download
           Click on `ITER.apk` in the Assets section below to download.

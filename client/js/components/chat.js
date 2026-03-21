@@ -1,7 +1,7 @@
 /**
  * Real-Time Chat Component
  * Study group chat with typing indicators and file attachments
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class ChatComponent {
     constructor(groupId, userId, userName) {

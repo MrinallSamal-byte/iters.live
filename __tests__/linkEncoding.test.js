@@ -6,6 +6,55 @@
 describe('Link Encoding Module', () => {
   // Simulate the LinkEncoding functions (since this is a client-side module)
   const LinkEncoding = {
+    DIRECT_PUBLIC_ROUTES: new Set([
+      '/',
+      '/index.html',
+      '/home',
+      '/about',
+      '/features',
+      '/academics',
+      '/contact',
+      '/login',
+      '/login.html',
+      '/register',
+      '/register.html',
+      '/creator',
+      '/creator.html',
+      '/connect-portal',
+      '/connect-portal.html',
+      '/soa-scraper',
+      '/soa-scraper.html'
+    ]),
+    DIRECT_APP_ROUTE_PREFIXES: [
+      '/dashboard/'
+    ],
+
+    stripHashAndQuery(url) {
+      if (!url || typeof url !== 'string') return '';
+
+      const hashIndex = url.indexOf('#');
+      const queryIndex = url.indexOf('?');
+      let cutIndex = url.length;
+
+      if (hashIndex !== -1) cutIndex = Math.min(cutIndex, hashIndex);
+      if (queryIndex !== -1) cutIndex = Math.min(cutIndex, queryIndex);
+
+      return url.slice(0, cutIndex);
+    },
+
+    isDirectRoute(url) {
+      if (!url || typeof url !== 'string') return false;
+      if (url === '#' || url.startsWith('#')) return true;
+      if (this.isExternalLink(url) || this.isStaticAsset(url)) return false;
+
+      const basePath = this.stripHashAndQuery(url) || '/';
+      if (this.DIRECT_PUBLIC_ROUTES.has(basePath)) return true;
+
+      if (basePath === '/dashboard') return true;
+
+      return this.DIRECT_APP_ROUTE_PREFIXES.some(prefix => basePath.startsWith(prefix));
+    },
+
     isEncoded(str) {
       if (!str || typeof str !== 'string') return false;
       // Minimum length of 12 to avoid false positives
@@ -20,6 +69,7 @@ describe('Link Encoding Module', () => {
       if (this.isEncoded(raw)) return raw;
       if (raw === '' || raw === '#' || raw.startsWith('#')) return raw;
       if (this.isExternalLink(raw)) return raw;
+      if (this.isDirectRoute(raw)) return raw;
       // Don't encode javascript:, vbscript:, or data: URLs (security-sensitive)
       const lowerRaw = raw.toLowerCase();
       if (lowerRaw.startsWith('javascript:') || 
@@ -117,7 +167,7 @@ describe('Link Encoding Module', () => {
 
   describe('encodeLink', () => {
     it('should encode a simple URL path', () => {
-      const raw = '/dashboard/student.html';
+      const raw = '/search.html?q=test';
       const encoded = LinkEncoding.encodeLink(raw);
       expect(encoded).not.toBe(raw);
       expect(LinkEncoding.isEncoded(encoded)).toBe(true);
@@ -144,6 +194,16 @@ describe('Link Encoding Module', () => {
       expect(LinkEncoding.encodeLink('https://google.com')).toBe('https://google.com');
       expect(LinkEncoding.encodeLink('mailto:test@example.com')).toBe('mailto:test@example.com');
       expect(LinkEncoding.encodeLink('tel:+1234567890')).toBe('tel:+1234567890');
+    });
+
+    it('should not encode direct public routes', () => {
+      expect(LinkEncoding.encodeLink('/connect-portal.html')).toBe('/connect-portal.html');
+      expect(LinkEncoding.encodeLink('/soa-scraper.html')).toBe('/soa-scraper.html');
+    });
+
+    it('should not encode dashboard routes', () => {
+      expect(LinkEncoding.encodeLink('/dashboard/student.html')).toBe('/dashboard/student.html');
+      expect(LinkEncoding.encodeLink('/dashboard/student-personal-info.html')).toBe('/dashboard/student-personal-info.html');
     });
 
     it('should not encode API endpoints', () => {
@@ -259,6 +319,22 @@ describe('Link Encoding Module', () => {
     it('should not identify HTML pages as static', () => {
       expect(LinkEncoding.isStaticAsset('/login.html')).toBe(false);
       expect(LinkEncoding.isStaticAsset('/dashboard/student.html')).toBe(false);
+    });
+  });
+
+  describe('isDirectRoute', () => {
+    it('should treat public portal routes as direct', () => {
+      expect(LinkEncoding.isDirectRoute('/connect-portal.html')).toBe(true);
+      expect(LinkEncoding.isDirectRoute('/soa-scraper.html')).toBe(true);
+    });
+
+    it('should treat dashboard routes as direct', () => {
+      expect(LinkEncoding.isDirectRoute('/dashboard/student.html')).toBe(true);
+      expect(LinkEncoding.isDirectRoute('/dashboard/student-personal-info.html?tab=contact')).toBe(true);
+    });
+
+    it('should not treat arbitrary application pages as direct', () => {
+      expect(LinkEncoding.isDirectRoute('/search.html?q=test')).toBe(false);
     });
   });
 

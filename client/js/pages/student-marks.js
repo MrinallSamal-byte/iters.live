@@ -90,6 +90,11 @@ async function loadMarksData() {
 
 function displayMarks(data) {
     const { summary } = data;
+    const isLightTheme = document.body.classList.contains('light-theme');
+    const axisColor = isLightTheme ? '#1f2937' : '#f5f4ef';
+    const gridColor = isLightTheme ? 'rgba(17, 17, 17, 0.08)' : 'rgba(255, 255, 255, 0.1)';
+    const lineColor = '#ff6b5e';
+    const lineFill = isLightTheme ? 'rgba(255, 107, 94, 0.12)' : 'rgba(255, 107, 94, 0.16)';
     
     if (!summary || summary.length === 0) {
         document.getElementById('marksTableBody').innerHTML = 
@@ -160,10 +165,16 @@ function displayMarks(data) {
                     datasets: [{
                         label: 'SGPA',
                         data: [7.8, 8.2, 8.5, parseFloat(sgpa)],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderColor: lineColor,
+                        backgroundColor: lineFill,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: lineColor,
+                        pointBorderColor: isLightTheme ? '#ffffff' : '#181818',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -177,11 +188,11 @@ function displayMarks(data) {
                             beginAtZero: false,
                             min: 7,
                             max: 10,
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: axisColor },
+                            grid: { color: gridColor }
                         },
                         x: {
-                            ticks: { color: '#fff' },
+                            ticks: { color: axisColor },
                             grid: { display: false }
                         }
                     }
@@ -213,7 +224,7 @@ function displayMarks(data) {
                     labels: Object.keys(grades),
                     datasets: [{
                         data: Object.values(grades),
-                        backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'],
+                        backgroundColor: ['#ff6b5e', '#ff8d71', '#f7b267', '#38b26d', '#7b7b7b'],
                         borderWidth: 0
                     }]
                 },

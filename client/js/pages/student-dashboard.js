@@ -56,6 +56,7 @@
     // Render static content immediately
     renderTodaySchedule();
     renderRecentActivity();
+    renderSoaPortalBanner();
 
     // Fetch all data in parallel for faster loading
     await refreshDashboardData();
@@ -168,6 +169,19 @@
       el.textContent = txt;
       el.classList.remove('loading-skeleton');
     }
+  }
+
+  function formatDateTime(value) {
+    if (!value) return 'recently';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
   }
 
   async function getAttendance(forceFresh = false) {
@@ -542,5 +556,80 @@
         </div>
       </div>
     `).join('');
+  }
+
+  async function renderSoaPortalBanner() {
+    const container = document.getElementById('soaPortalBanner');
+    if (!container) return;
+
+    try {
+      const response = await APP.API.get('/soa/status');
+      const connection = response.connection || {};
+      const portalEnabled = response.portalEnabled !== false;
+      const hasImportedData = Boolean(connection.hasImportedData);
+      const isConnected = Boolean(connection.connected);
+
+      let title = 'Connect your SOA portal';
+      let copy = 'Import personal info, contact info, qualifications, attendance, and marks from the official SOA portal into ITERasn hub.';
+      let primaryLabel = 'Connect SOA Portal';
+      let primaryHref = '/connect-portal.html';
+      let secondaryLabel = hasImportedData ? 'Open SOA Data' : 'Student Dashboard';
+      let secondaryHref = hasImportedData ? '/dashboard/student-personal-info.html' : '/dashboard/student.html';
+
+      if (!portalEnabled && hasImportedData) {
+        title = 'Saved SOA data is available';
+        copy = `Live SOA import is unavailable right now, but your saved SOA data${connection.lastSynced ? ` from ${formatDateTime(connection.lastSynced)}` : ''} is still available inside the app.`;
+        primaryLabel = 'Open SOA Data';
+        primaryHref = '/dashboard/student-personal-info.html';
+        secondaryLabel = 'Connect Later';
+        secondaryHref = '/connect-portal.html';
+      } else if (!portalEnabled) {
+        title = 'Live SOA import is unavailable';
+        copy = 'You can keep using the dashboard and switch to demo mode from the connect page until live SOA import becomes available again.';
+        primaryLabel = 'Open Connect Page';
+        primaryHref = '/connect-portal.html';
+        secondaryLabel = 'View Marks';
+        secondaryHref = '/dashboard/student-marks.html';
+      } else if (isConnected) {
+        title = 'SOA portal connected';
+        copy = `Your SOA data is linked${connection.lastSynced ? ` and was last synced on ${formatDateTime(connection.lastSynced)}` : ''}. Attendance and marks will fall back to this import when native records are missing.`;
+        primaryLabel = 'Open SOA Data';
+        primaryHref = '/dashboard/student-personal-info.html';
+        secondaryLabel = 'Refresh Import';
+        secondaryHref = '/connect-portal.html';
+      } else if (hasImportedData) {
+        title = 'Saved SOA import available';
+        copy = `You have saved SOA data${connection.lastSynced ? ` from ${formatDateTime(connection.lastSynced)}` : ''}. Reconnect to refresh it from the official portal.`;
+        primaryLabel = 'Open SOA Data';
+        primaryHref = '/dashboard/student-personal-info.html';
+        secondaryLabel = 'Reconnect';
+        secondaryHref = '/connect-portal.html';
+      }
+
+      container.innerHTML = `
+        <div class="soa-banner-shell">
+          <div class="soa-banner-copy">
+            <h3>${APP.sanitize(title)}</h3>
+            <p>${APP.sanitize(copy)}</p>
+          </div>
+          <div class="soa-banner-actions">
+            <a class="soa-banner-btn" href="${primaryHref}">${APP.sanitize(primaryLabel)}</a>
+            <a class="soa-banner-link" href="${secondaryHref}">${APP.sanitize(secondaryLabel)}</a>
+          </div>
+        </div>
+      `;
+    } catch (_) {
+      container.innerHTML = `
+        <div class="soa-banner-shell">
+          <div class="soa-banner-copy">
+            <h3>Connect your SOA portal</h3>
+            <p>Import your official SOA attendance, marks, and personal information into ITERasn hub.</p>
+          </div>
+          <div class="soa-banner-actions">
+            <a class="soa-banner-btn" href="/connect-portal.html">Connect SOA Portal</a>
+          </div>
+        </div>
+      `;
+    }
   }
 })();

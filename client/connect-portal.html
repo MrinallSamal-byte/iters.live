@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#6366f1">
-    <title>Connect Portal - ITER EduHub</title>
+    <title>Connect SOA Portal - ITERasn hub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/responsive.css">
@@ -13,329 +13,533 @@
     <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="/css/responsive-universal.css">
     <link rel="stylesheet" href="/css/button-fixes.css">
-    <link rel="stylesheet" href="/css/login-split.css">
     <link rel="manifest" href="/manifest.json">
     <style>
-        .portal-connect-container {
+        .portal-page {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 32px 20px 48px;
         }
 
-        .portal-card {
+        .portal-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .hero-card,
+        .flow-card,
+        .support-card,
+        .status-card,
+        .demo-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(18px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            max-width: 520px;
-            width: 100%;
-            box-shadow: 0 8px 32px var(--glass-shadow);
+            box-shadow: 0 18px 45px var(--glass-shadow);
         }
 
-        .portal-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .portal-header h1 {
-            font-size: 1.75rem;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .portal-header p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .portal-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Data Source Selection */
-        .data-source-selection {
+        .hero-card {
+            padding: 2rem;
             margin-bottom: 1.5rem;
         }
 
-        .data-source-selection h3 {
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.14);
+            color: #c7d2fe;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            margin: 0 0 0.85rem;
+            color: var(--text-primary);
+            font-size: clamp(2rem, 3vw, 2.7rem);
+            line-height: 1.08;
+        }
+
+        .hero-copy {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 720px;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .hero-note {
+            padding: 1.2rem 1.3rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(15, 23, 42, 0.15));
+        }
+
+        .hero-note h2 {
+            margin: 0 0 0.6rem;
             color: var(--text-primary);
             font-size: 1.1rem;
-            margin-bottom: 1rem;
-            text-align: center;
         }
 
-        .source-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .source-option {
-            padding: 1.25rem;
-            border: 2px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            background: rgba(255, 255, 255, 0.02);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .source-option:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.1);
-        }
-
-        .source-option.active {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.15);
-        }
-
-        .source-option .icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .source-option h4 {
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .source-option p {
+        .hero-note p,
+        .hero-note li {
             color: var(--text-secondary);
-            font-size: 0.8rem;
+            font-size: 0.92rem;
+            line-height: 1.65;
         }
 
-        /* Login Form */
-        .portal-form {
+        .hero-note ul {
+            margin: 0;
+            padding-left: 1rem;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+            gap: 1.5rem;
+        }
+
+        .flow-card,
+        .support-card,
+        .status-card,
+        .demo-card {
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            margin: 0 0 0.45rem;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+        }
+
+        .section-copy {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .step-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .step-card {
+            padding: 1.15rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(10, 16, 30, 0.26);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .step-card.active {
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .step-card.complete {
+            border-color: rgba(34, 197, 94, 0.45);
+        }
+
+        .step-header {
+            display: flex;
+            gap: 0.9rem;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .step-number {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(99, 102, 241, 0.16);
+            color: #c7d2fe;
+            font-weight: 700;
+        }
+
+        .step-card.complete .step-number {
+            background: rgba(34, 197, 94, 0.16);
+            color: #bbf7d0;
+        }
+
+        .step-header h3 {
+            margin: 0 0 0.25rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .step-header p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .step-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-ghost {
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            border: none;
+            color: white;
+            padding: 0.95rem 1.1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            min-width: 210px;
+        }
+
+        .btn-primary:hover:not(:disabled),
+        .btn-secondary:hover:not(:disabled),
+        .btn-ghost:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled,
+        .btn-secondary:disabled,
+        .btn-ghost:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.9rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .btn-ghost {
+            border: none;
+            color: #c7d2fe;
+            padding: 0.25rem 0;
+            background: transparent;
+            font-size: 0.88rem;
+            justify-content: flex-start;
+        }
+
+        .status-banner {
             display: none;
-            margin-bottom: 1.5rem;
+            margin-top: 1.5rem;
+            padding: 1rem 1.1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
-        .portal-form.visible {
+        .status-banner.visible {
             display: block;
         }
 
-        .form-group {
-            margin-bottom: 1rem;
+        .status-banner.info {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #bfdbfe;
+        }
+
+        .status-banner.success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #bbf7d0;
+        }
+
+        .status-banner.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fecaca;
+        }
+
+        .status-banner.warning {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #fde68a;
+        }
+
+        .status-banner strong {
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .captcha-shell {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            background: rgba(99, 102, 241, 0.06);
+        }
+
+        .captcha-shell.visible {
+            display: block;
+        }
+
+        .captcha-frame {
+            min-height: 92px;
+            border-radius: 14px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            margin-bottom: 0.9rem;
+            overflow: hidden;
+        }
+
+        .captcha-frame img {
+            max-width: 100%;
+            max-height: 70px;
+            object-fit: contain;
+        }
+
+        .captcha-frame span {
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .portal-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
         }
 
         .form-group label {
             display: block;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
             margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.875rem 1rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            padding: 0.9rem 1rem;
             border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.55);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
         }
 
-        /* Status Message */
-        .status-message {
-            display: none;
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            margin-bottom: 1rem;
+        .form-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+
+        .remember-check {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .remember-check input {
+            accent-color: var(--primary);
+        }
+
+        .status-card,
+        .support-card,
+        .demo-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .connection-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.42rem 0.72rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .connection-pill.connected {
+            background: rgba(34, 197, 94, 0.14);
+            color: #bbf7d0;
+        }
+
+        .connection-pill.cached {
+            background: rgba(245, 158, 11, 0.14);
+            color: #fde68a;
+        }
+
+        .connection-pill.disconnected {
+            background: rgba(148, 163, 184, 0.14);
+            color: #cbd5f5;
+        }
+
+        .status-list,
+        .support-list {
+            display: grid;
+            gap: 0.9rem;
+            margin-top: 1.1rem;
+        }
+
+        .status-item,
+        .support-item {
+            padding: 0.95rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-item h4,
+        .support-item h4 {
+            margin: 0 0 0.3rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .status-item p,
+        .support-item p,
+        .status-item dl {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .status-data {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-data div {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+
+        .status-data strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .support-actions,
+        .demo-actions,
+        .status-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.2rem;
+        }
+
+        .footer-link {
+            margin-top: 1.3rem;
+            text-align: center;
+        }
+
+        .footer-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
             font-size: 0.9rem;
         }
 
-        .status-message.loading {
-            display: block;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
+        .footer-link a:hover {
+            color: var(--primary);
         }
 
-        .status-message.success {
-            display: block;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #4ade80;
-        }
-
-        .status-message.error {
-            display: block;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-        }
-
-        /* Retry Info */
-        .retry-info {
-            display: none;
-            padding: 0.75rem;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: var(--radius-md);
-            color: #fbbf24;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .retry-info.visible {
-            display: block;
-        }
-
-        /* Attempt Counter */
-        .attempt-counter {
-            display: none;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1rem;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-secondary);
-            padding: 0.875rem;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-        }
-
-        /* Spinner */
         .spinner {
-            display: inline-block;
             width: 16px;
             height: 16px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-right: 8px;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .skip-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--glass-border);
+        @media (max-width: 980px) {
+            .hero-grid,
+            .portal-grid,
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .skip-link a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
+        @media (max-width: 640px) {
+            .portal-page {
+                padding: 20px 14px 32px;
+            }
 
-        .skip-link a:hover {
-            color: var(--primary);
-        }
+            .hero-card,
+            .flow-card,
+            .support-card,
+            .status-card,
+            .demo-card {
+                padding: 1.2rem;
+            }
 
-        /* Toast notification */
-        .toast-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            z-index: 10000;
-            animation: slideIn 0.3s ease-out;
-        }
+            .hero-actions,
+            .step-actions,
+            .status-actions,
+            .support-actions,
+            .demo-actions {
+                flex-direction: column;
+            }
 
-        .toast-notification.success {
-            background: rgba(34, 197, 94, 0.9);
-            color: white;
-        }
-
-        .toast-notification.error {
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-        }
-
-        .toast-notification.warning {
-            background: rgba(245, 158, 11, 0.9);
-            color: white;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Backup option */
-        .backup-option {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .backup-option button {
-            background: transparent;
-            color: var(--text-secondary);
-            padding: 0.75rem;
-            border: 1px dashed var(--glass-border);
-            border-radius: var(--radius-md);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .backup-option button:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -347,81 +551,180 @@
         <div class="gradient-orb orb-3"></div>
     </div>
 
-    <div class="portal-connect-container">
-        <div class="portal-card">
-            <div class="portal-header">
-                <div class="portal-icon">🔗</div>
-                <h1>Connect Your Portal</h1>
-                <p>Choose how you want to load your data</p>
-            </div>
-
-            <!-- Data Source Selection -->
-            <div class="data-source-selection" id="dataSourceSelection">
-                <h3>Select Data Source</h3>
-                <div class="source-options">
-                    <div class="source-option" id="optionLive" data-source="live">
-                        <div class="icon">🌐</div>
-                        <h4>Pull Real Data</h4>
-                        <p>Sync from SOA Portal</p>
+    <main class="portal-page">
+        <div class="portal-shell">
+            <section class="hero-card">
+                <div class="hero-grid">
+                    <div>
+                        <span class="hero-kicker">SOA Portal Import</span>
+                        <h1 class="hero-title">Connect your SOA portal and import your student data.</h1>
+                        <p class="hero-copy">
+                            This page starts a secure SOA/CampusLynx session on our backend, lets you complete the
+                            login details for your own account, then imports the available student data into ITERasn hub.
+                            It is not OAuth or third-party SSO.
+                        </p>
+                        <div class="hero-actions">
+                            <a class="btn-secondary" href="https://soaportals.com/StudentPortalSOA/" target="_blank" rel="noopener noreferrer">
+                                Open official SOA portal
+                            </a>
+                            <a class="btn-secondary" id="openImportedDataBtn" href="/dashboard/student-personal-info.html" style="display: none;">
+                                Open imported SOA data
+                            </a>
+                        </div>
                     </div>
-                    <div class="source-option" id="optionDemo" data-source="demo">
-                        <div class="icon">🎭</div>
-                        <h4>Demo Data</h4>
-                        <p>Explore with sample data</p>
+
+                    <aside class="hero-note">
+                        <h2>What happens here</h2>
+                        <ul>
+                            <li>Fetch a fresh official SOA CAPTCHA.</li>
+                            <li>Enter your registration number, SOA password, and the CAPTCHA in this app.</li>
+                            <li>We import available personal info, contact info, qualifications, attendance, marks, and more into your account.</li>
+                        </ul>
+                    </aside>
+                </div>
+            </section>
+
+            <div class="portal-grid">
+                <section class="flow-card">
+                    <h2 class="section-title">Live SOA import</h2>
+                    <p class="section-copy">
+                        Use this when you want to pull the latest data from the official SOA student portal into your ITERasn hub account.
+                    </p>
+
+                    <div class="status-banner" id="statusBanner" role="status" aria-live="polite"></div>
+
+                    <div class="step-list">
+                        <article class="step-card active" id="stepSession">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <div>
+                                    <h3>Start SOA session</h3>
+                                    <p>Request a fresh CAPTCHA from the official SOA portal before you enter your login details.</p>
+                                </div>
+                            </div>
+                            <div class="step-actions">
+                                <button type="button" class="btn-primary" id="startSessionBtn">Fetch SOA CAPTCHA</button>
+                            </div>
+                            <div class="captcha-shell" id="captchaShell">
+                                <div class="captcha-frame" id="captchaFrame">
+                                    <span>Fetch a session to load the CAPTCHA.</span>
+                                </div>
+                                <div class="step-actions">
+                                    <button type="button" class="btn-secondary" id="refreshCaptchaBtn">Refresh CAPTCHA</button>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="step-card" id="stepCredentials">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <div>
+                                    <h3>Enter your official login details</h3>
+                                    <p>Your password and CAPTCHA stay ephemeral. Only the registration number can be remembered on this device if you choose it.</p>
+                                </div>
+                            </div>
+
+                            <form class="portal-form" id="portalForm" autocomplete="off">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="regNumber">Registration number</label>
+                                        <input type="text" id="regNumber" name="regNumber" placeholder="e.g. 2101234567" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="portalPassword">SOA portal password</label>
+                                        <input type="password" id="portalPassword" name="portalPassword" placeholder="Enter your SOA portal password" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="captchaInput">CAPTCHA</label>
+                                        <input type="text" id="captchaInput" name="captchaInput" placeholder="Enter the CAPTCHA shown above" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sessionDisplay">Session status</label>
+                                        <input type="text" id="sessionDisplay" value="Waiting for a fresh CAPTCHA session" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-meta">
+                                    <label class="remember-check">
+                                        <input type="checkbox" id="rememberRegNo">
+                                        <span>Remember registration number on this device</span>
+                                    </label>
+                                    <button type="button" class="btn-ghost" id="clearRememberedBtn">Clear remembered registration number</button>
+                                </div>
+                            </form>
+                        </article>
+
+                        <article class="step-card" id="stepImport">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <div>
+                                    <h3>Import and save your SOA data</h3>
+                                    <p>On success, ITERasn hub saves the imported data to your account and opens your student-facing SOA data page.</p>
+                                </div>
+                            </div>
+                            <div class="step-actions">
+                                <button type="submit" form="portalForm" class="btn-primary" id="importBtn">Import my SOA data</button>
+                            </div>
+                        </article>
                     </div>
-                </div>
-            </div>
 
-            <!-- Portal Login Form -->
-            <form class="portal-form" id="portalForm">
-                <div class="form-group">
-                    <label for="regNumber">Registration Number</label>
-                    <input type="text" id="regNumber" name="regNumber" placeholder="e.g., 2101234567" required>
-                </div>
-                <div class="form-group">
-                    <label for="portalPassword">SOA Portal Password</label>
-                    <input type="password" id="portalPassword" name="portalPassword" placeholder="Enter your portal password" required>
-                </div>
-                <div class="credential-status" id="credentialStatus" style="display: none;">
-                    <small style="color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between;">
-                        <span>✓ Credentials saved</span>
-                        <button type="button" id="clearCredentialsBtn" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.85rem; padding: 0; text-decoration: underline;">Clear</button>
-                    </small>
-                </div>
-                <div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md);">
-                    <small style="color: #fbbf24; font-size: 0.8rem; display: block; line-height: 1.4;">
-                        🔒 Security Note: Credentials are saved in your browser for convenience. For enhanced security, avoid using this feature on shared computers.
-                    </small>
-                </div>
-            </form>
+                    <div class="footer-link">
+                        <a href="/dashboard/student.html">Back to student dashboard</a>
+                    </div>
+                </section>
 
-            <!-- Status Messages -->
-            <div class="status-message" id="statusMessage"></div>
-            <div class="retry-info" id="retryInfo"></div>
-            <div class="attempt-counter" id="attemptCounter"></div>
+                <aside>
+                    <section class="status-card" id="connectionStatusCard">
+                        <h2 class="section-title">Your connection status</h2>
+                        <p class="section-copy">If you have imported SOA data before, you can open it directly even when you are not running a fresh sync right now.</p>
 
-            <!-- Actions -->
-            <div class="portal-actions">
-                <button type="button" class="btn-primary" id="syncBtn" style="display: none;">
-                    🔄 Fetch Data from SOA Portal
-                </button>
-                <button type="button" class="btn-primary" id="demoBtn" style="display: none;">
-                    🎭 Continue with Demo Data
-                </button>
-            </div>
+                        <div class="status-list">
+                            <div class="status-item">
+                                <span class="connection-pill disconnected" id="connectionPill">Not connected</span>
+                                <div class="status-data" id="connectionMeta"></div>
+                            </div>
+                        </div>
 
-            <!-- Backup Option -->
-            <div class="backup-option" id="backupOption" style="display: none;">
-                <button type="button" id="loadBackupBtn">
-                    📂 Load Previously Saved Data
-                </button>
-            </div>
+                        <div class="status-actions">
+                            <a class="btn-secondary" id="openImportedDataLink" href="/dashboard/student-personal-info.html" style="display: none;">
+                                Open imported data
+                            </a>
+                            <button type="button" class="btn-secondary" id="useCachedDataBtn" style="display: none;">Use cached imported data</button>
+                        </div>
+                    </section>
 
-            <div class="skip-link">
-                <a href="/login.html">← Back to Login</a>
+                    <section class="support-card">
+                        <h2 class="section-title">Security and privacy</h2>
+                        <div class="support-list">
+                            <div class="support-item">
+                                <h4>Official-portal style flow</h4>
+                                <p>This flow references the official SOA portal and can open it in a new tab, but the actual import happens through our backend-controlled SOA session.</p>
+                            </div>
+                            <div class="support-item">
+                                <h4>No stored password</h4>
+                                <p>Your password is never stored in localStorage, sessionStorage, Firestore, logs, or backups.</p>
+                            </div>
+                            <div class="support-item">
+                                <h4>Retry safely</h4>
+                                <p>If the session expires or the CAPTCHA becomes invalid, fetch a fresh CAPTCHA and try again. Previously imported data stays available inside the app.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="demo-card">
+                        <h2 class="section-title">Fallback options</h2>
+                        <p class="section-copy">
+                            If live import is unavailable right now, you can still continue with demo data or open previously imported SOA data that is already saved to your account.
+                        </p>
+                        <div class="demo-actions">
+                            <button type="button" class="btn-secondary" id="demoBtn">Continue with demo data</button>
+                        </div>
+                    </section>
+                </aside>
             </div>
         </div>
-    </div>
+    </main>
 
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
         <span class="theme-icon">🌙</span>

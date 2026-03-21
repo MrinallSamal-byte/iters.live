@@ -3,13 +3,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
 
     <application
+        android:name=".app.EduHubApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -21,11 +17,9 @@
         
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
             android:launchMode="singleTask"
-            android:screenOrientation="unspecified"
-            android:theme="@style/Theme.ITEREduHub.NoActionBar">
+            android:theme="@style/Theme.ITEREduHub">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,13 +33,6 @@
                 <data android:scheme="https" android:host="iter-college-management.vercel.app" />
                 <data android:scheme="https" android:host="www.iters.live" />
             </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:noHistory="true"
-            android:theme="@style/SplashTheme">
         </activity>
 
         <provider

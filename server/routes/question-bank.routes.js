@@ -57,7 +57,8 @@ router.post(
       const { subject_id, question_text, question_type, difficulty, topic = null, blooms_taxonomy = null, options = null, correct_answer = null, marks = 1 } = req.body;
       const result = await dbQuery(
         `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, blooms_taxonomy, options, correct_answer, marks)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING id`,
         [teacher_id, subject_id, question_text, question_type, difficulty, topic, blooms_taxonomy, options ? JSON.stringify(options) : null, correct_answer, marks]
       );
       res.status(201).json({ success: true, data: { id: result[0].id } });
@@ -86,12 +87,30 @@ router.get(
       const { subject_id, difficulty, topic, q, page = 1, limit = 20 } = req.query;
       const where = [];
       const params = [];
-      if (subject_id) { where.push('subject_id = $1'); params.push(Number(subject_id)); }
-      if (difficulty) { where.push('difficulty = $2'); params.push(difficulty); }
-      if (topic) { where.push('topic = $3'); params.push(topic); }
-      if (q) { where.push('(question_text LIKE $4 OR topic LIKE $5)'); params.push(`%${q}%`, `%${q}%`); }
+      let nextParam = 1;
+      if (subject_id) {
+        where.push(`subject_id = $${nextParam++}`);
+        params.push(Number(subject_id));
+      }
+      if (difficulty) {
+        where.push(`difficulty = $${nextParam++}`);
+        params.push(difficulty);
+      }
+      if (topic) {
+        where.push(`topic = $${nextParam++}`);
+        params.push(topic);
+      }
+      if (q) {
+        const textParam = `$${nextParam++}`;
+        const topicParam = `$${nextParam++}`;
+        where.push(`(question_text LIKE ${textParam} OR topic LIKE ${topicParam})`);
+        params.push(`%${q}%`, `%${q}%`);
+      }
       // Teachers can only see their own by default; admin sees all
-      if (req.user.role === 'teacher') { where.push('teacher_id = $6'); params.push(req.user.id); }
+      if (req.user.role === 'teacher') {
+        where.push(`teacher_id = $${nextParam++}`);
+        params.push(req.user.id);
+      }
       const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
       const offset = (Number(page) - 1) * Number(limit);
 
@@ -115,7 +134,7 @@ router.get('/:id', authMiddleware, [param('id').isInt({ min: 1 })], async (req, 
   const err = handleValidation(req, res); if (err) return;
   try {
     const id = Number(req.params.id);
-    const rows = await dbQuery('SELECT * FROM question_bank WHERE id = $10', [id]);
+    const rows = await dbQuery('SELECT * FROM question_bank WHERE id = $1', [id]);
     if (rows.length === 0) return res.status(404).json({ success: false, message: 'Not found' });
     const row = rows[0];
     if (row.options) { try { row.options = JSON.parse(row.options); } catch { row.options = []; } }
@@ -148,19 +167,26 @@ router.put(
       const id = Number(req.params.id);
       // Ownership check for teachers
       if (req.user.role === 'teacher') {
-        const own = await dbQuery('SELECT id FROM question_bank WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
+        const own = await dbQuery('SELECT id FROM question_bank WHERE id = $1 AND teacher_id = $2', [id, req.user.id]);
         if (own.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
       }
       const fields = ['question_text','question_type','difficulty','topic','blooms_taxonomy','correct_answer','marks'];
       const sets = [];
       const params = [];
+      let nextParam = 1;
       for (const f of fields) {
-        if (typeof req.body[f] !== 'undefined') { sets.push(`${f} = ?`); params.push(req.body[f]); }
+        if (typeof req.body[f] !== 'undefined') {
+          sets.push(`${f} = $${nextParam++}`);
+          params.push(req.body[f]);
+        }
       }
-      if (typeof req.body.options !== 'undefined') { sets.push('options = ?'); params.push(JSON.stringify(req.body.options)); }
+      if (typeof req.body.options !== 'undefined') {
+        sets.push(`options = $${nextParam++}`);
+        params.push(JSON.stringify(req.body.options));
+      }
       if (sets.length === 0) return res.json({ success: true, message: 'No changes' });
       params.push(id);
-      await dbQuery(`UPDATE question_bank SET ${sets.join(', ')} WHERE id = ?`, params);
+      await dbQuery(`UPDATE question_bank SET ${sets.join(', ')} WHERE id = $${nextParam}`, params);
       res.json({ success: true, message: 'Updated' });
     } catch (error) {
       console.error('Error context:', error);
@@ -175,10 +201,10 @@ router.delete('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [param
   try {
     const id = Number(req.params.id);
     if (req.user.role === 'teacher') {
-      const own = await dbQuery('SELECT id FROM question_bank WHERE id = ? AND teacher_id = ?', [id, req.user.id]);
+      const own = await dbQuery('SELECT id FROM question_bank WHERE id = $1 AND teacher_id = $2', [id, req.user.id]);
       if (own.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
     }
-    await dbQuery('DELETE FROM question_bank WHERE id = ?', [id]);
+    await dbQuery('DELETE FROM question_bank WHERE id = $1', [id]);
     res.json({ success: true, message: 'Deleted' });
   } catch (error) {
     console.error('Error context:', error);
@@ -202,7 +228,8 @@ router.post('/import', authMiddleware, roleMiddleware('teacher', 'admin'), impor
             if (!subject_id || !question_text) continue;
             const result = await dbQuery(
               `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, correct_answer, marks)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+               RETURNING id`,
               [teacher_id, Number(subject_id), String(question_text).slice(0, 5000), (question_type||'mcq'), (difficulty||'easy'), topic||null, correct_answer||null, Number(marks||1)]
             );
             inserted.push(result[0].id);
@@ -228,7 +255,8 @@ router.post('/import', authMiddleware, roleMiddleware('teacher', 'admin'), impor
         const marks = Number(row[idx('marks')] || 1);
         const result = await dbQuery(
           `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, correct_answer, marks)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING id`,
           [teacher_id, subject_id, String(question_text).slice(0, 5000), question_type, difficulty, topic, correct_answer, marks]
         );
         inserted.push(result[0].id);

@@ -6,7 +6,7 @@ const db = require('../database/db');
 /**
  * PYQ (Previous Year Questions) Routes
  * Provides access to question papers from previous exams
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 
 /**

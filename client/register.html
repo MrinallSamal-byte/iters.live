@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
-    <title>Register - ITER EduHub</title>
+    <meta name="theme-color" content="#ff5a4f">
+    <title>Register - ITERasn hub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/responsive.css">
@@ -13,10 +13,13 @@
     <link rel="stylesheet" href="/css/responsive-universal.css">
     <link rel="stylesheet" href="/css/button-fixes.css">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
+    <link rel="stylesheet" href="/css/login-split.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/assets/soa-logo.png">
 </head>
-<body>
+<body class="nothing-home public-auth-page register-page">
     <div class="bg-animation">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
@@ -24,143 +27,124 @@
     </div>
 
     <div class="login-container">
-        <div class="login-card glass-card fade-in-up">
-            <div class="login-header">
-                <div class="login-logo">
-                    <img src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan University" style="width: 80px; height: 80px; object-fit: contain;">
+        <div class="login-wrapper register-wrapper">
+            <div class="login-brand-section">
+                <div class="brand-content">
+                    <img class="brand-logo" src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
+                    <h1 class="brand-title">ITERasn hub</h1>
+                    <p class="brand-subtitle">Create your portal account with the same clean, focused workspace language used across the home page and dashboards.</p>
+
+                    <div class="demo-hint-compact register-highlights">
+                        <ul>
+                            <li><span>01</span> <strong>Students</strong> can get attendance, marks, timetable, notes, events, and payments in one place.</li>
+                            <li><span>02</span> <strong>Teachers</strong> can handle attendance, marks, assignments, materials, and rubrics faster.</li>
+                            <li><span>03</span> <strong>Designed for flow</strong> with a lighter, cleaner interface that matches ITERasn hub everywhere.</li>
+                        </ul>
+                    </div>
                 </div>
-                <h1>Create Account</h1>
-                <p>Register for ITER EduHub</p>
             </div>
 
-            <!-- Role Selection -->
-            <div class="role-selection">
-                <button class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">
-                    🎓 Student
-                </button>
-                <button class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">
-                    👨‍🏫 Teacher
-                </button>
-            </div>
-
-            <form id="registerForm" class="login-form">
-                <input type="hidden" name="role" id="selectedRole" value="student">
-
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input 
-                        type="text" 
-                        id="name" 
-                        name="name"
-                        placeholder="Enter your full name"
-                        required
-                    >
+            <div class="login-form-section">
+                <div class="mobile-brand-header">
+                    <img class="mobile-brand-logo" src="/assets/soa-logo.png" alt="SOA Logo">
+                    <h2 class="mobile-brand-title">ITERasn hub</h2>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email"
-                        placeholder="your.email@example.com"
-                        required
-                    >
+                <div class="login-header">
+                    <h1>Create Account</h1>
+                    <p>Register for ITERasn hub and choose the role that fits your workspace.</p>
                 </div>
 
-                <div class="form-row">
+                <div class="role-selection">
+                    <button class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">
+                        🎓 Student
+                    </button>
+                    <button class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">
+                        👨‍🏫 Teacher
+                    </button>
+                </div>
+
+                <form id="registerForm" class="login-form">
+                    <input type="hidden" name="role" id="selectedRole" value="student">
+
                     <div class="form-group">
-                        <label for="registration_number">Registration Number</label>
-                        <input 
-                            type="text" 
-                            id="registration_number" 
-                            name="registration_number"
-                            placeholder="STU20250001"
-                            required
-                        >
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
                     </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input 
-                            type="tel" 
-                            id="phone" 
-                            name="phone"
-                            placeholder="+91 1234567890"
-                            required
-                        >
-                    </div>
-                </div>
 
-                <div class="form-row" id="studentFields">
                     <div class="form-group">
-                        <label for="department">Department</label>
-                        <select id="department" name="department" required>
-                            <option value="">Select Department</option>
-                            <option value="CSE">Computer Science & Engineering</option>
-                            <option value="ECE">Electronics & Communication</option>
-                            <option value="MECH">Mechanical Engineering</option>
-                            <option value="CIVIL">Civil Engineering</option>
-                            <option value="EEE">Electrical Engineering</option>
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="registration_number">Registration Number</label>
+                            <input type="text" id="registration_number" name="registration_number" placeholder="STU20250001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+91 1234567890" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="studentFields">
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="CSE">Computer Science & Engineering</option>
+                                <option value="ECE">Electronics & Communication</option>
+                                <option value="MECH">Mechanical Engineering</option>
+                                <option value="CIVIL">Civil Engineering</option>
+                                <option value="EEE">Electrical Engineering</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="year">Year</label>
+                            <select id="year" name="year" required>
+                                <option value="">Select Year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="sectionField">
+                        <label for="section">Section</label>
+                        <select id="section" name="section" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
                         </select>
                     </div>
+
                     <div class="form-group">
-                        <label for="year">Year</label>
-                        <select id="year" name="year" required>
-                            <option value="">Select Year</option>
-                            <option value="1">1st Year</option>
-                            <option value="2">2nd Year</option>
-                            <option value="3">3rd Year</option>
-                            <option value="4">4th Year</option>
-                        </select>
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter strong password" required>
+                        <small class="form-hint">Min 10 characters, with uppercase, lowercase, number & symbol</small>
                     </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
+                        Register
+                    </button>
+
+                    <div class="error-message" id="errorMessage" style="display: none;"></div>
+                </form>
+
+                <div class="login-footer">
+                    <p>Already have an account? <a href="/login.html" data-public-nav="login">Login here</a></p>
+                    <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">← Back to Home</a>
                 </div>
-
-                <div class="form-group" id="sectionField">
-                    <label for="section">Section</label>
-                    <select id="section" name="section" required>
-                        <option value="">Select Section</option>
-                        <option value="A">Section A</option>
-                        <option value="B">Section B</option>
-                        <option value="C">Section C</option>
-                        <option value="D">Section D</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password"
-                        placeholder="Enter strong password"
-                        required
-                    >
-                    <small class="form-hint">
-                        Min 10 characters, with uppercase, lowercase, number & symbol
-                    </small>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm_password">Confirm Password</label>
-                    <input 
-                        type="password" 
-                        id="confirm_password" 
-                        name="confirm_password"
-                        placeholder="Re-enter password"
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
-                    Register
-                </button>
-
-                <div class="error-message" id="errorMessage" style="display: none;"></div>
-            </form>
-
-            <div class="login-footer">
-                <p>Already have an account? <a href="/login.html">Login here</a></p>
-                <a href="/index.html" class="back-link">← Back to Home</a>
             </div>
         </div>
     </div>
@@ -169,235 +153,12 @@
         <span class="theme-icon">🌙</span>
     </button>
 
-    <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--spacing-xl, 2rem);
-            position: relative;
-            z-index: 1;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 600px;
-            padding: var(--spacing-2xl, 2.5rem);
-            margin: auto;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: var(--spacing-2xl, 2rem);
-        }
-
-        .login-logo {
-            margin-bottom: var(--spacing-lg, 1.5rem);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-header h1 {
-            font-size: 2rem;
-            margin-bottom: var(--spacing-sm, 0.5rem);
-            font-weight: 700;
-        }
-
-        .login-header p {
-            color: var(--text-secondary, #94a3b8);
-            font-size: 1rem;
-        }
-
-        .role-selection {
-            display: flex;
-            gap: var(--spacing-md, 1rem);
-            margin-bottom: var(--spacing-xl, 2rem);
-        }
-
-        .role-btn {
-            flex: 1;
-            padding: var(--spacing-md, 1rem);
-            transition: all var(--transition-fast, 0.2s);
-            font-size: 1rem;
-            font-weight: 500;
-            border: 2px solid var(--border-color, #e2e8f0);
-            background: transparent;
-            cursor: pointer;
-        }
-
-        .role-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-        }
-
-        .role-btn.active {
-            background: var(--primary, #6366f1);
-            color: white;
-            border-color: var(--primary, #6366f1);
-        }
-
-        .login-form {
-            margin-bottom: var(--spacing-xl, 2rem);
-        }
-
-        .form-group {
-            margin-bottom: var(--spacing-lg, 1.5rem);
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: var(--spacing-sm, 0.5rem);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: var(--spacing-md, 1rem);
-            border: 2px solid var(--border-color, #e2e8f0);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: var(--card-bg, rgba(255, 255, 255, 0.05));
-            color: var(--text-primary, inherit);
-            transition: all var(--transition-fast, 0.2s);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary, #6366f1);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .form-hint {
-            display: block;
-            color: var(--text-secondary, #94a3b8);
-            font-size: 0.75rem;
-            margin-top: var(--spacing-xs, 0.25rem);
-            line-height: 1.4;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-md, 1rem);
-            margin-bottom: var(--spacing-lg, 1.5rem);
-        }
-
-        .form-row .form-group {
-            margin-bottom: 0;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .btn-large {
-            padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: var(--primary, #6366f1);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all var(--transition-fast, 0.2s);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: var(--primary-dark, #4f46e5);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            padding: var(--spacing-md, 1rem);
-            border-radius: 8px;
-            margin-top: var(--spacing-md, 1rem);
-            border-left: 4px solid #ef4444;
-            font-size: 0.9rem;
-        }
-
-        .login-footer {
-            text-align: center;
-            padding-top: var(--spacing-lg, 1.5rem);
-            border-top: 1px solid var(--border-color, #e2e8f0);
-        }
-
-        .login-footer p {
-            margin-bottom: var(--spacing-sm, 0.5rem);
-            color: var(--text-secondary, #94a3b8);
-        }
-
-        .login-footer a {
-            color: var(--primary, #6366f1);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color var(--transition-fast, 0.2s);
-        }
-
-        .login-footer a:hover {
-            color: var(--primary-dark, #4f46e5);
-            text-decoration: underline;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: var(--spacing-sm, 0.5rem);
-        }
-
-        @media (max-width: 768px) {
-            .login-card {
-                padding: var(--spacing-xl, 1.5rem);
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .login-header h1 {
-                font-size: 1.75rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: var(--spacing-md, 1rem);
-            }
-
-            .login-card {
-                padding: var(--spacing-lg, 1.25rem);
-            }
-
-            .role-selection {
-                flex-direction: column;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
     <script src="/js/mobile-fixes.js"></script>
     <script src="/js/prevent-empty-hash.js"></script>
     <script src="/js/scroll-fix.js"></script>
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/mobile-nav.js"></script>
-    <script src="/js/url-navigator.js"></script>
     <script>
         function selectRole(role) {
             document.getElementById('selectedRole').value = role;
@@ -489,6 +250,55 @@
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
         }
+
+        function clearPublicRedirectState() {
+            try {
+                sessionStorage.removeItem('loginRedirect');
+                sessionStorage.removeItem('loginMessage');
+            } catch (storageError) {
+                console.warn('Failed to clear pending login redirect state:', storageError);
+            }
+
+            try {
+                if (window.APP && typeof window.APP.clearPostLogoutRedirect === 'function') {
+                    window.APP.clearPostLogoutRedirect();
+                } else {
+                    localStorage.removeItem('postLogoutRedirectTarget');
+                    localStorage.removeItem('postLogoutRedirectTimestamp');
+                    localStorage.removeItem('postLogoutRedirectReason');
+                }
+            } catch (storageError) {
+                console.warn('Failed to clear stale public redirect state:', storageError);
+            }
+        }
+
+        document.querySelectorAll('.login-footer a[data-public-nav]').forEach((link) => {
+            link.addEventListener('click', (ev) => {
+                if (
+                    ev.defaultPrevented ||
+                    ev.button !== 0 ||
+                    ev.metaKey ||
+                    ev.ctrlKey ||
+                    ev.shiftKey ||
+                    ev.altKey
+                ) {
+                    return;
+                }
+
+                const href = link.getAttribute('href');
+                if (!href) return;
+
+                ev.preventDefault();
+                clearPublicRedirectState();
+
+                if (link.dataset.replaceHistory === 'true') {
+                    window.location.replace(href);
+                    return;
+                }
+
+                window.location.assign(href);
+            });
+        });
 
         // Register service worker (optional)
         if ('serviceWorker' in navigator) {

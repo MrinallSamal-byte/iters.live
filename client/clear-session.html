@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear Session - ITER EduHub</title>
+    <title>Clear Session - ITERasn hub</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -72,7 +72,7 @@
         <p>Click the button below to clear all stored authentication data and start fresh.</p>
         
         <button onclick="clearSession()">Clear Session Data</button>
-        <button onclick="goToLogin()">Go to Login</button>
+        <button onclick="goToHome()">Go to Home</button>
         
         <div class="success" id="successMessage">
             ✅ Session cleared successfully! You can now login fresh.
@@ -88,25 +88,28 @@
 
     <script>
         function clearSession() {
-            // Clear all authentication data
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            
-            // Clear any other stored data
-            localStorage.clear();
+            if (window.APP && typeof window.APP.clearClientState === 'function') {
+                window.APP.clearClientState({ preserveTheme: true });
+            } else {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.clear();
+                sessionStorage.clear();
+            }
             
             // Show success message
             document.getElementById('successMessage').style.display = 'block';
             
             // Auto redirect after 2 seconds
             setTimeout(() => {
-                window.location.href = '/login.html';
+                window.location.replace('/index.html');
             }, 2000);
         }
         
-        function goToLogin() {
-            window.location.href = '/login.html';
+        function goToHome() {
+            window.location.replace('/index.html');
         }
         
         // Show what's currently stored
@@ -121,5 +124,6 @@
             }
         });
     </script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

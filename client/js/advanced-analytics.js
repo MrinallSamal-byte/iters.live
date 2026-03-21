@@ -1,7 +1,7 @@
 /**
  * Advanced Analytics Controller
  * Provides comprehensive data visualization and insights
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class AdvancedAnalytics {
     constructor(containerId) {

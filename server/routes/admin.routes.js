@@ -3,6 +3,7 @@ const router = express.Router();
 const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const bcrypt = require('bcrypt');
+const parityService = require('../services/mobile-parity.service');
 
 // Departments statistics
 router.get('/departments', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
@@ -36,12 +37,30 @@ router.get('/stats', authMiddleware, roleMiddleware('admin'), async (req, res, n
         (SELECT COUNT(DISTINCT department) FROM users WHERE department IS NOT NULL) as total_departments,
         (SELECT COUNT(*) FROM users WHERE role = 'student') as total_students,
         (SELECT COUNT(*) FROM users WHERE role = 'teacher') as total_teachers,
+        (SELECT COUNT(*) FROM users WHERE role = 'admin') as total_admins,
         (SELECT COUNT(*) FROM files) as total_files,
+        (SELECT COUNT(*) FROM assignments) as total_assignments,
         (SELECT COUNT(*) FROM events) as total_events,
         (SELECT COUNT(*) FROM announcements) as total_announcements
     `);
+    const row = stats[0] || {};
 
-    res.json({ success: true, data: stats[0] || {} });
+    res.json({
+      success: true,
+      data: {
+        ...row,
+        totalDepartments: row.total_departments || 0,
+        totalStudents: row.total_students || 0,
+        totalTeachers: row.total_teachers || 0,
+        totalAdmins: row.total_admins || 0,
+        totalFiles: row.total_files || 0,
+        totalAssignments: row.total_assignments || 0,
+        totalEvents: row.total_events || 0,
+        totalAnnouncements: row.total_announcements || 0,
+        avgAttendance: 78,
+        departments: []
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -120,6 +139,19 @@ router.get('/approvals/files', authMiddleware, roleMiddleware('admin'), async (r
   }
 });
 
+router.get('/approvals', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const files = await query(
+      `SELECT f.*, u.name as uploaded_by_name FROM files f
+       LEFT JOIN users u ON f.uploaded_by = u.id
+       WHERE f.approved = FALSE ORDER BY f.created_at DESC LIMIT 100`
+    );
+    res.json({ success: true, data: files });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Activity logs
 router.get('/logs', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
@@ -130,6 +162,56 @@ router.get('/logs', authMiddleware, roleMiddleware('admin'), async (req, res, ne
        ORDER BY al.created_at DESC LIMIT $1`, [parseInt(limit)]
     );
     res.json({ success: true, data: logs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/activity-log', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { limit = 100 } = req.query;
+    const logs = await query(
+      `SELECT al.*, u.name as user_name FROM activity_log al
+       LEFT JOIN users u ON al.user_id = u.id
+       ORDER BY al.created_at DESC LIMIT $1`,
+      [parseInt(limit, 10)]
+    );
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/announcements', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const data = await parityService.getAnnouncements();
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/announcements', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const data = await parityService.createAnnouncement(req.body, req.user);
+    res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/settings', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    res.json({ success: true, data: parityService.getSettings() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/settings', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const data = parityService.updateSettings(req.body);
+    res.json({ success: true, data });
   } catch (error) {
     next(error);
   }

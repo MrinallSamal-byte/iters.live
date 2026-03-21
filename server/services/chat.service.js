@@ -3,7 +3,7 @@ const db = require('../database/db');
 /**
  * Real-Time Chat Service
  * Handles study group chat functionality with Socket.IO
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class ChatService {
     constructor(io) {

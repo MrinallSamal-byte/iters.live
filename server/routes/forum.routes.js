@@ -5,7 +5,7 @@ const { db } = require('../database/firebase');
 
 /**
  * Forum Routes for Student Q&A Platform
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  * 
  * Note: Migrated from SQL to Firestore with dummy data fallback
  */

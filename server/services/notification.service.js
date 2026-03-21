@@ -20,22 +20,24 @@ class NotificationService {
     } = data;
 
     try {
-      const [result] = await db.query(
+      const rows = await db.query(
         `INSERT INTO notifications (user_id, title, message, type, link, metadata)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id, user_id, title, message, type, link, metadata, is_read, created_at`,
         [userId, title, message, type, link, JSON.stringify(metadata)]
       );
+      const row = rows[0];
 
       const notification = {
-        id: result.insertId,
-        userId,
-        title,
-        message,
-        type,
-        link,
+        id: row?.id,
+        userId: row?.user_id || userId,
+        title: row?.title || title,
+        message: row?.message || message,
+        type: row?.type || type,
+        link: row?.link || link,
         metadata,
-        isRead: false,
-        createdAt: new Date()
+        isRead: row?.is_read || false,
+        createdAt: row?.created_at || new Date()
       };
 
       // Emit real-time notification via Socket.IO
@@ -58,46 +60,14 @@ class NotificationService {
    * Create bulk notifications for multiple users
    */
   async createBulk(users, data) {
-    const { title, message, type = 'info', link = null, metadata = {} } = data;
+    const results = await Promise.all(users.map((userId) => this.create({ userId, ...data })));
+    const successCount = results.filter((result) => result.success).length;
 
-    try {
-      const values = users.map(userId => [
-        userId,
-        title,
-        message,
-        type,
-        link,
-        JSON.stringify(metadata)
-      ]);
-
-      const [result] = await db.query(
-        `INSERT INTO notifications (user_id, title, message, type, link, metadata)
-         VALUES ?`,
-        [values]
-      );
-
-      // Emit real-time notifications
-      for (const userId of users) {
-        await this.emitRealTime(userId, {
-          title,
-          message,
-          type,
-          link,
-          metadata
-        });
-      }
-
-      return {
-        success: true,
-        count: result.affectedRows
-      };
-    } catch (error) {
-      console.error('Failed to create bulk notifications:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    return {
+      success: successCount === users.length,
+      count: successCount,
+      error: successCount === users.length ? null : 'One or more notifications failed to create'
+    };
   }
 
   /**
@@ -111,52 +81,54 @@ class NotificationService {
       pageSize = 20
     } = options;
 
-    let query = 'SELECT * FROM notifications WHERE user_id = ?';
+    let sql = 'SELECT * FROM notifications WHERE user_id = $1';
     const params = [userId];
+    let nextParam = 2;
 
     if (isRead !== null) {
-      query += ' AND is_read = ?';
+      sql += ` AND is_read = $${nextParam++}`;
       params.push(isRead);
     }
 
     if (type) {
-      query += ' AND type = ?';
+      sql += ` AND type = $${nextParam++}`;
       params.push(type);
     }
 
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    sql += ` ORDER BY created_at DESC LIMIT $${nextParam++} OFFSET $${nextParam++}`;
     params.push(pageSize, (page - 1) * pageSize);
 
     try {
-  const notifications = await db.query(query, params);
+      const notifications = await db.query(sql, params);
 
       // Get unread count
       const unreadRows = await db.query(
-        'SELECT COUNT(*) as unreadCount FROM notifications WHERE user_id = ? AND is_read = FALSE',
+        'SELECT COUNT(*) as unreadCount FROM notifications WHERE user_id = $1 AND is_read = FALSE',
         [userId]
       );
-      const unreadCount = unreadRows[0]?.unreadCount || 0;
+      const unreadCount = Number(unreadRows[0]?.unreadcount || unreadRows[0]?.unreadCount || 0);
 
       // Get total count
-      let countQuery = 'SELECT COUNT(*) as total FROM notifications WHERE user_id = ?';
+      let countSql = 'SELECT COUNT(*) as total FROM notifications WHERE user_id = $1';
       const countParams = [userId];
+      nextParam = 2;
 
       if (isRead !== null) {
-        countQuery += ' AND is_read = ?';
+        countSql += ` AND is_read = $${nextParam++}`;
         countParams.push(isRead);
       }
 
       if (type) {
-        countQuery += ' AND type = ?';
+        countSql += ` AND type = $${nextParam++}`;
         countParams.push(type);
       }
 
-  const totalRows = await db.query(countQuery, countParams);
-  const total = totalRows[0]?.total || 0;
+      const totalRows = await db.query(countSql, countParams);
+      const total = Number(totalRows[0]?.total || 0);
 
       return {
         success: true,
-        notifications: notifications.map(n => ({
+        notifications: notifications.map((n) => ({
           ...n,
           metadata: JSON.parse(n.metadata || '{}')
         })),
@@ -182,13 +154,13 @@ class NotificationService {
    */
   async markAsRead(notificationId, userId) {
     try {
-      const result = await db.query(
-        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE id = ? AND user_id = ?',
+      const rows = await db.query(
+        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING id',
         [notificationId, userId]
       );
 
       return {
-        success: result.affectedRows > 0
+        success: rows.length > 0
       };
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
@@ -204,14 +176,14 @@ class NotificationService {
    */
   async markAllAsRead(userId) {
     try {
-      const result = await db.query(
-        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE user_id = ? AND is_read = FALSE',
+      const rows = await db.query(
+        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE user_id = $1 AND is_read = FALSE RETURNING id',
         [userId]
       );
 
       return {
         success: true,
-        count: result.affectedRows
+        count: rows.length
       };
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
@@ -227,13 +199,13 @@ class NotificationService {
    */
   async delete(notificationId, userId) {
     try {
-      const result = await db.query(
-        'DELETE FROM notifications WHERE id = ? AND user_id = ?',
+      const rows = await db.query(
+        'DELETE FROM notifications WHERE id = $1 AND user_id = $2 RETURNING id',
         [notificationId, userId]
       );
 
       return {
-        success: result.affectedRows > 0
+        success: rows.length > 0
       };
     } catch (error) {
       console.error('Failed to delete notification:', error);
@@ -249,14 +221,14 @@ class NotificationService {
    */
   async deleteAllRead(userId) {
     try {
-      const result = await db.query(
-        'DELETE FROM notifications WHERE user_id = ? AND is_read = TRUE',
+      const rows = await db.query(
+        'DELETE FROM notifications WHERE user_id = $1 AND is_read = TRUE RETURNING id',
         [userId]
       );
 
       return {
         success: true,
-        count: result.affectedRows
+        count: rows.length
       };
     } catch (error) {
       console.error('Failed to delete read notifications:', error);
@@ -273,10 +245,10 @@ class NotificationService {
   async getUnreadCount(userId) {
     try {
       const countRows = await db.query(
-        'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = FALSE',
+        'SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND is_read = FALSE',
         [userId]
       );
-      const count = countRows[0]?.count || 0;
+      const count = Number(countRows[0]?.count || 0);
 
       return {
         success: true,

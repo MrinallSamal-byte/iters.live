@@ -10,7 +10,7 @@
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    border: 3px solid var(--primary, #6366f1);
+    border: 3px solid var(--primary, #ff5a4f);
     background: var(--glass-bg, rgba(255,255,255,0.1));
     backdrop-filter: blur(10px);
     cursor: pointer;
@@ -20,12 +20,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 90, 79, 0.24);
 }
 
 .profile-avatar-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 6px 25px rgba(255, 90, 79, 0.34);
 }
 
 .profile-avatar-img {
@@ -70,7 +70,7 @@
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.42);
 }
 
 .profile-dropdown.active {
@@ -84,7 +84,7 @@
     display: flex;
     gap: 15px;
     align-items: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.12), rgba(255, 255, 255, 0.03));
 }
 
 .profile-dropdown-avatar {
@@ -92,7 +92,7 @@
     height: 55px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid var(--primary, #6366f1);
+    border: 2px solid var(--primary, #ff5a4f);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -129,7 +129,7 @@
 
 .profile-dropdown-role {
     font-size: 13px;
-    color: var(--primary, #6366f1);
+    color: var(--primary, #ff5a4f);
     text-transform: capitalize;
     font-weight: 600;
 }
@@ -174,7 +174,7 @@
 }
 
 .profile-dropdown-item:hover {
-    background: var(--glass-hover, rgba(99, 102, 241, 0.15));
+    background: var(--glass-hover, rgba(255, 90, 79, 0.12));
     transform: translateX(5px);
 }
 
@@ -219,7 +219,7 @@
     border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
     border-radius: 20px;
     width: 100%;
-    max-width: 520px;
+    max-width: 560px;
     max-height: 90vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
@@ -231,7 +231,7 @@
 }
 
 .profile-modal-large {
-    max-width: 650px;
+    max-width: 760px;
 }
 
 .profile-modal-header {
@@ -240,7 +240,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.14), rgba(255, 255, 255, 0.03));
 }
 
 .profile-modal-header h3 {
@@ -282,12 +282,12 @@
     margin: 0 auto 25px;
     border-radius: 50%;
     overflow: hidden;
-    border: 4px solid var(--primary, #6366f1);
+    border: 4px solid var(--primary, #ff5a4f);
     background: var(--glass-bg, rgba(255,255,255,0.05));
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 40px rgba(255, 90, 79, 0.2);
 }
 
 .profile-upload-preview img {
@@ -313,11 +313,14 @@
 }
 
 .id-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 20px;
-    padding: 35px;
-    color: white;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    background:
+        radial-gradient(circle at top right, rgba(255, 118, 95, 0.2), transparent 30%),
+        linear-gradient(145deg, rgba(24, 24, 24, 0.98), rgba(47, 26, 22, 0.96));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    padding: 34px;
+    color: #f5f4ef;
+    box-shadow: 0 26px 60px rgba(0,0,0,0.42);
     position: relative;
     overflow: hidden;
 }
@@ -325,18 +328,13 @@
 .id-card::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: 0.45;
     pointer-events: none;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
 
 .id-card > * {
@@ -348,51 +346,56 @@
     display: flex;
     gap: 15px;
     align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(255,255,255,0.3);
+    justify-content: space-between;
+    margin-bottom: 26px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 .id-card-logo {
-    width: 70px;
-    height: 70px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: white;
-    padding: 5px;
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    object-fit: contain;
+    background: #f5f4ef;
+    padding: 6px;
+    flex-shrink: 0;
 }
 
 .id-card-college h4 {
     margin: 0 0 5px 0;
-    font-size: 18px;
+    font-size: 1.2rem;
     font-weight: 700;
     line-height: 1.3;
+    letter-spacing: -0.03em;
 }
 
 .id-card-college p {
     margin: 0;
-    font-size: 13px;
-    opacity: 0.95;
+    font-size: 0.82rem;
+    opacity: 0.78;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 .id-card-body {
     display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 25px;
-    margin-bottom: 25px;
+    grid-template-columns: 148px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
 }
 
 .id-card-photo {
-    width: 140px;
-    height: 170px;
-    border-radius: 12px;
+    width: 148px;
+    height: 188px;
+    border-radius: 24px;
     overflow: hidden;
-    border: 3px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.16);
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .id-card-photo img {
@@ -406,59 +409,71 @@
 }
 
 .id-card-photo-placeholder span {
-    font-size: 52px;
+    font-size: 56px;
     font-weight: 700;
 }
 
 .id-card-details {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
 }
 
 .id-card-field {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
+    padding: 0.9rem 0.95rem;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
 .id-card-field label {
-    font-size: 11px;
-    opacity: 0.85;
+    font-size: 10px;
+    opacity: 0.72;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-weight: 600;
+    letter-spacing: 0.18em;
+    font-weight: 700;
 }
 
 .id-card-field span {
     font-size: 15px;
     font-weight: 700;
+    line-height: 1.35;
 }
 
 .id-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 20px;
-    border-top: 2px solid rgba(255,255,255,0.3);
+    gap: 1rem;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.12);
 }
 
 .id-card-footer p {
     margin: 0;
-    font-size: 13px;
-    opacity: 0.95;
+    font-size: 0.86rem;
+    opacity: 0.9;
     font-weight: 600;
+}
+
+.id-card-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
 }
 
 .id-card-qr {
     width: 60px;
     height: 60px;
     background: white;
-    border-radius: 8px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
 }
 
 .settings-section {
@@ -504,9 +519,9 @@
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary, #6366f1);
-    background: rgba(99, 102, 241, 0.1);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary, #ff5a4f);
+    background: rgba(255, 90, 79, 0.08);
+    box-shadow: 0 0 0 4px rgba(255, 90, 79, 0.1);
 }
 
 .form-control:read-only {
@@ -534,14 +549,14 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, #ff6b5e, #e24e43);
     color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 90, 79, 0.28);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 90, 79, 0.34);
 }
 
 .btn-primary:disabled {
@@ -590,6 +605,12 @@
         padding: 25px;
     }
 
+    .id-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
     .id-card-body {
         grid-template-columns: 1fr;
         text-align: center;
@@ -600,7 +621,7 @@
     }
 
     .id-card-details {
-        align-items: center;
+        grid-template-columns: 1fr;
     }
 
     .id-card-field {
@@ -635,4 +656,111 @@
     .id-card-college h4 {
         font-size: 16px;
     }
+
+    .id-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+body.light-theme .id-card {
+    background:
+        radial-gradient(circle at top right, rgba(255, 118, 95, 0.16), transparent 30%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(246, 240, 236, 0.98));
+    color: #161616;
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+body.light-theme .id-card::before {
+    background-image:
+        linear-gradient(rgba(19, 19, 19, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19, 19, 19, 0.05) 1px, transparent 1px);
+}
+
+body.light-theme .id-card-field {
+    background: rgba(19, 19, 19, 0.03);
+    border-color: rgba(19, 19, 19, 0.06);
+}
+
+body.light-theme .id-card-header,
+body.light-theme .id-card-footer {
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+/* ITERasn hub workspace profile refresh */
+body:not(.nothing-home) .profile-avatar-btn,
+body:not(.nothing-home) .profile-icon {
+    border-color: rgba(255, 90, 79, 0.2);
+    background:
+        linear-gradient(135deg, rgba(255, 90, 79, 0.16), rgba(255, 255, 255, 0.06)),
+        rgba(16, 16, 16, 0.92);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+}
+
+body:not(.nothing-home) .profile-avatar-btn:hover,
+body:not(.nothing-home) .profile-icon:hover {
+    box-shadow: 0 20px 34px rgba(255, 90, 79, 0.22);
+}
+
+body:not(.nothing-home) .profile-status-indicator {
+    border-color: rgba(12, 12, 12, 0.95);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.08);
+}
+
+body:not(.nothing-home) .profile-dropdown,
+body:not(.nothing-home) .profile-modal-content {
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 24%),
+        rgba(14, 14, 14, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.35);
+}
+
+body.light-theme .profile-dropdown,
+body.light-theme .profile-modal-content {
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 24%),
+        rgba(255, 255, 255, 0.94);
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+body:not(.nothing-home) .profile-dropdown-header,
+body:not(.nothing-home) .profile-modal-header {
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.14), rgba(255, 255, 255, 0.04));
+}
+
+body:not(.nothing-home) .profile-dropdown-name {
+    letter-spacing: -0.03em;
+}
+
+body:not(.nothing-home) .profile-dropdown-role {
+    color: var(--primary, #ff5a4f);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+body:not(.nothing-home) .profile-dropdown-item:hover,
+body:not(.nothing-home) .profile-dropdown-link:hover {
+    background: rgba(255, 90, 79, 0.1);
+}
+
+body:not(.nothing-home) .profile-dropdown-item {
+    border-radius: 14px;
+}
+
+body:not(.nothing-home) .btn-primary {
+    background: linear-gradient(135deg, #ff6a5c 0%, #e34d42 100%);
+    box-shadow: 0 14px 30px rgba(255, 90, 79, 0.24);
+}
+
+body:not(.nothing-home) .btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.light-theme .btn-secondary {
+    background: rgba(19, 19, 19, 0.04);
+    border-color: rgba(19, 19, 19, 0.1);
+    color: var(--text-primary, #161616);
 }

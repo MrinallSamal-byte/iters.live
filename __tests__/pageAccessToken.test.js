@@ -55,6 +55,7 @@ describe('Page Access Token Module', () => {
   // Simulate the PageAccessToken functions
   const PageAccessToken = {
     TOKEN_EXPIRY_MS: 5 * 60 * 1000,
+    SESSION_TIMEOUT_MS: 20 * 60 * 1000,
     TOKEN_STORAGE_KEY: 'pageAccessToken',
     TOKEN_TIMESTAMP_KEY: 'pageAccessTokenTimestamp',
     TOKEN_PATH_KEY: 'pageAccessTokenPath',
@@ -90,7 +91,32 @@ describe('Page Access Token Module', () => {
       return this._currentPath;
     },
 
+    getLastActivityTimestamp() {
+      const sessionActivity = parseInt(sessionStorage.getItem('lastActivityTimestamp') || '0', 10);
+      const localActivity = parseInt(localStorage.getItem('lastActivityTimestamp') || '0', 10);
+      return Math.max(sessionActivity, localActivity, 0);
+    },
+
+    hasStoredAuthState() {
+      return Boolean(
+        localStorage.getItem('accessToken') ||
+        localStorage.getItem('user') ||
+        sessionStorage.getItem('accessToken') ||
+        sessionStorage.getItem('user')
+      );
+    },
+
+    hasExpiredSessionByInactivity() {
+      const lastActivity = this.getLastActivityTimestamp();
+      if (!lastActivity) return false;
+      return Date.now() - lastActivity >= this.SESSION_TIMEOUT_MS;
+    },
+
     validatePageAccessToken() {
+      if (this.hasStoredAuthState() && this.hasExpiredSessionByInactivity()) {
+        return { valid: false, reason: 'session_timeout' };
+      }
+
       if (!this.isUserAuthenticated()) {
         return { valid: false, reason: 'not_authenticated' };
       }
@@ -118,6 +144,10 @@ describe('Page Access Token Module', () => {
 
     isUserAuthenticated() {
       try {
+        if (this.hasStoredAuthState() && this.hasExpiredSessionByInactivity()) {
+          return false;
+        }
+
         const accessToken = localStorage.getItem('accessToken');
         const user = localStorage.getItem('user');
         if (accessToken && user) {
@@ -239,6 +269,15 @@ describe('Page Access Token Module', () => {
       const result = PageAccessToken.validatePageAccessToken();
       expect(result.valid).toBe(false);
       expect(result.reason).toBe('no_token');
+    });
+
+    it('should return session_timeout when auth exists but inactivity exceeded 20 minutes', () => {
+      const oldActivity = Date.now() - (21 * 60 * 1000);
+      mockLocalStorage['lastActivityTimestamp'] = oldActivity.toString();
+
+      const result = PageAccessToken.validatePageAccessToken();
+      expect(result.valid).toBe(false);
+      expect(result.reason).toBe('session_timeout');
     });
 
     it('should return token_expired for expired tokens', () => {
@@ -394,6 +433,14 @@ describe('Page Access Token Module', () => {
       mockLocalStorage['accessToken'] = 'test-token';
       mockLocalStorage['user'] = JSON.stringify({ name: 'Test' });
       
+      expect(PageAccessToken.isUserAuthenticated()).toBe(false);
+    });
+
+    it('should return false when the stored session expired by inactivity', () => {
+      mockLocalStorage['accessToken'] = 'test-token';
+      mockLocalStorage['user'] = JSON.stringify({ role: 'student' });
+      mockLocalStorage['lastActivityTimestamp'] = (Date.now() - (21 * 60 * 1000)).toString();
+
       expect(PageAccessToken.isUserAuthenticated()).toBe(false);
     });
   });

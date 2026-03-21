@@ -7,6 +7,11 @@
 (function() {
     'use strict';
 
+    function isCompactNavMode(menuButton) {
+        if (!menuButton) return false;
+        return window.getComputedStyle(menuButton).display !== 'none';
+    }
+
     // ===================================
     // CRITICAL FIX 1: Prevent scroll jumps (IMPROVED)
     // ===================================
@@ -284,6 +289,7 @@
             navLinks?.classList.remove('active', 'mobile-open');
             overlay?.classList.remove('active');
             document.body.classList.remove('nav-open');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
         }
     }
 
@@ -356,17 +362,22 @@
                 navLinks.classList.remove('active', 'mobile-open');
                 overlay.classList.remove('active');
                 document.body.classList.remove('nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
             } else {
                 mobileMenuBtn.classList.add('active');
                 navLinks.classList.add('active', 'mobile-open');
                 overlay.classList.add('active');
                 document.body.classList.add('nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'true');
             }
         }
 
         // Remove old listeners and add new ones
         const newMenuBtn = mobileMenuBtn.cloneNode(true);
         mobileMenuBtn.parentNode.replaceChild(newMenuBtn, mobileMenuBtn);
+        newMenuBtn.dataset.menuEnhanced = 'true';
+        newMenuBtn.setAttribute('aria-expanded', 'false');
+        document.body.dataset.mobileMenuEnhanced = 'true';
 
         // Add click listener
         newMenuBtn.addEventListener('click', toggleMenu, { passive: false });
@@ -388,7 +399,7 @@
         const links = navLinks.querySelectorAll('a');
         links.forEach(function(link) {
             link.addEventListener('click', function(e) {
-                if (window.innerWidth <= 768) {
+                if (isCompactNavMode(newMenuBtn)) {
                     setTimeout(toggleMenu, 100);
                 }
             });
@@ -403,7 +414,7 @@
 
         // Close on resize to desktop
         window.addEventListener('resize', function() {
-            if (window.innerWidth > 768 && newMenuBtn.classList.contains('active')) {
+            if (!isCompactNavMode(newMenuBtn) && newMenuBtn.classList.contains('active')) {
                 toggleMenu();
             }
         });

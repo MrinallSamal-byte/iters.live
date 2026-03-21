@@ -942,3 +942,195 @@ pre, code, .code-block {
 /* ============================================================================
    END OF RESPONSIVE UNIVERSAL CSS
    ============================================================================ */
+
+/* ============================================================================
+   RESPONSIVE RESCUE LAYER
+   Hardens pages with inline desktop-first grids and fixed-width panels.
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+    .dashboard-grid,
+    .quick-stats,
+    .quick-links-grid,
+    .analytics-grid,
+    .details-grid,
+    .students-grid,
+    .semester-links-grid,
+    .template-grid,
+    .insights-grid,
+    .projects-grid,
+    .skills-grid,
+    .contact-cards,
+    .creator-links,
+    .creator-info-grid,
+    .highlights-grid,
+    .about-highlights,
+    .vision-mission,
+    .hero-section .container,
+    .creator-hero .container,
+    .contact-shell,
+    .about-grid,
+    .footer-shell,
+    .experience-board,
+    .resources-grid,
+    .recent-list {
+        grid-template-columns: 1fr !important;
+    }
+
+    .page-hero,
+    .dashboard-section,
+    .stat-box,
+    .analytics-item,
+    .schedule-item,
+    .announcement-item,
+    .deadline-item,
+    .quick-link-card,
+    .settings-section,
+    .upload-form,
+    .filter-container,
+    .search-filter-bar,
+    .table-container,
+    .timetable-wrapper,
+    .timeline-item,
+    .skill-category,
+    .project-card,
+    .contact-card {
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-content-inline,
+    .section-header-formal,
+    .hero-actions,
+    .form-actions,
+    .modal-actions,
+    .filter-row,
+    .search-filter-bar,
+    .summary-row,
+    .timeline-header,
+    .role-selection,
+    .view-toggle,
+    .contact-row,
+    .hero-buttons,
+    .contact-actions,
+    .program-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .resources-grid,
+    .recent-list,
+    .request-row,
+    .filter-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-row,
+    .info-grid,
+    .factor-grid,
+    .about-me-highlights,
+    .metrics-grid,
+    .features-grid,
+    .program-grid,
+    .screen-grid,
+    .projects-grid,
+    .contact-cards,
+    .creator-links,
+    .creator-info-grid,
+    .highlights-grid,
+    .skills-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .btn,
+    .tab-btn,
+    .category-btn,
+    .filter-chip,
+    .filter-tag,
+    .view-btn,
+    .settings-tab,
+    .block-tab,
+    .role-btn,
+    .hero-buttons .btn,
+    .contact-actions .btn,
+    .program-footer .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    .table-responsive,
+    .table-container,
+    .timetable-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table,
+    .modern-table,
+    .timetable-table {
+        min-width: 640px !important;
+    }
+
+    .chart-wrapper,
+    canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .modal-content,
+    .modal-large,
+    .profile-dropdown {
+        width: min(100%, calc(100vw - 16px)) !important;
+        max-width: calc(100vw - 16px) !important;
+    }
+
+    .recent-item,
+    .resource-header,
+    .resource-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .subject-tags,
+    .quick-access-container {
+        gap: 0.6rem !important;
+    }
+
+    .subject-tag,
+    .btn-quick-access {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 560px) {
+    .page-hero,
+    .dashboard-section,
+    .stat-box,
+    .analytics-item,
+    .schedule-item,
+    .announcement-item,
+    .deadline-item,
+    .quick-link-card,
+    .settings-section,
+    .upload-form,
+    .filter-container,
+    .search-filter-bar,
+    .modal-content,
+    .timeline-item,
+    .skill-category,
+    .project-card,
+    .contact-card {
+        border-radius: 20px !important;
+        padding: 0.9rem !important;
+    }
+
+    .hero-title,
+    .page-title,
+    .section-title {
+        max-width: none !important;
+        word-break: break-word;
+    }
+}

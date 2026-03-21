@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOA Personal Information - ITERasn hub</title>
+    <script>
+        (function () {
+            'use strict';
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            if (!checkAuth()) {
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to view your SOA data.');
+                } catch (e) { }
+                window.location.replace('/login.html');
+                document.write('<html><body><p>Redirecting to login...</p></body></html>');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        .soa-page-main {
+            padding-bottom: 2rem;
+        }
+
+        .soa-hero {
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .soa-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) 280px;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .soa-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.78rem;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.14);
+            color: #c7d2fe;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 0.9rem;
+        }
+
+        .soa-title {
+            margin: 0 0 0.65rem;
+            color: var(--text-primary);
+            font-size: clamp(1.8rem, 2.8vw, 2.35rem);
+        }
+
+        .soa-copy {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 760px;
+        }
+
+        .soa-status-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 1.25rem;
+        }
+
+        .soa-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .soa-pill.connected {
+            background: rgba(34, 197, 94, 0.15);
+            color: #bbf7d0;
+        }
+
+        .soa-pill.cached {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fde68a;
+        }
+
+        .soa-pill.demo {
+            background: rgba(148, 163, 184, 0.15);
+            color: #dbeafe;
+        }
+
+        .soa-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.35rem;
+        }
+
+        .soa-btn,
+        .soa-btn-secondary,
+        .soa-btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            border: none;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.92rem;
+            font-weight: 700;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .soa-btn:hover,
+        .soa-btn-secondary:hover,
+        .soa-btn-danger:hover {
+            transform: translateY(-1px);
+        }
+
+        .soa-btn {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .soa-btn-secondary {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+        }
+
+        .soa-btn-danger {
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.28);
+        }
+
+        .soa-profile-card {
+            padding: 1.4rem;
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            text-align: center;
+        }
+
+        .soa-avatar {
+            width: 108px;
+            height: 108px;
+            margin: 0 auto 1rem;
+            border-radius: 28px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(15, 23, 42, 0.7));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .soa-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .soa-profile-card h2 {
+            margin: 0 0 0.3rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .soa-profile-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .soa-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .soa-meta-card,
+        .soa-tab-shell,
+        .soa-empty,
+        .soa-loading,
+        .soa-section-card {
+            padding: 1.3rem;
+            border-radius: var(--radius-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 14px 36px var(--glass-shadow);
+        }
+
+        .soa-meta-card h3,
+        .soa-section-card h3,
+        .soa-empty h2 {
+            margin: 0 0 0.35rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .soa-meta-card p,
+        .soa-section-card p,
+        .soa-empty p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .soa-tab-shell {
+            padding: 1.2rem;
+        }
+
+        .soa-tab-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .soa-tab-btn {
+            padding: 0.72rem 0.95rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .soa-tab-btn.active {
+            background: rgba(99, 102, 241, 0.16);
+            color: #e0e7ff;
+            border-color: rgba(99, 102, 241, 0.32);
+        }
+
+        .soa-tab-panel {
+            display: none;
+        }
+
+        .soa-tab-panel.active {
+            display: block;
+        }
+
+        .soa-field-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+        }
+
+        .soa-field {
+            padding: 0.95rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .soa-field-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .soa-field-value {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .soa-table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .soa-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 660px;
+        }
+
+        .soa-table th,
+        .soa-table td {
+            padding: 0.9rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            vertical-align: top;
+        }
+
+        .soa-table th {
+            color: var(--text-primary);
+            font-size: 0.84rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .soa-table td strong {
+            color: var(--text-primary);
+        }
+
+        .soa-panel-stack {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .soa-empty,
+        .soa-loading {
+            text-align: center;
+        }
+
+        .soa-empty-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.1rem;
+        }
+
+        .soa-muted {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .soa-disconnect-note {
+            margin-top: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 980px) {
+            .soa-hero-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .soa-hero,
+            .soa-meta-card,
+            .soa-tab-shell,
+            .soa-empty,
+            .soa-loading,
+            .soa-section-card {
+                padding: 1.1rem;
+            }
+
+            .soa-actions,
+            .soa-empty-actions {
+                flex-direction: column;
+            }
+
+            .soa-btn,
+            .soa-btn-secondary,
+            .soa-btn-danger {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <main class="dashboard-main soa-page-main">
+        <section class="glass-card soa-hero">
+            <div class="soa-hero-grid">
+                <div>
+                    <span class="soa-kicker">Personal Information</span>
+                    <h1 class="soa-title">Imported SOA student data</h1>
+                    <p class="soa-copy" id="soaHeroCopy">
+                        This page shows the SOA portal data imported into ITERasn hub for your account.
+                    </p>
+                    <div class="soa-status-badges" id="soaStatusBadges"></div>
+                    <div class="soa-actions">
+                        <a class="soa-btn" href="/connect-portal.html" id="connectSoaBtn">Connect SOA Portal</a>
+                        <a class="soa-btn-secondary" href="/connect-portal.html" id="resyncSoaBtn">Refresh import</a>
+                        <button type="button" class="soa-btn-danger" id="disconnectSoaBtn" style="display: none;">Disconnect SOA portal</button>
+                    </div>
+                    <p class="soa-disconnect-note" id="disconnectNote" style="display: none;">
+                        Disconnecting stops the active connection status, but the last imported data stays available inside the app until you refresh it again.
+                    </p>
+                </div>
+
+                <aside class="soa-profile-card" id="soaProfileCard">
+                    <div class="soa-avatar" id="soaAvatar">S</div>
+                    <h2 id="soaStudentName">Student</h2>
+                    <p id="soaStudentMeta">No SOA profile imported yet.</p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="soa-meta-grid" id="soaMetaGrid"></section>
+
+        <section class="soa-loading" id="soaLoadingState">
+            <h2>Loading SOA data</h2>
+            <p>Fetching your saved import status and imported student data.</p>
+        </section>
+
+        <section class="soa-empty" id="soaEmptyState" style="display: none;">
+            <h2>No SOA data imported yet</h2>
+            <p>Connect your official SOA portal to import personal information, contact details, qualifications, attendance, and marks into ITERasn hub.</p>
+            <div class="soa-empty-actions">
+                <a class="soa-btn" href="/connect-portal.html">Connect SOA Portal</a>
+                <a class="soa-btn-secondary" href="/dashboard/student.html">Back to dashboard</a>
+            </div>
+        </section>
+
+        <section class="soa-tab-shell" id="soaContentShell" style="display: none;">
+            <div class="soa-tab-list" id="soaTabList"></div>
+            <div class="soa-panel-stack" id="soaTabPanels"></div>
+        </section>
+    </main>
+
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/universal-profile.js"></script>
+    <script src="/js/pages/student-personal-info.js"></script>
+</body>
+
+</html>

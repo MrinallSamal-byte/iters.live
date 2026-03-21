@@ -15,6 +15,8 @@
                 { icon: '🏠', text: 'Dashboard', href: '/dashboard/student.html', page: 'dashboard' },
                 { icon: '📊', text: 'Attendance', href: '/dashboard/student-attendance.html', page: 'attendance' },
                 { icon: '📈', text: 'Marks', href: '/dashboard/student-marks.html', page: 'marks' },
+                { icon: '🪪', text: 'SOA Data', href: '/dashboard/student-personal-info.html', page: 'personal-info' },
+                { icon: '🔗', text: 'Connect SOA Portal', href: '/connect-portal.html', page: 'connect-portal' },
                 { icon: '📅', text: 'Timetable', href: '/dashboard/student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: '/dashboard/student-notes.html', page: 'notes' },
                 { icon: '💬', text: 'Forum', href: '/dashboard/student-forum.html', page: 'forum' },
@@ -195,21 +197,28 @@
         createSidebar() {
             const menuItems = this.menus[this.currentRole] || this.menus.student;
             const roleTitle = this.currentRole.charAt(0).toUpperCase() + this.currentRole.slice(1);
+            const isDemoMode = (localStorage.getItem('prototypeMode') || '').toString() === 'true';
 
             const sidebarHTML = `
                 <aside class="universal-sidebar" id="universalSidebar">
                     <div class="sidebar-header">
-                        <img src="../assets/logo.png" alt="ITER Logo" class="sidebar-logo" onerror="this.style.display='none'">
+                        <img src="/assets/soa-logo.png" alt="ITER Logo" class="sidebar-logo">
                         <div class="sidebar-branding">
-                            <span class="sidebar-title">ITER Portal</span>
+                            <span class="sidebar-title">ITERasn hub</span>
                             <span class="sidebar-subtitle">${roleTitle} Dashboard</span>
                         </div>
-                        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
-                            ☰
+                        <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-controls="universalSidebar" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">
+                            <span class="sidebar-toggle-icon" aria-hidden="true">←</span>
                         </button>
                     </div>
 
                     <nav class="sidebar-nav">
+                        ${isDemoMode ? `
+                            <div class="sidebar-mode-pill" title="Local demo session is active">
+                                <span class="sidebar-mode-dot"></span>
+                                <span class="sidebar-mode-text">Demo Mode</span>
+                            </div>
+                        ` : ''}
                         <ul class="sidebar-nav-list">
                             ${menuItems.map(item => `
                                 <li class="sidebar-nav-item">
@@ -227,7 +236,7 @@
                 <div class="sidebar-overlay" id="sidebarOverlay"></div>
                 
                 <!-- Mobile toggle button -->
-                <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">
+                <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" type="button" aria-controls="universalSidebar" aria-expanded="false" aria-label="Open sidebar menu">
                     ☰
                 </button>
             `;
@@ -322,10 +331,9 @@
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             if (isCollapsed && sidebar) {
                 sidebar.classList.add('collapsed');
-                if (toggleBtn) toggleBtn.textContent = '☰';
-            } else {
-                if (toggleBtn) toggleBtn.textContent = '«';
             }
+            this.syncSidebarState();
+
             // Wire Logout link in sidebar
             const logoutLink = document.querySelector('.sidebar-nav-link[data-page="logout"]');
             if (logoutLink) {
@@ -334,21 +342,54 @@
                     this.logout();
                 });
             }
+
+            window.addEventListener('resize', () => {
+                this.syncSidebarState();
+
+                if (window.innerWidth > 968) {
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if (sidebar) sidebar.classList.remove('mobile-open');
+                    if (overlay) overlay.classList.remove('active');
+                }
+            });
         },
 
         toggleSidebar() {
             const sidebar = document.getElementById('universalSidebar');
-            const toggleBtn = document.getElementById('sidebarToggle');
 
             if (sidebar) {
                 sidebar.classList.toggle('collapsed');
-                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                this.syncSidebarState();
+            }
+        },
 
-                if (toggleBtn) {
-                    toggleBtn.textContent = isCollapsed ? '☰' : '«';
+        syncSidebarState() {
+            const sidebar = document.getElementById('universalSidebar');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const mobileToggleBtn = document.getElementById('mobileSidebarToggle');
+
+            if (!sidebar) return;
+
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            const isMobile = window.innerWidth <= 968;
+
+            if (toggleBtn) {
+                const icon = toggleBtn.querySelector('.sidebar-toggle-icon');
+                toggleBtn.classList.toggle('is-collapsed', isCollapsed);
+                toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
+                toggleBtn.setAttribute('aria-label', isCollapsed ? 'Open sidebar' : 'Collapse sidebar');
+                toggleBtn.setAttribute('title', isCollapsed ? 'Open sidebar' : 'Collapse sidebar');
+                toggleBtn.hidden = isMobile;
+                if (icon) {
+                    icon.textContent = isCollapsed ? '→' : '←';
                 }
+            }
 
-                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            if (mobileToggleBtn) {
+                const isMobileOpen = sidebar.classList.contains('mobile-open');
+                mobileToggleBtn.setAttribute('aria-expanded', String(isMobile && isMobileOpen));
+                mobileToggleBtn.setAttribute('aria-label', isMobileOpen ? 'Close sidebar menu' : 'Open sidebar menu');
             }
         },
 
@@ -361,6 +402,7 @@
                 mobileToggle.addEventListener('click', () => {
                     if (sidebar) sidebar.classList.add('mobile-open');
                     if (overlay) overlay.classList.add('active');
+                    this.syncSidebarState();
                 });
             }
 
@@ -368,6 +410,7 @@
                 overlay.addEventListener('click', () => {
                     if (sidebar) sidebar.classList.remove('mobile-open');
                     overlay.classList.remove('active');
+                    this.syncSidebarState();
                 });
             }
 
@@ -377,6 +420,7 @@
                     if (window.innerWidth <= 968) {
                         if (sidebar) sidebar.classList.remove('mobile-open');
                         if (overlay) overlay.classList.remove('active');
+                        this.syncSidebarState();
                     }
                 });
             });
@@ -397,10 +441,11 @@
 
             links.forEach(link => {
                 const pageName = link.getAttribute('data-page');
+                const isPaymentsPage = pageName === 'payments' && currentPage.includes('payment');
 
                 if (currentPage === this.currentRole && pageName === 'dashboard') {
                     link.classList.add('active');
-                } else if (currentPage.includes(pageName)) {
+                } else if (currentPage.includes(pageName) || isPaymentsPage) {
                     link.classList.add('active');
                 }
             });
@@ -596,7 +641,7 @@
             ctx.fillRect(panelX, panelY, panelW, 54);
             ctx.fillStyle = '#e5e7eb';
             ctx.font = 'bold 20px Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-            ctx.fillText('ITER EduHub • ID Card', panelX + 16, panelY + 34);
+            ctx.fillText('ITERasn hub • ID Card', panelX + 16, panelY + 34);
 
             // Photo placeholder or image
             const photoX = panelX + 24, photoY = panelY + 74, photoSize = 96;

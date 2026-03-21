@@ -33,6 +33,17 @@ const CACHE_MAX_AGE = {
   api: 5 * 60 * 1000,                 // 5 minutes
   runtime: 24 * 60 * 60 * 1000        // 1 day
 };
+const NON_CACHEABLE_HTML_PATHS = new Set([
+  '/login',
+  '/login.html',
+  '/register',
+  '/register.html',
+  '/creator',
+  '/creator.html',
+  '/connect-portal',
+  '/connect-portal.html',
+  '/clear-session.html'
+]);
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -63,6 +74,22 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'CLEAR_APP_CACHE') {
+    return;
+  }
+
+  const clearPromise = caches.keys().then((cacheNames) => Promise.all(
+    cacheNames
+      .filter((cacheName) => cacheName.startsWith('iter-'))
+      .map((cacheName) => caches.delete(cacheName))
+  ));
+
+  if (typeof event.waitUntil === 'function') {
+    event.waitUntil(clearPromise);
+  }
 });
 
 // Helper function to check if API endpoint should be cached
@@ -200,6 +227,13 @@ self.addEventListener('fetch', (event) => {
   }
 
   // HTML pages - network first with cache fallback
+  if (request.mode === 'navigate' && NON_CACHEABLE_HTML_PATHS.has(url.pathname)) {
+    event.respondWith(
+      fetch(request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -256,7 +290,7 @@ async function removeFromQueue(id) {
 // Push notifications
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'ITER EduHub';
+  const title = data.title || 'ITERasn hub';
   const options = {
     body: data.body || 'You have a new notification',
     icon: '/assets/icon-192.png',

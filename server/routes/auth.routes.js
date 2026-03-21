@@ -1,13 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const { db, auth } = require('../database/firebase');
+const { db, auth, isFirebaseAdminReady } = require('../database/firebase');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 const axios = require('axios');
 const sessionModule = require('../middleware/session');
+const { createAppSessionToken } = require('../utils/app-session');
+const { getLocalDemoUser, registerLocalDemoStudent } = require('../services/demo-auth.service');
 
 // Flask Scraper Service URL
 const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
+const allowLocalDemoAuth = process.env.ALLOW_LOCAL_DEMO_AUTH === 'true' || process.env.NODE_ENV !== 'production';
+
+function buildLocalDemoLoginResponse(user) {
+  const localAccessToken = `demo-local-${user.registration_number || user.id || user.role}-${Date.now()}`;
+  return {
+    success: true,
+    message: 'Demo login successful',
+    data: {
+      user,
+      accessToken: localAccessToken,
+      appAccessToken: createAppSessionToken(user, {
+        demoMode: true,
+        authMode: 'local-demo'
+      }),
+      refreshToken: null,
+      demoMode: true,
+      authMode: 'local-demo'
+    }
+  };
+}
 
 /**
  * POST /api/auth/google-login
@@ -18,6 +40,13 @@ const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:500
  */
 router.post('/google-login', async (req, res, next) => {
   try {
+    if (!isFirebaseAdminReady) {
+      return res.status(503).json({
+        success: false,
+        message: 'Google login is unavailable until Firebase Admin is configured.'
+      });
+    }
+
     const { idToken } = req.body;
 
     if (!idToken) {
@@ -83,6 +112,9 @@ router.post('/google-login', async (req, res, next) => {
       data: {
         user,
         token: idToken,
+        appAccessToken: createAppSessionToken(user, {
+          authMode: 'google-id-token'
+        }),
         isNewUser,
         needsPortalConnection,
         redirectUrl: null // Portal connection page is suspended - go directly to dashboard
@@ -113,6 +145,22 @@ router.post('/login', [
     }
 
     const { registration_number, password, skipPortalSync } = req.body;
+
+    if (!isFirebaseAdminReady) {
+      if (allowLocalDemoAuth) {
+        const demoUser = getLocalDemoUser(registration_number, password);
+        if (!demoUser) {
+          return res.status(401).json({ success: false, message: 'Invalid registration number or password' });
+        }
+
+        return res.json(buildLocalDemoLoginResponse(demoUser));
+      }
+
+      return res.status(503).json({
+        success: false,
+        message: 'Login is unavailable until Firebase Admin is configured on the server.'
+      });
+    }
 
     // Get user from Firestore
     const userDoc = await db.collection('users').doc(registration_number).get();
@@ -215,6 +263,9 @@ router.post('/login', [
       data: {
         user,
         accessToken: customToken,
+        appAccessToken: createAppSessionToken(user, {
+          authMode: 'firebase-custom-token'
+        }),
         refreshToken: null,
         portalSync: portalSyncResult
       }
@@ -236,6 +287,42 @@ router.post('/register-student', [
   body('password').isLength({ min: 6 })
 ], async (req, res, next) => {
   try {
+    if (!isFirebaseAdminReady) {
+      if (!allowLocalDemoAuth) {
+        return res.status(503).json({
+          success: false,
+          message: 'Student registration requires Firebase Admin configuration.'
+        });
+      }
+
+      const { name, registration_number, email, password, department, year, section } = req.body;
+      const user = registerLocalDemoStudent({
+        name,
+        registration_number,
+        email,
+        password,
+        department,
+        year,
+        section
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: 'Student registered successfully in local demo mode',
+        data: {
+          user,
+          accessToken: `demo-local-${user.registration_number || user.id}-${Date.now()}`,
+          appAccessToken: createAppSessionToken(user, {
+            demoMode: true,
+            authMode: 'local-demo'
+          }),
+          refreshToken: null,
+          demoMode: true,
+          authMode: 'local-demo'
+        }
+      });
+    }
+
     const { name, registration_number, email, password, department, year, section } = req.body;
 
     const userRef = db.collection('users').doc(registration_number);
@@ -281,7 +368,33 @@ router.post('/register-student', [
     res.status(201).json({
       success: true,
       message: 'Student registered successfully',
-      data: { user: { ...newUser, id: registration_number } }
+      data: {
+        user: {
+          id: registration_number,
+          name: newUser.name,
+          registration_number: newUser.registration_number,
+          email: newUser.email,
+          department: newUser.department,
+          year: newUser.year,
+          section: newUser.section,
+          role: newUser.role,
+          is_active: newUser.is_active
+        },
+        appAccessToken: createAppSessionToken({
+          id: registration_number,
+          name: newUser.name,
+          registration_number: newUser.registration_number,
+          email: newUser.email,
+          department: newUser.department,
+          year: newUser.year,
+          section: newUser.section,
+          role: newUser.role,
+          is_active: newUser.is_active
+        }, {
+          authMode: 'app-session'
+        }),
+        refreshToken: null
+      }
     });
 
   } catch (error) {
@@ -415,4 +528,3 @@ router.post('/refresh-session', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-

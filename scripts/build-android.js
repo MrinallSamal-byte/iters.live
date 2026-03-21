@@ -1,206 +1,105 @@
 #!/usr/bin/env node
-/**
- * Android TWA/PWA Build Script
- * Generates configuration for Trusted Web Activity
- */
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
-const outputDir = path.join(__dirname, '../releases/android');
+const rootDir = path.resolve(__dirname, '..');
+const androidDir = path.join(rootDir, 'android-app');
+const appBuildGradle = path.join(androidDir, 'app', 'build.gradle');
+const isWindows = process.platform === 'win32';
+const gradleExecutable = isWindows
+  ? path.join(androidDir, 'gradlew.bat')
+  : path.join(androidDir, 'gradlew');
 
-// Ensure output directory exists
-if (!fs.existsSync(outputDir)) {
-  fs.mkdirSync(outputDir, { recursive: true });
+const release = process.argv.includes('--release');
+const skipTests = process.argv.includes('--skip-tests');
+const dryRun = process.argv.includes('--dry-run');
+const buildTask = release ? 'assembleRelease' : 'assembleDebug';
+const artifactDir = path.join(rootDir, 'releases', 'android');
+
+function fail(message) {
+  console.error(`Android native build helper failed: ${message}`);
+  process.exit(1);
 }
 
-console.log('🤖 Building Android TWA configuration...\n');
-
-// TWA Manifest (twa-manifest.json)
-const twaManifest = {
-  packageId: "live.iters.app", // Updated package ID
-  host: "iter-college-management.vercel.app", // Production domain
-  name: "ITER", // Requested app name
-  launcherName: "ITER",
-  display: "standalone",
-  themeColor: "#6366f1",
-  backgroundColor: "#0f172a",
-  enableNotifications: true,
-  startUrl: "/",
-  iconUrl: "/assets/soa-logo.png", // Using the existing logo
-  maskableIconUrl: "/assets/soa-logo.png",
-  monochromeIconUrl: "/assets/soa-logo.png",
-  splashScreenFadeOutDuration: 300,
-  signingKey: {
-    path: "./android.keystore",
-    alias: "iter-edu-key"
-  },
-  appVersionName: "1.0.0",
-  appVersionCode: 1,
-  shortcuts: [
-    {
-      name: "Dashboard",
-      shortName: "Dashboard",
-      url: "/dashboard/student.html",
-      icon: "/assets/soa-logo.png"
-    }
-  ],
-  generatorApp: "bubblewrap-cli",
-  webManifestUrl: "/manifest.json",
-  fallbackType: "customtabs",
-  features: {
-    locationDelegation: {
-      enabled: false
-    },
-    playBilling: {
-      enabled: false
-    }
-  },
-  alphaDependencies: {
-    enabled: false
-  },
-  enableSiteSettingsShortcut: true,
-  isChromeOSOnly: false
-};
-
-// Write TWA manifest
-const twaManifestPath = path.join(outputDir, 'twa-manifest.json');
-fs.writeFileSync(twaManifestPath, JSON.stringify(twaManifest, null, 2));
-console.log('✓ Created twa-manifest.json');
-
-// Create build instructions
-const instructions = `
-# Android TWA Build Instructions
-
-## Prerequisites
-1. Install Android Studio (https://developer.android.com/studio)
-2. Install Node.js and npm
-3. Install Bubblewrap CLI: npm install -g @bubblewrap/cli
-
-## Option 1: Using Bubblewrap CLI (Recommended)
-
-### First Time Setup:
-\`\`\`bash
-cd releases/android
-bubblewrap init --manifest=twa-manifest.json
-\`\`\`
-
-### Build APK:
-\`\`\`bash
-bubblewrap build
-\`\`\`
-
-### Build App Bundle (for Play Store):
-\`\`\`bash
-bubblewrap build --appBundle
-\`\`\`
-
-## Option 2: Manual Android Studio
-
-1. Create a new Android project with Empty Activity
-2. Add dependencies to build.gradle:
-   \`\`\`gradle
-   implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
-   \`\`\`
-
-3. Update AndroidManifest.xml with TWA configuration:
-   \`\`\`xml
-   <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
-             android:exported="true"
-             android:theme="@style/Theme.LauncherActivity">
-       <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                  android:value="https://your-domain.com" />
-       <intent-filter>
-           <action android:name="android.intent.action.MAIN" />
-           <category android:name="android.intent.category.LAUNCHER" />
-       </intent-filter>
-   </activity>
-   \`\`\`
-
-4. Add Digital Asset Links for verification
-
-5. Build APK via Android Studio: Build > Build Bundle(s) / APK(s) > Build APK(s)
-
-## Deployment
-
-### Testing on Device:
-\`\`\`bash
-adb install app-release.apk
-\`\`\`
-
-### Play Store Deployment:
-1. Create app bundle: bubblewrap build --appBundle
-2. Upload to Google Play Console
-3. Complete store listing and publish
-
-## Requirements for Android 9+
-- targetSdkVersion: 33 (Android 13)
-- minSdkVersion: 28 (Android 9)
-- Supports all features on Android 9 and above
-
-## Testing PWA Features
-- Install PWA from browser first
-- Test "Add to Home Screen"
-- Verify offline functionality
-- Test notifications and background sync
-
-## Digital Asset Links Verification
-Host this file at https://your-domain.com/.well-known/assetlinks.json:
-
-\`\`\`json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "edu.iter.collegemanagement",
-    "sha256_cert_fingerprints": ["YOUR_CERT_FINGERPRINT"]
+function ensureNativeAndroidConfiguration() {
+  if (!fs.existsSync(appBuildGradle)) {
+    fail(`Missing Android module file: ${appBuildGradle}`);
   }
-}]
-\`\`\`
 
-Get fingerprint:
-\`\`\`bash
-keytool -list -v -keystore android.keystore
-\`\`\`
+  const gradleText = fs.readFileSync(appBuildGradle, 'utf8');
+  const minSdkMatch = gradleText.match(/minSdk(?:Version)?\s+(\d+)/);
+  if (!minSdkMatch) {
+    fail('Unable to determine minSdk from android-app/app/build.gradle.');
+  }
 
-## Notes
-- Replace 'your-domain.com' with actual production domain
-- Update package name in twa-manifest.json
-- Generate signing key for production builds
-- Test thoroughly on various Android versions (9-14)
-`;
+  const minSdk = Number(minSdkMatch[1]);
+  if (Number.isNaN(minSdk) || minSdk < 29) {
+    fail(`android-app/app/build.gradle must target Android 10+ (found minSdk ${minSdk}).`);
+  }
+}
 
-const instructionsPath = path.join(outputDir, 'BUILD_INSTRUCTIONS.md');
-fs.writeFileSync(instructionsPath, instructions);
-console.log('✓ Created BUILD_INSTRUCTIONS.md');
+function runGradle(tasks) {
+  if (!fs.existsSync(gradleExecutable)) {
+    fail(`Gradle wrapper not found at ${gradleExecutable}.`);
+  }
 
-// Create README
-const readme = `
-# ITER EduHub - Android App
+  const command = isWindows ? gradleExecutable : './gradlew';
+  console.log(`Running native Android build: ${tasks.join(' ')}`);
 
-This directory contains configuration files for building the Android app.
+  if (dryRun) {
+    return;
+  }
 
-## Quick Start
+  execFileSync(command, [...tasks, '--no-daemon'], {
+    cwd: androidDir,
+    stdio: 'inherit',
+    shell: isWindows
+  });
+}
 
-\`\`\`bash
-npm install -g @bubblewrap/cli
-bubblewrap init --manifest=twa-manifest.json
-bubblewrap build
-\`\`\`
+function copyArtifact() {
+  const artifactPath = release
+    ? path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk')
+    : path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
-The APK will be generated in the \`app\` subdirectory.
+  if (!fs.existsSync(artifactPath)) {
+    console.warn(`Build completed, but no APK was found at ${artifactPath}.`);
+    console.warn('If you produced an AAB-only release, collect it directly from android-app/app/build/outputs.');
+    return;
+  }
 
-See BUILD_INSTRUCTIONS.md for detailed information.
-`;
+  fs.mkdirSync(artifactDir, { recursive: true });
+  const fileName = release
+    ? 'ITERasn-hub-native-release.apk'
+    : 'ITERasn-hub-native-debug.apk';
+  const releasePath = path.join(artifactDir, fileName);
 
-const readmePath = path.join(outputDir, 'README.md');
-fs.writeFileSync(readmePath, readme);
-console.log('✓ Created README.md\n');
+  fs.copyFileSync(artifactPath, releasePath);
+  console.log(`Copied APK to ${releasePath}`);
+}
 
-console.log('✅ Android TWA configuration completed!');
-console.log('\nNext steps:');
-console.log('1. Update your-domain.com in twa-manifest.json with your actual domain');
-console.log('2. Run: npm install -g @bubblewrap/cli');
-console.log('3. Run: cd releases/android && bubblewrap init --manifest=twa-manifest.json');
-console.log('4. Run: bubblewrap build');
-console.log('\nFor more details, see releases/android/BUILD_INSTRUCTIONS.md\n');
+function main() {
+  ensureNativeAndroidConfiguration();
+
+  const tasks = [];
+  if (!skipTests) {
+    tasks.push('testDebugUnitTest');
+  }
+  tasks.push(buildTask);
+
+  console.log('Building the native Android client in android-app/.');
+  console.log(`Mode: ${release ? 'release' : 'debug'}`);
+  console.log(`Unit tests: ${skipTests ? 'skipped' : 'enabled'}`);
+
+  runGradle(tasks);
+  if (!dryRun) {
+    copyArtifact();
+  }
+
+  console.log('Native Android build helper finished.');
+  console.log('This script no longer generates WebView/TWA/Bubblewrap wrappers.');
+}
+
+main();

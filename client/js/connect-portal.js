@@ -1,769 +1,532 @@
-/**
- * Connect Portal JavaScript
- * 
- * Features:
- * - Data source selection (live portal vs demo data)
- * - 3-attempt login system with automatic fallback
- * - CAPTCHA solving integration via backend
- * - Backup data recovery
- * - Smooth transitions and error handling
- * - Automatic detection of portal availability
- */
-
-(function() {
+(function () {
     'use strict';
 
-    // Constants
-    const MAX_RETRY_ATTEMPTS = 3;
-    const RETRY_KEY_PREFIX = 'portalRetryAttempts:';
-    const CREDENTIALS_KEY = 'portal_credentials';
-    
-    // Configuration for retry messaging
-    const RETRY_DELAYS = [500, 1000, 2000]; // milliseconds
-    const TOTAL_RETRY_TIME_ESTIMATE = Math.ceil(
-        (RETRY_DELAYS.reduce((a, b) => a + b, 0) + (30000 * MAX_RETRY_ATTEMPTS)) / 1000 / 60
-    ); // Total time in minutes including processing
+    const REMEMBERED_REG_KEY = 'soaRememberedRegNo';
+    const IMPORT_TARGET = '/dashboard/student-personal-info.html';
 
-    // State
-    let selectedSource = null;
-    let portalEnabled = true; // Will be checked from server
+    let portalEnabled = true;
+    let currentSessionId = null;
+    let currentConnection = null;
 
-    // DOM Elements
-    let portalForm;
-    let syncBtn;
+    let statusBanner;
+    let startSessionBtn;
+    let refreshCaptchaBtn;
+    let importBtn;
     let demoBtn;
-    let statusMessage;
-    let retryInfo;
-    let attemptCounter;
+    let useCachedDataBtn;
+    let openImportedDataBtn;
+    let openImportedDataLink;
+    let portalForm;
     let regNumberInput;
     let portalPasswordInput;
-    let dataSourceSelection;
-    let backupOption;
-    let credentialStatus;
-    let clearCredentialsBtn;
+    let captchaInput;
+    let sessionDisplay;
+    let rememberRegNo;
+    let clearRememberedBtn;
+    let captchaShell;
+    let captchaFrame;
+    let connectionPill;
+    let connectionMeta;
+    let stepSession;
+    let stepCredentials;
+    let stepImport;
 
-    /**
-     * Save credentials to localStorage
-     * 
-     * SECURITY NOTE: Credentials are stored with base64 encoding, which provides
-     * only basic obfuscation, NOT encryption. This is acceptable for educational
-     * portal credentials, but users should be aware:
-     * - Credentials can be decoded by anyone with access to browser storage
-     * - Users can clear credentials anytime via the "Clear" button
-     * - For enhanced security, avoid using this on shared/public computers
-     * 
-     * @param {string} regNumber - Registration number
-     * @param {string} password - Portal password (will be base64 encoded for basic obfuscation)
-     */
-    function saveCredentials(regNumber, password) {
-        try {
-            const credentials = {
-                regNumber: regNumber,
-                // Base64 encoding provides basic obfuscation only (not encryption)
-                password: btoa(password),
-                savedAt: new Date().toISOString()
-            };
-            localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
-            console.log('Credentials saved to localStorage (base64 encoded)');
-            updateCredentialStatus(true);
-        } catch (error) {
-            console.warn('Failed to save credentials:', error);
-        }
-    }
+    document.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('pagehide', releaseActiveSession);
+    window.addEventListener('beforeunload', releaseActiveSession);
 
-    /**
-     * Load saved credentials from localStorage
-     * Includes error handling for corrupted/invalid base64 data
-     */
-    function loadSavedCredentials() {
-        try {
-            const saved = localStorage.getItem(CREDENTIALS_KEY);
-            if (saved) {
-                const credentials = JSON.parse(saved);
-                if (regNumberInput && credentials.regNumber) {
-                    regNumberInput.value = credentials.regNumber;
-                }
-                if (portalPasswordInput && credentials.password) {
-                    try {
-                        // Decode the password - may throw if corrupted
-                        const decodedPassword = atob(credentials.password);
-                        portalPasswordInput.value = decodedPassword;
-                    } catch (decodeError) {
-                        console.warn('Failed to decode saved password - clearing credentials');
-                        clearSavedCredentials();
-                        return;
-                    }
-                }
-                console.log('Loaded saved credentials');
-                updateCredentialStatus(true);
-            }
-        } catch (error) {
-            console.warn('Failed to load saved credentials:', error);
-            // Clear corrupted data
-            clearSavedCredentials();
-        }
-    }
-
-    /**
-     * Clear saved credentials
-     */
-    function clearSavedCredentials() {
-        try {
-            localStorage.removeItem(CREDENTIALS_KEY);
-            if (regNumberInput) regNumberInput.value = '';
-            if (portalPasswordInput) portalPasswordInput.value = '';
-            console.log('Cleared saved credentials');
-            updateCredentialStatus(false);
-            showToast('Credentials cleared', 'success');
-        } catch (error) {
-            console.warn('Failed to clear credentials:', error);
-        }
-    }
-
-    /**
-     * Update credential status indicator
-     */
-    function updateCredentialStatus(hasSaved) {
-        if (credentialStatus) {
-            credentialStatus.style.display = hasSaved ? 'block' : 'none';
-        }
-    }
-
-    /**
-     * Initialize the connect portal page
-     */
-    async function init() {
-        // Get DOM elements
-        portalForm = document.getElementById('portalForm');
-        syncBtn = document.getElementById('syncBtn');
-        demoBtn = document.getElementById('demoBtn');
-        statusMessage = document.getElementById('statusMessage');
-        retryInfo = document.getElementById('retryInfo');
-        attemptCounter = document.getElementById('attemptCounter');
-        regNumberInput = document.getElementById('regNumber');
-        portalPasswordInput = document.getElementById('portalPassword');
-        dataSourceSelection = document.getElementById('dataSourceSelection');
-        backupOption = document.getElementById('backupOption');
-        credentialStatus = document.getElementById('credentialStatus');
-        clearCredentialsBtn = document.getElementById('clearCredentialsBtn');
-
-        // Check if user is logged in
-        const user = APP.Storage.get('user');
-        if (!user) {
+    function init() {
+        if (typeof APP === 'undefined') {
             window.location.href = '/login.html';
             return;
         }
 
-        // Check if portal features are enabled on the server
-        await checkPortalAvailability();
-
-        // Load saved credentials if available
-        loadSavedCredentials();
-
-        // Pre-fill registration number if available
-        if (user.registration_number && !user.registration_number.startsWith('GOOGLE_')) {
-            if (regNumberInput) {
-                regNumberInput.value = user.registration_number;
-            }
+        const user = APP.Storage.get('user');
+        if (!user || !APP.isAuthenticated()) {
+            window.location.href = '/login.html';
+            return;
         }
 
-        // Set up data source selection
-        setupDataSourceSelection();
+        if (user.role !== 'student') {
+            const dashboardByRole = {
+                teacher: '/dashboard/teacher.html',
+                admin: '/dashboard/admin.html'
+            };
+            const target = dashboardByRole[user.role] || '/dashboard/student.html';
+            APP.navigateToDashboard(target);
+            return;
+        }
 
-        // Check for pending portal sync from login page
-        checkPendingSync();
+        bindDom();
+        bindEvents();
+        hydrateRegistrationNumber(user);
+        loadConnectionStatus();
+    }
 
-        // Update attempt counter display
-        updateAttemptDisplay();
+    function bindDom() {
+        statusBanner = document.getElementById('statusBanner');
+        startSessionBtn = document.getElementById('startSessionBtn');
+        refreshCaptchaBtn = document.getElementById('refreshCaptchaBtn');
+        importBtn = document.getElementById('importBtn');
+        demoBtn = document.getElementById('demoBtn');
+        useCachedDataBtn = document.getElementById('useCachedDataBtn');
+        openImportedDataBtn = document.getElementById('openImportedDataBtn');
+        openImportedDataLink = document.getElementById('openImportedDataLink');
+        portalForm = document.getElementById('portalForm');
+        regNumberInput = document.getElementById('regNumber');
+        portalPasswordInput = document.getElementById('portalPassword');
+        captchaInput = document.getElementById('captchaInput');
+        sessionDisplay = document.getElementById('sessionDisplay');
+        rememberRegNo = document.getElementById('rememberRegNo');
+        clearRememberedBtn = document.getElementById('clearRememberedBtn');
+        captchaShell = document.getElementById('captchaShell');
+        captchaFrame = document.getElementById('captchaFrame');
+        connectionPill = document.getElementById('connectionPill');
+        connectionMeta = document.getElementById('connectionMeta');
+        stepSession = document.getElementById('stepSession');
+        stepCredentials = document.getElementById('stepCredentials');
+        stepImport = document.getElementById('stepImport');
+    }
 
-        // Bind events
-        if (portalForm) {
-            portalForm.addEventListener('submit', handleSyncSubmit);
+    function bindEvents() {
+        startSessionBtn?.addEventListener('click', startSession);
+        refreshCaptchaBtn?.addEventListener('click', refreshCaptcha);
+        portalForm?.addEventListener('submit', importPortalData);
+        demoBtn?.addEventListener('click', loadDemoData);
+        useCachedDataBtn?.addEventListener('click', openImportedData);
+        clearRememberedBtn?.addEventListener('click', clearRememberedRegistrationNumber);
+    }
+
+    function hydrateRegistrationNumber(user) {
+        let rememberedValue = null;
+
+        try {
+            rememberedValue = JSON.parse(localStorage.getItem(REMEMBERED_REG_KEY) || 'null');
+        } catch (_) {
+            rememberedValue = null;
         }
-        if (syncBtn) {
-            syncBtn.addEventListener('click', handleSyncSubmit);
+
+        if (rememberedValue && regNumberInput) {
+            regNumberInput.value = rememberedValue;
+            if (rememberRegNo) rememberRegNo.checked = true;
+            return;
         }
-        if (demoBtn) {
-            demoBtn.addEventListener('click', handleUseDemoData);
-        }
-        
-        // Add backup load button handler if it exists
-        const loadBackupBtn = document.getElementById('loadBackupBtn');
-        if (loadBackupBtn) {
-            loadBackupBtn.addEventListener('click', handleLoadBackup);
-        }
-        
-        // Add clear credentials button handler
-        if (clearCredentialsBtn) {
-            clearCredentialsBtn.addEventListener('click', clearSavedCredentials);
+
+        if (user?.registration_number && !String(user.registration_number).startsWith('GOOGLE_') && regNumberInput) {
+            regNumberInput.value = user.registration_number;
         }
     }
 
-    /**
-     * Check if portal features are available on the server
-     */
-    async function checkPortalAvailability() {
+    async function loadConnectionStatus() {
+        setStatus('info', 'Checking your SOA connection status.', 'We are loading the latest saved import status for your account.');
+
         try {
-            const response = await APP.API.get('/portal/status');
-            if (response.success && response.data) {
-                portalEnabled = response.data.portalEnabled !== false;
+            const response = await APP.API.get('/soa/status');
+            portalEnabled = response.portalEnabled !== false;
+            currentConnection = response.connection || null;
+            renderConnectionStatus();
+
+            if (!portalEnabled && currentConnection?.hasImportedData) {
+                setStatus('warning', 'Live SOA import is unavailable right now.', 'You can still open the SOA data already imported into your account.');
+            } else if (!portalEnabled) {
+                setStatus('warning', 'Live SOA import is unavailable right now.', response.message || 'Use demo data for now and try the live import again later.');
+            } else if (currentConnection?.connected) {
+                setStatus('success', 'SOA portal already connected.', 'You can import again with a fresh CAPTCHA whenever you need a new sync.');
+            } else if (currentConnection?.hasImportedData) {
+                setStatus('info', 'Previously imported SOA data is available.', 'Open the saved data directly or run a fresh import if you want the newest portal data.');
             } else {
-                // Default to enabled if we can get a response but no explicit status
-                portalEnabled = true;
+                hideStatus();
             }
         } catch (error) {
-            // If we can't check, assume portal is enabled and let the user try
-            console.log('Could not check portal status, defaulting to enabled');
             portalEnabled = true;
+            setStatus('warning', 'We could not verify the SOA status.', 'You can still try fetching a CAPTCHA or switch to demo data.');
+        } finally {
+            updateFlowAvailability();
+        }
+    }
+
+    function updateFlowAvailability() {
+        if (startSessionBtn) {
+            startSessionBtn.disabled = !portalEnabled;
         }
 
-        // If portal is disabled, update UI to reflect that
+        if (refreshCaptchaBtn) {
+            refreshCaptchaBtn.disabled = !portalEnabled;
+        }
+
+        if (importBtn) {
+            importBtn.disabled = !portalEnabled;
+        }
+
+        if (!portalEnabled && sessionDisplay) {
+            sessionDisplay.value = 'Live import unavailable on this server right now';
+        }
+
+        updateStepCards(Boolean(currentSessionId));
+    }
+
+    function updateStepCards(hasActiveSession) {
+        stepSession?.classList.toggle('active', !hasActiveSession);
+        stepSession?.classList.toggle('complete', hasActiveSession);
+        stepCredentials?.classList.toggle('active', hasActiveSession);
+        stepImport?.classList.toggle('active', hasActiveSession);
+    }
+
+    function renderConnectionStatus() {
+        if (!connectionPill || !connectionMeta) return;
+
+        const connection = currentConnection || {};
+        let stateClass = 'disconnected';
+        let stateText = 'Not connected';
+
+        if (connection.connected) {
+            stateClass = 'connected';
+            stateText = 'Verified from SOA';
+        } else if (connection.hasImportedData) {
+            stateClass = 'cached';
+            stateText = 'Cached SOA data';
+        }
+
+        connectionPill.className = `connection-pill ${stateClass}`;
+        connectionPill.textContent = stateText;
+
+        const metaRows = [
+            ['Provider', connection.portalProvider ? connection.portalProvider.toUpperCase() : 'Not set'],
+            ['Last synced', formatDateTime(connection.lastSynced)],
+            ['Status', connection.needsReconnect ? 'Needs reconnect' : connection.connected ? 'Connected' : connection.hasImportedData ? 'Saved data available' : 'No import yet'],
+            ['Student', connection.profileSummary?.studentName || 'Not imported yet']
+        ];
+
+        connectionMeta.innerHTML = metaRows.map(([label, value]) => `
+            <div>
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(value || '—')}</strong>
+            </div>
+        `).join('');
+
+        const canOpenImportedData = Boolean(connection.hasImportedData);
+        if (openImportedDataBtn) openImportedDataBtn.style.display = canOpenImportedData ? 'inline-flex' : 'none';
+        if (openImportedDataLink) openImportedDataLink.style.display = canOpenImportedData ? 'inline-flex' : 'none';
+        if (useCachedDataBtn) useCachedDataBtn.style.display = canOpenImportedData ? 'inline-flex' : 'none';
+    }
+
+    async function startSession() {
         if (!portalEnabled) {
-            const optionLive = document.getElementById('optionLive');
-            if (optionLive) {
-                optionLive.style.opacity = '0.5';
-                optionLive.style.cursor = 'not-allowed';
-                optionLive.innerHTML = `
-                    <div class="icon">🌐</div>
-                    <h4>Live Data</h4>
-                    <p style="color: #f59e0b;">Currently Unavailable</p>
-                `;
+            setStatus('warning', 'Live SOA import is unavailable right now.', 'Use demo data or open your saved SOA data if you have already imported it before.');
+            return;
+        }
+
+        setButtonLoading(startSessionBtn, 'Fetching SOA CAPTCHA');
+        setStatus('info', 'Opening a secure SOA session.', 'We are requesting a fresh CAPTCHA from the official SOA portal.');
+
+        try {
+            const response = await APP.API.get('/soa/captcha');
+            currentSessionId = response.sessionId;
+            renderCaptcha(response.captchaImage);
+            if (sessionDisplay) sessionDisplay.value = 'Fresh SOA session ready';
+            updateStepCards(true);
+            setStatus('success', 'SOA CAPTCHA ready.', 'Complete the form below to start importing your student data.');
+        } catch (error) {
+            resetSessionUi();
+            const payload = error.data || {};
+            if (payload.status === 'PORTAL_DISABLED') {
+                portalEnabled = false;
+                currentConnection = payload.connection || currentConnection;
+                renderConnectionStatus();
+                updateFlowAvailability();
             }
-            // Auto-select demo option
-            selectDataSource('demo');
-            showStatus('Portal syncing is currently unavailable on this server. Please use demo data.', 'loading');
+            setStatus('error', 'Could not fetch a fresh SOA CAPTCHA.', payload.message || error.message || 'Please try again in a moment.');
+        } finally {
+            resetButton(startSessionBtn);
         }
     }
 
-    /**
-     * Set up data source selection options
-     */
-    function setupDataSourceSelection() {
-        const optionLive = document.getElementById('optionLive');
-        const optionDemo = document.getElementById('optionDemo');
+    async function refreshCaptcha() {
+        if (!currentSessionId) {
+            startSession();
+            return;
+        }
 
-        if (optionLive) {
-            optionLive.addEventListener('click', () => {
-                if (!portalEnabled) {
-                    showStatus('Portal syncing is currently unavailable. Please use demo data.', 'error');
-                    return;
-                }
-                selectDataSource('live');
+        setButtonLoading(refreshCaptchaBtn, 'Refreshing');
+        setStatus('info', 'Refreshing the CAPTCHA.', 'Use the latest CAPTCHA shown here before you submit the import.');
+
+        try {
+            const response = await APP.API.post('/soa/refresh-captcha', {
+                sessionId: currentSessionId
             });
-        }
-
-        if (optionDemo) {
-            optionDemo.addEventListener('click', () => selectDataSource('demo'));
-        }
-    }
-
-    /**
-     * Handle data source selection
-     */
-    function selectDataSource(source) {
-        selectedSource = source;
-
-        // Update UI
-        const optionLive = document.getElementById('optionLive');
-        const optionDemo = document.getElementById('optionDemo');
-
-        if (optionLive) optionLive.classList.remove('active');
-        if (optionDemo) optionDemo.classList.remove('active');
-
-        if (source === 'live') {
-            if (optionLive) optionLive.classList.add('active');
-            showLiveDataForm();
-        } else {
-            if (optionDemo) optionDemo.classList.add('active');
-            showDemoDataOption();
-        }
-    }
-
-    /**
-     * Show live data form for portal login
-     */
-    function showLiveDataForm() {
-        if (portalForm) {
-            portalForm.classList.add('visible');
-        }
-        if (syncBtn) {
-            syncBtn.style.display = 'block';
-        }
-        if (demoBtn) {
-            demoBtn.style.display = 'none';
-        }
-        if (backupOption) {
-            backupOption.style.display = 'block';
-        }
-    }
-
-    /**
-     * Show demo data option
-     */
-    function showDemoDataOption() {
-        if (portalForm) {
-            portalForm.classList.remove('visible');
-        }
-        if (syncBtn) {
-            syncBtn.style.display = 'none';
-        }
-        if (demoBtn) {
-            demoBtn.style.display = 'block';
-        }
-        if (backupOption) {
-            backupOption.style.display = 'none';
-        }
-    }
-
-    /**
-     * Check for pending portal sync from login page
-     */
-    function checkPendingSync() {
-        const pendingSync = sessionStorage.getItem('pendingPortalSync');
-        const savedPassword = sessionStorage.getItem('portalPassword');
-        
-        if (pendingSync) {
-            try {
-                const syncData = JSON.parse(pendingSync);
-                // Only use if less than 5 minutes old
-                if (Date.now() - syncData.timestamp < 5 * 60 * 1000) {
-                    if (regNumberInput) {
-                        regNumberInput.value = syncData.reg_number || regNumberInput.value;
-                    }
-                    
-                    // Auto-select live data option
-                    selectDataSource('live');
-                    
-                    // Auto-fill password if available from login
-                    if (savedPassword && portalPasswordInput) {
-                        portalPasswordInput.value = savedPassword;
-                        // Auto-trigger sync
-                        showStatus('🔄 Auto-syncing with your login credentials...', 'loading');
-                        setTimeout(() => {
-                            handleSyncSubmit({ preventDefault: () => {} });
-                        }, 500);
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not parse pending sync data');
-            }
-            // Clear after use
-            sessionStorage.removeItem('pendingPortalSync');
-            sessionStorage.removeItem('portalPassword');
-        }
-    }
-
-    function getUserId() {
-        const user = APP.Storage.get('user');
-        return user ? (user.id || user.registration_number) : 'unknown';
-    }
-
-    function getRetryAttempts() {
-        const key = RETRY_KEY_PREFIX + getUserId();
-        const attempts = parseInt(localStorage.getItem(key) || '0', 10);
-        return attempts;
-    }
-
-    function setRetryAttempts(count) {
-        const key = RETRY_KEY_PREFIX + getUserId();
-        localStorage.setItem(key, count.toString());
-    }
-
-    function clearRetryAttempts() {
-        const key = RETRY_KEY_PREFIX + getUserId();
-        localStorage.removeItem(key);
-    }
-
-    function updateAttemptDisplay() {
-        const attempts = getRetryAttempts();
-        const remaining = MAX_RETRY_ATTEMPTS - attempts;
-
-        if (attemptCounter) {
-            if (attempts > 0 && remaining > 0) {
-                attemptCounter.textContent = `Attempts remaining: ${remaining}`;
-                attemptCounter.style.display = 'block';
+            currentSessionId = response.sessionId || currentSessionId;
+            renderCaptcha(response.captchaImage);
+            if (sessionDisplay) sessionDisplay.value = 'CAPTCHA refreshed';
+            setStatus('success', 'Fresh CAPTCHA loaded.', 'Enter the new CAPTCHA value before you import.');
+        } catch (error) {
+            const payload = error.data || {};
+            if (payload.status === 'SESSION_EXPIRED') {
+                resetSessionUi();
+                setStatus('warning', 'That SOA session expired.', 'Fetch a fresh CAPTCHA and then submit your credentials again.');
             } else {
-                attemptCounter.style.display = 'none';
+                setStatus('error', 'Could not refresh the CAPTCHA.', payload.message || error.message || 'Please fetch a new session and try again.');
             }
-        }
-
-        // If max attempts reached, auto-fallback
-        if (attempts >= MAX_RETRY_ATTEMPTS) {
-            handleAutoFallback();
+        } finally {
+            resetButton(refreshCaptchaBtn);
         }
     }
 
-    function showStatus(message, type) {
-        if (statusMessage) {
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message ' + type;
-            statusMessage.style.display = 'block';
+    async function importPortalData(event) {
+        event.preventDefault();
+
+        const regNo = regNumberInput?.value.trim();
+        const password = portalPasswordInput?.value || '';
+        const captcha = captchaInput?.value.trim();
+
+        if (!currentSessionId) {
+            setStatus('warning', 'Fetch the CAPTCHA first.', 'Start a secure SOA session before submitting your login details.');
+            return;
         }
+
+        if (!regNo || !password || !captcha) {
+            setStatus('warning', 'Complete every field first.', 'Registration number, password, and CAPTCHA are all required for the SOA import.');
+            return;
+        }
+
+        rememberRegistrationNumber(regNo);
+        setButtonLoading(importBtn, 'Importing SOA data');
+        setStatus('info', 'Importing your SOA data.', 'This can take a short while while we log in, collect the available sections, and save them to your account.');
+
+        try {
+            const response = await APP.API.post('/soa/login', {
+                sessionId: currentSessionId,
+                regNo,
+                password,
+                captcha
+            });
+
+            clearSensitiveInputs();
+            currentSessionId = null;
+            syncStoredUser(response.connection, null, false);
+            currentConnection = response.connection || currentConnection;
+            renderConnectionStatus();
+            resetSessionUi(false);
+            setStatus('success', 'SOA data imported successfully.', 'Opening your student-facing SOA data page now.');
+
+            window.setTimeout(() => {
+                APP.navigateToDashboard(response.redirectTo || IMPORT_TARGET);
+            }, 900);
+        } catch (error) {
+            clearSensitiveInputs();
+            const payload = error.data || {};
+
+            if (payload.status === 'SESSION_EXPIRED') {
+                resetSessionUi();
+                setStatus('warning', 'Your SOA session expired.', 'Fetch a new CAPTCHA and submit your login details again.');
+            } else if (payload.status === 'AUTH_FAILED') {
+                setStatus('error', 'SOA login failed.', payload.message || 'Check your registration number, password, and CAPTCHA, then try again.');
+            } else if (payload.status === 'PORTAL_UNREACHABLE') {
+                currentConnection = payload.connection || currentConnection;
+                renderConnectionStatus();
+                setStatus('warning', 'The official SOA portal could not be reached.', 'If you already imported data before, you can still open the saved copy inside this app.');
+            } else if (payload.status === 'PORTAL_DISABLED') {
+                portalEnabled = false;
+                currentConnection = payload.connection || currentConnection;
+                renderConnectionStatus();
+                updateFlowAvailability();
+                setStatus('warning', 'Live SOA import is unavailable right now.', payload.message || 'You can continue with demo data or open saved imported data.');
+            } else if (payload.status === 'RATE_LIMITED') {
+                setStatus('warning', 'Too many import attempts.', payload.message || 'Please wait a little before you try again.');
+            } else {
+                setStatus('error', 'SOA import failed.', payload.message || error.message || 'Fetch a fresh CAPTCHA and try again.');
+            }
+        } finally {
+            resetButton(importBtn);
+        }
+    }
+
+    async function loadDemoData() {
+        setButtonLoading(demoBtn, 'Loading demo data');
+        setStatus('info', 'Loading demo data.', 'You can continue exploring the student experience without a live SOA import.');
+
+        try {
+            const response = await APP.API.get('/portal/demo');
+            const demoConnection = {
+                connected: false,
+                isVerified: false,
+                portalProvider: null,
+                lastSynced: new Date().toISOString(),
+                hasImportedData: true,
+                needsReconnect: false,
+                dataSource: 'demo',
+                profileSummary: {
+                    studentName: response.data?.profile?.name || 'Demo Student',
+                    registrationNumber: response.data?.profile?.registration_number || 'Demo',
+                    branch: response.data?.profile?.department || 'Demo',
+                    semester: response.data?.profile?.semester || null
+                }
+            };
+
+            currentConnection = demoConnection;
+            syncStoredUser(demoConnection, response.data, true);
+            renderConnectionStatus();
+            setStatus('success', 'Demo data is ready.', 'Opening the student-facing SOA data page with demo content.');
+
+            window.setTimeout(() => {
+                APP.navigateToDashboard(IMPORT_TARGET);
+            }, 700);
+        } catch (error) {
+            setStatus('error', 'Demo data could not be loaded.', error.message || 'Please try again in a moment.');
+        } finally {
+            resetButton(demoBtn);
+        }
+    }
+
+    function openImportedData() {
+        APP.navigateToDashboard(IMPORT_TARGET);
+    }
+
+    function rememberRegistrationNumber(regNo) {
+        if (!rememberRegNo) return;
+
+        try {
+            if (!rememberRegNo.checked) {
+                localStorage.removeItem(REMEMBERED_REG_KEY);
+                return;
+            }
+
+            localStorage.setItem(REMEMBERED_REG_KEY, JSON.stringify(regNo));
+        } catch (_) {
+            // Storage may be unavailable. The live flow still works without remembering the value.
+        }
+    }
+
+    function clearRememberedRegistrationNumber() {
+        try {
+            localStorage.removeItem(REMEMBERED_REG_KEY);
+        } catch (_) {
+            // Ignore storage errors.
+        }
+        if (rememberRegNo) rememberRegNo.checked = false;
+        if (regNumberInput) regNumberInput.value = '';
+        setStatus('info', 'Remembered registration number cleared.', 'You can still enter a registration number manually for this session.');
+    }
+
+    function syncStoredUser(connection, data, keepLocalPortalData) {
+        const user = APP.Storage.get('user');
+        if (!user) return;
+
+        user.portalConnected = Boolean(connection?.connected);
+        user.isVerified = Boolean(connection?.isVerified);
+        user.portalProvider = connection?.portalProvider || null;
+        user.portal_last_synced = connection?.lastSynced || null;
+        user.portalStatus = connection || null;
+        user.dataSource = connection?.dataSource || user.dataSource || null;
+
+        if (keepLocalPortalData && data) {
+            user.portalData = data;
+        } else {
+            delete user.portalData;
+        }
+
+        APP.Storage.set('user', user);
+    }
+
+    function renderCaptcha(imageSrc) {
+        if (!captchaShell || !captchaFrame) return;
+
+        captchaShell.classList.add('visible');
+        captchaFrame.innerHTML = '';
+
+        const image = document.createElement('img');
+        image.src = imageSrc;
+        image.alt = 'Official SOA CAPTCHA';
+        captchaFrame.appendChild(image);
+    }
+
+    function resetSessionUi(clearCaptcha = true) {
+        currentSessionId = null;
+        updateStepCards(false);
+
+        if (sessionDisplay) {
+            sessionDisplay.value = portalEnabled
+                ? 'Waiting for a fresh CAPTCHA session'
+                : 'Live import unavailable on this server right now';
+        }
+
+        if (clearCaptcha && captchaFrame) {
+            captchaFrame.innerHTML = '<span>Fetch a session to load the CAPTCHA.</span>';
+        }
+
+        if (clearCaptcha && captchaShell) {
+            captchaShell.classList.remove('visible');
+        }
+    }
+
+    function clearSensitiveInputs() {
+        if (portalPasswordInput) portalPasswordInput.value = '';
+        if (captchaInput) captchaInput.value = '';
+    }
+
+    function setStatus(type, title, message) {
+        if (!statusBanner) return;
+        statusBanner.className = `status-banner ${type} visible`;
+        statusBanner.innerHTML = `
+            <strong>${escapeHtml(title)}</strong>
+            <span>${escapeHtml(message || '')}</span>
+        `;
     }
 
     function hideStatus() {
-        if (statusMessage) {
-            statusMessage.className = 'status-message';
-            statusMessage.style.display = 'none';
+        if (!statusBanner) return;
+        statusBanner.className = 'status-banner';
+        statusBanner.innerHTML = '';
+    }
+
+    function setButtonLoading(button, label) {
+        if (!button) return;
+        if (!button.dataset.originalLabel) {
+            button.dataset.originalLabel = button.innerHTML;
+        }
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner"></span>${escapeHtml(label)}`;
+    }
+
+    function resetButton(button) {
+        if (!button) return;
+        button.disabled = false;
+        if (button.dataset.originalLabel) {
+            button.innerHTML = button.dataset.originalLabel;
         }
     }
 
-    function showRetryInfo(message) {
-        if (retryInfo) {
-            retryInfo.textContent = message;
-            retryInfo.classList.add('visible');
-        }
+    function formatDateTime(value) {
+        if (!value) return 'Not synced yet';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return date.toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
     }
 
-    function hideRetryInfo() {
-        if (retryInfo) {
-            retryInfo.classList.remove('visible');
-        }
+    function escapeHtml(value) {
+        return APP?.sanitize ? APP.sanitize(String(value || '')) : String(value || '');
     }
 
-    function showToast(message, type) {
-        const existingToast = document.querySelector('.toast-notification');
-        if (existingToast) {
-            existingToast.remove();
+    function releaseActiveSession() {
+        if (!currentSessionId) return;
+        const sessionId = currentSessionId;
+        currentSessionId = null;
+
+        const token = APP?.Storage?.get ? APP.Storage.get('accessToken') : null;
+        const headers = {};
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
         }
 
-        const toast = document.createElement('div');
-        toast.className = 'toast-notification ' + type;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = 'slideIn 0.3s ease-out reverse';
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
+        fetch(`/api/soa/session/${encodeURIComponent(sessionId)}`, {
+            method: 'DELETE',
+            headers,
+            keepalive: true
+        }).catch(() => {});
     }
-
-    function setLoading(isLoading) {
-        if (isLoading) {
-            if (syncBtn) {
-                syncBtn.disabled = true;
-                syncBtn.innerHTML = '<span class="spinner"></span> Syncing...';
-            }
-            if (demoBtn) demoBtn.disabled = true;
-            const loadBackupBtn = document.getElementById('loadBackupBtn');
-            if (loadBackupBtn) loadBackupBtn.disabled = true;
-        } else {
-            if (syncBtn) {
-                syncBtn.disabled = false;
-                syncBtn.innerHTML = '🔄 Fetch Data from SOA Portal';
-            }
-            if (demoBtn) demoBtn.disabled = false;
-            const loadBackupBtn = document.getElementById('loadBackupBtn');
-            if (loadBackupBtn) loadBackupBtn.disabled = false;
-        }
-    }
-
-    /**
-     * Handle portal sync submission
-     * 
-     * ============================================================================
-     * NOTE: Portal scraping functionality has been disabled on the server
-     * ============================================================================
-     * This function calls backend API endpoints that attempt to scrape data
-     * from external student portals. The actual scraping code has been commented
-     * out on the server side, so these API calls will return disabled responses.
-     * ============================================================================
-     */
-    async function handleSyncSubmit(e) {
-        if (e && e.preventDefault) {
-            e.preventDefault();
-        }
-
-        const regNumber = regNumberInput ? regNumberInput.value.trim() : '';
-        const password = portalPasswordInput ? portalPasswordInput.value.trim() : '';
-
-        if (!regNumber || !password) {
-            showStatus('Please fill in all fields', 'error');
-            return;
-        }
-
-        setLoading(true);
-        showStatus(
-            `🔄 Connecting to SOA Portal... This may take up to ${TOTAL_RETRY_TIME_ESTIMATE} minutes as the scraper will retry up to ${MAX_RETRY_ATTEMPTS} times with delays.`,
-            'loading'
-        );
-        hideRetryInfo();
-
-        try {
-            // NOTE: The backend will perform 3 retry attempts with incremental delays
-            // The scraper now handles: attempt 1 (immediate), attempt 2 (after 0.5s), attempt 3 (after 1s)
-            const response = await APP.API.post('/portal/login', {
-                reg_number: regNumber,
-                password: password
-            });
-
-            if (response.success) {
-                if (response.status === 'SUCCESS') {
-                    clearRetryAttempts();
-                    // Save credentials on successful sync
-                    saveCredentials(regNumber, password);
-                    showStatus('✅ Portal data synced successfully!', 'success');
-                    showToast('Live data synced successfully!', 'success');
-                    updateUserStorage(true, true, response.data);
-                    setTimeout(() => {
-                        APP.navigateToDashboard('/dashboard/student.html');
-                    }, 1500);
-                } else if (response.status === 'BACKUP_LOADED') {
-                    clearRetryAttempts();
-                    const msg = response.data.warning || response.message || 'Showing previously saved data.';
-                    showStatus(`📂 ${msg}`, 'success');
-                    showToast('Loaded backup data', 'warning');
-                    updateUserStorage(false, false, response.data);
-                    setTimeout(() => {
-                        APP.navigateToDashboard('/dashboard/student.html');
-                    }, 2000);
-                } else if (response.status === 'DEMO_LOADED') {
-                    clearRetryAttempts();
-                    showStatus('🎭 No backup found. Loading demo data to explore the system.', 'success');
-                    showToast('Demo data loaded', 'warning');
-                    updateUserStorage(false, false, response.data);
-                    setTimeout(() => {
-                        APP.navigateToDashboard('/dashboard/student.html');
-                    }, 2000);
-                }
-            } else {
-                handleSyncFailure(response);
-            }
-        } catch (error) {
-            console.error('Sync error:', error);
-            const errorData = error.data || error;
-            const errorStatus = errorData.status || 'SCRAPE_ERROR';
-            const errorMessage = errorData.message || error.message || 'Unknown error';
-            const attempt = errorData.attempt;
-            const attemptsRemaining = errorData.attemptsRemaining;
-            const failureReasons = errorData.failureReasons || [];
-            
-            // Log failure reasons for debugging
-            if (failureReasons.length > 0) {
-                console.error('Scraper failure reasons:', failureReasons);
-            }
-            
-            handleSyncFailure({
-                status: errorStatus,
-                message: errorMessage,
-                attempt: attempt,
-                attemptsRemaining: attemptsRemaining,
-                failureReasons: failureReasons
-            });
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    /**
-     * Handle sync failure
-     */
-    function handleSyncFailure(response) {
-        const attempt = response.attempt || (getRetryAttempts() + 1);
-        const remaining = response.attemptsRemaining !== undefined 
-            ? response.attemptsRemaining 
-            : (MAX_RETRY_ATTEMPTS - attempt);
-
-        if (response.attempt) {
-            setRetryAttempts(response.attempt);
-        } else {
-            setRetryAttempts(attempt);
-        }
-
-        if (response.status === 'AUTH_FAILED') {
-            showStatus('❌ Invalid portal credentials. Please check your Registration Number and Password.', 'error');
-        } else if (response.status === 'PORTAL_UNREACHABLE') {
-            showStatus('⚠️ Cannot fetch data from college website. The portal was unreachable after 3 attempts.', 'error');
-            showRetryInfo(
-                'The student portal appears to be offline or under maintenance. Click "Load Previously Saved Data" to use your backup, or select "Demo Data" to explore the system.'
-            );
-            return;
-        } else if (response.status === 'PORTAL_DISABLED') {
-            showStatus('⚠️ Portal syncing is temporarily disabled. Please use demo data.', 'error');
-            showRetryInfo('Portal features are currently suspended. You can use demo data to explore all features.');
-            return;
-        } else if (response.message && response.message.toLowerCase().includes('captcha')) {
-            showStatus('❌ Failed to solve CAPTCHA. Please try again.', 'error');
-        } else if (response.message && response.message.includes('after 3 attempts')) {
-            // This is the final error after all retries exhausted
-            showStatus(`❌ ${response.message}`, 'error');
-            showRetryInfo(
-                `The scraper attempted ${MAX_RETRY_ATTEMPTS} times with delays but could not fetch data. Try again later or use backup/demo data.`
-            );
-            // Show detailed failure reasons in console for debugging
-            if (response.failureReasons && response.failureReasons.length > 0) {
-                console.error('Detailed failure reasons:', response.failureReasons);
-            }
-            return;
-        } else {
-            const msg = response.message || 'Failed to fetch portal data';
-            showStatus(`❌ ${msg}`, 'error');
-        }
-
-        if (remaining > 0) {
-            showRetryInfo(
-                `Attempt ${attempt} of ${MAX_RETRY_ATTEMPTS} failed. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`
-            );
-            updateAttemptDisplay();
-        } else {
-            handleAutoFallback();
-        }
-    }
-
-    /**
-     * Handle automatic fallback after max attempts
-     */
-    async function handleAutoFallback() {
-        showStatus('⚠️ Verification failed. Loading backup data...', 'loading');
-        setLoading(true);
-
-        try {
-            const backupLoaded = await loadBackupData();
-            if (backupLoaded) {
-                showStatus('📂 Loaded your previously saved data.', 'success');
-                showToast('Backup data loaded successfully', 'success');
-                clearRetryAttempts();
-                setTimeout(() => {
-                    APP.navigateToDashboard('/dashboard/student.html');
-                }, 1500);
-                return;
-            }
-        } catch (e) {
-            console.warn('Backup load failed:', e);
-        }
-
-        try {
-            await loadDemoData();
-            showToast('Demo data loaded (no backup available)', 'warning');
-        } catch (error) {
-            console.error('Fallback error:', error);
-            showToast('Error loading data', 'error');
-        }
-
-        clearRetryAttempts();
-        setLoading(false);
-        setTimeout(() => {
-            APP.navigateToDashboard('/dashboard/student.html');
-        }, 2000);
-    }
-
-    /**
-     * Handle loading backup data
-     */
-    async function handleLoadBackup() {
-        setLoading(true);
-        showStatus('📂 Loading backup data...', 'loading');
-
-        try {
-            const backupLoaded = await loadBackupData();
-            if (backupLoaded) {
-                showStatus('✅ Backup data loaded successfully!', 'success');
-                showToast('Backup data loaded', 'success');
-                setTimeout(() => {
-                    APP.navigateToDashboard('/dashboard/student.html');
-                }, 1000);
-            } else {
-                showStatus('❌ No backup data found. Try syncing from portal or use demo data.', 'error');
-                showToast('No backup data found', 'error');
-            }
-        } catch (error) {
-            console.error('Backup load error:', error);
-            showStatus('Failed to load backup data', 'error');
-            showToast('Error loading backup data', 'error');
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    /**
-     * Handle using demo data
-     */
-    async function handleUseDemoData() {
-        setLoading(true);
-        showStatus('Loading demo data...', 'loading');
-
-        try {
-            await loadDemoData();
-            showStatus('✅ Demo data loaded successfully!', 'success');
-            showToast('Demo data loaded successfully', 'success');
-            setTimeout(() => {
-                APP.navigateToDashboard('/dashboard/student.html');
-            }, 1000);
-        } catch (error) {
-            console.error('Demo data error:', error);
-            showStatus('Failed to load demo data', 'error');
-            showToast('Error loading demo data', 'error');
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    /**
-     * Load backup data from server
-     */
-    async function loadBackupData() {
-        const user = APP.Storage.get('user');
-        const regNumber = (regNumberInput ? regNumberInput.value.trim() : '') || (user ? user.registration_number : '');
-
-        try {
-            const response = await APP.API.get('/portal/recover', {
-                params: { reg_number: regNumber }
-            });
-
-            if (response.success && (response.status === 'BACKUP_LOADED' || response.status === 'DEMO_LOADED')) {
-                updateUserStorage(false, false, response.data);
-                return true;
-            }
-        } catch (error) {
-            console.warn('Recover endpoint failed, trying backup endpoint:', error);
-            try {
-                const response = await APP.API.post('/portal/load-backup', {
-                    reg_number: regNumber
-                });
-
-                if (response.success && response.status === 'BACKUP_LOADED') {
-                    updateUserStorage(false, false, response.data);
-                    return true;
-                }
-            } catch (e) {
-                console.warn('Backup endpoint also failed:', e);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Load demo data
-     */
-    async function loadDemoData() {
-        const user = APP.Storage.get('user');
-        const regNumber = (regNumberInput ? regNumberInput.value.trim() : '') || (user ? user.registration_number : '');
-
-        // Use the dedicated demo endpoint that always works
-        const response = await APP.API.get('/portal/demo');
-
-        if (response.success) {
-            updateUserStorage(false, false, response.data);
-            return response;
-        } else {
-            throw new Error(response.message || 'Failed to load demo data');
-        }
-    }
-
-    /**
-     * Update user storage with portal data
-     */
-    function updateUserStorage(isVerified, portalConnected, data) {
-        const user = APP.Storage.get('user');
-        if (user) {
-            user.portalConnected = portalConnected;
-            user.isVerified = isVerified;
-            user.portalData = data;
-            user.dataSource = data.dataSource || (portalConnected ? 'live_portal' : 'demo');
-            APP.Storage.set('user', user);
-        }
-    }
-
-    // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', init);
 })();

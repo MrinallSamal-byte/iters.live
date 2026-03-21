@@ -9,6 +9,63 @@
 
     // Configuration flag - can be toggled to disable link encoding globally
     const ENABLE_LINK_ENCODING = true;
+    const DIRECT_PUBLIC_ROUTES = new Set([
+        '/',
+        '/index.html',
+        '/home',
+        '/about',
+        '/features',
+        '/academics',
+        '/contact',
+        '/login',
+        '/login.html',
+        '/register',
+        '/register.html',
+        '/creator',
+        '/creator.html',
+        '/connect-portal',
+        '/connect-portal.html',
+        '/soa-scraper',
+        '/soa-scraper.html'
+    ]);
+    const DIRECT_APP_ROUTE_PREFIXES = [
+        '/dashboard/'
+    ];
+
+    function stripHashAndQuery(url) {
+        if (!url || typeof url !== 'string') return '';
+
+        const hashIndex = url.indexOf('#');
+        const queryIndex = url.indexOf('?');
+        let cutIndex = url.length;
+
+        if (hashIndex !== -1) cutIndex = Math.min(cutIndex, hashIndex);
+        if (queryIndex !== -1) cutIndex = Math.min(cutIndex, queryIndex);
+
+        return url.slice(0, cutIndex);
+    }
+
+    function isDirectRoute(url) {
+        if (!url || typeof url !== 'string') return false;
+        if (url === '#' || url.startsWith('#')) return true;
+        if (isExternalLink(url) || isStaticAsset(url)) return false;
+
+        const basePath = stripHashAndQuery(url) || '/';
+        if (DIRECT_PUBLIC_ROUTES.has(basePath)) return true;
+
+        if (basePath === '/dashboard') return true;
+
+        return DIRECT_APP_ROUTE_PREFIXES.some(prefix => basePath.startsWith(prefix));
+    }
+
+    function isDirectPublicRoute(url) {
+        if (!url || typeof url !== 'string') return false;
+        if (url === '#' || url.startsWith('#')) return true;
+        if (isExternalLink(url) || isStaticAsset(url)) return false;
+
+        const basePath = stripHashAndQuery(url) || '/';
+        return DIRECT_PUBLIC_ROUTES.has(basePath);
+    }
 
     /**
      * Check if a string is already Base64 URL-safe encoded
@@ -43,6 +100,9 @@
         
         // Don't encode external links (http://, https://, mailto:, tel:, etc.)
         if (isExternalLink(raw)) return raw;
+
+        // Keep public routes human-readable.
+        if (isDirectRoute(raw)) return raw;
         
         // Don't encode javascript:, vbscript:, or data: URLs (security-sensitive)
         const lowerRaw = raw.toLowerCase();
@@ -165,7 +225,7 @@
      */
     function getEncodedRedirectUrl(raw) {
         if (!ENABLE_LINK_ENCODING) return raw;
-        if (!raw || isExternalLink(raw) || isStaticAsset(raw)) return raw;
+        if (!raw || isExternalLink(raw) || isStaticAsset(raw) || isDirectRoute(raw)) return raw;
         
         const encoded = encodeLink(raw);
         // Only wrap in /r/ handler if actually encoded
@@ -183,6 +243,11 @@
         if (!rawUrl) return;
         
         if (!ENABLE_LINK_ENCODING) {
+            window.location.href = rawUrl;
+            return;
+        }
+
+        if (isDirectRoute(rawUrl)) {
             window.location.href = rawUrl;
             return;
         }
@@ -227,6 +292,7 @@
                 isExternalLink(href) ||
                 href === '#' ||
                 href.startsWith('#') ||
+                isDirectRoute(href) ||
                 isStaticAsset(href)) {
                 return;
             }
@@ -307,7 +373,7 @@
         if (!link || link.hasAttribute('data-encoded') || link.hasAttribute('data-external')) return;
         
         const href = link.getAttribute('href');
-        if (!href || isExternalLink(href) || href === '#' || href.startsWith('#') || isStaticAsset(href)) return;
+        if (!href || isExternalLink(href) || href === '#' || href.startsWith('#') || isDirectRoute(href) || isStaticAsset(href)) return;
 
         const encoded = encodeLink(href);
         if (encoded !== href) {
@@ -325,7 +391,7 @@
         if (!el || el.hasAttribute('data-encoded')) return;
         
         const href = el.getAttribute('data-href');
-        if (!href || isExternalLink(href) || isStaticAsset(href)) return;
+        if (!href || isExternalLink(href) || isDirectRoute(href) || isStaticAsset(href)) return;
 
         const encoded = encodeLink(href);
         if (encoded !== href) {
@@ -343,7 +409,7 @@
         if (!el || el.hasAttribute('data-encoded')) return;
         
         const url = el.getAttribute('data-url');
-        if (!url || isExternalLink(url) || isStaticAsset(url)) return;
+        if (!url || isExternalLink(url) || isDirectRoute(url) || isStaticAsset(url)) return;
 
         const encoded = encodeLink(url);
         if (encoded !== url) {
@@ -429,6 +495,8 @@
         decodeLink,
         isEncoded,
         isExternalLink,
+        isDirectRoute,
+        isDirectPublicRoute,
         isStaticAsset,
         getEncodedRedirectUrl,
         navigateTo,

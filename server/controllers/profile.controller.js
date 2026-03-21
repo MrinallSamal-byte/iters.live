@@ -6,6 +6,7 @@
 const { db } = require('../database/firebase');
 const path = require('path');
 const fs = require('fs').promises;
+const { getPortalSnapshotForUser } = require('../services/soa-data.service');
 
 /**
  * GET /api/users/me
@@ -15,6 +16,7 @@ const getCurrentUser = async (req, res) => {
     try {
         // req.user is already populated by authMiddleware from Firestore
         const user = req.user;
+        let portalSnapshot = null;
 
         // Remove sensitive data
         const safeUser = { ...user };
@@ -24,6 +26,17 @@ const getCurrentUser = async (req, res) => {
         if (user.role === 'student') {
             // TODO: Fetch admit card from Firestore 'admit_cards' collection
             safeUser.admit_card = null;
+            try {
+                portalSnapshot = await getPortalSnapshotForUser({
+                    userId: user.id,
+                    registrationNumber: user.registration_number
+                });
+                safeUser.portal = portalSnapshot.status;
+                safeUser.portalProfile = portalSnapshot.normalizedData?.profile || null;
+            } catch (_) {
+                safeUser.portal = null;
+                safeUser.portalProfile = null;
+            }
         }
 
         res.json({

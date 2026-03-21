@@ -1381,10 +1381,14 @@
 
             // Action buttons - different for Google Drive files and unavailable links
             let actionButtons;
+            let actionRowClass = 'resource-primary-actions';
             if (note.noLinkAvailable) {
-                actionButtons = `<button class="btn btn-secondary" disabled>
-                       ⏳ Link Coming Soon
-                   </button>`;
+                actionRowClass += ' single-action';
+                actionButtons = `<div class="${actionRowClass}">
+                        <button class="btn btn-secondary" disabled>
+                            ⏳ Link Coming Soon
+                        </button>
+                    </div>`;
             } else if (note.isGoogleDrive) {
                 // Primary action - Open in Drive (using root link)
                 const rootLink = note.links?.root;
@@ -1410,25 +1414,34 @@
                     });
                 }
                 
-                actionButtons = `${primaryButton}
-                   ${quickAccessButtons ? `<div class="quick-access-container">${quickAccessButtons}</div>` : ''}
-                   <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${note.semester})">
-                       📂 Browse Semester ${note.semester}
-                   </button>`;
+                actionRowClass += ' single-action';
+                actionButtons = `
+                    <div class="${actionRowClass}">
+                        ${primaryButton}
+                    </div>
+                    ${quickAccessButtons ? `<div class="quick-access-container">${quickAccessButtons}</div>` : ''}
+                    <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${note.semester})">
+                        📂 Open Semester ${note.semester} Folder
+                    </button>`;
             } else {
-                actionButtons = `<button class="btn btn-primary" onclick="NotesManager.downloadNote(${note.id})">
-                       📥 Download
-                   </button>
-                   <button class="btn btn-secondary" onclick="NotesManager.viewNote(${note.id})">
-                       👁️ View
-                   </button>`;
+                actionButtons = `
+                    <div class="${actionRowClass}">
+                        <button class="btn btn-primary" onclick="NotesManager.downloadNote(${note.id})">
+                            📥 Download
+                        </button>
+                        <button class="btn btn-secondary" onclick="NotesManager.viewNote(${note.id})">
+                            👁️ Preview
+                        </button>
+                    </div>`;
             }
 
             return `
                 <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''} ${note.noLinkAvailable ? 'no-link' : ''}" data-id="${note.id}" ${note.isGoogleDrive && !note.noLinkAvailable ? `onclick="NotesManager.openInDrive(${note.id})"` : ''}>
                     <div class="resource-header">
-                        <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                        <div class="resource-icon-shell">
+                            <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
+                        </div>
+                        <div class="resource-badge-row">
                             ${subjectCodeBadge}
                             <div class="resource-badge">${typeLabels[note.type] || 'Resource'}</div>
                             ${driveBadge}
@@ -1436,8 +1449,11 @@
                             ${noLinkBadge}
                         </div>
                     </div>
+                    <div class="resource-context">
+                        ${note.subject} • ${note.branch} • Semester ${note.semester}
+                    </div>
                     <h4 class="resource-title">${note.title}</h4>
-                    <div class="resource-meta">
+                    <div class="resource-meta-grid">
                         <span class="resource-meta-item">
                             <span>📚</span> ${note.subject}
                         </span>

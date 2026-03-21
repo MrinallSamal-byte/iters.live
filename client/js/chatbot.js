@@ -1,7 +1,7 @@
 /**
  * AI Chatbot Widget - Smart Role-Aware Assistant
  * Intelligent AI-powered assistant that adapts to user role (student, teacher, admin, guest)
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 
 class Chatbot {
@@ -137,7 +137,7 @@ class Chatbot {
             ],
             guest: [
                 { text: '🎓 About ITER', query: 'Tell me about ITER' },
-                { text: '✨ Features', query: 'What features does EduHub have?' },
+                { text: '✨ Features', query: 'What features does ITERasn hub have?' },
                 { text: '📱 How to Register', query: 'How to register?' },
                 { text: '🔐 Login Help', query: 'How to login?' }
             ]
@@ -316,7 +316,7 @@ class Chatbot {
             },
             'features': {
                 keywords: ['features', 'what can', 'capabilities', 'services', 'offerings', 'eduhub'],
-                answer: `✨ <strong>ITER EduHub Features</strong>\n\n<strong>For Students:</strong>\n• 📊 Real-time Attendance Tracking\n• 📈 Marks & Performance Analytics\n• 📚 Digital Notes & PYQs\n• 📅 Interactive Timetable\n• 🎫 Admit Card Download\n• 💬 Student Forum\n• 🎉 Events & Clubs\n\n<strong>For Teachers:</strong>\n• 📝 Assignment Management\n• 🎯 Question Bank\n• 📊 Grade Management\n\n<strong>For Admins:</strong>\n• 👥 User Management\n• 📊 Advanced Analytics\n• 📢 Announcements\n\n<a href="/#features" class="nav-suggestion">🔍 Explore All Features</a>`
+                answer: `✨ <strong>ITERasn hub Features</strong>\n\n<strong>For Students:</strong>\n• 📊 Real-time Attendance Tracking\n• 📈 Marks & Performance Analytics\n• 📚 Digital Notes & PYQs\n• 📅 Interactive Timetable\n• 🎫 Admit Card Download\n• 💬 Student Forum\n• 🎉 Events & Clubs\n\n<strong>For Teachers:</strong>\n• 📝 Assignment Management\n• 🎯 Question Bank\n• 📊 Grade Management\n\n<strong>For Admins:</strong>\n• 👥 User Management\n• 📊 Advanced Analytics\n• 📢 Announcements\n\n<a href="/#features" class="nav-suggestion">🔍 Explore All Features</a>`
             },
             'register': {
                 keywords: ['register', 'sign up', 'create account', 'new account', 'join', 'registration'],
@@ -328,7 +328,7 @@ class Chatbot {
             },
             'placement': {
                 keywords: ['placement', 'job', 'career', 'recruitment', 'companies', 'package'],
-                answer: `💼 <strong>Placements at ITER</strong>\n\n<strong>Statistics:</strong>\n• 95%+ Placement Rate\n• Highest Package: 30+ LPA\n• Average Package: 8+ LPA\n• 200+ Recruiting Companies\n\n<strong>Top Recruiters:</strong>\nGoogle, Microsoft, Amazon, Adobe, TCS, Infosys, Wipro, and many more!\n\n<a href="/#placements" class="nav-suggestion">📊 View Details</a>`
+                answer: `💼 <strong>Placements at ITER</strong>\n\n<strong>Statistics:</strong>\n• 95%+ Placement Rate\n• Highest Package: 30+ LPA\n• Average Package: 8+ LPA\n• 200+ Recruiting Companies\n\n<strong>Top Recruiters:</strong>\nGoogle, Microsoft, Amazon, Adobe, TCS, Infosys, Wipro, and many more!\n\n<a href="/#academics" class="nav-suggestion">📊 View Details</a>`
             },
             'contact': {
                 keywords: ['contact', 'phone', 'email', 'address', 'reach', 'help', 'support'],
@@ -546,7 +546,7 @@ class Chatbot {
             
             admin: `Hello! 👋 I'm your ITER Assistant.\n\n<strong>As an Admin, I can help you with:</strong>\n• 👥 Manage users & roles\n• ✅ Review pending approvals\n• 📊 View system analytics\n• 📢 Create announcements\n• 🎓 Manage departments\n• ⚙️ System configuration\n\nWhat would you like to do?`,
             
-            guest: `Welcome to ITER EduHub! 👋\n\n<strong>I can help you learn about:</strong>\n• 🎓 About ITER & SOA University\n• ✨ EduHub features & capabilities\n• 📝 How to register & login\n• 💼 Placements & career\n• 📚 Academic programs\n• 📞 Contact information\n\nAsk me anything about ITER EduHub!`
+            guest: `Welcome to ITERasn hub! 👋\n\n<strong>I can help you learn about:</strong>\n• 🎓 About ITER & SOA University\n• ✨ ITERasn hub features & capabilities\n• 📝 How to register & login\n• 💼 Placements & career\n• 📚 Academic programs\n• 📞 Contact information\n\nAsk me anything about ITERasn hub!`
         };
 
         this.addMessage(welcomeMessages[this.userRole] || welcomeMessages.guest, 'bot');
@@ -670,21 +670,22 @@ class Chatbot {
             // Build context string safely
             const userRole = this.userRole || 'guest';
             const pageContext = this.pageContext || 'general';
-            const contextStr = `User role: ${userRole}, Page context: ${pageContext}`;
+            const contextStr = `User role: ${userRole}, Page context: ${pageContext}, Question type: ${questionType}`;
             
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({ 
                     message: message,
-                    context: contextStr
+                    context: contextStr,
+                    systemPrompt: this.getSystemPrompt(questionType)
                 })
             });
 
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.response) {
-                    return data.response;
+                    return this.postProcessAiResponse(data.response, questionType);
                 } else if (!data.success) {
                     console.warn('AI API returned success:false', { message: data.message, error: data.error });
                 } else {
@@ -798,6 +799,63 @@ class Chatbot {
         }
         
         return 'general';
+    }
+
+    getSystemPrompt(questionType) {
+        const basePrompt = `You are ITERasn hub's assistant.
+Be accurate, direct, and useful.
+Avoid filler, long intros, repeated disclaimers, and unnecessary formatting.
+If the answer is uncertain, say so briefly.`;
+
+        if (questionType === 'general') {
+            return `${basePrompt}
+For general questions:
+- Answer in 1 to 3 short sentences or up to 3 short bullet points.
+- Lead with the answer, not a preface.
+- Keep it precise and easy to scan.
+- Do not over-explain unless the user asks for detail.`;
+        }
+
+        if (questionType === 'website') {
+            return `${basePrompt}
+For ITERasn hub website questions:
+- Give the direct action first.
+- Mention only the most relevant page or feature.
+- Keep the reply short unless steps are necessary.`;
+        }
+
+        if (questionType === 'math') {
+            return `${basePrompt}
+For math or study questions:
+- Be clear and compact by default.
+- Show steps only when needed for correctness or understanding.
+- Prefer short worked answers over long theory dumps.`;
+        }
+
+        return basePrompt;
+    }
+
+    postProcessAiResponse(response, questionType) {
+        if (typeof response !== 'string') {
+            return response;
+        }
+
+        const cleaned = response.trim();
+        if (questionType !== 'general') {
+            return cleaned;
+        }
+
+        const normalized = cleaned.replace(/\n{3,}/g, '\n\n');
+        const paragraphs = normalized
+            .split(/\n\s*\n/)
+            .map(part => part.trim())
+            .filter(Boolean);
+
+        if (paragraphs.length <= 2 && normalized.length <= 420) {
+            return normalized;
+        }
+
+        return paragraphs.slice(0, 2).join('\n\n');
     }
 
     /**
@@ -928,7 +986,7 @@ class Chatbot {
      */
     getGeneralResponse(message) {
         const links = this.getRoleLinks();
-        return `🤔 <strong>Interesting question!</strong>\n\nFor detailed answers to general questions, I need the AI service which is currently unavailable.\n\n<strong>How I can help instead:</strong>\n• Answer questions about ITER EduHub features\n• Help you navigate attendance, marks, notes, etc.\n• Guide you to the right resources\n\n<strong>Try asking:</strong>\n• "How do I check my attendance?"\n• "Where can I find study materials?"\n• "How to view my marks?"\n\nOr <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for academic questions!`;
+        return `I can answer ITERasn hub and portal questions directly.\n\nFor broader general questions, please try again when AI is available or use <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> for help.`;
     }
 
     getGreetingResponse() {
@@ -949,9 +1007,9 @@ class Chatbot {
                 "Hey! What system task can I help with?"
             ],
             guest: [
-                "Hello! 👋 Welcome to ITER EduHub. I can tell you about ITER, our features, or help you register!",
+                "Hello! 👋 Welcome to ITERasn hub. I can tell you about ITER, our features, or help you register!",
                 "Hi there! 😊 Looking to learn about ITER or need help with registration?",
-                "Hey! How can I help you explore ITER EduHub today?"
+                "Hey! How can I help you explore ITERasn hub today?"
             ]
         };
 
@@ -968,7 +1026,7 @@ class Chatbot {
             
             admin: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="manage users">👥 User Management</div>\n    <div class="faq-item" data-query="pending approvals">✅ Approvals</div>\n    <div class="faq-item" data-query="analytics">📊 View Analytics</div>\n    <div class="faq-item" data-query="settings">⚙️ System Settings</div>\n</div>\n\nFor technical issues, contact IT department!`,
             
-            guest: `Thanks for asking about "${this.escapeHtml(message)}"! 🤔\n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="about iter">🎓 About ITER</div>\n    <div class="faq-item" data-query="features">✨ EduHub Features</div>\n    <div class="faq-item" data-query="register">📝 How to Register</div>\n    <div class="faq-item" data-query="contact">📞 Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion">🔐 Login</a> or <a href="/register.html" class="nav-suggestion">📝 Register</a> to access more features!`
+            guest: `Thanks for asking about "${this.escapeHtml(message)}"! 🤔\n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="about iter">🎓 About ITER</div>\n    <div class="faq-item" data-query="features">✨ ITERasn hub Features</div>\n    <div class="faq-item" data-query="register">📝 How to Register</div>\n    <div class="faq-item" data-query="contact">📞 Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion">🔐 Login</a> or <a href="/register.html" class="nav-suggestion">📝 Register</a> to access more features!`
         };
 
         return fallbacks[this.userRole] || fallbacks.guest;

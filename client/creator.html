@@ -4,50 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="About the Creator - Mrinall Samal | B.Tech CSE Student at ITER, SOA University | Full-Stack Developer | Web Developer">
-    <meta name="keywords" content="Mrinall Samal, ITER, SOA University, Web Developer, Computer Science Student, Full-Stack Developer, Portfolio">
+    <meta name="description" content="Creator profile for Mrinall Samal, the student builder behind ITERasn hub.">
+    <meta name="keywords" content="Mrinall Samal, ITERasn hub, ITER, SOA University, full-stack developer, product designer, portfolio">
     <meta name="author" content="Mrinall Samal">
-    <meta name="theme-color" content="#6366f1">
-    <title>About the Creator | ITER EduHub</title>
+    <meta name="theme-color" content="#b97845">
+    <title>Creator | ITERasn hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/responsive.css">
     <link rel="stylesheet" href="/css/responsive-enhanced.css">
     <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/creator-page.css">
     <link rel="stylesheet" href="/css/navbar-scroll-behavior.css">
     <link rel="stylesheet" href="/css/responsive-polish.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/home-minimal.css">
+    <link rel="stylesheet" href="/css/creator-page.css">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/assets/icon.png">
+    <link rel="icon" href="/assets/soa-logo.png">
 </head>
 
-<body class="landing-page creator-page">
-    <!-- Background Animation -->
-    <div class="bg-animation">
+<body class="landing-page nothing-home public-creator-page creator-page">
+    <div class="bg-animation" aria-hidden="true">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="gradient-orb orb-3"></div>
+        <div class="creator-grid-glow"></div>
+        <div class="creator-noise"></div>
     </div>
 
-    <!-- Navigation - Same as index.html -->
-    <nav class="navbar glass-card">
+    <nav class="navbar glass-card" aria-label="Primary">
         <div class="nav-container">
-            <div class="nav-logo">
-                <img src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)" class="logo-img">
-                <span class="logo-text">ITER <span class="accent">EduHub</span></span>
-            </div>
+            <a href="/index.html" class="nav-logo" aria-label="ITERasn hub Home">
+                <img src="/assets/soa-logo.png" alt="SOA University logo" class="logo-img">
+                <div class="logo-lockup">
+                    <span class="logo-text">ITERasn hub</span>
+                    <span class="logo-subtext">Institute of Technical Education &amp; Research</span>
+                </div>
+            </a>
+
             <div class="nav-links">
                 <a href="/index.html#about" class="nav-link">About</a>
                 <a href="/index.html#features" class="nav-link">Features</a>
-                <a href="/index.html#academics" class="nav-link">Academics</a>
+                <a href="/index.html#academics" class="nav-link">Programs</a>
                 <a href="/creator.html" class="nav-link active">Creator</a>
                 <a href="/index.html#contact" class="nav-link">Contact</a>
-                <a href="/register.html" class="btn btn-outline" style="margin-right: 0.5rem;">Register</a>
+                <a href="/register.html" class="btn btn-outline">Register</a>
                 <a href="/login.html" class="btn btn-primary">Portal Login</a>
             </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -55,495 +64,584 @@
         </div>
     </nav>
 
-    <!-- Hero Section - Creator Profile -->
-    <section class="hero-section creator-hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-icon">👨‍💻</span>
-                    <span class="badge-text">Full-Stack Developer | B.Tech CSE</span>
-                </div>
-                <h1 class="hero-title">
-                    Mrinall Samal
-                </h1>
-                <p class="hero-subtitle creator-subtitle">
-                    Aspiring Software Engineer & Web Developer
-                </p>
-                <p class="hero-description">
-                    A passionate second-year Computer Science student at ITER, SOA University, dedicated to crafting 
-                    innovative digital solutions. Specializing in full-stack web development with a keen eye for 
-                    modern UI/UX design and scalable architectures.
-                </p>
-                <div class="hero-buttons scroll-reveal">
-                    <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer" 
-                        class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
-                        <span style="margin-right: 8px;">🐙</span> GitHub
-                    </a>
-                    <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank" 
-                        rel="noopener noreferrer" class="btn btn-large btn-outline ripple-effect hover-lift">
-                        <span style="margin-right: 8px;">💼</span> LinkedIn
-                    </a>
-                    <a href="mailto:samalmrinall9@gmail.com" 
-                        class="btn btn-large btn-secondary ripple-effect hover-lift">
-                        <span style="margin-right: 8px;">📧</span> Contact Me
-                    </a>
-                </div>
-            </div>
-            <div class="hero-image fade-in-up delay-1">
-                <div class="hero-logo-container creator-avatar">
-                    <div class="creator-avatar-inner">
-                        <span class="creator-emoji">👨‍💻</span>
+    <main class="creator-content-wrapper">
+        <section class="hero-section creator-hero">
+            <div class="container creator-hero-grid">
+                <div class="hero-content creator-story">
+                    <p class="creator-section-kicker scroll-reveal">About the Creator</p>
+                    <div class="hero-badge creator-badge scroll-reveal">
+                        <span>Independent Builder</span>
+                        <span class="creator-badge-divider"></span>
+                        <span>ITER, SOA University</span>
                     </div>
-                    <div class="logo-glow"></div>
+                    <h1 class="hero-title scroll-reveal">
+                        Mrinall Samal builds campus software with product taste and engineering discipline.
+                    </h1>
+                    <p class="creator-subtitle scroll-reveal">
+                        B.Tech CSE student working across interface systems, backend architecture, and the details that make software feel trustworthy.
+                    </p>
+                    <p class="hero-description scroll-reveal">
+                        ITERasn hub is the clearest expression of that work so far: a student platform shaped end to end, from public-facing identity and responsive UI to APIs, data flow, analytics, and AI-assisted tools. The goal is not to make something flashy. It is to make something clear, fast, and credible.
+                    </p>
+                    <div class="creator-note-strip glass-card scroll-reveal">
+                        <span class="creator-note-label">Current direction</span>
+                        <p>Refining student software into a product experience that feels deliberate instead of improvised.</p>
+                    </div>
+                    <div class="creator-proof-points scroll-reveal" aria-label="Core strengths">
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Product lens</span>
+                            <p>Translating student workflows into interfaces that feel clear, premium, and usable.</p>
+                        </article>
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Execution</span>
+                            <p>Comfortable moving from page structure and motion systems into APIs, auth, and data flow.</p>
+                        </article>
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Priority</span>
+                            <p>Making every screen feel intentional, from wide desktops to narrow mobile devices.</p>
+                        </article>
+                    </div>
+                    <div class="hero-buttons scroll-reveal">
+                        <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer"
+                            class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
+                            View GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank"
+                            rel="noopener noreferrer" class="btn btn-large btn-outline ripple-effect hover-lift">
+                            LinkedIn
+                        </a>
+                        <a href="mailto:samalmrinall9@gmail.com"
+                            class="btn btn-large btn-secondary ripple-effect hover-lift">
+                            Contact
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- About Me Section -->
-    <section class="about-me-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">About Me</h2>
-                <p class="section-subtitle">Get to know the person behind the code</p>
+                <aside class="creator-showcase glass-card scroll-reveal" aria-label="Creator profile summary">
+                    <div class="creator-showcase-top">
+                        <p class="creator-panel-label">Profile</p>
+                        <span class="creator-status">Available for collaboration</span>
+                    </div>
+
+                    <div class="creator-portrait">
+                        <div class="creator-portrait-ring"></div>
+                        <div class="creator-monogram">MS</div>
+                    </div>
+
+                    <p class="creator-portrait-caption">
+                        Building from Bhubaneswar with a focus on premium interfaces, reliable systems, and product-level polish.
+                    </p>
+
+                    <div class="creator-profile-grid">
+                        <div class="creator-profile-item">
+                            <span>Base</span>
+                            <strong>Bhubaneswar, Odisha</strong>
+                        </div>
+                        <div class="creator-profile-item">
+                            <span>Discipline</span>
+                            <strong>Full-stack product engineering</strong>
+                        </div>
+                        <div class="creator-profile-item">
+                            <span>Focus</span>
+                            <strong>Campus platforms, PWAs, and UI systems</strong>
+                        </div>
+                        <div class="creator-profile-item">
+                            <span>Mode</span>
+                            <strong>Design-aware and execution-heavy</strong>
+                        </div>
+                    </div>
+
+                    <div class="creator-metric-band">
+                        <div class="creator-metric">
+                            <strong>01</strong>
+                            <span>flagship student platform in active development</span>
+                        </div>
+                        <div class="creator-metric">
+                            <strong>03</strong>
+                            <span>core lanes: UI, backend, deployment</span>
+                        </div>
+                    </div>
+                </aside>
             </div>
-            <div class="about-me-content">
-                <div class="about-me-card glass-card scroll-reveal">
-                    <div class="about-me-text">
-                        <p>
-                            Hello! I'm <strong>Mrinall Samal</strong>, a curious and driven Computer Science student 
-                            with a deep passion for technology and problem-solving. My journey into programming began 
-                            with a simple curiosity about how websites work, and it has since evolved into a 
-                            full-fledged love for building digital experiences.
+        </section>
+
+        <section class="creator-overview-section" aria-label="Quick creator overview">
+            <div class="container">
+                <div class="creator-overview-shell glass-card scroll-reveal">
+                    <div class="creator-overview-copy">
+                        <p class="section-kicker">Quick map</p>
+                        <h2 class="creator-overview-title">A cleaner way to scan the work, focus, and collaboration fit.</h2>
+                        <p class="creator-overview-text">
+                            Start with the key signals below, then jump straight to the part of the page that matters to you.
                         </p>
-                        <p>
-                            Currently pursuing my B.Tech in Computer Science and Engineering at <strong>ITER, SOA University</strong>, 
-                            I constantly strive to expand my knowledge and apply it to real-world projects. The ITER EduHub 
-                            platform you're exploring is a testament to my commitment to creating meaningful, user-centric applications.
+                    </div>
+
+                    <div class="creator-glance-grid" aria-label="Creator summary">
+                        <article class="creator-glance-card">
+                            <span>Strength</span>
+                            <strong>UI systems, backend delivery, and responsive polish</strong>
+                        </article>
+                        <article class="creator-glance-card">
+                            <span>Best fit</span>
+                            <strong>Internships, product teams, and frontend-heavy software builds</strong>
+                        </article>
+                        <article class="creator-glance-card">
+                            <span>Current goal</span>
+                            <strong>Make ITERasn hub feel dependable on every screen size</strong>
+                        </article>
+                    </div>
+
+                    <nav class="creator-section-nav" aria-label="Jump to creator page sections">
+                        <a href="#approach" class="creator-section-link">Approach</a>
+                        <a href="#education" class="creator-section-link">Education</a>
+                        <a href="#capabilities" class="creator-section-link">Capabilities</a>
+                        <a href="#work" class="creator-section-link">Work</a>
+                        <a href="#stack" class="creator-section-link">Stack</a>
+                        <a href="#contact" class="creator-section-link">Contact</a>
+                    </nav>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-me-section creator-essay-section" id="approach">
+            <div class="container">
+                <div class="creator-section-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Approach</p>
+                        <h2 class="section-title">Built around clarity, systems thinking, and restraint.</h2>
+                        <p class="section-subtitle">
+                            The most interesting part of software is where product decisions and engineering decisions start affecting each other.
                         </p>
-                        <p>
-                            When I'm not coding, you'll find me exploring new technologies, contributing to open-source 
-                            projects, or diving into competitive programming challenges. I believe in the power of 
-                            continuous learning and the impact that well-crafted software can have on people's lives.
+                    </div>
+
+                    <div class="creator-essay-grid">
+                        <div class="about-me-text scroll-reveal">
+                            <p>
+                                Most academic software solves the function and forgets the experience. My work sits in that gap: translating cluttered student workflows into interfaces that are easier to understand, easier to trust, and easier to come back to.
+                            </p>
+                            <p>
+                                At ITER, the classroom sharpens the fundamentals. Outside it, hands-on product building forces better decisions around structure, state, data, responsiveness, and maintainability. That combination is what makes these projects valuable to me.
+                            </p>
+                            <p>
+                                What I care about most is building something coherent, where the visual layer, interaction design, and backend logic all feel like parts of the same system instead of disconnected pieces.
+                            </p>
+                        </div>
+
+                        <div class="creator-principles">
+                            <article class="principle-item glass-card scroll-reveal">
+                                <span class="principle-index">01</span>
+                                <h3>Clarity over noise</h3>
+                                <p>Reduce friction, tighten hierarchy, and keep the interface useful under real student workloads.</p>
+                            </article>
+
+                            <article class="principle-item glass-card scroll-reveal">
+                                <span class="principle-index">02</span>
+                                <h3>Systems over one-offs</h3>
+                                <p>Reusable patterns, cleaner structure, and decisions that scale beyond a single screen or feature.</p>
+                            </article>
+
+                            <article class="principle-item glass-card scroll-reveal">
+                                <span class="principle-index">03</span>
+                                <h3>Polish with purpose</h3>
+                                <p>Motion, surfaces, and copy should reinforce trust, not compensate for weak product thinking.</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="education-section" id="education">
+            <div class="container">
+                <div class="creator-section-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Academic Path</p>
+                        <h2 class="section-title">Formal training, applied through real product work.</h2>
+                        <p class="section-subtitle">
+                            A foundation in computer science, reinforced by building outside the syllabus.
                         </p>
                     </div>
-                    <div class="about-me-highlights">
-                        <div class="highlight-item">
-                            <span class="highlight-icon">🎯</span>
-                            <div>
-                                <h4>Goal-Oriented</h4>
-                                <p>Focused on delivering quality solutions</p>
-                            </div>
-                        </div>
-                        <div class="highlight-item">
-                            <span class="highlight-icon">📚</span>
-                            <div>
-                                <h4>Continuous Learner</h4>
-                                <p>Always exploring new technologies</p>
-                            </div>
-                        </div>
-                        <div class="highlight-item">
-                            <span class="highlight-icon">🤝</span>
-                            <div>
-                                <h4>Team Player</h4>
-                                <p>Collaborative and communicative</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Education Section -->
-    <section class="education-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">Education</h2>
-                <p class="section-subtitle">My academic journey</p>
-            </div>
-            <div class="education-timeline">
-                <div class="timeline-item glass-card scroll-reveal">
-                    <div class="timeline-icon">🎓</div>
-                    <div class="timeline-content">
-                        <div class="timeline-header">
-                            <h3>B.Tech in Computer Science & Engineering</h3>
-                            <span class="timeline-date">2024 - 2028 (Expected)</span>
+                    <div class="education-timeline">
+                        <div class="timeline-item glass-card scroll-reveal">
+                            <div class="timeline-icon">01</div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h3>B.Tech in Computer Science and Engineering</h3>
+                                    <span class="timeline-date">2024 - 2028</span>
+                                </div>
+                                <h4>ITER, SOA University, Bhubaneswar</h4>
+                                <p>
+                                    Focused on algorithms, data structures, web technologies, databases, and software engineering while building live product experience alongside the degree.
+                                </p>
+                                <div class="education-highlights">
+                                    <span class="edu-tag">Full-stack development</span>
+                                    <span class="edu-tag">Database systems</span>
+                                    <span class="edu-tag">Software engineering</span>
+                                </div>
+                            </div>
                         </div>
-                        <h4>ITER, SOA University, Bhubaneswar</h4>
-                        <p>Currently in 2nd year, pursuing a comprehensive curriculum covering algorithms, data structures, 
-                           web development, database management, and software engineering principles.</p>
-                        <div class="education-highlights">
-                            <span class="edu-tag">NAAC A++ Accredited</span>
-                            <span class="edu-tag">NIRF Ranked</span>
-                            <span class="edu-tag">NBA Approved</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-item glass-card scroll-reveal">
-                    <div class="timeline-icon">📖</div>
-                    <div class="timeline-content">
-                        <div class="timeline-header">
-                            <h3>Higher Secondary Education (12th)</h3>
-                            <span class="timeline-date">2021 - 2023</span>
-                        </div>
-                        <h4>Science Stream with Computer Science</h4>
-                        <p>Completed higher secondary education with focus on Physics, Chemistry, Mathematics, 
-                           and Computer Science, building a strong foundation for engineering studies.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Skills Section -->
-    <section class="skills-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">Skills & Expertise</h2>
-                <p class="section-subtitle">Technologies and tools I work with</p>
-            </div>
-            <div class="skills-grid">
-                <!-- Frontend Skills -->
-                <div class="skill-category glass-card scroll-reveal">
-                    <div class="skill-category-header">
-                        <span class="skill-category-icon">🎨</span>
-                        <h3>Frontend Development</h3>
-                    </div>
-                    <div class="skill-items">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">HTML5 / CSS3</span>
-                                <span class="skill-level">90%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="90"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">JavaScript (ES6+)</span>
-                                <span class="skill-level">85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="85"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">React.js</span>
-                                <span class="skill-level">70%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="70"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">GSAP Animations</span>
-                                <span class="skill-level">75%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="75"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Backend Skills -->
-                <div class="skill-category glass-card scroll-reveal">
-                    <div class="skill-category-header">
-                        <span class="skill-category-icon">⚙️</span>
-                        <h3>Backend Development</h3>
-                    </div>
-                    <div class="skill-items">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Node.js</span>
-                                <span class="skill-level">85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="85"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Express.js</span>
-                                <span class="skill-level">85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="85"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">PostgreSQL / MySQL</span>
-                                <span class="skill-level">80%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="80"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">REST APIs</span>
-                                <span class="skill-level">85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="85"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tools & Others -->
-                <div class="skill-category glass-card scroll-reveal">
-                    <div class="skill-category-header">
-                        <span class="skill-category-icon">🛠️</span>
-                        <h3>Tools & Technologies</h3>
-                    </div>
-                    <div class="skill-items">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Git / GitHub</span>
-                                <span class="skill-level">85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="85"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">VS Code</span>
-                                <span class="skill-level">90%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="90"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Docker</span>
-                                <span class="skill-level">60%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="60"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Render / Firebase</span>
-                                <span class="skill-level">80%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-progress" data-progress="80"></div>
+                        <div class="timeline-item glass-card scroll-reveal">
+                            <div class="timeline-icon">02</div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h3>Higher Secondary Education</h3>
+                                    <span class="timeline-date">2021 - 2023</span>
+                                </div>
+                                <h4>Science Stream with Computer Science</h4>
+                                <p>
+                                    Built the base in mathematics, analytical thinking, and computing that now supports product development and problem solving.
+                                </p>
+                                <div class="education-highlights">
+                                    <span class="edu-tag">Mathematics</span>
+                                    <span class="edu-tag">Computer science</span>
+                                    <span class="edu-tag">Problem solving</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Projects Section -->
-    <section class="projects-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">Featured Projects</h2>
-                <p class="section-subtitle">Some of my notable work</p>
+        <section class="skills-section" id="capabilities">
+            <div class="container">
+                <div class="creator-section-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Capabilities</p>
+                        <h2 class="section-title">A builder's stack, not a checkbox list.</h2>
+                        <p class="section-subtitle">
+                            Each area combines tools with the kind of decisions required to ship a usable product.
+                        </p>
+                    </div>
+
+                    <div class="skills-grid">
+                        <article class="skill-category glass-card scroll-reveal">
+                            <div class="skill-category-header">
+                                <span class="skill-category-label">Frontend systems</span>
+                                <h3>Interfaces with hierarchy, motion, and responsive discipline.</h3>
+                            </div>
+                            <div class="skill-items">
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">HTML, CSS, JavaScript</span>
+                                        <span class="skill-level">Core</span>
+                                    </div>
+                                    <p>Landing pages, dashboards, responsive layout systems, and component polish.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">React and component thinking</span>
+                                        <span class="skill-level">Applied</span>
+                                    </div>
+                                    <p>Structured UI work with reusable patterns and maintainable interaction logic.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">Motion and presentation</span>
+                                        <span class="skill-level">GSAP</span>
+                                    </div>
+                                    <p>Animation used to improve rhythm, orientation, and perceived quality.</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="skill-category glass-card scroll-reveal">
+                            <div class="skill-category-header">
+                                <span class="skill-category-label">Backend architecture</span>
+                                <h3>APIs, auth flows, data models, and the plumbing behind the experience.</h3>
+                            </div>
+                            <div class="skill-items">
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">Node.js and Express</span>
+                                        <span class="skill-level">Primary</span>
+                                    </div>
+                                    <p>Service design, route architecture, middleware, and feature delivery.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">PostgreSQL and MySQL</span>
+                                        <span class="skill-level">Production-minded</span>
+                                    </div>
+                                    <p>Schema thinking, data flow, and backend decisions shaped around real use cases.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">Authentication and integrations</span>
+                                        <span class="skill-level">Reliable</span>
+                                    </div>
+                                    <p>JWT, role-based access, external services, and feature coordination across layers.</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="skill-category glass-card scroll-reveal">
+                            <div class="skill-category-header">
+                                <span class="skill-category-label">Product delivery</span>
+                                <h3>From code to deployment, with enough rigor to keep shipping cleanly.</h3>
+                            </div>
+                            <div class="skill-items">
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">Git, GitHub, VS Code</span>
+                                        <span class="skill-level">Daily</span>
+                                    </div>
+                                    <p>Versioned workflows, issue-solving, and steady iteration across the stack.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">PWA and mobile behavior</span>
+                                        <span class="skill-level">Shipping</span>
+                                    </div>
+                                    <p>Offline-minded thinking, installation flows, and touch-friendly interfaces.</p>
+                                </div>
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span class="skill-name">Deployment stack</span>
+                                        <span class="skill-level">Render, Firebase, Docker</span>
+                                    </div>
+                                    <p>Pragmatic infrastructure choices that support fast iteration without unnecessary weight.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
             </div>
-            <div class="projects-grid">
-                <!-- ITER EduHub Project -->
-                <div class="project-card glass-card scroll-reveal">
-                    <div class="project-badge featured">Featured</div>
-                    <div class="project-icon">🎓</div>
-                    <h3>ITER EduHub Portal</h3>
-                    <p>A comprehensive college management system with real-time attendance tracking, marks analytics, 
-                       digital library, AI assistant, and multi-role authentication.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag-small">Node.js</span>
-                        <span class="tech-tag-small">Express</span>
-                        <span class="tech-tag-small">PostgreSQL</span>
-                        <span class="tech-tag-small">Socket.IO</span>
-                        <span class="tech-tag-small">JWT</span>
+        </section>
+
+        <section class="projects-section" id="work">
+            <div class="container">
+                <div class="creator-section-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Selected Work</p>
+                        <h2 class="section-title">One flagship product, supported by focused systems work.</h2>
+                        <p class="section-subtitle">
+                            The emphasis is on building real surfaces and tightening the details that make them feel finished.
+                        </p>
                     </div>
-                    <div class="project-features">
-                        <span>📊 Attendance Tracking</span>
-                        <span>📈 Performance Analytics</span>
-                        <span>📚 Digital Library</span>
-                        <span>🤖 AI Assistant</span>
+
+                    <div class="projects-grid">
+                        <article class="project-card project-card-featured glass-card scroll-reveal">
+                            <div class="project-card-top">
+                                <span class="project-eyebrow">Flagship platform</span>
+                                <span class="project-badge featured">In progress</span>
+                            </div>
+                            <h3>ITERasn hub</h3>
+                            <p>
+                                A student platform designed to make academic workflows feel cleaner and more coherent across public pages, role-based dashboards, academic tools, AI features, and mobile-ready interactions.
+                            </p>
+
+                            <div class="project-proof-grid">
+                                <div>
+                                    <span>Surface</span>
+                                    <strong>Landing experience, dashboards, profile flows</strong>
+                                </div>
+                                <div>
+                                    <span>Systems</span>
+                                    <strong>APIs, auth, data handling, deployment</strong>
+                                </div>
+                                <div>
+                                    <span>Features</span>
+                                    <strong>Analytics, library tools, assistant workflows</strong>
+                                </div>
+                                <div>
+                                    <span>Intent</span>
+                                    <strong>Fast, credible, student-centered software</strong>
+                                </div>
+                            </div>
+
+                            <div class="project-tech">
+                                <span class="tech-tag-small">Node.js</span>
+                                <span class="tech-tag-small">Express</span>
+                                <span class="tech-tag-small">PostgreSQL</span>
+                                <span class="tech-tag-small">Socket.IO</span>
+                                <span class="tech-tag-small">PWA</span>
+                                <span class="tech-tag-small">AI features</span>
+                            </div>
+
+                            <div class="project-links">
+                                <a href="/index.html" class="project-link">View platform</a>
+                                <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer" class="project-link">
+                                    Source code
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="project-card glass-card scroll-reveal">
+                            <div class="project-card-top">
+                                <span class="project-eyebrow">Interface direction</span>
+                            </div>
+                            <h3>Public-facing brand and landing systems</h3>
+                            <p>
+                                Designing the visual layer so the product has a stronger point of view, clearer hierarchy, and less of the interchangeable look common in generic student platforms.
+                            </p>
+                            <div class="project-tech">
+                                <span class="tech-tag-small">Visual systems</span>
+                                <span class="tech-tag-small">Responsive layout</span>
+                                <span class="tech-tag-small">Motion design</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer" class="project-link">
+                                    Explore work
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="project-card glass-card scroll-reveal">
+                            <div class="project-card-top">
+                                <span class="project-eyebrow">Delivery layer</span>
+                            </div>
+                            <h3>Mobile-first and platform behavior</h3>
+                            <p>
+                                Extending the product with PWA thinking, responsive patterns, and production-minded delivery so the experience stays useful beyond a single screen size.
+                            </p>
+                            <div class="project-tech">
+                                <span class="tech-tag-small">PWA</span>
+                                <span class="tech-tag-small">Touch UX</span>
+                                <span class="tech-tag-small">Deployment</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer" class="project-link">
+                                    Explore work
+                                </a>
+                            </div>
+                        </article>
                     </div>
-                    <div class="project-links">
-                        <a href="/index.html" class="project-link">
-                            <span>🔗</span> View Project
+                </div>
+            </div>
+        </section>
+
+        <section class="tech-stack-section" id="stack">
+            <div class="container">
+                <div class="creator-section-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Stack Notes</p>
+                        <h2 class="section-title">Pragmatic tooling, chosen to keep the product moving.</h2>
+                        <p class="section-subtitle">
+                            The stack favors speed of iteration, maintainability, and enough depth to support a growing platform.
+                        </p>
+                    </div>
+
+                    <div class="tech-stack-note glass-card scroll-reveal">
+                        <p class="creator-panel-label">Why this stack</p>
+                        <h3>Lean enough to move fast, deep enough to support real product complexity.</h3>
+                        <p>
+                            ITERasn hub uses practical technologies that support multi-role logic, real-time capability, structured data, and a responsive experience without adding unnecessary weight.
+                        </p>
+                    </div>
+
+                    <div class="tech-tags-container">
+                        <div class="tech-tags">
+                            <span class="tech-tag-pill" data-tooltip="Server-side JavaScript runtime">Node.js</span>
+                            <span class="tech-tag-pill" data-tooltip="Fast web framework for APIs and services">Express.js</span>
+                            <span class="tech-tag-pill" data-tooltip="Relational data for structured product flows">PostgreSQL</span>
+                            <span class="tech-tag-pill" data-tooltip="Modern client-side behavior and interactions">JavaScript</span>
+                            <span class="tech-tag-pill" data-tooltip="Responsive interface systems and layouts">HTML5/CSS3</span>
+                            <span class="tech-tag-pill" data-tooltip="Real-time updates and event handling">Socket.IO</span>
+                            <span class="tech-tag-pill" data-tooltip="Token-based access control">JWT</span>
+                            <span class="tech-tag-pill" data-tooltip="Purposeful motion and page choreography">GSAP</span>
+                            <span class="tech-tag-pill" data-tooltip="Charts and academic data visualization">Chart.js</span>
+                            <span class="tech-tag-pill" data-tooltip="Mobile installation and app-like behavior">PWA</span>
+                            <span class="tech-tag-pill" data-tooltip="Secure hashing and auth support">Bcrypt</span>
+                            <span class="tech-tag-pill" data-tooltip="Version control and iterative shipping">Git</span>
+                            <span class="tech-tag-pill" data-tooltip="Frontend deployment and delivery">Vercel</span>
+                            <span class="tech-tag-pill" data-tooltip="Backend infrastructure and hosting">Render</span>
+                        </div>
+                    </div>
+
+                    <div class="key-features scroll-reveal">
+                        <h3 class="features-subtitle">What it enables</h3>
+                        <div class="features-list">
+                            <div class="feature-item">
+                                <span class="feature-icon">01</span>
+                                <span class="feature-text">Multi-role experiences with shared product consistency</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">02</span>
+                                <span class="feature-text">Structured academic data, analytics, and content flows</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">03</span>
+                                <span class="feature-text">Responsive delivery across desktop, tablet, and mobile</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">04</span>
+                                <span class="feature-text">Real-time and AI-assisted features layered into the platform</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-creator-section" id="contact">
+            <div class="container">
+                <div class="contact-creator-shell glass-card">
+                    <div class="section-header scroll-reveal creator-section-header">
+                        <p class="section-kicker">Contact</p>
+                        <h2 class="section-title">Open to thoughtful collaborations and product-minded conversations.</h2>
+                        <p class="section-subtitle">
+                            Email is the best route for internships, freelance work, or discussing how this platform is built.
+                        </p>
+                    </div>
+
+                    <div class="contact-cards">
+                        <a href="mailto:samalmrinall9@gmail.com" class="contact-card glass-card scroll-reveal">
+                            <span class="contact-card-label">Email</span>
+                            <h3>samalmrinall9@gmail.com</h3>
+                            <p>Best for collaboration, internships, and detailed conversations.</p>
                         </a>
-                        <a href="https://github.com/MrinallSamal-byte" target="_blank" class="project-link">
-                            <span>🐙</span> Source Code
-                        </a>
-                    </div>
-                </div>
 
-                <!-- More Projects -->
-                <div class="project-card glass-card scroll-reveal">
-                    <div class="project-icon">💻</div>
-                    <h3>Portfolio Website</h3>
-                    <p>A personal portfolio website showcasing my projects, skills, and professional journey 
-                       with modern glassmorphism design and smooth animations.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag-small">HTML5</span>
-                        <span class="tech-tag-small">CSS3</span>
-                        <span class="tech-tag-small">JavaScript</span>
-                        <span class="tech-tag-small">GSAP</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/MrinallSamal-byte" target="_blank" class="project-link">
-                            <span>🐙</span> View on GitHub
+                        <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer"
+                            class="contact-card glass-card scroll-reveal">
+                            <span class="contact-card-label">GitHub</span>
+                            <h3>@MrinallSamal-byte</h3>
+                            <p>Code, experiments, and the implementation side of the work.</p>
                         </a>
-                    </div>
-                </div>
 
-                <div class="project-card glass-card scroll-reveal">
-                    <div class="project-icon">📱</div>
-                    <h3>Mobile PWA Apps</h3>
-                    <p>Progressive Web Applications that provide native-like experiences across all devices 
-                       with offline support and push notifications.</p>
-                    <div class="project-tech">
-                        <span class="tech-tag-small">PWA</span>
-                        <span class="tech-tag-small">Service Workers</span>
-                        <span class="tech-tag-small">IndexedDB</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/MrinallSamal-byte" target="_blank" class="project-link">
-                            <span>🐙</span> View on GitHub
+                        <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank" rel="noopener noreferrer"
+                            class="contact-card glass-card scroll-reveal">
+                            <span class="contact-card-label">LinkedIn</span>
+                            <h3>Mrinall Samal</h3>
+                            <p>Professional updates, background, and direct outreach.</p>
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Technologies Section -->
-    <section class="tech-stack-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">Technologies Used in EduHub</h2>
-                <p class="section-subtitle">The tech stack powering this platform</p>
-            </div>
-            
-            <div class="tech-tags-container">
-                <div class="tech-tags">
-                    <span class="tech-tag-pill" data-tooltip="Server-side JavaScript runtime">Node.js</span>
-                    <span class="tech-tag-pill" data-tooltip="Fast, minimalist web framework">Express.js</span>
-                    <span class="tech-tag-pill" data-tooltip="Powerful relational database">PostgreSQL</span>
-                    <span class="tech-tag-pill" data-tooltip="Modern ES6+ JavaScript">JavaScript</span>
-                    <span class="tech-tag-pill" data-tooltip="Semantic markup & modern styling">HTML5/CSS3</span>
-                    <span class="tech-tag-pill" data-tooltip="Real-time bidirectional communication">Socket.IO</span>
-                    <span class="tech-tag-pill" data-tooltip="Secure token-based authentication">JWT</span>
-                    <span class="tech-tag-pill" data-tooltip="Professional-grade animations">GSAP</span>
-                    <span class="tech-tag-pill" data-tooltip="Beautiful data visualization">Chart.js</span>
-                    <span class="tech-tag-pill" data-tooltip="Progressive Web App technology">PWA</span>
-                    <span class="tech-tag-pill" data-tooltip="Password hashing library">Bcrypt</span>
-                    <span class="tech-tag-pill" data-tooltip="Version control system">Git</span>
-                    <span class="tech-tag-pill" data-tooltip="Frontend deployment platform">Vercel</span>
-                    <span class="tech-tag-pill" data-tooltip="Backend infrastructure">Railway</span>
-                </div>
-            </div>
-
-            <!-- Key Features -->
-            <div class="key-features scroll-reveal">
-                <h3 class="features-subtitle">Key Platform Features</h3>
-                <div class="features-list">
-                    <div class="feature-item">
-                        <span class="feature-icon">📊</span>
-                        <span class="feature-text">Real-time Attendance Tracking</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">📈</span>
-                        <span class="feature-text">Performance Analytics & Insights</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">📚</span>
-                        <span class="feature-text">Comprehensive Digital Library</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">🤖</span>
-                        <span class="feature-text">AI-Powered Study Assistant</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">👥</span>
-                        <span class="feature-text">Multi-Role User System</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">🔒</span>
-                        <span class="feature-text">Enterprise-Grade Security</span>
+        <section class="disclaimer-section">
+            <div class="container">
+                <div class="disclaimer-card glass-card scroll-reveal">
+                    <div class="disclaimer-copy">
+                        <span class="disclaimer-label">Project context</span>
+                        <h4>Student-built, independent, and intentionally experimental.</h4>
+                        <p>
+                            ITERasn hub is an educational project and is not an official ITER or SOA University product. Any demo content or simulated data is used to prototype features and showcase engineering work.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contact Section -->
-    <section class="contact-creator-section">
-        <div class="container">
-            <div class="section-header scroll-reveal">
-                <h2 class="section-title">Let's Connect</h2>
-                <p class="section-subtitle">Feel free to reach out for collaborations or just a friendly chat</p>
-            </div>
-            <div class="contact-cards">
-                <a href="mailto:samalmrinall9@gmail.com" class="contact-card glass-card scroll-reveal">
-                    <div class="contact-card-icon">📧</div>
-                    <h3>Email</h3>
-                    <p>samalmrinall9@gmail.com</p>
-                </a>
-                <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer" 
-                   class="contact-card glass-card scroll-reveal">
-                    <div class="contact-card-icon">🐙</div>
-                    <h3>GitHub</h3>
-                    <p>@MrinallSamal-byte</p>
-                </a>
-                <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank" rel="noopener noreferrer" 
-                   class="contact-card glass-card scroll-reveal">
-                    <div class="contact-card-icon">💼</div>
-                    <h3>LinkedIn</h3>
-                    <p>Mrinall Samal</p>
+        <section class="back-home-section">
+            <div class="container">
+                <a href="/index.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
+                    Return to Home
                 </a>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Disclaimer Section -->
-    <section class="disclaimer-section">
-        <div class="container">
-            <div class="disclaimer-card glass-card scroll-reveal">
-                <div class="disclaimer-icon">ℹ️</div>
-                <h4>Important Notice</h4>
-                <p>
-                    This is a <strong>student project</strong> created for educational and demonstration purposes only. 
-                    It is <strong>not an official product of ITER or SOA University</strong>. All data shown is 
-                    simulated for demonstration purposes. This project showcases full-stack development capabilities 
-                    and modern web design practices.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Back to Home Button -->
-    <section class="back-home-section">
-        <div class="container">
-            <a href="/index.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
-                <span style="margin-right: 8px;">🏠</span> Back to Home
-            </a>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>ITER, SOA University</h4>
-                    <p>Institute of Technical Education & Research</p>
-                    <p><strong>NAAC A++ Accredited</strong></p>
+                    <h4>ITERasn hub</h4>
+                    <p>Student-built platform design and engineering.</p>
+                    <p><strong>Independent creator profile</strong></p>
                 </div>
                 <div class="footer-section">
                     <h4>Quick Links</h4>
@@ -553,23 +651,21 @@
                 </div>
                 <div class="footer-section">
                     <h4>Creator</h4>
-                    <a href="https://github.com/MrinallSamal-byte" target="_blank">GitHub</a>
-                    <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank">LinkedIn</a>
+                    <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
                     <a href="mailto:samalmrinall9@gmail.com">Email</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 ITER, SOA University | Created with ❤️ by Mrinall Samal</p>
+                <p>&copy; ITERasn hub. Designed and built by Mrinall Samal.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon">&#9790;</span>
     </button>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="/js/mobile-fixes.js"></script>
@@ -577,7 +673,6 @@
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/mobile-nav.js"></script>
-    <script src="/js/url-navigator.js"></script>
     <script src="/js/advanced-animations.js"></script>
     <script src="/js/navbar-scroll-behavior.js"></script>
     <script src="/js/creator-page.js"></script>

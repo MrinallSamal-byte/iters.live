@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - ITER EduHub</title>
+    <title>Student Dashboard - ITERasn hub</title>
     <!-- SECURITY: Immediate authentication check before any content loads -->
     <script>
         (function() {
@@ -67,6 +67,10 @@
                     <p class="page-subtitle">Here's what's happening with your academics today</p>
                 </div>
             </div>
+        </section>
+
+        <section class="dashboard-section glass-card hover-lift scroll-reveal soa-portal-banner" id="soaPortalBanner">
+            <div class="loading-text">Checking SOA portal connection...</div>
         </section>
 
         <!-- Quick Stats -->
@@ -266,6 +270,20 @@
                         <p>Check your academic scores</p>
                     </div>
                 </a>
+                <a href="/dashboard/student-personal-info.html" class="quick-link-card">
+                    <div class="quick-link-icon">🪪</div>
+                    <div class="quick-link-content">
+                        <h4>SOA Data</h4>
+                        <p>Open imported personal info, contact info, and results</p>
+                    </div>
+                </a>
+                <a href="/connect-portal.html" class="quick-link-card">
+                    <div class="quick-link-icon">🔗</div>
+                    <div class="quick-link-content">
+                        <h4>Connect SOA Portal</h4>
+                        <p>Import the latest data from the official SOA portal</p>
+                    </div>
+                </a>
                 <a href="/dashboard/student-timetable.html" class="quick-link-card">
                     <div class="quick-link-icon">📅</div>
                     <div class="quick-link-content">
@@ -407,6 +425,66 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
+        }
+
+        .soa-portal-banner {
+            padding: 1.4rem 1.5rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .soa-banner-shell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .soa-banner-copy h3 {
+            margin: 0 0 0.45rem 0;
+            color: var(--text-primary);
+        }
+
+        .soa-banner-copy p {
+            margin: 0;
+            color: var(--text-secondary);
+            max-width: 720px;
+            line-height: 1.6;
+        }
+
+        .soa-banner-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .soa-banner-btn,
+        .soa-banner-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        .soa-banner-btn:hover,
+        .soa-banner-link:hover {
+            transform: translateY(-1px);
+        }
+
+        .soa-banner-btn {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .soa-banner-link {
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .quick-link-card {

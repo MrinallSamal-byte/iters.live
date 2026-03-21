@@ -357,7 +357,7 @@ class StudyScheduleGenerator {
    */
   exportSchedule() {
     const schedule = this.generateSchedule();
-    let ical = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ITER EduHub//Study Schedule//EN\n`;
+    let ical = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ITERasn hub//Study Schedule//EN\n`;
 
     schedule.forEach(day => {
       day.sessions.forEach(session => {

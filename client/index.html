@@ -5,125 +5,208 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="ITER - Institute of Technical Education & Research, Siksha 'O' Anusandhan (Deemed to be University). NAAC A++ Accredited premier technical institution in Bhubaneswar, Odisha. Explore our advanced EduHub portal with real-time attendance, marks tracking, digital library, and more.">
+        content="ITERasn hub is the digital gateway for students, faculty, and administrators at the Institute of Technical Education and Research, SOA University.">
     <meta name="keywords"
-        content="ITER, SOA University, Technical Education, Engineering College, Student Portal, EduHub, NAAC A++, Bhubaneswar, Odisha">
+        content="ITERasn hub, ITER, SOA University, student portal, technical education, Bhubaneswar, Odisha">
     <meta name="author" content="ITER - Institute of Technical Education & Research">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#0a0a0a">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="ITER - Institute of Technical Education & Research | SOA University">
+    <meta property="og:title" content="ITERasn hub | Simplified Campus Portal">
     <meta property="og:description"
-        content="Premier technical institution offering world-class education with advanced digital EduHub portal for students, faculty, and administration.">
+        content="A cleaner, faster homepage for ITERasn hub with direct access to the portal, registration, programs, and campus contact details.">
     <meta property="og:url" content="https://iter.ac.in">
     <link rel="canonical" href="/">
-    <title>ITER - Institute of Technical Education & Research | SOA University Home</title>
+    <title>ITERasn hub | Simplified Campus Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
     <link rel="stylesheet" href="/css/responsive.css">
     <link rel="stylesheet" href="/css/responsive-enhanced.css">
     <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="/css/responsive-universal.css">
     <link rel="stylesheet" href="/css/button-fixes.css">
-    <link rel="stylesheet" href="/css/responsive-fixes.css">
     <link rel="stylesheet" href="/css/mobile-touch-fixes.css">
-    <link rel="stylesheet" href="/css/notice-ticker.css">
     <link rel="stylesheet" href="/css/navbar-scroll-behavior.css">
-    <link rel="stylesheet" href="/css/responsive-polish.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/assets/icon.png">
-    <!-- Auto-redirect logged-in users to their dashboard -->
+    <link rel="icon" href="/assets/soa-logo.png">
     <script>
         (function() {
             'use strict';
-            // Check if user is already logged in
+            const SESSION_TIMEOUT_MS = 20 * 60 * 1000;
+            const AUTH_KEYS = [
+                'accessToken',
+                'refreshToken',
+                'user',
+                'token',
+                'prototypeMode',
+                'demoRole',
+                'rememberedUser',
+                'lastActivityTimestamp',
+                'sessionId',
+                'sessionStartTimestamp',
+                'pageAccessToken',
+                'pageAccessTokenTimestamp',
+                'pageAccessTokenPath',
+                'loginRedirect',
+                'loginMessage'
+            ];
+
+            function getStorageItem(storageObject, key) {
+                try {
+                    return storageObject.getItem(key);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function removeStorageItem(storageObject, key) {
+                try {
+                    storageObject.removeItem(key);
+                } catch (e) {
+                    // Ignore storage errors
+                }
+            }
+
+            function clearStaleClientState(options = {}) {
+                const preservePostLogoutRedirect = options.preservePostLogoutRedirect === true;
+                const preserveLocalKeys = new Set(['theme']);
+                const preserveSessionKeys = new Set(['theme', 'logoutReason']);
+
+                AUTH_KEYS.forEach((key) => {
+                    if (!preserveLocalKeys.has(key)) removeStorageItem(localStorage, key);
+                    if (!preserveSessionKeys.has(key)) removeStorageItem(sessionStorage, key);
+                });
+
+                if (!preservePostLogoutRedirect) {
+                    ['postLogoutRedirectTarget', 'postLogoutRedirectTimestamp', 'postLogoutRedirectReason'].forEach((key) => {
+                        removeStorageItem(localStorage, key);
+                    });
+                }
+
+                try {
+                    Object.keys(localStorage).forEach((key) => {
+                        if ((key.startsWith('portal') || key.startsWith('soa') || key.includes('retry')) && !preserveLocalKeys.has(key)) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                } catch (e) {
+                    // Ignore storage errors
+                }
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    try {
+                        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_APP_CACHE' });
+                    } catch (e) {
+                        // Ignore service worker errors
+                    }
+                }
+
+                if ('caches' in window) {
+                    caches.keys()
+                        .then((cacheNames) => Promise.all(
+                            cacheNames
+                                .filter((cacheName) => cacheName.startsWith('iter-'))
+                                .map((cacheName) => caches.delete(cacheName))
+                        ))
+                        .catch(() => {});
+                }
+            }
+
+            function getLastActivityTimestamp() {
+                const sessionActivity = parseInt(getStorageItem(sessionStorage, 'lastActivityTimestamp') || '0', 10);
+                const localActivity = parseInt(getStorageItem(localStorage, 'lastActivityTimestamp') || '0', 10);
+                return Math.max(sessionActivity, localActivity, 0);
+            }
+
+            function hasExpiredSession(accessToken, user) {
+                if (!accessToken && !user) return false;
+                const lastActivity = getLastActivityTimestamp();
+                return Boolean(lastActivity) && (Date.now() - lastActivity >= SESSION_TIMEOUT_MS);
+            }
+
             function checkAuthAndRedirect() {
                 try {
-                    const accessToken = localStorage.getItem('accessToken');
-                    const user = localStorage.getItem('user');
-                    
+                    const postLogoutTarget = getStorageItem(localStorage, 'postLogoutRedirectTarget');
+                    if (postLogoutTarget === '/index.html') {
+                        clearStaleClientState({ preservePostLogoutRedirect: true });
+                        return false;
+                    }
+
+                    const accessToken = getStorageItem(localStorage, 'accessToken') || getStorageItem(sessionStorage, 'accessToken');
+                    const user = getStorageItem(localStorage, 'user') || getStorageItem(sessionStorage, 'user');
+
+                    if (hasExpiredSession(accessToken, user) || (Boolean(accessToken) !== Boolean(user))) {
+                        clearStaleClientState();
+                        return false;
+                    }
+
                     if (accessToken && user) {
                         const userData = JSON.parse(user);
-                        
-                        // Redirect based on role
                         if (userData && userData.role) {
                             const dashboards = {
-                                'student': '/dashboard/student.html',
-                                'teacher': '/dashboard/teacher.html',
-                                'admin': '/dashboard/admin.html'
+                                student: '/dashboard/student.html',
+                                teacher: '/dashboard/teacher.html',
+                                admin: '/dashboard/admin.html'
                             };
-                            
+
                             const dashboardUrl = dashboards[userData.role];
                             if (dashboardUrl) {
-                                // Redirect immediately
                                 window.location.replace(dashboardUrl);
                                 return true;
                             }
                         }
                     }
                 } catch (e) {
-                    // If there's an error parsing user data, clear invalid data
                     console.warn('Invalid auth data, clearing storage');
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('user');
+                    clearStaleClientState();
                 }
+
                 return false;
             }
-            
-            // Execute redirect check immediately
+
             checkAuthAndRedirect();
         })();
     </script>
-    <style>
-        /* Logout notification animations */
-        @keyframes slideDown {
-            from { top: -100px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { top: 20px; opacity: 1; }
-            to { top: -100px; opacity: 0; }
-        }
-        #logoutNotification {
-            animation: slideDown 0.3s ease;
-        }
-        #logoutNotification.hiding {
-            animation: slideUp 0.3s ease;
-        }
-    </style>
 </head>
 
-<body class="landing-page">
-    <!-- Logout notification toast (shown when user is logged out) -->
-    <div id="logoutNotification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; background: rgba(30, 30, 46, 0.95); color: white; padding: 1rem 2rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+<body class="landing-page nothing-home public-home-page">
+    <div id="logoutNotification" class="logout-notification" style="display: none;">
         <span id="logoutMessage"></span>
     </div>
 
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
+    <div class="bg-animation" aria-hidden="true">
+        <div class="bg-noise"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-spot bg-spot-left"></div>
+        <div class="bg-spot bg-spot-right"></div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="navbar glass-card">
+    <nav class="navbar glass-card" aria-label="Primary">
         <div class="nav-container">
-            <div class="nav-logo">
-                <img src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)" class="logo-img">
-                <span class="logo-text">ITER</span>
-            </div>
+            <a href="/index.html" class="nav-logo" aria-label="ITERasn hub Home">
+                <img src="/assets/soa-logo.png" alt="SOA University logo" class="logo-img">
+                <div class="logo-lockup">
+                    <span class="logo-text">ITERasn hub</span>
+                    <span class="logo-subtext">Institute of Technical Education &amp; Research</span>
+                </div>
+            </a>
+
             <div class="nav-links">
                 <a href="#about" class="nav-link">About</a>
-                <a href="#academics" class="nav-link">Academics</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#academics" class="nav-link">Programs</a>
                 <a href="/creator.html" class="nav-link">Creator</a>
                 <a href="#contact" class="nav-link">Contact</a>
-                <a href="/register.html" class="btn btn-outline" style="margin-right: 0.5rem;">Register</a>
+                <a href="/register.html" class="btn btn-outline">Register</a>
                 <a href="/login.html" class="btn btn-primary">Portal Login</a>
             </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -131,574 +214,329 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-icon">🏆</span>
-                    <span class="badge-text">A++ NAAC Accredited | NIRF Ranked | NBA Approved</span>
-                </div>
-                <h1 class="hero-title">
-                    Institute of Technical Education & Research
-                </h1>
-                <p class="hero-subtitle">
-                    Siksha 'O' Anusandhan (Deemed to be University), Bhubaneswar
-                </p>
-                <p class="hero-description">
-                    Welcome to ITER's Advanced EduHub Portal - A premier institution dedicated to excellence in
-                    technical education, research, and innovation. Experience seamless digital learning with
-                    real-time attendance tracking, performance analytics, comprehensive digital resources, and
-                    cutting-edge student management features.
-                </p>
-                <div class="hero-buttons scroll-reveal">
-                    <a href="/login.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
-                        Student Portal
-                    </a>
-                    <a href="/register.html" class="btn btn-large btn-outline ripple-effect hover-lift">
-                        Register Now
-                    </a>
-                    <a href="#about" class="btn btn-large btn-secondary ripple-effect hover-lift">
-                        Learn More
-                    </a>
-                </div>
-                <div class="hero-stats stagger-animation">
-                    <div class="stat-item scroll-reveal">
-                        <div class="stat-number counter" data-target="10000" data-suffix="+">0</div>
-                        <div class="stat-label">Students</div>
-                    </div>
-                    <div class="stat-item scroll-reveal">
-                        <div class="stat-number counter" data-target="500" data-suffix="+">0</div>
-                        <div class="stat-label">Faculty Members</div>
-                    </div>
-                    <div class="stat-item scroll-reveal">
-                        <div class="stat-number counter" data-target="20" data-suffix="+">0</div>
-                        <div class="stat-label">Programs</div>
-                    </div>
-                    <div class="stat-item scroll-reveal">
-                        <div class="stat-number stat-text">NAAC A++</div>
-                        <div class="stat-label">Accreditation</div>
-                    </div>
-                    <div class="stat-item scroll-reveal">
-                        <div class="stat-number counter" data-target="95" data-suffix="%+">0</div>
-                        <div class="stat-label">Placement Rate</div>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-image fade-in-up delay-1">
-                <div class="hero-logo-container">
-                    <img src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan (Deemed to be University)"
-                        class="hero-logo-img">
-                    <div class="logo-glow"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Live Notice Ticker -->
-    <div class="notice-ticker-container" id="noticeTicker">
-        <div class="notice-ticker-wrapper glass-card">
-            <div class="notice-ticker-label">
-                <span class="ticker-icon">📢</span>
-                <span class="ticker-text">Latest Updates</span>
-            </div>
-            <div class="notice-ticker-content">
-                <div class="notice-item" data-notice-id="1">
-                    <span class="notice-icon">🎓</span>
-                    <span class="notice-text">Semester exams will commence from January 25th, 2025. Students are advised
-                        to check the detailed schedule on the student portal.</span>
-                </div>
-                <div class="notice-item" data-notice-id="2">
-                    <span class="notice-icon">📚</span>
-                    <span class="notice-text">Digital Library has been updated with 500+ new e-books and research
-                        papers. Access them now through the EduHub portal.</span>
-                </div>
-                <div class="notice-item" data-notice-id="3">
-                    <span class="notice-icon">💼</span>
-                    <span class="notice-text">Campus placement drive by Google, Microsoft, and Amazon scheduled for
-                        February 2025. Register on the placement portal.</span>
-                </div>
-                <div class="notice-item" data-notice-id="4">
-                    <span class="notice-icon">🎉</span>
-                    <span class="notice-text">Annual Tech Fest 'TechVision 2025' - Register your team for hackathons,
-                        coding competitions, and tech talks. Last date: January 20th.</span>
-                </div>
-                <div class="notice-item" data-notice-id="5">
-                    <span class="notice-icon">⚠️</span>
-                    <span class="notice-text">Important: Students with attendance below 75% must submit their
-                        regularization forms by January 18th to avoid academic penalties.</span>
-                </div>
-            </div>
-            <button class="notice-close-btn" id="noticeCloseBtn" aria-label="Close notice ticker">
-                <span>✕</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- About Section -->
-    <section id="about" class="about-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">About ITER, SOA University</h2>
-                <p class="section-subtitle">A Legacy of Excellence in Technical Education Since 1996</p>
-            </div>
-            <div class="about-content">
-                <div class="about-text">
-                    <p class="about-description">
-                        The Institute of Technical Education and Research (ITER) is a premier constituent college of
-                        Siksha 'O' Anusandhan (Deemed to be University), Bhubaneswar, Odisha. Established with a vision
-                        to provide world-class technical education, ITER has been at the forefront of fostering
-                        innovation,
-                        research, and academic excellence for over two decades.
+    <main class="home-main">
+        <section class="hero-section">
+            <div class="container">
+                <div class="hero-copy reveal-on-scroll">
+                    <p class="micro-label">REDESIGNED HOME EXPERIENCE</p>
+                    <h1 class="hero-title">Cleaner campus access with a sharper, simpler interface.</h1>
+                    <p class="hero-description">
+                        The homepage is now focused on clarity first: quick portal entry, cleaner hierarchy, a more
+                        premium visual rhythm, and direct paths to the pages visitors actually need.
                     </p>
-                    <p class="about-description">
-                        SOA University is NAAC A++ accredited, recognized by UGC under Section 3 of the UGC Act, 1956,
-                        and has been granted Category-I status. ITER offers undergraduate, postgraduate, and doctoral
-                        programs in various engineering disciplines, all designed to meet industry demands and global
-                        standards.
-                    </p>
-                    <div class="about-highlights">
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">🏆</div>
-                            <h4>NAAC A++ Accredited</h4>
-                            <p>Highest grade for academic excellence and quality education</p>
-                        </div>
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">�</div>
-                            <h4>NBA Accredited</h4>
-                            <p>All major programs accredited by National Board of Accreditation</p>
-                        </div>
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">�🔬</div>
-                            <h4>Research Excellence</h4>
-                            <p>200+ publications, 50+ patents, advanced research centers</p>
-                        </div>
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">🌍</div>
-                            <h4>Global Recognition</h4>
-                            <p>QS ranked, collaborations with 30+ international universities</p>
-                        </div>
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">💼</div>
-                            <h4>95%+ Placement</h4>
-                            <p>Top recruiters: Google, Microsoft, TCS, Wipro, Infosys, Amazon</p>
-                        </div>
-                        <div class="highlight-item glass-card">
-                            <div class="highlight-icon">�‍🎓</div>
-                            <h4>10,000+ Alumni</h4>
-                            <p>Successful graduates working worldwide in leading organizations</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Vision & Mission -->
-            <div class="vision-mission">
-                <div class="vm-card glass-card">
-                    <div class="vm-icon">🎯</div>
-                    <h3>Our Vision</h3>
-                    <p>To be a globally recognized center of excellence in technical education, research, and
-                        innovation,
-                        producing competent professionals who contribute significantly to societal development and
-                        technological advancement.</p>
-                </div>
-                <div class="vm-card glass-card">
-                    <div class="vm-icon">🚀</div>
-                    <h3>Our Mission</h3>
-                    <p>To provide quality education with state-of-the-art infrastructure, foster research and
-                        innovation,
-                        develop industry-ready professionals, promote entrepreneurship, and create a conducive learning
-                        environment
-                        that nurtures creativity, critical thinking, and ethical values.</p>
-                </div>
-            </div>
+                    <div class="hero-buttons">
+                        <a href="/login.html" class="btn btn-primary btn-large">Open Portal</a>
+                        <a href="/register.html" class="btn btn-outline btn-large">Create Account</a>
+                        <a href="/creator.html" class="btn btn-secondary btn-large">Meet the Creator</a>
+                    </div>
 
-            <!-- Achievements -->
-            <div class="achievements-section">
-                <h3 class="achievements-title">Recent Achievements & Rankings</h3>
-                <div class="achievements-grid">
-                    <div class="achievement-item glass-card">
-                        <span class="achievement-badge">🥇</span>
-                        <p><strong>NIRF Rank</strong><br>Among Top 150 Engineering Colleges in India</p>
-                    </div>
-                    <div class="achievement-item glass-card">
-                        <span class="achievement-badge">⭐</span>
-                        <p><strong>QS I-GAUGE</strong><br>Diamond Rating for Academic Excellence</p>
-                    </div>
-                    <div class="achievement-item glass-card">
-                        <span class="achievement-badge">🏅</span>
-                        <p><strong>ARIIA Ranking</strong><br>Recognized for Innovation Achievements</p>
-                    </div>
-                    <div class="achievement-item glass-card">
-                        <span class="achievement-badge">🎓</span>
-                        <p><strong>AICTE Approved</strong><br>All programs approved by AICTE</p>
+                    <div class="hero-notes">
+                        <div class="hero-note">
+                            <span class="note-dot"></span>
+                            <span>Student, teacher, and admin flows remain unchanged behind the cleaner entry point.</span>
+                        </div>
+                        <div class="hero-note">
+                            <span class="note-dot"></span>
+                            <span>Every homepage link points to a real destination or a valid on-page section.</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Download Section -->
-    <section id="download" class="download-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Download Now</h2>
-                <p class="section-subtitle">Available on all platforms</p>
-            </div>
-            <div class="download-grid">
-                <div class="download-card glass-card hover-lift">
-                    <div class="download-icon">🌐</div>
-                    <h3>Web App</h3>
-                    <p>Access from any browser, anywhere</p>
-                    <a href="/login.html" class="btn btn-primary">Open Web App</a>
+                <div class="hero-panel reveal-on-scroll">
+                    <div class="device-frame">
+                        <div class="device-topbar">
+                            <span class="device-dot"></span>
+                            <span class="micro-label">PORTAL SURFACE</span>
+                            <span class="device-status">READY</span>
+                        </div>
+
+                        <div class="device-screen">
+                            <div class="screen-card screen-card-primary">
+                                <p class="micro-label">QUICK ENTRY</p>
+                                <h2>Direct paths into ITERasn hub</h2>
+                                <p>Minimal friction for portal login, registration, and campus discovery.</p>
+                                <div class="shortcut-list">
+                                    <a href="/login.html" class="shortcut-item">
+                                        <span>Student Portal</span>
+                                        <span>Open</span>
+                                    </a>
+                                    <a href="/register.html" class="shortcut-item">
+                                        <span>New Registration</span>
+                                        <span>Open</span>
+                                    </a>
+                                    <a href="/creator.html" class="shortcut-item">
+                                        <span>Creator Page</span>
+                                        <span>Open</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="screen-grid">
+                                <div class="screen-card">
+                                    <p class="micro-label">ACADEMICS</p>
+                                    <h3>Programs</h3>
+                                    <p>Browse disciplines, labs, and high-demand engineering tracks.</p>
+                                </div>
+                                <div class="screen-card">
+                                    <p class="micro-label">OPERATIONS</p>
+                                    <h3>Portal Tools</h3>
+                                    <p>Attendance, marks, notes, announcements, and academic workflows.</p>
+                                </div>
+                                <div class="screen-card">
+                                    <p class="micro-label">CAMPUS</p>
+                                    <h3>Contact</h3>
+                                    <p>Reach the institute directly through verified campus contact details.</p>
+                                </div>
+                                <div class="screen-card">
+                                    <p class="micro-label">STATUS</p>
+                                    <h3 id="liveStatus">Simple. Useful. Fast.</h3>
+                                    <p>A homepage designed to feel premium without becoming noisy.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="download-card glass-card hover-lift">
-                    <div class="download-icon">📱</div>
-                    <h3>Android App <span class="coming-soon-badge">Coming Soon</span></h3>
-                    <p>Full website experience - Android 9+</p>
-                    <button class="btn btn-primary" disabled style="opacity: 0.6; cursor: not-allowed;">
-                        <i class="fas fa-download"></i> Download App
-                    </button>
-                    <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">
-                        <i class="fas fa-info-circle"></i> 3-5 MB • All features included
+            </div>
+        </section>
+
+        <section class="metrics-section" aria-label="Institution highlights">
+            <div class="container">
+                <div class="metrics-grid">
+                    <article class="metric-card reveal-on-scroll">
+                        <p class="micro-label">STUDENT COMMUNITY</p>
+                        <strong class="metric-value counter" data-target="10000" data-suffix="+">0</strong>
+                        <p>One digital layer for access, progress, and updates.</p>
+                    </article>
+                    <article class="metric-card reveal-on-scroll">
+                        <p class="micro-label">FACULTY STRENGTH</p>
+                        <strong class="metric-value counter" data-target="500" data-suffix="+">0</strong>
+                        <p>Teaching, mentoring, evaluation, and resources on a unified system.</p>
+                    </article>
+                    <article class="metric-card reveal-on-scroll">
+                        <p class="micro-label">ACADEMIC TRACKS</p>
+                        <strong class="metric-value counter" data-target="20" data-suffix="+">0</strong>
+                        <p>Programs aligned to current engineering and management demands.</p>
+                    </article>
+                    <article class="metric-card reveal-on-scroll">
+                        <p class="micro-label">OUTCOME SIGNAL</p>
+                        <strong class="metric-value counter" data-target="95" data-suffix="%">0</strong>
+                        <p>Strong placement momentum supported by practical training and industry links.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <div class="section-heading reveal-on-scroll">
+                    <p class="micro-label">WHY THE NEW UI WORKS</p>
+                    <h2 class="section-title">Less visual noise, better decision making.</h2>
+                    <p class="section-copy">
+                        The updated layout uses restraint instead of clutter. It keeps the modern feel, but with cleaner
+                        spacing, stronger hierarchy, and obvious next actions.
                     </p>
                 </div>
-                <div class="download-card glass-card hover-lift">
-                    <div class="download-icon">💻</div>
-                    <h3>Desktop App <span class="coming-soon-badge">Coming Soon</span></h3>
-                    <p>Windows, Mac, and Linux support</p>
-                    <div class="desktop-downloads">
-                        <button class="btn btn-secondary btn-sm" disabled
-                            style="opacity: 0.6; cursor: not-allowed;">Windows</button>
-                        <button class="btn btn-secondary btn-sm" disabled
-                            style="opacity: 0.6; cursor: not-allowed;">Linux</button>
+
+                <div class="features-grid">
+                    <article class="feature-card glass-card reveal-on-scroll">
+                        <p class="micro-label">01</p>
+                        <h3>Focused first screen</h3>
+                        <p>The hero now leads directly to portal login, account creation, and the creator page without distractions.</p>
+                    </article>
+                    <article class="feature-card glass-card reveal-on-scroll">
+                        <p class="micro-label">02</p>
+                        <h3>Minimal, premium styling</h3>
+                        <p>A Nothing-inspired visual language built with monochrome surfaces, crisp borders, and a restrained red accent.</p>
+                    </article>
+                    <article class="feature-card glass-card reveal-on-scroll">
+                        <p class="micro-label">03</p>
+                        <h3>Safer navigation</h3>
+                        <p>Broken placeholder links were removed so the homepage only surfaces destinations that actually exist.</p>
+                    </article>
+                </div>
+
+                <div class="experience-board reveal-on-scroll">
+                    <div class="experience-copy">
+                        <p class="micro-label">PRIMARY JOURNEYS</p>
+                        <h3>Visitors can understand the system in seconds.</h3>
+                        <p>
+                            Instead of stacking too many modules at once, the homepage now introduces the product clearly
+                            and hands users the right route quickly.
+                        </p>
+                    </div>
+
+                    <div class="route-list">
+                        <a href="/login.html" class="route-item">
+                            <span>Portal Login</span>
+                            <span>Launch</span>
+                        </a>
+                        <a href="/register.html" class="route-item">
+                            <span>Registration</span>
+                            <span>Launch</span>
+                        </a>
+                        <a href="/creator.html" class="route-item">
+                            <span>Creator Page</span>
+                            <span>Launch</span>
+                        </a>
+                        <a href="#academics" class="route-item">
+                            <span>Academic Programs</span>
+                            <span>Scroll</span>
+                        </a>
+                        <a href="#contact" class="route-item">
+                            <span>Campus Contact</span>
+                            <span>Scroll</span>
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Academics Section -->
-    <section id="academics" class="academics-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Academic Programs</h2>
-                <p class="section-subtitle">Industry-aligned programs with NBA accreditation</p>
-            </div>
-            <div class="academics-grid">
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">💻</div>
-                    <h3>Computer Science & Engineering</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: AI/ML, Data Science, Cyber Security, Cloud Computing</p>
-                    <ul class="academic-features">
-                        <li>✓ Industry-relevant curriculum with latest tech stacks</li>
-                        <li>✓ Hands-on labs: AI/ML, IoT, Cloud Computing, Blockchain</li>
-                        <li>✓ Top recruiters: Google, Microsoft, Amazon, Adobe</li>
-                        <li>✓ Research areas: Deep Learning, Computer Vision, NLP</li>
-                    </ul>
+        <section id="about" class="about-section">
+            <div class="container about-grid">
+                <div class="about-copy reveal-on-scroll">
+                    <p class="micro-label">ABOUT ITER</p>
+                    <h2 class="section-title">A strong institution deserves a homepage with discipline.</h2>
+                    <p class="section-copy">
+                        ITER, a constituent institute of Siksha 'O' Anusandhan (Deemed to be University), has built its
+                        reputation on academic rigor, applied learning, and technical excellence. The new homepage reflects
+                        that with a calmer, sharper digital front door.
+                    </p>
+                    <p class="section-copy">
+                        Instead of overloading visitors with every detail at once, the page now builds trust first and guides
+                        them into the right system flow.
+                    </p>
                 </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">⚡</div>
-                    <h3>Electronics & Communication</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: VLSI, Embedded Systems, IoT, Signal Processing</p>
-                    <ul class="academic-features">
-                        <li>✓ Advanced VLSI & PCB design labs</li>
-                        <li>✓ Embedded systems & microcontroller training</li>
-                        <li>✓ Industry tie-ups with Intel, Qualcomm, Texas Instruments</li>
-                        <li>✓ Research in 5G, Wireless Communication, IoT</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">⚙️</div>
-                    <h3>Mechanical Engineering</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: Design, Manufacturing, Thermal, Robotics</p>
-                    <ul class="academic-features">
-                        <li>✓ CAD/CAM/CAE labs with latest software (CATIA, ANSYS)</li>
-                        <li>✓ Modern CNC machines & automation training</li>
-                        <li>✓ Industry internships with L&T, BHEL, Tata Motors</li>
-                        <li>✓ Research in Additive Manufacturing, Robotics</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">🏗️</div>
-                    <h3>Civil Engineering</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: Structural, Environmental, Transportation, Geo-tech</p>
-                    <ul class="academic-features">
-                        <li>✓ Well-equipped labs: Concrete, Soil, Highway, Surveying</li>
-                        <li>✓ Field visits to construction sites & infrastructure projects</li>
-                        <li>✓ Training in STAAD Pro, AutoCAD, Primavera</li>
-                        <li>✓ Research in Sustainable Construction, Smart Cities</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">🔋</div>
-                    <h3>Electrical Engineering</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: Power Systems, Control, Renewable Energy, EV</p>
-                    <ul class="academic-features">
-                        <li>✓ Power systems, machines & control engineering labs</li>
-                        <li>✓ Renewable energy research center (Solar, Wind)</li>
-                        <li>✓ Smart grid & electric vehicle technology training</li>
-                        <li>✓ Placements in power sector (NTPC, Power Grid, ONGC)</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">🌐</div>
-                    <h3>Information Technology</h3>
-                    <p><strong>B.Tech, M.Tech</strong></p>
-                    <p>Specializations: Web Development, Mobile Apps, Networking, Security</p>
-                    <ul class="academic-features">
-                        <li>✓ Full-stack development training (MERN, MEAN)</li>
-                        <li>✓ Cloud computing & DevOps certifications</li>
-                        <li>✓ Cyber security & ethical hacking labs</li>
-                        <li>✓ Placements in IT giants: TCS, Infosys, Wipro, Cognizant</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">🏭</div>
-                    <h3>Industrial & Production</h3>
-                    <p><strong>B.Tech, M.Tech</strong></p>
-                    <p>Specializations: Industrial Management, Operations, Quality Control</p>
-                    <ul class="academic-features">
-                        <li>✓ Operations research & supply chain management</li>
-                        <li>✓ Quality control & Six Sigma training</li>
-                        <li>✓ Industry 4.0 & automation exposure</li>
-                        <li>✓ Placements in manufacturing & consulting firms</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">🧪</div>
-                    <h3>Biotechnology</h3>
-                    <p><strong>B.Tech, M.Tech, Ph.D.</strong></p>
-                    <p>Specializations: Genetic Engineering, Bioinformatics, Bioprocessing</p>
-                    <ul class="academic-features">
-                        <li>✓ State-of-the-art molecular biology labs</li>
-                        <li>✓ Bioinformatics & computational biology</li>
-                        <li>✓ Research in drug discovery, bio-fuels</li>
-                        <li>✓ Collaborations with pharma & biotech companies</li>
-                    </ul>
-                </div>
-                <div class="academic-card glass-card hover-lift">
-                    <div class="academic-icon">📊</div>
-                    <h3>MBA & Management</h3>
-                    <p><strong>MBA (Full-time & Executive)</strong></p>
-                    <p>Specializations: Finance, Marketing, HR, Business Analytics, IT</p>
-                    <ul class="academic-features">
-                        <li>✓ Industry interface with corporate leaders</li>
-                        <li>✓ Live projects & case study methodology</li>
-                        <li>✓ International immersion programs</li>
-                        <li>✓ Placements in top MNCs & consulting firms</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Facilities Section -->
-    <section class="facilities-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">World-Class Facilities</h2>
-                <p class="section-subtitle">Infrastructure that inspires learning and innovation</p>
-            </div>
-            <div class="facilities-grid">
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">📚</div>
-                    <h3>Digital Library</h3>
-                    <p>50,000+ books, 5,000+ e-journals, IEEE/Springer databases, digital resources, reading halls</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🔬</div>
-                    <h3>Research Labs</h3>
-                    <p>50+ advanced labs equipped with latest equipment, research centers for AI, IoT, Robotics</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🏫</div>
-                    <h3>Smart Classrooms</h3>
-                    <p>AC classrooms with digital boards, projectors, Wi-Fi, comfortable seating, modern ambiance</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🏃</div>
-                    <h3>Sports Complex</h3>
-                    <p>Basketball, volleyball, badminton courts, gym, yoga center, indoor/outdoor sports facilities</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🏨</div>
-                    <h3>Hostel Facilities</h3>
-                    <p>Separate boys & girls hostels, mess, Wi-Fi, 24/7 security, recreational areas, medical center</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🚌</div>
-                    <h3>Transport</h3>
-                    <p>Bus facility covering all major routes in Bhubaneswar, safe & convenient transport</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">💊</div>
-                    <h3>Health Center</h3>
-                    <p>24/7 medical facility, qualified doctors, ambulance service, health insurance support</p>
-                </div>
-                <div class="facility-card glass-card">
-                    <div class="facility-icon">🍴</div>
-                    <h3>Cafeteria</h3>
-                    <p>Multiple food courts, hygienic & nutritious meals, variety of cuisines, affordable pricing</p>
+                <div class="about-panels">
+                    <article class="principle-card glass-card reveal-on-scroll">
+                        <p class="micro-label">ACCREDITATION</p>
+                        <h3>NAAC A++</h3>
+                        <p>Quality, consistency, and academic performance remain central to the institution identity.</p>
+                    </article>
+                    <article class="principle-card glass-card reveal-on-scroll">
+                        <p class="micro-label">RESEARCH</p>
+                        <h3>Applied learning</h3>
+                        <p>Labs, projects, and industry-facing programs shape the student experience beyond the classroom.</p>
+                    </article>
+                    <article class="principle-card glass-card reveal-on-scroll">
+                        <p class="micro-label">PLACEMENTS</p>
+                        <h3>Career readiness</h3>
+                        <p>Students move from academics to opportunity with stronger visibility across campus workflows.</p>
+                    </article>
+                    <article class="principle-card glass-card reveal-on-scroll">
+                        <p class="micro-label">DIGITAL SYSTEM</p>
+                        <h3>One portal layer</h3>
+                        <p>Attendance, marks, notes, payments, events, and admin actions stay connected through ITERasn hub.</p>
+                    </article>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Placement Section -->
-    <section class="placement-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Placements & Recruiters</h2>
-                <p class="section-subtitle">Connecting talent with opportunity</p>
-            </div>
-            <div class="placement-stats">
-                <div class="placement-stat glass-card">
-                    <h3>95%+</h3>
-                    <p>Overall Placement</p>
+        <section id="academics" class="academics-section">
+            <div class="container">
+                <div class="section-heading reveal-on-scroll">
+                    <p class="micro-label">PROGRAM OVERVIEW</p>
+                    <h2 class="section-title">Academic programs with strong technical depth.</h2>
+                    <p class="section-copy">
+                        A condensed overview keeps the homepage useful without turning it back into a long wall of content.
+                    </p>
                 </div>
-                <div class="placement-stat glass-card">
-                    <h3>30+ LPA</h3>
-                    <p>Highest Package</p>
-                </div>
-                <div class="placement-stat glass-card">
-                    <h3>8+ LPA</h3>
-                    <p>Average Package</p>
-                </div>
-                <div class="placement-stat glass-card">
-                    <h3>200+</h3>
-                    <p>Companies Visit</p>
-                </div>
-            </div>
-            <div class="recruiters-section">
-                <h3>Top Recruiters</h3>
-                <div class="recruiters-grid">
-                    <div class="recruiter-tag">Google</div>
-                    <div class="recruiter-tag">Microsoft</div>
-                    <div class="recruiter-tag">Amazon</div>
-                    <div class="recruiter-tag">Adobe</div>
-                    <div class="recruiter-tag">Flipkart</div>
-                    <div class="recruiter-tag">Walmart</div>
-                    <div class="recruiter-tag">TCS</div>
-                    <div class="recruiter-tag">Infosys</div>
-                    <div class="recruiter-tag">Wipro</div>
-                    <div class="recruiter-tag">Cognizant</div>
-                    <div class="recruiter-tag">Accenture</div>
-                    <div class="recruiter-tag">Capgemini</div>
-                    <div class="recruiter-tag">Oracle</div>
-                    <div class="recruiter-tag">SAP</div>
-                    <div class="recruiter-tag">IBM</div>
-                    <div class="recruiter-tag">Intel</div>
-                    <div class="recruiter-tag">Qualcomm</div>
-                    <div class="recruiter-tag">Texas Instruments</div>
-                    <div class="recruiter-tag">L&T</div>
-                    <div class="recruiter-tag">Tata Motors</div>
-                    <div class="recruiter-tag">BHEL</div>
-                    <div class="recruiter-tag">NTPC</div>
-                    <div class="recruiter-tag">Power Grid</div>
-                    <div class="recruiter-tag">Deloitte</div>
-                </div>
-            </div>
-        </div>
-    </section>
 
+                <div class="program-grid">
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">01</span>
+                        <h3>Computer Science</h3>
+                        <p>AI, data science, cloud, cyber security, software systems, and applied computing.</p>
+                    </article>
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">02</span>
+                        <h3>Electronics</h3>
+                        <p>Embedded systems, communication, VLSI, IoT, and next-generation hardware pathways.</p>
+                    </article>
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">03</span>
+                        <h3>Mechanical</h3>
+                        <p>Design, manufacturing, robotics, thermal systems, and modern industrial tooling.</p>
+                    </article>
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">04</span>
+                        <h3>Civil</h3>
+                        <p>Infrastructure, construction systems, structural thinking, and sustainable development.</p>
+                    </article>
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">05</span>
+                        <h3>Electrical</h3>
+                        <p>Power systems, control, renewable energy, machines, and grid-focused engineering.</p>
+                    </article>
+                    <article class="program-card reveal-on-scroll">
+                        <span class="program-index">06</span>
+                        <h3>Management &amp; IT</h3>
+                        <p>Technology-enabled management, digital operations, and interdisciplinary business readiness.</p>
+                    </article>
+                </div>
 
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Get in Touch</h2>
-                <p class="section-subtitle">We're here to help you succeed</p>
+                <div class="program-footer reveal-on-scroll">
+                    <p>For notes, attendance, marks, payments, and other live modules, continue into the portal.</p>
+                    <a href="/login.html" class="btn btn-primary">Go to Portal</a>
+                </div>
             </div>
-            <div class="contact-grid">
-                <div class="contact-card glass-card">
-                    <div class="contact-icon">📍</div>
-                    <h3>Visit Us</h3>
-                    <p>Jagamohan Nagar, Khandagiri<br>Bhubaneswar, Odisha 751030</p>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <div class="container contact-shell">
+                <div class="contact-copy reveal-on-scroll">
+                    <p class="micro-label">CONTACT</p>
+                    <h2 class="section-title">Reach the campus directly.</h2>
+                    <p class="section-copy">
+                        Contact information stays visible and straightforward so visitors can move from browsing to action
+                        without hunting through the site.
+                    </p>
                 </div>
-                <div class="contact-card glass-card">
-                    <div class="contact-icon">📧</div>
-                    <h3>Email Us</h3>
-                    <p>info@iter.ac.in<br>admissions@iter.ac.in</p>
-                </div>
-                <div class="contact-card glass-card">
-                    <div class="contact-icon">📞</div>
-                    <h3>Call Us</h3>
-                    <p>+91-674-2350171<br>+91-674-2351006</p>
-                </div>
-                <div class="contact-card glass-card">
-                    <div class="contact-icon">🕒</div>
-                    <h3>Office Hours</h3>
-                    <p>Monday - Friday: 9:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM</p>
+
+                <div class="contact-card glass-card reveal-on-scroll">
+                    <a href="mailto:info@iter.ac.in" class="contact-row">
+                        <span class="contact-label">Email</span>
+                        <span class="contact-value">info@iter.ac.in</span>
+                    </a>
+                    <a href="tel:+916742350171" class="contact-row">
+                        <span class="contact-label">Phone</span>
+                        <span class="contact-value">+91 674 2350171</span>
+                    </a>
+                    <div class="contact-row contact-row-static">
+                        <span class="contact-label">Address</span>
+                        <span class="contact-value">Jagamohan Nagar, Khandagiri, Bhubaneswar, Odisha 751030</span>
+                    </div>
+                    <div class="contact-actions">
+                        <a href="/register.html" class="btn btn-outline">Start Registration</a>
+                        <a href="/login.html" class="btn btn-primary">Portal Login</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>ITER, SOA University</h4>
-                    <p>Institute of Technical Education & Research</p>
-                    <p>Siksha 'O' Anusandhan (Deemed to be University)</p>
-                    <p style="margin-top: 10px;">
-                        <strong>NAAC A++ Accredited</strong>
-                    </p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <a href="#about">About Us</a>
-                    <a href="#academics">Academics</a>
-                    <a href="/creator.html">About Creator</a>
-                    <a href="/login.html">Student Portal</a>
-                    <a href="/register.html">Register</a>
-                </div>
-                <div class="footer-section">
-                    <h4>Contact Us</h4>
-                    <a href="mailto:info@iter.ac.in">info@iter.ac.in</a>
-                    <a href="tel:+916742350171">+91-674-2350171</a>
-                    <p style="margin-top: 10px; font-size: 0.9em;">
-                        Jagamohan Nagar, Khandagiri<br>
-                        Bhubaneswar, Odisha 751030
-                    </p>
-                </div>
-                <div class="footer-section">
-                    <h4>Follow Us</h4>
-                    <div class="social-links">
-                        <a href="#" class="social-link">Facebook</a>
-                        <a href="#" class="social-link">Twitter</a>
-                        <a href="#" class="social-link">LinkedIn</a>
-                        <a href="#" class="social-link">Instagram</a>
-                    </div>
-                </div>
+        <div class="container footer-shell">
+            <div>
+                <p class="micro-label">ITERASN HUB</p>
+                <p class="footer-copy">A cleaner campus homepage with real links, calmer hierarchy, and faster entry into the system.</p>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Institute of Technical Education & Research, SOA University. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#academics">Programs</a>
+                <a href="/creator.html">Creator</a>
+                <a href="#contact">Contact</a>
             </div>
+            <p class="footer-year">&copy; <span id="currentYear"></span> ITERasn hub</p>
         </div>
     </footer>
 
-    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
         <span class="theme-icon">🌙</span>
     </button>
 
-    <!-- GSAP for Advanced Animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
-    <!-- Lottie for vector animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-
-    <!-- Core Scripts -->
     <script src="/js/mobile-fixes.js"></script>
     <script src="/js/prevent-empty-hash.js"></script>
     <script src="/js/scroll-fix.js"></script>
@@ -706,43 +544,36 @@
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/mobile-nav.js"></script>
-    <script src="/js/url-navigator.js"></script>
-    <script src="/js/advanced-animations.js"></script>
     <script src="/js/loading-states.js"></script>
     <script src="/js/toast.js"></script>
-    <script src="/js/notice-ticker.js"></script>
     <script src="/js/navbar-scroll-behavior.js"></script>
     <script src="/js/navbar-active-links.js"></script>
     <script src="/js/landing.js"></script>
     <script src="/js/chatbot.js"></script>
 
-    <!-- Logout notification handler -->
     <script>
         (function() {
             'use strict';
-            
-            // Check for logout reason on landing page
+
             const logoutReason = sessionStorage.getItem('logoutReason');
             if (logoutReason) {
                 sessionStorage.removeItem('logoutReason');
-                
+
                 const messages = {
-                    'session_timeout': '⏰ Your session has expired due to inactivity. Please log in again to continue.',
-                    'session_invalid': '⚠️ Your session is no longer valid. Please log in again.',
-                    'not_authenticated': '🔒 Please log in to access the dashboard.',
-                    'logged_out_other_tab': '📱 You were logged out from another tab.',
-                    'user_initiated': '👋 You have been logged out successfully.'
+                    session_timeout: 'Your session expired due to inactivity. Please log in again.',
+                    session_invalid: 'Your session is no longer valid. Please log in again.',
+                    not_authenticated: 'Please log in to access the dashboard.',
+                    logged_out_other_tab: 'You were logged out from another tab.',
+                    user_initiated: 'You have been logged out successfully.'
                 };
-                
-                const message = messages[logoutReason] || 'Please log in to continue.';
+
                 const notification = document.getElementById('logoutNotification');
                 const messageEl = document.getElementById('logoutMessage');
-                
+
                 if (notification && messageEl) {
-                    messageEl.textContent = message;
+                    messageEl.textContent = messages[logoutReason] || 'Please log in to continue.';
                     notification.style.display = 'block';
-                    
-                    // Auto-hide after 5 seconds with proper animation
+
                     setTimeout(() => {
                         notification.classList.add('hiding');
                         setTimeout(() => {

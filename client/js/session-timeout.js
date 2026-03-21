@@ -147,34 +147,71 @@
             // Ignore - will still work without the notification
         }
         
-        // Clear ALL sessionStorage data (except logoutReason which we just set)
         try {
-            // Get all keys except logoutReason
-            const keysToRemove = Object.keys(sessionStorage).filter(key => key !== 'logoutReason');
-            keysToRemove.forEach(key => sessionStorage.removeItem(key));
+            localStorage.setItem('postLogoutRedirectTarget', '/index.html');
+            localStorage.setItem('postLogoutRedirectTimestamp', Date.now().toString());
+            localStorage.setItem('postLogoutRedirectReason', logoutReason);
         } catch (e) {
-            // Fallback: manually remove known keys
-            sessionStorage.removeItem(LAST_ACTIVITY_KEY);
-            sessionStorage.removeItem(SESSION_ID_KEY);
-            sessionStorage.removeItem(SESSION_START_KEY);
-            sessionStorage.removeItem('pageAccessToken');
-            sessionStorage.removeItem('pageAccessTokenTimestamp');
-            sessionStorage.removeItem('pageAccessTokenPath');
+            // Ignore storage errors
         }
-        
-        // Clear ALL localStorage auth and user data
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem(LAST_ACTIVITY_KEY);
-        localStorage.removeItem('demoRole');
-        localStorage.removeItem('rememberedUser');
-        
-        // Clear any portal-related data efficiently
-        const keysToRemove = Object.keys(localStorage).filter(key => 
-            key.startsWith('portal') || key.startsWith('soa') || key.includes('retry')
-        );
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        if (window.APP && typeof window.APP.clearClientState === 'function') {
+            window.APP.clearClientState({
+                preserveTheme: true,
+                preserveLogoutReason: true,
+                preservePostLogoutRedirect: true
+            });
+        } else {
+            // Fallback cleanup if APP is unavailable
+            [
+                'accessToken',
+                'refreshToken',
+                'user',
+                'token',
+                'prototypeMode',
+                'demoRole',
+                'rememberedUser',
+                LAST_ACTIVITY_KEY,
+                SESSION_ID_KEY,
+                SESSION_START_KEY,
+                'pageAccessToken',
+                'pageAccessTokenTimestamp',
+                'pageAccessTokenPath',
+                'loginRedirect',
+                'loginMessage'
+            ].forEach((key) => {
+                try { localStorage.removeItem(key); } catch (e) {}
+                if (key !== 'logoutReason') {
+                    try { sessionStorage.removeItem(key); } catch (e) {}
+                }
+            });
+
+            try {
+                Object.keys(localStorage)
+                    .filter((key) => key.startsWith('portal') || key.startsWith('soa') || key.includes('retry'))
+                    .forEach((key) => localStorage.removeItem(key));
+            } catch (e) {
+                // Ignore storage errors
+            }
+
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                try {
+                    navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_APP_CACHE' });
+                } catch (e) {
+                    // Ignore service worker errors
+                }
+            }
+
+            if ('caches' in window) {
+                caches.keys()
+                    .then((cacheNames) => Promise.all(
+                        cacheNames
+                            .filter((cacheName) => cacheName.startsWith('iter-'))
+                            .map((cacheName) => caches.delete(cacheName))
+                    ))
+                    .catch(() => {});
+            }
+        }
         
         // Stop the session check interval
         if (sessionCheckInterval) {
@@ -187,12 +224,7 @@
             window.socket.disconnect();
         }
         
-        // Redirect to landing page (index.html) instead of login page
-        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-            window.LinkEncoding.navigateTo('/index.html');
-        } else {
-            window.location.href = '/index.html';
-        }
+        window.location.replace('/index.html');
     }
 
     /**

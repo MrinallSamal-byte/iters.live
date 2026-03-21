@@ -1,7 +1,7 @@
 /**
  * Global Search Component
  * Advanced search with keyboard shortcuts (Ctrl+K / Cmd+K)
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class GlobalSearch {
     constructor() {

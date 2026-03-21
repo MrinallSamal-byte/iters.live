@@ -1,258 +1,345 @@
-/**
- * SOA Portal Scraper Routes
- * 
- * API routes for SOA portal scraping with user-provided CAPTCHA
- * 
- * Endpoints:
- * - GET /api/soa/captcha - Fetches fresh captcha from SOA portal
- * - POST /api/soa/login - Performs login with user credentials and captcha
- * - POST /api/soa/refresh-captcha - Refreshes captcha for existing session
- * - GET /api/soa/status - Check if scraper service is available
- * 
- * Security:
- * - Credentials are NEVER stored or logged
- * - Sessions expire after 10 minutes
- * - Fresh browser session for each captcha request
- */
-
 const express = require('express');
-const router = express.Router();
-const { optionalAuth } = require('../middleware/auth');
+const rateLimit = require('express-rate-limit');
+const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { isPortalEnabled, PORTAL_DISABLED_MESSAGE } = require('../config/featureFlags');
+const cacheService = require('../services/cache.service');
 const soaScraperService = require('../services/soa-scraper.service');
+const {
+  normalizeSoaPortalData,
+  getPortalSnapshotForUser,
+  persistPortalDataForUser,
+  disconnectPortalForUser,
+  serializeDate
+} = require('../services/soa-data.service');
 
-/**
- * GET /api/soa/status
- * Check if SOA scraper service is available
- */
-router.get('/status', async (req, res) => {
-    try {
-        return res.json({
-            success: true,
-            status: 'available',
-            message: 'SOA Portal Scraper is available',
-            features: {
-                captchaExtraction: true,
-                userProvidedCaptcha: true,
-                dataScrapingSupported: [
-                    'profile',
-                    'attendance',
-                    'marks',
-                    'internalAssessments',
-                    'timetable',
-                    'subjects',
-                    'notifications'
-                ]
-            }
-        });
-    } catch (error) {
-        console.error('[SOA Routes] Status check error:', error.message);
-        return res.status(500).json({
-            success: false,
-            status: 'error',
-            message: 'SOA Portal Scraper status check failed'
-        });
-    }
+const router = express.Router();
+const OFFICIAL_PORTAL_URL = 'https://soaportals.com/StudentPortalSOA/';
+
+const captchaLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    status: 'RATE_LIMITED',
+    message: 'Too many CAPTCHA requests. Please wait a few minutes before trying again.'
+  }
 });
 
-/**
- * GET /api/soa/captcha
- * Create a new session and fetch CAPTCHA from SOA portal
- * 
- * Response:
- * {
- *   success: true,
- *   status: "CAPTCHA_REQUIRED",
- *   sessionId: "soa_...",
- *   captchaImage: "data:image/png;base64,...",
- *   message: "..."
- * }
- */
-router.get('/captcha', optionalAuth, async (req, res) => {
-    try {
-        console.log('[SOA Routes] Captcha request received');
-        
-        const result = await soaScraperService.createSessionAndGetCaptcha();
-        
-        if (!result.success) {
-            return res.status(result.status === 'PORTAL_UNREACHABLE' ? 503 : 500).json(result);
-        }
-        
-        return res.json(result);
-        
-    } catch (error) {
-        console.error('[SOA Routes] Captcha error:', error.message);
-        return res.status(500).json({
-            success: false,
-            status: 'SCRAPE_ERROR',
-            message: `Failed to get CAPTCHA: ${error.message}`
-        });
-    }
+const importLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    status: 'RATE_LIMITED',
+    message: 'Too many SOA import attempts. Please wait before trying again.'
+  }
 });
 
-/**
- * POST /api/soa/refresh-captcha
- * Refresh CAPTCHA for an existing session
- * 
- * Request body:
- * {
- *   sessionId: "soa_..."
- * }
- */
-router.post('/refresh-captcha', optionalAuth, async (req, res) => {
-    try {
-        const { sessionId } = req.body;
-        
-        if (!sessionId) {
-            return res.status(400).json({
-                success: false,
-                status: 'INVALID_REQUEST',
-                message: 'Session ID is required'
-            });
-        }
-        
-        console.log('[SOA Routes] Captcha refresh request for session:', sessionId);
-        
-        const result = await soaScraperService.refreshCaptcha(sessionId);
-        
-        if (!result.success) {
-            return res.status(result.status === 'SESSION_EXPIRED' ? 410 : 500).json(result);
-        }
-        
-        return res.json(result);
-        
-    } catch (error) {
-        console.error('[SOA Routes] Captcha refresh error:', error.message);
-        return res.status(500).json({
-            success: false,
-            status: 'SCRAPE_ERROR',
-            message: `Failed to refresh CAPTCHA: ${error.message}`
-        });
-    }
+function requireStudent(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      status: 'AUTH_REQUIRED',
+      message: 'Please log in to connect your SOA portal.'
+    });
+  }
+
+  if (req.user.role !== 'student') {
+    return res.status(403).json({
+      success: false,
+      status: 'ACCESS_DENIED',
+      message: 'Only student accounts can connect an SOA portal.'
+    });
+  }
+
+  return next();
+}
+
+function buildUnavailableResponse(snapshot = null, extra = {}) {
+  return {
+    success: false,
+    status: 'PORTAL_DISABLED',
+    message: PORTAL_DISABLED_MESSAGE,
+    portalEnabled: false,
+    demoAvailable: true,
+    officialPortalUrl: OFFICIAL_PORTAL_URL,
+    connection: snapshot?.status || {
+      connected: false,
+      isVerified: false,
+      portalProvider: null,
+      lastSynced: null,
+      hasImportedData: false,
+      needsReconnect: false,
+      dataSource: null,
+      profileSummary: null
+    },
+    ...extra
+  };
+}
+
+async function invalidateStudentPortalCaches(userId) {
+  if (!userId) return;
+  await Promise.allSettled([
+    cacheService.invalidateAttendance(userId),
+    cacheService.invalidateMarks(userId),
+    cacheService.invalidateUserData(userId)
+  ]);
+}
+
+async function loadSnapshot(req) {
+  return getPortalSnapshotForUser({
+    userId: req.user?.id,
+    registrationNumber: req.user?.registration_number
+  });
+}
+
+router.get('/status', optionalAuth, async (req, res) => {
+  try {
+    const portalEnabled = isPortalEnabled();
+    const snapshot = req.user ? await loadSnapshot(req) : null;
+
+    return res.json({
+      success: true,
+      portalEnabled,
+      demoAvailable: true,
+      officialPortalUrl: OFFICIAL_PORTAL_URL,
+      message: portalEnabled ? 'SOA portal import is available.' : PORTAL_DISABLED_MESSAGE,
+      connection: snapshot?.status || {
+        connected: false,
+        isVerified: false,
+        portalProvider: null,
+        lastSynced: null,
+        hasImportedData: false,
+        needsReconnect: false,
+        dataSource: null,
+        profileSummary: null
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 'SCRAPE_ERROR',
+      message: 'Failed to load SOA portal status.'
+    });
+  }
 });
 
-/**
- * POST /api/soa/login
- * Perform login with user-provided credentials and CAPTCHA
- * 
- * Request body:
- * {
- *   sessionId: "soa_...",
- *   regNo: "1234567890",
- *   password: "user_password",
- *   captcha: "ABC123"
- * }
- * 
- * Response (Success):
- * {
- *   success: true,
- *   status: "SUCCESS",
- *   data: {
- *     profile: {...},
- *     attendance: [...],
- *     marks: [...],
- *     ...
- *   }
- * }
- * 
- * Response (Failure):
- * {
- *   success: false,
- *   status: "AUTH_FAILED" | "SESSION_EXPIRED" | "SCRAPE_ERROR",
- *   message: "..."
- * }
- */
-router.post('/login', optionalAuth, async (req, res) => {
-    try {
-        const { sessionId, regNo, password, captcha } = req.body;
-        
-        // Validate required fields
-        if (!sessionId || !regNo || !password || !captcha) {
-            return res.status(400).json({
-                success: false,
-                status: 'INVALID_REQUEST',
-                message: 'Session ID, Registration Number, Password, and CAPTCHA are required'
-            });
-        }
-        
-        console.log('[SOA Routes] Login request for session:', sessionId, 'regNo:', regNo);
-        
-        // Perform login and scrape
-        const result = await soaScraperService.loginAndScrape(
-            sessionId,
-            regNo,
-            password,
-            captcha
-        );
-        
-        // Clear password from memory
-        req.body.password = null;
-        
-        if (!result.success) {
-            const statusCode = result.status === 'AUTH_FAILED' ? 401 
-                             : result.status === 'SESSION_EXPIRED' ? 410 
-                             : 500;
-            return res.status(statusCode).json(result);
-        }
-        
-        // Format successful response
-        return res.json({
-            success: true,
-            status: 'success',
-            message: result.message,
-            data: {
-                profile: result.data.profile || {},
-                attendance: result.data.attendance || [],
-                marks: result.data.marks || [],
-                internalAssessments: result.data.internalAssessments || [],
-                timetable: result.data.timetable || [],
-                subjects: result.data.subjects || [],
-                notifications: result.data.notifications || [],
-                backlogs: result.data.backlogs || [],
-                fees: result.data.fees || {},
-                fetchedAt: result.data.fetchedAt,
-                dataSource: 'live_soa_portal'
-            }
-        });
-        
-    } catch (error) {
-        console.error('[SOA Routes] Login error:', error.message);
-        return res.status(500).json({
-            success: false,
-            status: 'SCRAPE_ERROR',
-            message: `Login failed: ${error.message}`
-        });
-    }
+router.get('/me', authMiddleware, requireStudent, async (req, res) => {
+  try {
+    const snapshot = await loadSnapshot(req);
+
+    return res.json({
+      success: true,
+      portalEnabled: isPortalEnabled(),
+      demoAvailable: true,
+      officialPortalUrl: OFFICIAL_PORTAL_URL,
+      connection: snapshot.status,
+      data: snapshot.normalizedData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 'SCRAPE_ERROR',
+      message: 'Failed to load imported SOA data.'
+    });
+  }
 });
 
-/**
- * DELETE /api/soa/session/:sessionId
- * Close an active session
- */
-router.delete('/session/:sessionId', async (req, res) => {
-    try {
-        const { sessionId } = req.params;
-        
-        if (!sessionId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Session ID is required'
-            });
-        }
-        
-        await soaScraperService.closeSession(sessionId);
-        
-        return res.json({
-            success: true,
-            message: 'Session closed successfully'
-        });
-        
-    } catch (error) {
-        console.error('[SOA Routes] Session close error:', error.message);
-        return res.status(500).json({
-            success: false,
-            message: `Failed to close session: ${error.message}`
-        });
+router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (req, res) => {
+  if (!isPortalEnabled()) {
+    const snapshot = await loadSnapshot(req);
+    return res.status(503).json(buildUnavailableResponse(snapshot));
+  }
+
+  try {
+    const result = await soaScraperService.createSessionAndGetCaptcha();
+
+    if (!result.success) {
+      return res.status(result.status === 'PORTAL_UNREACHABLE' ? 503 : 500).json({
+        ...result,
+        portalEnabled: true,
+        demoAvailable: true,
+        officialPortalUrl: OFFICIAL_PORTAL_URL
+      });
     }
+
+    return res.json({
+      success: true,
+      status: result.status,
+      sessionId: result.sessionId,
+      captchaImage: result.captchaImage,
+      message: result.message,
+      officialPortalUrl: OFFICIAL_PORTAL_URL
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 'SCRAPE_ERROR',
+      message: 'Failed to fetch SOA CAPTCHA.',
+      officialPortalUrl: OFFICIAL_PORTAL_URL
+    });
+  }
+});
+
+router.post('/refresh-captcha', authMiddleware, requireStudent, captchaLimiter, async (req, res) => {
+  if (!isPortalEnabled()) {
+    const snapshot = await loadSnapshot(req);
+    return res.status(503).json(buildUnavailableResponse(snapshot));
+  }
+
+  try {
+    const { sessionId } = req.body || {};
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        status: 'INVALID_REQUEST',
+        message: 'Session ID is required.'
+      });
+    }
+
+    const result = await soaScraperService.refreshCaptcha(sessionId);
+
+    if (!result.success) {
+      return res.status(result.status === 'SESSION_EXPIRED' ? 410 : 500).json(result);
+    }
+
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 'SCRAPE_ERROR',
+      message: 'Failed to refresh the SOA CAPTCHA.'
+    });
+  }
+});
+
+async function handleImport(req, res) {
+  if (!isPortalEnabled()) {
+    const snapshot = await loadSnapshot(req);
+    return res.status(503).json(buildUnavailableResponse(snapshot));
+  }
+
+  const { sessionId, regNo, password, captcha } = req.body || {};
+
+  if (!sessionId || !regNo || !password || !captcha) {
+    return res.status(400).json({
+      success: false,
+      status: 'INVALID_REQUEST',
+      message: 'Session ID, registration number, password, and CAPTCHA are required.'
+    });
+  }
+
+  try {
+    const result = await soaScraperService.loginAndScrape(sessionId, regNo, password, captcha);
+    req.body.password = null;
+
+    if (!result.success) {
+      const snapshot = await loadSnapshot(req);
+      const statusCode = result.status === 'AUTH_FAILED'
+        ? 401
+        : result.status === 'SESSION_EXPIRED'
+          ? 410
+          : result.status === 'PORTAL_UNREACHABLE'
+            ? 503
+            : 500;
+
+      return res.status(statusCode).json({
+        ...result,
+        officialPortalUrl: OFFICIAL_PORTAL_URL,
+        connection: snapshot.status
+      });
+    }
+
+    const normalizedData = result.data?.provider === 'soa'
+      ? result.data
+      : normalizeSoaPortalData(result.data);
+
+    await persistPortalDataForUser({
+      userId: req.user.id,
+      registrationNumber: regNo,
+      normalizedData,
+      isVerified: true,
+      portalConnected: true
+    });
+
+    await invalidateStudentPortalCaches(req.user.id);
+
+    const snapshot = await loadSnapshot(req);
+
+    return res.json({
+      success: true,
+      status: 'SUCCESS',
+      message: 'SOA data imported successfully.',
+      officialPortalUrl: OFFICIAL_PORTAL_URL,
+      redirectTo: '/dashboard/student-personal-info.html',
+      connection: snapshot.status,
+      data: snapshot.normalizedData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 'SCRAPE_ERROR',
+      message: 'SOA import failed. Please try again with a fresh CAPTCHA.'
+    });
+  }
+}
+
+router.post('/login', authMiddleware, requireStudent, importLimiter, handleImport);
+router.post('/resync', authMiddleware, requireStudent, importLimiter, handleImport);
+
+router.post('/disconnect', authMiddleware, requireStudent, async (req, res) => {
+  try {
+    const snapshot = await disconnectPortalForUser({
+      userId: req.user.id,
+      registrationNumber: req.user.registration_number
+    });
+
+    await invalidateStudentPortalCaches(req.user.id);
+
+    return res.json({
+      success: true,
+      message: 'SOA portal disconnected. Cached imported data is still available in this app.',
+      connection: snapshot.status,
+      data: snapshot.normalizedData
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to disconnect SOA portal.'
+    });
+  }
+});
+
+router.delete('/session/:sessionId', optionalAuth, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        status: 'INVALID_REQUEST',
+        message: 'Session ID is required.'
+      });
+    }
+
+    await soaScraperService.closeSession(sessionId);
+
+    return res.json({
+      success: true,
+      message: 'SOA portal session closed successfully.',
+      closedAt: serializeDate(new Date())
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to close SOA portal session.'
+    });
+  }
 });
 
 module.exports = router;

@@ -4,6 +4,10 @@ const { query } = require('../database/db');
 const { varyStudentSnapshot } = require('../services/demoData.service');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const cacheService = require('../services/cache.service');
+const {
+  getPortalSnapshotForUser,
+  buildMarksRouteData
+} = require('../services/soa-data.service');
 
 // Upload marks
 router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
@@ -34,11 +38,24 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
     }
     
     const marks = await query('SELECT * FROM marks WHERE student_id = $1 ORDER BY exam_date DESC', [studentId]);
-    
-    const summary = await query(`SELECT subject, exam_type, AVG(marks_obtained) as avg_marks, AVG(total_marks) as avg_total
-       FROM marks WHERE student_id = $1 GROUP BY subject, exam_type`, [studentId]);
+    let data;
 
-    const data = { marks, summary };
+    if (marks.length > 0) {
+      const summary = await query(`SELECT subject, exam_type, AVG(marks_obtained) as avg_marks, AVG(total_marks) as avg_total
+         FROM marks WHERE student_id = $1 GROUP BY subject, exam_type`, [studentId]);
+
+      data = {
+        marks,
+        summary,
+        source: 'database'
+      };
+    } else {
+      const snapshot = await getPortalSnapshotForUser({ userId: studentId });
+      const fallbackData = buildMarksRouteData(snapshot.normalizedData);
+      data = fallbackData.summary.length
+        ? fallbackData
+        : { marks: [], summary: [], cgpa: null, source: 'none' };
+    }
     
     // Cache the result (5 minutes TTL)
     cacheService.setMarks(studentId, data, null, 300);

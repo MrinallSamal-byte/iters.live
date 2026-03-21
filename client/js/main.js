@@ -31,6 +31,271 @@ if (!storageAvailable) {
 
 // In-memory storage fallback (won't persist across pages)
 const memoryStorage = {};
+const SESSION_TIMEOUT_MS = 20 * 60 * 1000;
+const POST_LOGOUT_REDIRECT_KEY = 'postLogoutRedirectTarget';
+const POST_LOGOUT_REDIRECT_AT_KEY = 'postLogoutRedirectTimestamp';
+const POST_LOGOUT_REDIRECT_REASON_KEY = 'postLogoutRedirectReason';
+const PUBLIC_HOME_PATHS = new Set(['/', '/index.html']);
+const PUBLIC_AUTH_PATHS = new Set(['/login', '/login.html', '/register', '/register.html']);
+const AUTH_STORAGE_KEYS = [
+    'accessToken',
+    'refreshToken',
+    'user',
+    'token',
+    'prototypeMode',
+    'demoRole',
+    'rememberedUser',
+    'lastActivityTimestamp',
+    'sessionId',
+    'sessionStartTimestamp',
+    'pageAccessToken',
+    'pageAccessTokenTimestamp',
+    'pageAccessTokenPath',
+    'loginRedirect',
+    'loginMessage'
+];
+
+function getRawStorageItem(storageObject, key) {
+    if (!storageObject) return null;
+    try {
+        return storageObject.getItem(key);
+    } catch (error) {
+        return null;
+    }
+}
+
+function removeRawStorageItem(storageObject, key) {
+    if (!storageObject) return;
+    try {
+        storageObject.removeItem(key);
+    } catch (error) {
+        // Ignore storage errors
+    }
+}
+
+function clearMatchingStorageKeys(storageObject, predicate, preserveKeys = new Set()) {
+    if (!storageObject) return;
+
+    try {
+        Object.keys(storageObject).forEach((key) => {
+            if (!preserveKeys.has(key) && predicate(key)) {
+                storageObject.removeItem(key);
+            }
+        });
+    } catch (error) {
+        // Ignore storage errors
+    }
+}
+
+function clearMemoryStorage() {
+    Object.keys(memoryStorage).forEach((key) => delete memoryStorage[key]);
+}
+
+function setPostLogoutRedirect(target = '/index.html', reason = 'session_timeout') {
+    try {
+        localStorage.setItem(POST_LOGOUT_REDIRECT_KEY, target);
+        localStorage.setItem(POST_LOGOUT_REDIRECT_AT_KEY, Date.now().toString());
+        localStorage.setItem(POST_LOGOUT_REDIRECT_REASON_KEY, reason);
+    } catch (error) {
+        // Ignore storage errors
+    }
+}
+
+function clearPostLogoutRedirect() {
+    removeRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_KEY);
+    removeRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_AT_KEY);
+    removeRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_REASON_KEY);
+}
+
+function resolveNavigationPath(href) {
+    if (!href || typeof href !== 'string') return null;
+
+    if (href.startsWith('#')) {
+        return window.location.pathname;
+    }
+
+    try {
+        return new URL(href, window.location.origin).pathname;
+    } catch (error) {
+        return null;
+    }
+}
+
+function shouldClearPostLogoutRedirectForLink(href) {
+    const pathname = resolveNavigationPath(href);
+    return pathname ? PUBLIC_AUTH_PATHS.has(pathname) : false;
+}
+
+function initPublicAuthLinkGuard() {
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href]');
+        if (!link) return;
+
+        const href = link.getAttribute('href');
+        if (!shouldClearPostLogoutRedirectForLink(href)) {
+            return;
+        }
+
+        clearPostLogoutRedirect();
+    }, true);
+}
+
+function getLastActivityTimestamp() {
+    const sessionActivity = parseInt(getRawStorageItem(sessionStorage, 'lastActivityTimestamp') || '0', 10);
+    const localActivity = parseInt(getRawStorageItem(localStorage, 'lastActivityTimestamp') || '0', 10);
+    return Math.max(sessionActivity, localActivity, 0);
+}
+
+function hasStoredAuthState() {
+    return Boolean(
+        getRawStorageItem(localStorage, 'accessToken') ||
+        getRawStorageItem(localStorage, 'user') ||
+        getRawStorageItem(sessionStorage, 'accessToken') ||
+        getRawStorageItem(sessionStorage, 'user')
+    );
+}
+
+function hasExpiredSessionByInactivity() {
+    const lastActivity = getLastActivityTimestamp();
+    if (!lastActivity) return false;
+    return Date.now() - lastActivity >= SESSION_TIMEOUT_MS;
+}
+
+function clearAppCaches() {
+    const cacheTasks = [];
+
+    if ('serviceWorker' in navigator) {
+        const notifyServiceWorker = (registration) => {
+            try {
+                registration?.active?.postMessage({ type: 'CLEAR_APP_CACHE' });
+            } catch (error) {
+                // Ignore messaging errors
+            }
+        };
+
+        if (navigator.serviceWorker.controller) {
+            try {
+                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_APP_CACHE' });
+            } catch (error) {
+                // Ignore messaging errors
+            }
+        }
+
+        cacheTasks.push(
+            navigator.serviceWorker.ready
+                .then(notifyServiceWorker)
+                .catch(() => {})
+        );
+    }
+
+    if ('caches' in window) {
+        cacheTasks.push(
+            caches.keys()
+                .then((cacheNames) => Promise.all(
+                    cacheNames
+                        .filter((cacheName) => cacheName.startsWith('iter-'))
+                        .map((cacheName) => caches.delete(cacheName))
+                ))
+                .catch(() => {})
+        );
+    }
+
+    return Promise.allSettled(cacheTasks);
+}
+
+function clearClientState(options = {}) {
+    const preserveTheme = options.preserveTheme !== false;
+    const preserveLogoutReason = options.preserveLogoutReason === true;
+    const preservePostLogoutRedirect = options.preservePostLogoutRedirect === true;
+    const clearCaches = options.clearCaches !== false;
+
+    clearMemoryStorage();
+    Socket.disconnect();
+
+    const localPreserveKeys = new Set();
+    const sessionPreserveKeys = new Set();
+
+    if (preserveTheme) {
+        localPreserveKeys.add('theme');
+        sessionPreserveKeys.add('theme');
+    }
+
+    if (preserveLogoutReason) {
+        sessionPreserveKeys.add('logoutReason');
+    }
+
+    if (preservePostLogoutRedirect) {
+        localPreserveKeys.add(POST_LOGOUT_REDIRECT_KEY);
+        localPreserveKeys.add(POST_LOGOUT_REDIRECT_AT_KEY);
+        localPreserveKeys.add(POST_LOGOUT_REDIRECT_REASON_KEY);
+    }
+
+    AUTH_STORAGE_KEYS.forEach((key) => {
+        if (!localPreserveKeys.has(key)) removeRawStorageItem(localStorage, key);
+        if (!sessionPreserveKeys.has(key)) removeRawStorageItem(sessionStorage, key);
+    });
+
+    clearMatchingStorageKeys(
+        localStorage,
+        (key) => key.startsWith('portal') || key.startsWith('soa') || key.includes('retry'),
+        localPreserveKeys
+    );
+    clearMatchingStorageKeys(
+        sessionStorage,
+        (key) => key.startsWith('portal') || key.startsWith('soa') || key.includes('retry'),
+        sessionPreserveKeys
+    );
+
+    if (!preservePostLogoutRedirect) {
+        clearPostLogoutRedirect();
+    }
+
+    if (clearCaches) {
+        clearAppCaches().catch(() => {});
+    }
+}
+
+function sanitizeExpiredPublicSession() {
+    if (window.location.pathname.startsWith('/dashboard/')) {
+        return false;
+    }
+
+    const accessToken = getRawStorageItem(localStorage, 'accessToken') || getRawStorageItem(sessionStorage, 'accessToken');
+    const user = getRawStorageItem(localStorage, 'user') || getRawStorageItem(sessionStorage, 'user');
+    const hasMismatchedAuthState = Boolean(accessToken) !== Boolean(user);
+    const hasExpiredAuthState = hasStoredAuthState() && hasExpiredSessionByInactivity();
+
+    if (!hasMismatchedAuthState && !hasExpiredAuthState) {
+        return false;
+    }
+
+    clearClientState({
+        preserveTheme: true,
+        preserveLogoutReason: true,
+        preservePostLogoutRedirect: true
+    });
+    return true;
+}
+
+function consumePostLogoutRedirect(currentPath = window.location.pathname) {
+    const target = getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_KEY);
+    const timestamp = parseInt(getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_AT_KEY) || '0', 10);
+
+    if (!target) return false;
+
+    if (!timestamp || Date.now() - timestamp > SESSION_TIMEOUT_MS) {
+        clearPostLogoutRedirect();
+        return false;
+    }
+
+    if (!PUBLIC_AUTH_PATHS.has(currentPath)) {
+        return false;
+    }
+
+    clearPostLogoutRedirect();
+    window.location.replace(target);
+    return true;
+}
 
 // Local Storage Helper with multiple fallbacks
 const Storage = {
@@ -248,9 +513,64 @@ const Socket = {
 };
 
 // Theme Toggle
+function ensureThemeToggle() {
+    if (!document.body || document.getElementById('themeToggle')) return;
+
+    const themeToggle = document.createElement('button');
+    themeToggle.type = 'button';
+    themeToggle.id = 'themeToggle';
+    themeToggle.className = 'theme-toggle';
+    themeToggle.title = 'Toggle theme';
+    themeToggle.setAttribute('aria-label', 'Toggle dark and light theme');
+    themeToggle.innerHTML = '<span class="theme-icon">🌙</span>';
+
+    document.body.appendChild(themeToggle);
+}
+
+function applyThemeToggleFallback(themeToggle) {
+    if (!themeToggle) return;
+
+    const computed = window.getComputedStyle(themeToggle);
+    if (computed.position !== 'static') {
+        themeToggle.dataset.fallbackStyled = 'false';
+        return;
+    }
+
+    themeToggle.style.position = 'fixed';
+    themeToggle.style.right = '20px';
+    themeToggle.style.bottom = '20px';
+    themeToggle.style.width = '54px';
+    themeToggle.style.height = '54px';
+    themeToggle.style.display = 'inline-flex';
+    themeToggle.style.alignItems = 'center';
+    themeToggle.style.justifyContent = 'center';
+    themeToggle.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    themeToggle.style.borderRadius = '999px';
+    themeToggle.style.background = 'rgba(15, 15, 18, 0.92)';
+    themeToggle.style.boxShadow = '0 16px 40px rgba(0, 0, 0, 0.28)';
+    themeToggle.style.color = '#f6f3ee';
+    themeToggle.style.backdropFilter = 'blur(18px)';
+    themeToggle.style.webkitBackdropFilter = 'blur(18px)';
+    themeToggle.style.cursor = 'pointer';
+    themeToggle.style.zIndex = '1000';
+    themeToggle.style.fontSize = '1.15rem';
+    themeToggle.dataset.fallbackStyled = 'true';
+}
+
 function initThemeToggle() {
+    ensureThemeToggle();
+
     const themeToggle = document.getElementById('themeToggle');
     if (!themeToggle) return;
+
+    applyThemeToggleFallback(themeToggle);
+
+    if (themeToggle.dataset.bound === 'true') {
+        const currentTheme = Storage.get('theme') || 'dark';
+        document.body.classList.toggle('light-theme', currentTheme === 'light');
+        updateThemeIcon(currentTheme);
+        return;
+    }
 
     const currentTheme = Storage.get('theme') || 'dark';
     document.body.classList.toggle('light-theme', currentTheme === 'light');
@@ -264,12 +584,25 @@ function initThemeToggle() {
         Storage.set('theme', newTheme);
         updateThemeIcon(newTheme);
     });
+
+    themeToggle.dataset.bound = 'true';
 }
 
 function updateThemeIcon(theme) {
+    const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.querySelector('.theme-icon');
     if (themeIcon) {
         themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    if (themeToggle?.dataset.fallbackStyled === 'true') {
+        const isLight = theme === 'light';
+        themeToggle.style.background = isLight ? 'rgba(248, 242, 236, 0.96)' : 'rgba(15, 15, 18, 0.92)';
+        themeToggle.style.borderColor = isLight ? 'rgba(29, 29, 32, 0.12)' : 'rgba(255, 255, 255, 0.2)';
+        themeToggle.style.color = isLight ? '#19191b' : '#f6f3ee';
+        themeToggle.style.boxShadow = isLight
+            ? '0 16px 40px rgba(116, 86, 74, 0.18)'
+            : '0 16px 40px rgba(0, 0, 0, 0.28)';
     }
 }
 
@@ -401,9 +734,14 @@ function initMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
 
     if (mobileMenuBtn && navLinks) {
+        if (document.body.dataset.mobileMenuEnhanced === 'true' || mobileMenuBtn.dataset.menuEnhanced === 'true') {
+            return;
+        }
+
         mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            mobileMenuBtn.classList.toggle('active');
+            const isActive = mobileMenuBtn.classList.toggle('active');
+            navLinks.classList.toggle('active', isActive);
+            mobileMenuBtn.setAttribute('aria-expanded', String(isActive));
         });
     }
 }
@@ -433,37 +771,49 @@ function logout() {
         window.SessionTimeout.logout('user_initiated');
     } else {
         // Fallback: manual cleanup and redirect
-        Storage.clear();
-        Socket.disconnect();
-        
-        // Store logout reason
         try {
             sessionStorage.setItem('logoutReason', 'user_initiated');
         } catch (e) {
             // Ignore
         }
+
+        setPostLogoutRedirect('/index.html', 'user_initiated');
+        clearClientState({
+            preserveTheme: true,
+            preserveLogoutReason: true,
+            preservePostLogoutRedirect: true
+        });
         
-        // Use encoded URL for navigation to landing page
-        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-            window.LinkEncoding.navigateTo('/index.html');
-        } else {
-            window.location.href = '/index.html';
-        }
+        window.location.replace('/index.html');
     }
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    const currentPage = window.location.pathname;
+
+    initPublicAuthLinkGuard();
+
+    const clearedExpiredPublicSession = sanitizeExpiredPublicSession();
+    if (clearedExpiredPublicSession && PUBLIC_AUTH_PATHS.has(currentPage)) {
+        window.location.replace('/index.html');
+        return;
+    }
+
+    if (consumePostLogoutRedirect(currentPage)) {
+        return;
+    }
+
+    ensureThemeToggle();
     initThemeToggle();
     initScrollAnimations();
     initMobileMenu();
 
     // Check if user is logged in and redirect if needed
-    const currentPage = window.location.pathname;
     const user = checkAuth();
 
     // Only redirect from landing page, allow access to login page
-    if (user && (currentPage === '/' || currentPage === '/index.html')) {
+    if (user && PUBLIC_HOME_PATHS.has(currentPage) && !hasExpiredSessionByInactivity()) {
         // Redirect to dashboard based on role
         const dashboardUrls = {
             student: '/dashboard/student.html',
@@ -486,6 +836,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+window.ensureThemeToggle = ensureThemeToggle;
+
 // Helper functions
 function isAuthenticated() {
     return !!Storage.get('accessToken');
@@ -505,6 +857,13 @@ window.APP = {
     validateForm,
     formatDate,
     formatTime,
+    clearClientState,
+    clearAppCaches,
+    setPostLogoutRedirect,
+    clearPostLogoutRedirect,
+    hasExpiredSessionByInactivity,
+    sanitizeExpiredPublicSession,
+    consumePostLogoutRedirect,
     checkAuth,
     logout,
     isAuthenticated,

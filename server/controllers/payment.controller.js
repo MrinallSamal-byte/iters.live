@@ -40,7 +40,7 @@ const createPayment = async (req, res) => {
             userId,
             studentName: req.user.name,
             studentEmail: req.user.email,
-            studentRegNo: req.user.reg_no || req.user.student_id || 'N/A',
+            studentRegNo: req.user.registration_number || req.user.reg_no || req.user.student_id || 'N/A',
             amount: parseFloat(amount),
             semester,
             category,

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marks - ITER EduHub</title>
+    <title>Marks - ITERasn hub</title>
     <!-- SECURITY: Immediate authentication check before any content loads -->
     <script>
         (function() {
@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/clean-dashboard.css">
     <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/universal-profile.css">
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
@@ -229,36 +230,25 @@
 
     <style>
         .page-hero {
-            padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
         .title-icon {
-            font-size: 2.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.2rem;
+            height: 3.2rem;
+            border-radius: 1.15rem;
+            background: rgba(255, 90, 79, 0.1);
+            border: 1px solid rgba(255, 90, 79, 0.18);
+            font-size: 1.45rem;
         }
-
-        .page-subtitle {
-            font-size: 1.125rem;
-            color: var(--text-secondary);
-        }
-
-
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
             margin-bottom: 2rem;
         }
 
@@ -272,31 +262,46 @@
         .insight-item {
             display: flex;
             gap: 1rem;
-            padding: 1rem;
-            background: var(--glass-bg);
-            border-radius: var(--radius-md);
-            transition: all 0.2s ease;
+            padding: 1rem 1.05rem;
+            background:
+                linear-gradient(180deg, rgba(255, 90, 79, 0.07), transparent 100%),
+                rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
 
         .insight-item:hover {
-            transform: translateX(5px);
-            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+            background:
+                linear-gradient(180deg, rgba(255, 90, 79, 0.1), transparent 100%),
+                rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 90, 79, 0.16);
         }
 
         .insight-icon-small {
-            font-size: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            font-size: 1.25rem;
             flex-shrink: 0;
+            background: rgba(255, 90, 79, 0.1);
+            border: 1px solid rgba(255, 90, 79, 0.14);
         }
 
         .insight-item h4 {
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+            font-size: 1rem;
         }
 
         .insight-item p {
             color: var(--text-secondary);
-            font-size: 0.875rem;
+            font-size: 0.93rem;
+            line-height: 1.5;
         }
 
         .semester-timeline {
@@ -308,20 +313,23 @@
 
         .semester-card {
             padding: 1.5rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            transition: all 0.3s ease;
+            background:
+                linear-gradient(180deg, rgba(255, 90, 79, 0.06), transparent 100%),
+                rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
         }
 
         .semester-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
-            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.22);
+            border-color: rgba(255, 90, 79, 0.2);
         }
 
         .chart-wrapper {
             padding: 1rem;
+            min-height: 320px;
         }
 
         .stat-trend {
@@ -343,9 +351,35 @@
             color: var(--text-secondary);
         }
 
-        @media (max-width: 768px) {
+        body.light-theme .insight-item,
+        body.light-theme .semester-card {
+            background:
+                linear-gradient(180deg, rgba(255, 90, 79, 0.05), transparent 100%),
+                rgba(19, 19, 19, 0.02);
+            border-color: rgba(19, 19, 19, 0.08);
+        }
+
+        body.light-theme .insight-item:hover {
+            background:
+                linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 100%),
+                rgba(19, 19, 19, 0.03);
+        }
+
+        @media (max-width: 980px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .chart-wrapper {
+                min-height: 260px;
+                padding: 0.25rem 0;
+            }
+
+            .insight-item,
+            .semester-card {
+                padding: 1rem;
             }
         }
     </style>

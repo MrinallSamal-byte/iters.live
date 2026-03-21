@@ -215,6 +215,19 @@ function shouldObfuscatePath(path) {
         path.startsWith('/releases/') ||
         path.startsWith('/web/') ||
         path.startsWith('/dashboard/') ||
+        path === '/' ||
+        path === '/index.html' ||
+        path === '/home' ||
+        path === '/login' ||
+        path === '/login.html' ||
+        path === '/register' ||
+        path === '/register.html' ||
+        path === '/creator' ||
+        path === '/creator.html' ||
+        path === '/about' ||
+        path === '/features' ||
+        path === '/academics' ||
+        path === '/contact' ||
         path === '/health' ||
         path === '/manifest.json' ||
         path === '/service-worker.js' ||

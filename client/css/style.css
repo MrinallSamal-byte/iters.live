@@ -1,29 +1,30 @@
 @import url('table-responsive-global.css');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 /* Global Styles and Variables */
 :root {
     /* Colors */
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --primary-light: #818cf8;
-    --secondary: #ec4899;
-    --accent: #8b5cf6;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    --primary: #ff5a4f;
+    --primary-dark: #e2493f;
+    --primary-light: #ff8c74;
+    --secondary: #f4efe7;
+    --accent: #ff7b68;
+    --success: #2cc37b;
+    --warning: #f1b34a;
+    --danger: #ff6b6b;
     
     /* Neutrals */
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    --bg-primary: #090909;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1e1e1e;
+    --text-primary: #f6f3ee;
+    --text-secondary: #c5c0b7;
+    --text-muted: #8b857e;
     
     /* Glass morphism */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: rgba(0, 0, 0, 0.3);
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-shadow: rgba(0, 0, 0, 0.36);
     
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -48,15 +49,15 @@
 
 /* Light Theme */
 body.light-theme {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.1);
-    --glass-shadow: rgba(0, 0, 0, 0.1);
+    --bg-primary: #f4efe7;
+    --bg-secondary: #fcfaf6;
+    --bg-tertiary: #ebe4da;
+    --text-primary: #161616;
+    --text-secondary: #5b544d;
+    --text-muted: #7b746d;
+    --glass-bg: rgba(255, 255, 255, 0.76);
+    --glass-border: rgba(19, 19, 19, 0.1);
+    --glass-shadow: rgba(19, 19, 19, 0.12);
     /* Switch native UI to light when in light theme */
     color-scheme: light;
 }
@@ -73,8 +74,11 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-primary);
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(255, 90, 79, 0.08), transparent 26%),
+        radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.06), transparent 24%),
+        linear-gradient(180deg, #050505 0%, var(--bg-primary) 100%);
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -136,8 +140,8 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px var(--glass-shadow);
+    border-radius: 24px;
+    box-shadow: 0 18px 48px var(--glass-shadow);
 }
 
 /* Container */
@@ -1177,6 +1181,130 @@ body.light-theme .theme-toggle:hover {
     background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
+/* Unified ITERasn hub visual language across public and dashboard pages */
+body:not(.nothing-home) .bg-animation {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body:not(.nothing-home) .gradient-orb {
+    opacity: 0.22;
+    filter: blur(100px);
+}
+
+.page-hero,
+.dashboard-section,
+.stat-box,
+.analytics-item,
+.schedule-item,
+.announcement-item,
+.deadline-item,
+.quick-link-card,
+.login-card,
+.login-wrapper,
+.about-me-card,
+.timeline-item,
+.skill-category,
+.project-card,
+.contact-card,
+.disclaimer-card {
+    background: rgba(16, 16, 16, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 28px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+body.light-theme .page-hero,
+body.light-theme .dashboard-section,
+body.light-theme .stat-box,
+body.light-theme .analytics-item,
+body.light-theme .schedule-item,
+body.light-theme .announcement-item,
+body.light-theme .deadline-item,
+body.light-theme .quick-link-card,
+body.light-theme .login-card,
+body.light-theme .login-wrapper,
+body.light-theme .about-me-card,
+body.light-theme .timeline-item,
+body.light-theme .skill-category,
+body.light-theme .project-card,
+body.light-theme .contact-card,
+body.light-theme .disclaimer-card {
+    background: rgba(255, 255, 255, 0.76);
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+.page-hero,
+.dashboard-section,
+.stat-box,
+.analytics-item,
+.schedule-item,
+.announcement-item,
+.deadline-item,
+.quick-link-card {
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.page-hero:hover,
+.dashboard-section:hover,
+.stat-box:hover,
+.analytics-item:hover,
+.schedule-item:hover,
+.announcement-item:hover,
+.deadline-item:hover,
+.quick-link-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 90, 79, 0.28);
+    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.32);
+}
+
+.page-title,
+.section-title-formal,
+.nav-title {
+    letter-spacing: -0.04em;
+}
+
+.page-subtitle,
+.announcement-text,
+.deadline-details,
+.stat-subtext,
+.analytics-label {
+    color: var(--text-secondary);
+}
+
+.section-badge,
+.notification-badge,
+.priority-badge,
+.status-badge,
+.deadline-type {
+    background: rgba(255, 90, 79, 0.12);
+    border: 1px solid rgba(255, 90, 79, 0.18);
+    color: var(--primary);
+    border-radius: 999px;
+}
+
+.quick-link-card,
+.project-link {
+    text-decoration: none;
+}
+
+.quick-link-card:hover,
+.project-link:hover {
+    border-color: rgba(255, 90, 79, 0.28);
+}
+
+.data-table th {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme .data-table th {
+    background: rgba(19, 19, 19, 0.04);
+}
+
 .dashboard-nav {
     position: sticky;
     top: var(--spacing-md);
@@ -1891,5 +2019,1361 @@ body.light-theme .theme-toggle:hover {
 
     .placement-stats {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Cross-page responsive polish */
+@media (max-width: 960px) {
+    .dashboard-main {
+        padding: 1.25rem 1rem 2rem;
+    }
+
+    .page-hero,
+    .dashboard-welcome,
+    .dashboard-section,
+    .widget,
+    .quick-stats,
+    .login-card,
+    .login-wrapper {
+        padding: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .quick-stats,
+    .dashboard-widgets,
+    .stats-grid,
+    .placement-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .table-responsive,
+    .timetable-table {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-main {
+        padding: 1rem 0.875rem 1.5rem;
+    }
+
+    .page-hero,
+    .dashboard-section,
+    .widget,
+    .stat-card,
+    .glass-card {
+        border-radius: 22px;
+    }
+
+    .dashboard-welcome h2 {
+        font-size: 1.6rem;
+    }
+
+    .dashboard-section h3,
+    .widget h3 {
+        font-size: 1.2rem;
+    }
+
+    .quick-stats,
+    .dashboard-widgets,
+    .stats-grid,
+    .placement-stats,
+    .vision-mission,
+    .why-choose-grid,
+    .tech-features,
+    .facilities-grid,
+    .academics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .events-list li,
+    .assignments-list li,
+    .downloads-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* ITERasn hub workspace redesign */
+body:not(.nothing-home) .dashboard-main {
+    position: relative;
+    z-index: 1;
+}
+
+body:not(.nothing-home) .dashboard-main::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 96%);
+    opacity: 0.5;
+}
+
+body:not(.nothing-home) .dashboard-main > * {
+    position: relative;
+    z-index: 1;
+}
+
+body:not(.nothing-home) .dashboard-main .page-hero,
+body:not(.nothing-home) .dashboard-main .dashboard-section,
+body:not(.nothing-home) .dashboard-main .widget,
+body:not(.nothing-home) .dashboard-main .stat-box,
+body:not(.nothing-home) .dashboard-main .schedule-item,
+body:not(.nothing-home) .dashboard-main .announcement-item,
+body:not(.nothing-home) .dashboard-main .deadline-item,
+body:not(.nothing-home) .dashboard-main .analytics-item,
+body:not(.nothing-home) .dashboard-main .quick-link-card,
+body:not(.nothing-home) .dashboard-main .semester-link-card,
+body:not(.nothing-home) .dashboard-main .insight-card,
+body:not(.nothing-home) .dashboard-main .upload-form,
+body:not(.nothing-home) .dashboard-main .filter-container,
+body:not(.nothing-home) .dashboard-main .notes-grid,
+body:not(.nothing-home) .dashboard-main .forum-main,
+body:not(.nothing-home) .dashboard-main .request-section,
+body:not(.nothing-home) .dashboard-main .rubric-list,
+body:not(.nothing-home) .dashboard-main .question-bank-grid {
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.06), transparent 30%),
+        rgba(14, 14, 14, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    box-shadow: 0 22px 56px rgba(0, 0, 0, 0.3);
+}
+
+body.light-theme .dashboard-main .page-hero,
+body.light-theme .dashboard-main .dashboard-section,
+body.light-theme .dashboard-main .widget,
+body.light-theme .dashboard-main .stat-box,
+body.light-theme .dashboard-main .schedule-item,
+body.light-theme .dashboard-main .announcement-item,
+body.light-theme .dashboard-main .deadline-item,
+body.light-theme .dashboard-main .analytics-item,
+body.light-theme .dashboard-main .quick-link-card,
+body.light-theme .dashboard-main .semester-link-card,
+body.light-theme .dashboard-main .insight-card,
+body.light-theme .dashboard-main .upload-form,
+body.light-theme .dashboard-main .filter-container,
+body.light-theme .dashboard-main .notes-grid,
+body.light-theme .dashboard-main .forum-main,
+body.light-theme .dashboard-main .request-section,
+body.light-theme .dashboard-main .rubric-list,
+body.light-theme .dashboard-main .question-bank-grid {
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.06), transparent 30%),
+        rgba(255, 255, 255, 0.84);
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+body:not(.nothing-home) .dashboard-main .page-hero {
+    padding: clamp(1.4rem, 3vw, 2rem);
+    overflow: hidden;
+}
+
+body:not(.nothing-home) .dashboard-main .page-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -45% auto;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 90, 79, 0.18), transparent 68%);
+    pointer-events: none;
+}
+
+body:not(.nothing-home) .dashboard-main .hero-content-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+body:not(.nothing-home) .dashboard-main .page-title {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+    color: var(--text-primary);
+}
+
+body:not(.nothing-home) .dashboard-main .page-subtitle {
+    max-width: 64ch;
+    margin-top: 0.65rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+body:not(.nothing-home) .dashboard-main .section-header-formal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+}
+
+body:not(.nothing-home) .dashboard-main .section-title-formal {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+body:not(.nothing-home) .dashboard-main .section-badge,
+body:not(.nothing-home) .dashboard-main .notification-badge,
+body:not(.nothing-home) .dashboard-main .priority-badge,
+body:not(.nothing-home) .dashboard-main .deadline-type {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+body:not(.nothing-home) .dashboard-main .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+body:not(.nothing-home) .dashboard-main .stat-box {
+    position: relative;
+    overflow: hidden;
+    padding: 1.35rem;
+}
+
+body:not(.nothing-home) .dashboard-main .stat-box::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--primary), rgba(255, 90, 79, 0.14));
+}
+
+body:not(.nothing-home) .dashboard-main .stat-number {
+    font-size: clamp(2rem, 3vw, 2.7rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
+}
+
+body:not(.nothing-home) .dashboard-main .stat-text {
+    margin-top: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+body:not(.nothing-home) .dashboard-main .stat-subtext,
+body:not(.nothing-home) .dashboard-main .stat-trend {
+    color: var(--text-secondary);
+}
+
+body:not(.nothing-home) .dashboard-main .dashboard-grid,
+body:not(.nothing-home) .dashboard-main .analytics-grid,
+body:not(.nothing-home) .dashboard-main .quick-links-grid,
+body:not(.nothing-home) .dashboard-main .schedule-grid,
+body:not(.nothing-home) .dashboard-main .insights-grid,
+body:not(.nothing-home) .dashboard-main .semester-links-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+body:not(.nothing-home) .dashboard-main .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body:not(.nothing-home) .dashboard-main .schedule-grid,
+body:not(.nothing-home) .dashboard-main .analytics-grid,
+body:not(.nothing-home) .dashboard-main .insights-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+body:not(.nothing-home) .dashboard-main .quick-links-grid {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+body:not(.nothing-home) .dashboard-main .semester-links-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+body:not(.nothing-home) .dashboard-main .schedule-item,
+body:not(.nothing-home) .dashboard-main .announcement-item,
+body:not(.nothing-home) .dashboard-main .deadline-item,
+body:not(.nothing-home) .dashboard-main .analytics-item,
+body:not(.nothing-home) .dashboard-main .quick-link-card,
+body:not(.nothing-home) .dashboard-main .semester-link-card,
+body:not(.nothing-home) .dashboard-main .insight-card {
+    padding: 1.15rem;
+    border-radius: 22px;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+body:not(.nothing-home) .dashboard-main .schedule-item:hover,
+body:not(.nothing-home) .dashboard-main .announcement-item:hover,
+body:not(.nothing-home) .dashboard-main .deadline-item:hover,
+body:not(.nothing-home) .dashboard-main .analytics-item:hover,
+body:not(.nothing-home) .dashboard-main .quick-link-card:hover,
+body:not(.nothing-home) .dashboard-main .semester-link-card:hover,
+body:not(.nothing-home) .dashboard-main .insight-card:hover,
+body:not(.nothing-home) .dashboard-main .dashboard-section:hover,
+body:not(.nothing-home) .dashboard-main .widget:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 90, 79, 0.22);
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.32);
+}
+
+body:not(.nothing-home) .dashboard-main .quick-link-card,
+body:not(.nothing-home) .dashboard-main .semester-link-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+body:not(.nothing-home) .dashboard-main .quick-link-card .quick-link-icon,
+body:not(.nothing-home) .dashboard-main .semester-number,
+body:not(.nothing-home) .dashboard-main .analytics-icon,
+body:not(.nothing-home) .dashboard-main .insight-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(255, 90, 79, 0.1);
+    border: 1px solid rgba(255, 90, 79, 0.16);
+}
+
+body:not(.nothing-home) .dashboard-main .semester-number {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+body:not(.nothing-home) .dashboard-main .upload-form,
+body:not(.nothing-home) .dashboard-main .filter-container {
+    padding: 1.15rem;
+}
+
+body:not(.nothing-home) .dashboard-main .form-label,
+body:not(.nothing-home) .dashboard-main label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+body:not(.nothing-home) .dashboard-main .form-input,
+body:not(.nothing-home) .dashboard-main .form-select,
+body:not(.nothing-home) .dashboard-main .form-textarea,
+body:not(.nothing-home) .dashboard-main .form-control,
+body:not(.nothing-home) .dashboard-main input[type="text"],
+body:not(.nothing-home) .dashboard-main input[type="email"],
+body:not(.nothing-home) .dashboard-main input[type="password"],
+body:not(.nothing-home) .dashboard-main input[type="number"],
+body:not(.nothing-home) .dashboard-main input[type="date"],
+body:not(.nothing-home) .dashboard-main input[type="time"],
+body:not(.nothing-home) .dashboard-main select,
+body:not(.nothing-home) .dashboard-main textarea {
+    width: 100%;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.035);
+    color: var(--text-primary);
+    padding: 0.95rem 1rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+body.light-theme .dashboard-main .form-input,
+body.light-theme .dashboard-main .form-select,
+body.light-theme .dashboard-main .form-textarea,
+body.light-theme .dashboard-main .form-control,
+body.light-theme .dashboard-main input[type="text"],
+body.light-theme .dashboard-main input[type="email"],
+body.light-theme .dashboard-main input[type="password"],
+body.light-theme .dashboard-main input[type="number"],
+body.light-theme .dashboard-main input[type="date"],
+body.light-theme .dashboard-main input[type="time"],
+body.light-theme .dashboard-main select,
+body.light-theme .dashboard-main textarea {
+    background: rgba(19, 19, 19, 0.035);
+    border-color: rgba(19, 19, 19, 0.1);
+}
+
+body:not(.nothing-home) .dashboard-main .form-input:focus,
+body:not(.nothing-home) .dashboard-main .form-select:focus,
+body:not(.nothing-home) .dashboard-main .form-textarea:focus,
+body:not(.nothing-home) .dashboard-main .form-control:focus,
+body:not(.nothing-home) .dashboard-main input:focus,
+body:not(.nothing-home) .dashboard-main select:focus,
+body:not(.nothing-home) .dashboard-main textarea:focus {
+    outline: none;
+    border-color: rgba(255, 90, 79, 0.34);
+    box-shadow: 0 0 0 4px rgba(255, 90, 79, 0.1);
+}
+
+body:not(.nothing-home) .dashboard-main .btn {
+    min-height: 46px;
+    border-radius: 999px;
+}
+
+body:not(.nothing-home) .dashboard-main .btn-primary {
+    background: linear-gradient(135deg, #ff6b5e 0%, #e24e43 100%);
+    color: #fff;
+    box-shadow: 0 18px 34px rgba(255, 90, 79, 0.24);
+}
+
+body:not(.nothing-home) .dashboard-main .btn-outline,
+body:not(.nothing-home) .dashboard-main .btn-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+body.light-theme .dashboard-main .btn-outline,
+body.light-theme .dashboard-main .btn-secondary {
+    border-color: rgba(19, 19, 19, 0.1);
+    background: rgba(19, 19, 19, 0.03);
+}
+
+body:not(.nothing-home) .dashboard-main .table-responsive {
+    border-radius: 22px;
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body:not(.nothing-home) .dashboard-main .data-table,
+body:not(.nothing-home) .dashboard-main .modern-table {
+    margin-top: 0;
+    background: transparent;
+}
+
+body:not(.nothing-home) .dashboard-main .data-table thead th,
+body:not(.nothing-home) .dashboard-main .modern-table thead th,
+body:not(.nothing-home) .dashboard-main .data-table th,
+body:not(.nothing-home) .dashboard-main .modern-table th {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+body.light-theme .dashboard-main .data-table thead th,
+body.light-theme .dashboard-main .modern-table thead th,
+body.light-theme .dashboard-main .data-table th,
+body.light-theme .dashboard-main .modern-table th {
+    background: rgba(19, 19, 19, 0.04);
+    border-bottom-color: rgba(19, 19, 19, 0.08);
+}
+
+body:not(.nothing-home) .dashboard-main .data-table td,
+body:not(.nothing-home) .dashboard-main .modern-table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .dashboard-main .data-table td,
+body.light-theme .dashboard-main .modern-table td {
+    border-bottom-color: rgba(19, 19, 19, 0.06);
+}
+
+body:not(.nothing-home) .dashboard-main .data-table tbody tr:hover,
+body:not(.nothing-home) .dashboard-main .modern-table tbody tr:hover {
+    background: rgba(255, 90, 79, 0.06);
+}
+
+body:not(.nothing-home) .dashboard-main canvas {
+    filter: saturate(0.98) contrast(1.02);
+}
+
+@media (max-width: 1024px) {
+    body:not(.nothing-home) .dashboard-main .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    body:not(.nothing-home) .dashboard-main .page-title {
+        font-size: 2rem;
+    }
+
+    body:not(.nothing-home) .dashboard-main .quick-stats,
+    body:not(.nothing-home) .dashboard-main .quick-links-grid,
+    body:not(.nothing-home) .dashboard-main .analytics-grid,
+    body:not(.nothing-home) .dashboard-main .schedule-grid,
+    body:not(.nothing-home) .dashboard-main .insights-grid,
+    body:not(.nothing-home) .dashboard-main .semester-links-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body:not(.nothing-home) .dashboard-main .page-hero,
+    body:not(.nothing-home) .dashboard-main .dashboard-section,
+    body:not(.nothing-home) .dashboard-main .widget,
+    body:not(.nothing-home) .dashboard-main .upload-form,
+    body:not(.nothing-home) .dashboard-main .filter-container {
+        border-radius: 22px;
+    }
+}
+
+/* ITERasn hub full workspace redesign */
+body:not(.nothing-home) {
+    position: relative;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 12% 10%, rgba(255, 90, 79, 0.14), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.07), transparent 20%),
+        linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+}
+
+body:not(.nothing-home)::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.06) 1px, transparent 0);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.18));
+}
+
+body:not(.nothing-home)::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 24%),
+        linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 52%, transparent 100%);
+    opacity: 0.85;
+}
+
+body.light-theme:not(.nothing-home) {
+    background:
+        radial-gradient(circle at 12% 10%, rgba(255, 90, 79, 0.13), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(19, 19, 19, 0.05), transparent 20%),
+        linear-gradient(180deg, #f8f4ed 0%, #efe7db 100%);
+}
+
+body.light-theme:not(.nothing-home)::before {
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(19, 19, 19, 0.08) 1px, transparent 0);
+}
+
+body:not(.nothing-home) .dashboard-main {
+    position: relative;
+    max-width: min(1560px, calc(100vw - 56px));
+    width: min(1560px, calc(100vw - var(--dashboard-sidebar-expanded-offset) - var(--dashboard-content-edge-gap)));
+    max-width: calc(100vw - var(--dashboard-sidebar-expanded-offset) - var(--dashboard-content-edge-gap));
+    margin: 0 var(--dashboard-content-edge-gap) 0 var(--dashboard-sidebar-expanded-offset);
+    padding: clamp(1.5rem, 2vw, 2.25rem);
+    display: grid;
+    gap: 1.45rem;
+}
+
+body:not(.nothing-home) .universal-sidebar.collapsed ~ .dashboard-main {
+    width: min(1560px, calc(100vw - var(--dashboard-sidebar-collapsed-offset) - var(--dashboard-content-edge-gap)));
+    max-width: calc(100vw - var(--dashboard-sidebar-collapsed-offset) - var(--dashboard-content-edge-gap));
+    margin-left: var(--dashboard-sidebar-collapsed-offset);
+    margin-right: var(--dashboard-content-edge-gap);
+}
+
+body:not(.nothing-home) .dashboard-main > * {
+    margin-bottom: 0;
+}
+
+body:not(.nothing-home) .page-hero,
+body:not(.nothing-home) .dashboard-section,
+body:not(.nothing-home) .stat-box,
+body:not(.nothing-home) .analytics-item,
+body:not(.nothing-home) .schedule-item,
+body:not(.nothing-home) .announcement-item,
+body:not(.nothing-home) .deadline-item,
+body:not(.nothing-home) .quick-link-card,
+body:not(.nothing-home) .semester-link-card,
+body:not(.nothing-home) .insight-card,
+body:not(.nothing-home) .feature-card,
+body:not(.nothing-home) .action-card,
+body:not(.nothing-home) .note-card,
+body:not(.nothing-home) .template-card,
+body:not(.nothing-home) .settings-section,
+body:not(.nothing-home) .upload-form,
+body:not(.nothing-home) .filter-container,
+body:not(.nothing-home) .search-filter-bar,
+body:not(.nothing-home) .empty-state,
+body:not(.nothing-home) .modal-content,
+body:not(.nothing-home) .detail-item,
+body:not(.nothing-home) .info-item,
+body:not(.nothing-home) .summary-item,
+body:not(.nothing-home) .table-container,
+body:not(.nothing-home) .timetable-wrapper {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 20%),
+        rgba(14, 14, 14, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
+}
+
+body.light-theme:not(.nothing-home) .page-hero,
+body.light-theme:not(.nothing-home) .dashboard-section,
+body.light-theme:not(.nothing-home) .stat-box,
+body.light-theme:not(.nothing-home) .analytics-item,
+body.light-theme:not(.nothing-home) .schedule-item,
+body.light-theme:not(.nothing-home) .announcement-item,
+body.light-theme:not(.nothing-home) .deadline-item,
+body.light-theme:not(.nothing-home) .quick-link-card,
+body.light-theme:not(.nothing-home) .semester-link-card,
+body.light-theme:not(.nothing-home) .insight-card,
+body.light-theme:not(.nothing-home) .feature-card,
+body.light-theme:not(.nothing-home) .action-card,
+body.light-theme:not(.nothing-home) .note-card,
+body.light-theme:not(.nothing-home) .template-card,
+body.light-theme:not(.nothing-home) .settings-section,
+body.light-theme:not(.nothing-home) .upload-form,
+body.light-theme:not(.nothing-home) .filter-container,
+body.light-theme:not(.nothing-home) .search-filter-bar,
+body.light-theme:not(.nothing-home) .empty-state,
+body.light-theme:not(.nothing-home) .modal-content,
+body.light-theme:not(.nothing-home) .detail-item,
+body.light-theme:not(.nothing-home) .info-item,
+body.light-theme:not(.nothing-home) .summary-item,
+body.light-theme:not(.nothing-home) .table-container,
+body.light-theme:not(.nothing-home) .timetable-wrapper {
+    background:
+        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 20%),
+        rgba(255, 255, 255, 0.86);
+    border-color: rgba(19, 19, 19, 0.08);
+    box-shadow: 0 22px 48px rgba(44, 33, 21, 0.12);
+}
+
+body:not(.nothing-home) .page-hero {
+    padding: clamp(1.5rem, 2.8vw, 2.4rem);
+}
+
+body:not(.nothing-home) .hero-content-inline,
+body:not(.nothing-home) .section-header-formal,
+body:not(.nothing-home) .hero-actions,
+body:not(.nothing-home) .form-actions,
+body:not(.nothing-home) .modal-actions,
+body:not(.nothing-home) .filter-row,
+body:not(.nothing-home) .view-toggle,
+body:not(.nothing-home) .role-selection {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+
+body:not(.nothing-home) .hero-content-inline,
+body:not(.nothing-home) .section-header-formal {
+    justify-content: space-between;
+}
+
+body:not(.nothing-home) .page-title {
+    font-size: clamp(2.1rem, 3.8vw, 3.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+    max-width: 12ch;
+}
+
+body:not(.nothing-home) .page-subtitle {
+    margin-top: 0.75rem;
+    max-width: 62ch;
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+body:not(.nothing-home) .section-title-formal,
+body:not(.nothing-home) .settings-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+body:not(.nothing-home) .title-icon,
+body:not(.nothing-home) .label-icon,
+body:not(.nothing-home) .summary-icon,
+body:not(.nothing-home) .feature-icon,
+body:not(.nothing-home) .action-icon,
+body:not(.nothing-home) .template-icon,
+body:not(.nothing-home) .note-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(255, 90, 79, 0.12);
+    border: 1px solid rgba(255, 90, 79, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body:not(.nothing-home) .quick-stats,
+body:not(.nothing-home) .quick-links-grid,
+body:not(.nothing-home) .analytics-grid,
+body:not(.nothing-home) .dashboard-grid,
+body:not(.nothing-home) .schedule-grid,
+body:not(.nothing-home) .students-grid,
+body:not(.nothing-home) .details-grid,
+body:not(.nothing-home) .insights-grid,
+body:not(.nothing-home) .semester-links-grid,
+body:not(.nothing-home) .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.1rem;
+}
+
+body:not(.nothing-home) .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+body:not(.nothing-home) .stat-box {
+    min-height: 208px;
+    padding: 1.4rem;
+}
+
+body:not(.nothing-home) .stat-box::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 90, 79, 0.42), transparent 68%);
+}
+
+body:not(.nothing-home) .stat-icon-large {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 1.55rem;
+    margin-bottom: 1rem;
+}
+
+body:not(.nothing-home) .stat-number,
+body:not(.nothing-home) .analytics-value,
+body:not(.nothing-home) .info-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1.55rem, 2.4vw, 2.5rem);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+}
+
+body:not(.nothing-home) .stat-text,
+body:not(.nothing-home) .analytics-label,
+body:not(.nothing-home) .info-label {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body:not(.nothing-home) .section-badge,
+body:not(.nothing-home) .notification-badge,
+body:not(.nothing-home) .priority-badge,
+body:not(.nothing-home) .status-badge,
+body:not(.nothing-home) .deadline-type,
+body:not(.nothing-home) .result-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(255, 90, 79, 0.12);
+    border: 1px solid rgba(255, 90, 79, 0.18);
+}
+
+body:not(.nothing-home) .quick-link-card,
+body:not(.nothing-home) .feature-card,
+body:not(.nothing-home) .action-card,
+body:not(.nothing-home) .template-card,
+body:not(.nothing-home) .note-card,
+body:not(.nothing-home) .semester-link-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-height: 100%;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+body:not(.nothing-home) .quick-link-content h4,
+body:not(.nothing-home) .feature-card h4,
+body:not(.nothing-home) .template-name,
+body:not(.nothing-home) .note-content h4 {
+    font-size: 1rem;
+    letter-spacing: -0.03em;
+}
+
+body:not(.nothing-home) .quick-link-content p,
+body:not(.nothing-home) .feature-card p,
+body:not(.nothing-home) .template-card p,
+body:not(.nothing-home) .note-content p,
+body:not(.nothing-home) .empty-state p {
+    color: var(--text-secondary);
+}
+
+body:not(.nothing-home) .announcement-item,
+body:not(.nothing-home) .deadline-item,
+body:not(.nothing-home) .schedule-item,
+body:not(.nothing-home) .activity-item,
+body:not(.nothing-home) .session-item {
+    padding: 1.15rem 1.2rem;
+}
+
+body:not(.nothing-home) .announcement-header,
+body:not(.nothing-home) .deadline-header,
+body:not(.nothing-home) .schedule-details,
+body:not(.nothing-home) .activity-details {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+body:not(.nothing-home) .filter-container,
+body:not(.nothing-home) .upload-form,
+body:not(.nothing-home) .search-filter-bar,
+body:not(.nothing-home) .settings-section {
+    padding: 1.2rem;
+}
+
+body:not(.nothing-home) .search-box,
+body:not(.nothing-home) .filter-group,
+body:not(.nothing-home) .form-group {
+    position: relative;
+}
+
+body:not(.nothing-home) .tab-btn,
+body:not(.nothing-home) .category-btn,
+body:not(.nothing-home) .filter-chip,
+body:not(.nothing-home) .filter-tag,
+body:not(.nothing-home) .view-btn,
+body:not(.nothing-home) .settings-tab,
+body:not(.nothing-home) .block-tab,
+body:not(.nothing-home) .role-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    padding: 0.72rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+body.light-theme:not(.nothing-home) .tab-btn,
+body.light-theme:not(.nothing-home) .category-btn,
+body.light-theme:not(.nothing-home) .filter-chip,
+body.light-theme:not(.nothing-home) .filter-tag,
+body.light-theme:not(.nothing-home) .view-btn,
+body.light-theme:not(.nothing-home) .settings-tab,
+body.light-theme:not(.nothing-home) .block-tab,
+body.light-theme:not(.nothing-home) .role-btn {
+    border-color: rgba(19, 19, 19, 0.1);
+    background: rgba(19, 19, 19, 0.03);
+}
+
+body:not(.nothing-home) .tab-btn.active,
+body:not(.nothing-home) .category-btn.active,
+body:not(.nothing-home) .filter-chip.active,
+body:not(.nothing-home) .filter-tag.active,
+body:not(.nothing-home) .view-btn.active,
+body:not(.nothing-home) .settings-tab.active,
+body:not(.nothing-home) .block-tab.active,
+body:not(.nothing-home) .role-btn.active {
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.18), rgba(255, 255, 255, 0.05));
+    border-color: rgba(255, 90, 79, 0.22);
+    color: var(--text-primary);
+    box-shadow: inset 0 0 0 1px rgba(255, 90, 79, 0.14);
+}
+
+body:not(.nothing-home) .tab-btn:hover,
+body:not(.nothing-home) .category-btn:hover,
+body:not(.nothing-home) .filter-chip:hover,
+body:not(.nothing-home) .filter-tag:hover,
+body:not(.nothing-home) .view-btn:hover,
+body:not(.nothing-home) .settings-tab:hover,
+body:not(.nothing-home) .block-tab:hover,
+body:not(.nothing-home) .role-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 90, 79, 0.2);
+}
+
+body:not(.nothing-home) .empty-state {
+    padding: 2rem 1.25rem;
+    text-align: center;
+}
+
+body:not(.nothing-home) .empty-state-icon,
+body:not(.nothing-home) .empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 90, 79, 0.1);
+    border: 1px solid rgba(255, 90, 79, 0.14);
+    font-size: 1.75rem;
+}
+
+body:not(.nothing-home) .table-responsive,
+body:not(.nothing-home) .table-container,
+body:not(.nothing-home) .timetable-wrapper {
+    overflow: auto;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.light-theme:not(.nothing-home) .table-responsive,
+body.light-theme:not(.nothing-home) .table-container,
+body.light-theme:not(.nothing-home) .timetable-wrapper {
+    border-color: rgba(19, 19, 19, 0.08);
+}
+
+body:not(.nothing-home) .data-table,
+body:not(.nothing-home) .modern-table,
+body:not(.nothing-home) .timetable-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+body:not(.nothing-home) .data-table th,
+body:not(.nothing-home) .modern-table th,
+body:not(.nothing-home) .timetable-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0.95rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.74rem;
+}
+
+body.light-theme:not(.nothing-home) .data-table th,
+body.light-theme:not(.nothing-home) .modern-table th,
+body.light-theme:not(.nothing-home) .timetable-table th {
+    background: rgba(19, 19, 19, 0.04);
+}
+
+body:not(.nothing-home) .data-table td,
+body:not(.nothing-home) .modern-table td,
+body:not(.nothing-home) .timetable-table td {
+    padding: 0.95rem 1rem;
+}
+
+body:not(.nothing-home) .data-table tbody tr:hover,
+body:not(.nothing-home) .modern-table tbody tr:hover,
+body:not(.nothing-home) .timetable-table tbody tr:hover {
+    background: rgba(255, 90, 79, 0.06);
+}
+
+body:not(.nothing-home) .modal-overlay,
+body:not(.nothing-home) .modal {
+    background: rgba(3, 3, 3, 0.72);
+    backdrop-filter: blur(10px);
+}
+
+body:not(.nothing-home) .modal-content,
+body:not(.nothing-home) .modal-large {
+    width: min(960px, calc(100vw - 24px));
+    max-width: 960px;
+}
+
+body:not(.nothing-home) .modal-header,
+body:not(.nothing-home) .modal-body,
+body:not(.nothing-home) .modal-actions {
+    padding: 1.2rem 1.25rem;
+}
+
+body:not(.nothing-home) .theme-toggle {
+    right: 26px;
+    bottom: 26px;
+}
+
+@media (max-width: 1200px) {
+    body:not(.nothing-home) .dashboard-main {
+        width: calc(100vw - var(--dashboard-sidebar-expanded-offset) - 18px);
+        max-width: calc(100vw - var(--dashboard-sidebar-expanded-offset) - 18px);
+        margin-left: var(--dashboard-sidebar-expanded-offset);
+        margin-right: 18px;
+        padding: 1.15rem;
+    }
+
+    body:not(.nothing-home) .universal-sidebar.collapsed ~ .dashboard-main {
+        width: calc(100vw - var(--dashboard-sidebar-collapsed-offset) - 18px);
+        max-width: calc(100vw - var(--dashboard-sidebar-collapsed-offset) - 18px);
+        margin-left: var(--dashboard-sidebar-collapsed-offset);
+        margin-right: 18px;
+    }
+}
+
+@media (max-width: 860px) {
+    body:not(.nothing-home) .dashboard-grid,
+    body:not(.nothing-home) .quick-stats,
+    body:not(.nothing-home) .quick-links-grid,
+    body:not(.nothing-home) .analytics-grid,
+    body:not(.nothing-home) .details-grid,
+    body:not(.nothing-home) .template-grid,
+    body:not(.nothing-home) .resources-grid,
+    body:not(.nothing-home) .events-grid,
+    body:not(.nothing-home) .clubs-grid,
+    body:not(.nothing-home) .assignments-grid,
+    body:not(.nothing-home) .students-grid,
+    body:not(.nothing-home) .contributors-grid,
+    body:not(.nothing-home) .rubrics-grid,
+    body:not(.nothing-home) .feature-grid,
+    body:not(.nothing-home) .factor-grid,
+    body:not(.nothing-home) .soa-hero-grid,
+    body:not(.nothing-home) .soa-field-grid,
+    body:not(.nothing-home) .soa-meta-grid,
+    body:not(.nothing-home) .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body:not(.nothing-home) .page-title {
+        max-width: none;
+    }
+}
+
+@media (max-width: 640px) {
+    body:not(.nothing-home) .dashboard-main {
+        max-width: calc(100vw - 18px);
+        padding: 0.85rem;
+        gap: 0.9rem;
+    }
+
+    body:not(.nothing-home) .page-hero,
+    body:not(.nothing-home) .dashboard-section,
+    body:not(.nothing-home) .stat-box,
+    body:not(.nothing-home) .analytics-item,
+    body:not(.nothing-home) .schedule-item,
+    body:not(.nothing-home) .announcement-item,
+    body:not(.nothing-home) .deadline-item,
+    body:not(.nothing-home) .quick-link-card,
+    body:not(.nothing-home) .settings-section,
+    body:not(.nothing-home) .upload-form,
+    body:not(.nothing-home) .filter-container,
+    body:not(.nothing-home) .search-filter-bar,
+    body:not(.nothing-home) .modal-content {
+        border-radius: 22px;
+        padding: 1rem;
+    }
+
+    body:not(.nothing-home) .section-badge,
+    body:not(.nothing-home) .notification-badge,
+    body:not(.nothing-home) .priority-badge,
+    body:not(.nothing-home) .status-badge,
+    body:not(.nothing-home) .deadline-type,
+    body:not(.nothing-home) .result-count {
+        letter-spacing: 0.08em;
+        font-size: 0.68rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    body:not(.nothing-home) .dashboard-main {
+        width: calc(100vw - 18px) !important;
+        max-width: calc(100vw - 18px) !important;
+        min-width: 0 !important;
+        margin: 0 auto !important;
+        padding: 5.4rem 0.95rem 1rem !important;
+    }
+
+    body:not(.nothing-home) .dashboard-grid,
+    body:not(.nothing-home) .quick-stats,
+    body:not(.nothing-home) .quick-links-grid,
+    body:not(.nothing-home) .analytics-grid,
+    body:not(.nothing-home) .details-grid,
+    body:not(.nothing-home) .students-grid,
+    body:not(.nothing-home) .semester-links-grid,
+    body:not(.nothing-home) .template-grid,
+    body:not(.nothing-home) .insights-grid,
+    body:not(.nothing-home) .projects-grid,
+    body:not(.nothing-home) .skills-grid,
+    body:not(.nothing-home) .contact-cards,
+    body:not(.nothing-home) .creator-links,
+    body:not(.nothing-home) .creator-info-grid,
+    body:not(.nothing-home) .highlights-grid,
+    body:not(.nothing-home) .about-highlights,
+    body:not(.nothing-home) .vision-mission,
+    body:not(.nothing-home) .creator-hero .container {
+        grid-template-columns: 1fr !important;
+    }
+
+    body:not(.nothing-home) .page-hero,
+    body:not(.nothing-home) .dashboard-section,
+    body:not(.nothing-home) .stat-box,
+    body:not(.nothing-home) .analytics-item,
+    body:not(.nothing-home) .schedule-item,
+    body:not(.nothing-home) .announcement-item,
+    body:not(.nothing-home) .deadline-item,
+    body:not(.nothing-home) .quick-link-card,
+    body:not(.nothing-home) .settings-section,
+    body:not(.nothing-home) .upload-form,
+    body:not(.nothing-home) .filter-container,
+    body:not(.nothing-home) .search-filter-bar,
+    body:not(.nothing-home) .table-container,
+    body:not(.nothing-home) .timetable-wrapper {
+        padding: 1.05rem !important;
+    }
+
+    body:not(.nothing-home) .top-profile-container,
+    body:not(.nothing-home) .universal-profile {
+        top: 0.85rem !important;
+        right: 0.85rem !important;
+    }
+
+    body:not(.nothing-home) .dashboard-main > *,
+    body:not(.nothing-home) .dashboard-main :where(
+        .page-hero,
+        .dashboard-section,
+        .forum-controls,
+        .filter-container,
+        .search-filter-bar,
+        .table-container,
+        .table-responsive,
+        .timetable-wrapper,
+        .chart-wrapper,
+        .modal-content,
+        .modal-large,
+        .question-card,
+        .resource-card,
+        .meal-card,
+        .contributor-card,
+        .assignment-card,
+        .student-card,
+        .rubric-card,
+        .event-card,
+        .club-card,
+        .feature-card,
+        .soa-section-card,
+        .prediction-card,
+        .recommendations-card,
+        .study-plan-section,
+        .info-card
+    ) {
+        min-width: 0 !important;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    body:not(.nothing-home) .dashboard-main {
+        width: calc(100vw - 12px) !important;
+        max-width: calc(100vw - 12px) !important;
+        padding: 5rem 0.7rem 6.25rem !important;
+        gap: 0.8rem !important;
+    }
+
+    body:not(.nothing-home) .page-title {
+        font-size: clamp(1.9rem, 8vw, 2.7rem) !important;
+        line-height: 1.02 !important;
+    }
+
+    body:not(.nothing-home) .hero-content-inline,
+    body:not(.nothing-home) .section-header-formal,
+    body:not(.nothing-home) .hero-actions,
+    body:not(.nothing-home) .form-actions,
+    body:not(.nothing-home) .modal-actions,
+    body:not(.nothing-home) .filter-row,
+    body:not(.nothing-home) .search-filter-bar,
+    body:not(.nothing-home) .summary-row,
+    body:not(.nothing-home) .timeline-header,
+    body:not(.nothing-home) .role-selection,
+    body:not(.nothing-home) .view-toggle {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    body:not(.nothing-home) .form-row,
+    body:not(.nothing-home) .info-grid,
+    body:not(.nothing-home) .factor-grid,
+    body:not(.nothing-home) .features-list,
+    body:not(.nothing-home) .resources-grid,
+    body:not(.nothing-home) .events-grid,
+    body:not(.nothing-home) .clubs-grid,
+    body:not(.nothing-home) .assignments-grid,
+    body:not(.nothing-home) .contributors-grid,
+    body:not(.nothing-home) .rubrics-grid,
+    body:not(.nothing-home) .options-grid,
+    body:not(.nothing-home) .feature-grid,
+    body:not(.nothing-home) .soa-hero-grid,
+    body:not(.nothing-home) .soa-field-grid,
+    body:not(.nothing-home) .soa-meta-grid,
+    body:not(.nothing-home) .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body:not(.nothing-home) :where(
+        .hero-actions,
+        .form-actions,
+        .modal-actions,
+        .soa-actions,
+        .soa-empty-actions,
+        .summary-row,
+        .timetable-controls,
+        .actions-container
+    ) > :where(
+        .btn,
+        .tab-btn,
+        .view-btn,
+        .settings-tab,
+        .role-btn,
+        .block-tab
+    ) {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    body:not(.nothing-home) :where(
+        .forum-controls,
+        .event-filters,
+        .date-selector,
+        .prediction-header,
+        .session-item,
+        .modal-footer,
+        .info-card,
+        .assignment-actions,
+        .question-actions,
+        .rubric-actions,
+        .answer-actions,
+        .search-filter-row
+    ) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    body:not(.nothing-home) :where(
+        .search-box-forum,
+        .date-input,
+        .date-nav-btn,
+        .filter-select,
+        .search-input
+    ) {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    body:not(.nothing-home) .table-responsive,
+    body:not(.nothing-home) .table-container,
+    body:not(.nothing-home) .timetable-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body:not(.nothing-home) .data-table,
+    body:not(.nothing-home) .modern-table,
+    body:not(.nothing-home) .timetable-table {
+        min-width: 640px !important;
+    }
+
+    body:not(.nothing-home) .data-table th,
+    body:not(.nothing-home) .modern-table th,
+    body:not(.nothing-home) .timetable-table th,
+    body:not(.nothing-home) .data-table td,
+    body:not(.nothing-home) .modern-table td,
+    body:not(.nothing-home) .timetable-table td {
+        padding: 0.8rem 0.85rem !important;
+    }
+
+    body:not(.nothing-home) .chart-wrapper,
+    body:not(.nothing-home) canvas {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    body:not(.nothing-home) .modal-content,
+    body:not(.nothing-home) .modal-large,
+    body:not(.nothing-home) .profile-dropdown {
+        width: min(100%, calc(100vw - 16px)) !important;
+        max-width: calc(100vw - 16px) !important;
+    }
+
+    body:not(.nothing-home) .theme-toggle {
+        right: 14px !important;
+        bottom: 82px !important;
+    }
+
+    body:not(.nothing-home) .chatbot-toggle {
+        right: 14px !important;
+        bottom: 14px !important;
+    }
+
+    body:not(.nothing-home) :where(
+        .page-title,
+        .resource-title,
+        .question-title,
+        .meal-type,
+        .contributor-name,
+        .quick-link-content h4,
+        .note-content h4
+    ) {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 560px) {
+    body:not(.nothing-home) .dashboard-main {
+        padding: 4.75rem 0.55rem 6.1rem !important;
+    }
+
+    body:not(.nothing-home) .page-hero,
+    body:not(.nothing-home) .dashboard-section,
+    body:not(.nothing-home) .stat-box,
+    body:not(.nothing-home) .analytics-item,
+    body:not(.nothing-home) .schedule-item,
+    body:not(.nothing-home) .announcement-item,
+    body:not(.nothing-home) .deadline-item,
+    body:not(.nothing-home) .quick-link-card,
+    body:not(.nothing-home) .settings-section,
+    body:not(.nothing-home) .upload-form,
+    body:not(.nothing-home) .filter-container,
+    body:not(.nothing-home) .search-filter-bar,
+    body:not(.nothing-home) .modal-content {
+        padding: 0.9rem !important;
+        border-radius: 20px !important;
+    }
+
+    body:not(.nothing-home) .stat-number,
+    body:not(.nothing-home) .analytics-value,
+    body:not(.nothing-home) .info-value {
+        font-size: 1.35rem !important;
+    }
+
+    body:not(.nothing-home) .top-profile-container,
+    body:not(.nothing-home) .universal-profile {
+        right: 0.6rem !important;
     }
 }

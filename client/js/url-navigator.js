@@ -115,21 +115,8 @@
         const mappings = await getUrlMappings();
         if (!mappings) return;
 
-        // Map of original paths to page keys
+        // Keep public routes direct; only map dashboard entry links if needed.
         const pathToKey = {
-            '/': 'home',
-            '/index.html': 'home',
-            '/#about': 'about',
-            '/index.html#about': 'about',
-            '/#features': 'features',
-            '/index.html#features': 'features',
-            '/#academics': 'academics',
-            '/index.html#academics': 'academics',
-            '/#contact': 'contact',
-            '/index.html#contact': 'contact',
-            '/login.html': 'login',
-            '/register.html': 'register',
-            '/creator.html': 'creator',
             '/dashboard/student.html': 'student',
             '/dashboard/teacher.html': 'teacher',
             '/dashboard/admin.html': 'admin'

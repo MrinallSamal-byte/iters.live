@@ -20,6 +20,13 @@ const fs = require('fs');
 const { db } = require('../database/firebase');
 const googleSheetsService = require('../services/googleSheets.service');
 const googleDriveBackup = require('../services/googleDriveBackup.service');
+const {
+  normalizeSoaPortalData,
+  persistPortalDataForUser,
+  getPortalSnapshotForUser,
+  disconnectPortalForUser,
+  getDemoPortalData
+} = require('../services/soa-data.service');
 
 // TEMPORARILY DISABLED — DO NOT REMOVE
 // Import feature flags to check if portal features are enabled
@@ -411,21 +418,59 @@ async function handleMaxAttemptsReached(regNumber, userId, res) {
  * Format portal data for response
  */
 function formatPortalData(data, isVerified, portalConnected, dataSource) {
+  const normalized = data?.provider === 'soa'
+    ? data
+    : normalizeSoaPortalData({
+      ...data,
+      dataSource: dataSource || data?.dataSource
+    });
+  const profile = normalized?.profile || {};
+  const hostel = [profile.hostelName, profile.roomNumber].filter(Boolean).join(', ') || null;
+
   return {
-    profile: data.profile || DUMMY_DATA.profile,
-    marks: data.marks || [],
-    attendance: data.attendance || [],
-    timetable: data.timetable || [],
-    courses: data.courses || [],
-    results: data.results || [],
-    notifications: data.notifications || [],
-    backlogs: data.backlogs || [],
-    internal_assessments: data.internal_assessments || [],
-    fees: data.fees || {},
-    raw_api_data: data.raw_api_data || {},
+    mode: dataSource?.includes('demo') ? 'demo' : undefined,
+    profile: {
+      name: profile.studentName || data?.profile?.name || DUMMY_DATA.profile?.name,
+      registration_number: profile.registrationNumber || data?.profile?.registration_number || null,
+      email: profile.email || data?.profile?.email || null,
+      department: profile.branch || profile.program || data?.profile?.department || null,
+      year: profile.year || data?.profile?.year || null,
+      section: profile.section || data?.profile?.section || null,
+      semester: profile.semester || data?.profile?.semester || null,
+      phone: profile.phone || data?.profile?.phone || null,
+      father_name: profile.fatherName || data?.profile?.father_name || null,
+      mother_name: profile.motherName || data?.profile?.mother_name || null,
+      hostel: hostel || data?.profile?.hostel || null,
+      photo_url: profile.photoUrl || data?.profile?.photo_url || null
+    },
+    marks: (normalized?.marks?.records || []).map((item) => ({
+      subject: item.subject,
+      subject_code: item.subjectCode,
+      marks: item.marksObtained,
+      grade: item.grade,
+      exam_type: item.examType,
+      total_marks: item.totalMarks,
+      credits: item.credits
+    })),
+    attendance: (normalized?.attendance?.summary || []).map((item) => ({
+      subject: item.subject,
+      subject_code: item.subjectCode,
+      attended: item.attendedClasses,
+      total: item.totalClasses,
+      percentage: item.percentage,
+      teacher: item.teacher
+    })),
+    timetable: normalized?.timetable || data?.timetable || [],
+    courses: normalized?.subjects || data?.courses || [],
+    results: normalized?.results || data?.results || [],
+    notifications: normalized?.notifications || data?.notifications || [],
+    backlogs: normalized?.backlogs || data?.backlogs || [],
+    internal_assessments: normalized?.internalAssessments || data?.internal_assessments || [],
+    fees: normalized?.fees || data?.fees || {},
+    raw_api_data: data?.raw_api_data || data?.raw || {},
     isVerified,
     portalConnected,
-    dataSource
+    dataSource: dataSource || normalized?.dataSource || null
   };
 }
 
@@ -600,30 +645,16 @@ const savePortalData = async (userId, regNumber, data, isVerified) => {
  */
 const saveDemoData = async (userId, regNumber, res) => {
   try {
-    const docId = userId || regNumber;
+    const demoPortalData = getDemoPortalData();
 
-    if (docId) {
-      const userRef = db.collection('users').doc(docId);
-      const userDoc = await userRef.get();
-
-      if (userDoc.exists) {
-        await userRef.update({
-          profile: DUMMY_DATA.profile,
-          marks_data: DUMMY_DATA.marks,
-          attendance_data: DUMMY_DATA.attendance,
-          timetable_data: DUMMY_DATA.timetable || [],
-          courses_data: DUMMY_DATA.courses || [],
-          results_data: DUMMY_DATA.results || [],
-          notifications_data: DUMMY_DATA.notifications || [],
-          backlogs_data: DUMMY_DATA.backlogs || [],
-          internal_assessments_data: DUMMY_DATA.internal_assessments || [],
-          fees_data: DUMMY_DATA.fees || {},
-          isVerified: false,
-          portalConnected: false,
-          portal_last_synced: new Date(),
-          updated_at: new Date()
-        });
-      }
+    if (userId || regNumber) {
+      await persistPortalDataForUser({
+        userId,
+        registrationNumber: regNumber,
+        normalizedData: demoPortalData,
+        isVerified: false,
+        portalConnected: false
+      });
     }
 
     return res.json({
@@ -631,20 +662,7 @@ const saveDemoData = async (userId, regNumber, res) => {
       status: STATUS_DEMO_LOADED,
       message: 'Demo data loaded successfully',
       data: {
-        mode: 'demo',
-        profile: DUMMY_DATA.profile,
-        marks: DUMMY_DATA.marks,
-        attendance: DUMMY_DATA.attendance,
-        timetable: DUMMY_DATA.timetable || [],
-        courses: DUMMY_DATA.courses || [],
-        results: DUMMY_DATA.results || [],
-        notifications: DUMMY_DATA.notifications || [],
-        backlogs: DUMMY_DATA.backlogs || [],
-        internal_assessments: DUMMY_DATA.internal_assessments || [],
-        fees: DUMMY_DATA.fees || {},
-        isVerified: false,
-        portalConnected: false,
-        dataSource: 'demo',
+        ...formatPortalData(demoPortalData, false, false, 'demo'),
         portalEnabled: isPortalEnabled()
       }
     });
@@ -668,65 +686,50 @@ const saveDemoData = async (userId, regNumber, res) => {
  * @param {Object} res - Express response
  */
 const getPortalStatus = async (req, res) => {
-  // Always return portal enabled status first
   const portalStatusEnabled = isPortalEnabled();
-  
-  // If portal is disabled, return that status
-  if (!portalStatusEnabled) {
-    return res.json({
-      success: true,
-      data: {
-        portalConnected: false,
-        isVerified: false,
-        lastSynced: null,
-        portalEnabled: false,
-        message: PORTAL_DISABLED_MESSAGE
-      }
-    });
-  }
-
-  // If no user is authenticated, just return portal enabled status
-  if (!req.user) {
-    return res.json({
-      success: true,
-      data: {
-        portalConnected: false,
-        isVerified: false,
-        lastSynced: null,
-        portalEnabled: true
-      }
-    });
-  }
-
   try {
-    const userId = req.user.id || req.user.uid;
-    const userRef = db.collection('users').doc(userId);
-    const userDoc = await userRef.get();
+    const snapshot = req.user ? await getPortalSnapshotForUser({
+      userId: req.user.id || req.user.uid,
+      registrationNumber: req.user.registration_number
+    }) : null;
 
-    if (!userDoc.exists) {
-      // User is authenticated but document doesn't exist yet
-      // Return default unconnected status (user doc will be created on first sync)
+    if (!portalStatusEnabled) {
+      return res.json({
+        success: true,
+        data: {
+          portalConnected: Boolean(snapshot?.status?.connected),
+          isVerified: Boolean(snapshot?.status?.isVerified),
+          lastSynced: snapshot?.status?.lastSynced || null,
+          portalEnabled: false,
+          message: PORTAL_DISABLED_MESSAGE
+        }
+      });
+    }
+
+    if (!req.user) {
       return res.json({
         success: true,
         data: {
           portalConnected: false,
           isVerified: false,
           lastSynced: null,
-          portalEnabled: true,
-          message: 'User profile not yet created. Portal data will be stored on first sync.'
+          portalEnabled: true
         }
       });
     }
 
-    const userData = userDoc.data();
-
     return res.json({
       success: true,
       data: {
-        portalConnected: userData.portalConnected || false,
-        isVerified: userData.isVerified || false,
-        lastSynced: userData.portal_last_synced || null,
-        portalEnabled: true
+        portalConnected: Boolean(snapshot?.status?.connected),
+        isVerified: Boolean(snapshot?.status?.isVerified),
+        lastSynced: snapshot?.status?.lastSynced || null,
+        portalEnabled: true,
+        message: snapshot?.status?.needsReconnect
+          ? 'Portal data exists but needs reconnection.'
+          : snapshot?.status?.hasImportedData
+            ? 'Portal data is available for this account.'
+            : 'Portal data will be stored on first sync.'
       }
     });
   } catch (error) {
@@ -751,14 +754,9 @@ const getPortalStatus = async (req, res) => {
  */
 const disconnectPortal = async (req, res) => {
   try {
-    const userId = req.user.id || req.user.uid;
-    const userRef = db.collection('users').doc(userId);
-
-    await userRef.update({
-      portalConnected: false,
-      isVerified: false,
-      portal_last_synced: null,
-      updated_at: new Date()
+    await disconnectPortalForUser({
+      userId: req.user.id || req.user.uid,
+      registrationNumber: req.user.registration_number
     });
 
     return res.json({
@@ -791,13 +789,7 @@ const getPortalData = async (req, res) => {
     return res.json({
       success: true,
       data: {
-        profile: DUMMY_DATA.profile,
-        marks: DUMMY_DATA.marks,
-        attendance: DUMMY_DATA.attendance,
-        timetable: DUMMY_DATA.timetable,
-        courses: DUMMY_DATA.courses,
-        isVerified: false,
-        portalConnected: false,
+        ...formatPortalData(getDemoPortalData(), false, false, 'demo'),
         portalEnabled: false,
         message: PORTAL_DISABLED_MESSAGE
       }
@@ -805,47 +797,26 @@ const getPortalData = async (req, res) => {
   }
 
   try {
-    const userId = req.user.id || req.user.uid;
-    const userRef = db.collection('users').doc(userId);
-    const userDoc = await userRef.get();
+    const snapshot = await getPortalSnapshotForUser({
+      userId: req.user.id || req.user.uid,
+      registrationNumber: req.user.registration_number
+    });
 
-    if (!userDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    const userData = userDoc.data();
-
-    // If portal is not connected, return demo data
-    if (!userData.portalConnected) {
+    if (!snapshot?.status?.hasImportedData) {
       return res.json({
         success: true,
-        data: {
-          profile: DUMMY_DATA.profile,
-          marks: DUMMY_DATA.marks,
-          attendance: DUMMY_DATA.attendance,
-          timetable: DUMMY_DATA.timetable,
-          courses: DUMMY_DATA.courses,
-          isVerified: false,
-          portalConnected: false
-        }
+        data: formatPortalData(getDemoPortalData(), false, false, 'demo')
       });
     }
 
     return res.json({
       success: true,
-      data: {
-        profile: userData.profile || DUMMY_DATA.profile,
-        marks: userData.marks_data || DUMMY_DATA.marks,
-        attendance: userData.attendance_data || DUMMY_DATA.attendance,
-        timetable: userData.timetable_data || DUMMY_DATA.timetable,
-        courses: userData.courses_data || DUMMY_DATA.courses,
-        isVerified: userData.isVerified || false,
-        portalConnected: userData.portalConnected || false,
-        lastSynced: userData.portal_last_synced || null
-      }
+      data: formatPortalData(
+        snapshot.normalizedData,
+        Boolean(snapshot.status?.isVerified),
+        Boolean(snapshot.status?.connected),
+        snapshot.status?.dataSource || 'cached_soa_import'
+      )
     });
   } catch (error) {
     console.error('Get portal data error:', error.message);
@@ -864,52 +835,21 @@ const getPortalData = async (req, res) => {
  * @param {boolean} isVerified - Whether data is verified from portal
  */
 const savePortalDataToFirestore = async (userId, regNumber, data, isVerified) => {
-  const updateData = {
-    profile: data.profile || {},
-    marks_data: data.marks || [],
-    attendance_data: data.attendance || [],
-    timetable_data: data.timetable || [],
-    courses_data: data.courses || [],
-    results_data: data.results || [],
-    notifications_data: data.notifications || [],
-    backlogs_data: data.backlogs || [],
-    internal_assessments_data: data.internal_assessments || [],
-    fees_data: data.fees || {},
-    isVerified: isVerified,
-    portalConnected: true,
-    portal_last_synced: new Date(),
-    updated_at: new Date()
-  };
-
-  const docId = userId || regNumber;
-
-  if (!docId) {
-    console.warn('savePortalDataToFirestore: No docId available, cannot save data');
-    return false;
-  }
-
   try {
-    const userRef = db.collection('users').doc(docId);
-    const userDoc = await userRef.get();
-
-    if (userDoc.exists) {
-      await userRef.update(updateData);
-      console.log(`Portal data saved for user: ${docId}`);
-      return true;
-    } else if (regNumber && regNumber !== docId) {
-      const regRef = db.collection('users').doc(regNumber);
-      const regDoc = await regRef.get();
-      if (regDoc.exists) {
-        await regRef.update(updateData);
-        console.log(`Portal data saved for registration: ${regNumber}`);
-        return true;
-      }
-    }
-    
-    console.warn(`savePortalDataToFirestore: No document found for ${docId} or ${regNumber}`);
-    return false;
+    const normalizedData = normalizeSoaPortalData({
+      ...data,
+      dataSource: data?.dataSource || 'live_portal'
+    });
+    await persistPortalDataForUser({
+      userId,
+      registrationNumber: regNumber,
+      normalizedData,
+      isVerified,
+      portalConnected: true
+    });
+    return true;
   } catch (error) {
-    console.error(`savePortalDataToFirestore error for ${docId}:`, error.message);
+    console.error(`savePortalDataToFirestore error for ${userId || regNumber}:`, error.message);
     return false;
   }
 };
@@ -968,16 +908,16 @@ async function tryLoadBackupData(regNumber, userId) {
       if (driveData && (driveData.profile || driveData.attendance?.length || driveData.marks?.length)) {
         console.log(`Loaded backup data from Google Drive for ${regNumber}`);
         return {
-          profile: driveData.profile || DUMMY_DATA.profile,
-          marks: driveData.marks || DUMMY_DATA.marks,
-          attendance: driveData.attendance || DUMMY_DATA.attendance,
-          timetable: driveData.timetable || DUMMY_DATA.timetable,
-          courses: driveData.courses || DUMMY_DATA.courses,
-          results: driveData.results || [],
-          notifications: driveData.notifications || [],
-          backlogs: driveData.backlogs || [],
-          internal_assessments: driveData.internal_assessments || [],
-          dataSource: 'google_drive',
+          ...formatPortalData(
+            normalizeSoaPortalData({
+              ...driveData,
+              fetchedAt: driveData.backupMetadata?.savedAt,
+              dataSource: 'google_drive'
+            }),
+            false,
+            false,
+            'google_drive'
+          ),
           lastUpdated: driveData.backupMetadata?.savedAt || null
         };
       }
@@ -994,14 +934,16 @@ async function tryLoadBackupData(regNumber, userId) {
       if (sheetsData && (sheetsData.profile || sheetsData.attendance?.length || sheetsData.marks?.length)) {
         console.log(`Loaded backup data from Google Sheets for ${regNumber}`);
         return {
-          profile: sheetsData.profile || DUMMY_DATA.profile,
-          marks: sheetsData.marks || DUMMY_DATA.marks,
-          attendance: sheetsData.attendance || DUMMY_DATA.attendance,
-          timetable: sheetsData.timetable || DUMMY_DATA.timetable,
-          courses: sheetsData.courses || DUMMY_DATA.courses,
-          results: sheetsData.results || [],
-          notifications: sheetsData.notifications || [],
-          dataSource: 'google_sheets',
+          ...formatPortalData(
+            normalizeSoaPortalData({
+              ...sheetsData,
+              fetchedAt: sheetsData.lastUpdated,
+              dataSource: 'google_sheets'
+            }),
+            false,
+            false,
+            'google_sheets'
+          ),
           lastUpdated: sheetsData.lastUpdated
         };
       }
@@ -1012,28 +954,16 @@ async function tryLoadBackupData(regNumber, userId) {
 
   // Try Firestore next
   try {
-    const docId = userId || regNumber;
-    if (docId) {
-      const userRef = db.collection('users').doc(docId);
-      const userDoc = await userRef.get();
-      
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        if (userData.marks_data?.length || userData.attendance_data?.length || userData.profile) {
-          console.log(`Loaded backup data from Firestore for ${docId}`);
-          return {
-            profile: userData.profile || DUMMY_DATA.profile,
-            marks: userData.marks_data || DUMMY_DATA.marks,
-            attendance: userData.attendance_data || DUMMY_DATA.attendance,
-            timetable: userData.timetable_data || DUMMY_DATA.timetable,
-            courses: userData.courses_data || DUMMY_DATA.courses,
-            results: userData.results_data || [],
-            notifications: userData.notifications_data || [],
-            dataSource: 'firestore',
-            lastUpdated: userData.portal_last_synced
-          };
-        }
-      }
+    const snapshot = await getPortalSnapshotForUser({
+      userId,
+      registrationNumber: regNumber
+    });
+    if (snapshot?.status?.hasImportedData && snapshot.normalizedData) {
+      console.log(`Loaded backup data from Firestore for ${snapshot.userId || userId || regNumber}`);
+      return {
+        ...formatPortalData(snapshot.normalizedData, false, false, snapshot.status?.dataSource || 'firestore'),
+        lastUpdated: snapshot.status?.lastSynced || null
+      };
     }
   } catch (error) {
     console.warn('Failed to load from Firestore:', error.message);

@@ -15,6 +15,8 @@
  */
 
 const { chromium } = require('playwright');
+const https = require('https');
+const { normalizeSoaPortalData } = require('./soa-data.service');
 
 // Status constants
 const STATUS_SUCCESS = 'SUCCESS';
@@ -26,7 +28,14 @@ const STATUS_SESSION_EXPIRED = 'SESSION_EXPIRED';
 
 // Portal configuration
 const PORTAL_URL = 'https://soaportals.com/StudentPortalSOA/#/';
+const PORTAL_ENTRY_URLS = [
+    'https://soaportals.com/StudentPortalSOA/',
+    PORTAL_URL,
+    'https://soaportals.com/'
+];
 const TIMEOUT = 60000; // 60 seconds
+const NAVIGATION_TIMEOUT = 30000;
+const PORTAL_READY_TIMEOUT = 15000;
 
 // In-memory session storage for browser contexts
 // Key: sessionId, Value: { browser, page, captchaImage, createdAt }
@@ -37,11 +46,280 @@ const SESSION_CLEANUP_INTERVAL = 5 * 60 * 1000;
 // Session expiry time (10 minutes)
 const SESSION_EXPIRY = 10 * 60 * 1000;
 
+const SECTION_NAVIGATION = [
+    {
+        key: 'personalInfo',
+        path: [
+            ['Student Personal Info', 'Student Personal Information', 'Personal Information']
+        ],
+        labels: ['Student Personal Info', 'Student Personal Information', 'Personal Information', 'Personal Info', 'Profile', 'Student Profile']
+    },
+    {
+        key: 'contactInfo',
+        path: [
+            ['Student Personal Info', 'Student Personal Information', 'Personal Information'],
+            ['Students Contact Info', 'Student Contact Info', 'Contact Information', 'Contact Info', 'Contact Details']
+        ],
+        labels: ['Students Contact Info', 'Student Contact Info', 'Contact Information', 'Contact Info', 'Contact Details', 'Address Details']
+    },
+    {
+        key: 'qualifications',
+        path: [
+            ['Student Personal Info', 'Student Personal Information', 'Personal Information'],
+            ['Students Qualifications', 'Student Qualifications', 'Qualifications', 'Qualification']
+        ],
+        labels: ['Students Qualifications', 'Student Qualifications', 'Qualifications', 'Qualification', 'Academic Qualification']
+    },
+    {
+        key: 'attendance',
+        path: [
+            ['Class Attendance', 'Attendance View', 'Attendance']
+        ],
+        labels: ['Class Attendance', 'Attendance View', 'Attendance']
+    },
+    {
+        key: 'marks',
+        path: [
+            ['Student Result', 'My Result', 'Results', 'Result']
+        ],
+        labels: ['Student Result', 'My Result', 'Marks', 'Result', 'Results', 'Semester Result']
+    },
+    { key: 'internalAssessments', labels: ['Internal Assessment', 'Internal Assessments', 'IA Marks', 'Internal Marks'] },
+    {
+        key: 'timetable',
+        path: [
+            ['Class Time Table', 'Class Timetable', 'Time Table', 'Timetable', 'Class Schedule']
+        ],
+        labels: ['Class Time Table', 'Class Timetable', 'Time Table', 'Timetable', 'Class Schedule', 'Schedule']
+    },
+    {
+        key: 'subjects',
+        path: [
+            ['Registered Subjects', 'Registered Subject', 'Subjects', 'Courses']
+        ],
+        labels: ['Registered Subjects', 'Registered Subject', 'Subjects', 'Courses']
+    },
+    {
+        key: 'admitCard',
+        path: [
+            ['Exam Info', 'Examination Info'],
+            ['My Admit Card', 'Admit Card']
+        ],
+        labels: ['My Admit Card', 'Admit Card']
+    },
+    { key: 'notifications', labels: ['Notifications', 'Notices', 'Notice Board'] },
+    { key: 'fees', labels: ['Fees', 'Fee Details'] }
+];
+
+const REGISTRATION_SELECTORS = [
+    'input[formcontrolname="userid"]',
+    'input[formcontrolname*="user"]',
+    'input[formcontrolname*="reg"]',
+    'input[name*="reg"]',
+    'input[id*="reg"]',
+    'input[placeholder*="USER ID"]',
+    'input[placeholder*="User ID"]',
+    'input[placeholder*="Registration"]',
+    'input[placeholder*="registration"]',
+    'input[ng-model*="reg"]',
+    'input[ng-model*="user"]',
+    'input[name="username"]',
+    'input[id="username"]',
+    'input[type="userid"]',
+    'input[type="text"]'
+];
+
+const PASSWORD_SELECTORS = [
+    'input[formcontrolname="password"]',
+    'input[formcontrolname*="pass"]',
+    'input[autocomplete="current-password"]',
+    'input[type="password"]',
+    'input[name*="password"]',
+    'input[id*="password"]',
+    'input[placeholder*="PASSWORD"]',
+    'input[placeholder*="Password"]',
+    'input[placeholder*="Pass"]',
+    'input[ng-model*="password"]',
+    'input[ng-reflect-name*="password"]'
+];
+
+const CAPTCHA_SELECTORS = [
+    'input[formcontrolname="captcha"]',
+    'input[formcontrolname*="captcha"]',
+    'input[name*="captcha"]',
+    'input[id*="captcha"]',
+    'input[placeholder*="Captcha"]',
+    'input[placeholder*="CAPTCHA"]',
+    'input[placeholder*="text as shown"]',
+    'input[placeholder*="Enter"]',
+    'input[ng-model*="captcha"]'
+];
+
+const LOGIN_ACTION_SELECTORS = [
+    'button[type="submit"]',
+    'input[type="submit"]',
+    'button[id*="login"]',
+    'button[class*="login"]',
+    'button[aria-label*="LOGIN" i]',
+    'button[ng-click*="login"]',
+    'button:has-text("Login")',
+    'button:has-text("LOGIN")',
+    'button:has-text("Sign In")',
+    'button:has-text("Submit")',
+    '.btn-primary[type="submit"]',
+    '.submit-button',
+    '#loginBtn'
+];
+
+function isPortalUnreachableError(message = '') {
+    return message.includes('net::ERR') ||
+        message.includes('Navigation timeout') ||
+        message.includes('page.goto: Timeout') ||
+        /^Timeout \d+ms exceeded/i.test(message) ||
+        message.includes('ECONNREFUSED') ||
+        message.includes('ERR_NAME_NOT_RESOLVED') ||
+        message.includes('ERR_CONNECTION_TIMED_OUT');
+}
+
+function isBrowserRuntimeError(message = '') {
+    return /Executable doesn't exist|browserType\.launch|headless_shell|chromium_headless_shell|sandbox_host_linux|Target page, context or browser has been closed/i.test(message);
+}
+
+function buildScraperErrorResponse(error, fallbackMessage) {
+    const message = String(error?.message || '');
+
+    if (message.includes('page.goto: Timeout') || /^Timeout \d+ms exceeded/i.test(message)) {
+        return {
+            status: STATUS_PORTAL_UNREACHABLE,
+            message: 'SOA portal took too long to respond. Please try again in a moment.'
+        };
+    }
+
+    if (isPortalUnreachableError(message)) {
+        return {
+            status: STATUS_PORTAL_UNREACHABLE,
+            message: 'SOA portal is currently unreachable. Please try again later.'
+        };
+    }
+
+    if (isBrowserRuntimeError(message)) {
+        return {
+            status: STATUS_SCRAPE_ERROR,
+            message: 'SOA import is temporarily unavailable on this server. Please try again shortly.'
+        };
+    }
+
+    return {
+        status: STATUS_SCRAPE_ERROR,
+        message: fallbackMessage
+    };
+}
+
+function hasTextValue(value) {
+    const text = String(value || '').trim();
+    return Boolean(text) && !/^(-+|n\/a|na|null|undefined)$/i.test(text);
+}
+
+function hasMeaningfulPortalData(normalized) {
+    if (!normalized || typeof normalized !== 'object') return false;
+
+    return Boolean(
+        hasTextValue(normalized.profile?.studentName) ||
+        hasTextValue(normalized.profile?.registrationNumber) ||
+        hasTextValue(normalized.profile?.enrollmentNumber) ||
+        hasTextValue(normalized.profile?.branch) ||
+        hasTextValue(normalized.profile?.program) ||
+        (Array.isArray(normalized.qualifications) && normalized.qualifications.length) ||
+        (Array.isArray(normalized.attendance?.records) && normalized.attendance.records.length) ||
+        (Array.isArray(normalized.marks?.records) && normalized.marks.records.length)
+    );
+}
+
+async function isLoginFormStillVisible(page) {
+    const selectors = [
+        ...PASSWORD_SELECTORS,
+        ...CAPTCHA_SELECTORS,
+        ...REGISTRATION_SELECTORS
+    ];
+
+    for (const selector of selectors) {
+        try {
+            const element = page.locator(selector).first();
+            const isVisible = await element.isVisible().catch(() => false);
+            if (isVisible) return true;
+        } catch (_) {
+            // Keep checking.
+        }
+    }
+
+    return false;
+}
+
+async function fillFirstVisibleField(page, selectors, value, label) {
+    for (const selector of selectors) {
+        try {
+            const element = page.locator(selector).first();
+            const isVisible = await element.isVisible().catch(() => false);
+            if (!isVisible) continue;
+            await element.fill(value);
+            console.log(`[SOA Scraper] Filled ${label} field with selector: ${selector}`);
+            return selector;
+        } catch (_) {
+            // Try next selector.
+        }
+    }
+
+    return null;
+}
+
+async function clickFirstVisibleAction(page, selectors, label) {
+    for (const selector of selectors) {
+        try {
+            const element = page.locator(selector).first();
+            const isVisible = await element.isVisible().catch(() => false);
+            if (!isVisible) continue;
+            const isDisabled = await element.isDisabled().catch(() => false);
+            if (isDisabled) continue;
+            await element.click();
+            console.log(`[SOA Scraper] Clicked ${label} with selector: ${selector}`);
+            return selector;
+        } catch (_) {
+            // Try next selector.
+        }
+    }
+
+    return null;
+}
+
+async function collectVisibleInputDiagnostics(page) {
+    return page.evaluate(() => Array.from(document.querySelectorAll('input,button'))
+        .filter((element) => {
+            const style = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        })
+        .slice(0, 20)
+        .map((element) => ({
+            tag: element.tagName,
+            type: element.getAttribute('type'),
+            formcontrolname: element.getAttribute('formcontrolname'),
+            id: element.getAttribute('id'),
+            name: element.getAttribute('name'),
+            placeholder: element.getAttribute('placeholder'),
+            ariaLabel: element.getAttribute('aria-label'),
+            text: element.tagName === 'BUTTON' ? element.innerText.trim().slice(0, 80) : null
+        })));
+}
+
 /**
  * Generate a unique session ID
  */
 function generateSessionId() {
     return `soa_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+}
+
+function escapeRegex(text) {
+    return String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -80,6 +358,519 @@ async function closeSession(sessionId) {
     }
 }
 
+async function waitForPortalUpdate(page, delay = 1200) {
+    await page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(delay);
+}
+
+async function waitForPortalShell(page, timeout = PORTAL_READY_TIMEOUT) {
+    const loginShellSelector = [
+        REGISTRATION_SELECTORS[0],
+        'input[placeholder*="USER ID"]',
+        'form',
+        'button',
+        'img'
+    ].join(',');
+
+    await Promise.race([
+        page.waitForSelector(loginShellSelector, { timeout }),
+        page.waitForFunction(() => {
+            const bodyText = document.body?.innerText || '';
+            return (
+                document.readyState !== 'loading' &&
+                (
+                    document.querySelector('input, form, button, img') ||
+                    /campusportal|student portal|welcome to soa|welcome to student portal/i.test(bodyText)
+                )
+            );
+        }, { timeout })
+    ]).catch(() => {});
+
+    await page.waitForTimeout(1200);
+}
+
+async function probePortalUrl(url, timeout = 12000) {
+    return new Promise((resolve) => {
+        const request = https.get(url, {
+            timeout,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        }, (response) => {
+            response.resume();
+            resolve({
+                reachable: true,
+                statusCode: response.statusCode,
+                url
+            });
+        });
+
+        request.on('timeout', () => {
+            request.destroy(new Error('timeout'));
+        });
+
+        request.on('error', (error) => {
+            resolve({
+                reachable: false,
+                statusCode: null,
+                url,
+                error: error.message
+            });
+        });
+    });
+}
+
+async function checkPortalReachability() {
+    for (const url of PORTAL_ENTRY_URLS) {
+        const result = await probePortalUrl(url);
+        if (result.reachable) {
+            return result;
+        }
+    }
+
+    return {
+        reachable: false,
+        url: PORTAL_ENTRY_URLS[0],
+        error: 'timeout'
+    };
+}
+
+async function navigateToPortal(page) {
+    let lastError = null;
+    const attempts = [
+        { waitUntil: 'commit', timeout: 15000, label: 'commit' },
+        { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT, label: 'domcontentloaded' },
+        { waitUntil: 'load', timeout: TIMEOUT, label: 'load' }
+    ];
+
+    for (const url of PORTAL_ENTRY_URLS.slice(0, 2)) {
+        for (const attempt of attempts) {
+            try {
+                console.log(`[SOA Scraper] Portal navigation attempt to ${url} with waitUntil=${attempt.label}`);
+                await page.goto(url, {
+                    waitUntil: attempt.waitUntil,
+                    timeout: attempt.timeout
+                });
+                await waitForPortalShell(page);
+                return true;
+            } catch (error) {
+                lastError = error;
+                console.warn(`[SOA Scraper] Portal navigation attempt (${attempt.label}) for ${url} failed: ${error.message}`);
+            }
+        }
+    }
+
+    throw lastError || new Error('SOA portal did not load');
+}
+
+async function getCaptchaWithRetry(page) {
+    let captchaImage = await extractCaptchaImage(page);
+    if (captchaImage) {
+        return captchaImage;
+    }
+
+    console.warn('[SOA Scraper] CAPTCHA not found after initial portal load, waiting for portal shell');
+    await waitForPortalShell(page, 10000);
+    captchaImage = await extractCaptchaImage(page);
+    if (captchaImage) {
+        return captchaImage;
+    }
+
+    console.warn('[SOA Scraper] CAPTCHA still not found, reloading portal once');
+    await page.reload({
+        waitUntil: 'domcontentloaded',
+        timeout: NAVIGATION_TIMEOUT
+    }).catch(() => {});
+    await waitForPortalShell(page, 10000);
+
+    return extractCaptchaImage(page);
+}
+
+async function clickPortalLabel(page, labels = []) {
+    const selectors = [
+        ['tab', page.getByRole.bind(page, 'tab')],
+        ['link', page.getByRole.bind(page, 'link')],
+        ['button', page.getByRole.bind(page, 'button')]
+    ];
+
+    for (const label of labels) {
+        const exactExpression = new RegExp(`^\\s*${escapeRegex(label)}\\s*$`, 'i');
+        const looseExpression = new RegExp(escapeRegex(label), 'i');
+
+        for (const [, getByRole] of selectors) {
+            try {
+                const locator = getByRole({ name: exactExpression }).first();
+                const isVisible = await locator.isVisible().catch(() => false);
+                if (!isVisible) continue;
+                await locator.click({ timeout: 5000 });
+                await waitForPortalUpdate(page);
+                return true;
+            } catch (_) {
+                // Try the next selector.
+            }
+        }
+
+        try {
+            const locator = page
+                .locator('a,button,[role="tab"],[role="button"],li,span,div,.mat-list-item,.mat-expansion-panel-header,.mat-menu-item')
+                .filter({ hasText: looseExpression })
+                .first();
+            const isVisible = await locator.isVisible().catch(() => false);
+            if (!isVisible) continue;
+            await locator.click({ timeout: 5000 });
+            await waitForPortalUpdate(page);
+            return true;
+        } catch (_) {
+            // Try the next label.
+        }
+    }
+
+    return false;
+}
+
+async function openPortalSection(page, section) {
+    if (Array.isArray(section?.path) && section.path.length) {
+        let openedAny = false;
+        for (const step of section.path) {
+            const labels = Array.isArray(step) ? step : [step];
+            const opened = await clickPortalLabel(page, labels);
+            if (!opened) {
+                return openedAny;
+            }
+            openedAny = true;
+        }
+
+        return openedAny;
+    }
+
+    return clickPortalLabel(page, section?.labels || []);
+}
+
+async function selectNativeOptions(page) {
+    const selects = await page.locator('select').all();
+    let selectedAny = false;
+
+    for (const select of selects) {
+        const isVisible = await select.isVisible().catch(() => false);
+        if (!isVisible) continue;
+
+        const options = await select.locator('option').evaluateAll((nodes) => nodes.map((option) => ({
+            value: option.value,
+            text: option.textContent?.trim() || ''
+        }))).catch(() => []);
+
+        const choice = options.find((option) => option.value && !/select|choose/i.test(option.text));
+        if (!choice) continue;
+
+        await select.selectOption(choice.value).catch(() => {});
+        selectedAny = true;
+    }
+
+    return selectedAny;
+}
+
+async function selectMaterialOptions(page) {
+    const triggers = await page.locator('.mat-select-trigger,[role="combobox"]').all();
+    let selectedAny = false;
+
+    for (const trigger of triggers) {
+        const isVisible = await trigger.isVisible().catch(() => false);
+        if (!isVisible) continue;
+
+        try {
+            await trigger.click({ timeout: 3000 });
+            await page.waitForTimeout(400);
+
+            const options = page.locator('mat-option,[role="option"],.mat-option');
+            const optionCount = await options.count().catch(() => 0);
+            if (!optionCount) {
+                await page.keyboard.press('Escape').catch(() => {});
+                continue;
+            }
+
+            let clicked = false;
+            for (let index = 0; index < optionCount; index += 1) {
+                const option = options.nth(index);
+                const text = await option.textContent().catch(() => '');
+                if (!text || /select|choose/i.test(text)) continue;
+                await option.click({ timeout: 3000 }).catch(() => {});
+                clicked = true;
+                selectedAny = true;
+                break;
+            }
+
+            if (!clicked) {
+                await page.keyboard.press('Escape').catch(() => {});
+            } else {
+                await page.waitForTimeout(300);
+            }
+        } catch (_) {
+            await page.keyboard.press('Escape').catch(() => {});
+        }
+    }
+
+    return selectedAny;
+}
+
+async function prepareSectionForCapture(page, section) {
+    if (!section?.key || !['attendance', 'timetable', 'admitCard'].includes(section.key)) {
+        return;
+    }
+
+    const selectedNative = await selectNativeOptions(page);
+    const selectedMaterial = await selectMaterialOptions(page);
+
+    if (!selectedNative && !selectedMaterial) {
+        return;
+    }
+
+    const submitted = await clickFirstVisibleAction(page, [
+        'button:has-text("Submit")',
+        'button[aria-label*="Submit" i]',
+        'button[type="submit"]',
+        '.submit-button'
+    ], `${section.key} submit button`);
+
+    if (submitted) {
+        await waitForPortalUpdate(page, 2500);
+    }
+}
+
+async function captureSectionSnapshot(page, sectionName) {
+    return page.evaluate((key) => {
+        const clean = (value) => {
+            if (value === null || value === undefined) return null;
+            const text = String(value).replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+            return text || null;
+        };
+
+        const isVisible = (element) => {
+            if (!element) return false;
+            const style = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return (
+                style.display !== 'none' &&
+                style.visibility !== 'hidden' &&
+                style.opacity !== '0' &&
+                rect.width > 0 &&
+                rect.height > 0
+            );
+        };
+
+        const fields = {};
+        const addField = (label, value) => {
+            const cleanedLabel = clean(label);
+            const cleanedValue = clean(value);
+            if (!cleanedLabel || !cleanedValue) return;
+            if (cleanedLabel.length > 80 || cleanedValue.length > 300) return;
+            if (!fields[cleanedLabel]) {
+                fields[cleanedLabel] = cleanedValue;
+                return;
+            }
+
+            if (fields[cleanedLabel] === cleanedValue) return;
+
+            let duplicateIndex = 2;
+            while (fields[`${cleanedLabel} ${duplicateIndex}`]) {
+                duplicateIndex += 1;
+            }
+            fields[`${cleanedLabel} ${duplicateIndex}`] = cleanedValue;
+        };
+
+        const getFormFieldLabel = (input) => {
+            if (!input) return null;
+
+            const inputId = input.getAttribute('id');
+            if (inputId) {
+                const directLabel = document.querySelector(`label[for="${inputId}"]`);
+                if (directLabel && isVisible(directLabel)) {
+                    return clean(directLabel.textContent);
+                }
+            }
+
+            const matField = input.closest('.mat-form-field, mat-form-field, .form-group, .form-field, td, th, .row, .col, .card, .panel');
+            if (matField) {
+                const candidateSelectors = [
+                    '.mat-form-field-label',
+                    'mat-label',
+                    'label',
+                    '.control-label',
+                    '.form-label',
+                    'th',
+                    'strong',
+                    'span'
+                ];
+
+                for (const selector of candidateSelectors) {
+                    const candidates = Array.from(matField.querySelectorAll(selector)).filter(isVisible);
+                    for (const candidate of candidates) {
+                        if (candidate === input || candidate.contains(input)) continue;
+                        const candidateText = clean(candidate.textContent);
+                        if (candidateText && candidateText.length <= 80) {
+                            return candidateText;
+                        }
+                    }
+                }
+            }
+
+            const previous = input.previousElementSibling;
+            if (previous && isVisible(previous)) {
+                const previousText = clean(previous.textContent);
+                if (previousText && previousText.length <= 80) {
+                    return previousText;
+                }
+            }
+
+            return clean(input.getAttribute('placeholder'));
+        };
+
+        const getFieldValue = (input) => {
+            if (!input) return null;
+
+            if (input.tagName === 'SELECT') {
+                const selectedOption = input.selectedOptions?.[0];
+                return clean(selectedOption?.textContent || input.value);
+            }
+
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                return input.checked ? 'Yes' : null;
+            }
+
+            return clean(input.value || input.textContent);
+        };
+
+        Array.from(document.querySelectorAll('label')).forEach((label) => {
+            if (!isVisible(label)) return;
+            const forId = label.getAttribute('for');
+            if (forId) {
+                const target = document.getElementById(forId);
+                const value = target?.value || target?.textContent;
+                addField(label.textContent, value);
+            }
+        });
+
+        Array.from(document.querySelectorAll('dt')).forEach((dt) => {
+            if (!isVisible(dt)) return;
+            const dd = dt.nextElementSibling;
+            addField(dt.textContent, dd?.textContent);
+        });
+
+        Array.from(document.querySelectorAll('tr')).forEach((row) => {
+            if (!isVisible(row)) return;
+            const cells = Array.from(row.querySelectorAll('th,td')).filter(isVisible);
+            if (cells.length !== 2) return;
+            addField(cells[0].innerText, cells[1].innerText);
+        });
+
+        Array.from(document.querySelectorAll('strong,b')).forEach((node) => {
+            if (!isVisible(node)) return;
+            const parent = node.parentElement;
+            if (!parent || !isVisible(parent)) return;
+            const label = clean(node.textContent);
+            const parentText = clean(parent.innerText);
+            if (!label || !parentText || parentText === label) return;
+            addField(label, parentText.replace(label, '').replace(/^[:\s-]+/, ''));
+        });
+
+        Array.from(document.querySelectorAll('div,p,span,li')).forEach((element) => {
+            if (!isVisible(element)) return;
+            const text = clean(element.innerText);
+            if (!text) return;
+            const match = text.match(/^([^:]{2,80}):\s*(.+)$/);
+            if (match) {
+                addField(match[1], match[2]);
+            }
+
+            if (element.closest('table')) return;
+
+            const lines = String(element.innerText || '')
+                .split(/\n+/)
+                .map((line) => clean(line))
+                .filter(Boolean);
+
+            if (lines.length < 2 || lines.length > 4) return;
+
+            const label = lines[0];
+            const value = lines.slice(1).join(' ');
+            if (!label || !value) return;
+            if (label.length > 80 || value.length > 220) return;
+            if (/^(welcome|note|powered by|student|personal information|class time table|attendance view|my result|my admit card)$/i.test(label)) {
+                return;
+            }
+
+            addField(label, value);
+        });
+
+        Array.from(document.querySelectorAll('input,textarea,select')).forEach((input) => {
+            if (!isVisible(input)) return;
+            const value = getFieldValue(input);
+            const label = getFormFieldLabel(input);
+            addField(label, value);
+        });
+
+        const tables = Array.from(document.querySelectorAll('table'))
+            .filter(isVisible)
+            .map((table) => {
+                const rows = Array.from(table.querySelectorAll('tr')).filter(isVisible);
+                if (!rows.length) return null;
+
+                const headers = Array.from(rows[0].querySelectorAll('th,td'))
+                    .map((cell) => clean(cell.innerText) || '')
+                    .filter(Boolean);
+
+                const bodyRows = rows.slice(1).map((row) =>
+                    Array.from(row.querySelectorAll('td,th'))
+                        .map((cell) => clean(cell.innerText) || '')
+                        .filter((cell) => cell !== '')
+                ).filter((row) => row.length);
+
+                if (!headers.length && !bodyRows.length) {
+                    return null;
+                }
+
+                const titleNode = table.closest('.card,.panel,.tab-pane,section,div')?.querySelector('h1,h2,h3,h4,h5,h6');
+
+                return {
+                    title: clean(titleNode?.innerText),
+                    headers,
+                    rows: bodyRows
+                };
+            })
+            .filter(Boolean);
+
+        const headings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6'))
+            .filter(isVisible)
+            .slice(0, 12)
+            .map((heading) => clean(heading.innerText))
+            .filter(Boolean);
+
+        return {
+            sectionName: key,
+            url: window.location.href,
+            title: clean(document.title),
+            headings,
+            fields,
+            tables,
+            pageText: clean(document.body.innerText)?.slice(0, 40000) || ''
+        };
+    }, sectionName);
+}
+
+async function collectSectionSnapshots(page) {
+    const sections = {
+        default: await captureSectionSnapshot(page, 'default')
+    };
+
+    for (const section of SECTION_NAVIGATION) {
+        const opened = await openPortalSection(page, section);
+        if (!opened) continue;
+        await prepareSectionForCapture(page, section);
+        sections[section.key] = await captureSectionSnapshot(page, section.key);
+    }
+
+    return sections;
+}
+
 /**
  * Create a new browser session and get CAPTCHA
  * @returns {Promise<Object>} Session info with captcha image
@@ -92,6 +883,18 @@ async function createSessionAndGetCaptcha() {
 
     try {
         console.log(`[SOA Scraper] Creating new session: ${sessionId}`);
+
+        const reachability = await checkPortalReachability();
+        if (!reachability.reachable) {
+            console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
+            return {
+                success: false,
+                status: STATUS_PORTAL_UNREACHABLE,
+                message: 'SOA portal is not responding right now. Please try again in a few minutes.'
+            };
+        }
+
+        console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
 
         // Launch browser using Playwright
         browser = await chromium.launch({
@@ -110,19 +913,15 @@ async function createSessionAndGetCaptcha() {
         });
 
         page = await context.newPage();
+        page.setDefaultTimeout(15000);
+        page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT);
 
         // Navigate to portal
         console.log(`[SOA Scraper] Navigating to portal: ${PORTAL_URL}`);
-        await page.goto(PORTAL_URL, {
-            waitUntil: 'networkidle',
-            timeout: TIMEOUT
-        });
-
-        // Wait for page to fully load
-        await page.waitForTimeout(3000);
+        await navigateToPortal(page);
 
         // Extract CAPTCHA image
-        const captchaImage = await extractCaptchaImage(page);
+        const captchaImage = await getCaptchaWithRetry(page);
         
         if (!captchaImage) {
             throw new Error('Could not extract CAPTCHA image from portal');
@@ -153,17 +952,15 @@ async function createSessionAndGetCaptcha() {
         // Cleanup on error
         if (page) await page.close().catch(() => {});
         if (browser) await browser.close().catch(() => {});
-
-        const isUnreachable = error.message.includes('net::ERR') || 
-                             error.message.includes('Navigation timeout') ||
-                             error.message.includes('ECONNREFUSED');
+        const failure = buildScraperErrorResponse(
+            error,
+            'We could not start the SOA portal session. Please try again.'
+        );
 
         return {
             success: false,
-            status: isUnreachable ? STATUS_PORTAL_UNREACHABLE : STATUS_SCRAPE_ERROR,
-            message: isUnreachable 
-                ? 'SOA portal is currently unreachable. Please try again later.'
-                : `Failed to load portal: ${error.message}`
+            status: failure.status,
+            message: failure.message
         };
     }
 }
@@ -340,6 +1137,23 @@ async function loginAndScrape(sessionId, regNo, password, captcha) {
 
         // Scrape all available data
         const studentData = await scrapeAllData(page);
+        const normalizedData = normalizeSoaPortalData({
+            ...studentData,
+            loginUserId: regNo,
+            portalRegistrationNumber: regNo
+        });
+        const hasUsableData = hasMeaningfulPortalData(normalizedData);
+
+        if (!hasUsableData) {
+            await closeSession(sessionId);
+            return {
+                success: false,
+                status: loginSuccess.uncertain ? STATUS_AUTH_FAILED : STATUS_SCRAPE_ERROR,
+                message: loginSuccess.uncertain
+                    ? 'SOA login could not be confirmed. Please check your registration number, password, and CAPTCHA, then try again.'
+                    : 'SOA login completed but no student data was returned. Please fetch a new CAPTCHA and try again.'
+            };
+        }
 
         // Close session after successful scrape
         await closeSession(sessionId);
@@ -348,7 +1162,7 @@ async function loginAndScrape(sessionId, regNo, password, captcha) {
             success: true,
             status: STATUS_SUCCESS,
             message: 'Data fetched successfully from SOA portal',
-            data: studentData
+            data: normalizedData
         };
 
     } catch (error) {
@@ -356,11 +1170,15 @@ async function loginAndScrape(sessionId, regNo, password, captcha) {
         
         // Close session on error
         await closeSession(sessionId);
+        const failure = buildScraperErrorResponse(
+            error,
+            'We could not complete the SOA import. Please fetch a new CAPTCHA and try again.'
+        );
 
         return {
             success: false,
-            status: STATUS_SCRAPE_ERROR,
-            message: `Error: ${error.message}`
+            status: failure.status,
+            message: failure.message
         };
     }
 }
@@ -375,140 +1193,59 @@ async function loginAndScrape(sessionId, regNo, password, captcha) {
  */
 async function performLogin(page, regNo, password, captcha) {
     try {
-        // Find and fill registration number field
-        const regSelectors = [
-            'input[name*="reg"]',
-            'input[id*="reg"]',
-            'input[placeholder*="Registration"]',
-            'input[placeholder*="registration"]',
-            'input[ng-model*="reg"]',
-            'input[ng-model*="user"]',
-            'input[name="username"]',
-            'input[id="username"]',
-            'input[type="text"]'
-        ];
+        const initialRegSelector = await fillFirstVisibleField(page, REGISTRATION_SELECTORS, regNo, 'registration');
+        const initialPasswordSelector = await fillFirstVisibleField(page, PASSWORD_SELECTORS, password, 'password');
+        const initialCaptchaSelector = await fillFirstVisibleField(page, CAPTCHA_SELECTORS, captcha, 'captcha');
 
-        let regFieldFilled = false;
-        for (const selector of regSelectors) {
-            try {
-                const element = page.locator(selector).first();
-                const isVisible = await element.isVisible().catch(() => false);
-                if (isVisible) {
-                    await element.fill(regNo);
-                    console.log(`[SOA Scraper] Filled registration field with selector: ${selector}`);
-                    regFieldFilled = true;
-                    break;
-                }
-            } catch (e) {
-                continue;
-            }
-        }
-
-        if (!regFieldFilled) {
+        if (!initialRegSelector) {
             console.warn(`[SOA Scraper] Could not find registration field`);
         }
-
-        // Find and fill password field
-        const pwdSelectors = [
-            'input[type="password"]',
-            'input[name*="password"]',
-            'input[id*="password"]',
-            'input[placeholder*="Password"]',
-            'input[ng-model*="password"]'
-        ];
-
-        let pwdFieldFilled = false;
-        for (const selector of pwdSelectors) {
-            try {
-                const element = page.locator(selector).first();
-                const isVisible = await element.isVisible().catch(() => false);
-                if (isVisible) {
-                    await element.fill(password);
-                    console.log(`[SOA Scraper] Filled password field with selector: ${selector}`);
-                    pwdFieldFilled = true;
-                    break;
-                }
-            } catch (e) {
-                continue;
-            }
-        }
-
-        if (!pwdFieldFilled) {
+        if (!initialPasswordSelector) {
             console.warn(`[SOA Scraper] Could not find password field`);
         }
-
-        // Fill CAPTCHA field
-        const captchaSelectors = [
-            'input[name*="captcha"]',
-            'input[id*="captcha"]',
-            'input[placeholder*="Captcha"]',
-            'input[placeholder*="CAPTCHA"]',
-            'input[placeholder*="Enter"]',
-            'input[ng-model*="captcha"]'
-        ];
-
-        let captchaFieldFilled = false;
-        for (const selector of captchaSelectors) {
-            try {
-                const element = page.locator(selector).first();
-                const isVisible = await element.isVisible().catch(() => false);
-                if (isVisible) {
-                    await element.fill(captcha);
-                    console.log(`[SOA Scraper] Filled captcha field with selector: ${selector}`);
-                    captchaFieldFilled = true;
-                    break;
-                }
-            } catch (e) {
-                continue;
-            }
-        }
-
-        if (!captchaFieldFilled) {
+        if (!initialCaptchaSelector) {
             console.warn(`[SOA Scraper] Could not find captcha field`);
         }
 
-        // Click login button
-        const loginSelectors = [
-            'button[type="submit"]',
-            'input[type="submit"]',
-            'button[id*="login"]',
-            'button[class*="login"]',
-            'button[ng-click*="login"]',
-            'button:has-text("Login")',
-            'button:has-text("Sign In")',
-            'button:has-text("Submit")',
-            '.btn-primary[type="submit"]',
-            '#loginBtn'
-        ];
-
-        let loginClicked = false;
-        for (const selector of loginSelectors) {
-            try {
-                const element = page.locator(selector).first();
-                const isVisible = await element.isVisible().catch(() => false);
-                if (isVisible) {
-                    await element.click();
-                    console.log(`[SOA Scraper] Clicked login button with selector: ${selector}`);
-                    loginClicked = true;
-                    break;
-                }
-            } catch (e) {
-                continue;
-            }
-        }
+        let loginClicked = await clickFirstVisibleAction(page, LOGIN_ACTION_SELECTORS, 'login button');
 
         if (!loginClicked) {
             // Try pressing Enter
             await page.keyboard.press('Enter');
             console.log(`[SOA Scraper] Pressed Enter to submit form`);
+            loginClicked = 'keyboard:Enter';
         }
 
         // Wait for response
-        await page.waitForTimeout(5000);
+        await waitForPortalUpdate(page, 2500);
+
+        let passwordStepSelector = null;
+        if (!initialPasswordSelector) {
+            passwordStepSelector = await fillFirstVisibleField(page, PASSWORD_SELECTORS, password, 'password');
+            if (passwordStepSelector) {
+                console.log('[SOA Scraper] Detected password step after initial SOA submit');
+
+                const captchaStillVisible = await fillFirstVisibleField(page, CAPTCHA_SELECTORS, captcha, 'captcha');
+                if (captchaStillVisible) {
+                    console.log('[SOA Scraper] CAPTCHA field remained visible during password step');
+                }
+
+                const passwordStepSubmit = await clickFirstVisibleAction(page, LOGIN_ACTION_SELECTORS, 'password-step submit button');
+                if (!passwordStepSubmit) {
+                    await page.keyboard.press('Enter');
+                    console.log('[SOA Scraper] Pressed Enter to submit password step');
+                }
+
+                await waitForPortalUpdate(page, 3000);
+            }
+        }
 
         // Check for login success/failure
         const pageContent = await page.content();
         const currentUrl = page.url();
+        const loginFormVisible = await isLoginFormStillVisible(page);
+        const visibleInputs = await collectVisibleInputDiagnostics(page);
+        console.log(`[SOA Scraper] Visible inputs after submit: ${JSON.stringify(visibleInputs)}`);
 
         // Check for error messages
         const errorIndicators = [
@@ -543,27 +1280,41 @@ async function performLogin(page, regNo, password, captcha) {
 
         // Check for success indicators
         const successIndicators = [
-            'dashboard',
             'welcome',
-            'profile',
+            'personal information',
+            'contact information',
+            'qualifications',
             'attendance',
-            'result',
+            'marks & results',
+            'exam result',
             'logout',
-            'student portal'
+            'log out',
+            'sign out'
         ];
 
         for (const success of successIndicators) {
-            if (lowerContent.includes(success)) {
+            if (lowerContent.includes(success) && !loginFormVisible) {
                 return { success: true };
             }
         }
 
-        // Check if URL changed (indicating successful login)
-        if (!currentUrl.includes('login') && 
-            (currentUrl.includes('dashboard') || 
-             currentUrl.includes('home') || 
-             currentUrl.includes('student'))) {
+        const isBaseLoginRoute = /StudentPortalSOA\/#\/?$/.test(currentUrl);
+
+        // Check if URL changed away from the initial login route.
+        if (!loginFormVisible && !isBaseLoginRoute && !currentUrl.includes('login')) {
             return { success: true };
+        }
+
+        if (passwordStepSelector && !loginFormVisible) {
+            return { success: true };
+        }
+
+        if (loginFormVisible) {
+            return {
+                success: false,
+                status: STATUS_AUTH_FAILED,
+                message: 'SOA login could not be confirmed. Please check your registration number, password, and CAPTCHA.'
+            };
         }
 
         // If we can't determine login status, return uncertain result
@@ -589,20 +1340,27 @@ async function performLogin(page, regNo, password, captcha) {
 async function scrapeAllData(page) {
     const data = {
         profile: {},
+        personalInfo: {},
+        contactInfo: {},
+        qualifications: [],
         attendance: [],
         marks: [],
+        results: [],
         internalAssessments: [],
         timetable: [],
         subjects: [],
         notifications: [],
         backlogs: [],
         fees: {},
-        rawHtml: ''
+        rawHtml: '',
+        rawSections: {}
     };
 
     try {
         // Get current page content
         const pageContent = await page.content();
+        data.rawSections = await collectSectionSnapshots(page);
+        data.rawHtml = pageContent;
         
         // Extract profile information
         data.profile = await scrapeProfile(page, pageContent);
@@ -627,7 +1385,16 @@ async function scrapeAllData(page) {
 
         // Add metadata
         data.fetchedAt = new Date().toISOString();
-        data.dataSource = 'live_portal';
+        data.dataSource = 'live_soa_portal';
+
+        const normalized = normalizeSoaPortalData(data);
+        data.profile = normalized.profile || data.profile;
+        data.personalInfo = normalized.personalInfo || {};
+        data.contactInfo = normalized.contactInfo || {};
+        data.qualifications = normalized.qualifications || [];
+        data.attendance = normalized.attendance?.summary || data.attendance;
+        data.marks = normalized.marks?.records || data.marks;
+        data.results = normalized.results || [];
 
         console.log(`[SOA Scraper] Successfully scraped data`);
 
@@ -1175,10 +1942,14 @@ async function refreshCaptcha(sessionId) {
 
     } catch (error) {
         console.error(`[SOA Scraper] Error refreshing CAPTCHA:`, error.message);
+        const failure = buildScraperErrorResponse(
+            error,
+            'Could not refresh CAPTCHA. Please start a new SOA session.'
+        );
         return {
             success: false,
-            status: STATUS_SCRAPE_ERROR,
-            message: `Error: ${error.message}`
+            status: failure.status,
+            message: failure.message
         };
     }
 }

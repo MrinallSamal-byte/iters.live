@@ -6,13 +6,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#667eea">
-  <title>Mobile-First Demo - ITER EduHub</title>
+  <title>Mobile-First Demo - ITERasn hub</title>
   
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/mobile.css">
-  <link rel="stylesheet" href="../css/skeleton.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/mobile.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
   
   <style>
     /* Demo specific styles */
@@ -262,9 +262,9 @@
   </nav>
 
   <!-- Scripts -->
+  <script src="/js/components/skeleton-loader.js"></script>
   <script type="module">
     import { MobileNavigation, PullToRefresh } from '../js/components/mobile-navigation.js';
-    import skeletonLoader from '../js/components/skeleton-loader.js';
     import lazyLoader from '../js/components/lazy-loader.js';
     import { SwipeableCard, swipeableCardManager } from '../js/components/swipeable-card.js';
 
@@ -309,7 +309,7 @@
       const container = document.getElementById('skeleton-demo');
       
       // Show skeleton
-      skeletonLoader.show('skeleton-demo', 'card', 3);
+      window.skeletonLoader.show('skeleton-demo', 'card', 3);
       
       // Simulate loading and show real content
       setTimeout(() => {
@@ -373,5 +373,6 @@
 
     console.log('Mobile-First Demo initialized ✓');
   </script>
+  <script src="/js/main.js"></script>
 </body>
 </html>

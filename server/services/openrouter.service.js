@@ -67,7 +67,7 @@ class OpenRouterService {
                     'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
                     'HTTP-Referer': options.referer || 'https://iter.edu',
-                    'X-Title': options.title || 'ITER EduHub'
+                    'X-Title': options.title || 'ITERasn hub'
                 },
                 body: JSON.stringify({
                     model,
@@ -174,11 +174,13 @@ class OpenRouterService {
      * @returns {Promise<string>} AI response
      */
     async answerQuestion(question, context = '', systemPrompt = null) {
-        const defaultSystemPrompt = `You are a helpful and knowledgeable educational assistant for college students. 
-Your primary focus is helping with study-related questions, but you can also help with general questions.
-Always aim to be educational and help students learn.
-Include step-by-step explanations for complex problems.
-Provide examples when they would help understanding.`;
+        const defaultSystemPrompt = `You are a helpful educational assistant for college students.
+Answer clearly, accurately, and concisely.
+For general questions, reply in 1 to 3 short sentences or up to 3 short bullet points.
+For study or problem-solving questions, stay concise by default and only include steps when they help.
+For website or navigation questions, give the direct action first.
+Avoid filler, repeated disclaimers, and long introductions.
+If unsure, say so briefly.`;
 
         const messages = [
             {
@@ -197,7 +199,7 @@ Provide examples when they would help understanding.`;
             const response = await this.makeRequestWithFallback(
                 this.models.chatbot,
                 messages,
-                { temperature: 0.7, maxTokens: 2000 }
+                { temperature: 0.5, maxTokens: 900 }
             );
             
             return response;

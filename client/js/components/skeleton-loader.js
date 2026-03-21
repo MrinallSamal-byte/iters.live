@@ -1,242 +1,224 @@
 /**
- * SkeletonLoader: replace content with shimmer placeholders
- * API:
- *  - show(elementId, type?)
- *  - hide(elementId)
- *  - createSkeleton(type): 'card' | 'list' | 'table' | 'chart'
- */
-class SkeletonLoader {
-  constructor() {
-    this.originalContent = new Map();
-    this.stylesInjected = false;
-    this.injectStyles();
-  }
-
-  injectStyles() {
-    if (this.stylesInjected) return;
-    const css = `
-      .skeleton-shimmer { position: relative; overflow: hidden; background: rgba(255,255,255,0.06); }
-      .skeleton-shimmer::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-        animation: skeleton-loading 3s infinite; }
-      @keyframes skeleton-loading { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
-      .skeleton-card { border-radius: 12px; height: 120px; margin: 8px 0; }
-      .skeleton-list { display: grid; gap: 10px; }
-      .skeleton-list .row { height: 16px; border-radius: 8px; }
-      .skeleton-table { display: grid; gap: 8px; }
-      .skeleton-table .row { height: 18px; border-radius: 6px; }
-      .skeleton-chart { height: 160px; border-radius: 12px; }
-    `;
-    const style = document.createElement('style');
-    style.textContent = css;
-    document.head.appendChild(style);
-    this.stylesInjected = true;
-  }
-
-  show(elementId, type = 'list') {
-    const el = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
-    if (!el) return;
-    if (!this.originalContent.has(el)) {
-      this.originalContent.set(el, el.innerHTML);
-    }
-    el.setAttribute('aria-busy', 'true');
-    el.innerHTML = '';
-    el.appendChild(this.createSkeleton(type));
-  }
-
-  hide(elementId) {
-    const el = typeof elementId === 'string' ? document.getElementById(elementId) : elementId;
-    if (!el) return;
-    el.removeAttribute('aria-busy');
-    if (this.originalContent.has(el)) {
-      el.innerHTML = this.originalContent.get(el);
-      this.originalContent.delete(el);
-    } else {
-      el.innerHTML = '';
-    }
-  }
-
-  createSkeleton(type = 'list') {
-    const wrapper = document.createElement('div');
-    switch (type) {
-      case 'card':
-        wrapper.className = 'skeleton-shimmer skeleton-card';
-        break;
-      case 'table': {
-        wrapper.className = 'skeleton-table';
-        for (let i = 0; i < 6; i++) {
-          const r = document.createElement('div');
-          r.className = 'skeleton-shimmer row';
-          wrapper.appendChild(r);
-        }
-        break;
-      }
-      case 'chart':
-        wrapper.className = 'skeleton-shimmer skeleton-chart';
-        break;
-      case 'list':
-      default: {
-        wrapper.className = 'skeleton-list';
-        for (let i = 0; i < 5; i++) {
-          const r = document.createElement('div');
-          r.className = 'skeleton-shimmer row';
-          r.style.width = `${60 + Math.floor(Math.random()*40)}%`;
-          wrapper.appendChild(r);
-        }
-        break;
-      }
-    }
-    return wrapper;
-  }
-}
-
-// Global export
-window.SkeletonLoader = SkeletonLoader;
-if (typeof module !== 'undefined') module.exports = SkeletonLoader;
-/**
  * Skeleton Loader Component
- * Shows placeholder content while data is loading
+ * Provides lightweight placeholder states for classic scripts and demo pages.
  */
 
-class SkeletonLoader {
-  constructor() {
-    this.templates = {
-      card: this.cardSkeleton,
-      list: this.listSkeleton,
-      table: this.tableSkeleton,
-      profile: this.profileSkeleton,
-      chart: this.chartSkeleton
-    };
-  }
-
-  /**
-   * Show skeleton for a container
-   */
-  show(containerId, type = 'card', count = 1) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.classList.add('skeleton-loading');
-    
-    const template = this.templates[type] || this.templates.card;
-    const skeletons = Array(count).fill(null).map(() => template()).join('');
-    
-    container.innerHTML = `<div class="skeleton-wrapper">${skeletons}</div>`;
-  }
-
-  /**
-   * Hide skeleton and show real content
-   */
-  hide(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.classList.remove('skeleton-loading');
-    
-    const wrapper = container.querySelector('.skeleton-wrapper');
-    if (wrapper) {
-      wrapper.remove();
+(function initSkeletonLoader(global) {
+  class SkeletonLoader {
+    constructor() {
+      this.templates = {
+        card: this.cardSkeleton.bind(this),
+        list: this.listSkeleton.bind(this),
+        table: this.tableSkeleton.bind(this),
+        profile: this.profileSkeleton.bind(this),
+        chart: this.chartSkeleton.bind(this)
+      };
+      this.stylesInjected = false;
+      this.injectStyles();
     }
-  }
 
-  /**
-   * Card skeleton template
-   */
-  cardSkeleton() {
-    return `
-      <div class="skeleton-card">
-        <div class="skeleton skeleton-image"></div>
-        <div class="skeleton-content">
-          <div class="skeleton skeleton-title"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text short"></div>
-        </div>
-      </div>
-    `;
-  }
+    injectStyles() {
+      if (this.stylesInjected || document.getElementById('skeleton-loader-styles')) {
+        this.stylesInjected = true;
+        return;
+      }
 
-  /**
-   * List item skeleton template
-   */
-  listSkeleton() {
-    return `
-      <div class="skeleton-list-item">
-        <div class="skeleton skeleton-avatar"></div>
-        <div class="skeleton-list-content">
-          <div class="skeleton skeleton-title short"></div>
-          <div class="skeleton skeleton-text"></div>
-        </div>
-      </div>
-    `;
-  }
+      const style = document.createElement('style');
+      style.id = 'skeleton-loader-styles';
+      style.textContent = `
+        .skeleton-wrapper { display: grid; gap: 1rem; width: 100%; }
+        .skeleton-loading { position: relative; min-height: 80px; }
+        .skeleton {
+          position: relative;
+          overflow: hidden;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.08);
+        }
+        .skeleton::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          transform: translateX(-100%);
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+          animation: skeleton-loading 1.5s ease-in-out infinite;
+        }
+        .skeleton-card,
+        .skeleton-list-item,
+        .skeleton-profile,
+        .skeleton-table-row,
+        .skeleton-table-header,
+        .skeleton-chart {
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.03);
+        }
+        .skeleton-card { padding: 1.25rem; display: grid; gap: 0.85rem; min-height: 148px; }
+        .skeleton-image,
+        .skeleton-profile-image { width: 72px; height: 72px; border-radius: 18px; }
+        .skeleton-content,
+        .skeleton-list-content { display: grid; gap: 0.75rem; }
+        .skeleton-title { height: 20px; width: 72%; }
+        .skeleton-text { height: 14px; width: 100%; }
+        .skeleton-text.short { width: 58%; }
+        .skeleton-text.centered,
+        .skeleton-title.centered { margin-inline: auto; }
+        .skeleton-list-item {
+          display: grid;
+          grid-template-columns: 56px 1fr;
+          gap: 1rem;
+          align-items: center;
+          padding: 1rem 1.1rem;
+        }
+        .skeleton-avatar { width: 56px; height: 56px; border-radius: 50%; }
+        .skeleton-table { display: grid; gap: 0.8rem; }
+        .skeleton-table-header,
+        .skeleton-table-row {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 0.75rem;
+          padding: 0.95rem;
+        }
+        .skeleton-profile { padding: 1.4rem; display: grid; gap: 1rem; text-align: center; }
+        .skeleton-profile-image { margin-inline: auto; width: 92px; height: 92px; border-radius: 22px; }
+        .skeleton-profile-stats {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.85rem;
+        }
+        .skeleton-stat { display: grid; gap: 0.5rem; }
+        .skeleton-number { height: 24px; width: 60%; margin-inline: auto; }
+        .skeleton-chart { padding: 1.25rem; display: grid; gap: 1rem; }
+        .skeleton-chart-bars {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 0.75rem;
+          align-items: end;
+          min-height: 160px;
+        }
+        .skeleton-chart-bar { display: flex; align-items: end; min-height: 100px; }
+        .skeleton-bar { width: 100%; height: 100%; border-radius: 12px; }
+        @keyframes skeleton-loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+      this.stylesInjected = true;
+    }
 
-  /**
-   * Table skeleton template
-   */
-  tableSkeleton() {
-    return `
-      <div class="skeleton-table">
-        <div class="skeleton-table-header">
-          ${Array(4).fill('<div class="skeleton skeleton-text"></div>').join('')}
+    resolveContainer(containerOrId) {
+      if (typeof containerOrId === 'string') {
+        return document.getElementById(containerOrId);
+      }
+      return containerOrId || null;
+    }
+
+    show(containerOrId, type = 'card', count = 1) {
+      const container = this.resolveContainer(containerOrId);
+      if (!container) return;
+
+      container.classList.add('skeleton-loading');
+      const template = this.templates[type] || this.templates.card;
+      const skeletons = Array.from({ length: Math.max(1, count) }, () => template()).join('');
+      container.innerHTML = `<div class="skeleton-wrapper">${skeletons}</div>`;
+    }
+
+    hide(containerOrId) {
+      const container = this.resolveContainer(containerOrId);
+      if (!container) return;
+
+      container.classList.remove('skeleton-loading');
+      const wrapper = container.querySelector('.skeleton-wrapper');
+      if (wrapper) {
+        wrapper.remove();
+      }
+    }
+
+    cardSkeleton() {
+      return `
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-image"></div>
+          <div class="skeleton-content">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text short"></div>
+          </div>
         </div>
-        ${Array(5).fill(`
-          <div class="skeleton-table-row">
+      `;
+    }
+
+    listSkeleton() {
+      return `
+        <div class="skeleton-list-item">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton-list-content">
+            <div class="skeleton skeleton-title short"></div>
+            <div class="skeleton skeleton-text"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    tableSkeleton() {
+      return `
+        <div class="skeleton-table">
+          <div class="skeleton-table-header">
             ${Array(4).fill('<div class="skeleton skeleton-text"></div>').join('')}
           </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  /**
-   * Profile skeleton template
-   */
-  profileSkeleton() {
-    return `
-      <div class="skeleton-profile">
-        <div class="skeleton skeleton-profile-image"></div>
-        <div class="skeleton skeleton-title centered"></div>
-        <div class="skeleton skeleton-text centered short"></div>
-        <div class="skeleton-profile-stats">
-          ${Array(3).fill(`
-            <div class="skeleton-stat">
-              <div class="skeleton skeleton-number"></div>
-              <div class="skeleton skeleton-text short"></div>
+          ${Array(5).fill(`
+            <div class="skeleton-table-row">
+              ${Array(4).fill('<div class="skeleton skeleton-text"></div>').join('')}
             </div>
           `).join('')}
         </div>
-      </div>
-    `;
-  }
+      `;
+    }
 
-  /**
-   * Chart skeleton template
-   */
-  chartSkeleton() {
-    return `
-      <div class="skeleton-chart">
-        <div class="skeleton skeleton-title"></div>
-        <div class="skeleton-chart-bars">
-          ${Array(6).fill(null).map((_, i) => `
-            <div class="skeleton-chart-bar" style="height: ${30 + Math.random() * 60}%">
-              <div class="skeleton skeleton-bar"></div>
-            </div>
-          `).join('')}
+    profileSkeleton() {
+      return `
+        <div class="skeleton-profile">
+          <div class="skeleton skeleton-profile-image"></div>
+          <div class="skeleton skeleton-title centered"></div>
+          <div class="skeleton skeleton-text centered short"></div>
+          <div class="skeleton-profile-stats">
+            ${Array(3).fill(`
+              <div class="skeleton-stat">
+                <div class="skeleton skeleton-number"></div>
+                <div class="skeleton skeleton-text short"></div>
+              </div>
+            `).join('')}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
+
+    chartSkeleton() {
+      return `
+        <div class="skeleton-chart">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton-chart-bars">
+            ${Array.from({ length: 6 }, () => `
+              <div class="skeleton-chart-bar" style="height: ${30 + Math.random() * 60}%">
+                <div class="skeleton skeleton-bar"></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    createInline(type = 'text', className = '') {
+      return `<div class="skeleton skeleton-${type} ${className}"></div>`;
+    }
   }
 
-  /**
-   * Create inline skeleton
-   */
-  createInline(type = 'text', className = '') {
-    return `<div class="skeleton skeleton-${type} ${className}"></div>`;
+  const skeletonLoader = new SkeletonLoader();
+  global.SkeletonLoader = SkeletonLoader;
+  global.skeletonLoader = skeletonLoader;
+
+  if (typeof module !== 'undefined') {
+    module.exports = skeletonLoader;
+    module.exports.SkeletonLoader = SkeletonLoader;
+    module.exports.skeletonLoader = skeletonLoader;
   }
-}
-
-// Export singleton
-const skeletonLoader = new SkeletonLoader();
-window.skeletonLoader = skeletonLoader;
-
-export default skeletonLoader;
+})(typeof window !== 'undefined' ? window : globalThis);

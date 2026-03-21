@@ -677,10 +677,10 @@
                         <div class="profile-modal-body">
                             <div class="id-card" id="idCardContent">
                                 <div class="id-card-header">
-                                    <img src="/assets/logo.png" alt="ITER Logo" class="id-card-logo" onerror="this.style.display='none'">
+                                    <img src="/assets/soa-logo.png" alt="ITER Logo" class="id-card-logo" onerror="this.style.display='none'">
                                     <div class="id-card-college">
-                                        <h4>ITER - Institute of Technical Education and Research</h4>
-                                        <p>Siksha 'O' Anusandhan (Deemed to be University)</p>
+                                        <h4>ITERasn hub</h4>
+                                        <p>Institute of Technical Education and Research</p>
                                     </div>
                                 </div>
                                 <div class="id-card-body">
@@ -725,27 +725,27 @@
                                     <p>Valid for Academic Year 2024-25</p>
                                     <div class="id-card-qr">
                                         <svg width="50" height="50" viewBox="0 0 50 50">
-                                            <rect x="5" y="5" width="8" height="8" fill="#667eea"/>
-                                            <rect x="17" y="5" width="4" height="8" fill="#667eea"/>
-                                            <rect x="25" y="5" width="8" height="8" fill="#667eea"/>
-                                            <rect x="37" y="5" width="8" height="8" fill="#667eea"/>
-                                            <rect x="5" y="17" width="4" height="4" fill="#667eea"/>
-                                            <rect x="13" y="17" width="4" height="4" fill="#667eea"/>
-                                            <rect x="25" y="17" width="4" height="4" fill="#667eea"/>
-                                            <rect x="37" y="17" width="8" height="4" fill="#667eea"/>
-                                            <rect x="5" y="25" width="8" height="8" fill="#667eea"/>
-                                            <rect x="17" y="25" width="4" height="8" fill="#667eea"/>
-                                            <rect x="25" y="25" width="8" height="8" fill="#667eea"/>
-                                            <rect x="37" y="25" width="4" height="8" fill="#667eea"/>
-                                            <rect x="5" y="37" width="8" height="8" fill="#667eea"/>
-                                            <rect x="17" y="37" width="8" height="8" fill="#667eea"/>
-                                            <rect x="29" y="37" width="4" height="8" fill="#667eea"/>
-                                            <rect x="37" y="37" width="8" height="8" fill="#667eea"/>
+                                            <rect x="5" y="5" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="17" y="5" width="4" height="8" fill="#ff6b5e"/>
+                                            <rect x="25" y="5" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="37" y="5" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="5" y="17" width="4" height="4" fill="#ff6b5e"/>
+                                            <rect x="13" y="17" width="4" height="4" fill="#ff6b5e"/>
+                                            <rect x="25" y="17" width="4" height="4" fill="#ff6b5e"/>
+                                            <rect x="37" y="17" width="8" height="4" fill="#ff6b5e"/>
+                                            <rect x="5" y="25" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="17" y="25" width="4" height="8" fill="#ff6b5e"/>
+                                            <rect x="25" y="25" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="37" y="25" width="4" height="8" fill="#ff6b5e"/>
+                                            <rect x="5" y="37" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="17" y="37" width="8" height="8" fill="#ff6b5e"/>
+                                            <rect x="29" y="37" width="4" height="8" fill="#ff6b5e"/>
+                                            <rect x="37" y="37" width="8" height="8" fill="#ff6b5e"/>
                                         </svg>
                                     </div>
                                 </div>
                             </div>
-                            <div style="text-align: center; margin-top: 20px;">
+                            <div class="id-card-actions">
                                 <button class="btn btn-primary" onclick="UniversalProfile.downloadIdCard()">
                                     📥 Download ID Card
                                 </button>

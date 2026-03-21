@@ -5,7 +5,7 @@ const openRouterService = require('./openrouter.service');
  * AI Service for Educational Assistance
  * Provides personalized study plans, recommendations, and Q&A
  * Uses OpenRouter API (primary) and Google Gemini AI (fallback) for intelligent responses
- * Part of ITER EduHub Enhancement Suite
+ * Part of ITERasn hub Enhancement Suite
  */
 class AIService {
     constructor() {
@@ -134,19 +134,19 @@ Format as JSON with structure:
      * Handles both study-related and general questions
      */
     async answerQuestion(question, context) {
-        const prompt = `You are a helpful and knowledgeable educational assistant for college students. Your primary focus is helping with study-related questions, but you can also help with general questions.
+        const prompt = `You are a helpful educational assistant for college students.
 
 Question: ${question}
 ${context ? `Context: ${context}` : ''}
 
 Instructions:
-- If this is a study-related question (academics, homework, concepts, problems, etc.), provide a detailed, clear, and educational answer with examples where helpful.
-- If this is a general question, still provide a helpful and accurate answer.
-- Always aim to be educational and help the student learn.
-- Include step-by-step explanations for complex problems.
-- Provide examples when they would help understanding.
+- If this is a study-related question, answer clearly and concisely. Include steps only when they help understanding.
+- If this is a general question, answer in 1 to 3 short sentences or up to 3 short bullet points.
+- If this is a website or navigation question, give the direct action first.
+- Avoid filler, long introductions, and repeated disclaimers.
+- If unsure, say so briefly.
 
-Please provide a thorough and helpful response:`;
+Please provide a concise and helpful response:`;
 
         try {
             // Try OpenRouter first

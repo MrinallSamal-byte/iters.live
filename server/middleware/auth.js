@@ -1,4 +1,13 @@
 const { auth, db } = require('../database/firebase');
+const { verifyAppSessionToken } = require('../utils/app-session');
+const { getLocalDemoUserFromToken } = require('../services/demo-auth.service');
+
+function attachSessionUser(req, user) {
+  req.user = {
+    ...user,
+    id: user.id || user.uid || user.registration_number
+  };
+}
 
 /**
  * Verify Firebase ID token and attach user to request
@@ -16,6 +25,23 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7);
+
+    try {
+      const decodedSession = verifyAppSessionToken(token);
+      const sessionUser = decodedSession?.user;
+      if (sessionUser) {
+        attachSessionUser(req, sessionUser);
+        return next();
+      }
+    } catch (_) {
+      // Continue to demo/Firebase verification.
+    }
+
+    const localDemoUser = getLocalDemoUserFromToken(token);
+    if (localDemoUser) {
+      attachSessionUser(req, localDemoUser);
+      return next();
+    }
 
     // Verify Firebase ID Token
     const decodedToken = await auth.verifyIdToken(token);
@@ -56,8 +82,10 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Attach user to request
-    req.user = user;
-    req.user.id = userDoc.id; // Ensure ID is available
+    attachSessionUser(req, {
+      ...user,
+      id: userDoc.id
+    });
 
     next();
   } catch (error) {
@@ -110,13 +138,31 @@ const optionalAuth = async (req, res, next) => {
       const token = authHeader.substring(7);
       
       try {
+        const decodedSession = verifyAppSessionToken(token);
+        if (decodedSession?.user) {
+          attachSessionUser(req, decodedSession.user);
+          return next();
+        }
+      } catch (_) {
+        // Continue to legacy token handling.
+      }
+
+      const localDemoUser = getLocalDemoUserFromToken(token);
+      if (localDemoUser) {
+        attachSessionUser(req, localDemoUser);
+        return next();
+      }
+
+      try {
         const decodedToken = await auth.verifyIdToken(token);
         const uid = decodedToken.uid;
 
         const userDoc = await db.collection('users').doc(uid).get();
         if (userDoc.exists) {
-          req.user = userDoc.data();
-          req.user.id = userDoc.id;
+          attachSessionUser(req, {
+            ...userDoc.data(),
+            id: userDoc.id
+          });
         }
       } catch (tokenError) {
         // Token is invalid/expired - silently ignore for optional auth
@@ -137,4 +183,3 @@ module.exports = {
   roleMiddleware,
   optionalAuth
 };
-

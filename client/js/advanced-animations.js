@@ -1,5 +1,5 @@
 /**
- * Advanced Animations System for ITER EduHub
+ * Advanced Animations System for ITERasn hub
  * Implements GSAP-based scroll animations, counter animations, hover effects, and particles
  * Version: 1.0.0
  */

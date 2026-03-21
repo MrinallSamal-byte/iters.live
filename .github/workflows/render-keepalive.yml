@@ -1,0 +1,41 @@
+name: Render Keepalive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve healthcheck target
+        id: target
+        env:
+          RENDER_HEALTHCHECK_URL: ${{ vars.RENDER_HEALTHCHECK_URL }}
+          RENDER_HEALTHCHECK_URL_SECRET: ${{ secrets.RENDER_HEALTHCHECK_URL }}
+        run: |
+          TARGET_URL="${RENDER_HEALTHCHECK_URL:-$RENDER_HEALTHCHECK_URL_SECRET}"
+
+          if [ -z "$TARGET_URL" ]; then
+            TARGET_URL="https://iter-aio.onrender.com"
+          fi
+
+          case "$TARGET_URL" in
+            */health|*/api/health)
+              HEALTH_URL="$TARGET_URL"
+              ;;
+            *)
+              HEALTH_URL="${TARGET_URL%/}/health"
+              ;;
+          esac
+
+          echo "health_url=$HEALTH_URL" >> "$GITHUB_OUTPUT"
+          echo "Using keepalive URL: $HEALTH_URL"
+
+      - name: Ping Render health endpoint
+        run: |
+          curl --fail --silent --show-error --max-time 30 \
+            --user-agent "iterasn-hub-keepalive" \
+            "${{ steps.target.outputs.health_url }}"
+

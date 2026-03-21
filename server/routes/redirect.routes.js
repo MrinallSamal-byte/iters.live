@@ -143,6 +143,11 @@ router.get('/:encoded', (req, res) => {
             console.warn('Invalid redirect URL attempted:', decoded);
             return res.redirect('/');
         }
+
+        // Preserve legacy encoded /web/* links by handing them back to the web router.
+        if (decoded.startsWith('/web/')) {
+            return res.redirect(decoded);
+        }
         
         // Extract path without hash and query for file serving
         let filePath = decoded;

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
-    <title>Login - ITER EduHub</title>
+    <meta name="theme-color" content="#ff5a4f">
+    <title>Login - ITERasn hub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="/css/responsive.css">
@@ -16,10 +16,12 @@
     <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="stylesheet" href="/css/login-split.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/assets/soa-logo.png">
 </head>
 
-<body>
+<body class="nothing-home public-auth-page login-page">
     <div class="bg-animation">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
@@ -32,7 +34,7 @@
             <div class="login-brand-section">
                 <div class="brand-content">
                     <img class="brand-logo" src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
-                    <h1 class="brand-title">ITER EduHub</h1>
+                    <h1 class="brand-title">ITERasn hub</h1>
                     <p class="brand-subtitle">Your gateway to academic excellence. Manage attendance, marks, and more in
                         one place.</p>
                 </div>
@@ -43,7 +45,7 @@
                 <!-- Mobile Header (Visible only on small screens) -->
                 <div class="mobile-brand-header">
                     <img class="mobile-brand-logo" src="/assets/soa-logo.png" alt="SOA Logo">
-                    <h2 class="mobile-brand-title">ITER EduHub</h2>
+                    <h2 class="mobile-brand-title">ITERasn hub</h2>
                 </div>
 
                 <div class="login-header">
@@ -99,8 +101,8 @@
                 </div>
 
                 <div class="login-footer">
-                    <p>Don't have an account? <a href="/register.html">Register here</a></p>
-                    <a href="/index.html" class="back-link">← Back to Home</a>
+                    <p>Don't have an account? <a href="/register.html" data-public-nav="register">Register here</a></p>
+                    <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">← Back to Home</a>
                 </div>
             </div>
         </div>
@@ -116,7 +118,6 @@
     <script src="/js/scroll-fix.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/mobile-nav.js"></script>
-    <script src="/js/url-navigator.js"></script>
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -159,6 +160,12 @@
                     if (response.success) {
                         // Store user data
                         APP.Storage.set('accessToken', idToken);
+                        try {
+                            localStorage.setItem('token', idToken);
+                            sessionStorage.setItem('token', idToken);
+                        } catch (storageError) {
+                            console.warn('Failed to persist legacy token key:', storageError);
+                        }
                         APP.Storage.set('user', response.data.user);
 
                         // All users go directly to their respective dashboards
@@ -278,8 +285,25 @@
                     if (response.success) {
                         console.log('Login successful, storing tokens...');
 
+                        const isLocalDemoMode = response.data.authMode === 'local-demo' || response.data.demoMode === true;
+                        if (isLocalDemoMode) {
+                            try {
+                                localStorage.setItem('prototypeMode', 'true');
+                                localStorage.setItem('demoRole', response.data.user.role);
+                            } catch (storageError) {
+                                console.warn('Failed to persist demo mode flags:', storageError);
+                            }
+                        } else {
+                            try {
+                                localStorage.removeItem('prototypeMode');
+                                localStorage.removeItem('demoRole');
+                            } catch (storageError) {
+                                console.warn('Failed to clear demo mode flags:', storageError);
+                            }
+                        }
+
                         // If backend returns a custom token (accessToken), sign in to Firebase Client SDK
-                        if (response.data.accessToken && window.firebaseAuth && window.signInWithCustomToken) {
+                        if (!isLocalDemoMode && response.data.accessToken && window.firebaseAuth && window.signInWithCustomToken) {
                             try {
                                 console.log('Signing in to Firebase with custom token...');
                                 const userCredential = await window.signInWithCustomToken(window.firebaseAuth, response.data.accessToken);
@@ -287,12 +311,30 @@
 
                                 // Use the ID token for subsequent requests
                                 APP.Storage.set('accessToken', idToken);
+                                try {
+                                    localStorage.setItem('token', idToken);
+                                    sessionStorage.setItem('token', idToken);
+                                } catch (storageError) {
+                                    console.warn('Failed to persist legacy token key:', storageError);
+                                }
                             } catch (firebaseError) {
                                 console.error('Firebase Custom Token Sign-In Failed:', firebaseError);
                                 APP.Storage.set('accessToken', response.data.accessToken);
+                                try {
+                                    localStorage.setItem('token', response.data.accessToken);
+                                    sessionStorage.setItem('token', response.data.accessToken);
+                                } catch (storageError) {
+                                    console.warn('Failed to persist legacy token key:', storageError);
+                                }
                             }
                         } else {
                             APP.Storage.set('accessToken', response.data.accessToken);
+                            try {
+                                localStorage.setItem('token', response.data.accessToken);
+                                sessionStorage.setItem('token', response.data.accessToken);
+                            } catch (storageError) {
+                                console.warn('Failed to persist legacy token key:', storageError);
+                            }
                         }
 
                         APP.Storage.set('refreshToken', response.data.refreshToken);
@@ -378,34 +420,54 @@
             });
 
             // Ensure footer links work correctly on touch
-            const registerLink = document.querySelector('.login-footer a[href="register.html"]');
-            const homeLink = document.querySelector('.login-footer .back-link');
-            function ensureNav(el, href) {
-                if (!el) return;
-                // Remove any existing problematic listeners by cloning
-                const clone = el.cloneNode(true);
-                el.parentNode.replaceChild(clone, el);
-                clone.addEventListener('click', (ev) => {
-                    ev.preventDefault();
-                    // Use encoded URL for navigation
-                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                        window.LinkEncoding.navigateTo(href);
+            function clearPublicRedirectState() {
+                try {
+                    sessionStorage.removeItem('loginRedirect');
+                    sessionStorage.removeItem('loginMessage');
+                } catch (storageError) {
+                    console.warn('Failed to clear pending login redirect state:', storageError);
+                }
+
+                try {
+                    if (window.APP && typeof window.APP.clearPostLogoutRedirect === 'function') {
+                        window.APP.clearPostLogoutRedirect();
                     } else {
-                        window.location.href = href;
+                        localStorage.removeItem('postLogoutRedirectTarget');
+                        localStorage.removeItem('postLogoutRedirectTimestamp');
+                        localStorage.removeItem('postLogoutRedirectReason');
                     }
-                }, { passive: false });
-                clone.addEventListener('touchend', (ev) => {
-                    ev.preventDefault();
-                    // Use encoded URL for navigation
-                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                        window.LinkEncoding.navigateTo(href);
-                    } else {
-                        window.location.href = href;
-                    }
-                }, { passive: false });
+                } catch (storageError) {
+                    console.warn('Failed to clear stale public redirect state:', storageError);
+                }
             }
-            ensureNav(registerLink, '/register.html');
-            ensureNav(homeLink, '/index.html');
+
+            document.querySelectorAll('.login-footer a[data-public-nav]').forEach((link) => {
+                link.addEventListener('click', (ev) => {
+                    if (
+                        ev.defaultPrevented ||
+                        ev.button !== 0 ||
+                        ev.metaKey ||
+                        ev.ctrlKey ||
+                        ev.shiftKey ||
+                        ev.altKey
+                    ) {
+                        return;
+                    }
+
+                    const href = link.getAttribute('href');
+                    if (!href) return;
+
+                    ev.preventDefault();
+                    clearPublicRedirectState();
+
+                    if (link.dataset.replaceHistory === 'true') {
+                        window.location.replace(href);
+                        return;
+                    }
+
+                    window.location.assign(href);
+                });
+            });
         });
 
         function showError(message) {

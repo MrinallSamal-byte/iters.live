@@ -3,19 +3,6 @@
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
 
-# WebView
--keepclassmembers class fqcn.of.javascript.interface.for.webview {
-   public *;
-}
--keepclassmembers class * extends android.webkit.WebViewClient {
-    public void *(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
-    public boolean *(android.webkit.WebView, java.lang.String);
-}
--keepclassmembers class * extends android.webkit.WebViewClient {
-    public void *(android.webkit.WebView, jav.lang.String);
-}
-
-# Keep JavaScript interfaces
--keepclassmembers class * {
-    @android.webkit.JavascriptInterface <methods>;
-}
+# Keep Kotlinx serialization metadata used by the native API client.
+-keepclassmembers class kotlinx.serialization.** { *; }
+-keep @kotlinx.serialization.Serializable class * { *; }

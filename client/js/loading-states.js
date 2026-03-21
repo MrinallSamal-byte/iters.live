@@ -1,5 +1,5 @@
 /**
- * Loading States Manager for ITER EduHub
+ * Loading States Manager for ITERasn hub
  * Provides skeleton loaders, spinners, and progress bars
  * Version: 1.0.0
  */

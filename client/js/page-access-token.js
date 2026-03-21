@@ -12,9 +12,154 @@
 
     // Configuration
     const TOKEN_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+    const SESSION_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
     const TOKEN_STORAGE_KEY = 'pageAccessToken';
     const TOKEN_TIMESTAMP_KEY = 'pageAccessTokenTimestamp';
     const TOKEN_PATH_KEY = 'pageAccessTokenPath';
+    const POST_LOGOUT_REDIRECT_KEY = 'postLogoutRedirectTarget';
+    const POST_LOGOUT_REDIRECT_AT_KEY = 'postLogoutRedirectTimestamp';
+    const POST_LOGOUT_REDIRECT_REASON_KEY = 'postLogoutRedirectReason';
+    const AUTH_STORAGE_KEYS = [
+        'accessToken',
+        'refreshToken',
+        'user',
+        'token',
+        'prototypeMode',
+        'demoRole',
+        'rememberedUser',
+        'lastActivityTimestamp',
+        'sessionId',
+        'sessionStartTimestamp',
+        TOKEN_STORAGE_KEY,
+        TOKEN_TIMESTAMP_KEY,
+        TOKEN_PATH_KEY,
+        'loginRedirect',
+        'loginMessage'
+    ];
+
+    function getStorageItem(storageObject, key) {
+        if (!storageObject) return null;
+
+        try {
+            return storageObject.getItem(key);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function removeStorageItem(storageObject, key) {
+        if (!storageObject) return;
+
+        try {
+            storageObject.removeItem(key);
+        } catch (e) {
+            // Ignore storage errors
+        }
+    }
+
+    function clearMatchingStorageKeys(storageObject, predicate) {
+        if (!storageObject) return;
+
+        try {
+            Object.keys(storageObject).forEach((key) => {
+                if (predicate(key)) {
+                    storageObject.removeItem(key);
+                }
+            });
+        } catch (e) {
+            // Ignore storage errors
+        }
+    }
+
+    function getLastActivityTimestamp() {
+        const sessionActivity = parseInt(getStorageItem(sessionStorage, 'lastActivityTimestamp') || '0', 10);
+        const localActivity = parseInt(getStorageItem(localStorage, 'lastActivityTimestamp') || '0', 10);
+        return Math.max(sessionActivity, localActivity, 0);
+    }
+
+    function hasStoredAuthState() {
+        return Boolean(
+            getStorageItem(localStorage, 'accessToken') ||
+            getStorageItem(localStorage, 'user') ||
+            getStorageItem(sessionStorage, 'accessToken') ||
+            getStorageItem(sessionStorage, 'user')
+        );
+    }
+
+    function hasExpiredSessionByInactivity() {
+        const lastActivity = getLastActivityTimestamp();
+        if (!lastActivity) return false;
+        return Date.now() - lastActivity >= SESSION_TIMEOUT_MS;
+    }
+
+    function setPostLogoutRedirect(reason = 'session_timeout') {
+        try {
+            localStorage.setItem(POST_LOGOUT_REDIRECT_KEY, '/index.html');
+            localStorage.setItem(POST_LOGOUT_REDIRECT_AT_KEY, Date.now().toString());
+            localStorage.setItem(POST_LOGOUT_REDIRECT_REASON_KEY, reason);
+        } catch (e) {
+            // Ignore storage errors
+        }
+    }
+
+    function clearClientStateFallback() {
+        AUTH_STORAGE_KEYS.forEach((key) => {
+            removeStorageItem(localStorage, key);
+            if (key !== 'logoutReason') {
+                removeStorageItem(sessionStorage, key);
+            }
+        });
+
+        clearMatchingStorageKeys(
+            localStorage,
+            (key) => key.startsWith('portal') || key.startsWith('soa') || key.includes('retry')
+        );
+        clearMatchingStorageKeys(
+            sessionStorage,
+            (key) => key.startsWith('portal') || key.startsWith('soa') || key.includes('retry')
+        );
+
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            try {
+                navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_APP_CACHE' });
+            } catch (e) {
+                // Ignore service worker errors
+            }
+        }
+
+        if ('caches' in window) {
+            caches.keys()
+                .then((cacheNames) => Promise.all(
+                    cacheNames
+                        .filter((cacheName) => cacheName.startsWith('iter-'))
+                        .map((cacheName) => caches.delete(cacheName))
+                ))
+                .catch(() => {});
+        }
+    }
+
+    function redirectToPublicHome(reason = 'session_timeout') {
+        try {
+            sessionStorage.setItem('logoutReason', reason);
+        } catch (e) {
+            // Ignore storage errors
+        }
+
+        setPostLogoutRedirect(reason);
+        clearPageAccessToken();
+
+        if (window.APP && typeof window.APP.clearClientState === 'function') {
+            window.APP.clearClientState({
+                preserveTheme: true,
+                preserveLogoutReason: true,
+                preservePostLogoutRedirect: true
+            });
+        } else {
+            clearClientStateFallback();
+        }
+
+        window.location.replace('/index.html');
+    }
 
     /**
      * SECURITY: Immediately hide the page body while checking authentication
@@ -99,6 +244,14 @@
      */
     function validatePageAccessToken() {
         const currentPath = window.location.pathname;
+
+        if (hasStoredAuthState() && hasExpiredSessionByInactivity()) {
+            return {
+                valid: false,
+                reason: 'session_timeout',
+                message: 'Your session expired due to inactivity.'
+            };
+        }
         
         // Check if user is authenticated first
         if (!isUserAuthenticated()) {
@@ -203,6 +356,10 @@
      */
     function isUserAuthenticated() {
         try {
+            if (hasStoredAuthState() && hasExpiredSessionByInactivity()) {
+                return false;
+            }
+
             // Check localStorage first
             const accessToken = localStorage.getItem('accessToken');
             const user = localStorage.getItem('user');
@@ -396,6 +553,12 @@
         if (!validation.valid) {
             // Clear any stored tokens to ensure clean state
             clearPageAccessToken();
+
+            if (validation.reason === 'session_timeout' || validation.reason === 'session_invalid') {
+                redirectToPublicHome(validation.reason);
+                return;
+            }
+
             // Redirect to login immediately - don't show any content
             redirectToLogin(validation.message);
             return;
