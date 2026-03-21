@@ -1130,16 +1130,18 @@ body.nothing-home.nav-open {
         align-items: center;
         justify-content: center;
         flex: 0 0 auto;
+        touch-action: manipulation;
     }
 
-    .nothing-home .nav-link {
-        display: flex;
-        align-items: center;
-        min-height: 48px;
-        padding: 0.95rem 1rem;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.03);
-    }
+.nothing-home .nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    touch-action: manipulation;
+}
 
     .nothing-home .nav-link::after {
         display: none;
@@ -1150,10 +1152,11 @@ body.nothing-home.nav-open {
         background: rgba(255, 255, 255, 0.08);
     }
 
-    .nothing-home .nav-links .btn {
-        width: 100%;
-        justify-content: center;
-    }
+.nothing-home .nav-links .btn {
+    width: 100%;
+    justify-content: center;
+    touch-action: manipulation;
+}
 
     .nothing-home .logo-subtext {
         white-space: normal;

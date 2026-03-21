@@ -18,6 +18,8 @@ const redirectLimiter = rateLimit({
 
 router.use(redirectLimiter);
 
+const HOME_FRAGMENT_ROUTES = new Set(['/about', '/features', '/academics', '/contact']);
+
 /**
  * Decode a Base64 URL-safe encoded string
  * @param {string} encoded - Encoded string
@@ -117,6 +119,24 @@ function isValidRedirectUrl(url) {
     return false;
 }
 
+function resolveDecodedPathToFile(clientDir, decodedPath) {
+    if (!decodedPath || decodedPath === '/' || decodedPath === '/index.html' || decodedPath === '/home' || HOME_FRAGMENT_ROUTES.has(decodedPath)) {
+        return path.join(clientDir, 'index.html');
+    }
+
+    const dashboardMatch = decodedPath.match(/^\/dashboard\/([a-z0-9\-_]+)(?:\.html)?$/i);
+    if (dashboardMatch) {
+        return path.join(clientDir, 'dashboard', `${dashboardMatch[1]}.html`);
+    }
+
+    const rootMatch = decodedPath.match(/^\/([a-z0-9\-_]+)(?:\.html)?$/i);
+    if (rootMatch) {
+        return path.join(clientDir, `${rootMatch[1]}.html`);
+    }
+
+    return path.join(clientDir, decodedPath);
+}
+
 /**
  * GET /r/:encoded
  * Decodes the encoded link and serves the file directly
@@ -167,13 +187,8 @@ router.get('/:encoded', (req, res) => {
         // Determine the actual file to serve
         const clientDir = path.join(__dirname, '../../client');
         
-        // Handle root path
-        if (filePath === '/') {
-            filePath = '/index.html';
-        }
-        
-        // Construct full file path
-        const fullPath = path.join(clientDir, filePath);
+        // Construct full file path from both clean and legacy page routes
+        const fullPath = resolveDecodedPathToFile(clientDir, filePath);
         
         // Security check: ensure the resolved path is within client directory
         const resolvedPath = path.resolve(fullPath);

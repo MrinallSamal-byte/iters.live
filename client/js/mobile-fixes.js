@@ -12,6 +12,10 @@
         return window.getComputedStyle(menuButton).display !== 'none';
     }
 
+    function isInteractiveTarget(target) {
+        return Boolean(target?.closest('a, button, input, select, textarea, label, summary, [role="button"], [role="link"]'));
+    }
+
     // ===================================
     // CRITICAL FIX 1: Prevent scroll jumps (IMPROVED)
     // ===================================
@@ -180,9 +184,18 @@
                             e.preventDefault();
                             const target = this.getAttribute('target');
                             if (target === '_blank') {
-                                window.open(href, '_blank', 'noopener,noreferrer');
+                                if (window.LinkEncoding && typeof window.LinkEncoding.openLink === 'function') {
+                                    window.LinkEncoding.openLink(href, '_blank');
+                                } else {
+                                    window.open(href, '_blank', 'noopener,noreferrer');
+                                }
                             } else {
-                                window.location.href = href;
+                                const isInternalRoute = href.startsWith('/') || href.startsWith('./') || href.startsWith('../');
+                                if (isInternalRoute && window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                                    window.LinkEncoding.navigateTo(href);
+                                } else {
+                                    window.location.href = href;
+                                }
                             }
                         }
                         // If URL is not recognized as safe, don't preventDefault - let browser handle it
@@ -323,6 +336,11 @@
         let lastTouchEnd = 0;
         
         document.addEventListener('touchend', function(e) {
+            if (isInteractiveTarget(e.target)) {
+                lastTouchEnd = Date.now();
+                return;
+            }
+
             const now = Date.now();
             if (now - lastTouchEnd <= 300) {
                 e.preventDefault();

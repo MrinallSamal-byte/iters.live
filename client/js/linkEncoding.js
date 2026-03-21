@@ -9,14 +9,16 @@
 
     // Configuration flag - can be toggled to disable link encoding globally
     const ENABLE_LINK_ENCODING = true;
-    const DIRECT_PUBLIC_ROUTES = new Set([
+    const ALWAYS_DIRECT_PUBLIC_ROUTES = new Set([
         '/',
         '/index.html',
         '/home',
         '/about',
         '/features',
         '/academics',
-        '/contact',
+        '/contact'
+    ]);
+    const DEV_DIRECT_PUBLIC_ROUTES = new Set([
         '/login',
         '/login.html',
         '/register',
@@ -31,10 +33,18 @@
     const DIRECT_APP_ROUTE_PREFIXES = [
         '/dashboard/'
     ];
+    const CANONICAL_PUBLIC_ROUTE_MAP = new Map([
+        ['/index.html', '/'],
+        ['/home', '/'],
+        ['/login.html', '/login'],
+        ['/register.html', '/register'],
+        ['/creator.html', '/creator'],
+        ['/connect-portal.html', '/connect-portal'],
+        ['/soa-scraper.html', '/soa-scraper']
+    ]);
+    const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
-    function stripHashAndQuery(url) {
-        if (!url || typeof url !== 'string') return '';
-
+    function splitUrlSuffix(url) {
         const hashIndex = url.indexOf('#');
         const queryIndex = url.indexOf('?');
         let cutIndex = url.length;
@@ -42,7 +52,43 @@
         if (hashIndex !== -1) cutIndex = Math.min(cutIndex, hashIndex);
         if (queryIndex !== -1) cutIndex = Math.min(cutIndex, queryIndex);
 
-        return url.slice(0, cutIndex);
+        return {
+            path: url.slice(0, cutIndex) || '/',
+            suffix: url.slice(cutIndex)
+        };
+    }
+
+    function toCanonicalPath(url) {
+        if (!url || typeof url !== 'string') return '';
+        if (url === '#' || url.startsWith('#')) return url;
+        if (isExternalLink(url) || isStaticAsset(url)) return url;
+
+        const { path, suffix } = splitUrlSuffix(url);
+        const mappedRoute = CANONICAL_PUBLIC_ROUTE_MAP.get(path);
+        if (mappedRoute) {
+            return `${mappedRoute}${suffix}`;
+        }
+
+        const dashboardMatch = path.match(/^\/dashboard\/([a-z0-9-]+)\.html$/i);
+        if (dashboardMatch) {
+            return `/dashboard/${dashboardMatch[1]}${suffix}`;
+        }
+
+        return url;
+    }
+
+    function stripHashAndQuery(url) {
+        if (!url || typeof url !== 'string') return '';
+        const canonicalUrl = toCanonicalPath(url);
+        return splitUrlSuffix(canonicalUrl).path;
+    }
+
+    function shouldObfuscateVisibleRoutes() {
+        return !LOCAL_HOSTNAMES.has(window.location.hostname);
+    }
+
+    function isHomeFragmentRoute(basePath) {
+        return ALWAYS_DIRECT_PUBLIC_ROUTES.has(basePath);
     }
 
     function isDirectRoute(url) {
@@ -51,8 +97,13 @@
         if (isExternalLink(url) || isStaticAsset(url)) return false;
 
         const basePath = stripHashAndQuery(url) || '/';
-        if (DIRECT_PUBLIC_ROUTES.has(basePath)) return true;
+        if (isHomeFragmentRoute(basePath)) return true;
 
+        if (shouldObfuscateVisibleRoutes()) {
+            return false;
+        }
+
+        if (DEV_DIRECT_PUBLIC_ROUTES.has(basePath)) return true;
         if (basePath === '/dashboard') return true;
 
         return DIRECT_APP_ROUTE_PREFIXES.some(prefix => basePath.startsWith(prefix));
@@ -64,7 +115,22 @@
         if (isExternalLink(url) || isStaticAsset(url)) return false;
 
         const basePath = stripHashAndQuery(url) || '/';
-        return DIRECT_PUBLIC_ROUTES.has(basePath);
+        return isHomeFragmentRoute(basePath) || (!shouldObfuscateVisibleRoutes() && DEV_DIRECT_PUBLIC_ROUTES.has(basePath));
+    }
+
+    function tryDecodeBase64Url(str) {
+        if (!str || typeof str !== 'string') return null;
+
+        try {
+            let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4) b64 += '=';
+
+            const binary = atob(b64);
+            const bytes = new Uint8Array([...binary].map(c => c.charCodeAt(0)));
+            return new TextDecoder().decode(bytes);
+        } catch (error) {
+            return null;
+        }
     }
 
     /**
@@ -74,12 +140,17 @@
      */
     function isEncoded(str) {
         if (!str || typeof str !== 'string') return false;
-        // Base64 URL-safe chars are alphanumeric, hyphen, underscore
-        // Minimum length of 12 to avoid false positives with common short paths
-        // Also check that it doesn't look like a path (no dots for extensions, no slashes)
-        if (str.length < 12) return false;
+        // Base64 URL-safe chars are alphanumeric, hyphen, underscore.
+        // Exclude obvious raw paths and only treat the value as encoded if
+        // decoding yields a valid internal application path.
+        if (str.length < 4) return false;
         if (str.includes('.') || str.includes('/')) return false;
-        return /^[A-Za-z0-9\-_]+$/.test(str);
+        if (!/^[A-Za-z0-9\-_]+$/.test(str)) return false;
+
+        const decoded = tryDecodeBase64Url(str);
+        return typeof decoded === 'string'
+            && decoded.startsWith('/')
+            && !/[\u0000-\u001f]/.test(decoded);
     }
 
     /**
@@ -91,35 +162,37 @@
     function encodeLink(raw) {
         if (!ENABLE_LINK_ENCODING) return raw || '';
         if (!raw || typeof raw !== 'string') return '';
+
+        const canonicalRaw = toCanonicalPath(raw);
         
         // Don't encode if already encoded
-        if (isEncoded(raw)) return raw;
+        if (isEncoded(canonicalRaw)) return canonicalRaw;
         
         // Don't encode empty or hash-only links
-        if (raw === '' || raw === '#' || raw.startsWith('#')) return raw;
+        if (canonicalRaw === '' || canonicalRaw === '#' || canonicalRaw.startsWith('#')) return canonicalRaw;
         
         // Don't encode external links (http://, https://, mailto:, tel:, etc.)
-        if (isExternalLink(raw)) return raw;
+        if (isExternalLink(canonicalRaw)) return canonicalRaw;
 
         // Keep public routes human-readable.
-        if (isDirectRoute(raw)) return raw;
+        if (isDirectRoute(canonicalRaw)) return canonicalRaw;
         
         // Don't encode javascript:, vbscript:, or data: URLs (security-sensitive)
-        const lowerRaw = raw.toLowerCase();
+        const lowerRaw = canonicalRaw.toLowerCase();
         if (lowerRaw.startsWith('javascript:') || 
             lowerRaw.startsWith('vbscript:') || 
             lowerRaw.startsWith('data:')) {
-            return raw;
+            return canonicalRaw;
         }
         
         // Don't encode API endpoints
-        if (raw.startsWith('/api/') || raw.includes('/api/')) return raw;
+        if (canonicalRaw.startsWith('/api/') || canonicalRaw.includes('/api/')) return canonicalRaw;
         
         // Don't encode static assets
-        if (isStaticAsset(raw)) return raw;
+        if (isStaticAsset(canonicalRaw)) return canonicalRaw;
 
         try {
-            const bytes = new TextEncoder().encode(raw);
+            const bytes = new TextEncoder().encode(canonicalRaw);
             let binary = '';
             bytes.forEach(b => binary += String.fromCharCode(b));
 
@@ -131,7 +204,7 @@
             return b64;
         } catch (error) {
             console.error('Error encoding link:', error);
-            return raw;
+            return canonicalRaw;
         }
     }
 
@@ -150,12 +223,7 @@
         if (!isEncoded(encoded)) return encoded;
 
         try {
-            let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-            while (b64.length % 4) b64 += '=';
-
-            const binary = atob(b64);
-            const bytes = new Uint8Array([...binary].map(c => c.charCodeAt(0)));
-            return new TextDecoder().decode(bytes);
+            return tryDecodeBase64Url(encoded) || encoded;
         } catch (error) {
             console.error('Error decoding link:', error);
             return encoded;
@@ -224,15 +292,16 @@
      * @returns {string} URL for the redirect handler
      */
     function getEncodedRedirectUrl(raw) {
-        if (!ENABLE_LINK_ENCODING) return raw;
-        if (!raw || isExternalLink(raw) || isStaticAsset(raw) || isDirectRoute(raw)) return raw;
+        const canonicalRaw = toCanonicalPath(raw);
+        if (!ENABLE_LINK_ENCODING) return canonicalRaw;
+        if (!canonicalRaw || isExternalLink(canonicalRaw) || isStaticAsset(canonicalRaw) || isDirectRoute(canonicalRaw)) return canonicalRaw;
         
-        const encoded = encodeLink(raw);
+        const encoded = encodeLink(canonicalRaw);
         // Only wrap in /r/ handler if actually encoded
-        if (encoded !== raw && isEncoded(encoded)) {
+        if (encoded !== canonicalRaw && isEncoded(encoded)) {
             return '/r/' + encoded;
         }
-        return raw;
+        return canonicalRaw;
     }
 
     /**
@@ -241,25 +310,26 @@
      */
     function navigateTo(rawUrl) {
         if (!rawUrl) return;
+        const canonicalUrl = toCanonicalPath(rawUrl);
         
         if (!ENABLE_LINK_ENCODING) {
-            window.location.href = rawUrl;
+            window.location.href = canonicalUrl;
             return;
         }
 
-        if (isDirectRoute(rawUrl)) {
-            window.location.href = rawUrl;
+        if (isDirectRoute(canonicalUrl)) {
+            window.location.href = canonicalUrl;
             return;
         }
         
         // If the URL is already encoded (starts with /r/), use it directly
-        if (rawUrl.startsWith('/r/')) {
-            window.location.href = rawUrl;
+        if (canonicalUrl.startsWith('/r/')) {
+            window.location.href = canonicalUrl;
             return;
         }
         
         // Get the encoded URL
-        const encodedUrl = getEncodedRedirectUrl(rawUrl);
+        const encodedUrl = getEncodedRedirectUrl(canonicalUrl);
         window.location.href = encodedUrl;
     }
 
@@ -270,9 +340,12 @@
      */
     function openLink(url, target = '_blank') {
         if (!url) return;
-        
-        const decoded = decodeLink(url);
-        window.open(decoded, target);
+
+        const canonicalUrl = toCanonicalPath(url);
+        const destination = canonicalUrl.startsWith('/r/')
+            ? canonicalUrl
+            : getEncodedRedirectUrl(canonicalUrl);
+        window.open(destination, target);
     }
 
     /**
@@ -285,21 +358,26 @@
         // Encode anchor hrefs
         document.querySelectorAll('a[href]').forEach(link => {
             const href = link.getAttribute('href');
+            const canonicalHref = toCanonicalPath(href);
+
+            if (canonicalHref && canonicalHref !== href) {
+                link.setAttribute('href', canonicalHref);
+            }
             
             // Skip if already processed, external, or hash-only
             if (link.hasAttribute('data-encoded') || 
                 link.hasAttribute('data-external') ||
-                isExternalLink(href) ||
-                href === '#' ||
-                href.startsWith('#') ||
-                isDirectRoute(href) ||
-                isStaticAsset(href)) {
+                isExternalLink(canonicalHref) ||
+                canonicalHref === '#' ||
+                canonicalHref.startsWith('#') ||
+                isDirectRoute(canonicalHref) ||
+                isStaticAsset(canonicalHref)) {
                 return;
             }
 
-            const encoded = encodeLink(href);
-            if (encoded !== href) {
-                link.setAttribute('data-original-href', href);
+            const encoded = encodeLink(canonicalHref);
+            if (encoded !== canonicalHref) {
+                link.setAttribute('data-original-href', canonicalHref);
                 link.setAttribute('data-encoded', encoded);
                 // Use redirect handler
                 link.setAttribute('href', '/r/' + encoded);
@@ -309,10 +387,15 @@
         // Encode data-href attributes
         document.querySelectorAll('[data-href]').forEach(el => {
             const href = el.getAttribute('data-href');
-            if (!el.hasAttribute('data-encoded') && !isExternalLink(href) && !isStaticAsset(href)) {
-                const encoded = encodeLink(href);
-                if (encoded !== href) {
-                    el.setAttribute('data-original-href', href);
+            const canonicalHref = toCanonicalPath(href);
+            if (canonicalHref && canonicalHref !== href) {
+                el.setAttribute('data-href', canonicalHref);
+            }
+            if (!el.hasAttribute('data-encoded') && !isExternalLink(canonicalHref) && !isStaticAsset(canonicalHref)) {
+                if (isDirectRoute(canonicalHref)) return;
+                const encoded = encodeLink(canonicalHref);
+                if (encoded !== canonicalHref) {
+                    el.setAttribute('data-original-href', canonicalHref);
                     el.setAttribute('data-encoded', encoded);
                     el.setAttribute('data-href', '/r/' + encoded);
                 }
@@ -322,10 +405,15 @@
         // Encode data-url attributes
         document.querySelectorAll('[data-url]').forEach(el => {
             const url = el.getAttribute('data-url');
-            if (!el.hasAttribute('data-encoded') && !isExternalLink(url) && !isStaticAsset(url)) {
-                const encoded = encodeLink(url);
-                if (encoded !== url) {
-                    el.setAttribute('data-original-url', url);
+            const canonicalUrl = toCanonicalPath(url);
+            if (canonicalUrl && canonicalUrl !== url) {
+                el.setAttribute('data-url', canonicalUrl);
+            }
+            if (!el.hasAttribute('data-encoded') && !isExternalLink(canonicalUrl) && !isStaticAsset(canonicalUrl)) {
+                if (isDirectRoute(canonicalUrl)) return;
+                const encoded = encodeLink(canonicalUrl);
+                if (encoded !== canonicalUrl) {
+                    el.setAttribute('data-original-url', canonicalUrl);
                     el.setAttribute('data-encoded', encoded);
                     el.setAttribute('data-url', '/r/' + encoded);
                 }
@@ -373,11 +461,15 @@
         if (!link || link.hasAttribute('data-encoded') || link.hasAttribute('data-external')) return;
         
         const href = link.getAttribute('href');
-        if (!href || isExternalLink(href) || href === '#' || href.startsWith('#') || isDirectRoute(href) || isStaticAsset(href)) return;
+        const canonicalHref = toCanonicalPath(href);
+        if (canonicalHref && canonicalHref !== href) {
+            link.setAttribute('href', canonicalHref);
+        }
+        if (!canonicalHref || isExternalLink(canonicalHref) || canonicalHref === '#' || canonicalHref.startsWith('#') || isDirectRoute(canonicalHref) || isStaticAsset(canonicalHref)) return;
 
-        const encoded = encodeLink(href);
-        if (encoded !== href) {
-            link.setAttribute('data-original-href', href);
+        const encoded = encodeLink(canonicalHref);
+        if (encoded !== canonicalHref) {
+            link.setAttribute('data-original-href', canonicalHref);
             link.setAttribute('data-encoded', encoded);
             link.setAttribute('href', '/r/' + encoded);
         }
@@ -391,11 +483,15 @@
         if (!el || el.hasAttribute('data-encoded')) return;
         
         const href = el.getAttribute('data-href');
-        if (!href || isExternalLink(href) || isDirectRoute(href) || isStaticAsset(href)) return;
+        const canonicalHref = toCanonicalPath(href);
+        if (canonicalHref && canonicalHref !== href) {
+            el.setAttribute('data-href', canonicalHref);
+        }
+        if (!canonicalHref || isExternalLink(canonicalHref) || isDirectRoute(canonicalHref) || isStaticAsset(canonicalHref)) return;
 
-        const encoded = encodeLink(href);
-        if (encoded !== href) {
-            el.setAttribute('data-original-href', href);
+        const encoded = encodeLink(canonicalHref);
+        if (encoded !== canonicalHref) {
+            el.setAttribute('data-original-href', canonicalHref);
             el.setAttribute('data-encoded', encoded);
             el.setAttribute('data-href', '/r/' + encoded);
         }
@@ -409,13 +505,42 @@
         if (!el || el.hasAttribute('data-encoded')) return;
         
         const url = el.getAttribute('data-url');
-        if (!url || isExternalLink(url) || isDirectRoute(url) || isStaticAsset(url)) return;
+        const canonicalUrl = toCanonicalPath(url);
+        if (canonicalUrl && canonicalUrl !== url) {
+            el.setAttribute('data-url', canonicalUrl);
+        }
+        if (!canonicalUrl || isExternalLink(canonicalUrl) || isDirectRoute(canonicalUrl) || isStaticAsset(canonicalUrl)) return;
 
-        const encoded = encodeLink(url);
-        if (encoded !== url) {
-            el.setAttribute('data-original-url', url);
+        const encoded = encodeLink(canonicalUrl);
+        if (encoded !== canonicalUrl) {
+            el.setAttribute('data-original-url', canonicalUrl);
             el.setAttribute('data-encoded', encoded);
             el.setAttribute('data-url', '/r/' + encoded);
+        }
+    }
+
+    function syncCurrentLocationToCanonical() {
+        const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        if (currentUrl.startsWith('/r/')) {
+            return;
+        }
+
+        const canonicalUrl = toCanonicalPath(currentUrl);
+
+        if (!canonicalUrl || !canonicalUrl.startsWith('/')) {
+            return;
+        }
+
+        if (shouldObfuscateVisibleRoutes() && !isDirectRoute(canonicalUrl)) {
+            const encodedUrl = getEncodedRedirectUrl(canonicalUrl);
+            if (encodedUrl && encodedUrl !== currentUrl) {
+                window.history.replaceState(window.history.state, document.title, encodedUrl);
+            }
+            return;
+        }
+
+        if (canonicalUrl !== currentUrl) {
+            window.history.replaceState(window.history.state, document.title, canonicalUrl);
         }
     }
 
@@ -475,12 +600,14 @@
         // Wait for DOM to be ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
+                syncCurrentLocationToCanonical();
                 encodeAllLinks();
                 setupLinkObserver();
                 setupClickHandler();
                 setupNavigationInterceptors();
             });
         } else {
+            syncCurrentLocationToCanonical();
             encodeAllLinks();
             setupLinkObserver();
             setupClickHandler();
@@ -498,6 +625,8 @@
         isDirectRoute,
         isDirectPublicRoute,
         isStaticAsset,
+        shouldObfuscateVisibleRoutes,
+        toCanonicalPath,
         getEncodedRedirectUrl,
         navigateTo,
         openLink,

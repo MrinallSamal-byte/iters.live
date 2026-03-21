@@ -276,7 +276,7 @@ async function handleImport(req, res) {
       status: 'SUCCESS',
       message: 'SOA data imported successfully.',
       officialPortalUrl: OFFICIAL_PORTAL_URL,
-      redirectTo: '/dashboard/student-personal-info.html',
+      redirectTo: '/dashboard/student-personal-info',
       connection: snapshot.status,
       data: snapshot.normalizedData
     });

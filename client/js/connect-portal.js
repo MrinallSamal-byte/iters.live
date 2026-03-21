@@ -2,7 +2,7 @@
     'use strict';
 
     const REMEMBERED_REG_KEY = 'soaRememberedRegNo';
-    const IMPORT_TARGET = '/dashboard/student-personal-info.html';
+    const IMPORT_TARGET = '/dashboard/student-personal-info';
 
     let portalEnabled = true;
     let currentSessionId = null;

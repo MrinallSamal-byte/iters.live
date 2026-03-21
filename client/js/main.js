@@ -111,13 +111,37 @@ function resolveNavigationPath(href) {
     if (!href || typeof href !== 'string') return null;
 
     if (href.startsWith('#')) {
-        return window.location.pathname;
+        return decodeVisiblePathname(window.location.pathname);
     }
 
     try {
-        return new URL(href, window.location.origin).pathname;
+        const pathname = new URL(href, window.location.origin).pathname;
+        return decodeVisiblePathname(pathname);
     } catch (error) {
         return null;
+    }
+}
+
+function decodeVisiblePathname(pathname = window.location.pathname) {
+    if (!pathname || typeof pathname !== 'string' || !pathname.startsWith('/r/')) {
+        return pathname;
+    }
+
+    try {
+        const encoded = pathname.slice(3);
+        let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        while (b64.length % 4) b64 += '=';
+        const decoded = atob(b64);
+        const queryIndex = decoded.indexOf('?');
+        const hashIndex = decoded.indexOf('#');
+        let cutIndex = decoded.length;
+
+        if (queryIndex !== -1) cutIndex = Math.min(cutIndex, queryIndex);
+        if (hashIndex !== -1) cutIndex = Math.min(cutIndex, hashIndex);
+
+        return decoded.slice(0, cutIndex) || pathname;
+    } catch (error) {
+        return pathname;
     }
 }
 
@@ -256,7 +280,7 @@ function clearClientState(options = {}) {
 }
 
 function sanitizeExpiredPublicSession() {
-    if (window.location.pathname.startsWith('/dashboard/')) {
+    if (decodeVisiblePathname(window.location.pathname).startsWith('/dashboard/')) {
         return false;
     }
 
@@ -277,7 +301,7 @@ function sanitizeExpiredPublicSession() {
     return true;
 }
 
-function consumePostLogoutRedirect(currentPath = window.location.pathname) {
+function consumePostLogoutRedirect(currentPath = decodeVisiblePathname(window.location.pathname)) {
     const target = getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_KEY);
     const timestamp = parseInt(getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_AT_KEY) || '0', 10);
 
@@ -790,7 +814,7 @@ function logout() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    const currentPage = window.location.pathname;
+    const currentPage = decodeVisiblePathname(window.location.pathname);
 
     initPublicAuthLinkGuard();
 

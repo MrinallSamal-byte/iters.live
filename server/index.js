@@ -73,6 +73,25 @@ function sendHtmlNoStore(res, filePath, callback) {
   }, callback);
 }
 
+function isLocalHostname(hostname = '') {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+}
+
+function encodeVisiblePath(rawPath = '/') {
+  return `/r/${Buffer.from(String(rawPath), 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
+}
+
+function maybeRedirectToEncodedRoute(req, res, targetPath) {
+  if (isLocalHostname(req.hostname)) {
+    return false;
+  }
+
+  const queryIndex = req.originalUrl.indexOf('?');
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+  res.redirect(encodeVisiblePath(`${targetPath}${query}`));
+  return true;
+}
+
 // Initialize Socket.IO
 const io = socketIo(server, {
   cors: {
@@ -250,53 +269,66 @@ app.get('/', staticFileLimiter, (req, res) => {
 });
 
 app.get('/index.html', staticFileLimiter, (req, res) => {
-  sendHtmlNoStore(res, path.join(__dirname, '../client/index.html'));
+  const target = req.originalUrl.includes('?')
+    ? `/${req.originalUrl.slice(req.originalUrl.indexOf('?'))}`
+    : '/';
+  res.redirect(target);
 });
 
 app.get('/home', (req, res) => {
-  res.redirect('/index.html');
+  res.redirect('/');
 });
 
-app.get('/login', (req, res) => {
-  res.redirect('/login.html');
-});
-
-app.get('/register', (req, res) => {
-  res.redirect('/register.html');
-});
-
-app.get('/creator', (req, res) => {
-  res.redirect('/creator.html');
-});
-
-app.get('/login.html', staticFileLimiter, (req, res) => {
+app.get('/login', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/login')) return;
   sendHtmlNoStore(res, path.join(__dirname, '../client/login.html'));
 });
 
-app.get('/register.html', staticFileLimiter, (req, res) => {
+app.get('/register', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/register')) return;
   sendHtmlNoStore(res, path.join(__dirname, '../client/register.html'));
 });
 
-app.get('/creator.html', staticFileLimiter, (req, res) => {
+app.get('/creator', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/creator')) return;
   sendHtmlNoStore(res, path.join(__dirname, '../client/creator.html'));
+});
+
+app.get('/login.html', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/login')) return;
+  res.redirect('/login');
+});
+
+app.get('/register.html', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/register')) return;
+  res.redirect('/register');
+});
+
+app.get('/creator.html', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/creator')) return;
+  res.redirect('/creator');
 });
 
 // Serve connect-portal page directly (no obfuscation for OAuth redirect)
 app.get('/connect-portal', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/connect-portal')) return;
   sendHtmlNoStore(res, path.join(__dirname, '../client/connect-portal.html'));
 });
 
 app.get('/connect-portal.html', staticFileLimiter, (req, res) => {
-  sendHtmlNoStore(res, path.join(__dirname, '../client/connect-portal.html'));
+  if (maybeRedirectToEncodedRoute(req, res, '/connect-portal')) return;
+  res.redirect('/connect-portal');
 });
 
 // Serve SOA portal scraper page directly
 app.get('/soa-scraper', staticFileLimiter, (req, res) => {
+  if (maybeRedirectToEncodedRoute(req, res, '/soa-scraper')) return;
   sendHtmlNoStore(res, path.join(__dirname, '../client/soa-scraper.html'));
 });
 
 app.get('/soa-scraper.html', staticFileLimiter, (req, res) => {
-  sendHtmlNoStore(res, path.join(__dirname, '../client/soa-scraper.html'));
+  if (maybeRedirectToEncodedRoute(req, res, '/soa-scraper')) return;
+  res.redirect('/soa-scraper');
 });
 
 // Public anchor convenience routes
@@ -319,11 +351,12 @@ app.get('/contact', (req, res) => {
 // Serve dashboard pages directly (needed for login redirects)
 app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
   const page = req.params.page;
-  const requestedPage = page.endsWith('.html') ? page : `${page}.html`;
+  const canonicalPage = page.endsWith('.html') ? page.slice(0, -5) : page;
+  const requestedPage = `${canonicalPage}.html`;
   
   // Validate page parameter to prevent path traversal attacks
   // Only allow alphanumeric characters, hyphens, and an optional .html extension
-  if (!/^[a-zA-Z0-9-]+(?:\.html)?$/.test(page)) {
+  if (!/^[a-zA-Z0-9-]+(?:\.html)?$/.test(page) || !/^[a-zA-Z0-9-]+$/.test(canonicalPage)) {
     return res.status(400).json({
       success: false,
       message: 'Invalid page name'
@@ -349,10 +382,14 @@ app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
     });
   }
 
-  if (!page.endsWith('.html')) {
+  if (maybeRedirectToEncodedRoute(req, res, `/dashboard/${canonicalPage}`)) {
+    return;
+  }
+
+  if (page.endsWith('.html')) {
     const queryIndex = req.originalUrl.indexOf('?');
     const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
-    return res.redirect(`/dashboard/${requestedPage}${query}`);
+    return res.redirect(`/dashboard/${canonicalPage}${query}`);
   }
   
   sendHtmlNoStore(res, resolvedPath, (err) => {
