@@ -15,6 +15,8 @@
   }
   
   const user = APP.Storage.get('user') || {};
+  const AI_STATUS_REFRESH_INTERVAL_MS = 60 * 1000;
+  let aiStatusRefreshTimer = null;
 
   // Client-side cache with TTL (5 minutes)
   const CACHE_TTL = 5 * 60 * 1000;
@@ -49,6 +51,12 @@
     const nameEl = document.getElementById('adminName');
     if (nameEl) nameEl.textContent = user.name || 'Admin';
 
+    bindAiStatusActions();
+    loadAiServiceStatus();
+    aiStatusRefreshTimer = window.setInterval(() => {
+      loadAiServiceStatus({ silent: true });
+    }, AI_STATUS_REFRESH_INTERVAL_MS);
+
     // Render static content immediately
     loadRecentActivity();
 
@@ -73,9 +81,186 @@
     renderDepartmentChart(stats);
   }
 
+  function bindAiStatusActions() {
+    const refreshButton = document.getElementById('refreshAiStatusBtn');
+    if (!refreshButton || refreshButton.dataset.bound === 'true') return;
+
+    refreshButton.addEventListener('click', () => {
+      loadAiServiceStatus();
+    });
+    refreshButton.dataset.bound = 'true';
+
+    window.addEventListener('pagehide', () => {
+      if (aiStatusRefreshTimer) {
+        clearInterval(aiStatusRefreshTimer);
+        aiStatusRefreshTimer = null;
+      }
+    }, { once: true });
+  }
+
   function setText(id, txt){ 
     const el = document.getElementById(id); 
     if (el) el.textContent = txt; 
+  }
+
+  function setHtml(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  function formatCheckedAt(timestamp) {
+    if (!timestamp) return 'Checked just now';
+
+    try {
+      return `Checked ${new Date(timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`;
+    } catch (_) {
+      return 'Checked just now';
+    }
+  }
+
+  function applyAiBadge(elementId, text, tone) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.className = `ai-service-pill ai-service-pill-${tone}`;
+    element.textContent = text;
+  }
+
+  function renderAiRecommendations(items) {
+    const container = document.getElementById('aiServiceRecommendations');
+    if (!container) return;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      container.innerHTML = '<div class="ai-recommendation-item">No immediate action needed. The AI providers look usable from the health endpoint.</div>';
+      return;
+    }
+
+    container.innerHTML = items.map((item) => `
+      <div class="ai-recommendation-item">${escapeHtml(item)}</div>
+    `).join('');
+  }
+
+  function renderAiStatus(state) {
+    setText('aiServiceStatusText', state.statusText);
+    setText('aiOpenRouterState', state.openRouterText);
+    setText('aiGeminiState', state.geminiText);
+    setText('aiServiceCheckedAt', state.checkedAtText);
+    setText('aiServiceSummary', state.summary);
+    setText('aiDiagnosticsText', state.diagnosticsPath || '/api/health/ai-service');
+
+    const diagnosticsLink = document.getElementById('aiDiagnosticsLink');
+    if (diagnosticsLink) {
+      diagnosticsLink.href = state.diagnosticsPath || '/api/health/ai-service';
+    }
+
+    applyAiBadge('aiServiceStatusBadge', state.statusBadgeText, state.statusTone);
+    applyAiBadge('aiOpenRouterBadge', state.openRouterBadgeText, state.openRouterTone);
+    applyAiBadge('aiGeminiBadge', state.geminiBadgeText, state.geminiTone);
+    renderAiRecommendations(state.recommendations);
+  }
+
+  async function loadAiServiceStatus(options = {}) {
+    const silent = options.silent === true;
+    const refreshButton = document.getElementById('refreshAiStatusBtn');
+
+    if (refreshButton) {
+      refreshButton.disabled = true;
+      refreshButton.textContent = silent ? 'Auto Refreshing...' : 'Refreshing...';
+    }
+
+    if (!silent) {
+      renderAiStatus({
+        statusText: 'Checking live provider status...',
+        openRouterText: 'Checking...',
+        geminiText: 'Checking...',
+        checkedAtText: 'Checking...',
+        summary: 'Requesting the latest AI diagnostics from the server.',
+        diagnosticsPath: '/api/health/ai-service',
+        statusBadgeText: 'Pending',
+        statusTone: 'pending',
+        openRouterBadgeText: 'Unknown',
+        openRouterTone: 'pending',
+        geminiBadgeText: 'Unknown',
+        geminiTone: 'pending',
+        recommendations: ['Waiting for the health endpoint to respond...']
+      });
+    }
+
+    try {
+      const response = await fetch('/api/health/ai-service', {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Health endpoint returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      const overallAvailable = data.status === 'available';
+      const openRouterConfigured = Boolean(data.services?.openRouter?.configured);
+      const openRouterAvailable = Boolean(data.services?.openRouter?.available);
+      const geminiConfigured = Boolean(data.services?.gemini?.configured);
+
+      renderAiStatus({
+        statusText: overallAvailable ? 'AI replies should be available' : 'AI replies are currently blocked',
+        openRouterText: openRouterAvailable
+          ? 'Configured and available'
+          : (openRouterConfigured ? 'Configured but unavailable' : 'Not configured'),
+        geminiText: geminiConfigured ? 'Configured as fallback' : 'Not configured',
+        checkedAtText: formatCheckedAt(data.timestamp),
+        summary: overallAvailable
+          ? 'The health endpoint reports at least one working AI provider. If the chatbot still falls back, inspect runtime request failures next.'
+          : 'The server says no AI provider is currently available. Configure an API key on Render to enable full chatbot replies.',
+        diagnosticsPath: '/api/health/ai-service',
+        statusBadgeText: overallAvailable ? 'Available' : 'Unavailable',
+        statusTone: overallAvailable ? 'ok' : 'error',
+        openRouterBadgeText: openRouterAvailable ? 'Live' : (openRouterConfigured ? 'Issue' : 'Missing'),
+        openRouterTone: openRouterAvailable ? 'ok' : (openRouterConfigured ? 'error' : 'pending'),
+        geminiBadgeText: geminiConfigured ? 'Ready' : 'Missing',
+        geminiTone: geminiConfigured ? 'neutral' : 'pending',
+        recommendations: Array.isArray(data.recommendations) ? data.recommendations : []
+      });
+    } catch (error) {
+      console.error('Error loading AI service status:', error);
+      renderAiStatus({
+        statusText: 'AI diagnostics request failed',
+        openRouterText: 'Unknown',
+        geminiText: 'Unknown',
+        checkedAtText: 'Check failed',
+        summary: 'The dashboard could not fetch `/api/health/ai-service`. Verify the backend is running and reachable.',
+        diagnosticsPath: '/api/health/ai-service',
+        statusBadgeText: 'Error',
+        statusTone: 'error',
+        openRouterBadgeText: 'Unknown',
+        openRouterTone: 'pending',
+        geminiBadgeText: 'Unknown',
+        geminiTone: 'pending',
+        recommendations: [
+          `Request failed: ${error.message}`,
+          'Open /api/health/ai-service directly to inspect the backend response.',
+          'If this is Render, check service logs for startup or environment variable issues.'
+        ]
+      });
+    } finally {
+      if (refreshButton) {
+        refreshButton.disabled = false;
+        refreshButton.textContent = 'Refresh';
+      }
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   async function getAdminStats(){

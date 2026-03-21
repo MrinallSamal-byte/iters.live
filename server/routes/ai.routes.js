@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken, optionalAuth } = require('../middleware/auth');
 const aiService = require('../services/ai.service');
-const { db } = require('../database/firebase');
+const { db, isFirebaseAdminReady } = require('../database/firebase');
 
 /**
  * AI Routes for Educational Assistance
@@ -19,6 +19,20 @@ const { db } = require('../database/firebase');
 function calculatePercentage(marksItem) {
     if (!marksItem.marks || !marksItem.total_marks) return 0;
     return (parseFloat(marksItem.marks) / parseFloat(marksItem.total_marks)) * 100;
+}
+
+async function tryLogAiChat(entry) {
+    if (!isFirebaseAdminReady || !db || typeof db.collection !== 'function') {
+        return false;
+    }
+
+    try {
+        await db.collection('ai_chat_logs').add(entry);
+        return true;
+    } catch (error) {
+        console.error('Failed to log chat:', error);
+        return false;
+    }
 }
 
 /**
@@ -141,7 +155,9 @@ router.post('/chat', optionalAuth, async (req, res) => {
         if (!aiService.isAvailable()) {
             return res.status(503).json({
                 success: false,
-                message: 'AI service is currently unavailable. Please configure OPENROUTER_API_KEY or GEMINI_API_KEY.'
+                code: 'AI_PROVIDER_UNAVAILABLE',
+                message: 'AI service is currently unavailable. Please configure OPENROUTER_API_KEY or GEMINI_API_KEY.',
+                diagnosticsPath: '/api/health/ai-service'
             });
         }
         
@@ -153,12 +169,12 @@ router.post('/chat', optionalAuth, async (req, res) => {
         
         // Log chat interaction to Firestore (optional, only if user is authenticated)
         if (req.user && (req.user.id || req.user.uid)) {
-            await db.collection('ai_chat_logs').add({
+            await tryLogAiChat({
                 user_id: req.user.id || req.user.uid,
                 question: userMessage,
                 answer: response,
                 created_at: new Date()
-            }).catch(err => console.error('Failed to log chat:', err));
+            });
         }
         
         // Return response in expected format

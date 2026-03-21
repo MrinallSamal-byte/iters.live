@@ -688,29 +688,36 @@ class Chatbot {
                     return this.postProcessAiResponse(data.response, questionType);
                 } else if (!data.success) {
                     console.warn('AI API returned success:false', { message: data.message, error: data.error });
+                    return this.getAiUnavailableResponse(data.message);
                 } else {
                     console.warn('AI API missing response in data', data);
                 }
             } else if (response.status === 503) {
-                // AI service unavailable - fall back to FAQ
-                console.log('AI service unavailable (503), using FAQ fallback');
                 const errorData = await response.json().catch(() => ({}));
                 console.log('503 error details:', errorData);
+                return this.getAiUnavailableResponse(
+                    errorData.message || 'The AI provider is not configured on the server.'
+                );
             } else if (response.status === 401) {
-                // Token issues - fall back gracefully
                 console.log('AI API authentication issue (401), using FAQ fallback');
+                return this.getAiUnavailableResponse('Your session token is invalid or expired for AI requests.');
             } else {
                 // Log other errors for debugging
                 console.log('AI API returned error:', response.status);
                 try {
                     const errorData = await response.json();
                     console.log('Error details:', errorData);
+                    return this.getAiUnavailableResponse(
+                        errorData.message || `The AI request failed with status ${response.status}.`
+                    );
                 } catch (e) {
                     console.log('Could not parse error response');
+                    return this.getAiUnavailableResponse(`The AI request failed with status ${response.status}.`);
                 }
             }
         } catch (error) {
             console.log('AI API not available, using smart classification:', error.message);
+            return this.getAiUnavailableResponse('The chatbot could not reach the AI endpoint from this page.');
         }
 
         // Intelligent fallback based on question type
@@ -987,6 +994,13 @@ For math or study questions:
     getGeneralResponse(message) {
         const links = this.getRoleLinks();
         return `I can answer ITERasn hub and portal questions directly.\n\nFor broader general questions, please try again when AI is available or use <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> for help.`;
+    }
+
+    getAiUnavailableResponse(reason = 'The AI service is unavailable right now.') {
+        const links = this.getRoleLinks();
+        const safeReason = this.escapeHtml(reason);
+
+        return `⚠️ <strong>AI reply is unavailable right now.</strong>\n\n${safeReason}\n\n<strong>How to fix:</strong>\n• Configure <code>OPENROUTER_API_KEY</code> on the server\n• Or configure <code>GEMINI_API_KEY</code> as fallback\n• Check <code>/api/health/ai-service</code> for live status\n\nYou can still use <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> or ask portal-specific questions here.`;
     }
 
     getGreetingResponse() {
