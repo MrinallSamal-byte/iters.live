@@ -198,14 +198,14 @@ function buildScraperErrorResponse(error, fallbackMessage) {
     if (message.includes('page.goto: Timeout') || /^Timeout \d+ms exceeded/i.test(message)) {
         return {
             status: STATUS_PORTAL_UNREACHABLE,
-            message: 'SOA portal took too long to respond. Please try again in a moment.'
+            message: 'SOA website is currently offline or taking too long to respond. Please try again later.'
         };
     }
 
     if (isPortalUnreachableError(message)) {
         return {
             status: STATUS_PORTAL_UNREACHABLE,
-            message: 'SOA portal is currently unreachable. Please try again later.'
+            message: 'SOA website is currently offline. Please try again later.'
         };
     }
 

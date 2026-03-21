@@ -605,9 +605,10 @@
     }
 
     .profile-dropdown {
-        width: calc(100vw - 30px);
-        max-width: 320px;
-        right: -15px;
+        width: min(320px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+        right: 0;
+        left: auto;
     }
 
     .profile-modal-content {

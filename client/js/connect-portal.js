@@ -97,6 +97,14 @@
         clearRememberedBtn?.addEventListener('click', clearRememberedRegistrationNumber);
     }
 
+    function showPortalOfflineMessage() {
+        const detail = currentConnection?.hasImportedData
+            ? 'The SOA website is currently offline. You can still open the last imported SOA data saved in your account.'
+            : 'The SOA website is currently offline. Please try again later, or continue with demo data for now.';
+
+        setStatus('warning', 'SOA website is currently offline.', detail);
+    }
+
     function hydrateRegistrationNumber(user) {
         let rememberedValue = null;
 
@@ -239,8 +247,8 @@
                 renderConnectionStatus();
                 updateFlowAvailability();
             }
-            if (payload.status === 'PORTAL_UNREACHABLE' && currentConnection?.hasImportedData) {
-                setStatus('warning', 'Could not fetch a fresh SOA CAPTCHA.', 'The official SOA portal is not responding right now. You can still open the last imported SOA data saved in your account.');
+            if (payload.status === 'PORTAL_UNREACHABLE') {
+                showPortalOfflineMessage();
             } else {
                 setStatus('error', 'Could not fetch a fresh SOA CAPTCHA.', payload.message || error.message || 'Please try again in a moment.');
             }
@@ -331,7 +339,7 @@
             } else if (payload.status === 'PORTAL_UNREACHABLE') {
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
-                setStatus('warning', 'The official SOA portal could not be reached.', 'If you already imported data before, you can still open the saved copy inside this app.');
+                showPortalOfflineMessage();
             } else if (payload.status === 'PORTAL_DISABLED') {
                 portalEnabled = false;
                 currentConnection = payload.connection || currentConnection;

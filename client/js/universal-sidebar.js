@@ -8,6 +8,7 @@
 
     const UniversalSidebar = {
         currentRole: '',
+        lastSidebarNavTouchAt: 0,
 
         // Navigation menus for different roles
         menus: {
@@ -343,6 +344,8 @@
                 });
             }
 
+            this.setupNavigationHandlers();
+
             window.addEventListener('resize', () => {
                 this.syncSidebarState();
 
@@ -351,6 +354,45 @@
                     if (sidebar) sidebar.classList.remove('mobile-open');
                     if (overlay) overlay.classList.remove('active');
                 }
+            });
+        },
+
+        setupNavigationHandlers() {
+            document.querySelectorAll('.sidebar-nav-link').forEach((link) => {
+                if (link.dataset.page === 'logout') {
+                    return;
+                }
+
+                const handleNavigate = (event) => {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '#') {
+                        return;
+                    }
+
+                    if (event.type === 'click') {
+                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+                            return;
+                        }
+
+                        if (Date.now() - this.lastSidebarNavTouchAt < 500) {
+                            event.preventDefault();
+                            return;
+                        }
+                    }
+
+                    if (event.type === 'touchend') {
+                        this.lastSidebarNavTouchAt = Date.now();
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    this.closeMobileSidebar();
+                    this.navigateWithinApp(href);
+                };
+
+                link.addEventListener('click', handleNavigate);
+                link.addEventListener('touchend', handleNavigate, { passive: false });
             });
         },
 
@@ -408,9 +450,7 @@
 
             if (overlay) {
                 overlay.addEventListener('click', () => {
-                    if (sidebar) sidebar.classList.remove('mobile-open');
-                    overlay.classList.remove('active');
-                    this.syncSidebarState();
+                    this.closeMobileSidebar();
                 });
             }
 
@@ -418,12 +458,22 @@
             document.querySelectorAll('.sidebar-nav-link').forEach(link => {
                 link.addEventListener('click', () => {
                     if (window.innerWidth <= 968) {
-                        if (sidebar) sidebar.classList.remove('mobile-open');
-                        if (overlay) overlay.classList.remove('active');
-                        this.syncSidebarState();
+                        this.closeMobileSidebar();
                     }
                 });
             });
+        },
+
+        closeMobileSidebar() {
+            const sidebar = document.getElementById('universalSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (window.innerWidth <= 968) {
+                if (sidebar) sidebar.classList.remove('mobile-open');
+                if (overlay) overlay.classList.remove('active');
+            }
+
+            this.syncSidebarState();
         },
 
         loadUserInfo() {
@@ -758,6 +808,28 @@
             const target = byRole[this.currentRole] || '/settings.html';
             
             // Use encoded URL for navigation
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo(target);
+            } else {
+                window.location.href = target;
+            }
+        },
+
+        navigateWithinApp(target) {
+            if (!target) return;
+
+            const isDashboardRoute = target.startsWith('/dashboard/') || target.includes('/dashboard/');
+            if (isDashboardRoute) {
+                if (typeof APP !== 'undefined' && typeof APP.navigateToDashboard === 'function') {
+                    APP.navigateToDashboard(target);
+                    return;
+                }
+
+                if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                    window.PageAccessToken.createPageAccessToken(target);
+                }
+            }
+
             if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
                 window.LinkEncoding.navigateTo(target);
             } else {

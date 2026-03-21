@@ -92,17 +92,78 @@
             if (avatarBtn && dropdown) {
                 avatarBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    const isOpening = !dropdown.classList.contains('active');
                     dropdown.classList.toggle('active');
+
+                    if (isOpening) {
+                        window.requestAnimationFrame(() => this.positionDropdown());
+                    } else {
+                        this.resetDropdownPosition();
+                    }
                 });
             }
 
             document.addEventListener('click', (e) => {
                 if (dropdown && !e.target.closest('.universal-profile')) {
                     dropdown.classList.remove('active');
+                    this.resetDropdownPosition();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (dropdown?.classList.contains('active')) {
+                    this.positionDropdown();
+                } else {
+                    this.resetDropdownPosition();
                 }
             });
 
             this.setupModalListeners();
+        },
+
+        positionDropdown() {
+            const avatarBtn = document.getElementById('profileAvatarBtn');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (!avatarBtn || !dropdown) return;
+
+            if (window.innerWidth > 768) {
+                this.resetDropdownPosition();
+                return;
+            }
+
+            const buttonRect = avatarBtn.getBoundingClientRect();
+            const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            const gutter = 12;
+            const availableWidth = Math.max(220, viewportWidth - (gutter * 2));
+            const menuWidth = Math.min(320, availableWidth);
+            const top = Math.max(buttonRect.bottom + 10, gutter);
+            const right = Math.max(gutter, viewportWidth - buttonRect.right);
+            const maxHeight = Math.max(220, viewportHeight - top - gutter);
+
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = `${top}px`;
+            dropdown.style.right = `${right}px`;
+            dropdown.style.left = 'auto';
+            dropdown.style.width = `${menuWidth}px`;
+            dropdown.style.maxWidth = `${availableWidth}px`;
+            dropdown.style.maxHeight = `${maxHeight}px`;
+            dropdown.style.overflowY = 'auto';
+        },
+
+        resetDropdownPosition() {
+            const dropdown = document.getElementById('profileDropdown');
+            if (!dropdown) return;
+
+            dropdown.style.position = '';
+            dropdown.style.top = '';
+            dropdown.style.right = '';
+            dropdown.style.left = '';
+            dropdown.style.width = '';
+            dropdown.style.maxWidth = '';
+            dropdown.style.maxHeight = '';
+            dropdown.style.overflowY = '';
         },
 
         setupModalListeners() {
