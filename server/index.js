@@ -217,6 +217,7 @@ app.use('/releases', express.static(path.join(__dirname, '../releases')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  setNoStore(res);
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),

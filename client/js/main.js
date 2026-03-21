@@ -2,6 +2,10 @@
 const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api'
     : '/api';
+const RENDER_HEARTBEAT_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'http://localhost:5000/health'
+    : '/health';
+const RENDER_HEARTBEAT_INTERVAL_MS = 14 * 60 * 1000;
 
 // Check if localStorage is available
 let storageAvailable = false;
@@ -320,6 +324,193 @@ function consumePostLogoutRedirect(currentPath = decodeVisiblePathname(window.lo
     window.location.replace(target);
     return true;
 }
+
+let renderHeartbeatTimer = null;
+let renderHeartbeatInFlight = false;
+const renderHeartbeatState = {
+    enabled: false,
+    endpoint: RENDER_HEARTBEAT_URL,
+    intervalMs: RENDER_HEARTBEAT_INTERVAL_MS,
+    lastError: null,
+    lastPingAt: null,
+    lastReason: null,
+    lastSuccessAt: null,
+    status: 'idle'
+};
+
+function updateRenderHeartbeatState(status, extra = {}) {
+    Object.assign(renderHeartbeatState, extra, { status });
+
+    if (document?.documentElement) {
+        document.documentElement.dataset.renderHeartbeatStatus = status;
+    }
+}
+
+function isRenderHeartbeatVisible() {
+    if (typeof document === 'undefined' || typeof document.visibilityState === 'undefined') {
+        return true;
+    }
+
+    return document.visibilityState === 'visible';
+}
+
+function clearRenderHeartbeatTimer() {
+    if (!renderHeartbeatTimer) return;
+
+    window.clearInterval(renderHeartbeatTimer);
+    renderHeartbeatTimer = null;
+}
+
+async function pingRenderHeartbeat(reason = 'interval') {
+    if (renderHeartbeatInFlight || !isRenderHeartbeatVisible()) {
+        return false;
+    }
+
+    renderHeartbeatInFlight = true;
+    updateRenderHeartbeatState('pinging', {
+        lastError: null,
+        lastPingAt: Date.now(),
+        lastReason: reason
+    });
+
+    try {
+        const response = await fetch(RENDER_HEARTBEAT_URL, {
+            method: 'GET',
+            cache: 'no-store',
+            credentials: 'same-origin',
+            keepalive: true
+        });
+
+        if (!response.ok) {
+            throw new Error(`Heartbeat failed with status ${response.status}`);
+        }
+
+        updateRenderHeartbeatState(
+            !renderHeartbeatState.enabled
+                ? 'stopped'
+                : (isRenderHeartbeatVisible() ? 'active' : 'paused'),
+            {
+            lastSuccessAt: Date.now()
+            }
+        );
+        return true;
+    } catch (error) {
+        updateRenderHeartbeatState(
+            !renderHeartbeatState.enabled
+                ? 'stopped'
+                : (isRenderHeartbeatVisible() ? 'error' : 'paused'),
+            {
+                lastError: error.message
+            }
+        );
+        return false;
+    } finally {
+        renderHeartbeatInFlight = false;
+    }
+}
+
+function pauseRenderHeartbeat() {
+    clearRenderHeartbeatTimer();
+    updateRenderHeartbeatState('paused');
+}
+
+function scheduleRenderHeartbeat() {
+    clearRenderHeartbeatTimer();
+
+    if (!renderHeartbeatState.enabled) {
+        updateRenderHeartbeatState('stopped');
+        return;
+    }
+
+    if (!isRenderHeartbeatVisible()) {
+        pauseRenderHeartbeat();
+        return;
+    }
+
+    renderHeartbeatTimer = window.setInterval(() => {
+        if (!renderHeartbeatState.enabled) {
+            clearRenderHeartbeatTimer();
+            return;
+        }
+
+        if (!isRenderHeartbeatVisible()) {
+            pauseRenderHeartbeat();
+            return;
+        }
+
+        pingRenderHeartbeat('interval').catch(() => {});
+    }, RENDER_HEARTBEAT_INTERVAL_MS);
+
+    updateRenderHeartbeatState('scheduled');
+    pingRenderHeartbeat('startup').catch(() => {});
+}
+
+function startRenderHeartbeat() {
+    renderHeartbeatState.enabled = true;
+    scheduleRenderHeartbeat();
+}
+
+function stopRenderHeartbeat() {
+    renderHeartbeatState.enabled = false;
+    clearRenderHeartbeatTimer();
+    updateRenderHeartbeatState('stopped');
+}
+
+function initRenderHeartbeat() {
+    if (typeof window === 'undefined' || typeof fetch !== 'function') {
+        updateRenderHeartbeatState('unsupported');
+        return;
+    }
+
+    if (window.__renderHeartbeatInitialized) {
+        return;
+    }
+
+    window.__renderHeartbeatInitialized = true;
+    startRenderHeartbeat();
+
+    document.addEventListener('visibilitychange', () => {
+        if (!renderHeartbeatState.enabled) {
+            return;
+        }
+
+        if (isRenderHeartbeatVisible()) {
+            scheduleRenderHeartbeat();
+            return;
+        }
+
+        pauseRenderHeartbeat();
+    });
+
+    window.addEventListener('focus', () => {
+        if (!renderHeartbeatState.enabled || !isRenderHeartbeatVisible()) {
+            return;
+        }
+
+        scheduleRenderHeartbeat();
+    });
+
+    window.addEventListener('pagehide', () => {
+        if (renderHeartbeatState.enabled) {
+            pauseRenderHeartbeat();
+        }
+    });
+}
+
+const RenderHeartbeat = {
+    getState() {
+        return { ...renderHeartbeatState };
+    },
+    ping() {
+        return pingRenderHeartbeat('manual');
+    },
+    start() {
+        startRenderHeartbeat();
+    },
+    stop() {
+        stopRenderHeartbeat();
+    }
+};
 
 // Local Storage Helper with multiple fallbacks
 const Storage = {
@@ -857,7 +1048,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             window.location.href = redirectUrl;
         }
+
+        return;
     }
+
+    initRenderHeartbeat();
 });
 
 window.ensureThemeToggle = ensureThemeToggle;
@@ -886,6 +1081,7 @@ window.APP = {
     setPostLogoutRedirect,
     clearPostLogoutRedirect,
     hasExpiredSessionByInactivity,
+    RenderHeartbeat,
     sanitizeExpiredPublicSession,
     consumePostLogoutRedirect,
     checkAuth,
