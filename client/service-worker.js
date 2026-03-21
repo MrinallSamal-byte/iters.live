@@ -1,5 +1,5 @@
 // Enhanced Service Worker for PWA with Advanced Caching Strategies
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `iter-edu-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `iter-runtime-${CACHE_VERSION}`;
 const API_CACHE = `iter-api-${CACHE_VERSION}`;
@@ -111,6 +111,20 @@ async function isCacheFresh(request, cacheName, maxAge) {
   return cacheAge < maxAge;
 }
 
+async function putWithTimestamp(cache, request, response) {
+  const responseToCache = response.clone();
+  const headers = new Headers(responseToCache.headers);
+  headers.set('sw-cache-date', Date.now().toString());
+
+  const responseWithTimestamp = new Response(responseToCache.body, {
+    status: responseToCache.status,
+    statusText: responseToCache.statusText,
+    headers
+  });
+
+  await cache.put(request, responseWithTimestamp);
+}
+
 // Stale-while-revalidate strategy
 async function staleWhileRevalidate(request, cacheName, maxAge) {
   const cache = await caches.open(cacheName);
@@ -121,18 +135,7 @@ async function staleWhileRevalidate(request, cacheName, maxAge) {
   // Fetch from network in background
   const fetchPromise = fetch(request).then(async (response) => {
     if (response.status === 200) {
-      // Clone the response and add cache timestamp
-      const responseToCache = response.clone();
-      const headers = new Headers(responseToCache.headers);
-      headers.set('sw-cache-date', Date.now().toString());
-      
-      const responseWithTimestamp = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: headers
-      });
-      
-      await cache.put(request, responseWithTimestamp);
+      await putWithTimestamp(cache, request, response);
     }
     return response;
   }).catch(() => null);
@@ -197,15 +200,17 @@ self.addEventListener('fetch', (event) => {
       caches.match(request).then((cachedResponse) => {
         if (cachedResponse) {
           // Check if cache is stale and update in background
-          if (!isCacheFresh(request, CACHE_NAME, CACHE_MAX_AGE.static)) {
+          isCacheFresh(request, CACHE_NAME, CACHE_MAX_AGE.static).then((isFresh) => {
+            if (isFresh) return;
+
             fetch(request).then((response) => {
               if (response.status === 200) {
                 caches.open(CACHE_NAME).then((cache) => {
-                  cache.put(request, response);
+                  putWithTimestamp(cache, request, response).catch(() => {});
                 });
               }
             }).catch(() => {});
-          }
+          }).catch(() => {});
           return cachedResponse;
         }
         
@@ -213,7 +218,7 @@ self.addEventListener('fetch', (event) => {
         return caches.open(RUNTIME_CACHE).then((cache) => {
           return fetch(request).then((response) => {
             if (response.status === 200) {
-              cache.put(request, response.clone());
+              putWithTimestamp(cache, request, response.clone()).catch(() => {});
             }
             return response;
           }).catch(() => {
