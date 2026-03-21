@@ -117,6 +117,119 @@
         });
     }
 
+    function closePrimaryMobileMenu() {
+        const menuButton = document.getElementById('mobileMenuBtn');
+        const navLinks = document.querySelector('.nav-links');
+        const overlay = document.querySelector('.mobile-nav-overlay');
+
+        if (!menuButton || !navLinks) {
+            return;
+        }
+
+        menuButton.classList.remove('active');
+        navLinks.classList.remove('active', 'mobile-open');
+        overlay?.classList.remove('active');
+        document.body.classList.remove('nav-open');
+        menuButton.setAttribute('aria-expanded', 'false');
+    }
+
+    function scrollToHomeSection(hash) {
+        if (!hash || !hash.startsWith('#')) {
+            return false;
+        }
+
+        const target = document.querySelector(hash);
+        if (!target) {
+            return false;
+        }
+
+        if (window.NavbarScrollBehavior?.show) {
+            window.NavbarScrollBehavior.show();
+        }
+
+        const navbar = document.querySelector('.navbar');
+        const navbarHeight = navbar ? navbar.offsetHeight : 70;
+        const targetPosition = target.getBoundingClientRect().top + window.scrollY - navbarHeight - 20;
+
+        closePrimaryMobileMenu();
+        window.scrollTo({
+            top: Math.max(targetPosition, 0),
+            behavior: 'smooth'
+        });
+
+        if (window.history?.replaceState) {
+            window.history.replaceState(window.history.state, document.title, hash);
+        }
+
+        window.requestAnimationFrame(() => {
+            window.NavbarActiveLinks?.update?.();
+        });
+
+        return true;
+    }
+
+    function isPrimaryInternalLink(link, href, event) {
+        if (!link || !href || href.startsWith('#')) {
+            return false;
+        }
+
+        if (link.hasAttribute('download') || link.getAttribute('target') === '_blank') {
+            return false;
+        }
+
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+            return false;
+        }
+
+        if (/^(mailto:|tel:|javascript:)/i.test(href)) {
+            return false;
+        }
+
+        try {
+            const url = new URL(href, window.location.origin);
+            return url.origin === window.location.origin;
+        } catch (_) {
+            return href.startsWith('/') || href.startsWith('./') || href.startsWith('../');
+        }
+    }
+
+    function initPrimaryNavLinks() {
+        const navLinks = document.querySelectorAll('.navbar .nav-links a[href]');
+        if (!navLinks.length) {
+            return;
+        }
+
+        navLinks.forEach((link) => {
+            if (link.dataset.primaryNavBound === 'true') {
+                return;
+            }
+
+            link.dataset.primaryNavBound = 'true';
+            link.addEventListener('click', (event) => {
+                const href = link.getAttribute('href');
+                if (!href) {
+                    return;
+                }
+
+                if (href.startsWith('#')) {
+                    const handled = scrollToHomeSection(href);
+                    if (handled) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    return;
+                }
+
+                if (isPrimaryInternalLink(link, href, event) && window.LinkEncoding?.navigateTo) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    closePrimaryMobileMenu();
+                    window.LinkEncoding.navigateTo(href);
+                }
+            });
+        });
+    }
+
     function initMobileAriaState() {
         const menuButton = document.getElementById('mobileMenuBtn');
         const navLinks = document.querySelector('.nav-links');
@@ -154,11 +267,14 @@
         initStatusRotation();
         initCurrentYear();
         initLogoShortcut();
+        initPrimaryNavLinks();
         initMobileAriaState();
     });
 
     window.Landing = {
         initRevealOnScroll,
-        initCounters
+        initCounters,
+        initPrimaryNavLinks,
+        scrollToHomeSection
     };
 })();
