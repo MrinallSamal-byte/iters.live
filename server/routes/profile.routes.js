@@ -22,18 +22,16 @@ const uploadLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// All routes require authentication
-router.use(verifyToken);
-
 // GET /api/users/me - Get current user profile
-router.get('/users/me', profileController.getCurrentUser);
+router.get('/users/me', verifyToken, profileController.getCurrentUser);
 
 // PUT /api/users/me - Update profile
-router.put('/users/me', profileController.updateProfile);
+router.put('/users/me', verifyToken, profileController.updateProfile);
 
 // POST /api/profile/photo - Upload profile photo
 router.post(
     '/profile/photo',
+    verifyToken,
     uploadLimiter,
     avatarUpload.single('avatar'),
     handleMulterError,
@@ -41,6 +39,6 @@ router.post(
 );
 
 // DELETE /api/profile/photo - Remove profile photo
-router.delete('/profile/photo', profileController.deletePhoto);
+router.delete('/profile/photo', verifyToken, profileController.deletePhoto);
 
 module.exports = router;
