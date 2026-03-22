@@ -109,6 +109,9 @@
   "build": {
     "appId": "com.iter.collegemanagement",
     "productName": "ITER College Management",
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
     "directories": {
       "output": "releases/desktop"
     },

@@ -7,6 +7,7 @@ const { execFileSync } = require('child_process');
 const rootDir = path.resolve(__dirname, '..');
 const androidDir = path.join(rootDir, 'android-app');
 const appBuildGradle = path.join(androidDir, 'app', 'build.gradle');
+const localPropertiesFile = path.join(androidDir, 'local.properties');
 const isWindows = process.platform === 'win32';
 const gradleExecutable = isWindows
   ? path.join(androidDir, 'gradlew.bat')
@@ -38,6 +39,25 @@ function ensureNativeAndroidConfiguration() {
   if (Number.isNaN(minSdk) || minSdk < 29) {
     fail(`android-app/app/build.gradle must target Android 10+ (found minSdk ${minSdk}).`);
   }
+}
+
+function ensureSdkPathConfiguration() {
+  if (fs.existsSync(localPropertiesFile)) {
+    const existing = fs.readFileSync(localPropertiesFile, 'utf8');
+    if (/^\s*sdk\.dir\s*=\s*.+/m.test(existing)) {
+      return;
+    }
+  }
+
+  const sdkDir = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
+  if (!sdkDir) {
+    console.warn('ANDROID_HOME/ANDROID_SDK_ROOT is not set and android-app/local.properties has no sdk.dir.');
+    return;
+  }
+
+  const escapedSdkDir = sdkDir.replace(/\\/g, '\\\\');
+  fs.writeFileSync(localPropertiesFile, `sdk.dir=${escapedSdkDir}\n`, 'utf8');
+  console.log(`Wrote Android SDK path to ${localPropertiesFile}`);
 }
 
 function runGradle(tasks) {
@@ -88,6 +108,7 @@ function copyArtifact() {
 
 function main() {
   ensureNativeAndroidConfiguration();
+  ensureSdkPathConfiguration();
 
   const tasks = [];
   if (!skipTests) {
