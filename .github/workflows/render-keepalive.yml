@@ -35,7 +35,10 @@ jobs:
 
       - name: Ping Render health endpoint
         run: |
-          curl --fail --silent --show-error --max-time 30 \
+          if ! curl --fail --silent --show-error --max-time 30 \
             --user-agent "iterasn-hub-keepalive" \
-            "${{ steps.target.outputs.health_url }}"
+            "${{ steps.target.outputs.health_url }}"; then
+            echo "::warning::Keepalive ping failed. If your Render app has a different URL, please set the RENDER_HEALTHCHECK_URL repository variable."
+            exit 0
+          fi
 
