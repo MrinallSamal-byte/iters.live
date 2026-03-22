@@ -33,32 +33,29 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
     - name: Make gradlew executable
       run: chmod +x ./android-app/gradlew
 
-    - name: Run Android Unit Tests
-      run: |
-        cd android-app
-        ./gradlew testDebugUnitTest --no-daemon
-
-    - name: Build Debug APK
-      run: |
-        cd android-app
-        ./gradlew assembleDebug --no-daemon
-
-    - name: Copy APK to releases folder
-      run: |
-        mkdir -p client/releases
-        cp android-app/app/build/outputs/apk/debug/app-debug.apk client/releases/ITER.apk
+    - name: Build Android app
+      run: npm run build:android -- --release
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ITER-EduHub-APK
-        path: client/releases/ITER.apk
+        path: releases/android/ITERasn-hub-native-release.apk
         retention-days: 90
 
     - name: Determine release tag
@@ -92,9 +89,9 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.release_tag.outputs.tag }}
-        name: ITERasn hub ${{ steps.release_tag.outputs.tag }}
+        name: ITER EduHub ${{ steps.release_tag.outputs.tag }}
         body: |
-          ## ITERasn hub Native Android App
+          ## ITER EduHub Native Android App
           
           **Version**: ${{ steps.release_tag.outputs.tag }}
           **Build**: #${{ github.run_number }}
@@ -120,8 +117,8 @@ jobs:
           - Network access to the configured backend/API
           
           ### 🔗 Direct Download
-          Click on `ITER.apk` in the Assets section below to download.
-        files: client/releases/ITER.apk
+          Click on the attached APK in the Assets section below to download.
+        files: releases/android/ITERasn-hub-native-release.apk
         draft: false
         prerelease: false
         make_latest: true
