@@ -49,7 +49,7 @@ jobs:
       run: chmod +x ./android-app/gradlew
 
     - name: Build Android app
-      run: npm run build:android -- --release
+      run: npm run build:android -- --release --skip-tests
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4

@@ -114,16 +114,18 @@ if (useVercelPostgres) {
   console.log('📡 Using Supabase PostgreSQL (local development)');
   
   const { Pool } = require('pg');
+  const dbHost = process.env.DB_HOST;
+  const normalizedHost = (dbHost || '').toLowerCase();
+  const isLocalHost = normalizedHost === 'localhost' || normalizedHost === '127.0.0.1';
+  const useSsl = process.env.DB_SSL === 'true' || (!isLocalHost && process.env.DB_SSL !== 'false');
   
   const poolConfig = {
-    host: process.env.DB_HOST,
+    host: dbHost,
     port: parseInt(process.env.DB_PORT) || 5432,
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'postgres',
-    ssl: {
-      rejectUnauthorized: false
-    },
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
     // Serverless-optimized settings
     max: process.env.VERCEL ? 2 : 20,
     min: process.env.VERCEL ? 0 : 2,
@@ -156,7 +158,8 @@ if (useVercelPostgres) {
   };
   
   // Test connection on startup (non-serverless only)
-  if (!process.env.VERCEL) {
+  const isTestRuntime = process.env.NODE_ENV === 'test' || Boolean(process.env.JEST_WORKER_ID);
+  if (!process.env.VERCEL && !isTestRuntime) {
     testConnection();
   }
   

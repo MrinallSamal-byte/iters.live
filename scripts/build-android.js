@@ -60,12 +60,18 @@ function runGradle(tasks) {
 }
 
 function copyArtifact() {
-  const artifactPath = release
-    ? path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk')
-    : path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk');
+  const artifactCandidates = release
+    ? [
+        path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk'),
+        path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release-unsigned.apk')
+      ]
+    : [path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk')];
 
-  if (!fs.existsSync(artifactPath)) {
-    console.warn(`Build completed, but no APK was found at ${artifactPath}.`);
+  const artifactPath = artifactCandidates.find((candidate) => fs.existsSync(candidate));
+
+  if (!artifactPath) {
+    console.warn(`Build completed, but no APK was found in expected locations:`);
+    artifactCandidates.forEach((candidate) => console.warn(` - ${candidate}`));
     console.warn('If you produced an AAB-only release, collect it directly from android-app/app/build/outputs.');
     return;
   }
