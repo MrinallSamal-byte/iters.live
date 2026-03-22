@@ -12,6 +12,10 @@ jest.mock('playwright', () => ({
 describe('soa-scraper.service CAPTCHA extraction', () => {
     beforeEach(() => {
         jest.resetModules();
+        const { chromium } = require('playwright');
+        chromium.launch.mockReset();
+        chromium.executablePath.mockReset();
+        chromium.executablePath.mockReturnValue('/mock/chromium');
     });
 
     it('extracts captcha from direct verify image selector when visible', async () => {
@@ -32,7 +36,7 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
         const result = await service.__private.extractCaptchaImage(page);
 
         expect(result).toBe(`data:image/png;base64,${screenshotBuffer.toString('base64')}`);
-        expect(page.locator).toHaveBeenCalledWith('.verify-img');
+        expect(page.locator).toHaveBeenCalledWith('img[class*="verify"]');
     });
 
     it('falls back to score-based visible image extraction when selector lookup misses', async () => {
@@ -92,5 +96,57 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
 
         expect(result).toBe(`data:image/png;base64,${screenshotBuffer.toString('base64')}`);
         expect(page.locator).toHaveBeenCalledWith('img');
+    });
+
+    it('returns null when no visible or scoreable captcha image candidates exist', async () => {
+        const page = {
+            locator: jest.fn((selector) => {
+                if (selector === 'img') {
+                    return {
+                        nth: jest.fn(() => ({
+                            isVisible: jest.fn().mockResolvedValue(false)
+                        }))
+                    };
+                }
+
+                if (selector === 'form') {
+                    return {
+                        first: jest.fn(() => ({
+                            isVisible: jest.fn().mockResolvedValue(false),
+                            locator: jest.fn(() => ({ all: jest.fn().mockResolvedValue([]) }))
+                        }))
+                    };
+                }
+
+                return {
+                    first: jest.fn(() => ({
+                        isVisible: jest.fn().mockResolvedValue(false)
+                    }))
+                };
+            }),
+            evaluate: jest.fn().mockResolvedValue({
+                hasCaptchaInput: false,
+                captchaRect: null,
+                images: [
+                    {
+                        index: 0,
+                        src: 'https://soaportals.com/logo.png',
+                        id: 'logo',
+                        className: 'brand',
+                        alt: 'Logo',
+                        visible: false,
+                        width: 120,
+                        height: 40,
+                        top: 20,
+                        left: 20
+                    }
+                ]
+            })
+        };
+
+        const service = require('../services/soa-scraper.service');
+        const result = await service.__private.extractCaptchaImage(page);
+
+        expect(result).toBeNull();
     });
 });

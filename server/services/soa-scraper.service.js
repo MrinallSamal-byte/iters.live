@@ -39,6 +39,22 @@ const PORTAL_DNS_SERVERS = ['1.1.1.1', '8.8.8.8'];
 const TIMEOUT = 60000; // 60 seconds
 const NAVIGATION_TIMEOUT = 30000;
 const PORTAL_READY_TIMEOUT = 15000;
+// Heuristic weights tuned for the current SOA/CampusLynx login UI:
+// explicit "captcha" hints are strongest, "verify" and expected dimensions are supporting signals.
+const CAPTCHA_HEURISTIC_SCORE = {
+    HAS_CAPTCHA_HINT: 6,
+    HAS_VERIFY_HINT: 4,
+    CAPTCHA_LIKE_DIMENSIONS: 2,
+    NEAR_CAPTCHA_INPUT: 5
+};
+// Typical CAPTCHA image bounds observed in the SOA portal login form.
+const CAPTCHA_IMAGE_DIMENSIONS = {
+    minWidth: 80,
+    maxWidth: 400,
+    minHeight: 25,
+    maxHeight: 120
+};
+const MAX_CAPTCHA_INPUT_VERTICAL_DISTANCE = 220;
 
 // In-memory session storage for browser contexts
 // Key: sessionId, Value: { browser, page, captchaImage, createdAt }
@@ -1055,7 +1071,6 @@ async function extractCaptchaImage(page) {
     try {
         // Try multiple selectors for CAPTCHA image
         const captchaSelectors = [
-            '.verify-img',
             'img[class*="verify"]',
             'img[aria-label*="captcha" i]',
             'img[id*="captcha"]',
@@ -1099,7 +1114,7 @@ async function extractCaptchaImage(page) {
                 return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
             };
 
-            const containsCaptchaHint = (text) => /captcha|text as shown|verification/i.test(String(text || ''));
+            const containsVerificationHint = (text) => /captcha|text as shown|verification/i.test(String(text || ''));
 
             const inputs = Array.from(document.querySelectorAll('input'));
             const captchaInput = inputs.find((input) => {
@@ -1110,7 +1125,7 @@ async function extractCaptchaImage(page) {
                     input.getAttribute('formcontrolname'),
                     input.getAttribute('aria-label')
                 ].join(' ');
-                return containsCaptchaHint(joinedText);
+                return containsVerificationHint(joinedText);
             });
             const captchaRect = captchaInput?.getBoundingClientRect?.() || null;
 
@@ -1147,17 +1162,31 @@ async function extractCaptchaImage(page) {
             .filter((img) => img.visible)
             .map((img) => {
                 const mergedText = `${img.src || ''} ${img.id || ''} ${img.className || ''} ${img.alt || ''}`.toLowerCase();
+                const hasCaptchaHint = mergedText.includes('captcha');
+                const hasVerifyHint = mergedText.includes('verify');
                 let score = 0;
 
-                if (mergedText.includes('captcha')) score += 6;
-                if (mergedText.includes('verify')) score += 4;
-                if (img.width >= 80 && img.width <= 400 && img.height >= 25 && img.height <= 120) score += 2;
+                if (hasCaptchaHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_CAPTCHA_HINT;
+                if (hasVerifyHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_VERIFY_HINT;
+                if (
+                    img.width >= CAPTCHA_IMAGE_DIMENSIONS.minWidth &&
+                    img.width <= CAPTCHA_IMAGE_DIMENSIONS.maxWidth &&
+                    img.height >= CAPTCHA_IMAGE_DIMENSIONS.minHeight &&
+                    img.height <= CAPTCHA_IMAGE_DIMENSIONS.maxHeight
+                ) {
+                    score += CAPTCHA_HEURISTIC_SCORE.CAPTCHA_LIKE_DIMENSIONS;
+                }
 
                 if (imageSearch?.captchaRect) {
+                    const imageLeft = img.left || 0;
+                    const imageRight = imageLeft + (img.width || 0);
                     const verticalDistance = Math.abs((img.top || 0) - imageSearch.captchaRect.top);
-                    const nearCaptchaInput = verticalDistance <= 220;
-                    const horizontalOverlap = (img.left || 0) <= imageSearch.captchaRect.right && ((img.left || 0) + (img.width || 0)) >= imageSearch.captchaRect.left;
-                    if (nearCaptchaInput && horizontalOverlap) score += 5;
+                    const nearCaptchaInput = verticalDistance <= MAX_CAPTCHA_INPUT_VERTICAL_DISTANCE;
+                    // Require both vertical proximity and horizontal overlap to avoid unrelated banner/logo images.
+                    const horizontalOverlap = imageLeft <= imageSearch.captchaRect.right && imageRight >= imageSearch.captchaRect.left;
+                    if (nearCaptchaInput && horizontalOverlap) {
+                        score += CAPTCHA_HEURISTIC_SCORE.NEAR_CAPTCHA_INPUT;
+                    }
                 }
 
                 return {
@@ -1180,7 +1209,8 @@ async function extractCaptchaImage(page) {
                 const base64 = screenshotBuffer.toString('base64');
                 console.log(`[SOA Scraper] Extracted CAPTCHA candidate (score=${candidate.score}, idx=${candidate.index})`);
                 return `data:image/png;base64,${base64}`;
-            } catch (_) {
+            } catch (error) {
+                console.debug(`[SOA Scraper] Candidate extraction failed (idx=${candidate.index}): ${error.message}`);
                 continue;
             }
         }
