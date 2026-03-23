@@ -41,6 +41,7 @@ const POST_LOGOUT_REDIRECT_AT_KEY = 'postLogoutRedirectTimestamp';
 const POST_LOGOUT_REDIRECT_REASON_KEY = 'postLogoutRedirectReason';
 const PUBLIC_HOME_PATHS = new Set(['/', '/index.html']);
 const PUBLIC_AUTH_PATHS = new Set(['/login', '/login.html', '/register', '/register.html']);
+let authExpiryHandled = false;
 const AUTH_STORAGE_KEYS = [
     'accessToken',
     'refreshToken',
@@ -637,6 +638,23 @@ const API = {
                 const error = new Error(data.message || 'Request failed');
                 error.status = response.status;
                 error.data = data;
+
+                if (response.status === 401 && !authExpiryHandled) {
+                    authExpiryHandled = true;
+
+                    if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
+                        window.SessionTimeout.logout('session_invalid');
+                    } else {
+                        setPostLogoutRedirect('/index.html', 'session_invalid');
+                        clearClientState({
+                            preserveTheme: true,
+                            preserveLogoutReason: true,
+                            preservePostLogoutRedirect: true
+                        });
+                        window.location.replace('/index.html');
+                    }
+                }
+
                 throw error;
             }
 
