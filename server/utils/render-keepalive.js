@@ -139,7 +139,7 @@ function startRenderKeepAlive({ fetchImpl = global.fetch, logger = console } = {
 
       const response = await fetchImpl(config.targetUrl, {
         method: 'GET',
-        headers: { 'User-Agent': 'iter-render-keepalive' },
+        headers: { 'User-Agent': 'iterasn-hub-keepalive' },
         signal: controller ? controller.signal : undefined
       });
 

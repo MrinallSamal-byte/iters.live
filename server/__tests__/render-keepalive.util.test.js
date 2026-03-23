@@ -63,9 +63,7 @@ describe('render-keepalive utility', () => {
     const stop = startRenderKeepAlive({ fetchImpl: fetchMock, logger });
 
     expect(fetchMock).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(45 * 1000);
-    await Promise.resolve();
-    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(45 * 1000);
     expect(fetchMock).toHaveBeenCalledWith(
       'https://iter-aio.onrender.com/health',
       expect.objectContaining({ method: 'GET' })
