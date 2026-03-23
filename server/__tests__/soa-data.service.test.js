@@ -116,4 +116,46 @@ describe('soa-data.service', () => {
     expect(snapshot.status.hasImportedData).toBe(true);
     expect(snapshot.normalizedData.attendance.summary[0].subject).toBe('Applied Kotlin');
   });
+
+  test('normalizes timetable and subject rows from captured SOA section tables', () => {
+    const normalized = normalizeSoaPortalData({
+      rawSections: {
+        timetable: {
+          tables: [
+            {
+              headers: ['Monday', 'Tuesday', 'Wednesday'],
+              rows: [
+                ['08:00 AM to 09:00 AM CSE3141 Lab', '10:00 AM to 11:00 AM MTH3003 Room 411', '']
+              ]
+            }
+          ]
+        },
+        subjects: {
+          tables: [
+            {
+              title: 'Registered Subjects',
+              headers: ['Subject Code', 'Subject Name', 'Credits'],
+              rows: [
+                ['CSE3141', 'Computer Science Workshop 2', '2'],
+                ['MTH3003', 'Applied Linear Algebra', '4']
+              ]
+            }
+          ]
+        }
+      },
+      dataSource: 'raw_sections_test'
+    });
+
+    expect(normalized.timetable).toHaveLength(1);
+    expect(normalized.timetable[0]).toMatchObject({
+      monday: '08:00 AM to 09:00 AM CSE3141 Lab',
+      tuesday: '10:00 AM to 11:00 AM MTH3003 Room 411'
+    });
+    expect(normalized.subjects).toHaveLength(2);
+    expect(normalized.subjects[0]).toMatchObject({
+      subjectcode: 'CSE3141',
+      subjectname: 'Computer Science Workshop 2',
+      credits: '2'
+    });
+  });
 });

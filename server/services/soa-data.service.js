@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const { db, isFirebaseAdminReady } = require('../database/firebase');
+const { query: sqlQuery } = require('../database/db');
 
 const localPortalStore = new Map();
 const DUMMY_DATA_PATH = path.join(__dirname, '../data/dummyStudentData.json');
+const SQL_PORTAL_SNAPSHOT_TABLE = 'soa_portal_snapshots';
 
 const FIELD_ALIASES = {
   studentName: ['studentname', 'name', 'fullname', 'studentfullname', 'nameofthestudent'],
@@ -64,6 +66,17 @@ function loadDummyData() {
 }
 
 const DUMMY_DATA = loadDummyData();
+let sqlSnapshotTablePromise = null;
+
+function isSqlPersistenceConfigured() {
+  return typeof sqlQuery === 'function' && Boolean(
+    process.env.ENABLE_SQL_PORTAL_CACHE === 'true' ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.DB_HOST ||
+    process.env.VERCEL
+  );
+}
 
 function cleanValue(value) {
   if (value === null || value === undefined) return null;
@@ -790,6 +803,123 @@ function normalizeMarksRecords(rawData, semesterResults = []) {
   };
 }
 
+function normalizeStructuredArray(items) {
+  if (!Array.isArray(items)) return [];
+
+  return items
+    .map((item) => {
+      if (Array.isArray(item)) {
+        const row = item.map((cell) => cleanValue(cell)).filter((cell) => cell !== null);
+        return row.length ? row : null;
+      }
+
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const record = {};
+      Object.entries(item).forEach(([key, value]) => {
+        const cleaned = cleanValue(value);
+        if (cleaned !== null) {
+          record[key] = cleaned;
+        }
+      });
+
+      return Object.keys(record).length ? record : null;
+    })
+    .filter(Boolean);
+}
+
+function isTimetableTable(table) {
+  const title = normalizeLabel(table?.title);
+  const headerText = normalizeLabel((table?.headers || []).join(' '));
+
+  return (
+    table?.sectionKey === 'timetable' ||
+    title.includes('timetable') ||
+    title.includes('schedule') ||
+    headerText.includes('monday') ||
+    headerText.includes('tuesday') ||
+    headerText.includes('wednesday') ||
+    headerText.includes('thursday') ||
+    headerText.includes('friday') ||
+    headerText.includes('saturday')
+  );
+}
+
+function isSubjectTable(table) {
+  const title = normalizeLabel(table?.title);
+  const headerText = normalizeLabel((table?.headers || []).join(' '));
+
+  return (
+    table?.sectionKey === 'subjects' ||
+    title.includes('registeredsubject') ||
+    title.includes('subjects') ||
+    title.includes('courses') ||
+    headerText.includes('subjectcode') ||
+    headerText.includes('subjectname') ||
+    headerText.includes('coursecode') ||
+    headerText.includes('coursename')
+  );
+}
+
+function normalizeTimetableRecords(rawData) {
+  const directRecords = normalizeStructuredArray(rawData?.timetable);
+  if (directRecords.length) {
+    return directRecords;
+  }
+
+  const records = [];
+  collectTables(rawData)
+    .filter(isTimetableTable)
+    .forEach((table) => {
+      const objectRows = tableToObjects(table).map((row) =>
+        Object.fromEntries(
+          Object.entries(row || {})
+            .map(([key, value]) => [key, cleanValue(value)])
+            .filter(([, value]) => value !== null)
+        )
+      ).filter((row) => Object.keys(row).length);
+
+      if (objectRows.length) {
+        records.push(...objectRows);
+        return;
+      }
+
+      const normalized = normalizeTable(table);
+      if (!normalized?.rows?.length) return;
+      normalized.rows.forEach((row) => {
+        const cells = row.map((cell) => cleanValue(cell)).filter((cell) => cell !== null);
+        if (cells.length) {
+          records.push(cells);
+        }
+      });
+    });
+
+  return dedupeBy(records, (item) => JSON.stringify(item));
+}
+
+function normalizeSubjectRecords(rawData) {
+  const directRecords = normalizeStructuredArray(rawData?.subjects || rawData?.courses);
+  if (directRecords.length) {
+    return directRecords;
+  }
+
+  const records = collectTables(rawData)
+    .filter(isSubjectTable)
+    .flatMap((table) => tableToObjects(table))
+    .map((row) =>
+      Object.fromEntries(
+        Object.entries(row || {})
+          .map(([key, value]) => [key, cleanValue(value)])
+          .filter(([, value]) => value !== null)
+      )
+    )
+    .filter((row) => Object.keys(row).length);
+
+  return dedupeBy(records, (item) => JSON.stringify(item));
+}
+
 function buildProfileSummary(rawData) {
   const groupedContact = extractGroupedContactInfo(rawData);
   const correspondenceAddressCandidate = findFieldValue(rawData, 'correspondenceAddress');
@@ -876,6 +1006,8 @@ function normalizeSoaPortalData(rawData = {}) {
   const semesterResults = normalizeSemesterResults(rawData);
   const marks = normalizeMarksRecords(rawData, semesterResults);
   const qualifications = normalizeQualifications(rawData);
+  const timetable = normalizeTimetableRecords(rawData);
+  const subjects = normalizeSubjectRecords(rawData);
   const rawSections = rawData.rawSections || {};
   const fetchedAt = serializeDate(rawData.fetchedAt || rawData.metadata?.fetchedAt || new Date());
 
@@ -930,8 +1062,8 @@ function normalizeSoaPortalData(rawData = {}) {
     semesterResults,
     results: marks.records,
     internalAssessments: Array.isArray(rawData.internalAssessments) ? rawData.internalAssessments : [],
-    timetable: Array.isArray(rawData.timetable) ? rawData.timetable : [],
-    subjects: Array.isArray(rawData.subjects) ? rawData.subjects : [],
+    timetable,
+    subjects,
     notifications: Array.isArray(rawData.notifications) ? rawData.notifications : [],
     backlogs: Array.isArray(rawData.backlogs) ? rawData.backlogs : [],
     fees: rawData.fees || {},
@@ -1044,6 +1176,7 @@ function buildFirestoreUpdate(normalized, options = {}) {
     portalConnected: options.portalConnected !== false,
     portalNeedsReconnect: Boolean(options.portalNeedsReconnect),
     portalProvider: 'soa',
+    dataSource: normalized.dataSource || 'cached_soa_import',
     portalRegistrationNumber: cleanValue(options.registrationNumber) || normalized.profile.registrationNumber,
     portal_last_synced: new Date(options.lastSynced || normalized.fetchedAt || Date.now()),
     isVerified: options.isVerified !== false,
@@ -1071,6 +1204,250 @@ function buildFirestoreUpdate(normalized, options = {}) {
   };
 }
 
+async function ensureSqlPortalSnapshotTable() {
+  if (!isSqlPersistenceConfigured()) {
+    return false;
+  }
+
+  if (!sqlSnapshotTablePromise) {
+    sqlSnapshotTablePromise = (async () => {
+      await sqlQuery(`
+        CREATE TABLE IF NOT EXISTS ${SQL_PORTAL_SNAPSHOT_TABLE} (
+          user_id TEXT PRIMARY KEY,
+          registration_number TEXT,
+          portal_connected BOOLEAN DEFAULT FALSE,
+          portal_needs_reconnect BOOLEAN DEFAULT FALSE,
+          is_verified BOOLEAN DEFAULT FALSE,
+          portal_provider TEXT,
+          portal_last_synced TIMESTAMPTZ,
+          data_source TEXT,
+          portal_data JSONB,
+          profile JSONB,
+          attendance_data JSONB,
+          marks_data JSONB,
+          timetable_data JSONB,
+          courses_data JSONB,
+          results_data JSONB,
+          notifications_data JSONB,
+          backlogs_data JSONB,
+          internal_assessments_data JSONB,
+          fees_data JSONB,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      await sqlQuery(`
+        CREATE INDEX IF NOT EXISTS soa_portal_snapshots_registration_number_idx
+        ON ${SQL_PORTAL_SNAPSHOT_TABLE} (registration_number)
+      `);
+      return true;
+    })().catch((error) => {
+      sqlSnapshotTablePromise = null;
+      throw error;
+    });
+  }
+
+  return sqlSnapshotTablePromise;
+}
+
+function toSqlJson(value) {
+  return value === undefined ? null : JSON.stringify(value ?? null);
+}
+
+function fromSqlJson(value, fallback = null) {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (_) {
+      return fallback;
+    }
+  }
+  return value;
+}
+
+function buildSqlSnapshotRow(updateData = {}, options = {}) {
+  return {
+    userId: cleanValue(options.userId) || cleanValue(updateData.portalRegistrationNumber),
+    registrationNumber: cleanValue(updateData.portalRegistrationNumber),
+    portalConnected: Boolean(updateData.portalConnected),
+    portalNeedsReconnect: Boolean(updateData.portalNeedsReconnect),
+    isVerified: Boolean(updateData.isVerified),
+    portalProvider: cleanValue(updateData.portalProvider),
+    portalLastSynced: updateData.portal_last_synced ? new Date(updateData.portal_last_synced) : null,
+    dataSource: pickFirst(updateData.dataSource, updateData.portalData?.dataSource, 'cached_soa_import'),
+    portalData: updateData.portalData || null,
+    profile: updateData.profile || {},
+    attendanceData: Array.isArray(updateData.attendance_data) ? updateData.attendance_data : [],
+    marksData: Array.isArray(updateData.marks_data) ? updateData.marks_data : [],
+    timetableData: Array.isArray(updateData.timetable_data) ? updateData.timetable_data : [],
+    coursesData: Array.isArray(updateData.courses_data) ? updateData.courses_data : [],
+    resultsData: Array.isArray(updateData.results_data) ? updateData.results_data : [],
+    notificationsData: Array.isArray(updateData.notifications_data) ? updateData.notifications_data : [],
+    backlogsData: Array.isArray(updateData.backlogs_data) ? updateData.backlogs_data : [],
+    internalAssessmentsData: Array.isArray(updateData.internal_assessments_data) ? updateData.internal_assessments_data : [],
+    feesData: updateData.fees_data || {},
+    updatedAt: updateData.updated_at ? new Date(updateData.updated_at) : new Date()
+  };
+}
+
+async function writeSqlPortalSnapshot(updateData, options = {}) {
+  if (!isSqlPersistenceConfigured()) {
+    return false;
+  }
+
+  const row = buildSqlSnapshotRow(updateData, options);
+  if (!row.userId) {
+    return false;
+  }
+
+  await ensureSqlPortalSnapshotTable();
+  await sqlQuery(
+    `
+      INSERT INTO ${SQL_PORTAL_SNAPSHOT_TABLE} (
+        user_id,
+        registration_number,
+        portal_connected,
+        portal_needs_reconnect,
+        is_verified,
+        portal_provider,
+        portal_last_synced,
+        data_source,
+        portal_data,
+        profile,
+        attendance_data,
+        marks_data,
+        timetable_data,
+        courses_data,
+        results_data,
+        notifications_data,
+        backlogs_data,
+        internal_assessments_data,
+        fees_data,
+        updated_at
+      )
+      VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9::jsonb, $10::jsonb,
+        $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb, $15::jsonb,
+        $16::jsonb, $17::jsonb, $18::jsonb, $19::jsonb, $20
+      )
+      ON CONFLICT (user_id) DO UPDATE SET
+        registration_number = EXCLUDED.registration_number,
+        portal_connected = EXCLUDED.portal_connected,
+        portal_needs_reconnect = EXCLUDED.portal_needs_reconnect,
+        is_verified = EXCLUDED.is_verified,
+        portal_provider = EXCLUDED.portal_provider,
+        portal_last_synced = EXCLUDED.portal_last_synced,
+        data_source = EXCLUDED.data_source,
+        portal_data = EXCLUDED.portal_data,
+        profile = EXCLUDED.profile,
+        attendance_data = EXCLUDED.attendance_data,
+        marks_data = EXCLUDED.marks_data,
+        timetable_data = EXCLUDED.timetable_data,
+        courses_data = EXCLUDED.courses_data,
+        results_data = EXCLUDED.results_data,
+        notifications_data = EXCLUDED.notifications_data,
+        backlogs_data = EXCLUDED.backlogs_data,
+        internal_assessments_data = EXCLUDED.internal_assessments_data,
+        fees_data = EXCLUDED.fees_data,
+        updated_at = EXCLUDED.updated_at
+    `,
+    [
+      row.userId,
+      row.registrationNumber,
+      row.portalConnected,
+      row.portalNeedsReconnect,
+      row.isVerified,
+      row.portalProvider,
+      row.portalLastSynced,
+      row.dataSource,
+      toSqlJson(row.portalData),
+      toSqlJson(row.profile),
+      toSqlJson(row.attendanceData),
+      toSqlJson(row.marksData),
+      toSqlJson(row.timetableData),
+      toSqlJson(row.coursesData),
+      toSqlJson(row.resultsData),
+      toSqlJson(row.notificationsData),
+      toSqlJson(row.backlogsData),
+      toSqlJson(row.internalAssessmentsData),
+      toSqlJson(row.feesData),
+      row.updatedAt
+    ]
+  );
+
+  return true;
+}
+
+function hydrateSqlPortalSnapshot(row = {}) {
+  return {
+    portalConnected: Boolean(row.portal_connected),
+    portalNeedsReconnect: Boolean(row.portal_needs_reconnect),
+    isVerified: Boolean(row.is_verified),
+    portalProvider: cleanValue(row.portal_provider),
+    portalRegistrationNumber: cleanValue(row.registration_number),
+    portal_last_synced: row.portal_last_synced || null,
+    dataSource: cleanValue(row.data_source),
+    portalData: fromSqlJson(row.portal_data),
+    profile: fromSqlJson(row.profile, {}),
+    attendance_data: fromSqlJson(row.attendance_data, []),
+    marks_data: fromSqlJson(row.marks_data, []),
+    timetable_data: fromSqlJson(row.timetable_data, []),
+    courses_data: fromSqlJson(row.courses_data, []),
+    results_data: fromSqlJson(row.results_data, []),
+    notifications_data: fromSqlJson(row.notifications_data, []),
+    backlogs_data: fromSqlJson(row.backlogs_data, []),
+    internal_assessments_data: fromSqlJson(row.internal_assessments_data, []),
+    fees_data: fromSqlJson(row.fees_data, {}),
+    updated_at: row.updated_at || null
+  };
+}
+
+async function readSqlPortalSnapshot(userId, registrationNumber) {
+  if (!isSqlPersistenceConfigured()) {
+    return null;
+  }
+
+  const keys = getStoreKeys(userId, registrationNumber);
+  if (!keys.length) {
+    return null;
+  }
+
+  await ensureSqlPortalSnapshotTable();
+
+  const params = [];
+  const predicates = [];
+  keys.forEach((key) => {
+    params.push(key);
+    const placeholder = `$${params.length}`;
+    predicates.push(`user_id = ${placeholder}`);
+    predicates.push(`registration_number = ${placeholder}`);
+  });
+
+  const rows = await sqlQuery(
+    `
+      SELECT *
+      FROM ${SQL_PORTAL_SNAPSHOT_TABLE}
+      WHERE ${predicates.join(' OR ')}
+      ORDER BY updated_at DESC NULLS LAST
+      LIMIT 1
+    `,
+    params
+  );
+
+  if (!rows.length) {
+    return null;
+  }
+
+  const row = rows[0];
+  return {
+    id: cleanValue(row.user_id) || cleanValue(row.registration_number) || keys[0],
+    data: hydrateSqlPortalSnapshot(row),
+    source: 'sql'
+  };
+}
+
 function getStoreKeys(userId, registrationNumber) {
   return dedupeBy(
     [cleanValue(userId), cleanValue(registrationNumber)].filter(Boolean),
@@ -1080,6 +1457,15 @@ function getStoreKeys(userId, registrationNumber) {
 
 async function readUserDoc(userId, registrationNumber) {
   const keys = getStoreKeys(userId, registrationNumber);
+
+  try {
+    const sqlRecord = await readSqlPortalSnapshot(userId, registrationNumber);
+    if (sqlRecord) {
+      return sqlRecord;
+    }
+  } catch (_) {
+    // Fall back to Firestore or in-memory stores below.
+  }
 
   if (isFirebaseAdminReady) {
     for (const key of keys) {
@@ -1123,10 +1509,18 @@ async function persistPortalDataForUser({ userId, registrationNumber, normalized
     portalNeedsReconnect: false
   });
   const primaryKey = cleanValue(userId) || cleanValue(registrationNumber);
-  const keys = primaryKey ? [primaryKey] : [];
+  const keys = getStoreKeys(userId, registrationNumber);
+
+  try {
+    await writeSqlPortalSnapshot(updateData, {
+      userId: primaryKey
+    });
+  } catch (_) {
+    // Fall back to Firestore and in-memory cache below.
+  }
 
   if (isFirebaseAdminReady) {
-    for (const key of keys) {
+    for (const key of primaryKey ? [primaryKey] : []) {
       try {
         await db.collection('users').doc(key).set(updateData, { merge: true });
       } catch (_) {
@@ -1163,14 +1557,26 @@ async function disconnectPortalForUser({ userId, registrationNumber }) {
     portalNeedsReconnect: true,
     isVerified: false,
     portalProvider: current.data.portalProvider || 'soa',
+    dataSource: pickFirst(current.data.dataSource, current.data.portalData?.dataSource, 'cached_soa_import'),
     updated_at: new Date()
   };
 
   const primaryKey = cleanValue(userId || current.id) || cleanValue(registrationNumber);
-  const keys = primaryKey ? [primaryKey] : [];
+  const keys = getStoreKeys(primaryKey, registrationNumber || current.data.portalRegistrationNumber);
+
+  try {
+    await writeSqlPortalSnapshot({
+      ...current.data,
+      ...updateData
+    }, {
+      userId: primaryKey
+    });
+  } catch (_) {
+    // Fall back to Firestore and in-memory cache below.
+  }
 
   if (isFirebaseAdminReady) {
-    for (const key of keys) {
+    for (const key of primaryKey ? [primaryKey] : []) {
       try {
         await db.collection('users').doc(key).set(updateData, { merge: true });
       } catch (_) {

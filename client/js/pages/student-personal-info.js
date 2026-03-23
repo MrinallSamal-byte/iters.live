@@ -72,21 +72,29 @@
     }
 
     async function loadPortalData() {
+        let requestFailed = false;
+
         try {
             const response = await APP.API.get('/soa/me');
             currentConnection = response.connection || null;
             currentData = response.data || null;
         } catch (_) {
+            requestFailed = true;
             currentConnection = null;
             currentData = null;
         }
 
-        if (!currentData) {
-            const user = APP.Storage.get('user') || {};
-            if (user.portalData) {
-                currentData = normalizeLocalPortalData(user.portalData);
-                currentConnection = user.portalStatus || buildLocalConnection(user, currentData);
-            }
+        const user = APP.Storage.get('user') || {};
+        const localData = normalizeLocalPortalData(user.portalData);
+        const localConnection = user.portalStatus || buildLocalConnection(user, localData);
+
+        if (currentData && localData?.dataSource === 'demo') {
+            clearStoredPortalData();
+        }
+
+        if (!currentData && shouldUseLocalPortalFallback(user, localData, currentConnection, localConnection, requestFailed)) {
+            currentData = localData;
+            currentConnection = currentConnection || localConnection;
         }
 
         render();
@@ -779,6 +787,42 @@
                 semester: data?.profile?.semester || null
             }
         };
+    }
+
+    function shouldUseLocalPortalFallback(user, localData, serverConnection, localConnection, requestFailed) {
+        if (!localData) return false;
+
+        const localDataSource = localData.dataSource || localConnection?.dataSource || user?.dataSource || 'demo';
+        const hasLiveMetadata = hasLivePortalMetadata(serverConnection) || hasLivePortalMetadata(localConnection) || Boolean(
+            user?.portalProvider === 'soa' ||
+            user?.portalConnected ||
+            user?.portal_last_synced
+        );
+
+        if (localDataSource === 'demo') {
+            return !hasLiveMetadata;
+        }
+
+        return requestFailed;
+    }
+
+    function hasLivePortalMetadata(connection) {
+        if (!connection) return false;
+
+        return Boolean(
+            connection.portalProvider === 'soa' ||
+            connection.connected ||
+            connection.lastSynced ||
+            connection.needsReconnect ||
+            (connection.hasImportedData && connection.dataSource !== 'demo')
+        );
+    }
+
+    function clearStoredPortalData() {
+        const user = APP.Storage.get('user');
+        if (!user || !user.portalData) return;
+        delete user.portalData;
+        APP.Storage.set('user', user);
     }
 
     function getRawSection(sectionKey) {

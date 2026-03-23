@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 RUN npm ci --omit=dev
-RUN npx playwright install --with-deps chromium
+RUN node ./node_modules/playwright/cli.js install --with-deps chromium
 
 COPY . .
 
