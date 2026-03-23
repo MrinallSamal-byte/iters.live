@@ -7,6 +7,7 @@
     let portalEnabled = true;
     let currentSessionId = null;
     let currentConnection = null;
+    let currentRuntime = null;
 
     let statusBanner;
     let startSessionBtn;
@@ -132,9 +133,14 @@
             const response = await APP.API.get('/soa/status');
             portalEnabled = response.portalEnabled !== false;
             currentConnection = response.connection || null;
+            currentRuntime = response.runtime || null;
             renderConnectionStatus();
 
-            if (!portalEnabled && currentConnection?.hasImportedData) {
+            if (currentRuntime?.ready === false && currentConnection?.hasImportedData) {
+                setStatus('warning', 'Live SOA import is unavailable on this server.', response.message || 'You can still open the SOA data already imported into your account.');
+            } else if (currentRuntime?.ready === false) {
+                setStatus('warning', 'Live SOA import is unavailable on this server.', response.message || 'Use demo data for now and try the live import again later.');
+            } else if (!portalEnabled && currentConnection?.hasImportedData) {
                 setStatus('warning', 'Live SOA import is unavailable right now.', 'You can still open the SOA data already imported into your account.');
             } else if (!portalEnabled) {
                 setStatus('warning', 'Live SOA import is unavailable right now.', response.message || 'Use demo data for now and try the live import again later.');
@@ -241,14 +247,17 @@
                 currentConnection = payload.connection;
                 renderConnectionStatus();
             }
-            if (payload.status === 'PORTAL_DISABLED') {
+            if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE') {
                 portalEnabled = false;
+                currentRuntime = payload.runtime || currentRuntime;
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 updateFlowAvailability();
             }
             if (payload.status === 'PORTAL_UNREACHABLE') {
                 showPortalOfflineMessage();
+            } else if (payload.status === 'SCRAPER_UNAVAILABLE') {
+                setStatus('warning', 'Live SOA import is unavailable on this server.', payload.message || 'Use demo data or open your saved SOA data for now.');
             } else {
                 setStatus('error', 'Could not fetch a fresh SOA CAPTCHA.', payload.message || error.message || 'Please try again in a moment.');
             }
@@ -340,12 +349,19 @@
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 showPortalOfflineMessage();
-            } else if (payload.status === 'PORTAL_DISABLED') {
+            } else if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE') {
                 portalEnabled = false;
+                currentRuntime = payload.runtime || currentRuntime;
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 updateFlowAvailability();
-                setStatus('warning', 'Live SOA import is unavailable right now.', payload.message || 'You can continue with demo data or open saved imported data.');
+                setStatus(
+                    'warning',
+                    payload.status === 'SCRAPER_UNAVAILABLE'
+                        ? 'Live SOA import is unavailable on this server.'
+                        : 'Live SOA import is unavailable right now.',
+                    payload.message || 'You can continue with demo data or open saved imported data.'
+                );
             } else if (payload.status === 'RATE_LIMITED') {
                 setStatus('warning', 'Too many import attempts.', payload.message || 'Please wait a little before you try again.');
             } else {

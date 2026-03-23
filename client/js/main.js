@@ -5,7 +5,7 @@ const API_URL = window.location.hostname === 'localhost'
 const RENDER_HEARTBEAT_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? 'http://localhost:5000/health'
     : '/health';
-const RENDER_HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 min — safely below Render's 15-min sleep threshold
+const RENDER_HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000; // 5 min — leaves margin before Render's 15-min idle sleep
 
 // Check if localStorage is available
 let storageAvailable = false;
@@ -487,6 +487,22 @@ function initRenderHeartbeat() {
     });
 
     window.addEventListener('focus', () => {
+        if (!renderHeartbeatState.enabled || !isRenderHeartbeatVisible()) {
+            return;
+        }
+
+        scheduleRenderHeartbeat();
+    });
+
+    window.addEventListener('pageshow', () => {
+        if (!renderHeartbeatState.enabled || !isRenderHeartbeatVisible()) {
+            return;
+        }
+
+        scheduleRenderHeartbeat();
+    });
+
+    window.addEventListener('online', () => {
         if (!renderHeartbeatState.enabled || !isRenderHeartbeatVisible()) {
             return;
         }

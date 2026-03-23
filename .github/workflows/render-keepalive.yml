@@ -40,10 +40,20 @@ jobs:
 
       - name: Ping Render health endpoint
         run: |
-          if ! curl --fail --silent --show-error --max-time 30 \
-            --user-agent "iterasn-hub-keepalive" \
-            "${{ steps.target.outputs.health_url }}"; then
-            echo "::warning::Keepalive ping failed. If your Render app has a different URL, please set the RENDER_HEALTHCHECK_URL repository variable."
-            exit 0
-          fi
+          HEALTH_URL="${{ steps.target.outputs.health_url }}"
 
+          for attempt in 1 2 3; do
+            if curl --fail --silent --show-error --max-time 45 \
+              --user-agent "iterasn-hub-keepalive" \
+              "$HEALTH_URL"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "Keepalive attempt $attempt failed. Waiting 45 seconds before retrying..."
+              sleep 45
+            fi
+          done
+
+          echo "::warning::Keepalive ping failed after 3 attempts. If your Render app has a different URL, please set the RENDER_HEALTHCHECK_URL repository variable."
+          exit 0

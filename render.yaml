@@ -1,10 +1,10 @@
 services:
   - type: web
     name: iter-aio
-    env: node
-    plan: free
-    buildCommand: npm install --omit=dev
-    startCommand: node server/index.js
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -48,20 +48,20 @@ services:
         sync: false
       - key: FIREBASE_PRIVATE_KEY
         sync: false
-      # Disable portal scraping on Render free tier due to memory limits
+      # Enable SOA scraping now that Chromium is installed through Docker.
       - key: PORTAL_FEATURES_ENABLED
-        value: "false"
+        value: "true"
       # Internal keepalive to reduce free-tier idle sleep
       - key: KEEPALIVE_ENABLED
         value: "true"
       - key: KEEPALIVE_INTERVAL_MS
         value: "600000" # 10 min — safely below Render's 15-min sleep threshold
-      # Memory optimization flags
+      # Leave enough room for the Playwright browser alongside Node.js.
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=400"
+        value: "--max-old-space-size=256"
     disk:
       name: uploads
-      mountPath: /opt/render/project/src/uploads
+      mountPath: /usr/src/app/uploads
       sizeGB: 1
 
 ## Using an existing Render PostgreSQL database as provided. No auto DB provision here.

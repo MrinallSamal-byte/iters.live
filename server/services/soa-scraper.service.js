@@ -14,10 +14,15 @@
  * - Fresh browser session for each login request
  */
 
+const fs = require('fs');
 const { chromium } = require('playwright');
 const dns = require('dns');
 const https = require('https');
 const { normalizeSoaPortalData } = require('./soa-data.service');
+const {
+    detectBrowserRuntimeIssue,
+    resolveChromiumExecutablePath
+} = require('../utils/playwright-runtime.util');
 
 // Status constants
 const STATUS_SUCCESS = 'SUCCESS';
@@ -26,6 +31,7 @@ const STATUS_SCRAPE_ERROR = 'SCRAPE_ERROR';
 const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 const STATUS_CAPTCHA_REQUIRED = 'CAPTCHA_REQUIRED';
 const STATUS_SESSION_EXPIRED = 'SESSION_EXPIRED';
+const STATUS_RUNTIME_UNAVAILABLE = 'SCRAPER_UNAVAILABLE';
 
 // Portal configuration
 const PORTAL_URL = 'https://soaportals.com/StudentPortalSOA/#/';
@@ -68,6 +74,16 @@ const resolvedPortalIpCache = {
     value: null,
     resolvedAt: 0
 };
+const RUNTIME_DIAGNOSTICS_TTL = 10 * 60 * 1000;
+let runtimeDiagnosticsCache = {
+    ready: null,
+    checkedAt: 0,
+    executablePath: null,
+    executableSource: null,
+    message: null,
+    code: null
+};
+let runtimeDiagnosticsPromise = null;
 
 const SECTION_NAVIGATION = [
     {
@@ -204,12 +220,129 @@ function isPortalUnreachableError(message = '') {
         message.includes('ERR_CONNECTION_TIMED_OUT');
 }
 
-function isBrowserRuntimeError(message = '') {
-    return /Executable doesn't exist|browserType\.launch|headless_shell|chromium_headless_shell|sandbox_host_linux|Target page, context or browser has been closed/i.test(message);
+function resolveBrowserExecutable() {
+    const configuredPath = resolveChromiumExecutablePath(process.env);
+    if (configuredPath) {
+        return {
+            path: configuredPath,
+            source: 'env'
+        };
+    }
+
+    try {
+        const bundledPath = chromium.executablePath();
+        if (bundledPath && fs.existsSync(bundledPath)) {
+            return {
+                path: bundledPath,
+                source: 'playwright'
+            };
+        }
+
+        return {
+            path: bundledPath || null,
+            source: bundledPath ? 'playwright-missing' : 'unknown'
+        };
+    } catch (_) {
+        return {
+            path: null,
+            source: 'unknown'
+        };
+    }
+}
+
+function buildLaunchArgs(resolvedPortalIp = null) {
+    const launchArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-crash-reporter'
+    ];
+
+    if (resolvedPortalIp) {
+        launchArgs.push(`--host-resolver-rules=MAP ${PORTAL_HOSTNAME} ${resolvedPortalIp},EXCLUDE localhost`);
+    }
+
+    return launchArgs;
+}
+
+function buildLaunchOptions({ executablePath = null, resolvedPortalIp = null } = {}) {
+    return {
+        executablePath: executablePath || undefined,
+        headless: true,
+        args: buildLaunchArgs(resolvedPortalIp)
+    };
+}
+
+async function getRuntimeDiagnostics({ force = false } = {}) {
+    const cacheAge = Date.now() - runtimeDiagnosticsCache.checkedAt;
+    if (!force && runtimeDiagnosticsCache.ready !== null && cacheAge < RUNTIME_DIAGNOSTICS_TTL) {
+        return runtimeDiagnosticsCache;
+    }
+
+    if (!force && runtimeDiagnosticsPromise) {
+        return runtimeDiagnosticsPromise;
+    }
+
+    runtimeDiagnosticsPromise = (async () => {
+        const executable = resolveBrowserExecutable();
+
+        if (!executable.path) {
+            runtimeDiagnosticsCache = {
+                ready: false,
+                checkedAt: Date.now(),
+                executablePath: null,
+                executableSource: executable.source,
+                message: 'SOA import is temporarily unavailable on this server because Chromium is not installed in the deployment runtime.',
+                code: 'MISSING_EXECUTABLE'
+            };
+            return runtimeDiagnosticsCache;
+        }
+
+        let browser = null;
+
+        try {
+            browser = await chromium.launch(buildLaunchOptions({
+                executablePath: executable.path
+            }));
+
+            const page = await browser.newPage();
+            await page.setContent('<html><body>runtime-ok</body></html>');
+
+            runtimeDiagnosticsCache = {
+                ready: true,
+                checkedAt: Date.now(),
+                executablePath: executable.path,
+                executableSource: executable.source,
+                message: 'SOA browser runtime is ready.',
+                code: null
+            };
+            return runtimeDiagnosticsCache;
+        } catch (error) {
+            const runtimeIssue = detectBrowserRuntimeIssue(error?.message || '');
+            runtimeDiagnosticsCache = {
+                ready: false,
+                checkedAt: Date.now(),
+                executablePath: executable.path,
+                executableSource: executable.source,
+                message: runtimeIssue.userMessage || 'SOA import is temporarily unavailable on this server. Please try again shortly.',
+                code: runtimeIssue.code || 'UNKNOWN'
+            };
+            return runtimeDiagnosticsCache;
+        } finally {
+            if (browser) {
+                await browser.close().catch(() => {});
+            }
+            runtimeDiagnosticsPromise = null;
+        }
+    })();
+
+    return runtimeDiagnosticsPromise;
 }
 
 function buildScraperErrorResponse(error, fallbackMessage) {
     const message = String(error?.message || '');
+    const runtimeIssue = detectBrowserRuntimeIssue(message);
 
     if (message.includes('page.goto: Timeout') || /^Timeout \d+ms exceeded/i.test(message)) {
         return {
@@ -225,10 +358,10 @@ function buildScraperErrorResponse(error, fallbackMessage) {
         };
     }
 
-    if (isBrowserRuntimeError(message)) {
+    if (runtimeIssue.isRuntimeError) {
         return {
-            status: STATUS_SCRAPE_ERROR,
-            message: 'SOA import is temporarily unavailable on this server. Please try again shortly.'
+            status: STATUS_RUNTIME_UNAVAILABLE,
+            message: runtimeIssue.userMessage || 'SOA import is temporarily unavailable on this server. Please try again shortly.'
         };
     }
 
@@ -961,6 +1094,16 @@ async function createSessionAndGetCaptcha() {
     try {
         console.log(`[SOA Scraper] Creating new session: ${sessionId}`);
 
+        const runtimeDiagnostics = await getRuntimeDiagnostics();
+        if (!runtimeDiagnostics.ready) {
+            return {
+                success: false,
+                status: STATUS_RUNTIME_UNAVAILABLE,
+                message: runtimeDiagnostics.message,
+                runtime: runtimeDiagnostics
+            };
+        }
+
         const reachability = await checkPortalReachability();
         if (!reachability.reachable) {
             console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
@@ -974,35 +1117,10 @@ async function createSessionAndGetCaptcha() {
             console.log(`[SOA Scraper] Resolved ${PORTAL_HOSTNAME} via public DNS: ${resolvedPortalIp}`);
         }
 
-        // Launch browser using Playwright
-        const launchArgs = [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu'
-        ];
-
-        if (resolvedPortalIp) {
-            launchArgs.push(`--host-resolver-rules=MAP ${PORTAL_HOSTNAME} ${resolvedPortalIp},EXCLUDE localhost`);
-        }
-
-        const launchOptions = {
-            headless: true,
-            args: launchArgs
-        };
-
-        try {
-            const explicitExecutablePath = typeof chromium.executablePath === 'function'
-                ? chromium.executablePath()
-                : null;
-            if (explicitExecutablePath) {
-                launchOptions.executablePath = explicitExecutablePath;
-            }
-        } catch (error) {
-            console.warn(`[SOA Scraper] Could not resolve Playwright executable path, using default launch strategy: ${error.message}`);
-        }
-
-        browser = await chromium.launch(launchOptions);
+        browser = await chromium.launch(buildLaunchOptions({
+            executablePath: runtimeDiagnostics.executablePath,
+            resolvedPortalIp
+        }));
 
         context = await browser.newContext({
             viewport: { width: 1280, height: 720 },
@@ -1057,7 +1175,8 @@ async function createSessionAndGetCaptcha() {
         return {
             success: false,
             status: failure.status,
-            message: failure.message
+            message: failure.message,
+            runtime: failure.status === STATUS_RUNTIME_UNAVAILABLE ? await getRuntimeDiagnostics({ force: true }) : undefined
         };
     }
 }
@@ -2168,12 +2287,14 @@ module.exports = {
     loginAndScrape,
     refreshCaptcha,
     closeSession,
+    getRuntimeDiagnostics,
     STATUS_SUCCESS,
     STATUS_AUTH_FAILED,
     STATUS_SCRAPE_ERROR,
     STATUS_PORTAL_UNREACHABLE,
     STATUS_CAPTCHA_REQUIRED,
     STATUS_SESSION_EXPIRED,
+    STATUS_RUNTIME_UNAVAILABLE,
     __private: {
         extractCaptchaImage
     }

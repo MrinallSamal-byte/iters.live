@@ -81,6 +81,29 @@ function buildUnavailableResponse(snapshot = null, extra = {}) {
   };
 }
 
+function buildRuntimeUnavailableResponse(snapshot = null, runtime = null, extra = {}) {
+  return {
+    success: false,
+    status: soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
+    message: runtime?.message || 'SOA import is temporarily unavailable on this server.',
+    portalEnabled: false,
+    demoAvailable: true,
+    officialPortalUrl: OFFICIAL_PORTAL_URL,
+    runtime,
+    connection: snapshot?.status || {
+      connected: false,
+      isVerified: false,
+      portalProvider: null,
+      lastSynced: null,
+      hasImportedData: false,
+      needsReconnect: false,
+      dataSource: null,
+      profileSummary: null
+    },
+    ...extra
+  };
+}
+
 async function invalidateStudentPortalCaches(userId) {
   if (!userId) return;
   await Promise.allSettled([
@@ -99,15 +122,23 @@ async function loadSnapshot(req) {
 
 router.get('/status', optionalAuth, async (req, res) => {
   try {
-    const portalEnabled = isPortalEnabled();
+    const featureEnabled = isPortalEnabled();
     const snapshot = req.user ? await loadSnapshot(req) : null;
+    const runtime = featureEnabled ? await soaScraperService.getRuntimeDiagnostics().catch(() => null) : null;
+    const portalEnabled = featureEnabled && runtime?.ready !== false;
+    const message = !featureEnabled
+      ? PORTAL_DISABLED_MESSAGE
+      : runtime?.ready === false
+        ? runtime.message
+        : 'SOA portal import is available.';
 
     return res.json({
       success: true,
       portalEnabled,
       demoAvailable: true,
       officialPortalUrl: OFFICIAL_PORTAL_URL,
-      message: portalEnabled ? 'SOA portal import is available.' : PORTAL_DISABLED_MESSAGE,
+      message,
+      runtime,
       connection: snapshot?.status || {
         connected: false,
         isVerified: false,
@@ -157,14 +188,24 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
 
   try {
     const snapshot = await loadSnapshot(req);
+    const runtime = await soaScraperService.getRuntimeDiagnostics();
+    if (!runtime.ready) {
+      return res.status(503).json(buildRuntimeUnavailableResponse(snapshot, runtime));
+    }
+
     const result = await soaScraperService.createSessionAndGetCaptcha();
 
     if (!result.success) {
-      return res.status(result.status === 'PORTAL_UNREACHABLE' ? 503 : 500).json({
+      return res.status(
+        result.status === 'PORTAL_UNREACHABLE' || result.status === soaScraperService.STATUS_RUNTIME_UNAVAILABLE
+          ? 503
+          : 500
+      ).json({
         ...result,
-        portalEnabled: true,
+        portalEnabled: result.status !== soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
         demoAvailable: true,
         officialPortalUrl: OFFICIAL_PORTAL_URL,
+        runtime: result.runtime || runtime,
         connection: snapshot?.status || {
           connected: false,
           isVerified: false,
@@ -216,7 +257,13 @@ router.post('/refresh-captcha', authMiddleware, requireStudent, captchaLimiter, 
     const result = await soaScraperService.refreshCaptcha(sessionId);
 
     if (!result.success) {
-      return res.status(result.status === 'SESSION_EXPIRED' ? 410 : 500).json(result);
+      return res.status(
+        result.status === 'SESSION_EXPIRED'
+          ? 410
+          : result.status === soaScraperService.STATUS_RUNTIME_UNAVAILABLE
+            ? 503
+            : 500
+      ).json(result);
     }
 
     return res.json(result);
@@ -257,6 +304,8 @@ async function handleImport(req, res) {
           ? 410
           : result.status === 'PORTAL_UNREACHABLE'
             ? 503
+            : result.status === soaScraperService.STATUS_RUNTIME_UNAVAILABLE
+              ? 503
             : 500;
 
       return res.status(statusCode).json({
