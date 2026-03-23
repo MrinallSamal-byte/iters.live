@@ -103,4 +103,30 @@ describe('main.js Render heartbeat', () => {
         expect(global.fetch).toHaveBeenCalledTimes(1);
         expect(jest.getTimerCount()).toBe(1);
     });
+
+    it('logs out once when API requests receive 401 token expiry responses', async () => {
+        const logout = jest.fn();
+        window.SessionTimeout = { logout };
+
+        global.fetch = jest.fn(async (url) => {
+            if (String(url).includes('/health')) {
+                return { ok: true, status: 200, json: async () => ({}) };
+            }
+
+            return {
+                ok: false,
+                status: 401,
+                json: async () => ({ message: 'Token expired' })
+            };
+        });
+
+        loadMain();
+        await flushPromises();
+
+        await expect(window.APP.API.get('/soa/captcha')).rejects.toMatchObject({ status: 401 });
+        await expect(window.APP.API.get('/soa/captcha')).rejects.toMatchObject({ status: 401 });
+
+        expect(logout).toHaveBeenCalledTimes(1);
+        expect(logout).toHaveBeenCalledWith('session_invalid');
+    });
 });
