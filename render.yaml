@@ -51,6 +51,11 @@ services:
       # Disable portal scraping on Render free tier due to memory limits
       - key: PORTAL_FEATURES_ENABLED
         value: "false"
+      # Internal keepalive to reduce free-tier idle sleep
+      - key: KEEPALIVE_ENABLED
+        value: "true"
+      - key: KEEPALIVE_INTERVAL_MS
+        value: "720000"
       # Memory optimization flags
       - key: NODE_OPTIONS
         value: "--max-old-space-size=400"

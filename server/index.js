@@ -427,9 +427,11 @@ app.use((err, req, res, next) => {
 
 // Initialize Redis cache
 const { initRedis, closeRedis, isRedisConnected } = require('./config/redis.config');
+const { startRenderKeepAlive } = require('./utils/render-keepalive');
 
 // Start server
 const PORT = process.env.PORT || 5000;
+let stopRenderKeepAlive = () => {};
 
 async function startServer() {
   try {
@@ -447,6 +449,8 @@ async function startServer() {
 ║   Cache: ${cacheType}                                        ║
 ╚═══════════════════════════════════════════════════════╝
       `);
+
+      stopRenderKeepAlive = startRenderKeepAlive();
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -460,6 +464,7 @@ startServer();
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, closing server gracefully...');
+  stopRenderKeepAlive();
   await closeRedis();
   server.close(() => {
     console.log('Server closed');
@@ -469,6 +474,7 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received, closing server gracefully...');
+  stopRenderKeepAlive();
   await closeRedis();
   server.close(() => {
     console.log('Server closed');
