@@ -41,6 +41,7 @@ const POST_LOGOUT_REDIRECT_AT_KEY = 'postLogoutRedirectTimestamp';
 const POST_LOGOUT_REDIRECT_REASON_KEY = 'postLogoutRedirectReason';
 const PUBLIC_HOME_PATHS = new Set(['/', '/index.html']);
 const PUBLIC_AUTH_PATHS = new Set(['/login', '/login.html', '/register', '/register.html']);
+const SESSION_INVALID_LOGOUT_REASON = 'session_invalid';
 let authExpiryHandled = false;
 const AUTH_STORAGE_KEYS = [
     'accessToken',
@@ -233,6 +234,8 @@ function clearAppCaches() {
 }
 
 function clearClientState(options = {}) {
+    authExpiryHandled = false;
+
     const preserveTheme = options.preserveTheme !== false;
     const preserveLogoutReason = options.preserveLogoutReason === true;
     const preservePostLogoutRedirect = options.preservePostLogoutRedirect === true;
@@ -643,9 +646,9 @@ const API = {
                     authExpiryHandled = true;
 
                     if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
-                        window.SessionTimeout.logout('session_invalid');
+                        window.SessionTimeout.logout(SESSION_INVALID_LOGOUT_REASON);
                     } else {
-                        setPostLogoutRedirect('/index.html', 'session_invalid');
+                        setPostLogoutRedirect('/index.html', SESSION_INVALID_LOGOUT_REASON);
                         clearClientState({
                             preserveTheme: true,
                             preserveLogoutReason: true,
