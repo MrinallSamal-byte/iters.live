@@ -32,7 +32,7 @@ describe('render-keepalive utility', () => {
     jest.restoreAllMocks();
   });
 
-  it('resolves default 12-minute interval and /health from Render URL', () => {
+  it('resolves default 10-minute interval and /health from Render URL', () => {
     process.env.KEEPALIVE_ENABLED = 'true';
     process.env.RENDER_EXTERNAL_URL = 'https://iter-aio.onrender.com';
 
@@ -63,7 +63,7 @@ describe('render-keepalive utility', () => {
     const stop = startRenderKeepAlive({ fetchImpl: fetchMock, logger });
 
     expect(fetchMock).not.toHaveBeenCalled();
-    await jest.advanceTimersByTimeAsync(45 * 1000);
+    await jest.advanceTimersByTimeAsync(30 * 1000); // matches new DEFAULT_INITIAL_DELAY_MS
     expect(fetchMock).toHaveBeenCalledWith(
       'https://iter-aio.onrender.com/health',
       expect.objectContaining({ method: 'GET' })

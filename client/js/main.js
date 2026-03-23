@@ -5,7 +5,7 @@ const API_URL = window.location.hostname === 'localhost'
 const RENDER_HEARTBEAT_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? 'http://localhost:5000/health'
     : '/health';
-const RENDER_HEARTBEAT_INTERVAL_MS = 14 * 60 * 1000;
+const RENDER_HEARTBEAT_INTERVAL_MS = 10 * 60 * 1000; // 10 min — safely below Render's 15-min sleep threshold
 
 // Check if localStorage is available
 let storageAvailable = false;

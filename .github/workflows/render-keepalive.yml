@@ -2,8 +2,13 @@ name: Render Keepalive
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *" # Every 5 min — well below Render's 15-min free-tier sleep threshold
   workflow_dispatch:
+
+# Prevent multiple simultaneous keepalive pings wasting Action minutes
+concurrency:
+  group: render-keepalive
+  cancel-in-progress: true
 
 jobs:
   ping-render:

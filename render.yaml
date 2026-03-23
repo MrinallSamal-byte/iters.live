@@ -55,7 +55,7 @@ services:
       - key: KEEPALIVE_ENABLED
         value: "true"
       - key: KEEPALIVE_INTERVAL_MS
-        value: "720000"
+        value: "600000" # 10 min — safely below Render's 15-min sleep threshold
       # Memory optimization flags
       - key: NODE_OPTIONS
         value: "--max-old-space-size=400"

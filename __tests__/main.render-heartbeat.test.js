@@ -75,7 +75,7 @@ describe('main.js Render heartbeat', () => {
         expect(window.APP.RenderHeartbeat.getState()).toEqual(expect.objectContaining({
             enabled: true,
             endpoint: 'http://localhost:5000/health',
-            intervalMs: 14 * 60 * 1000,
+            intervalMs: 10 * 60 * 1000,
             status: 'active'
         }));
         expect(document.documentElement.dataset.renderHeartbeatStatus).toBe('active');
@@ -93,7 +93,7 @@ describe('main.js Render heartbeat', () => {
 
         expect(jest.getTimerCount()).toBe(0);
 
-        jest.advanceTimersByTime(14 * 60 * 1000);
+        jest.advanceTimersByTime(10 * 60 * 1000);
         expect(global.fetch).not.toHaveBeenCalled();
 
         visibilityState = 'visible';
