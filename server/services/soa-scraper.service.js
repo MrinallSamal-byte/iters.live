@@ -39,6 +39,22 @@ const PORTAL_DNS_SERVERS = ['1.1.1.1', '8.8.8.8'];
 const TIMEOUT = 60000; // 60 seconds
 const NAVIGATION_TIMEOUT = 30000;
 const PORTAL_READY_TIMEOUT = 15000;
+// Heuristic weights tuned for the current SOA/CampusLynx login UI:
+// explicit "captcha" hints are strongest, "verify" and expected dimensions are supporting signals.
+const CAPTCHA_HEURISTIC_SCORE = {
+    HAS_CAPTCHA_HINT: 6,
+    HAS_VERIFY_HINT: 4,
+    CAPTCHA_LIKE_DIMENSIONS: 2,
+    NEAR_CAPTCHA_INPUT: 5
+};
+// Typical CAPTCHA image bounds observed in the SOA portal login form.
+const CAPTCHA_IMAGE_DIMENSIONS = {
+    minWidth: 80,
+    maxWidth: 400,
+    minHeight: 25,
+    maxHeight: 120
+};
+const MAX_CAPTCHA_INPUT_VERTICAL_DISTANCE = 220;
 
 // In-memory session storage for browser contexts
 // Key: sessionId, Value: { browser, page, captchaImage, createdAt }
@@ -343,7 +359,10 @@ function cleanupExpiredSessions() {
 }
 
 // Start cleanup interval
-setInterval(cleanupExpiredSessions, SESSION_CLEANUP_INTERVAL);
+const sessionCleanupTimer = setInterval(cleanupExpiredSessions, SESSION_CLEANUP_INTERVAL);
+if (typeof sessionCleanupTimer?.unref === 'function') {
+    sessionCleanupTimer.unref();
+}
 
 /**
  * Close and cleanup a session
@@ -522,6 +541,13 @@ async function getCaptchaWithRetry(page) {
 
     console.warn('[SOA Scraper] CAPTCHA not found after initial portal load, waiting for portal shell');
     await waitForPortalShell(page, 10000);
+    captchaImage = await extractCaptchaImage(page);
+    if (captchaImage) {
+        return captchaImage;
+    }
+
+    console.warn('[SOA Scraper] CAPTCHA not found yet, waiting briefly for delayed image rendering');
+    await page.waitForTimeout(1500).catch(() => {});
     captchaImage = await extractCaptchaImage(page);
     if (captchaImage) {
         return captchaImage;
@@ -960,11 +986,23 @@ async function createSessionAndGetCaptcha() {
             launchArgs.push(`--host-resolver-rules=MAP ${PORTAL_HOSTNAME} ${resolvedPortalIp},EXCLUDE localhost`);
         }
 
-        browser = await chromium.launch({
-            executablePath: chromium.executablePath(),
+        const launchOptions = {
             headless: true,
             args: launchArgs
-        });
+        };
+
+        try {
+            const explicitExecutablePath = typeof chromium.executablePath === 'function'
+                ? chromium.executablePath()
+                : null;
+            if (explicitExecutablePath) {
+                launchOptions.executablePath = explicitExecutablePath;
+            }
+        } catch (error) {
+            console.warn(`[SOA Scraper] Could not resolve Playwright executable path, using default launch strategy: ${error.message}`);
+        }
+
+        browser = await chromium.launch(launchOptions);
 
         context = await browser.newContext({
             viewport: { width: 1280, height: 720 },
@@ -1033,6 +1071,8 @@ async function extractCaptchaImage(page) {
     try {
         // Try multiple selectors for CAPTCHA image
         const captchaSelectors = [
+            'img[class*="verify"]',
+            'img[aria-label*="captcha" i]',
             'img[id*="captcha"]',
             'img[class*="captcha"]',
             'img[src*="captcha"]',
@@ -1065,43 +1105,113 @@ async function extractCaptchaImage(page) {
             }
         }
 
-        // Try to find CAPTCHA by looking at image sources
-        const images = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('img')).map(img => ({
+        // Try to infer CAPTCHA image by attributes, dimensions, and proximity to captcha input
+        const imageSearch = await page.evaluate(() => {
+            const isVisible = (element) => {
+                if (!element) return false;
+                const style = window.getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+            };
+
+            const containsVerificationHint = (text) => /captcha|text as shown|verification/i.test(String(text || ''));
+
+            const inputs = Array.from(document.querySelectorAll('input'));
+            const captchaInput = inputs.find((input) => {
+                const joinedText = [
+                    input.id,
+                    input.name,
+                    input.placeholder,
+                    input.getAttribute('formcontrolname'),
+                    input.getAttribute('aria-label')
+                ].join(' ');
+                return containsVerificationHint(joinedText);
+            });
+            const captchaRect = captchaInput?.getBoundingClientRect?.() || null;
+
+            const images = Array.from(document.querySelectorAll('img')).map((img, index) => ({
+                index,
                 src: img.src,
                 id: img.id,
                 className: img.className,
-                alt: img.alt
+                alt: img.alt,
+                visible: isVisible(img),
+                width: Math.round(img.getBoundingClientRect().width || img.width || 0),
+                height: Math.round(img.getBoundingClientRect().height || img.height || 0),
+                top: Math.round(img.getBoundingClientRect().top || 0),
+                left: Math.round(img.getBoundingClientRect().left || 0)
             }));
+
+            return {
+                hasCaptchaInput: Boolean(captchaInput),
+                captchaRect: captchaRect
+                    ? {
+                        top: Math.round(captchaRect.top || 0),
+                        left: Math.round(captchaRect.left || 0),
+                        right: Math.round(captchaRect.right || 0)
+                    }
+                    : null,
+                images
+            };
         });
 
+        const images = Array.isArray(imageSearch?.images) ? imageSearch.images : [];
         console.log(`[SOA Scraper] Found ${images.length} images on page`);
-        
-        for (const img of images) {
-            if (img.src && (
-                img.src.toLowerCase().includes('captcha') ||
-                img.id?.toLowerCase().includes('captcha') ||
-                img.className?.toLowerCase().includes('captcha') ||
-                img.alt?.toLowerCase().includes('captcha')
-            )) {
-                console.log(`[SOA Scraper] Found CAPTCHA image by src/id/class:`, img);
-                
-                // Try to get the element and screenshot it
-                let element = null;
-                if (img.id) {
-                    element = await page.locator(`#${img.id}`).first();
-                } else if (img.src) {
-                    element = await page.locator(`img[src="${img.src}"]`).first();
+
+        const prioritized = images
+            .filter((img) => img.visible)
+            .map((img) => {
+                const mergedText = `${img.src || ''} ${img.id || ''} ${img.className || ''} ${img.alt || ''}`.toLowerCase();
+                const hasCaptchaHint = mergedText.includes('captcha');
+                const hasVerifyHint = mergedText.includes('verify');
+                let score = 0;
+
+                if (hasCaptchaHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_CAPTCHA_HINT;
+                if (hasVerifyHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_VERIFY_HINT;
+                if (
+                    img.width >= CAPTCHA_IMAGE_DIMENSIONS.minWidth &&
+                    img.width <= CAPTCHA_IMAGE_DIMENSIONS.maxWidth &&
+                    img.height >= CAPTCHA_IMAGE_DIMENSIONS.minHeight &&
+                    img.height <= CAPTCHA_IMAGE_DIMENSIONS.maxHeight
+                ) {
+                    score += CAPTCHA_HEURISTIC_SCORE.CAPTCHA_LIKE_DIMENSIONS;
                 }
-                
-                if (element) {
-                    const isVisible = await element.isVisible().catch(() => false);
-                    if (isVisible) {
-                        const screenshotBuffer = await element.screenshot({ type: 'png' });
-                        const base64 = screenshotBuffer.toString('base64');
-                        return `data:image/png;base64,${base64}`;
+
+                if (imageSearch?.captchaRect) {
+                    const imageLeft = img.left || 0;
+                    const imageRight = imageLeft + (img.width || 0);
+                    const verticalDistance = Math.abs((img.top || 0) - imageSearch.captchaRect.top);
+                    const nearCaptchaInput = verticalDistance <= MAX_CAPTCHA_INPUT_VERTICAL_DISTANCE;
+                    // Require both vertical proximity and horizontal overlap to avoid unrelated banner/logo images.
+                    const horizontalOverlap = imageLeft <= imageSearch.captchaRect.right && imageRight >= imageSearch.captchaRect.left;
+                    if (nearCaptchaInput && horizontalOverlap) {
+                        score += CAPTCHA_HEURISTIC_SCORE.NEAR_CAPTCHA_INPUT;
                     }
                 }
+
+                return {
+                    ...img,
+                    score
+                };
+            })
+            .filter((img) => img.score > 0)
+            .sort((left, right) => right.score - left.score);
+
+        for (const candidate of prioritized) {
+            try {
+                const element = page.locator('img').nth(candidate.index);
+                const isVisible = await element.isVisible().catch(() => false);
+                if (!isVisible) {
+                    continue;
+                }
+
+                const screenshotBuffer = await element.screenshot({ type: 'png' });
+                const base64 = screenshotBuffer.toString('base64');
+                console.log(`[SOA Scraper] Extracted CAPTCHA candidate (score=${candidate.score}, idx=${candidate.index})`);
+                return `data:image/png;base64,${base64}`;
+            } catch (error) {
+                console.debug(`[SOA Scraper] Candidate extraction failed (idx=${candidate.index}): ${error.message}`);
+                continue;
             }
         }
 
@@ -1143,6 +1253,7 @@ async function extractCaptchaImage(page) {
 
         // Take a screenshot of the entire login area for debugging
         console.log(`[SOA Scraper] Could not find specific CAPTCHA element`);
+        console.log(`[SOA Scraper] CAPTCHA input detected: ${Boolean(imageSearch?.hasCaptchaInput)}`);
         return null;
 
     } catch (error) {
@@ -2062,5 +2173,8 @@ module.exports = {
     STATUS_SCRAPE_ERROR,
     STATUS_PORTAL_UNREACHABLE,
     STATUS_CAPTCHA_REQUIRED,
-    STATUS_SESSION_EXPIRED
+    STATUS_SESSION_EXPIRED,
+    __private: {
+        extractCaptchaImage
+    }
 };
