@@ -92,7 +92,12 @@
             clearStoredPortalData();
         }
 
-        if (!currentData && shouldUseLocalPortalFallback(user, localData, currentConnection, localConnection, requestFailed)) {
+        // Fall back to locally-cached portal data when:
+        // (a) the server request failed outright, OR
+        // (b) the server returned no meaningful data but the local cache has real (non-demo) data.
+        // This prevents data loss on server restarts when Firebase is not configured.
+        const serverHasMeaningfulData = hasMeaningfulData(currentData);
+        if (!serverHasMeaningfulData && shouldUseLocalPortalFallback(user, localData, currentConnection, localConnection, requestFailed)) {
             currentData = localData;
             currentConnection = currentConnection || localConnection;
         }
@@ -800,10 +805,14 @@
         );
 
         if (localDataSource === 'demo') {
+            // Only show demo data when there is no live SOA portal metadata anywhere
             return !hasLiveMetadata;
         }
 
-        return requestFailed;
+        // Non-demo local data (real SOA import cached in localStorage):
+        // always use it when the server has no data to show — covers request failures
+        // AND the case where the server process restarted and its in-memory cache is gone.
+        return true;
     }
 
     function hasLivePortalMetadata(connection) {

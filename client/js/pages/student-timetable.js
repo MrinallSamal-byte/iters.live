@@ -18,31 +18,41 @@
     });
 
     async function loadTimetable() {
+        let serverData = null;
+
         try {
             const response = await APP.API.get('/soa/me');
-            const data = response?.data || null;
-            const model = buildTimetableModel(data);
-
-            if (!model) {
-                showEmptyTimetable('No imported timetable is saved for this account yet.');
-                return;
-            }
-
-            timetableState = {
-                model,
-                profile: data?.profile || {}
-            };
-
-            renderTimetableTable(model);
-            renderTodaySchedule(model);
-            updateStats(model);
+            serverData = response?.data || null;
         } catch (error) {
-            console.error('Failed to load timetable:', error);
-            showEmptyTimetable('Timetable could not be loaded. Reconnect your SOA portal and try again.');
-            if (typeof Toast !== 'undefined') {
-                Toast.error(error.message || 'Failed to load timetable', 'Error');
+            console.error('Failed to load timetable from server:', error);
+        }
+
+        // Fall back to locally-cached portal data when the server has no data
+        // (covers server restart + in-memory cache eviction before SQL was populated).
+        if (!serverData && !buildTimetableModel(serverData)) {
+            const user = APP.Storage.get('user') || {};
+            const localPortalData = user.portalData || null;
+            if (localPortalData && (localPortalData.timetable || localPortalData.raw?.sections?.timetable)) {
+                serverData = localPortalData;
             }
         }
+
+        const data = serverData;
+        const model = buildTimetableModel(data);
+
+        if (!model) {
+            showEmptyTimetable('No imported timetable is saved for this account yet.');
+            return;
+        }
+
+        timetableState = {
+            model,
+            profile: data?.profile || {}
+        };
+
+        renderTimetableTable(model);
+        renderTodaySchedule(model);
+        updateStats(model);
     }
 
     function buildTimetableModel(data) {

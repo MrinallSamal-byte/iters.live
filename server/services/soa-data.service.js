@@ -1191,8 +1191,56 @@ function buildFirestoreUpdate(normalized, options = {}) {
   };
 }
 
+let _sqlTableEnsured = false;
+let _sqlTableEnsurePromise = null;
+
 async function ensureSqlPortalSnapshotTable() {
-  return false;
+  if (_sqlTableEnsured) return true;
+  if (_sqlTableEnsurePromise) return _sqlTableEnsurePromise;
+
+  _sqlTableEnsurePromise = (async () => {
+    try {
+      const { query: dbQuery } = require('../database/db-hybrid');
+      await dbQuery(`
+        CREATE TABLE IF NOT EXISTS portal_snapshots (
+          user_id            TEXT        NOT NULL,
+          registration_number TEXT,
+          portal_connected   BOOLEAN     NOT NULL DEFAULT FALSE,
+          portal_needs_reconnect BOOLEAN NOT NULL DEFAULT FALSE,
+          is_verified        BOOLEAN     NOT NULL DEFAULT FALSE,
+          portal_provider    TEXT,
+          portal_last_synced TIMESTAMPTZ,
+          data_source        TEXT,
+          portal_data        TEXT,
+          profile_data       TEXT,
+          attendance_data    TEXT,
+          marks_data         TEXT,
+          timetable_data     TEXT,
+          courses_data       TEXT,
+          results_data       TEXT,
+          notifications_data TEXT,
+          backlogs_data      TEXT,
+          internal_assessments_data TEXT,
+          fees_data          TEXT,
+          updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id)
+        )
+      `);
+      // Index for fast lookups by registration number
+      await dbQuery(`
+        CREATE INDEX IF NOT EXISTS idx_portal_snapshots_reg_no
+          ON portal_snapshots (registration_number)
+      `).catch(() => {}); // Non-fatal if index already exists
+      _sqlTableEnsured = true;
+      return true;
+    } catch (err) {
+      _sqlTableEnsurePromise = null; // allow retry next call
+      console.error('[PortalData] Could not ensure portal_snapshots table:', err.message);
+      return false;
+    }
+  })();
+
+  return _sqlTableEnsurePromise;
 }
 
 function toSqlJson(value) {
@@ -1222,6 +1270,7 @@ function buildSqlSnapshotRow(updateData = {}, options = {}) {
     portalLastSynced: updateData.portal_last_synced ? new Date(updateData.portal_last_synced) : null,
     dataSource: pickFirst(updateData.dataSource, updateData.portalData?.dataSource, 'cached_soa_import'),
     portalData: updateData.portalData || null,
+    // profile stored under profile_data column
     profile: updateData.profile || {},
     attendanceData: Array.isArray(updateData.attendance_data) ? updateData.attendance_data : [],
     marksData: Array.isArray(updateData.marks_data) ? updateData.marks_data : [],
@@ -1237,7 +1286,76 @@ function buildSqlSnapshotRow(updateData = {}, options = {}) {
 }
 
 async function writeSqlPortalSnapshot(updateData, options = {}) {
-  return true;
+  const userId = cleanValue(options.userId) || cleanValue(updateData?.portalRegistrationNumber);
+  if (!userId) return false;
+
+  try {
+    const tableReady = await ensureSqlPortalSnapshotTable();
+    if (!tableReady) return false;
+
+    const { query: dbQuery } = require('../database/db-hybrid');
+    const row = buildSqlSnapshotRow(updateData, { userId });
+
+    await dbQuery(`
+      INSERT INTO portal_snapshots (
+        user_id, registration_number,
+        portal_connected, portal_needs_reconnect, is_verified,
+        portal_provider, portal_last_synced, data_source,
+        portal_data, profile_data, attendance_data, marks_data,
+        timetable_data, courses_data, results_data, notifications_data,
+        backlogs_data, internal_assessments_data, fees_data, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8,
+        $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+      )
+      ON CONFLICT (user_id) DO UPDATE SET
+        registration_number       = EXCLUDED.registration_number,
+        portal_connected          = EXCLUDED.portal_connected,
+        portal_needs_reconnect    = EXCLUDED.portal_needs_reconnect,
+        is_verified               = EXCLUDED.is_verified,
+        portal_provider           = EXCLUDED.portal_provider,
+        portal_last_synced        = EXCLUDED.portal_last_synced,
+        data_source               = EXCLUDED.data_source,
+        portal_data               = EXCLUDED.portal_data,
+        profile_data              = EXCLUDED.profile_data,
+        attendance_data           = EXCLUDED.attendance_data,
+        marks_data                = EXCLUDED.marks_data,
+        timetable_data            = EXCLUDED.timetable_data,
+        courses_data              = EXCLUDED.courses_data,
+        results_data              = EXCLUDED.results_data,
+        notifications_data        = EXCLUDED.notifications_data,
+        backlogs_data             = EXCLUDED.backlogs_data,
+        internal_assessments_data = EXCLUDED.internal_assessments_data,
+        fees_data                 = EXCLUDED.fees_data,
+        updated_at                = EXCLUDED.updated_at
+    `, [
+      row.userId,
+      row.registrationNumber,
+      row.portalConnected,
+      row.portalNeedsReconnect,
+      row.isVerified,
+      row.portalProvider,
+      row.portalLastSynced,
+      row.dataSource,
+      toSqlJson(row.portalData),
+      toSqlJson(row.profile),
+      toSqlJson(row.attendanceData),
+      toSqlJson(row.marksData),
+      toSqlJson(row.timetableData),
+      toSqlJson(row.coursesData),
+      toSqlJson(row.resultsData),
+      toSqlJson(row.notificationsData),
+      toSqlJson(row.backlogsData),
+      toSqlJson(row.internalAssessmentsData),
+      toSqlJson(row.feesData),
+      row.updatedAt
+    ]);
+
+    return true;
+  } catch (err) {
+    console.error('[PortalData] writeSqlPortalSnapshot error:', err.message);
+    return false;
+  }
 }
 
 function hydrateSqlPortalSnapshot(row = {}) {
@@ -1249,8 +1367,10 @@ function hydrateSqlPortalSnapshot(row = {}) {
     portalRegistrationNumber: cleanValue(row.registration_number),
     portal_last_synced: row.portal_last_synced || null,
     dataSource: cleanValue(row.data_source),
+    // portal_data is the full normalized snapshot
     portalData: fromSqlJson(row.portal_data),
-    profile: fromSqlJson(row.profile, {}),
+    // legacy field aliases
+    profile: fromSqlJson(row.profile_data, {}),
     attendance_data: fromSqlJson(row.attendance_data, []),
     marks_data: fromSqlJson(row.marks_data, []),
     timetable_data: fromSqlJson(row.timetable_data, []),
@@ -1265,7 +1385,39 @@ function hydrateSqlPortalSnapshot(row = {}) {
 }
 
 async function readSqlPortalSnapshot(userId, registrationNumber) {
-  return null;
+  const cleanUserId = cleanValue(userId);
+  const cleanRegNo = cleanValue(registrationNumber);
+  if (!cleanUserId && !cleanRegNo) return null;
+
+  try {
+    const tableReady = await ensureSqlPortalSnapshotTable();
+    if (!tableReady) return null;
+
+    const { query: dbQuery } = require('../database/db-hybrid');
+    let rows;
+
+    if (cleanUserId) {
+      rows = await dbQuery(
+        'SELECT * FROM portal_snapshots WHERE user_id = $1 LIMIT 1',
+        [cleanUserId]
+      );
+    }
+
+    // Fallback: look up by registration number
+    if ((!rows || !rows.length) && cleanRegNo) {
+      rows = await dbQuery(
+        'SELECT * FROM portal_snapshots WHERE registration_number = $1 LIMIT 1',
+        [cleanRegNo]
+      );
+    }
+
+    if (!rows || !rows.length) return null;
+
+    return hydrateSqlPortalSnapshot(rows[0]);
+  } catch (err) {
+    console.error('[PortalData] readSqlPortalSnapshot error:', err.message);
+    return null;
+  }
 }
 
 function getStoreKeys(userId, registrationNumber) {
@@ -1281,7 +1433,13 @@ async function readUserDoc(userId, registrationNumber) {
   try {
     const sqlRecord = await readSqlPortalSnapshot(userId, registrationNumber);
     if (sqlRecord) {
-      return sqlRecord;
+      // Wrap in the same {id, data, source} envelope the rest of the pipeline expects.
+      // The SQL row is already deserialized; expose it as `data` for normalizeStoredPortalData.
+      return {
+        id: cleanValue(sqlRecord.portalRegistrationNumber) || cleanValue(userId),
+        data: sqlRecord,
+        source: 'postgres'
+      };
     }
   } catch (_) {
     // Fall back to Firestore or in-memory stores below.

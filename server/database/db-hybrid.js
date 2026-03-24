@@ -17,6 +17,26 @@ const queryLogger = winston.createLogger({
 // Determine which database to use
 const useVercelPostgres = process.env.VERCEL || process.env.POSTGRES_URL;
 
+// Parse DATABASE_URL into individual env vars when present (Render, Heroku, etc.)
+// This must run before pool creation so DB_HOST etc. are populated.
+if (!process.env.DB_HOST && !useVercelPostgres && process.env.DATABASE_URL) {
+  try {
+    const dbUrl = new URL(process.env.DATABASE_URL);
+    process.env.DB_HOST = dbUrl.hostname;
+    process.env.DB_PORT = dbUrl.port || '5432';
+    process.env.DB_USER = decodeURIComponent(dbUrl.username);
+    process.env.DB_PASSWORD = decodeURIComponent(dbUrl.password);
+    process.env.DB_NAME = (dbUrl.pathname || '/postgres').replace(/^\//, '') || 'postgres';
+    // Always require SSL for remote PostgreSQL (standard for Render/Supabase)
+    if (!process.env.DB_SSL) {
+      process.env.DB_SSL = 'true';
+    }
+    console.log(`📡 Parsed DATABASE_URL → ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+  } catch (parseError) {
+    console.error('⚠️  Failed to parse DATABASE_URL:', parseError.message);
+  }
+}
+
 let pool, query, transaction;
 
 if (useVercelPostgres) {

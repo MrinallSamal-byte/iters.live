@@ -82,7 +82,10 @@ const resolvedPortalIpCache = {
     value: null,
     resolvedAt: 0
 };
+// Cache a successful ready=true check for 10 minutes; cache failures for only 2 minutes so
+// a transient launch error does not permanently block the feature for the whole server lifetime.
 const RUNTIME_DIAGNOSTICS_TTL = 10 * 60 * 1000;
+const RUNTIME_DIAGNOSTICS_FAILURE_TTL = 2 * 60 * 1000;
 let runtimeDiagnosticsCache = {
     ready: null,
     checkedAt: 0,
@@ -328,7 +331,12 @@ function buildLaunchOptions({ executablePath = null, resolvedPortalIp = null } =
 
 async function getRuntimeDiagnostics({ force = false } = {}) {
     const cacheAge = Date.now() - runtimeDiagnosticsCache.checkedAt;
-    if (!force && runtimeDiagnosticsCache.ready !== null && cacheAge < RUNTIME_DIAGNOSTICS_TTL) {
+    // Use a shorter TTL for failure states so a transient crash doesn't block the
+    // feature for the whole 10-minute window.
+    const ttl = runtimeDiagnosticsCache.ready === false
+        ? RUNTIME_DIAGNOSTICS_FAILURE_TTL
+        : RUNTIME_DIAGNOSTICS_TTL;
+    if (!force && runtimeDiagnosticsCache.ready !== null && cacheAge < ttl) {
         return decorateRuntimeDiagnostics(runtimeDiagnosticsCache);
     }
 
