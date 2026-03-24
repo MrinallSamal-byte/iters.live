@@ -12,6 +12,7 @@ jest.mock('playwright', () => ({
 describe('soa-scraper.service CAPTCHA extraction', () => {
     beforeEach(() => {
         jest.resetModules();
+        delete process.env.SOA_MAX_ACTIVE_SESSIONS;
         const { chromium } = require('playwright');
         chromium.launch.mockReset();
         chromium.executablePath.mockReset();
@@ -148,5 +149,35 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
         const result = await service.__private.extractCaptchaImage(page);
 
         expect(result).toBeNull();
+    });
+
+    it('rejects new captcha sessions when the global active-session cap is reached', async () => {
+        process.env.SOA_MAX_ACTIVE_SESSIONS = '1';
+        jest.resetModules();
+
+        const { chromium } = require('playwright');
+        chromium.launch.mockReset();
+        chromium.executablePath.mockReset();
+        chromium.executablePath.mockReturnValue('/mock/chromium');
+
+        const service = require('../services/soa-scraper.service');
+        service.__private.activeSessions.set('existing-session', {
+            createdAt: Date.now(),
+            context: { close: jest.fn().mockResolvedValue(undefined) },
+            browser: { close: jest.fn().mockResolvedValue(undefined) }
+        });
+
+        const result = await service.createSessionAndGetCaptcha();
+
+        expect(result).toMatchObject({
+            success: false,
+            status: service.STATUS_SCRAPER_BUSY,
+            activeSessionCount: 1,
+            maxActiveSessions: 1,
+            hasCapacity: false
+        });
+        expect(chromium.launch).not.toHaveBeenCalled();
+
+        service.__private.activeSessions.clear();
     });
 });

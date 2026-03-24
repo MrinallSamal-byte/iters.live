@@ -17,13 +17,13 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: CORS_WHITELIST
-        value: https://iter-aio.onrender.com
+        value: https://updated-iters-live.onrender.com,https://iters.live
       - key: MAX_FILE_SIZE
         value: "10485760"
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_SITE_URL
-        value: https://iter-aio.onrender.com
+        value: https://iters.live
       - key: OPENROUTER_SITE_NAME
         value: ITERasn hub
       - key: OPENROUTER_TIMEOUT_MS
@@ -51,6 +51,9 @@ services:
       # Enable SOA scraping now that Chromium is installed through Docker.
       - key: PORTAL_FEATURES_ENABLED
         value: "true"
+      # Prevent too many concurrent Chromium sessions from exhausting the Render instance.
+      - key: SOA_MAX_ACTIVE_SESSIONS
+        value: "2"
       # Internal keepalive to reduce free-tier idle sleep
       - key: KEEPALIVE_ENABLED
         value: "true"

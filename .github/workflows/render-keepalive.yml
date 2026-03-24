@@ -23,7 +23,7 @@ jobs:
           TARGET_URL="${RENDER_HEALTHCHECK_URL:-$RENDER_HEALTHCHECK_URL_SECRET}"
 
           if [ -z "$TARGET_URL" ]; then
-            TARGET_URL="https://iter-aio.onrender.com"
+            TARGET_URL="https://updated-iters-live.onrender.com"
           fi
 
           case "$TARGET_URL" in

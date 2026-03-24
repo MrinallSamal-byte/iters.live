@@ -125,11 +125,13 @@ router.get('/status', optionalAuth, async (req, res) => {
     const featureEnabled = isPortalEnabled();
     const snapshot = req.user ? await loadSnapshot(req) : null;
     const runtime = featureEnabled ? await soaScraperService.getRuntimeDiagnostics().catch(() => null) : null;
-    const portalEnabled = featureEnabled && runtime?.ready !== false;
+    const portalEnabled = featureEnabled && runtime?.ready !== false && runtime?.hasCapacity !== false;
     const message = !featureEnabled
       ? PORTAL_DISABLED_MESSAGE
       : runtime?.ready === false
         ? runtime.message
+        : runtime?.hasCapacity === false
+          ? runtime.message
         : 'SOA portal import is available.';
 
     return res.json({
@@ -189,8 +191,26 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
   try {
     const snapshot = await loadSnapshot(req);
     const runtime = await soaScraperService.getRuntimeDiagnostics();
-    if (!runtime.ready) {
-      return res.status(503).json(buildRuntimeUnavailableResponse(snapshot, runtime));
+    if (!runtime.ready || runtime.hasCapacity === false) {
+      return res.status(503).json({
+        success: false,
+        status: runtime.ready ? soaScraperService.STATUS_SCRAPER_BUSY : soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
+        message: runtime.message,
+        portalEnabled: false,
+        demoAvailable: true,
+        officialPortalUrl: OFFICIAL_PORTAL_URL,
+        runtime,
+        connection: snapshot?.status || {
+          connected: false,
+          isVerified: false,
+          portalProvider: null,
+          lastSynced: null,
+          hasImportedData: false,
+          needsReconnect: false,
+          dataSource: null,
+          profileSummary: null
+        }
+      });
     }
 
     const result = await soaScraperService.createSessionAndGetCaptcha();
@@ -198,11 +218,13 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
     if (!result.success) {
       return res.status(
         result.status === 'PORTAL_UNREACHABLE' || result.status === soaScraperService.STATUS_RUNTIME_UNAVAILABLE
+          || result.status === soaScraperService.STATUS_SCRAPER_BUSY
           ? 503
           : 500
       ).json({
         ...result,
-        portalEnabled: result.status !== soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
+        portalEnabled: result.status !== soaScraperService.STATUS_RUNTIME_UNAVAILABLE
+          && result.status !== soaScraperService.STATUS_SCRAPER_BUSY,
         demoAvailable: true,
         officialPortalUrl: OFFICIAL_PORTAL_URL,
         runtime: result.runtime || runtime,

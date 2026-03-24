@@ -34,29 +34,29 @@ describe('render-keepalive utility', () => {
 
   it('resolves default 10-minute interval and /health from Render URL', () => {
     process.env.KEEPALIVE_ENABLED = 'true';
-    process.env.RENDER_EXTERNAL_URL = 'https://iter-aio.onrender.com';
+    process.env.RENDER_EXTERNAL_URL = 'https://updated-iters-live.onrender.com';
 
     const config = resolveKeepAliveConfig();
 
     expect(config.enabled).toBe(true);
     expect(config.intervalMs).toBe(DEFAULT_INTERVAL_MS);
-    expect(config.targetUrl).toBe('https://iter-aio.onrender.com/health');
+    expect(config.targetUrl).toBe('https://updated-iters-live.onrender.com/health');
   });
 
   it('uses KEEPALIVE_URL override as-is when provided', () => {
     process.env.KEEPALIVE_ENABLED = 'true';
-    process.env.KEEPALIVE_URL = 'https://iter-aio.onrender.com/custom-health';
+    process.env.KEEPALIVE_URL = 'https://updated-iters-live.onrender.com/custom-health';
 
     const config = resolveKeepAliveConfig();
 
-    expect(config.targetUrl).toBe('https://iter-aio.onrender.com/custom-health');
+    expect(config.targetUrl).toBe('https://updated-iters-live.onrender.com/custom-health');
   });
 
   it('starts only in production Render-like environments and pings after initial delay', async () => {
     process.env.NODE_ENV = 'production';
     process.env.KEEPALIVE_ENABLED = 'true';
     process.env.RENDER = 'true';
-    process.env.RENDER_EXTERNAL_HOSTNAME = 'iter-aio.onrender.com';
+    process.env.RENDER_EXTERNAL_HOSTNAME = 'updated-iters-live.onrender.com';
 
     const fetchMock = jest.fn().mockResolvedValue({ status: 200 });
     const logger = { info: jest.fn(), warn: jest.fn() };
@@ -65,7 +65,7 @@ describe('render-keepalive utility', () => {
     expect(fetchMock).not.toHaveBeenCalled();
     await jest.advanceTimersByTimeAsync(30 * 1000); // matches new DEFAULT_INITIAL_DELAY_MS
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://iter-aio.onrender.com/health',
+      'https://updated-iters-live.onrender.com/health',
       expect.objectContaining({ method: 'GET' })
     );
 
@@ -76,7 +76,7 @@ describe('render-keepalive utility', () => {
     process.env.NODE_ENV = 'production';
     process.env.KEEPALIVE_ENABLED = 'false';
     process.env.RENDER = 'true';
-    process.env.RENDER_EXTERNAL_URL = 'https://iter-aio.onrender.com';
+    process.env.RENDER_EXTERNAL_URL = 'https://updated-iters-live.onrender.com';
 
     const fetchMock = jest.fn();
     const logger = { info: jest.fn(), warn: jest.fn() };

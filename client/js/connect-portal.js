@@ -247,8 +247,8 @@
                 currentConnection = payload.connection;
                 renderConnectionStatus();
             }
-            if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE') {
-                portalEnabled = false;
+            if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE' || payload.status === 'SCRAPER_BUSY') {
+                portalEnabled = payload.status === 'SCRAPER_BUSY' ? true : false;
                 currentRuntime = payload.runtime || currentRuntime;
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
@@ -256,6 +256,8 @@
             }
             if (payload.status === 'PORTAL_UNREACHABLE') {
                 showPortalOfflineMessage();
+            } else if (payload.status === 'SCRAPER_BUSY') {
+                setStatus('warning', 'Live SOA import is temporarily busy.', payload.message || 'Please wait a minute, then fetch a new CAPTCHA session.');
             } else if (payload.status === 'SCRAPER_UNAVAILABLE') {
                 setStatus('warning', 'Live SOA import is unavailable on this server.', payload.message || 'Use demo data or open your saved SOA data for now.');
             } else {
@@ -349,17 +351,19 @@
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 showPortalOfflineMessage();
-            } else if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE') {
-                portalEnabled = false;
+            } else if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE' || payload.status === 'SCRAPER_BUSY') {
+                portalEnabled = payload.status === 'SCRAPER_BUSY' ? true : false;
                 currentRuntime = payload.runtime || currentRuntime;
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 updateFlowAvailability();
                 setStatus(
                     'warning',
-                    payload.status === 'SCRAPER_UNAVAILABLE'
-                        ? 'Live SOA import is unavailable on this server.'
-                        : 'Live SOA import is unavailable right now.',
+                    payload.status === 'SCRAPER_BUSY'
+                        ? 'Live SOA import is temporarily busy.'
+                        : payload.status === 'SCRAPER_UNAVAILABLE'
+                            ? 'Live SOA import is unavailable on this server.'
+                            : 'Live SOA import is unavailable right now.',
                     payload.message || 'You can continue with demo data or open saved imported data.'
                 );
             } else if (payload.status === 'RATE_LIMITED') {

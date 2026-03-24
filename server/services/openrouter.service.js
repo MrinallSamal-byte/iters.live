@@ -7,7 +7,7 @@
 const { getSecureKeyPreview, isValidOpenRouterKey } = require('../utils/security.util');
 
 const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
-const DEFAULT_SITE_URL = 'https://iter-aio.onrender.com';
+const DEFAULT_SITE_URL = 'https://iters.live';
 const DEFAULT_SITE_NAME = 'ITERasn hub';
 const DEFAULT_TIMEOUT_MS = 20_000;
 const DEFAULT_MODEL_CATALOG_TTL_MS = 30 * 60 * 1000;

@@ -463,6 +463,7 @@ If Firebase Admin is not initialized locally, the app supports demo login fallba
 - `CLIENT_URL`
 - `CORS_WHITELIST`
 - `SOCKET_CORS_ORIGIN`
+- `SOA_MAX_ACTIVE_SESSIONS`
 
 ### Database
 
@@ -766,12 +767,13 @@ flowchart TD
 ### Important Render notes
 
 - uploads volume is mounted through Render disk config
-- portal features are disabled by default in `render.yaml`
+- portal features are enabled by default in `render.yaml`
 - AI and Firebase require real env vars on Render
 - direct public routes and direct dashboard routes are now important to current navigation behavior
-- the current `render.yaml` uses `plan: free`, so Render can spin the service down after inactivity
+- the current `render.yaml` uses `plan: starter`
+- SOA browser sessions are capped with `SOA_MAX_ACTIVE_SESSIONS=2` in `render.yaml` to avoid Chromium session pileups exhausting the Render instance
 - this repo now includes `.github/workflows/render-keepalive.yml`, which pings the Render `/health` endpoint every 10 minutes as a best-effort warm-up strategy
-- by default the keepalive targets `https://iter-aio.onrender.com/health`; if your Render URL is different, set a GitHub Actions repository variable or secret named `RENDER_HEALTHCHECK_URL`
+- by default the keepalive targets `https://updated-iters-live.onrender.com/health`; if your Render URL is different, set a GitHub Actions repository variable or secret named `RENDER_HEALTHCHECK_URL`
 - this keepalive reduces cold starts on free tier, but only a paid Render instance can reliably guarantee an always-on service
 
 ## Testing and Verification

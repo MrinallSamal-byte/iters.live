@@ -32,6 +32,7 @@ const STATUS_PORTAL_UNREACHABLE = 'PORTAL_UNREACHABLE';
 const STATUS_CAPTCHA_REQUIRED = 'CAPTCHA_REQUIRED';
 const STATUS_SESSION_EXPIRED = 'SESSION_EXPIRED';
 const STATUS_RUNTIME_UNAVAILABLE = 'SCRAPER_UNAVAILABLE';
+const STATUS_SCRAPER_BUSY = 'SCRAPER_BUSY';
 
 // Portal configuration
 const PORTAL_URL = 'https://soaportals.com/StudentPortalSOA/#/';
@@ -45,6 +46,11 @@ const PORTAL_DNS_SERVERS = ['1.1.1.1', '8.8.8.8'];
 const TIMEOUT = 60000; // 60 seconds
 const NAVIGATION_TIMEOUT = 30000;
 const PORTAL_READY_TIMEOUT = 15000;
+
+function parsePositiveInteger(value, fallback) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
 // Heuristic weights tuned for the current SOA/CampusLynx login UI:
 // explicit "captcha" hints are strongest, "verify" and expected dimensions are supporting signals.
 const CAPTCHA_HEURISTIC_SCORE = {
@@ -71,6 +77,7 @@ const activeSessions = new Map();
 const SESSION_CLEANUP_INTERVAL = 5 * 60 * 1000;
 // Session expiry time (10 minutes)
 const SESSION_EXPIRY = 10 * 60 * 1000;
+const MAX_ACTIVE_SESSIONS = parsePositiveInteger(process.env.SOA_MAX_ACTIVE_SESSIONS, 2);
 const resolvedPortalIpCache = {
     value: null,
     resolvedAt: 0
@@ -85,6 +92,44 @@ let runtimeDiagnosticsCache = {
     code: null
 };
 let runtimeDiagnosticsPromise = null;
+
+function getSessionCapacitySnapshot() {
+    const activeSessionCount = activeSessions.size;
+    return {
+        activeSessionCount,
+        maxActiveSessions: MAX_ACTIVE_SESSIONS,
+        hasCapacity: activeSessionCount < MAX_ACTIVE_SESSIONS
+    };
+}
+
+function decorateRuntimeDiagnostics(runtime) {
+    const sessionCapacity = getSessionCapacitySnapshot();
+    if (!runtime || typeof runtime !== 'object') {
+        return {
+            ready: false,
+            checkedAt: Date.now(),
+            executablePath: null,
+            executableSource: null,
+            message: 'SOA import is temporarily unavailable on this server. Please try again shortly.',
+            code: 'UNKNOWN',
+            ...sessionCapacity
+        };
+    }
+
+    if (!runtime.ready || sessionCapacity.hasCapacity) {
+        return {
+            ...runtime,
+            ...sessionCapacity
+        };
+    }
+
+    return {
+        ...runtime,
+        ...sessionCapacity,
+        message: `SOA import is temporarily busy. ${sessionCapacity.activeSessionCount}/${sessionCapacity.maxActiveSessions} browser sessions are already active. Please wait a minute and try again.`,
+        code: 'SESSION_LIMIT_REACHED'
+    };
+}
 
 const SECTION_NAVIGATION = [
     {
@@ -284,11 +329,12 @@ function buildLaunchOptions({ executablePath = null, resolvedPortalIp = null } =
 async function getRuntimeDiagnostics({ force = false } = {}) {
     const cacheAge = Date.now() - runtimeDiagnosticsCache.checkedAt;
     if (!force && runtimeDiagnosticsCache.ready !== null && cacheAge < RUNTIME_DIAGNOSTICS_TTL) {
-        return runtimeDiagnosticsCache;
+        return decorateRuntimeDiagnostics(runtimeDiagnosticsCache);
     }
 
     if (!force && runtimeDiagnosticsPromise) {
-        return runtimeDiagnosticsPromise;
+        const runtime = await runtimeDiagnosticsPromise;
+        return decorateRuntimeDiagnostics(runtime);
     }
 
     runtimeDiagnosticsPromise = (async () => {
@@ -344,7 +390,8 @@ async function getRuntimeDiagnostics({ force = false } = {}) {
         }
     })();
 
-    return runtimeDiagnosticsPromise;
+    const runtime = await runtimeDiagnosticsPromise;
+    return decorateRuntimeDiagnostics(runtime);
 }
 
 function buildScraperErrorResponse(error, fallbackMessage) {
@@ -488,18 +535,26 @@ function escapeRegex(text) {
 /**
  * Cleanup expired sessions
  */
-function cleanupExpiredSessions() {
+async function cleanupExpiredSessions() {
     const now = Date.now();
+    const expiredSessionIds = [];
     for (const [sessionId, session] of activeSessions) {
         if (now - session.createdAt > SESSION_EXPIRY) {
             console.log(`[SOA Scraper] Cleaning up expired session: ${sessionId}`);
-            closeSession(sessionId);
+            expiredSessionIds.push(sessionId);
         }
     }
+
+    await Promise.allSettled(expiredSessionIds.map((sessionId) => closeSession(sessionId)));
+    return expiredSessionIds.length;
 }
 
 // Start cleanup interval
-const sessionCleanupTimer = setInterval(cleanupExpiredSessions, SESSION_CLEANUP_INTERVAL);
+const sessionCleanupTimer = setInterval(() => {
+    cleanupExpiredSessions().catch((error) => {
+        console.error('[SOA Scraper] Error cleaning up expired sessions:', error.message);
+    });
+}, SESSION_CLEANUP_INTERVAL);
 if (typeof sessionCleanupTimer?.unref === 'function') {
     sessionCleanupTimer.unref();
 }
@@ -1170,6 +1225,18 @@ async function createSessionAndGetCaptcha() {
 
     try {
         console.log(`[SOA Scraper] Creating new session: ${sessionId}`);
+
+        await cleanupExpiredSessions();
+        const sessionCapacity = getSessionCapacitySnapshot();
+        if (!sessionCapacity.hasCapacity) {
+            return {
+                success: false,
+                status: STATUS_SCRAPER_BUSY,
+                message: `SOA import is temporarily busy. ${sessionCapacity.activeSessionCount}/${sessionCapacity.maxActiveSessions} browser sessions are already active. Please wait a minute and try again.`,
+                retryAfterSeconds: 60,
+                ...sessionCapacity
+            };
+        }
 
         const runtimeDiagnostics = await getRuntimeDiagnostics();
         if (!runtimeDiagnostics.ready) {
@@ -2380,7 +2447,11 @@ module.exports = {
     STATUS_CAPTCHA_REQUIRED,
     STATUS_SESSION_EXPIRED,
     STATUS_RUNTIME_UNAVAILABLE,
+    STATUS_SCRAPER_BUSY,
     __private: {
-        extractCaptchaImage
+        activeSessions,
+        cleanupExpiredSessions,
+        extractCaptchaImage,
+        getSessionCapacitySnapshot
     }
 };
