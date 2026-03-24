@@ -330,4 +330,57 @@ describe('SOA data service', () => {
     expect(status.needsReconnect).toBe(true);
     expect(status.portalProvider).toBe('soa');
   });
+
+  test('keeps legacy firebase user documents usable after a later login', () => {
+    const normalized = normalizeStoredPortalData({
+      portalConnected: false,
+      portalNeedsReconnect: true,
+      portalProvider: 'soa',
+      portal_last_synced: '2025-11-28T12:35:52.880Z',
+      profile: {
+        name: 'Demo Student',
+        registration_number: '24E119C17',
+        department: 'Computer Science & Engineering',
+        semester: 5,
+        email: 'demo.student@iter.ac.in',
+        phone: '9876543210',
+        section: 'A'
+      },
+      attendance_data: [
+        { subject: 'Data Structures', attended: '42', total: '45', percentage: '93%' }
+      ],
+      marks_data: [
+        { subject: 'Data Structures', marks: '85', grade: 'A' }
+      ]
+    });
+
+    const status = buildPortalStatusPayload({
+      portalConnected: false,
+      portalNeedsReconnect: true,
+      portalProvider: 'soa',
+      portal_last_synced: '2025-11-28T12:35:52.880Z'
+    }, normalized);
+
+    const attendanceRouteData = buildAttendanceRouteData(normalized);
+    const marksRouteData = buildMarksRouteData(normalized);
+
+    expect(normalized.dataSource).toBe('cached_soa_import');
+    expect(normalized.profile.registrationNumber).toBe('24E119C17');
+    expect(normalized.profile.studentName).toBe('Demo Student');
+    expect(attendanceRouteData.source).toBe('soa_import');
+    expect(attendanceRouteData.summary[0]).toMatchObject({
+      subject: 'Data Structures',
+      total_classes: 45,
+      present_count: 42
+    });
+    expect(marksRouteData.source).toBe('soa_import');
+    expect(marksRouteData.summary[0]).toMatchObject({
+      subject: 'Data Structures',
+      avg_marks: 85,
+      avg_total: 0
+    });
+    expect(status.hasImportedData).toBe(true);
+    expect(status.connected).toBe(false);
+    expect(status.needsReconnect).toBe(true);
+  });
 });

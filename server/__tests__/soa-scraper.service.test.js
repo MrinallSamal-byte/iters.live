@@ -18,7 +18,7 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
         chromium.executablePath.mockReturnValue('/mock/chromium');
     });
 
-    it('extracts captcha from direct verify image selector when visible', async () => {
+    it('extracts captcha from the first matching selector when a visible inline image is present', async () => {
         const screenshotBuffer = Buffer.from('selector-captcha');
         const visibleElement = {
             isVisible: jest.fn().mockResolvedValue(true),
@@ -36,7 +36,7 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
         const result = await service.__private.extractCaptchaImage(page);
 
         expect(result).toBe(`data:image/png;base64,${screenshotBuffer.toString('base64')}`);
-        expect(page.locator).toHaveBeenCalledWith('img[class*="verify"]');
+        expect(page.locator).toHaveBeenCalledWith('img[src^="data:image"]');
     });
 
     it('falls back to score-based visible image extraction when selector lookup misses', async () => {
