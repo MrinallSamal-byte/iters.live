@@ -1,420 +1,279 @@
-// ============================================
-// NOTES ROUTES WITH BRANCH & SEMESTER FILTERS
-// server/routes/notes.routes.js
-// ============================================
-
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
 const { authMiddleware } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const {
+  createRecord,
+  findOne,
+  getRecord,
+  listRecords,
+  deleteRecord
+} = require('../services/firebase-data.service');
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
-    destination: async (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '../uploads/notes');
-        await fs.mkdir(uploadDir, { recursive: true });
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
-    }
+  destination: async (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads/notes');
+    await fs.mkdir(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  }
 });
 
 const upload = multer({
-    storage,
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /pdf|doc|docx|ppt|pptx|txt/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /pdf|doc|docx|ppt|pptx|txt/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
 
-        if (extname && mimetype) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only PDF, DOC, DOCX, PPT, PPTX, and TXT files are allowed!'));
-        }
+    if (extname && mimetype) {
+      return cb(null, true);
     }
+    cb(new Error('Only PDF, DOC, DOCX, PPT, PPTX, and TXT files are allowed!'));
+  }
 });
 
-// ============================================
-// GET ALL NOTES WITH FILTERS
-// ============================================
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function getUserMap(users = []) {
+  return new Map(users.map((user) => [user.id, user.name]));
+}
+
+async function enrichNotes(notes, userId) {
+  const [users, downloads, favorites] = await Promise.all([
+    listRecords('users'),
+    listRecords('note_downloads'),
+    listRecords('note_favorites')
+  ]);
+
+  const userNameById = getUserMap(users);
+  const downloadCountById = downloads.reduce((map, item) => {
+    map.set(item.note_id, (map.get(item.note_id) || 0) + 1);
+    return map;
+  }, new Map());
+  const favoriteSet = new Set(favorites.filter((item) => item.user_id === userId).map((item) => item.note_id));
+
+  return notes.map((note) => ({
+    ...note,
+    uploaded_by_name: userNameById.get(note.uploaded_by) || null,
+    uploader_role: users.find((user) => user.id === note.uploaded_by)?.role || null,
+    downloads: downloadCountById.get(note.id) || 0,
+    is_favorited: favoriteSet.has(note.id),
+    file_type: path.extname(note.file_path || note.file_name || '').toUpperCase().replace('.', ''),
+    file_size: note.file_size || 'Unknown'
+  }));
+}
+
 router.get('/', authMiddleware, async (req, res) => {
-    try {
-        const { branch, semester, type, search, subject } = req.query;
-        const userId = req.user.id;
-        const userRole = req.user.role;
+  try {
+    const { branch, semester, type, search, subject } = req.query;
+    const userId = req.user.id;
+    const userRole = req.user.role;
 
-        let sql = `
-            SELECT 
-                n.*,
-                u.name as uploaded_by_name,
-                u.role as uploader_role,
-                (SELECT COUNT(*) FROM note_downloads WHERE note_id = n.id) as downloads,
-                (SELECT COUNT(*) FROM note_favorites WHERE note_id = n.id AND user_id = ?) as is_favorited
-            FROM notes n
-            LEFT JOIN users u ON n.uploaded_by = u.id
-            WHERE n.status = 'approved'
-        `;
-        
-        const params = [userId];
+    let notes = await listRecords('notes', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
 
-        // Apply branch filter
-        if (branch) {
-            sql += ` AND n.branch = ?`;
-            params.push(branch);
-        }
-
-        // Apply semester filter
-        if (semester) {
-            sql += ` AND n.semester = ?`;
-            params.push(parseInt(semester));
-        }
-
-        // Apply type filter
-        if (type) {
-            sql += ` AND n.type = ?`;
-            params.push(type);
-        }
-
-        // Apply subject filter
-        if (subject) {
-            sql += ` AND n.subject LIKE ?`;
-            params.push(`%${subject}%`);
-        }
-
-        // Apply search filter
-        if (search) {
-            sql += ` AND (n.title LIKE ? OR n.subject LIKE ? OR n.description LIKE ?)`;
-            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-        }
-
-        // If student, show only their branch notes (optional)
-        if (userRole === 'student') {
-            const userBranch = req.user.department || req.user.branch;
-            if (userBranch && !branch) {
-                sql += ` AND n.branch = ?`;
-                params.push(userBranch);
-            }
-        }
-
-        sql += ` ORDER BY n.created_at DESC`;
-
-        // Convert '?' placeholders to Postgres $1..$n
-        let idx = 0;
-        const pgSql = sql.replace(/\?/g, () => `$${++idx}`);
-
-        const notes = await db.query(pgSql, params);
-
-        res.json({
-            success: true,
-            notes: notes.map(note => ({
-                ...note,
-                is_favorited: note.is_favorited > 0,
-                file_size: note.file_size || 'Unknown',
-                file_type: path.extname(note.file_path).toUpperCase().replace('.', '')
-            }))
-        });
-    } catch (error) {
-        console.error('Error fetching notes:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch notes'
-        });
+    notes = notes.filter((note) => note.status === 'approved');
+    if (branch) notes = notes.filter((note) => note.branch === branch);
+    if (semester) notes = notes.filter((note) => toNumber(note.semester, null) === toNumber(semester, null));
+    if (type) notes = notes.filter((note) => note.type === type);
+    if (subject) notes = notes.filter((note) => String(note.subject || '').toLowerCase().includes(String(subject).toLowerCase()));
+    if (search) {
+      const q = String(search).toLowerCase();
+      notes = notes.filter((note) =>
+        String(note.title || '').toLowerCase().includes(q)
+        || String(note.subject || '').toLowerCase().includes(q)
+        || String(note.description || '').toLowerCase().includes(q)
+      );
     }
+
+    if (userRole === 'student' && !branch) {
+      const userBranch = req.user.department || req.user.branch;
+      if (userBranch) {
+        notes = notes.filter((note) => note.branch === userBranch);
+      }
+    }
+
+    const enriched = await enrichNotes(notes, userId);
+    res.json({ success: true, notes: enriched });
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch notes' });
+  }
 });
 
-// ============================================
-// GET NOTES STATISTICS
-// ============================================
 router.get('/stats', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.id;
+  try {
+    const userId = req.user.id;
+    const [notes, downloads, favorites] = await Promise.all([
+      listRecords('notes'),
+      listRecords('note_downloads'),
+      listRecords('note_favorites')
+    ]);
 
-    const totalNotes = await db.query("SELECT COUNT(*) as count FROM notes WHERE status = 'approved'"
-        );
-
-        const downloadedNotes = await db.query(
-            'SELECT COUNT(DISTINCT note_id) as count FROM note_downloads WHERE user_id = $1', [userId]
-        );
-
-        const savedNotes = await db.query('SELECT COUNT(*) as count FROM note_favorites WHERE user_id = $1', [userId]
-        );
-
-    const subjects = await db.query("SELECT COUNT(DISTINCT subject) as count FROM notes WHERE status = 'approved'"
-        );
-
-        res.json({
-            success: true,
-            totalNotes: totalNotes[0].count,
-            downloadedNotes: downloadedNotes[0].count,
-            savedNotes: savedNotes[0].count,
-            totalSubjects: subjects[0].count
-        });
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch statistics'
-        });
-    }
+    const approvedNotes = notes.filter((note) => note.status === 'approved');
+    res.json({
+      success: true,
+      totalNotes: approvedNotes.length,
+      downloadedNotes: new Set(downloads.filter((item) => item.user_id === userId).map((item) => item.note_id)).size,
+      savedNotes: favorites.filter((item) => item.user_id === userId).length,
+      totalSubjects: new Set(approvedNotes.map((note) => note.subject).filter(Boolean)).size
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch statistics' });
+  }
 });
 
-// ============================================
-// GET SINGLE NOTE DETAILS
-// ============================================
 router.get('/:id', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id;
-
-        const notes = await db.query(
-            `SELECT 
-                n.*,
-                u.name as uploaded_by_name,
-                (SELECT COUNT(*) FROM note_downloads WHERE note_id = n.id) as downloads,
-                (SELECT COUNT(*) FROM note_favorites WHERE note_id = n.id AND user_id = $1) as is_favorited
-            FROM notes n
-            LEFT JOIN users u ON n.uploaded_by = u.id
-            WHERE n.id = $2 AND n.status = 'approved'`,
-            [userId, id]
-        );
-
-        if (notes.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Note not found'
-            });
-        }
-
-        res.json({
-            success: true,
-            note: {
-                ...notes[0],
-                is_favorited: notes[0].is_favorited > 0
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching note:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch note details'
-        });
+  try {
+    const note = await getRecord('notes', req.params.id);
+    if (!note || note.status !== 'approved') {
+      return res.status(404).json({ success: false, message: 'Note not found' });
     }
+
+    const [enriched] = await enrichNotes([note], req.user.id);
+    res.json({ success: true, note: enriched });
+  } catch (error) {
+    console.error('Error fetching note:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch note details' });
+  }
 });
 
-// ============================================
-// DOWNLOAD NOTE
-// ============================================
 router.get('/:id/download', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id;
-
-        // Get note details
-        const notes = await db.query(
-            "SELECT * FROM notes WHERE id = $1 AND status = 'approved'", [id]
-        );
-
-        if (notes.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Note not found'
-            });
-        }
-
-        const note = notes[0];
-        const filePath = path.join(__dirname, '../uploads/notes', path.basename(note.file_path));
-
-        // Check if file exists
-        try {
-            await fs.access(filePath);
-        } catch (error) {
-            return res.status(404).json({
-                success: false,
-                message: 'File not found on server'
-            });
-        }
-
-        // Record download
-        await db.query('INSERT INTO note_downloads (note_id, user_id, downloaded_at) VALUES ($1, $2, NOW())', [id, userId]
-        );
-
-        // Send file
-        res.download(filePath, note.title + path.extname(note.file_path));
-    } catch (error) {
-        console.error('Error downloading note:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to download note'
-        });
+  try {
+    const note = await getRecord('notes', req.params.id);
+    if (!note || note.status !== 'approved') {
+      return res.status(404).json({ success: false, message: 'Note not found' });
     }
+
+    const filePath = path.join(__dirname, '../uploads/notes', path.basename(note.file_path));
+    try {
+      await fs.access(filePath);
+    } catch (_) {
+      return res.status(404).json({ success: false, message: 'File not found on server' });
+    }
+
+    await createRecord('note_downloads', {
+      note_id: req.params.id,
+      user_id: req.user.id,
+      downloaded_at: new Date().toISOString()
+    });
+
+    res.download(filePath, `${note.title}${path.extname(note.file_path)}`);
+  } catch (error) {
+    console.error('Error downloading note:', error);
+    res.status(500).json({ success: false, message: 'Failed to download note' });
+  }
 });
 
-// ============================================
-// VIEW/PREVIEW NOTE
-// ============================================
 router.get('/:id/view', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-
-    const notes = await db.query("SELECT * FROM notes WHERE id = $1 AND status = 'approved'", [id]
-    );
-
-        if (notes.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Note not found'
-            });
-        }
-
-        const note = notes[0];
-        const viewUrl = `/uploads/notes/${path.basename(note.file_path)}`;
-
-        res.json({
-            success: true,
-            viewUrl
-        });
-    } catch (error) {
-        console.error('Error viewing note:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to view note'
-        });
+  try {
+    const note = await getRecord('notes', req.params.id);
+    if (!note || note.status !== 'approved') {
+      return res.status(404).json({ success: false, message: 'Note not found' });
     }
+
+    res.json({
+      success: true,
+      viewUrl: `/uploads/notes/${path.basename(note.file_path)}`
+    });
+  } catch (error) {
+    console.error('Error viewing note:', error);
+    res.status(500).json({ success: false, message: 'Failed to view note' });
+  }
 });
 
-// ============================================
-// UPLOAD NOTE (Teacher/Admin)
-// ============================================
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
-    try {
-        const { title, subject, branch, semester, type, description } = req.body;
-        const userId = req.user.id;
-        const userRole = req.user.role;
+  try {
+    const { title, subject, branch, semester, type, description } = req.body;
 
-        // Only teachers and admins can upload
-        if (userRole !== 'teacher' && userRole !== 'admin') {
-            return res.status(403).json({
-                success: false,
-                message: 'Only teachers and admins can upload notes'
-            });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'No file uploaded'
-            });
-        }
-
-        // Get file size
-        const stats = await fs.stat(req.file.path);
-        const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-
-        // Insert note
-        const result = await db.query(`INSERT INTO notes 
-            (title, subject, branch, semester, type, description, file_path, file_size, uploaded_by, status, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', NOW()) RETURNING id`, [
-                title,
-                subject,
-                branch,
-                parseInt(semester),
-                type,
-                description || '',
-                req.file.filename,
-                `${fileSizeMB} MB`,
-                userId
-            ]
-        );
-
-        res.json({
-            success: true,
-            message: 'Note uploaded successfully and sent for approval',
-            noteId: (result && result[0] && result[0].id) || null
-        });
-    } catch (error) {
-        console.error('Error uploading note:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to upload note'
-        });
+    if (!['teacher', 'admin'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Only teachers and admins can upload notes' });
     }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    const stats = await fs.stat(req.file.path);
+    const fileSizeMB = `${(stats.size / (1024 * 1024)).toFixed(2)} MB`;
+    const note = await createRecord('notes', {
+      title,
+      subject,
+      branch,
+      semester: toNumber(semester, null),
+      type,
+      description: description || '',
+      file_path: req.file.filename,
+      file_size: fileSizeMB,
+      uploaded_by: req.user.id,
+      status: 'approved'
+    });
+
+    res.json({
+      success: true,
+      message: 'Note uploaded successfully',
+      noteId: note.id
+    });
+  } catch (error) {
+    console.error('Error uploading note:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload note' });
+  }
 });
 
-// ============================================
-// TOGGLE FAVORITE
-// ============================================
 router.post('/:id/favorite', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id;
+  try {
+    const existing = await findOne('note_favorites', {
+      filters: [
+        { field: 'note_id', value: req.params.id },
+        { field: 'user_id', value: req.user.id }
+      ]
+    });
 
-        // Check if already favorited
-        const existing = await db.query('SELECT * FROM note_favorites WHERE note_id = $1 AND user_id = $2', [id, userId]
-        );
-
-        if (existing.length > 0) {
-            // Remove favorite
-            await db.query('DELETE FROM note_favorites WHERE note_id = $1 AND user_id = $2', [id, userId]
-            );
-            res.json({
-                success: true,
-                message: 'Removed from favorites',
-                is_favorited: false
-            });
-        } else {
-            // Add favorite
-            await db.query('INSERT INTO note_favorites (note_id, user_id, created_at) VALUES ($1, $2, NOW())', [id, userId]
-            );
-            res.json({
-                success: true,
-                message: 'Added to favorites',
-                is_favorited: true
-            });
-        }
-    } catch (error) {
-        console.error('Error toggling favorite:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to update favorite'
-        });
+    if (existing) {
+      await deleteRecord('note_favorites', existing.id);
+      return res.json({ success: true, message: 'Removed from favorites', is_favorited: false });
     }
+
+    await createRecord('note_favorites', {
+      note_id: req.params.id,
+      user_id: req.user.id
+    });
+    res.json({ success: true, message: 'Added to favorites', is_favorited: true });
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    res.status(500).json({ success: false, message: 'Failed to update favorite' });
+  }
 });
 
-// ============================================
-// GET FAVORITES
-// ============================================
 router.get('/favorites/list', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.id;
+  try {
+    const favorites = await listRecords('note_favorites', {
+      filters: [{ field: 'user_id', value: req.user.id }],
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+    const noteIds = new Set(favorites.map((item) => item.note_id));
+    const notes = await listRecords('notes', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
 
-        const favorites = await db.query(`SELECT 
-                n.*,
-                u.name as uploaded_by_name,
-                (SELECT COUNT(*) FROM note_downloads WHERE note_id = n.id) as downloads
-            FROM note_favorites nf
-            JOIN notes n ON nf.note_id = n.id
-            LEFT JOIN users u ON n.uploaded_by = u.id
-            WHERE nf.user_id = $1 AND n.status = 'approved'
-            ORDER BY nf.created_at DESC`, [userId]
-        );
-
-        res.json({
-            success: true,
-            favorites
-        });
-    } catch (error) {
-        console.error('Error fetching favorites:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch favorites'
-        });
-    }
+    const enriched = await enrichNotes(notes.filter((note) => noteIds.has(note.id) && note.status === 'approved'), req.user.id);
+    res.json({ success: true, favorites: enriched });
+  } catch (error) {
+    console.error('Error fetching favorites:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch favorites' });
+  }
 });
 
 module.exports = router;

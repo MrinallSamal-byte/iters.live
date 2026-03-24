@@ -90,7 +90,7 @@ router.get('/stats', auth, async (req, res) => {
 router.put('/:id/read', auth, async (req, res) => {
   try {
     const result = await notificationService.markAsRead(
-      parseInt(req.params.id),
+      req.params.id,
       req.user.id
     );
 
@@ -150,7 +150,7 @@ router.put('/read-all', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const result = await notificationService.delete(
-      parseInt(req.params.id),
+      req.params.id,
       req.user.id
     );
 

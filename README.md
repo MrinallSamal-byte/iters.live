@@ -41,7 +41,7 @@ ITERasn hub is an academic operations portal designed around three primary roles
 - Frontend: vanilla HTML, CSS, and JavaScript
 - Backend: Node.js with Express
 - Real-time layer: Socket.IO
-- Data layer: hybrid SQL + Firebase backend. Academic/admin records come from the active SQL adapter, while auth, files, forum, payments, and stored portal imports use Firebase Admin when configured.
+- Data layer: Firebase-first backend for auth, dashboard data, files, forum, payments, portal imports, and notifications, with optional Realtime Database mirroring when configured. Some legacy analytics/search utilities still retain SQL compatibility paths.
 - Auth: JWT-based app auth plus Firebase-backed flows where configured
 - AI: OpenRouter and Gemini integration
 - Deployment target: Render
@@ -488,6 +488,7 @@ Use either the single JSON string or split variables:
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_DATABASE_URL` for Realtime Database mirroring
 
 ### AI providers
 
@@ -827,6 +828,7 @@ For production-like auth:
 
 - provide `FIREBASE_SERVICE_ACCOUNT`
 - or provide split Firebase env vars
+- set `FIREBASE_DATABASE_URL` if you want Firebase Realtime Database mirroring in addition to Firestore
 
 ### AI chatbot gives fallback or unavailable responses
 

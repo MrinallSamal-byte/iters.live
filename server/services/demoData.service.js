@@ -1,4 +1,4 @@
-const { query, transaction } = require('../database/db');
+const { createRecord, listRecords } = require('./firebase-data.service');
 
 // Baseline demo accounts
 const DEMO_IDS = {
@@ -7,7 +7,6 @@ const DEMO_IDS = {
   admin: 'ADM2025001'
 };
 
-// PRNG with seed for stable per-login variability
 function mulberry32(a) {
   return function() {
     let t = (a += 0x6D2B79F5);
@@ -20,55 +19,83 @@ function mulberry32(a) {
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
 async function getDemoUserIdByReg(regNo) {
-  const rows = await query('SELECT id FROM users WHERE registration_number = $1', [regNo]);
-  return rows[0]?.id || null;
+  const users = await listRecords('users', {
+    filters: [{ field: 'registration_number', value: regNo }],
+    limit: 1
+  });
+  return users[0]?.id || null;
+}
+
+async function cloneCollection(collectionName, fromStudentId, toStudentId, options = {}) {
+  const rows = await listRecords(collectionName, {
+    filters: [{ field: 'student_id', value: String(fromStudentId) }]
+  });
+
+  let filtered = rows;
+  if (typeof options.filter === 'function') {
+    filtered = filtered.filter(options.filter);
+  }
+  if (typeof options.transform === 'function') {
+    filtered = filtered.map(options.transform);
+  }
+
+  if (options.limit) {
+    filtered = filtered
+      .sort((left, right) => String(right.created_at || right.exam_date || '').localeCompare(String(left.created_at || left.exam_date || '')))
+      .slice(0, options.limit);
+  }
+
+  for (const row of filtered) {
+    const { id, created_at, updated_at, ...rest } = row;
+    await createRecord(collectionName, {
+      ...rest,
+      student_id: String(toStudentId),
+      created_at: created_at || new Date().toISOString(),
+      updated_at: updated_at || new Date().toISOString()
+    });
+  }
 }
 
 async function ensureClonedDataFor(userId, role) {
-  // Clone minimal dependent data if the user has no records yet
-  if (role === 'student') {
-    const att = await query('SELECT id FROM attendance WHERE student_id = $1 LIMIT 1', [userId]);
-    if (att.length === 0) {
-      const demoId = await getDemoUserIdByReg(DEMO_IDS.student);
-      if (demoId) await cloneStudentData(demoId, userId);
-    }
+  if (role !== 'student') {
+    return;
+  }
+
+  const attendance = await listRecords('attendance', {
+    filters: [{ field: 'student_id', value: String(userId) }],
+    limit: 1
+  });
+
+  if (attendance.length > 0) {
+    return;
+  }
+
+  const demoId = await getDemoUserIdByReg(DEMO_IDS.student);
+  if (demoId) {
+    await cloneStudentData(demoId, userId);
   }
 }
 
 async function cloneStudentData(fromStudentId, toStudentId) {
-  // Copy a lightweight slice of data to keep DB small on free plans
-  await transaction(async (client) => {
-    // Attendance (recent 30 days)
-    await client.query(
-      `INSERT INTO attendance (student_id, subject, date, status, marked_by, remarks, created_at)
-       SELECT $1, subject, date, status, marked_by, remarks, created_at
-       FROM attendance WHERE student_id = $2 AND date >= (CURRENT_DATE - INTERVAL '30 days')`,
-      [toStudentId, fromStudentId]
-    );
+  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
 
-    // Marks (recent)
-    await client.query(
-      `INSERT INTO marks (student_id, subject, exam_type, marks_obtained, total_marks, exam_date, uploaded_by, remarks, created_at, updated_at)
-       SELECT $1, subject, exam_type, marks_obtained, total_marks, exam_date, uploaded_by, remarks, created_at, updated_at
-       FROM marks WHERE student_id = $2 AND exam_date >= (CURRENT_DATE - INTERVAL '365 days')`,
-      [toStudentId, fromStudentId]
-    );
+  await cloneCollection('attendance', fromStudentId, toStudentId, {
+    filter: (row) => Date.parse(row.date || row.created_at || '') >= thirtyDaysAgo
+  });
 
-    // Fees
-    await client.query(
-      `INSERT INTO fees (student_id, semester, amount, paid_amount, due_date, payment_status, transaction_id, payment_date, receipt_url, created_at, updated_at)
-       SELECT $1, semester, amount, paid_amount, due_date, payment_status, transaction_id, payment_date, receipt_url, created_at, updated_at
-       FROM fees WHERE student_id = $2`,
-      [toStudentId, fromStudentId]
-    );
+  await cloneCollection('marks', fromStudentId, toStudentId, {
+    filter: (row) => Date.parse(row.exam_date || row.created_at || '') >= oneYearAgo
+  });
 
-    // Admit card (latest only)
-    await client.query(
-      `INSERT INTO admit_cards (student_id, exam_name, exam_date, file_id, qr_code, verification_code, is_active, generated_at)
-       SELECT $1, exam_name, exam_date, file_id, qr_code, CONCAT(verification_code, '_', $1::text), is_active, generated_at
-       FROM admit_cards WHERE student_id = $2 ORDER BY generated_at DESC LIMIT 1`,
-      [toStudentId, fromStudentId]
-    );
+  await cloneCollection('fees', fromStudentId, toStudentId);
+
+  await cloneCollection('admit_cards', fromStudentId, toStudentId, {
+    limit: 1,
+    transform: (row) => ({
+      ...row,
+      verification_code: row.verification_code ? `${row.verification_code}_${toStudentId}` : null
+    })
   });
 }
 
@@ -78,21 +105,19 @@ function varyStudentSnapshot(rows, seed) {
 
   const varied = { ...rows };
 
-  // Attendance summary tweaks on the fly
   if (Array.isArray(varied.summary)) {
-    varied.summary = varied.summary.map(s => {
-      const delta = Math.round(jitter() * 4); // ±4%
-      const pct = clamp((Number(s.percentage) || 0) + delta, 50, 100);
-      return { ...s, percentage: pct };
+    varied.summary = varied.summary.map((summary) => {
+      const delta = Math.round(jitter() * 4);
+      const pct = clamp((Number(summary.percentage) || 0) + delta, 50, 100);
+      return { ...summary, percentage: pct };
     });
   }
 
-  // Marks tweaks
   if (Array.isArray(varied.marks)) {
-    varied.marks = varied.marks.map(m => {
-      const delta = Math.round(jitter() * 3); // small ±3 marks
-      const mo = clamp(Number(m.marks_obtained) + delta, 0, Number(m.total_marks));
-      return { ...m, marks_obtained: mo };
+    varied.marks = varied.marks.map((mark) => {
+      const delta = Math.round(jitter() * 3);
+      const obtained = clamp(Number(mark.marks_obtained) + delta, 0, Number(mark.total_marks));
+      return { ...mark, marks_obtained: obtained };
     });
   }
 

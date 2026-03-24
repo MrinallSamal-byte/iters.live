@@ -1,46 +1,56 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../database/db');
 const { authMiddleware } = require('../middleware/auth');
+const { listRecords } = require('../services/firebase-data.service');
+const { getPortalSnapshotForUser } = require('../services/soa-data.service');
 
-// Get timetable for student/teacher
+function weekdayRank(day) {
+  const order = {
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6
+  };
+  return order[day] || 7;
+}
+
+function sortTimetable(records = []) {
+  return [...records].sort((left, right) => {
+    const dayDiff = weekdayRank(left.day_of_week) - weekdayRank(right.day_of_week);
+    if (dayDiff !== 0) return dayDiff;
+    return String(left.start_time || '').localeCompare(String(right.start_time || ''));
+  });
+}
+
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    let timetable;
-    
+    let timetable = [];
+
     if (req.user.role === 'student') {
-      timetable = await query(`SELECT t.*, u.name as teacher_name FROM timetable t
-         LEFT JOIN users u ON t.teacher_id = u.id
-         WHERE t.department = $1 AND t.year = $2 AND t.section = $3
-         ORDER BY 
-           CASE t.day_of_week
-             WHEN 'Monday' THEN 1
-             WHEN 'Tuesday' THEN 2
-             WHEN 'Wednesday' THEN 3
-             WHEN 'Thursday' THEN 4
-             WHEN 'Friday' THEN 5
-             WHEN 'Saturday' THEN 6
-             ELSE 7
-           END,
-           t.start_time`, [req.user.department, req.user.year, req.user.section]
-      );
+      timetable = await listRecords('timetable', {
+        filters: [
+          { field: 'department', value: req.user.department },
+          { field: 'year', value: req.user.year },
+          { field: 'section', value: req.user.section }
+        ]
+      });
+
+      if (timetable.length === 0) {
+        const snapshot = await getPortalSnapshotForUser({
+          userId: req.user.id,
+          registrationNumber: req.user.registration_number
+        });
+        timetable = snapshot.normalizedData?.timetable || [];
+      }
     } else if (req.user.role === 'teacher') {
-      timetable = await query(`SELECT * FROM timetable WHERE teacher_id = $1
-         ORDER BY 
-           CASE day_of_week
-             WHEN 'Monday' THEN 1
-             WHEN 'Tuesday' THEN 2
-             WHEN 'Wednesday' THEN 3
-             WHEN 'Thursday' THEN 4
-             WHEN 'Friday' THEN 5
-             WHEN 'Saturday' THEN 6
-             ELSE 7
-           END,
-           start_time`, [req.user.id]
-      );
+      timetable = await listRecords('timetable', {
+        filters: [{ field: 'teacher_id', value: req.user.id }]
+      });
     }
 
-    res.json({ success: true, data: timetable });
+    res.json({ success: true, data: sortTimetable(timetable) });
   } catch (error) {
     next(error);
   }

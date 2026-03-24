@@ -1,7 +1,12 @@
-const { query } = require('../database/db');
 const { db: firebaseDb, isFirebaseAdminReady } = require('../database/firebase');
 const { sanitizeUser } = require('../utils/app-session');
 const { isPortalEnabled } = require('../config/featureFlags');
+const {
+  createRecord,
+  getRecord,
+  listRecords,
+  setRecord
+} = require('./firebase-data.service');
 const {
   getPortalSnapshotForUser,
   buildAttendanceRouteData,
@@ -109,9 +114,348 @@ function getMembershipSet(userId) {
   return demoClubMemberships.get(userId);
 }
 
+function sortByString(items, field, direction = 'asc') {
+  return [...items].sort((left, right) => {
+    const leftValue = String(left?.[field] || '');
+    const rightValue = String(right?.[field] || '');
+    return direction === 'desc'
+      ? rightValue.localeCompare(leftValue)
+      : leftValue.localeCompare(rightValue);
+  });
+}
+
+function sortByBooleanThenDate(items, booleanField, dateField) {
+  return [...items].sort((left, right) => {
+    const boolDiff = Number(Boolean(right?.[booleanField])) - Number(Boolean(left?.[booleanField]));
+    if (boolDiff !== 0) {
+      return boolDiff;
+    }
+    return String(right?.[dateField] || '').localeCompare(String(left?.[dateField] || ''));
+  });
+}
+
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function mapById(items = []) {
+  return new Map(items.map((item) => [String(item.id), item]));
+}
+
+async function listCollection(collectionName, options = {}, fallback = []) {
+  try {
+    const rows = await listRecords(collectionName, options);
+    return rows;
+  } catch (error) {
+    return typeof fallback === 'function' ? fallback(error) : fallback;
+  }
+}
+
+async function getUserMetricsById() {
+  const [attendance, marks] = await Promise.all([
+    listCollection('attendance'),
+    listCollection('marks')
+  ]);
+
+  const attendanceTotals = new Map();
+  attendance.forEach((record) => {
+    const studentId = String(record.student_id || '');
+    if (!studentId) return;
+    const current = attendanceTotals.get(studentId) || { total: 0, present: 0 };
+    current.total += 1;
+    if (record.status === 'present') {
+      current.present += 1;
+    }
+    attendanceTotals.set(studentId, current);
+  });
+
+  const marksTotals = new Map();
+  marks.forEach((record) => {
+    const studentId = String(record.student_id || '');
+    if (!studentId) return;
+    const totalMarks = Number(record.total_marks || 0);
+    if (!totalMarks) return;
+    const current = marksTotals.get(studentId) || { percentageSum: 0, count: 0 };
+    current.percentageSum += (Number(record.marks_obtained || 0) / totalMarks) * 100;
+    current.count += 1;
+    marksTotals.set(studentId, current);
+  });
+
+  return {
+    attendanceTotals,
+    marksTotals
+  };
+}
+
+async function queryFirebaseData(sql, params = []) {
+  const normalizedSql = String(sql || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+  if (normalizedSql.includes('from notifications')) {
+    return listRecords('notifications', {
+      filters: [{ field: 'user_id', value: String(params[0]) }],
+      orderBy: [{ field: 'created_at', direction: 'desc' }],
+      limit: 6
+    });
+  }
+
+  if (normalizedSql.includes('from notes') && normalizedSql.includes('branch = $1 or branch is null')) {
+    const department = params[0];
+    const notes = await listCollection('notes', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+    return notes
+      .filter((item) => item.status === 'approved' && (!item.branch || item.branch === department))
+      .slice(0, 8);
+  }
+
+  if (normalizedSql.includes('from notes') && normalizedSql.includes('uploaded_by = $1 or status = \'approved\'')) {
+    const userId = String(params[0]);
+    const notes = await listCollection('notes', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+    return notes
+      .filter((item) => String(item.uploaded_by || '') === userId || item.status === 'approved')
+      .slice(0, 8);
+  }
+
+  if (normalizedSql.includes('from clubs')) {
+    const clubs = await listCollection('clubs', {
+      orderBy: [{ field: 'name', direction: 'asc' }]
+    });
+    return clubs.filter((item) => item.is_active !== false);
+  }
+
+  if (normalizedSql.includes('from announcements')) {
+    const announcements = await listCollection('announcements', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+    return sortByBooleanThenDate(announcements, 'pinned', 'created_at').slice(0, 25);
+  }
+
+  if (normalizedSql.includes('from attendance') && normalizedSql.includes('order by date desc limit 12')) {
+    return listRecords('attendance', {
+      filters: [{ field: 'student_id', value: String(params[0]) }],
+      orderBy: [{ field: 'date', direction: 'desc' }],
+      limit: 12
+    });
+  }
+
+  if (normalizedSql.includes('from attendance') && normalizedSql.includes('group by subject')) {
+    const rows = await listCollection('attendance', {
+      filters: [{ field: 'student_id', value: String(params[0]) }]
+    });
+    const grouped = new Map();
+    rows.forEach((item) => {
+      const subject = item.subject || 'Subject';
+      if (!grouped.has(subject)) {
+        grouped.set(subject, {
+          subject,
+          total_classes: 0,
+          present_count: 0,
+          percentage: 0
+        });
+      }
+      const group = grouped.get(subject);
+      group.total_classes += 1;
+      if (item.status === 'present') {
+        group.present_count += 1;
+      }
+      group.percentage = group.total_classes
+        ? Number(((group.present_count * 100) / group.total_classes).toFixed(2))
+        : 0;
+    });
+    return sortByString(Array.from(grouped.values()), 'subject', 'asc');
+  }
+
+  if (normalizedSql.includes('from marks') && normalizedSql.includes('order by exam_date desc limit 12')) {
+    return listRecords('marks', {
+      filters: [{ field: 'student_id', value: String(params[0]) }],
+      orderBy: [{ field: 'exam_date', direction: 'desc' }],
+      limit: 12
+    });
+  }
+
+  if (normalizedSql.includes('from marks') && normalizedSql.includes('group by subject, exam_type')) {
+    const rows = await listCollection('marks', {
+      filters: [{ field: 'student_id', value: String(params[0]) }]
+    });
+    const grouped = new Map();
+    rows.forEach((item) => {
+      const key = `${item.subject || 'Subject'}::${item.exam_type || 'Exam'}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          subject: item.subject || 'Subject',
+          exam_type: item.exam_type || 'Exam',
+          marksSum: 0,
+          totalSum: 0,
+          count: 0
+        });
+      }
+      const group = grouped.get(key);
+      group.marksSum += Number(item.marks_obtained || 0);
+      group.totalSum += Number(item.total_marks || 0);
+      group.count += 1;
+    });
+    return Array.from(grouped.values()).map((item) => ({
+      subject: item.subject,
+      exam_type: item.exam_type,
+      avg_marks: item.count ? Number((item.marksSum / item.count).toFixed(2)) : 0,
+      avg_total: item.count ? Number((item.totalSum / item.count).toFixed(2)) : 0
+    }));
+  }
+
+  if (normalizedSql.includes('from timetable_view')) {
+    return listRecords('timetable', {
+      filters: [
+        { field: 'department', value: params[0] },
+        { field: 'year', value: params[1] },
+        { field: 'section', value: params[2] }
+      ],
+      orderBy: [
+        { field: 'day_of_week', direction: 'asc' },
+        { field: 'start_time', direction: 'asc' }
+      ]
+    });
+  }
+
+  if (normalizedSql.includes('from events')) {
+    const events = await listCollection('events', {
+      orderBy: [{ field: 'event_date', direction: 'asc' }]
+    });
+    return events.filter((item) => item.is_active !== false).slice(0, 8);
+  }
+
+  if (normalizedSql.includes('from hostel_menu')) {
+    const today = todayIsoDate();
+    const rows = await listCollection('hostel_menu', {
+      orderBy: [{ field: 'date', direction: 'asc' }]
+    });
+    return rows
+      .filter((item) => String(item.date || '') >= today)
+      .slice(0, 12);
+  }
+
+  if (normalizedSql.includes('from users') && normalizedSql.includes('where role = \'student\' and department = $1')) {
+    const department = params[0];
+    const users = await listCollection('users', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+    const { attendanceTotals, marksTotals } = await getUserMetricsById();
+    return users
+      .filter((item) => item.role === 'student' && item.department === department)
+      .map((item) => {
+        const attendanceStats = attendanceTotals.get(String(item.id)) || { total: 0, present: 0 };
+        const marksStats = marksTotals.get(String(item.id)) || { percentageSum: 0, count: 0 };
+        return {
+          id: item.id,
+          name: item.name || item.full_name || item.username || 'Student',
+          registration_number: item.registration_number || item.id,
+          email: item.email || null,
+          department: item.department || null,
+          year: item.year ?? null,
+          section: item.section || null,
+          attendance_percent: attendanceStats.total
+            ? Number(((attendanceStats.present * 100) / attendanceStats.total).toFixed(2))
+            : 0,
+          avg_marks: marksStats.count
+            ? Number((marksStats.percentageSum / marksStats.count).toFixed(2))
+            : 0
+        };
+      })
+      .slice(0, 30);
+  }
+
+  if (normalizedSql.includes('from assignments')) {
+    const department = params[0];
+    const [assignments, submissions] = await Promise.all([
+      listCollection('assignments', {
+        orderBy: [{ field: 'deadline', direction: 'desc' }]
+      }),
+      listCollection('assignment_submissions')
+    ]);
+
+    return assignments
+      .filter((item) => item.department === department)
+      .slice(0, 10)
+      .map((item) => {
+        const matching = submissions.filter((submission) => String(submission.assignment_id) === String(item.id));
+        const gradedCount = matching.filter((submission) => submission.status === 'graded').length;
+        return {
+          id: item.id,
+          title: item.title,
+          subject: item.subject,
+          description: item.description,
+          deadline: item.deadline,
+          submissions_count: matching.length,
+          pending_count: Math.max(matching.length - gradedCount, 0)
+        };
+      });
+  }
+
+  if (normalizedSql.includes('from question_bank')) {
+    return listRecords('question_bank', {
+      filters: [{ field: 'teacher_id', value: String(params[0]) }],
+      orderBy: [{ field: 'created_at', direction: 'desc' }],
+      limit: 10
+    });
+  }
+
+  if (normalizedSql.includes('from rubrics')) {
+    return listRecords('rubrics', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }],
+      limit: 5
+    });
+  }
+
+  if (normalizedSql.includes('from users') && normalizedSql.includes('order by created_at desc limit 25')) {
+    return listRecords('users', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }],
+      limit: 25
+    }).then((users) => users.map((item) => ({
+      id: item.id,
+      name: item.name || item.full_name || item.username || 'User',
+      registration_number: item.registration_number || item.id,
+      email: item.email || null,
+      role: item.role || 'student',
+      department: item.department || null,
+      year: item.year ?? null,
+      section: item.section || null,
+      is_active: item.is_active !== false
+    })));
+  }
+
+  if (normalizedSql.includes('count(case when role = \'student\' then 1 end) as total_students')) {
+    const users = await listCollection('users');
+    const grouped = new Map();
+    users.forEach((item) => {
+      if (!item.department) {
+        return;
+      }
+      if (!grouped.has(item.department)) {
+        grouped.set(item.department, {
+          code: item.department,
+          name: item.department,
+          total_students: 0,
+          total_teachers: 0
+        });
+      }
+      const group = grouped.get(item.department);
+      if (item.role === 'student') {
+        group.total_students += 1;
+      }
+      if (item.role === 'teacher') {
+        group.total_teachers += 1;
+      }
+    });
+    return sortByString(Array.from(grouped.values()), 'code', 'asc');
+  }
+
+  throw new Error(`Unsupported Firebase parity query: ${normalizedSql.slice(0, 80)}`);
+}
+
 async function safeQuery(sql, params, fallback) {
   try {
-    return await query(sql, params);
+    return await queryFirebaseData(sql, params);
   } catch (error) {
     return typeof fallback === 'function' ? fallback(error) : fallback;
   }
@@ -642,17 +986,31 @@ async function getTeacherNotes(user) {
 }
 
 async function getClubs(userId) {
-  const rows = await safeQuery(
-    `SELECT id, name, category, description, member_count as members, event_count as events, established_year as established
-     FROM clubs
-     WHERE is_active = TRUE
-     ORDER BY name`,
-    [],
-    demoClubs
-  );
+  const [rows, memberships] = await Promise.all([
+    safeQuery(
+      `SELECT id, name, category, description, member_count as members, event_count as events, established_year as established
+       FROM clubs
+       WHERE is_active = TRUE
+       ORDER BY name`,
+      [],
+      demoClubs
+    ),
+    listCollection('club_memberships', {
+      filters: [{ field: 'user_id', value: String(userId) }]
+    }, [])
+  ]);
+  const effectiveRows = rows.length ? rows : demoClubs;
 
-  const memberships = getMembershipSet(userId);
-  return rows.map((club) => toClubItem(club, memberships.has(toNumber(club.id, 0))));
+  const membershipIds = new Set(
+    memberships
+      .filter((item) => item.is_active !== false)
+      .map((item) => String(item.club_id))
+  );
+  const fallbackMemberships = getMembershipSet(userId);
+  return effectiveRows.map((club) => toClubItem(
+    club,
+    membershipIds.has(String(club.id)) || fallbackMemberships.has(toNumber(club.id, 0))
+  ));
 }
 
 async function getAnnouncements() {
@@ -666,8 +1024,9 @@ async function getAnnouncements() {
     [],
     demoAnnouncements
   );
+  const effectiveRows = rows.length ? rows : demoAnnouncements;
 
-  return rows.map((item) => toAnnouncementItem({
+  return effectiveRows.map((item) => toAnnouncementItem({
     ...item,
     created_by: item.created_by || 'Admin Office'
   }));
@@ -675,7 +1034,6 @@ async function getAnnouncements() {
 
 async function createAnnouncement(payload, user) {
   const announcement = toAnnouncementItem({
-    id: `ann-${Date.now()}`,
     title: payload.title,
     content: payload.content,
     priority: payload.priority || 'normal',
@@ -687,17 +1045,59 @@ async function createAnnouncement(payload, user) {
     created_at: new Date().toISOString()
   });
 
-  demoAnnouncements = [announcement, ...demoAnnouncements];
-  return announcement;
+  try {
+    const record = await createRecord('announcements', announcement);
+    return toAnnouncementItem(record);
+  } catch (_) {
+    const fallback = {
+      ...announcement,
+      id: `ann-${Date.now()}`
+    };
+    demoAnnouncements = [fallback, ...demoAnnouncements];
+    return fallback;
+  }
 }
 
-function getSettings() {
-  return Object.entries(demoSettings).map(([key, value]) => toSettingItem(key, value));
+async function getStoredSettings() {
+  try {
+    const record = await getRecord('app_settings', 'mobile_parity');
+    if (record?.settings && typeof record.settings === 'object') {
+      return {
+        ...demoSettings,
+        ...record.settings
+      };
+    }
+
+    await setRecord('app_settings', 'mobile_parity', {
+      settings: demoSettings
+    }, { merge: true });
+  } catch (_) {
+    // Fall through to demo defaults.
+  }
+
+  return { ...demoSettings };
 }
 
-function updateSettings(patch) {
-  Object.assign(demoSettings, normalizeSettingsPatch(patch));
-  return getSettings();
+async function getSettings() {
+  const settings = await getStoredSettings();
+  return Object.entries(settings).map(([key, value]) => toSettingItem(key, value));
+}
+
+async function updateSettings(patch) {
+  const merged = {
+    ...(await getStoredSettings()),
+    ...normalizeSettingsPatch(patch)
+  };
+
+  try {
+    await setRecord('app_settings', 'mobile_parity', {
+      settings: merged
+    }, { merge: true });
+  } catch (_) {
+    Object.assign(demoSettings, merged);
+  }
+
+  return Object.entries(merged).map(([key, value]) => toSettingItem(key, value));
 }
 
 async function getPortalStudentData(user) {
@@ -1108,7 +1508,7 @@ async function getAdminSnapshot() {
   ]);
 
   const announcements = await getAnnouncements();
-  const settings = getSettings();
+  const settings = await getSettings();
   const sharedFiles = await getSharedFileHub({ role: 'admin' });
 
   const totalUsers = users.length;
@@ -1209,12 +1609,30 @@ async function buildSnapshot(user) {
 }
 
 async function joinClub(userId, clubId) {
-  getMembershipSet(userId).add(toNumber(clubId, 0));
+  const membershipId = `${userId}_${clubId}`;
+  try {
+    await setRecord('club_memberships', membershipId, {
+      user_id: String(userId),
+      club_id: String(clubId),
+      is_active: true
+    }, { merge: true });
+  } catch (_) {
+    getMembershipSet(userId).add(toNumber(clubId, 0));
+  }
   return getClubs(userId);
 }
 
 async function leaveClub(userId, clubId) {
-  getMembershipSet(userId).delete(toNumber(clubId, 0));
+  const membershipId = `${userId}_${clubId}`;
+  try {
+    await setRecord('club_memberships', membershipId, {
+      user_id: String(userId),
+      club_id: String(clubId),
+      is_active: false
+    }, { merge: true });
+  } catch (_) {
+    getMembershipSet(userId).delete(toNumber(clubId, 0));
+  }
   return getClubs(userId);
 }
 

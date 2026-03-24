@@ -711,11 +711,60 @@ const API = {
 
 // Socket.IO Helper
 let socket = null;
+let socketClientLoadingPromise = null;
+const pendingSocketListeners = [];
+
+function flushPendingSocketListeners(activeSocket) {
+    if (!activeSocket) return;
+
+    while (pendingSocketListeners.length > 0) {
+        const { event, callback } = pendingSocketListeners.shift();
+        activeSocket.on(event, callback);
+    }
+}
+
+function loadSocketClient() {
+    if (typeof io !== 'undefined') {
+        return Promise.resolve();
+    }
+
+    if (socketClientLoadingPromise) {
+        return socketClientLoadingPromise;
+    }
+
+    socketClientLoadingPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = '/socket.io/socket.io.js';
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Socket.IO client'));
+        document.head.appendChild(script);
+    }).catch((error) => {
+        console.error('Socket client load error:', error);
+        return null;
+    }).finally(() => {
+        if (typeof io === 'undefined') {
+            socketClientLoadingPromise = null;
+        }
+    });
+
+    return socketClientLoadingPromise;
+}
 
 const Socket = {
     connect() {
         const token = Storage.get('accessToken');
         if (!token) return;
+        if (socket && socket.connected) return socket;
+
+        if (typeof io === 'undefined') {
+            loadSocketClient().then(() => {
+                if (typeof io !== 'undefined') {
+                    this.connect();
+                }
+            });
+            return null;
+        }
 
         const socketUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:5000'
@@ -735,6 +784,7 @@ const Socket = {
                     section: user.section
                 });
             }
+            flushPendingSocketListeners(socket);
         });
 
         socket.on('disconnect', () => {
@@ -752,9 +802,13 @@ const Socket = {
     },
 
     on(event, callback) {
-        if (socket) {
-            socket.on(event, callback);
+        const activeSocket = socket || this.connect();
+        if (activeSocket) {
+            activeSocket.on(event, callback);
+            return;
         }
+
+        pendingSocketListeners.push({ event, callback });
     },
 
     emit(event, data) {
@@ -1063,6 +1117,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if user is logged in and redirect if needed
     const user = checkAuth();
+
+    if (user && !PUBLIC_AUTH_PATHS.has(currentPage) && !PUBLIC_HOME_PATHS.has(currentPage) && !hasExpiredSessionByInactivity()) {
+        Socket.connect();
+    }
 
     // Only redirect from landing page, allow access to login page
     if (user && PUBLIC_HOME_PATHS.has(currentPage) && !hasExpiredSessionByInactivity()) {

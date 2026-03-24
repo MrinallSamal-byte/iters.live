@@ -1,17 +1,9 @@
-const db = require('../database/db');
 const cacheService = require('./cache.service');
-
-/**
- * Advanced search service with global search capabilities
- */
+const { listRecords } = require('./firebase-data.service');
 
 class SearchService {
-  /**
-   * Global search across all resources
-   */
   async globalSearch(query, options = {}) {
     const {
-      userId,
       userRole,
       types = ['all'],
       page = 1,
@@ -21,12 +13,9 @@ class SearchService {
 
     const cacheKey = `search:${query}:${JSON.stringify(options)}`;
     const cached = cacheService.getApi(cacheKey);
-    
-    if (cached) {
-      return cached;
-    }
+    if (cached) return cached;
 
-    const searchQuery = `%${query}%`;
+    const q = String(query || '').toLowerCase();
     const results = {
       users: [],
       files: [],
@@ -36,81 +25,93 @@ class SearchService {
     };
 
     try {
-      // Search users (if allowed)
+      const [users, files, events, assignments] = await Promise.all([
+        listRecords('users'),
+        listRecords('files'),
+        listRecords('events'),
+        listRecords('assignments')
+      ]);
+
       if (types.includes('all') || types.includes('users')) {
-        const userResults = await db.query(
-          `SELECT id, name, registration_number, email, department, role,
-                  phone_number AS phone,
-                  profile_picture AS profile_pic,
-                  'user' as type
-           FROM users
-           WHERE (name LIKE ? OR registration_number LIKE ? OR email LIKE ?)
-           AND is_active = TRUE
-           LIMIT 10`,
-          [searchQuery, searchQuery, searchQuery]
-        );
-        results.users = userResults || [];
+        results.users = users
+          .filter((user) => user.is_active !== false)
+          .filter((user) =>
+            String(user.name || '').toLowerCase().includes(q)
+            || String(user.registration_number || '').toLowerCase().includes(q)
+            || String(user.email || '').toLowerCase().includes(q)
+          )
+          .slice(0, 10)
+          .map((user) => ({
+            id: user.id,
+            name: user.name,
+            registration_number: user.registration_number,
+            email: user.email,
+            department: user.department,
+            role: user.role,
+            phone: user.phone_number || null,
+            profile_pic: user.profile_picture || null,
+            type: 'user'
+          }));
       }
 
-      // Search files
       if (types.includes('all') || types.includes('files')) {
-        const fileResults = await db.query(
-          `SELECT f.id, f.original_name as name, f.category, f.subject, 
-                  f.created_at, u.name as uploaded_by_name, 'file' as type
-           FROM files f
-           LEFT JOIN users u ON f.uploaded_by = u.id
-           WHERE (f.original_name LIKE ? OR f.description LIKE ? OR f.subject LIKE ?)
-           AND f.approved = TRUE
-           LIMIT 20`,
-          [searchQuery, searchQuery, searchQuery]
-        );
-        results.files = fileResults || [];
+        results.files = files
+          .filter((file) => file.approved === true)
+          .filter((file) =>
+            String(file.original_name || '').toLowerCase().includes(q)
+            || String(file.description || '').toLowerCase().includes(q)
+            || String(file.subject || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((file) => ({
+            id: file.id,
+            name: file.original_name,
+            category: file.category,
+            subject: file.subject,
+            created_at: file.created_at,
+            uploaded_by_name: file.uploaded_by_name || null,
+            type: 'file'
+          }));
       }
 
-      // Search events
       if (types.includes('all') || types.includes('events')) {
-        const eventResults = await db.query(
-          `SELECT id, title as name, description, event_date, location, 
-                  category, 'event' as type
-           FROM events
-           WHERE (title LIKE ? OR description LIKE ? OR location LIKE ?)
-           AND is_active = TRUE
-           AND event_date >= CURDATE()
-           LIMIT 20`,
-          [searchQuery, searchQuery, searchQuery]
-        );
-        results.events = eventResults || [];
+        results.events = events
+          .filter((event) => event.is_active !== false)
+          .filter((event) =>
+            String(event.title || '').toLowerCase().includes(q)
+            || String(event.description || '').toLowerCase().includes(q)
+            || String(event.location || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((event) => ({
+            id: event.id,
+            name: event.title,
+            description: event.description,
+            event_date: event.event_date,
+            location: event.location,
+            category: event.category,
+            type: 'event'
+          }));
       }
 
-      // Search announcements
-      if (types.includes('all') || types.includes('announcements')) {
-        const announcementResults = await db.query(
-          `SELECT id, title as name, content, category, created_at, 'announcement' as type
-           FROM announcements
-           WHERE (title LIKE ? OR content LIKE ?)
-           AND (expires_at IS NULL OR expires_at > NOW())
-           ORDER BY is_pinned DESC, created_at DESC
-           LIMIT 20`,
-          [searchQuery, searchQuery]
-        );
-        results.announcements = announcementResults || [];
+      if ((types.includes('all') || types.includes('assignments')) && ['student', 'teacher', 'admin'].includes(userRole)) {
+        results.assignments = assignments
+          .filter((assignment) =>
+            String(assignment.title || '').toLowerCase().includes(q)
+            || String(assignment.description || '').toLowerCase().includes(q)
+            || String(assignment.subject || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((assignment) => ({
+            id: assignment.id,
+            name: assignment.title,
+            description: assignment.description,
+            deadline: assignment.deadline,
+            subject: assignment.subject,
+            type: 'assignment'
+          }));
       }
 
-      // Search assignments (if student or teacher)
-      if ((types.includes('all') || types.includes('assignments')) && 
-          ['student', 'teacher'].includes(userRole)) {
-        const assignmentResults = await db.query(
-          `SELECT id, title as name, description, deadline, subject, 'assignment' as type
-           FROM assignments
-           WHERE (title LIKE ? OR description LIKE ? OR subject LIKE ?)
-           AND deadline >= CURDATE()
-           LIMIT 20`,
-          [searchQuery, searchQuery, searchQuery]
-        );
-        results.assignments = assignmentResults || [];
-      }
-
-      // Combine and score results
       const allResults = [
         ...results.users,
         ...results.files,
@@ -119,46 +120,30 @@ class SearchService {
         ...results.assignments
       ];
 
-      // Calculate relevance score
-      const scoredResults = allResults.map(item => {
+      const scoredResults = allResults.map((item) => {
+        const itemName = String(item.name || '').toLowerCase();
         let score = 0;
-        const lowerQuery = query.toLowerCase();
-        const itemName = (item.name || '').toLowerCase();
-
-        // Exact match gets highest score
-        if (itemName === lowerQuery) score += 100;
-        // Starts with query gets high score
-        else if (itemName.startsWith(lowerQuery)) score += 50;
-        // Contains query gets medium score
-        else if (itemName.includes(lowerQuery)) score += 25;
-
-        // Boost score based on type priority
+        if (itemName === q) score += 100;
+        else if (itemName.startsWith(q)) score += 50;
+        else if (itemName.includes(q)) score += 25;
         if (item.type === 'file') score += 10;
         if (item.type === 'event') score += 8;
         if (item.type === 'announcement') score += 5;
-
         return { ...item, score };
       });
 
-      // Sort results
       let sortedResults = scoredResults;
       if (sortBy === 'relevance') {
-        sortedResults = scoredResults.sort((a, b) => b.score - a.score);
+        sortedResults = [...scoredResults].sort((a, b) => b.score - a.score);
       } else if (sortBy === 'date') {
-        sortedResults = scoredResults.sort((a, b) => 
-          new Date(b.created_at || 0) - new Date(a.created_at || 0)
-        );
+        sortedResults = [...scoredResults].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
       }
 
-      // Paginate
       const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedResults = sortedResults.slice(startIndex, endIndex);
-
       const response = {
         success: true,
         query,
-        results: paginatedResults,
+        results: sortedResults.slice(startIndex, startIndex + pageSize),
         summary: {
           total: sortedResults.length,
           users: results.users.length,
@@ -175,110 +160,63 @@ class SearchService {
         }
       };
 
-      // Cache for 2 minutes
       cacheService.setApi(cacheKey, response, 120);
-
       return response;
     } catch (error) {
       console.error('Global search error:', error);
-      return {
-        success: false,
-        error: error.message,
-        results: []
-      };
+      return { success: false, error: error.message, results: [] };
     }
   }
 
-  /**
-   * Search users with advanced filters
-   */
   async searchUsers(query, filters = {}) {
-    const {
-      role,
-      department,
-      year,
-      section,
-      page = 1,
-      pageSize = 20
-    } = filters;
-
-    let sql = `
-      SELECT id, name, registration_number, email, phone_number, 
-             department, year, section, role, profile_picture
-      FROM users
-      WHERE is_active = TRUE
-    `;
-    const params = [];
-
-    if (query) {
-      sql += ` AND (name LIKE ? OR registration_number LIKE ? OR email LIKE ?)`;
-      const searchQuery = `%${query}%`;
-      params.push(searchQuery, searchQuery, searchQuery);
-    }
-
-    if (role) {
-      sql += ` AND role = ?`;
-      params.push(role);
-    }
-
-    if (department) {
-      sql += ` AND department = ?`;
-      params.push(department);
-    }
-
-    if (year) {
-      sql += ` AND year = ?`;
-      params.push(year);
-    }
-
-    if (section) {
-      sql += ` AND section = ?`;
-      params.push(section);
-    }
-
-    // Get total count
-    const countSql = sql.replace(
-      'SELECT id, name, registration_number, email, phone_number, department, year, section, role, profile_picture',
-      'SELECT COUNT(*) as total'
-    );
-  const countRows = await db.query(countSql, params);
-  const total = countRows[0]?.total || 0;
-
-    // Add pagination
-    sql += ` ORDER BY name LIMIT ? OFFSET ?`;
-    params.push(pageSize, (page - 1) * pageSize);
-
+    const { role, department, year, section, page = 1, pageSize = 20 } = filters;
     try {
-      const users = await db.query(sql, params);
-      // Alias for client consumption
-      const usersAliased = users.map(u => ({
-        ...u,
-        phone: u.phone_number !== undefined ? u.phone_number : u.phone,
-        profile_pic: u.profile_picture !== undefined ? u.profile_picture : u.profile_pic
+      let users = await listRecords('users');
+      const q = String(query || '').toLowerCase();
+
+      users = users.filter((user) => user.is_active !== false);
+      if (q) {
+        users = users.filter((user) =>
+          String(user.name || '').toLowerCase().includes(q)
+          || String(user.registration_number || '').toLowerCase().includes(q)
+          || String(user.email || '').toLowerCase().includes(q)
+        );
+      }
+      if (role) users = users.filter((user) => user.role === role);
+      if (department) users = users.filter((user) => user.department === department);
+      if (year) users = users.filter((user) => String(user.year) === String(year));
+      if (section) users = users.filter((user) => user.section === section);
+
+      const offset = (page - 1) * pageSize;
+      const sliced = users.slice(offset, offset + pageSize).map((user) => ({
+        id: user.id,
+        name: user.name,
+        registration_number: user.registration_number,
+        email: user.email,
+        phone: user.phone_number || null,
+        department: user.department,
+        year: user.year,
+        section: user.section,
+        role: user.role,
+        profile_pic: user.profile_picture || null
       }));
 
       return {
         success: true,
-        users: usersAliased.map(({ phone_number, profile_picture, ...rest }) => rest),
+        users: sliced,
         pagination: {
           page,
           pageSize,
-          total,
-          totalPages: Math.ceil(total / pageSize)
+          total: users.length,
+          totalPages: Math.ceil(users.length / pageSize)
         }
       };
     } catch (error) {
       console.error('Search users error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Search files with advanced filters
-   */
   async searchFiles(query, filters = {}) {
     const {
       category,
@@ -292,161 +230,106 @@ class SearchService {
       sortOrder = 'DESC'
     } = filters;
 
-    let sql = `
-      SELECT f.*, u.name as uploaded_by_name
-      FROM files f
-      LEFT JOIN users u ON f.uploaded_by = u.id
-      WHERE f.approved = TRUE
-    `;
-    const params = [];
-
-    if (query) {
-      sql += ` AND (f.original_name LIKE ? OR f.description LIKE ?)`;
-      const searchQuery = `%${query}%`;
-      params.push(searchQuery, searchQuery);
-    }
-
-    if (category) {
-      sql += ` AND f.category = ?`;
-      params.push(category);
-    }
-
-    if (subject) {
-      sql += ` AND f.subject = ?`;
-      params.push(subject);
-    }
-
-    if (uploadedBy) {
-      sql += ` AND f.uploaded_by = ?`;
-      params.push(uploadedBy);
-    }
-
-    if (startDate) {
-      sql += ` AND f.created_at >= ?`;
-      params.push(startDate);
-    }
-
-    if (endDate) {
-      sql += ` AND f.created_at <= ?`;
-      params.push(endDate);
-    }
-
-    // Get total count
-    const countSql = sql.replace(
-      'SELECT f.*, u.name as uploaded_by_name',
-      'SELECT COUNT(*) as total'
-    );
-  const countRows = await db.query(countSql, params);
-  const total = countRows[0]?.total || 0;
-
-    // Add sorting and pagination
-    const allowedSortFields = ['created_at', 'file_size', 'download_count', 'original_name'];
-    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
-    const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-    sql += ` ORDER BY f.${sortField} ${order} LIMIT ? OFFSET ?`;
-    params.push(pageSize, (page - 1) * pageSize);
-
     try {
-      const files = await db.query(sql, params);
+      let files = await listRecords('files');
+      const q = String(query || '').toLowerCase();
 
+      files = files.filter((file) => file.approved === true);
+      if (q) {
+        files = files.filter((file) =>
+          String(file.original_name || '').toLowerCase().includes(q)
+          || String(file.description || '').toLowerCase().includes(q)
+        );
+      }
+      if (category) files = files.filter((file) => file.category === category);
+      if (subject) files = files.filter((file) => file.subject === subject);
+      if (uploadedBy) files = files.filter((file) => file.uploaded_by === uploadedBy);
+      if (startDate) files = files.filter((file) => String(file.created_at || '') >= startDate);
+      if (endDate) files = files.filter((file) => String(file.created_at || '') <= endDate);
+
+      const allowedSortFields = ['created_at', 'file_size', 'download_count', 'original_name'];
+      const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
+      const direction = sortOrder.toUpperCase() === 'ASC' ? 1 : -1;
+
+      files = [...files].sort((left, right) => {
+        const leftValue = left[sortField] || '';
+        const rightValue = right[sortField] || '';
+        if (leftValue === rightValue) return 0;
+        return leftValue > rightValue ? direction : -direction;
+      });
+
+      const offset = (page - 1) * pageSize;
       return {
         success: true,
-        files,
+        files: files.slice(offset, offset + pageSize),
         pagination: {
           page,
           pageSize,
-          total,
-          totalPages: Math.ceil(total / pageSize)
+          total: files.length,
+          totalPages: Math.ceil(files.length / pageSize)
         }
       };
     } catch (error) {
       console.error('Search files error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get search suggestions (autocomplete)
-   */
   async getSuggestions(query, type = 'all') {
     const cacheKey = `suggestions:${type}:${query}`;
     const cached = cacheService.getApi(cacheKey);
-    
-    if (cached) {
-      return cached;
-    }
+    if (cached) return cached;
 
-    const searchQuery = `${query}%`;
+    const q = String(query || '').toLowerCase();
     const suggestions = [];
 
     try {
       if (type === 'all' || type === 'users') {
-        const [users] = await db.query(
-          `SELECT name, 'user' as type FROM users 
-           WHERE name LIKE ? AND is_active = TRUE
-           LIMIT 5`,
-          [searchQuery]
-        );
-        suggestions.push(...users);
+        const users = await listRecords('users');
+        suggestions.push(...users
+          .filter((user) => user.is_active !== false && String(user.name || '').toLowerCase().startsWith(q))
+          .slice(0, 5)
+          .map((user) => ({ name: user.name, type: 'user' })));
       }
 
       if (type === 'all' || type === 'subjects') {
-        const [subjects] = await db.query(
-          `SELECT DISTINCT subject as name, 'subject' as type 
-           FROM files 
-           WHERE subject LIKE ? AND subject IS NOT NULL
-           LIMIT 5`,
-          [searchQuery]
-        );
+        const files = await listRecords('files');
+        const subjects = Array.from(new Set(files
+          .map((file) => file.subject)
+          .filter((subject) => subject && String(subject).toLowerCase().startsWith(q))))
+          .slice(0, 5)
+          .map((name) => ({ name, type: 'subject' }));
         suggestions.push(...subjects);
       }
 
       if (type === 'all' || type === 'files') {
-        const [files] = await db.query(
-          `SELECT original_name as name, 'file' as type 
-           FROM files 
-           WHERE original_name LIKE ? AND approved = TRUE
-           LIMIT 5`,
-          [searchQuery]
-        );
-        suggestions.push(...files);
+        const files = await listRecords('files');
+        suggestions.push(...files
+          .filter((file) => file.approved === true && String(file.original_name || '').toLowerCase().startsWith(q))
+          .slice(0, 5)
+          .map((file) => ({ name: file.original_name, type: 'file' })));
       }
 
       const response = {
         success: true,
         suggestions: suggestions.slice(0, 10)
       };
-
-      // Cache for 5 minutes
       cacheService.setApi(cacheKey, response, 300);
-
       return response;
     } catch (error) {
       console.error('Get suggestions error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get trending searches
-   */
   async getTrendingSearches(limit = 10) {
-    // This would require a search_history table
-    // Placeholder implementation
     return {
       success: true,
       trending: [
         { query: 'Data Structures', count: 45 },
         { query: 'Python Notes', count: 38 },
         { query: 'Assignment 3', count: 32 }
-      ]
+      ].slice(0, limit)
     };
   }
 }

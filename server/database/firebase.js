@@ -3,8 +3,9 @@ require('dotenv').config();
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
-let db, auth, storage;
+let db, auth, storage, realtimeDb;
 let isFirebaseAdminReady = false;
+let isRealtimeDbReady = false;
 
 function normalizePrivateKey(value) {
     if (!value || typeof value !== 'string') return value;
@@ -55,16 +56,30 @@ try {
     }
 
     if (serviceAccount && serviceAccount.private_key !== "-----BEGIN PRIVATE KEY-----\nREPLACE_WITH_YOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n") {
-        admin.initializeApp({
+        const appConfig = {
             credential: admin.credential.cert(serviceAccount),
             storageBucket: "iterslive.firebasestorage.app"
-        });
+        };
+
+        if (process.env.FIREBASE_DATABASE_URL) {
+            appConfig.databaseURL = process.env.FIREBASE_DATABASE_URL;
+        }
+
+        admin.initializeApp(appConfig);
         console.log('✓ Firebase Admin SDK initialized successfully');
 
         db = admin.firestore();
         auth = admin.auth();
         storage = admin.storage();
         isFirebaseAdminReady = true;
+
+        if (process.env.FIREBASE_DATABASE_URL) {
+            realtimeDb = admin.database();
+            isRealtimeDbReady = true;
+            console.log('✓ Firebase Realtime Database initialized successfully');
+        } else {
+            console.warn('⚠️ FIREBASE_DATABASE_URL not set. Realtime Database mirroring is disabled.');
+        }
     } else {
         console.warn('⚠️ valid serviceAccountKey.json not found. Firebase Admin SDK not initialized.');
         console.warn('⚠️ Configure Firebase using server/serviceAccountKey.json or FIREBASE_* environment variables.');
@@ -74,6 +89,7 @@ try {
         db = { collection: throwErr, doc: throwErr, batch: throwErr };
         auth = { verifyIdToken: throwErr, createCustomToken: throwErr, createUser: throwErr };
         storage = { bucket: throwErr };
+        realtimeDb = { ref: throwErr };
     }
 } catch (error) {
     console.error('✗ Failed to initialize Firebase Admin SDK:', error);
@@ -81,6 +97,7 @@ try {
     db = { collection: throwErr, doc: throwErr, batch: throwErr };
     auth = { verifyIdToken: throwErr, createCustomToken: throwErr, createUser: throwErr };
     storage = { bucket: throwErr };
+    realtimeDb = { ref: throwErr };
 }
 
 module.exports = {
@@ -88,5 +105,7 @@ module.exports = {
     db,
     auth,
     storage,
-    isFirebaseAdminReady
+    realtimeDb,
+    isFirebaseAdminReady,
+    isRealtimeDbReady
 };

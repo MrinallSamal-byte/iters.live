@@ -46,11 +46,12 @@ router.post('/admin/announcements', authMiddleware, roleMiddleware('admin'), asy
 });
 
 router.get('/admin/settings', authMiddleware, roleMiddleware('admin'), async (req, res) => {
-  res.json({ success: true, data: parityService.getSettings() });
+  const data = await parityService.getSettings();
+  res.json({ success: true, data });
 });
 
 router.put('/admin/settings', authMiddleware, roleMiddleware('admin'), async (req, res) => {
-  const data = parityService.updateSettings(req.body);
+  const data = await parityService.updateSettings(req.body);
   res.json({ success: true, data });
 });
 

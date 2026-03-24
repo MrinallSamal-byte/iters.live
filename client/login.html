@@ -159,10 +159,12 @@
 
                     if (response.success) {
                         // Store user data
-                        APP.Storage.set('accessToken', idToken);
+                        const appAccessToken = response.data.appAccessToken || idToken;
+                        APP.Storage.set('accessToken', appAccessToken);
+                        APP.Storage.set('firebaseIdToken', idToken);
                         try {
-                            localStorage.setItem('token', idToken);
-                            sessionStorage.setItem('token', idToken);
+                            localStorage.setItem('token', appAccessToken);
+                            sessionStorage.setItem('token', appAccessToken);
                         } catch (storageError) {
                             console.warn('Failed to persist legacy token key:', storageError);
                         }
@@ -308,30 +310,33 @@
                                 console.log('Signing in to Firebase with custom token...');
                                 const userCredential = await window.signInWithCustomToken(window.firebaseAuth, response.data.accessToken);
                                 const idToken = await userCredential.user.getIdToken();
+                                const appAccessToken = response.data.appAccessToken || response.data.accessToken || idToken;
 
-                                // Use the ID token for subsequent requests
-                                APP.Storage.set('accessToken', idToken);
+                                APP.Storage.set('accessToken', appAccessToken);
+                                APP.Storage.set('firebaseIdToken', idToken);
                                 try {
-                                    localStorage.setItem('token', idToken);
-                                    sessionStorage.setItem('token', idToken);
+                                    localStorage.setItem('token', appAccessToken);
+                                    sessionStorage.setItem('token', appAccessToken);
                                 } catch (storageError) {
                                     console.warn('Failed to persist legacy token key:', storageError);
                                 }
                             } catch (firebaseError) {
                                 console.error('Firebase Custom Token Sign-In Failed:', firebaseError);
-                                APP.Storage.set('accessToken', response.data.accessToken);
+                                const fallbackAccessToken = response.data.appAccessToken || response.data.accessToken;
+                                APP.Storage.set('accessToken', fallbackAccessToken);
                                 try {
-                                    localStorage.setItem('token', response.data.accessToken);
-                                    sessionStorage.setItem('token', response.data.accessToken);
+                                    localStorage.setItem('token', fallbackAccessToken);
+                                    sessionStorage.setItem('token', fallbackAccessToken);
                                 } catch (storageError) {
                                     console.warn('Failed to persist legacy token key:', storageError);
                                 }
                             }
                         } else {
-                            APP.Storage.set('accessToken', response.data.accessToken);
+                            const fallbackAccessToken = response.data.appAccessToken || response.data.accessToken;
+                            APP.Storage.set('accessToken', fallbackAccessToken);
                             try {
-                                localStorage.setItem('token', response.data.accessToken);
-                                sessionStorage.setItem('token', response.data.accessToken);
+                                localStorage.setItem('token', fallbackAccessToken);
+                                sessionStorage.setItem('token', fallbackAccessToken);
                             } catch (storageError) {
                                 console.warn('Failed to persist legacy token key:', storageError);
                             }

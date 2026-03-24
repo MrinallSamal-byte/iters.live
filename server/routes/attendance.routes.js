@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const { emitToClass } = require('../socket/socket');
 const { varyStudentSnapshot } = require('../services/demoData.service');
@@ -9,30 +8,93 @@ const {
   getPortalSnapshotForUser,
   buildAttendanceRouteData
 } = require('../services/soa-data.service');
+const {
+  findOne,
+  getRecord,
+  createRecord,
+  updateRecord,
+  listRecords
+} = require('../services/firebase-data.service');
+
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function buildAttendanceSummary(records = []) {
+  const grouped = new Map();
+
+  for (const record of records) {
+    const subject = record.subject || 'General';
+    if (!grouped.has(subject)) {
+      grouped.set(subject, {
+        subject,
+        total_classes: 0,
+        present_count: 0,
+        percentage: 0
+      });
+    }
+
+    const item = grouped.get(subject);
+    item.total_classes += 1;
+    if (record.status === 'present' || record.status === 'late') {
+      item.present_count += 1;
+    }
+  }
+
+  return Array.from(grouped.values()).map((item) => ({
+    ...item,
+    percentage: item.total_classes
+      ? Number(((item.present_count * 100) / item.total_classes).toFixed(2))
+      : 0
+  }));
+}
+
+function sortAttendanceRecords(records = []) {
+  return [...records].sort((left, right) => String(right.date || '').localeCompare(String(left.date || '')));
+}
 
 // Mark attendance
 router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
     const { student_id, subject, date, status, remarks } = req.body;
-    // Upsert emulation for Postgres: try update, if no row, insert
-    const updated = await query(
-      'UPDATE attendance SET status = $1, remarks = $2, marked_by = $3 WHERE student_id = $4 AND subject = $5 AND date = $6 RETURNING id',
-      [status, remarks || null, req.user.id, student_id, subject, date]
-    );
-    if (updated.length === 0) {
-      await query(
-        'INSERT INTO attendance (student_id, subject, date, status, marked_by, remarks) VALUES ($1, $2, $3, $4, $5, $6)',
-        [student_id, subject, date, status, req.user.id, remarks || null]
-      );
+    const student = await getRecord('users', student_id);
+
+    const payload = {
+      student_id,
+      subject,
+      date,
+      status,
+      remarks: remarks || null,
+      marked_by: req.user.id,
+      department: student?.department || null,
+      year: student?.year ?? null,
+      section: student?.section || null
+    };
+
+    const existing = await findOne('attendance', {
+      filters: [
+        { field: 'student_id', value: student_id },
+        { field: 'subject', value: subject },
+        { field: 'date', value: date }
+      ]
+    });
+
+    if (existing) {
+      await updateRecord('attendance', existing.id, payload);
+    } else {
+      await createRecord('attendance', payload);
     }
 
-    // Invalidate cache for this student
     cacheService.invalidateAttendance(student_id);
 
-    const students = await query('SELECT department, year, section FROM users WHERE id = $1', [student_id]);
-    if (students.length > 0) {
-      const s = students[0];
-      emitToClass(s.department, s.year, s.section, 'attendance:update', { student_id, subject, date, status });
+    if (student?.department && student?.year && student?.section) {
+      emitToClass(student.department, student.year, student.section, 'attendance:update', {
+        student_id,
+        subject,
+        date,
+        status
+      });
     }
 
     res.json({ success: true, message: 'Attendance marked successfully' });
@@ -45,27 +107,21 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
     const studentId = req.params.id;
-    
-    // Check cache first
-    const cached = cacheService.getAttendance(studentId);
+    const cached = await cacheService.getAttendance(studentId);
     if (cached && !req.variationSeed) {
       return res.json({ success: true, data: cached });
     }
-    
-    const attendance = await query('SELECT * FROM attendance WHERE student_id = $1 ORDER BY date DESC', [studentId]);
+
+    const attendance = sortAttendanceRecords(await listRecords('attendance', {
+      filters: [{ field: 'student_id', value: studentId }]
+    }));
+
     let data;
-
     if (attendance.length > 0) {
-      const summary = await query(`SELECT subject, 
-         COUNT(*) as total_classes,
-         SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-         ROUND(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as percentage
-         FROM attendance WHERE student_id = $1 GROUP BY subject`, [studentId]);
-
       data = {
         records: attendance,
-        summary,
-        source: 'database'
+        summary: buildAttendanceSummary(attendance),
+        source: 'firebase'
       };
     } else {
       const snapshot = await getPortalSnapshotForUser({ userId: studentId });
@@ -74,9 +130,8 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
         ? fallbackData
         : { records: [], summary: [], source: 'none' };
     }
-    
-    // Cache the result (5 minutes TTL)
-    cacheService.setAttendance(studentId, data, null, 300);
+
+    await cacheService.setAttendance(studentId, data, null, 300);
 
     if (req.variationSeed) {
       const varied = varyStudentSnapshot({ summary: data.summary || [] }, req.variationSeed);
@@ -89,67 +144,65 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
         }
       });
     }
+
     res.json({ success: true, data });
   } catch (error) {
     next(error);
   }
 });
 
-/**
- * Get attendance summary for charts and visualizations
- */
+// Get attendance summary for charts and visualizations
 router.get('/summary', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const allRecords = sortAttendanceRecords(await listRecords('attendance', {
+      filters: [{ field: 'student_id', value: userId }]
+    }));
 
-    // Get heatmap data (last 12 weeks)
     const twelveWeeksAgo = new Date();
     twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84);
 
-    const heatmapData = await query(`
-      SELECT 
-        date,
-        EXTRACT(DOW FROM date) as dayOfWeek,
-        status
-      FROM attendance
-      WHERE student_id = $1 AND date >= $2
-      ORDER BY date ASC
-    `, [userId, twelveWeeksAgo.toISOString().split('T')[0]]);
+    const heatmapData = allRecords
+      .filter((record) => {
+        const timestamp = Date.parse(record.date || '');
+        return !Number.isNaN(timestamp) && timestamp >= twelveWeeksAgo.getTime();
+      })
+      .map((record) => {
+        const date = new Date(record.date);
+        return {
+          date: record.date,
+          dayOfWeek: date.getDay(),
+          status: record.status
+        };
+      });
 
-    // Get subject-wise attendance
-    const subjectWise = await query(`
-      SELECT 
-        subject,
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
-        SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
-        ROUND(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as percentage
-      FROM attendance
-      WHERE student_id = $1
-      GROUP BY subject
-      ORDER BY percentage ASC
-    `, [userId]);
+    const subjectWise = buildAttendanceSummary(allRecords)
+      .map((item) => ({
+        subject: item.subject,
+        total: item.total_classes,
+        present: item.present_count,
+        absent: item.total_classes - item.present_count,
+        percentage: item.percentage
+      }))
+      .sort((left, right) => left.percentage - right.percentage);
 
-    // Get overall stats
-    const overallStats = await query(`
-      SELECT 
-        COUNT(*) as totalClasses,
-        SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
-        SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
-        ROUND(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as percentage
-      FROM attendance
-      WHERE student_id = $1
-    `, [userId]);
+    const overall = {
+      totalClasses: allRecords.length,
+      present: allRecords.filter((record) => record.status === 'present' || record.status === 'late').length,
+      absent: allRecords.filter((record) => record.status === 'absent').length
+    };
+    overall.percentage = overall.totalClasses
+      ? Number(((overall.present * 100) / overall.totalClasses).toFixed(2))
+      : 0;
 
     res.json({
       success: true,
       data: {
         heatmapData,
         subjectWise,
-        overall: overallStats[0] || {}
+        overall
       }
     });
-
   } catch (error) {
     next(error);
   }

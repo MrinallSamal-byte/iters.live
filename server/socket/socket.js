@@ -1,4 +1,6 @@
-const jwt = require('jsonwebtoken');
+const { auth } = require('../database/firebase');
+const { getLocalDemoUserFromToken } = require('../services/demo-auth.service');
+const { verifyAppSessionToken } = require('../utils/app-session');
 const ChatService = require('../services/chat.service');
 
 let io = null;
@@ -11,7 +13,7 @@ const initializeSocket = (socketIo) => {
   io = socketIo;
   chatService = new ChatService(io);
 
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
     
     if (!token) {
@@ -19,12 +21,34 @@ const initializeSocket = (socketIo) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.userId = decoded.userId;
-      socket.userRole = decoded.role;
-      next();
+      const decodedSession = verifyAppSessionToken(token);
+      if (decodedSession?.user) {
+        socket.userId = decodedSession.user.id || decodedSession.user.uid || decodedSession.user.registration_number;
+        socket.userRole = decodedSession.user.role;
+        return next();
+      }
+    } catch (_) {
+      // Fall through to demo/Firebase token handling.
+    }
+
+    try {
+      const localDemoUser = getLocalDemoUserFromToken(token);
+      if (localDemoUser) {
+        socket.userId = localDemoUser.id || localDemoUser.registration_number;
+        socket.userRole = localDemoUser.role;
+        return next();
+      }
+    } catch (_) {
+      // Continue to Firebase token verification.
+    }
+
+    try {
+      const decoded = await auth.verifyIdToken(token);
+      socket.userId = decoded.uid;
+      socket.userRole = decoded.role || decoded.claims?.role || 'student';
+      return next();
     } catch (error) {
-      next(new Error('Invalid token'));
+      return next(new Error('Invalid token'));
     }
   });
 

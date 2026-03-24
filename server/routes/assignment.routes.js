@@ -1,17 +1,95 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const {
+  createRecord,
+  findOne,
+  listRecords,
+  updateRecord
+} = require('../services/firebase-data.service');
+const { emitToClass, emitToUser } = require('../socket/socket');
+const notificationService = require('../services/notification.service');
+
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeSubmissionAnswers(value) {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (_) {
+      return null;
+    }
+  }
+  return value;
+}
+
+function sortAssignments(items = []) {
+  return [...items].sort((left, right) => String(left.deadline || '').localeCompare(String(right.deadline || '')));
+}
+
+async function getStudentAssignments(req) {
+  const assignments = await listRecords('assignments', {
+    filters: [
+      { field: 'department', value: req.user.department },
+      { field: 'year', value: req.user.year }
+    ]
+  });
+
+  const submissions = await listRecords('assignment_submissions', {
+    filters: [{ field: 'student_id', value: req.user.id }]
+  });
+
+  const statusByAssignmentId = new Map(submissions.map((item) => [item.assignment_id, item.status || 'submitted']));
+
+  return sortAssignments(assignments.filter((assignment) => assignment.is_active !== false)).map((assignment) => ({
+    ...assignment,
+    submission_status: statusByAssignmentId.get(assignment.id) || null
+  }));
+}
 
 // Create assignment
 router.post('/', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
-    const { title, description, subject, department, year, total_marks, deadline, attachment_id } = req.body;
-    
-    const result = await query('INSERT INTO assignments (title, description, subject, department, year, total_marks, deadline, created_by, attachment_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id', [title, description, subject, department, year, total_marks, deadline, req.user.id, attachment_id]
-    );
+    const {
+      title,
+      description,
+      subject,
+      department,
+      year,
+      total_marks,
+      deadline,
+      attachment_id
+    } = req.body;
 
-    res.status(201).json({ success: true, message: 'Assignment created successfully', data: { id: result[0].id } });
+    const assignment = await createRecord('assignments', {
+      title,
+      description,
+      subject,
+      department,
+      year,
+      total_marks: toNumber(total_marks, 0),
+      deadline,
+      created_by: req.user.id,
+      attachment_id: attachment_id || null,
+      is_active: true
+    });
+
+    if (department && year) {
+      emitToClass(department, year, 'A', 'assignments:update', { id: assignment.id });
+      emitToClass(department, year, 'B', 'assignments:update', { id: assignment.id });
+      emitToClass(department, year, 'C', 'assignments:update', { id: assignment.id });
+      emitToClass(department, year, 'D', 'assignments:update', { id: assignment.id });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Assignment created successfully',
+      data: { id: assignment.id }
+    });
   } catch (error) {
     next(error);
   }
@@ -20,12 +98,16 @@ router.post('/', authMiddleware, roleMiddleware('teacher', 'admin'), async (req,
 // Get assignments for student
 router.get('/student', authMiddleware, roleMiddleware('student'), async (req, res, next) => {
   try {
-    const assignments = await query(`SELECT a.*, 
-       (SELECT status FROM assignment_submissions WHERE assignment_id = a.id AND student_id = $1) as submission_status
-       FROM assignments a 
-       WHERE a.department = $2 AND a.year = $3 AND a.is_active = TRUE
-       ORDER BY a.deadline ASC`, [req.user.id, req.user.department, req.user.year]
-    );
+    const assignments = await getStudentAssignments(req);
+    res.json({ success: true, data: assignments });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/my-assignments', authMiddleware, roleMiddleware('student'), async (req, res, next) => {
+  try {
+    const assignments = await getStudentAssignments(req);
     res.json({ success: true, data: assignments });
   } catch (error) {
     next(error);
@@ -35,10 +117,31 @@ router.get('/student', authMiddleware, roleMiddleware('student'), async (req, re
 // Submit assignment
 router.post('/:id/submit', authMiddleware, roleMiddleware('student'), async (req, res, next) => {
   try {
-    const { submission_text, file_id } = req.body;
-    
-    await query('INSERT INTO assignment_submissions (assignment_id, student_id, submission_text, file_id) VALUES ($1, $2, $3, $4) ON DUPLICATE KEY UPDATE submission_text = $5, file_id = $6, submitted_at = NOW() RETURNING id', [req.params.id, req.user.id, submission_text, file_id, submission_text, file_id]
-    );
+    const { submission_text, file_id, submission_answers } = req.body;
+    const assignmentId = req.params.id;
+
+    const existing = await findOne('assignment_submissions', {
+      filters: [
+        { field: 'assignment_id', value: assignmentId },
+        { field: 'student_id', value: req.user.id }
+      ]
+    });
+
+    const payload = {
+      assignment_id: assignmentId,
+      student_id: req.user.id,
+      submission_text: submission_text || null,
+      file_id: file_id || null,
+      submission_answers: normalizeSubmissionAnswers(submission_answers),
+      status: 'submitted',
+      submitted_at: new Date().toISOString()
+    };
+
+    if (existing) {
+      await updateRecord('assignment_submissions', existing.id, payload);
+    } else {
+      await createRecord('assignment_submissions', payload);
+    }
 
     res.json({ success: true, message: 'Assignment submitted successfully' });
   } catch (error) {
@@ -50,9 +153,40 @@ router.post('/:id/submit', authMiddleware, roleMiddleware('student'), async (req
 router.post('/:id/grade', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
     const { student_id, marks_obtained, feedback } = req.body;
-    
-    await query('UPDATE assignment_submissions SET marks_obtained = $1, feedback = $2, graded_by = $3, graded_at = NOW(), status = "graded" WHERE assignment_id = $4 AND student_id = $5', [marks_obtained, feedback, req.user.id, req.params.id, student_id]
-    );
+    const assignmentId = req.params.id;
+
+    const submission = await findOne('assignment_submissions', {
+      filters: [
+        { field: 'assignment_id', value: assignmentId },
+        { field: 'student_id', value: student_id }
+      ]
+    });
+
+    if (!submission) {
+      return res.status(404).json({ success: false, message: 'Submission not found' });
+    }
+
+    await updateRecord('assignment_submissions', submission.id, {
+      marks_obtained: toNumber(marks_obtained, 0),
+      feedback: feedback || null,
+      graded_by: req.user.id,
+      graded_at: new Date().toISOString(),
+      status: 'graded'
+    });
+
+    emitToUser(student_id, 'assignments:update', { assignmentId });
+
+    await notificationService.create({
+      userId: student_id,
+      title: 'Assignment Graded',
+      message: 'A graded assignment is now available in your dashboard.',
+      type: 'assignment',
+      link: '/dashboard/student.html',
+      metadata: {
+        assignmentId,
+        marks_obtained: toNumber(marks_obtained, 0)
+      }
+    });
 
     res.json({ success: true, message: 'Assignment graded successfully' });
   } catch (error) {
@@ -60,98 +194,106 @@ router.post('/:id/grade', authMiddleware, roleMiddleware('teacher', 'admin'), as
   }
 });
 
-/**
- * Get assignment statistics for charts
- */
+// Get assignment statistics for charts
 router.get('/statistics', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const assignments = await listRecords('assignments', {
+      filters: [
+        { field: 'department', value: req.user.department },
+        { field: 'year', value: req.user.year }
+      ]
+    });
+    const submissions = await listRecords('assignment_submissions', {
+      filters: [{ field: 'student_id', value: userId }]
+    });
 
-    // Get submission timeline (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const submissionTimelineMap = new Map();
+    for (const submission of submissions) {
+      const timestamp = Date.parse(submission.submitted_at || '');
+      if (Number.isNaN(timestamp) || timestamp < thirtyDaysAgo) continue;
+      const date = String(submission.submitted_at).slice(0, 10);
+      submissionTimelineMap.set(date, (submissionTimelineMap.get(date) || 0) + 1);
+    }
 
-    const submissionTimeline = await query(`
-      SELECT 
-        DATE(submitted_at) as date,
-        COUNT(*) as count
-      FROM assignment_submissions
-      WHERE student_id = $1 AND submitted_at >= $2
-      GROUP BY DATE(submitted_at)
-      ORDER BY date ASC
-    `, [userId, thirtyDaysAgo.toISOString().split('T')[0]]);
+    const submissionTimeline = Array.from(submissionTimelineMap.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([date, count]) => ({ date, count }));
 
-    // Get overall statistics
-    const overallStats = await query(`
-      SELECT 
-        COUNT(DISTINCT a.id) as totalAssignments,
-        COUNT(DISTINCT s.id) as submitted,
-        COUNT(DISTINCT CASE WHEN s.status = 'graded' THEN s.id END) as graded,
-        AVG(s.marks_obtained) as averageMarks
-      FROM assignments a
-      LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = $1
-      WHERE a.department = $2 AND a.year = $3
-    `, [userId, req.user.department, req.user.year]);
+    const submissionByAssignmentId = new Map(submissions.map((item) => [item.assignment_id, item]));
 
-    // Get subject-wise performance
-    const subjectPerformance = await query(`
-      SELECT 
-        a.subject,
-        COUNT(DISTINCT a.id) as totalAssignments,
-        COUNT(DISTINCT s.id) as submitted,
-        AVG(s.marks_obtained) as averageMarks
-      FROM assignments a
-      LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = $1
-      WHERE a.department = $2 AND a.year = $3
-      GROUP BY a.subject
-    `, [userId, req.user.department, req.user.year]);
+    const overall = {
+      totalAssignments: assignments.length,
+      submitted: submissions.length,
+      graded: submissions.filter((item) => item.status === 'graded').length,
+      averageMarks: submissions.length
+        ? Number((submissions.reduce((sum, item) => sum + toNumber(item.marks_obtained, 0), 0) / submissions.length).toFixed(2))
+        : 0
+    };
+
+    const subjectPerformanceMap = new Map();
+    for (const assignment of assignments) {
+      const subject = assignment.subject || 'General';
+      if (!subjectPerformanceMap.has(subject)) {
+        subjectPerformanceMap.set(subject, {
+          subject,
+          totalAssignments: 0,
+          submitted: 0,
+          marksSum: 0,
+          markedCount: 0
+        });
+      }
+
+      const item = subjectPerformanceMap.get(subject);
+      item.totalAssignments += 1;
+
+      const submission = submissionByAssignmentId.get(assignment.id);
+      if (submission) {
+        item.submitted += 1;
+        if (submission.marks_obtained !== undefined && submission.marks_obtained !== null) {
+          item.marksSum += toNumber(submission.marks_obtained, 0);
+          item.markedCount += 1;
+        }
+      }
+    }
+
+    const subjectPerformance = Array.from(subjectPerformanceMap.values()).map((item) => ({
+      subject: item.subject,
+      totalAssignments: item.totalAssignments,
+      submitted: item.submitted,
+      averageMarks: item.markedCount ? Number((item.marksSum / item.markedCount).toFixed(2)) : 0
+    }));
 
     res.json({
       success: true,
       data: {
         submissionTimeline,
-        overall: overallStats[0] || {},
+        overall,
         subjectPerformance
       }
     });
-
   } catch (error) {
     next(error);
   }
 });
 
-module.exports = router;
-
-/**
- * MCQ Answer Key & Auto-Grading
- * Adds endpoints for configuring MCQ answer keys and auto-grading submissions
- */
-
 // Save or update MCQ answer key for an assignment
 router.post('/:id/answer-key', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
-    const assignmentId = Number(req.params.id);
-    const { answerKey, totalPoints = 0, passPercentage = 40 } = req.body; // answerKey: [{questionId, correctAnswer, points}]
+    const assignmentId = req.params.id;
+    const { answerKey, totalPoints = 0, passPercentage = 40 } = req.body;
+
     if (!Array.isArray(answerKey) || answerKey.length === 0) {
       return res.status(400).json({ success: false, message: 'answerKey array is required' });
     }
 
-    // Store in a table column if exists; otherwise store in auxiliary table assignment_answer_keys
-    await query(`
-      CREATE TABLE IF NOT EXISTS assignment_answer_keys (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        assignment_id INT NOT NULL,
-        answer_key JSON NOT NULL,
-        total_points INT DEFAULT 0,
-        pass_percentage INT DEFAULT 40,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        UNIQUE KEY (assignment_id)
-      )`);
-
-    await query(
-      `INSERT INTO assignment_answer_keys (assignment_id, answer_key, total_points, pass_percentage)
-       VALUES ($1, $2, $3, $4) ON DUPLICATE KEY UPDATE answer_key = VALUES(answer_key), total_points = VALUES(total_points), pass_percentage = VALUES(pass_percentage)`, [assignmentId, JSON.stringify(answerKey), Number(totalPoints), Number(passPercentage)]
-    );
+    await updateRecord('assignment_answer_keys', assignmentId, {
+      assignment_id: assignmentId,
+      answer_key: answerKey,
+      total_points: toNumber(totalPoints, 0),
+      pass_percentage: toNumber(passPercentage, 40)
+    });
 
     res.json({ success: true, message: 'Answer key saved' });
   } catch (error) {
@@ -162,31 +304,43 @@ router.post('/:id/answer-key', authMiddleware, roleMiddleware('teacher', 'admin'
 // Auto-grade all MCQ submissions for an assignment
 router.post('/:id/auto-grade', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
-    const assignmentId = Number(req.params.id);
+    const assignmentId = req.params.id;
+    const key = await findOne('assignment_answer_keys', {
+      filters: [{ field: 'assignment_id', value: assignmentId }]
+    });
 
-    const keys = await query('SELECT * FROM assignment_answer_keys WHERE assignment_id = $1', [assignmentId]);
-    if (keys.length === 0) return res.status(404).json({ success: false, message: 'Answer key not configured' });
-    const key = keys[0];
-    let answerKey = [];
-    try { answerKey = JSON.parse(key.answer_key || '[]'); } catch { answerKey = []; }
+    if (!key) {
+      return res.status(404).json({ success: false, message: 'Answer key not configured' });
+    }
 
-    // Expect assignment_submissions to contain a JSON column with answers: { questionId: answer }
-    const submissions = await query(`SELECT id, student_id, submission_answers FROM assignment_submissions WHERE assignment_id = $1`, [assignmentId]
-    );
+    const submissions = await listRecords('assignment_submissions', {
+      filters: [{ field: 'assignment_id', value: assignmentId }]
+    });
 
     let graded = 0;
-    for (const s of submissions) {
-      let answers = {};
-      try { answers = JSON.parse(s.submission_answers || '{}'); } catch { answers = {}; }
-      let score = 0; const results = [];
-      for (const q of answerKey) {
-        const correct = String(answers[q.questionId]) === String(q.correctAnswer);
-        if (correct) score += Number(q.points || 0);
-        results.push({ id: q.questionId, correct });
+    for (const submission of submissions) {
+      const answers = normalizeSubmissionAnswers(submission.submission_answers) || {};
+      let score = 0;
+      const results = [];
+
+      for (const question of key.answer_key || []) {
+        const correct = String(answers[question.questionId]) === String(question.correctAnswer);
+        if (correct) {
+          score += toNumber(question.points, 0);
+        }
+        results.push({ id: question.questionId, correct });
       }
-      await query(`UPDATE assignment_submissions SET marks_obtained = $1, feedback = $2, graded_by = $3, graded_at = NOW(), status = 'graded' WHERE id = $4`, [score, JSON.stringify({ auto: true, results }), req.user.id, s.id]
-      );
-      graded++;
+
+      await updateRecord('assignment_submissions', submission.id, {
+        marks_obtained: score,
+        feedback: { auto: true, results },
+        graded_by: req.user.id,
+        graded_at: new Date().toISOString(),
+        status: 'graded'
+      });
+
+      emitToUser(submission.student_id, 'assignments:update', { assignmentId });
+      graded += 1;
     }
 
     res.json({ success: true, message: 'Auto-grading complete', data: { graded } });
@@ -194,3 +348,5 @@ router.post('/:id/auto-grade', authMiddleware, roleMiddleware('teacher', 'admin'
     next(error);
   }
 });
+
+module.exports = router;

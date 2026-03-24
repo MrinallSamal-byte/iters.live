@@ -1,11 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { db, isFirebaseAdminReady } = require('../database/firebase');
-const { query: sqlQuery } = require('../database/db');
 
 const localPortalStore = new Map();
 const DUMMY_DATA_PATH = path.join(__dirname, '../data/dummyStudentData.json');
-const SQL_PORTAL_SNAPSHOT_TABLE = 'soa_portal_snapshots';
 
 const FIELD_ALIASES = {
   studentName: ['studentname', 'name', 'fullname', 'studentfullname', 'nameofthestudent'],
@@ -66,17 +64,6 @@ function loadDummyData() {
 }
 
 const DUMMY_DATA = loadDummyData();
-let sqlSnapshotTablePromise = null;
-
-function isSqlPersistenceConfigured() {
-  return typeof sqlQuery === 'function' && Boolean(
-    process.env.ENABLE_SQL_PORTAL_CACHE === 'true' ||
-    process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL ||
-    process.env.DB_HOST ||
-    process.env.VERCEL
-  );
-}
 
 function cleanValue(value) {
   if (value === null || value === undefined) return null;
@@ -1205,49 +1192,7 @@ function buildFirestoreUpdate(normalized, options = {}) {
 }
 
 async function ensureSqlPortalSnapshotTable() {
-  if (!isSqlPersistenceConfigured()) {
-    return false;
-  }
-
-  if (!sqlSnapshotTablePromise) {
-    sqlSnapshotTablePromise = (async () => {
-      await sqlQuery(`
-        CREATE TABLE IF NOT EXISTS ${SQL_PORTAL_SNAPSHOT_TABLE} (
-          user_id TEXT PRIMARY KEY,
-          registration_number TEXT,
-          portal_connected BOOLEAN DEFAULT FALSE,
-          portal_needs_reconnect BOOLEAN DEFAULT FALSE,
-          is_verified BOOLEAN DEFAULT FALSE,
-          portal_provider TEXT,
-          portal_last_synced TIMESTAMPTZ,
-          data_source TEXT,
-          portal_data JSONB,
-          profile JSONB,
-          attendance_data JSONB,
-          marks_data JSONB,
-          timetable_data JSONB,
-          courses_data JSONB,
-          results_data JSONB,
-          notifications_data JSONB,
-          backlogs_data JSONB,
-          internal_assessments_data JSONB,
-          fees_data JSONB,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          updated_at TIMESTAMPTZ DEFAULT NOW()
-        )
-      `);
-      await sqlQuery(`
-        CREATE INDEX IF NOT EXISTS soa_portal_snapshots_registration_number_idx
-        ON ${SQL_PORTAL_SNAPSHOT_TABLE} (registration_number)
-      `);
-      return true;
-    })().catch((error) => {
-      sqlSnapshotTablePromise = null;
-      throw error;
-    });
-  }
-
-  return sqlSnapshotTablePromise;
+  return false;
 }
 
 function toSqlJson(value) {
@@ -1292,91 +1237,6 @@ function buildSqlSnapshotRow(updateData = {}, options = {}) {
 }
 
 async function writeSqlPortalSnapshot(updateData, options = {}) {
-  if (!isSqlPersistenceConfigured()) {
-    return false;
-  }
-
-  const row = buildSqlSnapshotRow(updateData, options);
-  if (!row.userId) {
-    return false;
-  }
-
-  await ensureSqlPortalSnapshotTable();
-  await sqlQuery(
-    `
-      INSERT INTO ${SQL_PORTAL_SNAPSHOT_TABLE} (
-        user_id,
-        registration_number,
-        portal_connected,
-        portal_needs_reconnect,
-        is_verified,
-        portal_provider,
-        portal_last_synced,
-        data_source,
-        portal_data,
-        profile,
-        attendance_data,
-        marks_data,
-        timetable_data,
-        courses_data,
-        results_data,
-        notifications_data,
-        backlogs_data,
-        internal_assessments_data,
-        fees_data,
-        updated_at
-      )
-      VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8, $9::jsonb, $10::jsonb,
-        $11::jsonb, $12::jsonb, $13::jsonb, $14::jsonb, $15::jsonb,
-        $16::jsonb, $17::jsonb, $18::jsonb, $19::jsonb, $20
-      )
-      ON CONFLICT (user_id) DO UPDATE SET
-        registration_number = EXCLUDED.registration_number,
-        portal_connected = EXCLUDED.portal_connected,
-        portal_needs_reconnect = EXCLUDED.portal_needs_reconnect,
-        is_verified = EXCLUDED.is_verified,
-        portal_provider = EXCLUDED.portal_provider,
-        portal_last_synced = EXCLUDED.portal_last_synced,
-        data_source = EXCLUDED.data_source,
-        portal_data = EXCLUDED.portal_data,
-        profile = EXCLUDED.profile,
-        attendance_data = EXCLUDED.attendance_data,
-        marks_data = EXCLUDED.marks_data,
-        timetable_data = EXCLUDED.timetable_data,
-        courses_data = EXCLUDED.courses_data,
-        results_data = EXCLUDED.results_data,
-        notifications_data = EXCLUDED.notifications_data,
-        backlogs_data = EXCLUDED.backlogs_data,
-        internal_assessments_data = EXCLUDED.internal_assessments_data,
-        fees_data = EXCLUDED.fees_data,
-        updated_at = EXCLUDED.updated_at
-    `,
-    [
-      row.userId,
-      row.registrationNumber,
-      row.portalConnected,
-      row.portalNeedsReconnect,
-      row.isVerified,
-      row.portalProvider,
-      row.portalLastSynced,
-      row.dataSource,
-      toSqlJson(row.portalData),
-      toSqlJson(row.profile),
-      toSqlJson(row.attendanceData),
-      toSqlJson(row.marksData),
-      toSqlJson(row.timetableData),
-      toSqlJson(row.coursesData),
-      toSqlJson(row.resultsData),
-      toSqlJson(row.notificationsData),
-      toSqlJson(row.backlogsData),
-      toSqlJson(row.internalAssessmentsData),
-      toSqlJson(row.feesData),
-      row.updatedAt
-    ]
-  );
-
   return true;
 }
 
@@ -1405,47 +1265,7 @@ function hydrateSqlPortalSnapshot(row = {}) {
 }
 
 async function readSqlPortalSnapshot(userId, registrationNumber) {
-  if (!isSqlPersistenceConfigured()) {
-    return null;
-  }
-
-  const keys = getStoreKeys(userId, registrationNumber);
-  if (!keys.length) {
-    return null;
-  }
-
-  await ensureSqlPortalSnapshotTable();
-
-  const params = [];
-  const predicates = [];
-  keys.forEach((key) => {
-    params.push(key);
-    const placeholder = `$${params.length}`;
-    predicates.push(`user_id = ${placeholder}`);
-    predicates.push(`registration_number = ${placeholder}`);
-  });
-
-  const rows = await sqlQuery(
-    `
-      SELECT *
-      FROM ${SQL_PORTAL_SNAPSHOT_TABLE}
-      WHERE ${predicates.join(' OR ')}
-      ORDER BY updated_at DESC NULLS LAST
-      LIMIT 1
-    `,
-    params
-  );
-
-  if (!rows.length) {
-    return null;
-  }
-
-  const row = rows[0];
-  return {
-    id: cleanValue(row.user_id) || cleanValue(row.registration_number) || keys[0],
-    data: hydrateSqlPortalSnapshot(row),
-    source: 'sql'
-  };
+  return null;
 }
 
 function getStoreKeys(userId, registrationNumber) {

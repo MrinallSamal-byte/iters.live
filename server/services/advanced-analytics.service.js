@@ -3,378 +3,472 @@
  * Provides detailed analytics and insights for students, teachers, and admins
  */
 
-const db = require('../database/db');
+const { getRecord, listRecords } = require('./firebase-data.service');
 const cacheService = require('./cache.service');
 
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toPercent(record) {
+  const total = toNumber(record.total_marks, 0);
+  if (!total) return 0;
+  return (toNumber(record.marks_obtained, 0) / total) * 100;
+}
+
+function average(values = []) {
+  if (!values.length) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function startOfMonthString(dateValue) {
+  return String(dateValue || '').slice(0, 7);
+}
+
 class AdvancedAnalyticsService {
-  /**
-   * Get comprehensive student performance analytics
-   * @param {number} studentId - Student ID
-   * @returns {Object} Performance analytics
-   */
   async getStudentPerformance(studentId) {
     const cacheKey = `analytics:student:${studentId}`;
     const cached = cacheService.get(cacheKey);
     if (cached) return cached;
 
-    try {
-      // Get student details
-      const studentRows = await db.query(
-        'SELECT id, username, full_name, department, year, section FROM users WHERE id = ? AND role = "student"',
-        [studentId]
-      );
-      const student = studentRows[0];
+    const student = await getRecord('users', String(studentId));
+    if (!student || student.role !== 'student') {
+      throw new Error('Student not found');
+    }
 
-      if (!student) {
-        throw new Error('Student not found');
+    const [marks, attendance, allUsers, assignments, submissions] = await Promise.all([
+      listRecords('marks', { filters: [{ field: 'student_id', value: String(studentId) }] }),
+      listRecords('attendance', { filters: [{ field: 'student_id', value: String(studentId) }] }),
+      listRecords('users'),
+      listRecords('assignments'),
+      listRecords('assignment_submissions', { filters: [{ field: 'student_id', value: String(studentId) }] })
+    ]);
+
+    const markPercentages = marks.map(toPercent);
+    const marksStats = {
+      total_exams: marks.length,
+      average_percentage: average(markPercentages),
+      best_percentage: Math.max(...markPercentages, 0),
+      worst_percentage: markPercentages.length ? Math.min(...markPercentages) : 0,
+      excellent_count: marks.filter((mark) => ['A+', 'A'].includes(mark.grade)).length,
+      failed_count: marks.filter((mark) => mark.grade === 'F').length
+    };
+
+    const subjectGroups = new Map();
+    marks.forEach((mark) => {
+      const key = mark.subject || 'Subject';
+      if (!subjectGroups.has(key)) {
+        subjectGroups.set(key, []);
       }
+      subjectGroups.get(key).push(mark);
+    });
 
-      // Get marks statistics
-      const marksStatsRows = await db.query(`
-        SELECT 
-          COUNT(*) as total_exams,
-          AVG(marks_obtained / total_marks * 100) as average_percentage,
-          MAX(marks_obtained / total_marks * 100) as best_percentage,
-          MIN(marks_obtained / total_marks * 100) as worst_percentage,
-          SUM(CASE WHEN grade IN ('A+', 'A') THEN 1 ELSE 0 END) as excellent_count,
-          SUM(CASE WHEN grade = 'F' THEN 1 ELSE 0 END) as failed_count
-        FROM marks
-        WHERE student_id = ?
-      `, [studentId]);
-      const marksStats = marksStatsRows[0] || {};
+    const subjectPerformance = Array.from(subjectGroups.entries())
+      .map(([subject, records]) => {
+        const percentages = records.map(toPercent);
+        const recentGrades = records
+          .sort((left, right) => String(right.created_at || '').localeCompare(String(left.created_at || '')))
+          .map((item) => item.grade)
+          .filter(Boolean)
+          .slice(0, 3);
 
-      // Get subject-wise performance
-      const subjectPerformance = await db.query(`
-        SELECT 
+        return {
           subject,
-          COUNT(*) as exam_count,
-          AVG(marks_obtained / total_marks * 100) as avg_percentage,
-          MAX(marks_obtained / total_marks * 100) as best_percentage,
-          MIN(marks_obtained / total_marks * 100) as worst_percentage,
-          GROUP_CONCAT(grade ORDER BY created_at DESC) as recent_grades
-        FROM marks
-        WHERE student_id = ?
-        GROUP BY subject
-        ORDER BY avg_percentage DESC
-      `, [studentId]);
+          examCount: records.length,
+          avgPercentage: average(percentages).toFixed(2),
+          bestPercentage: Math.max(...percentages, 0).toFixed(2),
+          worstPercentage: (percentages.length ? Math.min(...percentages) : 0).toFixed(2),
+          recentGrades
+        };
+      })
+      .sort((left, right) => Number(right.avgPercentage) - Number(left.avgPercentage));
 
-      // Get class average for comparison
-      const classAverages = await db.query(`
-        SELECT 
-          m.subject,
-          AVG(m.marks_obtained / m.total_marks * 100) as class_avg,
-          (SELECT AVG(marks_obtained / total_marks * 100) 
-           FROM marks 
-           WHERE student_id = ? AND subject = m.subject) as student_avg
-        FROM marks m
-        JOIN users u ON m.student_id = u.id
-        WHERE u.department = ? AND u.year = ? AND u.section = ?
-        GROUP BY m.subject
-      `, [studentId, student.department, student.year, student.section]);
+    const classmateIds = new Set(
+      allUsers
+        .filter((user) =>
+          user.role === 'student'
+          && user.department === student.department
+          && Number(user.year) === Number(student.year)
+          && user.section === student.section)
+        .map((user) => String(user.id))
+    );
 
-      // Identify weak subjects (below class average by 10% or more)
-      const weakSubjects = classAverages
-        .filter(s => s.student_avg < s.class_avg - 10)
-        .map(s => ({
-          subject: s.subject,
-          studentAvg: parseFloat(s.student_avg).toFixed(2),
-          classAvg: parseFloat(s.class_avg).toFixed(2),
-          gap: parseFloat(s.class_avg - s.student_avg).toFixed(2)
-        }));
+    const classMarks = await listRecords('marks');
+    const classComparisonMap = new Map();
+    classMarks.forEach((mark) => {
+      if (!classmateIds.has(String(mark.student_id))) {
+        return;
+      }
+      const subject = mark.subject || 'Subject';
+      if (!classComparisonMap.has(subject)) {
+        classComparisonMap.set(subject, { classPercentages: [], studentPercentages: [] });
+      }
+      const entry = classComparisonMap.get(subject);
+      entry.classPercentages.push(toPercent(mark));
+      if (String(mark.student_id) === String(studentId)) {
+        entry.studentPercentages.push(toPercent(mark));
+      }
+    });
 
-      // Identify strong subjects (above class average by 10% or more)
-      const strongSubjects = classAverages
-        .filter(s => s.student_avg > s.class_avg + 10)
-        .map(s => ({
-          subject: s.subject,
-          studentAvg: parseFloat(s.student_avg).toFixed(2),
-          classAvg: parseFloat(s.class_avg).toFixed(2),
-          advantage: parseFloat(s.student_avg - s.class_avg).toFixed(2)
-        }));
+    const classComparison = Array.from(classComparisonMap.entries()).map(([subject, values]) => {
+      const studentAvg = average(values.studentPercentages);
+      const classAvg = average(values.classPercentages);
+      return {
+        subject,
+        studentAvg: studentAvg.toFixed(2),
+        classAvg: classAvg.toFixed(2),
+        difference: (studentAvg - classAvg).toFixed(2),
+        status: studentAvg > classAvg ? 'above' : studentAvg < classAvg ? 'below' : 'equal'
+      };
+    });
 
-      // Get attendance statistics
-      const attendanceStatsRows = await db.query(`
-        SELECT 
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-          SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count,
-          SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count,
-          (SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) / COUNT(*) * 100) as attendance_percentage
-        FROM attendance
-        WHERE student_id = ?
-      `, [studentId]);
-      const attendanceStats = attendanceStatsRows[0] || {};
+    const weakSubjects = classComparison
+      .filter((item) => Number(item.studentAvg) < Number(item.classAvg) - 10)
+      .map((item) => ({
+        subject: item.subject,
+        studentAvg: item.studentAvg,
+        classAvg: item.classAvg,
+        gap: (Number(item.classAvg) - Number(item.studentAvg)).toFixed(2)
+      }));
 
-      // Get performance trend (last 6 months)
-      const performanceTrend = await db.query(`
-        SELECT 
-          DATE_FORMAT(created_at, '%Y-%m') as month,
-          AVG(marks_obtained / total_marks * 100) as avg_percentage,
-          COUNT(*) as exam_count
-        FROM marks
-        WHERE student_id = ? 
-        AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-        GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-        ORDER BY month ASC
-      `, [studentId]);
+    const strongSubjects = classComparison
+      .filter((item) => Number(item.studentAvg) > Number(item.classAvg) + 10)
+      .map((item) => ({
+        subject: item.subject,
+        studentAvg: item.studentAvg,
+        classAvg: item.classAvg,
+        advantage: (Number(item.studentAvg) - Number(item.classAvg)).toFixed(2)
+      }));
 
-      // Predict performance trend
-      const prediction = this.predictPerformanceTrend(performanceTrend);
+    const attendanceStats = {
+      total_classes: attendance.length,
+      present_count: attendance.filter((item) => item.status === 'present').length,
+      absent_count: attendance.filter((item) => item.status === 'absent').length,
+      late_count: attendance.filter((item) => item.status === 'late').length,
+      attendance_percentage: attendance.length
+        ? (attendance.filter((item) => item.status === 'present').length / attendance.length) * 100
+        : 0
+    };
 
-      // Get recent assignments
-      const assignments = await db.query(`
-        SELECT 
-          id, title, subject, due_date, status,
-          (SELECT COUNT(*) FROM assignment_submissions WHERE assignment_id = a.id AND student_id = ?) as submitted
-        FROM assignments a
-        WHERE a.status = 'active'
-        ORDER BY due_date ASC
-        LIMIT 5
-      `, [studentId]);
+    const trendMap = new Map();
+    marks.forEach((mark) => {
+      const month = startOfMonthString(mark.exam_date || mark.created_at);
+      if (!month) return;
+      if (!trendMap.has(month)) {
+        trendMap.set(month, []);
+      }
+      trendMap.get(month).push(toPercent(mark));
+    });
 
-      const result = {
-        student: {
+    const performanceTrend = Array.from(trendMap.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .slice(-6)
+      .map(([month, values]) => ({
+        month,
+        avg_percentage: Number(average(values).toFixed(2)),
+        exam_count: values.length
+      }));
+
+    const prediction = this.predictPerformanceTrend(performanceTrend);
+    const submittedAssignments = new Map(submissions.map((item) => [String(item.assignment_id), item]));
+    const recentAssignments = assignments
+      .filter((assignment) => assignment.department === student.department && Number(assignment.year) === Number(student.year))
+      .filter((assignment) => assignment.is_active !== false)
+      .sort((left, right) => String(left.deadline || '').localeCompare(String(right.deadline || '')))
+      .slice(0, 5)
+      .map((assignment) => {
+        const submission = submittedAssignments.get(String(assignment.id));
+        return {
+          ...assignment,
+          isSubmitted: Boolean(submission),
+          isOverdue: Boolean(assignment.deadline) && new Date(assignment.deadline) < new Date() && !submission
+        };
+      });
+
+    const result = {
+      student: {
+        id: student.id,
+        name: student.name || student.full_name,
+        username: student.username || student.registration_number || student.id,
+        department: student.department,
+        year: student.year,
+        section: student.section
+      },
+      marks: {
+        totalExams: marksStats.total_exams || 0,
+        averagePercentage: toNumber(marksStats.average_percentage).toFixed(2),
+        bestPercentage: toNumber(marksStats.best_percentage).toFixed(2),
+        worstPercentage: toNumber(marksStats.worst_percentage).toFixed(2),
+        excellentCount: marksStats.excellent_count || 0,
+        failedCount: marksStats.failed_count || 0
+      },
+      subjectPerformance,
+      classComparison,
+      weakSubjects,
+      strongSubjects,
+      attendance: {
+        ...attendanceStats,
+        attendance_percentage: toNumber(attendanceStats.attendance_percentage).toFixed(2)
+      },
+      performanceTrend,
+      prediction,
+      recentAssignments,
+      insights: this.generateInsights(marksStats, attendanceStats, weakSubjects, strongSubjects)
+    };
+
+    cacheService.set(cacheKey, result, 1800);
+    return result;
+  }
+
+  async getAttendancePatterns(filters = {}) {
+    const [users, attendance] = await Promise.all([
+      listRecords('users'),
+      listRecords('attendance')
+    ]);
+
+    const filteredStudents = users.filter((user) => {
+      if (user.role !== 'student') return false;
+      if (filters.department && user.department !== filters.department) return false;
+      if (filters.year && Number(user.year) !== Number(filters.year)) return false;
+      if (filters.section && user.section !== filters.section) return false;
+      return true;
+    });
+
+    const studentById = new Map(filteredStudents.map((user) => [String(user.id), user]));
+    const attendanceByStudent = new Map();
+    attendance.forEach((record) => {
+      const studentId = String(record.student_id || '');
+      if (!studentById.has(studentId)) return;
+      if (!attendanceByStudent.has(studentId)) {
+        attendanceByStudent.set(studentId, []);
+      }
+      attendanceByStudent.get(studentId).push(record);
+    });
+
+    const chronicAbsentees = filteredStudents
+      .map((student) => {
+        const records = attendanceByStudent.get(String(student.id)) || [];
+        const present = records.filter((item) => item.status === 'present').length;
+        const attendancePercentage = records.length ? (present / records.length) * 100 : 0;
+        return {
           id: student.id,
-          name: student.full_name,
-          username: student.username,
+          username: student.username || student.registration_number || student.id,
+          full_name: student.name || student.full_name || 'Student',
           department: student.department,
           year: student.year,
-          section: student.section
-        },
-        marks: {
-          totalExams: marksStats.total_exams || 0,
-          averagePercentage: parseFloat(marksStats.average_percentage || 0).toFixed(2),
-          bestPercentage: parseFloat(marksStats.best_percentage || 0).toFixed(2),
-          worstPercentage: parseFloat(marksStats.worst_percentage || 0).toFixed(2),
-          excellentCount: marksStats.excellent_count || 0,
-          failedCount: marksStats.failed_count || 0
-        },
-        subjectPerformance: subjectPerformance.map(s => ({
-          subject: s.subject,
-          examCount: s.exam_count,
-          avgPercentage: parseFloat(s.avg_percentage).toFixed(2),
-          bestPercentage: parseFloat(s.best_percentage).toFixed(2),
-          worstPercentage: parseFloat(s.worst_percentage).toFixed(2),
-          recentGrades: s.recent_grades ? s.recent_grades.split(',').slice(0, 3) : []
-        })),
-        classComparison: classAverages.map(s => ({
-          subject: s.subject,
-          studentAvg: parseFloat(s.student_avg).toFixed(2),
-          classAvg: parseFloat(s.class_avg).toFixed(2),
-          difference: parseFloat(s.student_avg - s.class_avg).toFixed(2),
-          status: s.student_avg > s.class_avg ? 'above' : s.student_avg < s.class_avg ? 'below' : 'equal'
-        })),
-        weakSubjects,
-        strongSubjects,
-        attendance: attendanceStats,
-        performanceTrend,
-        prediction,
-        recentAssignments: assignments.map(a => ({
-          ...a,
-          isSubmitted: a.submitted > 0,
-          isOverdue: new Date(a.due_date) < new Date() && a.submitted === 0
-        })),
-        insights: this.generateInsights(marksStats, attendanceStats, weakSubjects, strongSubjects)
-      };
+          section: student.section,
+          total_classes: records.length,
+          present_count: present,
+          attendance_percentage: attendancePercentage.toFixed(2)
+        };
+      })
+      .filter((item) => Number(item.attendance_percentage) < 75)
+      .sort((left, right) => Number(left.attendance_percentage) - Number(right.attendance_percentage));
 
-      cacheService.set(cacheKey, result, 1800); // Cache for 30 minutes
-      return result;
-    } catch (error) {
-      console.error('Error in getStudentPerformance:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Detect attendance patterns and anomalies
-   * @param {Object} filters - Filter criteria
-   * @returns {Object} Attendance patterns
-   */
-  async getAttendancePatterns(filters = {}) {
-    try {
-      // Detect chronic absenteeism (attendance < 75%)
-      const [chronicAbsentees] = await db.query(`
-        SELECT 
-          u.id, u.username, u.full_name, u.department, u.year, u.section,
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_count,
-          (SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) / COUNT(*) * 100) as attendance_percentage
-        FROM users u
-        JOIN attendance a ON u.id = a.student_id
-        WHERE u.role = 'student'
-        ${filters.department ? 'AND u.department = ?' : ''}
-        ${filters.year ? 'AND u.year = ?' : ''}
-        ${filters.section ? 'AND u.section = ?' : ''}
-        GROUP BY u.id
-        HAVING attendance_percentage < 75
-        ORDER BY attendance_percentage ASC
-      `, Object.values(filters).filter(Boolean));
-
-      // Detect proxy attendance patterns (suspicious patterns)
-      const [suspiciousPatterns] = await db.query(`
-        SELECT 
-          student_id,
-          u.username,
-          u.full_name,
-          DATE(date) as attendance_date,
-          COUNT(*) as attendance_count,
-          GROUP_CONCAT(DISTINCT marked_by) as marked_by_users
-        FROM attendance a
-        JOIN users u ON a.student_id = u.id
-        WHERE a.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY student_id, DATE(date)
-        HAVING attendance_count > 1
-        ORDER BY attendance_count DESC
-      `);
-
-      // Find students with perfect attendance
-      const [perfectAttendance] = await db.query(`
-        SELECT 
-          u.id, u.username, u.full_name, u.department, u.year, u.section,
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_count
-        FROM users u
-        JOIN attendance a ON u.id = a.student_id
-        WHERE u.role = 'student'
-        AND a.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY u.id
-        HAVING present_count = total_classes AND total_classes > 10
-        ORDER BY total_classes DESC
-      `);
-
-      // Attendance trends by day of week
-      const [dayOfWeekTrends] = await db.query(`
-        SELECT 
-          DAYNAME(date) as day_of_week,
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-          (SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) / COUNT(*) * 100) as attendance_rate
-        FROM attendance
-        WHERE date >= DATE_SUB(NOW(), INTERVAL 60 DAY)
-        GROUP BY DAYNAME(date), DAYOFWEEK(date)
-        ORDER BY DAYOFWEEK(date)
-      `);
-
-      // Subject-wise attendance
-      const [subjectAttendance] = await db.query(`
-        SELECT 
-          subject,
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-          (SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) / COUNT(*) * 100) as attendance_rate
-        FROM attendance
-        WHERE date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY subject
-        ORDER BY attendance_rate ASC
-      `);
-
-      return {
-        chronicAbsentees: chronicAbsentees.map(s => ({
-          ...s,
-          attendance_percentage: parseFloat(s.attendance_percentage).toFixed(2)
-        })),
-        suspiciousPatterns,
-        perfectAttendance,
-        dayOfWeekTrends: dayOfWeekTrends.map(d => ({
-          ...d,
-          attendance_rate: parseFloat(d.attendance_rate).toFixed(2)
-        })),
-        subjectAttendance: subjectAttendance.map(s => ({
-          ...s,
-          attendance_rate: parseFloat(s.attendance_rate).toFixed(2)
-        })),
-        summary: {
-          totalChronicAbsentees: chronicAbsentees.length,
-          totalSuspiciousPatterns: suspiciousPatterns.length,
-          totalPerfectAttendance: perfectAttendance.length,
-          lowestAttendanceDay: dayOfWeekTrends.reduce((min, d) => 
-            parseFloat(d.attendance_rate) < parseFloat(min.attendance_rate) ? d : min, 
-            dayOfWeekTrends[0] || {}
-          )?.day_of_week,
-          lowestAttendanceSubject: subjectAttendance[0]?.subject
+    const suspiciousMap = new Map();
+    attendance
+      .filter((record) => Date.parse(record.created_at || '') >= Date.now() - (30 * 24 * 60 * 60 * 1000))
+      .forEach((record) => {
+        const key = `${record.student_id}::${record.date}`;
+        if (!suspiciousMap.has(key)) {
+          suspiciousMap.set(key, []);
         }
-      };
-    } catch (error) {
-      console.error('Error in getAttendancePatterns:', error);
-      throw error;
+        suspiciousMap.get(key).push(record);
+      });
+
+    const suspiciousPatterns = Array.from(suspiciousMap.entries())
+      .filter(([, records]) => records.length > 1)
+      .map(([key, records]) => {
+        const [studentId, attendanceDate] = key.split('::');
+        const student = studentById.get(studentId) || {};
+        return {
+          student_id: studentId,
+          username: student.username || student.registration_number || studentId,
+          full_name: student.name || student.full_name || 'Student',
+          attendance_date: attendanceDate,
+          attendance_count: records.length,
+          marked_by_users: records.map((record) => record.marked_by).filter(Boolean).join(',')
+        };
+      })
+      .sort((left, right) => right.attendance_count - left.attendance_count);
+
+    const perfectAttendance = filteredStudents
+      .map((student) => {
+        const records = (attendanceByStudent.get(String(student.id)) || []).filter((record) =>
+          Date.parse(record.created_at || record.date || '') >= Date.now() - (30 * 24 * 60 * 60 * 1000));
+        const present = records.filter((item) => item.status === 'present').length;
+        return {
+          id: student.id,
+          username: student.username || student.registration_number || student.id,
+          full_name: student.name || student.full_name || 'Student',
+          department: student.department,
+          year: student.year,
+          section: student.section,
+          total_classes: records.length,
+          present_count: present
+        };
+      })
+      .filter((item) => item.total_classes > 10 && item.present_count === item.total_classes)
+      .sort((left, right) => right.total_classes - left.total_classes);
+
+    const recentAttendance = attendance.filter((record) =>
+      Date.parse(record.date || record.created_at || '') >= Date.now() - (60 * 24 * 60 * 60 * 1000));
+
+    const dayOfWeekMap = new Map();
+    recentAttendance.forEach((record) => {
+      const date = new Date(record.date || record.created_at);
+      if (Number.isNaN(date.getTime())) return;
+      const label = date.toLocaleDateString('en-US', { weekday: 'long' });
+      if (!dayOfWeekMap.has(label)) {
+        dayOfWeekMap.set(label, { day_of_week: label, total_classes: 0, present_count: 0, dayIndex: date.getDay() });
       }
+      const entry = dayOfWeekMap.get(label);
+      entry.total_classes += 1;
+      if (record.status === 'present') {
+        entry.present_count += 1;
+      }
+    });
+
+    const dayOfWeekTrends = Array.from(dayOfWeekMap.values())
+      .sort((left, right) => left.dayIndex - right.dayIndex)
+      .map((entry) => ({
+        day_of_week: entry.day_of_week,
+        total_classes: entry.total_classes,
+        present_count: entry.present_count,
+        attendance_rate: entry.total_classes
+          ? ((entry.present_count / entry.total_classes) * 100).toFixed(2)
+          : '0.00'
+      }));
+
+    const subjectMap = new Map();
+    attendance
+      .filter((record) => Date.parse(record.date || record.created_at || '') >= Date.now() - (30 * 24 * 60 * 60 * 1000))
+      .forEach((record) => {
+        const subject = record.subject || 'Subject';
+        if (!subjectMap.has(subject)) {
+          subjectMap.set(subject, { subject, total_classes: 0, present_count: 0 });
+        }
+        const entry = subjectMap.get(subject);
+        entry.total_classes += 1;
+        if (record.status === 'present') {
+          entry.present_count += 1;
+        }
+      });
+
+    const subjectAttendance = Array.from(subjectMap.values())
+      .map((entry) => ({
+        subject: entry.subject,
+        total_classes: entry.total_classes,
+        present_count: entry.present_count,
+        attendance_rate: entry.total_classes
+          ? ((entry.present_count / entry.total_classes) * 100).toFixed(2)
+          : '0.00'
+      }))
+      .sort((left, right) => Number(left.attendance_rate) - Number(right.attendance_rate));
+
+    return {
+      chronicAbsentees,
+      suspiciousPatterns,
+      perfectAttendance,
+      dayOfWeekTrends,
+      subjectAttendance,
+      summary: {
+        totalChronicAbsentees: chronicAbsentees.length,
+        totalSuspiciousPatterns: suspiciousPatterns.length,
+        totalPerfectAttendance: perfectAttendance.length,
+        lowestAttendanceDay: dayOfWeekTrends[0]?.day_of_week,
+        lowestAttendanceSubject: subjectAttendance[0]?.subject
+      }
+    };
   }
 
-  /**
-   * Get teacher performance analytics
-   * @param {number} teacherId - Teacher ID
-   * @returns {Object} Teacher analytics
-   */
   async getTeacherAnalytics(teacherId) {
-    try {
-      // Classes taught
-  const classesTaught = await db.query(`
-        SELECT 
+    const [attendance, marks] = await Promise.all([
+      listRecords('attendance', { filters: [{ field: 'marked_by', value: String(teacherId) }] }),
+      listRecords('marks', { filters: [{ field: 'uploaded_by', value: String(teacherId) }] })
+    ]);
+
+    const classMap = new Map();
+    attendance.forEach((record) => {
+      const subject = record.subject || 'Subject';
+      if (!classMap.has(subject)) {
+        classMap.set(subject, {
           subject,
-          COUNT(DISTINCT CONCAT(department, year, section)) as class_count,
-          COUNT(DISTINCT student_id) as student_count,
-          COUNT(*) as total_sessions
-        FROM attendance
-        WHERE marked_by = ?
-        GROUP BY subject
-      `, [teacherId]);
+          classes: new Set(),
+          students: new Set(),
+          total_sessions: 0
+        });
+      }
+      const entry = classMap.get(subject);
+      entry.classes.add(`${record.department || ''}-${record.year || ''}-${record.section || ''}`);
+      entry.students.add(String(record.student_id));
+      entry.total_sessions += 1;
+    });
 
-      // Attendance marking stats
-  const attendanceStatsRows2 = await db.query(`
-        SELECT 
-          COUNT(*) as total_marked,
-          COUNT(DISTINCT DATE(date)) as days_active,
-          AVG(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100 as avg_attendance_rate
-        FROM attendance
-        WHERE marked_by = ?
-  `, [teacherId]);
-  const attendanceStats = attendanceStatsRows2[0] || {};
+    const classesTaught = Array.from(classMap.values()).map((entry) => ({
+      subject: entry.subject,
+      class_count: entry.classes.size,
+      student_count: entry.students.size,
+      total_sessions: entry.total_sessions
+    }));
 
-      // Marks uploaded stats
-  const marksStatsRows2 = await db.query(`
-        SELECT 
-          COUNT(*) as total_marks_uploaded,
-          COUNT(DISTINCT subject) as subjects_taught,
-          AVG(marks_obtained / total_marks * 100) as class_average
-        FROM marks
-        WHERE uploaded_by = ?
-  `, [teacherId]);
-  const marksStats = marksStatsRows2[0] || {};
+    const attendanceStats = {
+      total_marked: attendance.length,
+      days_active: new Set(attendance.map((record) => String(record.date || '').slice(0, 10)).filter(Boolean)).size,
+      avg_attendance_rate: attendance.length
+        ? average(attendance.map((record) => record.status === 'present' ? 100 : 0))
+        : 0
+    };
 
-      // Recent activity
-  const recentActivity = await db.query(`
-        (SELECT 'attendance' as type, subject, COUNT(*) as count, MAX(created_at) as last_activity
-         FROM attendance WHERE marked_by = ? GROUP BY subject)
-        UNION ALL
-        (SELECT 'marks' as type, subject, COUNT(*) as count, MAX(created_at) as last_activity
-         FROM marks WHERE uploaded_by = ? GROUP BY subject)
-        ORDER BY last_activity DESC
-        LIMIT 10
-      `, [teacherId, teacherId]);
+    const marksStats = {
+      total_marks_uploaded: marks.length,
+      subjects_taught: new Set(marks.map((record) => record.subject).filter(Boolean)).size,
+      class_average: marks.length ? average(marks.map(toPercent)) : 0
+    };
 
-      return {
-        classesTaught,
-        attendanceStats,
-        marksStats,
-        recentActivity
-      };
-    } catch (error) {
-      console.error('Error in getTeacherAnalytics:', error);
-      throw error;
-    }
+    const recentActivityMap = new Map();
+    [...attendance.map((item) => ({ type: 'attendance', ...item })), ...marks.map((item) => ({ type: 'marks', ...item }))]
+      .forEach((record) => {
+        const key = `${record.type}::${record.subject || 'Subject'}`;
+        if (!recentActivityMap.has(key)) {
+          recentActivityMap.set(key, {
+            type: record.type,
+            subject: record.subject || 'Subject',
+            count: 0,
+            last_activity: record.created_at || record.date || null
+          });
+        }
+        const entry = recentActivityMap.get(key);
+        entry.count += 1;
+        const candidate = String(record.created_at || record.date || '');
+        if (candidate > String(entry.last_activity || '')) {
+          entry.last_activity = candidate;
+        }
+      });
+
+    const recentActivity = Array.from(recentActivityMap.values())
+      .sort((left, right) => String(right.last_activity || '').localeCompare(String(left.last_activity || '')))
+      .slice(0, 10);
+
+    return {
+      classesTaught,
+      attendanceStats,
+      marksStats,
+      recentActivity
+    };
   }
 
-  /**
-   * Predict performance trend using linear regression
-   * @private
-   */
   predictPerformanceTrend(data) {
     if (!data || data.length < 2) {
       return { trend: 'insufficient_data', prediction: null };
     }
 
     const n = data.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumX2 = 0;
 
     data.forEach((point, index) => {
       const x = index;
@@ -387,45 +481,27 @@ class AdvancedAnalyticsService {
 
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
-
-    // Predict next month
     const nextValue = slope * n + intercept;
 
     return {
       trend: slope > 0.5 ? 'improving' : slope < -0.5 ? 'declining' : 'stable',
       prediction: parseFloat(nextValue).toFixed(2),
       slope: parseFloat(slope).toFixed(2),
-      confidence: Math.min(n / 6, 1) * 100 // Confidence increases with more data points
+      confidence: Math.min(n / 6, 1) * 100
     };
   }
 
-  /**
-   * Generate insights based on analytics
-   * @private
-   */
   generateInsights(marksStats, attendanceStats, weakSubjects, strongSubjects) {
     const insights = [];
-
-    // Performance insights
     const avgPercentage = parseFloat(marksStats.average_percentage || 0);
     if (avgPercentage >= 80) {
-      insights.push({
-        type: 'success',
-        message: 'Excellent overall performance! Keep up the great work.'
-      });
+      insights.push({ type: 'success', message: 'Excellent overall performance! Keep up the great work.' });
     } else if (avgPercentage >= 60) {
-      insights.push({
-        type: 'info',
-        message: 'Good performance. Focus on weak subjects to improve further.'
-      });
+      insights.push({ type: 'info', message: 'Good performance. Focus on weak subjects to improve further.' });
     } else {
-      insights.push({
-        type: 'warning',
-        message: 'Performance needs improvement. Consider seeking help from teachers.'
-      });
+      insights.push({ type: 'warning', message: 'Performance needs improvement. Consider seeking help from teachers.' });
     }
 
-    // Attendance insights
     const attendancePercentage = parseFloat(attendanceStats.attendance_percentage || 0);
     if (attendancePercentage < 75) {
       insights.push({
@@ -439,19 +515,17 @@ class AdvancedAnalyticsService {
       });
     }
 
-    // Weak subjects
     if (weakSubjects.length > 0) {
       insights.push({
         type: 'warning',
-        message: `Need improvement in: ${weakSubjects.map(s => s.subject).join(', ')}`
+        message: `Need improvement in: ${weakSubjects.map((subject) => subject.subject).join(', ')}`
       });
     }
 
-    // Strong subjects
     if (strongSubjects.length > 0) {
       insights.push({
         type: 'success',
-        message: `Performing well in: ${strongSubjects.map(s => s.subject).join(', ')}`
+        message: `Performing well in: ${strongSubjects.map((subject) => subject.subject).join(', ')}`
       });
     }
 

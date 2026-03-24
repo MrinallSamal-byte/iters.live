@@ -1,47 +1,51 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../database/db');
+const { listRecords } = require('../services/firebase-data.service');
 
-// Get hostel menu
+function mealRank(mealType) {
+  const order = {
+    breakfast: 1,
+    lunch: 2,
+    snacks: 3,
+    dinner: 4
+  };
+  return order[mealType] || 5;
+}
+
+function sortMenu(items = []) {
+  return [...items].sort((left, right) => {
+    const dateDiff = String(left.date || '').localeCompare(String(right.date || ''));
+    if (dateDiff !== 0) return dateDiff;
+    return mealRank(left.meal_type) - mealRank(right.meal_type);
+  });
+}
+
 router.get('/menu', async (req, res, next) => {
   try {
-    const { date } = req.query;
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    
-    const menu = await query(`
-      SELECT * FROM hostel_menu WHERE date = $1 
-      ORDER BY CASE meal_type 
-        WHEN 'breakfast' THEN 1 
-        WHEN 'lunch' THEN 2 
-        WHEN 'snacks' THEN 3 
-        WHEN 'dinner' THEN 4 
-        ELSE 5 END`, [targetDate]
-    );
-
-    res.json({ success: true, data: menu });
+    const targetDate = req.query.date || new Date().toISOString().split('T')[0];
+    const menu = await listRecords('hostel_menu', {
+      filters: [{ field: 'date', value: targetDate }]
+    });
+    res.json({ success: true, data: sortMenu(menu) });
   } catch (error) {
     next(error);
   }
 });
 
-// Get menu for week
 router.get('/menu/week', async (req, res, next) => {
   try {
     const today = new Date();
     const weekLater = new Date(today);
     weekLater.setDate(weekLater.getDate() + 7);
 
-    const menu = await query(`
-      SELECT * FROM hostel_menu WHERE date BETWEEN $1 AND $2 
-      ORDER BY date, CASE meal_type 
-        WHEN 'breakfast' THEN 1 
-        WHEN 'lunch' THEN 2 
-        WHEN 'snacks' THEN 3 
-        WHEN 'dinner' THEN 4 
-        ELSE 5 END`, [today.toISOString().split('T')[0], weekLater.toISOString().split('T')[0]]
-    );
+    const menu = await listRecords('hostel_menu');
+    const start = today.toISOString().split('T')[0];
+    const end = weekLater.toISOString().split('T')[0];
 
-    res.json({ success: true, data: menu });
+    res.json({
+      success: true,
+      data: sortMenu(menu.filter((item) => item.date >= start && item.date <= end))
+    });
   } catch (error) {
     next(error);
   }

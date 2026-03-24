@@ -5,11 +5,77 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
+const {
+  db,
+  realtimeDb,
+  isFirebaseAdminReady,
+  isRealtimeDbReady
+} = require('../database/firebase');
+const { listRecords } = require('../services/firebase-data.service');
 const { authMiddleware: auth } = require('../middleware/auth');
 const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
+
+const CORE_COLLECTIONS = [
+  'users',
+  'attendance',
+  'marks',
+  'assignments',
+  'events',
+  'notifications'
+];
+
+async function getDatabaseHealth() {
+  if (!isFirebaseAdminReady) {
+    return {
+      status: 'unavailable',
+      provider: 'firebase',
+      firestore: {
+        ready: false
+      },
+      realtime: {
+        ready: isRealtimeDbReady
+      }
+    };
+  }
+
+  let firestoreReady = false;
+  let firestoreError = null;
+  let realtimeReady = isRealtimeDbReady;
+  let realtimeError = null;
+
+  try {
+    await db.collection('_health').limit(1).get();
+    firestoreReady = true;
+  } catch (error) {
+    firestoreError = error.message;
+  }
+
+  if (isRealtimeDbReady) {
+    try {
+      await realtimeDb.ref('healthcheck').once('value');
+      realtimeReady = true;
+    } catch (error) {
+      realtimeReady = false;
+      realtimeError = error.message;
+    }
+  }
+
+  return {
+    status: firestoreReady ? 'healthy' : 'degraded',
+    provider: 'firebase',
+    firestore: {
+      ready: firestoreReady,
+      error: firestoreError
+    },
+    realtime: {
+      ready: realtimeReady,
+      enabled: isRealtimeDbReady,
+      error: realtimeError
+    }
+  };
+}
 
 /**
  * @route   GET /api/health
@@ -18,13 +84,13 @@ const path = require('path');
  */
 router.get('/', async (req, res) => {
   try {
-    const healthCheck = await db.healthCheck();
+    const healthCheck = await getDatabaseHealth();
     
     res.json({
       status: healthCheck.status,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      database: healthCheck.stats
+      database: healthCheck
     });
   } catch (error) {
     res.status(503).json({
@@ -46,9 +112,13 @@ router.get('/detailed', auth, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Database health
-    const dbHealth = await db.healthCheck();
-    const poolStats = db.getPoolStats();
+    const dbHealth = await getDatabaseHealth();
+    const collectionSnapshots = await Promise.all(
+      CORE_COLLECTIONS.map(async (collection) => ({
+        name: collection,
+        count: (await listRecords(collection, { preferRealtime: true })).length
+      }))
+    );
 
     // Memory usage
     const memUsage = process.memoryUsage();
@@ -62,31 +132,13 @@ router.get('/detailed', auth, async (req, res) => {
     const cpus = os.cpus();
     const cpuUsage = process.cpuUsage();
 
-    // Check if materialized views exist
-    const viewStats = await db.query(`
-      SELECT TABLE_NAME, CREATE_TIME, UPDATE_TIME, TABLE_ROWS
-      FROM information_schema.TABLES
-      WHERE TABLE_SCHEMA = $1 AND TABLE_NAME LIKE 'view_%'
-    `, [process.env.DB_NAME || 'iter_college_db']);
-
-    // Get index statistics
-    const indexStats = await db.query(`
-      SELECT TABLE_NAME, COUNT(*) as index_count
-      FROM information_schema.STATISTICS
-      WHERE TABLE_SCHEMA = $1 AND INDEX_NAME != 'PRIMARY'
-      GROUP BY TABLE_NAME
-      ORDER BY index_count DESC
-      LIMIT 10
-    `, [process.env.DB_NAME || 'iter_college_db']);
-
-    // Check slow query log size
     let slowQueryLogSize = 0;
     try {
       const logPath = path.join(__dirname, '../../logs/slow-queries.log');
       const stats = await fs.stat(logPath);
       slowQueryLogSize = stats.size;
     } catch (e) {
-      // Log file doesn't exist yet
+      // No SQL slow query log in Firebase mode.
     }
 
     res.json({
@@ -120,17 +172,10 @@ router.get('/detailed', auth, async (req, res) => {
       },
       database: {
         status: dbHealth.status,
-        connectionPool: poolStats,
-        materializedViews: viewStats.length,
-        views: viewStats.map(v => ({
-          name: v.TABLE_NAME,
-          rows: v.TABLE_ROWS,
-          lastUpdated: v.UPDATE_TIME
-        })),
-        indexes: indexStats.map(i => ({
-          table: i.TABLE_NAME,
-          count: i.index_count
-        })),
+        provider: dbHealth.provider,
+        firestore: dbHealth.firestore,
+        realtime: dbHealth.realtime,
+        collections: collectionSnapshots,
         slowQueryLogSize: `${Math.round(slowQueryLogSize / 1024)}KB`
       }
     });
@@ -155,17 +200,19 @@ router.post('/refresh-views', auth, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    await db.query('CALL sp_refresh_all_views()');
+    await Promise.all(CORE_COLLECTIONS.map((collection) => listRecords(collection, {
+      preferRealtime: false
+    }).catch(() => [])));
 
     res.json({
       success: true,
-      message: 'All materialized views refreshed successfully',
+      message: 'Firebase collection mirrors refreshed successfully',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('View refresh error:', error);
     res.status(500).json({
-      error: 'Failed to refresh views',
+      error: 'Failed to refresh Firebase collection mirrors',
       details: error.message
     });
   }
@@ -182,39 +229,11 @@ router.get('/slow-queries', auth, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const logPath = path.join(__dirname, '../../logs/slow-queries.log');
-    
-    try {
-      const logContent = await fs.readFile(logPath, 'utf8');
-      const lines = logContent.split('\n').filter(l => l.trim());
-      
-      // Parse JSON log lines
-      const logs = lines
-        .slice(-100) // Last 100 entries
-        .map(line => {
-          try {
-            return JSON.parse(line);
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter(l => l !== null)
-        .reverse(); // Most recent first
-
-      res.json({
-        total: logs.length,
-        queries: logs
-      });
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return res.json({
-          total: 0,
-          queries: [],
-          message: 'No slow queries logged yet'
-        });
-      }
-      throw error;
-    }
+    res.json({
+      total: 0,
+      queries: [],
+      message: 'Slow query logs are not available in Firebase-backed mode'
+    });
   } catch (error) {
     console.error('Slow query fetch error:', error);
     res.status(500).json({

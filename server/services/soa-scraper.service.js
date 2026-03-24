@@ -50,6 +50,7 @@ const PORTAL_READY_TIMEOUT = 15000;
 const CAPTCHA_HEURISTIC_SCORE = {
     HAS_CAPTCHA_HINT: 6,
     HAS_VERIFY_HINT: 4,
+    HAS_INLINE_IMAGE: 8,
     CAPTCHA_LIKE_DIMENSIONS: 2,
     NEAR_CAPTCHA_INPUT: 5
 };
@@ -88,29 +89,31 @@ let runtimeDiagnosticsPromise = null;
 const SECTION_NAVIGATION = [
     {
         key: 'personalInfo',
+        route: '#/student/studentsPersonalInfo',
         path: [
-            ['Student Personal Info', 'Student Personal Information', 'Personal Information']
+            ['Student Personal Info.', 'Student Personal Info', 'Student Personal Information', 'Personal Information']
         ],
         labels: ['Student Personal Info', 'Student Personal Information', 'Personal Information', 'Personal Info', 'Profile', 'Student Profile']
     },
     {
         key: 'contactInfo',
+        route: '#/student/studentsPersonalInfo',
         path: [
-            ['Student Personal Info', 'Student Personal Information', 'Personal Information'],
             ['Students Contact Info', 'Student Contact Info', 'Contact Information', 'Contact Info', 'Contact Details']
         ],
         labels: ['Students Contact Info', 'Student Contact Info', 'Contact Information', 'Contact Info', 'Contact Details', 'Address Details']
     },
     {
         key: 'qualifications',
+        route: '#/student/studentsPersonalInfo',
         path: [
-            ['Student Personal Info', 'Student Personal Information', 'Personal Information'],
             ['Students Qualifications', 'Student Qualifications', 'Qualifications', 'Qualification']
         ],
         labels: ['Students Qualifications', 'Student Qualifications', 'Qualifications', 'Qualification', 'Academic Qualification']
     },
     {
         key: 'attendance',
+        route: '#/student/myclassattendance',
         path: [
             ['Class Attendance', 'Attendance View', 'Attendance']
         ],
@@ -118,6 +121,7 @@ const SECTION_NAVIGATION = [
     },
     {
         key: 'marks',
+        route: '#/student/studentresult',
         path: [
             ['Student Result', 'My Result', 'Results', 'Result']
         ],
@@ -126,6 +130,7 @@ const SECTION_NAVIGATION = [
     { key: 'internalAssessments', labels: ['Internal Assessment', 'Internal Assessments', 'IA Marks', 'Internal Marks'] },
     {
         key: 'timetable',
+        route: '#/student/myclasstimetable',
         path: [
             ['Class Time Table', 'Class Timetable', 'Time Table', 'Timetable', 'Class Schedule']
         ],
@@ -133,6 +138,7 @@ const SECTION_NAVIGATION = [
     },
     {
         key: 'subjects',
+        route: '#/student/studentregisteredfaculty',
         path: [
             ['Registered Subjects', 'Registered Subject', 'Subjects', 'Courses']
         ],
@@ -140,6 +146,7 @@ const SECTION_NAVIGATION = [
     },
     {
         key: 'admitCard',
+        route: '#/student/studentadmitcard',
         path: [
             ['Exam Info', 'Examination Info'],
             ['My Admit Card', 'Admit Card']
@@ -526,6 +533,8 @@ async function waitForPortalShell(page, timeout = PORTAL_READY_TIMEOUT) {
     const loginShellSelector = [
         REGISTRATION_SELECTORS[0],
         'input[placeholder*="USER ID"]',
+        CAPTCHA_SELECTORS[0],
+        'input[placeholder*="text as shown"]',
         'form',
         'button',
         'img'
@@ -544,6 +553,53 @@ async function waitForPortalShell(page, timeout = PORTAL_READY_TIMEOUT) {
             );
         }, { timeout })
     ]).catch(() => {});
+
+    await page.waitForFunction(({ minWidth, minHeight }) => {
+        const isVisible = (element) => {
+            if (!element) return false;
+            const style = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+        };
+
+        const registrationInput = Array.from(document.querySelectorAll('input')).find((input) => {
+            const joined = [
+                input.id,
+                input.name,
+                input.placeholder,
+                input.getAttribute('formcontrolname'),
+                input.getAttribute('aria-label')
+            ].join(' ');
+            return /userid|user id|registration/i.test(joined);
+        });
+
+        const captchaInput = Array.from(document.querySelectorAll('input')).find((input) => {
+            const joined = [
+                input.id,
+                input.name,
+                input.placeholder,
+                input.getAttribute('formcontrolname'),
+                input.getAttribute('aria-label')
+            ].join(' ');
+            return /captcha|text as shown|verification/i.test(joined);
+        });
+
+        const inlineCaptchaImage = Array.from(document.querySelectorAll('img')).find((img) => {
+            const src = String(img.currentSrc || img.src || '');
+            const rect = img.getBoundingClientRect();
+            return (
+                isVisible(img) &&
+                src.startsWith('data:image') &&
+                rect.width >= minWidth &&
+                rect.height >= minHeight
+            );
+        });
+
+        return Boolean(registrationInput && captchaInput && inlineCaptchaImage);
+    }, {
+        minWidth: CAPTCHA_IMAGE_DIMENSIONS.minWidth,
+        minHeight: CAPTCHA_IMAGE_DIMENSIONS.minHeight
+    }, { timeout }).catch(() => {});
 
     await page.waitForTimeout(1200);
 }
@@ -667,6 +723,8 @@ async function navigateToPortal(page) {
 }
 
 async function getCaptchaWithRetry(page) {
+    await waitForPortalShell(page, 12000);
+
     let captchaImage = await extractCaptchaImage(page);
     if (captchaImage) {
         return captchaImage;
@@ -739,8 +797,26 @@ async function clickPortalLabel(page, labels = []) {
 }
 
 async function openPortalSection(page, section) {
+    let openedAny = false;
+
+    if (section?.route) {
+        const targetUrl = section.route.startsWith('http')
+            ? section.route
+            : `https://soaportals.com/StudentPortalSOA/${section.route.replace(/^\/+/, '')}`;
+
+        try {
+            await page.goto(targetUrl, {
+                waitUntil: 'domcontentloaded',
+                timeout: NAVIGATION_TIMEOUT
+            });
+            await waitForPortalUpdate(page, 1800);
+            openedAny = true;
+        } catch (_) {
+            // Fall back to label-based navigation below.
+        }
+    }
+
     if (Array.isArray(section?.path) && section.path.length) {
-        let openedAny = false;
         for (const step of section.path) {
             const labels = Array.isArray(step) ? step : [step];
             const opened = await clickPortalLabel(page, labels);
@@ -753,7 +829,8 @@ async function openPortalSection(page, section) {
         return openedAny;
     }
 
-    return clickPortalLabel(page, section?.labels || []);
+    const opened = await clickPortalLabel(page, section?.labels || []);
+    return openedAny || opened;
 }
 
 async function selectNativeOptions(page) {
@@ -1190,6 +1267,7 @@ async function extractCaptchaImage(page) {
     try {
         // Try multiple selectors for CAPTCHA image
         const captchaSelectors = [
+            'img[src^="data:image"]',
             'img[class*="verify"]',
             'img[aria-label*="captcha" i]',
             'img[id*="captcha"]',
@@ -1283,10 +1361,13 @@ async function extractCaptchaImage(page) {
                 const mergedText = `${img.src || ''} ${img.id || ''} ${img.className || ''} ${img.alt || ''}`.toLowerCase();
                 const hasCaptchaHint = mergedText.includes('captcha');
                 const hasVerifyHint = mergedText.includes('verify');
+                const hasInlineImage = mergedText.startsWith('data:image');
+                const looksLikeKnownLogo = /campuslynx|campuslynx-loader|campuslynx-logo|soa\.png|jilit/.test(mergedText);
                 let score = 0;
 
                 if (hasCaptchaHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_CAPTCHA_HINT;
                 if (hasVerifyHint) score += CAPTCHA_HEURISTIC_SCORE.HAS_VERIFY_HINT;
+                if (hasInlineImage) score += CAPTCHA_HEURISTIC_SCORE.HAS_INLINE_IMAGE;
                 if (
                     img.width >= CAPTCHA_IMAGE_DIMENSIONS.minWidth &&
                     img.width <= CAPTCHA_IMAGE_DIMENSIONS.maxWidth &&
@@ -1306,6 +1387,10 @@ async function extractCaptchaImage(page) {
                     if (nearCaptchaInput && horizontalOverlap) {
                         score += CAPTCHA_HEURISTIC_SCORE.NEAR_CAPTCHA_INPUT;
                     }
+                }
+
+                if (looksLikeKnownLogo) {
+                    score -= CAPTCHA_HEURISTIC_SCORE.HAS_INLINE_IMAGE;
                 }
 
                 return {

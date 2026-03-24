@@ -1,153 +1,226 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware: auth, roleMiddleware } = require('../middleware/auth');
+const {
+  createRecord,
+  deleteRecord,
+  getRecord,
+  listRecords,
+  updateRecord
+} = require('../services/firebase-data.service');
+
 const teacherOnly = roleMiddleware('teacher', 'admin');
 
-// Question Bank Routes
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+async function getTeacherQuestions(teacherId) {
+  return listRecords('question_bank', {
+    filters: [{ field: 'teacher_id', value: String(teacherId) }],
+    orderBy: [{ field: 'created_at', direction: 'desc' }]
+  });
+}
+
 router.get('/questions', auth, teacherOnly, async (req, res) => {
-    try {
-        const { type, difficulty, tags } = req.query;
-        let query = 'SELECT * FROM question_bank WHERE teacher_id = ?';
-        const params = [req.user.id];
+  try {
+    const { type, difficulty } = req.query;
+    let questions = await getTeacherQuestions(req.user.id);
 
-        if (type) {
-            query += ' AND question_type = ?';
-            params.push(type);
-        }
-        if (difficulty) {
-            query += ' AND difficulty = ?';
-            params.push(difficulty);
-        }
-
-        const [questions] = await req.db.query(query, params);
-        res.json({ success: true, questions });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+    if (type) {
+      questions = questions.filter((item) => item.question_type === type);
     }
+    if (difficulty) {
+      questions = questions.filter((item) => item.difficulty === difficulty);
+    }
+
+    res.json({ success: true, questions });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 router.post('/questions', auth, teacherOnly, async (req, res) => {
-    try {
-        const { questionText, questionType, options, correctAnswer, points, difficulty, tags, explanation } = req.body;
+  try {
+    const {
+      questionText,
+      questionType,
+      options,
+      correctAnswer,
+      points,
+      difficulty,
+      tags,
+      explanation
+    } = req.body;
 
-        const [result] = await req.db.query(`INSERT INTO question_bank (teacher_id, question_text, question_type, options, correct_answer, points, difficulty, tags, explanation)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [req.user.id, questionText, questionType, JSON.stringify(options), correctAnswer, points, difficulty, JSON.stringify(tags), explanation]
-        );
+    const record = await createRecord('question_bank', {
+      teacher_id: String(req.user.id),
+      question_text: questionText,
+      question_type: questionType,
+      options: Array.isArray(options) ? options : [],
+      correct_answer: correctAnswer || null,
+      points: toNumber(points, 1),
+      marks: toNumber(points, 1),
+      difficulty: difficulty || 'medium',
+      tags: Array.isArray(tags) ? tags : [],
+      explanation: explanation || null
+    });
 
-        res.json({ success: true, questionId: result[0].id });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+    res.json({ success: true, questionId: record.id });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 router.put('/questions/:id', auth, teacherOnly, async (req, res) => {
-    try {
-        const { questionText, questionType, options, correctAnswer, points, difficulty, tags, explanation } = req.body;
-
-        await req.db.query(`UPDATE question_bank 
-             SET question_text = $1, question_type = $2, options = $3, correct_answer = $4, 
-                 points = $5, difficulty = $6, tags = $7, explanation = $8
-             WHERE id = $9 AND teacher_id = $10`, [questionText, questionType, JSON.stringify(options), correctAnswer, points, difficulty, JSON.stringify(tags), explanation, req.params.id, req.user.id]
-        );
-
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+  try {
+    const existing = await getRecord('question_bank', req.params.id);
+    if (!existing || String(existing.teacher_id) !== String(req.user.id)) {
+      return res.status(404).json({ success: false, error: 'Question not found' });
     }
+
+    const {
+      questionText,
+      questionType,
+      options,
+      correctAnswer,
+      points,
+      difficulty,
+      tags,
+      explanation
+    } = req.body;
+
+    await updateRecord('question_bank', req.params.id, {
+      question_text: questionText,
+      question_type: questionType,
+      options: Array.isArray(options) ? options : existing.options || [],
+      correct_answer: correctAnswer || null,
+      points: toNumber(points, existing.points || 1),
+      marks: toNumber(points, existing.marks || existing.points || 1),
+      difficulty: difficulty || existing.difficulty || 'medium',
+      tags: Array.isArray(tags) ? tags : existing.tags || [],
+      explanation: explanation || null
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 router.delete('/questions/:id', auth, teacherOnly, async (req, res) => {
-    try {
-        await req.db.query('DELETE FROM question_bank WHERE id = $1 AND teacher_id = $2', [req.params.id, req.user.id]);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+  try {
+    const existing = await getRecord('question_bank', req.params.id);
+    if (!existing || String(existing.teacher_id) !== String(req.user.id)) {
+      return res.status(404).json({ success: false, error: 'Question not found' });
     }
+
+    await deleteRecord('question_bank', req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// Quiz Routes
 router.post('/quizzes', auth, teacherOnly, async (req, res) => {
-    try {
-        const { title, description, duration, passPercentage, questionIds } = req.body;
+  try {
+    const { title, description, duration, passPercentage, questionIds } = req.body;
+    const record = await createRecord('quizzes', {
+      teacher_id: String(req.user.id),
+      title,
+      description: description || null,
+      duration: toNumber(duration, 0),
+      pass_percentage: toNumber(passPercentage, 0),
+      question_ids: Array.isArray(questionIds) ? questionIds.map(String) : []
+    });
 
-        const [result] = await req.db.query(`INSERT INTO quizzes (teacher_id, title, description, duration, pass_percentage, question_ids)
-             VALUES ($1, $2, $3, $4, $5, $6)`, [req.user.id, title, description, duration, passPercentage, JSON.stringify(questionIds)]
-        );
-
-        res.json({ success: true, quizId: result[0].id });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+    res.json({ success: true, quizId: record.id });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 router.post('/quizzes/:id/submit', auth, async (req, res) => {
-    try {
-        const { answers, timeTaken } = req.body;
-        
-        // Get quiz and questions
-        const [quiz] = await req.db.query('SELECT * FROM quizzes WHERE id = $1', [req.params.id]);
-        if (!quiz[0]) {
-            return res.status(404).json({ success: false, error: 'Quiz not found' });
-        }
+  try {
+    const { answers = {}, timeTaken } = req.body;
+    const quiz = await getRecord('quizzes', req.params.id);
 
-        const questionIds = JSON.parse(quiz[0].question_ids);
-        const [questions] = await req.db.query('SELECT * FROM question_bank WHERE id IN ($1)', [questionIds]);
-
-        // Grade submission
-        let score = 0;
-        const results = [];
-
-        questions.forEach(q => {
-            const userAnswer = answers[q.id];
-            const isCorrect = userAnswer === q.correct_answer;
-            
-            if (isCorrect) {
-                score += q.points;
-            }
-            
-            results.push({
-                questionId: q.id,
-                userAnswer,
-                correctAnswer: q.correct_answer,
-                isCorrect,
-                points: isCorrect ? q.points : 0
-            });
-        });
-
-        // Save submission
-        await req.db.query(`INSERT INTO quiz_submissions (quiz_id, student_id, answers, score, time_taken)
-             VALUES ($1, $2, $3, $4, $5)`, [req.params.id, req.user.id, JSON.stringify(answers), score, timeTaken]
-        );
-
-        res.json({ success: true, score, results });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+    if (!quiz) {
+      return res.status(404).json({ success: false, error: 'Quiz not found' });
     }
+
+    const questionIds = Array.isArray(quiz.question_ids) ? quiz.question_ids.map(String) : [];
+    const questions = (await listRecords('question_bank')).filter((item) => questionIds.includes(String(item.id)));
+
+    let score = 0;
+    const results = questions.map((question) => {
+      const userAnswer = answers[question.id];
+      const isCorrect = userAnswer === question.correct_answer;
+      const points = isCorrect ? toNumber(question.points || question.marks, 1) : 0;
+      score += points;
+
+      return {
+        questionId: question.id,
+        userAnswer,
+        correctAnswer: question.correct_answer,
+        isCorrect,
+        points
+      };
+    });
+
+    await createRecord('quiz_submissions', {
+      quiz_id: String(req.params.id),
+      student_id: String(req.user.id),
+      answers,
+      score,
+      time_taken: toNumber(timeTaken, 0)
+    });
+
+    res.json({ success: true, score, results });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// Rubric Routes
 router.get('/rubrics', auth, teacherOnly, async (req, res) => {
-    try {
-        const [rubrics] = await req.db.query('SELECT * FROM rubrics WHERE teacher_id = $1', [req.user.id]);
-        res.json({ success: true, rubrics });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+  try {
+    const rubrics = await listRecords('rubrics', {
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+
+    const ownRubrics = rubrics.filter((item) =>
+      String(item.teacher_id || item.created_by || '') === String(req.user.id));
+
+    res.json({ success: true, rubrics: ownRubrics });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 router.post('/rubrics', auth, teacherOnly, async (req, res) => {
-    try {
-        const { name, description, criteria } = req.body;
-        const totalPoints = criteria.reduce((sum, c) => sum + Math.max(...c.levels.map(l => l.points)), 0);
+  try {
+    const { name, description, criteria } = req.body;
+    const criteriaList = Array.isArray(criteria) ? criteria : [];
+    const totalPoints = criteriaList.reduce((sum, criterion) => {
+      const levels = Array.isArray(criterion.levels) ? criterion.levels : [];
+      const levelMax = levels.reduce((max, level) => Math.max(max, toNumber(level.points, 0)), 0);
+      return sum + levelMax;
+    }, 0);
 
-        const [result] = await req.db.query(`INSERT INTO rubrics (teacher_id, name, description, criteria, total_points)
-             VALUES ($1, $2, $3, $4, $5)`, [req.user.id, name, description, JSON.stringify(criteria), totalPoints]
-        );
+    const record = await createRecord('rubrics', {
+      teacher_id: String(req.user.id),
+      created_by: String(req.user.id),
+      name,
+      description: description || null,
+      criteria: criteriaList,
+      total_points: totalPoints
+    });
 
-        res.json({ success: true, rubricId: result[0].id });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+    res.json({ success: true, rubricId: record.id });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 module.exports = router;

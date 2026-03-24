@@ -1,33 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const { body, param, validationResult } = require('express-validator');
-const { query } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const {
+  createRecord,
+  getRecord,
+  listRecords,
+  updateRecord
+} = require('../services/firebase-data.service');
 
 function handleValidation(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
+  return null;
 }
 
-// Create rubric
 router.post(
   '/',
   authMiddleware,
   roleMiddleware('teacher', 'admin'),
   [
-    body('assignment_id').isInt({ min: 1 }),
+    body('assignment_id').notEmpty(),
     body('name').isString().isLength({ min: 1, max: 100 }),
     body('criteria').isArray({ min: 1 }).withMessage('criteria must be an array')
   ],
   async (req, res) => {
     const err = handleValidation(req, res); if (err) return;
     try {
-      const { assignment_id, name, criteria } = req.body;
-      const result = await query('INSERT INTO rubrics (assignment_id, name, criteria) VALUES ($1, $2, $3) RETURNING id', [assignment_id, name, JSON.stringify(criteria)]
-      );
-      res.status(201).json({ success: true, data: { id: result[0].id } });
+      const record = await createRecord('rubrics', {
+        assignment_id: req.body.assignment_id,
+        name: req.body.name,
+        criteria: req.body.criteria,
+        created_by: req.user.id
+      });
+      res.status(201).json({ success: true, data: { id: record.id } });
     } catch (error) {
       console.error('Error context:', error);
       res.status(500).json({ success: false, message: 'Failed to create rubric' });
@@ -35,43 +43,41 @@ router.post(
   }
 );
 
-// Get rubric for assignment
-router.get('/:assignment_id', authMiddleware, [param('assignment_id').isInt({ min: 1 })], async (req, res) => {
+router.get('/:assignment_id', authMiddleware, [param('assignment_id').isString().notEmpty()], async (req, res) => {
   const err = handleValidation(req, res); if (err) return;
   try {
-    const rows = await query('SELECT * FROM rubrics WHERE assignment_id = $1 ORDER BY created_at DESC LIMIT 1', [req.params.assignment_id]);
+    const rows = await listRecords('rubrics', {
+      filters: [{ field: 'assignment_id', value: req.params.assignment_id }],
+      orderBy: [{ field: 'created_at', direction: 'desc' }],
+      limit: 1
+    });
     if (rows.length === 0) return res.status(404).json({ success: false, message: 'Rubric not found' });
-    const r = rows[0];
-    try { r.criteria = JSON.parse(r.criteria); } catch { r.criteria = []; }
-    res.json({ success: true, data: r });
+    res.json({ success: true, data: rows[0] });
   } catch (error) {
     console.error('Error context:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch rubric' });
   }
 });
 
-// Update rubric
 router.put('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [
-  param('id').isInt({ min: 1 }),
+  param('id').isString().notEmpty(),
   body('name').optional().isString().isLength({ min: 1, max: 100 }),
   body('criteria').optional().isArray({ min: 1 })
 ], async (req, res) => {
   const err = handleValidation(req, res); if (err) return;
   try {
-    const fields = [];
-    const params = [];
-    let nextParam = 1;
-    if (typeof req.body.name !== 'undefined') {
-      fields.push(`name = $${nextParam++}`);
-      params.push(req.body.name);
+    const existing = await getRecord('rubrics', req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'Rubric not found' });
+
+    const payload = {};
+    if (typeof req.body.name !== 'undefined') payload.name = req.body.name;
+    if (typeof req.body.criteria !== 'undefined') payload.criteria = req.body.criteria;
+
+    if (Object.keys(payload).length === 0) {
+      return res.json({ success: true, message: 'No changes' });
     }
-    if (typeof req.body.criteria !== 'undefined') {
-      fields.push(`criteria = $${nextParam++}`);
-      params.push(JSON.stringify(req.body.criteria));
-    }
-    if (fields.length === 0) return res.json({ success: true, message: 'No changes' });
-    params.push(Number(req.params.id));
-    await query(`UPDATE rubrics SET ${fields.join(', ')} WHERE id = $${nextParam}`, params);
+
+    await updateRecord('rubrics', req.params.id, payload);
     res.json({ success: true, message: 'Updated' });
   } catch (error) {
     console.error('Error context:', error);
@@ -79,11 +85,9 @@ router.put('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [
   }
 });
 
-// Apply rubric to submissions (stub - depends on submissions schema)
-router.post('/:id/apply', authMiddleware, roleMiddleware('teacher', 'admin'), [param('id').isInt({ min: 1 })], async (req, res) => {
+router.post('/:id/apply', authMiddleware, roleMiddleware('teacher', 'admin'), [param('id').isString().notEmpty()], async (req, res) => {
   const err = handleValidation(req, res); if (err) return;
   try {
-    // TODO: Implement applying rubric to assignment submissions when submissions table available
     res.json({ success: true, message: 'Rubric applied to submissions (stub)' });
   } catch (error) {
     console.error('Error context:', error);

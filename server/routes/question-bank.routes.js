@@ -5,10 +5,15 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const csv = require('csv-parse');
 const ExcelJS = require('exceljs');
-const { query: dbQuery } = require('../database/db');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
+const {
+  createRecord,
+  deleteRecord,
+  getRecord,
+  listRecords,
+  updateRecord
+} = require('../services/firebase-data.service');
 
-// Rate limit imports
 const importLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -16,7 +21,6 @@ const importLimiter = rateLimit({
   legacyHeaders: false
 });
 
-// File upload (CSV/Excel) for import
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -26,15 +30,28 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Helpers
 function handleValidation(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
+  return null;
 }
 
-// Create question
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeQuestion(record) {
+  return {
+    ...record,
+    subject_id: toNumber(record.subject_id, record.subject_id),
+    marks: toNumber(record.marks, 1),
+    options: Array.isArray(record.options) ? record.options : []
+  };
+}
+
 router.post(
   '/',
   authMiddleware,
@@ -53,15 +70,19 @@ router.post(
   async (req, res) => {
     const err = handleValidation(req, res); if (err) return;
     try {
-      const teacher_id = req.user.id;
-      const { subject_id, question_text, question_type, difficulty, topic = null, blooms_taxonomy = null, options = null, correct_answer = null, marks = 1 } = req.body;
-      const result = await dbQuery(
-        `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, blooms_taxonomy, options, correct_answer, marks)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-         RETURNING id`,
-        [teacher_id, subject_id, question_text, question_type, difficulty, topic, blooms_taxonomy, options ? JSON.stringify(options) : null, correct_answer, marks]
-      );
-      res.status(201).json({ success: true, data: { id: result[0].id } });
+      const record = await createRecord('question_bank', {
+        teacher_id: req.user.id,
+        subject_id: toNumber(req.body.subject_id, 0),
+        question_text: req.body.question_text,
+        question_type: req.body.question_type,
+        difficulty: req.body.difficulty,
+        topic: req.body.topic || null,
+        blooms_taxonomy: req.body.blooms_taxonomy || null,
+        options: req.body.options || [],
+        correct_answer: req.body.correct_answer || null,
+        marks: toNumber(req.body.marks, 1)
+      });
+      res.status(201).json({ success: true, data: { id: record.id } });
     } catch (error) {
       console.error('Error context:', error);
       res.status(500).json({ success: false, message: 'Failed to create question', error: process.env.NODE_ENV === 'development' ? error.message : undefined });
@@ -69,7 +90,6 @@ router.post(
   }
 );
 
-// List questions with filters and pagination
 router.get(
   '/',
   authMiddleware,
@@ -85,43 +105,39 @@ router.get(
     const err = handleValidation(req, res); if (err) return;
     try {
       const { subject_id, difficulty, topic, q, page = 1, limit = 20 } = req.query;
-      const where = [];
-      const params = [];
-      let nextParam = 1;
-      if (subject_id) {
-        where.push(`subject_id = $${nextParam++}`);
-        params.push(Number(subject_id));
-      }
-      if (difficulty) {
-        where.push(`difficulty = $${nextParam++}`);
-        params.push(difficulty);
-      }
-      if (topic) {
-        where.push(`topic = $${nextParam++}`);
-        params.push(topic);
-      }
-      if (q) {
-        const textParam = `$${nextParam++}`;
-        const topicParam = `$${nextParam++}`;
-        where.push(`(question_text LIKE ${textParam} OR topic LIKE ${topicParam})`);
-        params.push(`%${q}%`, `%${q}%`);
-      }
-      // Teachers can only see their own by default; admin sees all
-      if (req.user.role === 'teacher') {
-        where.push(`teacher_id = $${nextParam++}`);
-        params.push(req.user.id);
-      }
-      const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
-      const offset = (Number(page) - 1) * Number(limit);
+      const filters = [];
 
-      const total = await dbQuery(`SELECT COUNT(*) AS c FROM question_bank ${whereSql}`, params);
-      const rows = await dbQuery(
-        `SELECT * FROM question_bank ${whereSql} ORDER BY created_at DESC LIMIT ${Number(limit)} OFFSET ${offset}`,
-        params
-      );
-      // Parse options JSON
-      rows.forEach(r => { if (r.options) { try { r.options = JSON.parse(r.options); } catch { r.options = []; } } });
-      res.json({ success: true, data: { items: rows, page: Number(page), limit: Number(limit), total: total[0].c || 0 } });
+      if (subject_id) filters.push({ field: 'subject_id', value: Number(subject_id) });
+      if (difficulty) filters.push({ field: 'difficulty', value: difficulty });
+      if (topic) filters.push({ field: 'topic', value: topic });
+      if (req.user.role === 'teacher') filters.push({ field: 'teacher_id', value: req.user.id });
+
+      let rows = await listRecords('question_bank', {
+        filters,
+        orderBy: [{ field: 'created_at', direction: 'desc' }]
+      });
+
+      if (q) {
+        const queryText = String(q).toLowerCase();
+        rows = rows.filter((item) => {
+          return String(item.question_text || '').toLowerCase().includes(queryText)
+            || String(item.topic || '').toLowerCase().includes(queryText);
+        });
+      }
+
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const offset = (pageNum - 1) * limitNum;
+
+      res.json({
+        success: true,
+        data: {
+          items: rows.slice(offset, offset + limitNum).map(normalizeQuestion),
+          page: pageNum,
+          limit: limitNum,
+          total: rows.length
+        }
+      });
     } catch (error) {
       console.error('Error context:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch questions', error: process.env.NODE_ENV === 'development' ? error.message : undefined });
@@ -129,29 +145,24 @@ router.get(
   }
 );
 
-// Get details
-router.get('/:id', authMiddleware, [param('id').isInt({ min: 1 })], async (req, res) => {
+router.get('/:id', authMiddleware, [param('id').isString().notEmpty()], async (req, res) => {
   const err = handleValidation(req, res); if (err) return;
   try {
-    const id = Number(req.params.id);
-    const rows = await dbQuery('SELECT * FROM question_bank WHERE id = $1', [id]);
-    if (rows.length === 0) return res.status(404).json({ success: false, message: 'Not found' });
-    const row = rows[0];
-    if (row.options) { try { row.options = JSON.parse(row.options); } catch { row.options = []; } }
-    res.json({ success: true, data: row });
+    const row = await getRecord('question_bank', req.params.id);
+    if (!row) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, data: normalizeQuestion(row) });
   } catch (error) {
     console.error('Error context:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch question' });
   }
 });
 
-// Update
 router.put(
   '/:id',
   authMiddleware,
   roleMiddleware('teacher', 'admin'),
   [
-    param('id').isInt({ min: 1 }),
+    param('id').isString().notEmpty(),
     body('question_text').optional().isString(),
     body('question_type').optional().isIn(['mcq', 'short_answer', 'essay']),
     body('difficulty').optional().isIn(['easy', 'medium', 'hard']),
@@ -164,29 +175,20 @@ router.put(
   async (req, res) => {
     const err = handleValidation(req, res); if (err) return;
     try {
-      const id = Number(req.params.id);
-      // Ownership check for teachers
-      if (req.user.role === 'teacher') {
-        const own = await dbQuery('SELECT id FROM question_bank WHERE id = $1 AND teacher_id = $2', [id, req.user.id]);
-        if (own.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
+      const existing = await getRecord('question_bank', req.params.id);
+      if (!existing) return res.status(404).json({ success: false, message: 'Not found' });
+      if (req.user.role === 'teacher' && existing.teacher_id !== req.user.id) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
       }
-      const fields = ['question_text','question_type','difficulty','topic','blooms_taxonomy','correct_answer','marks'];
-      const sets = [];
-      const params = [];
-      let nextParam = 1;
-      for (const f of fields) {
-        if (typeof req.body[f] !== 'undefined') {
-          sets.push(`${f} = $${nextParam++}`);
-          params.push(req.body[f]);
-        }
-      }
-      if (typeof req.body.options !== 'undefined') {
-        sets.push(`options = $${nextParam++}`);
-        params.push(JSON.stringify(req.body.options));
-      }
-      if (sets.length === 0) return res.json({ success: true, message: 'No changes' });
-      params.push(id);
-      await dbQuery(`UPDATE question_bank SET ${sets.join(', ')} WHERE id = $${nextParam}`, params);
+
+      const payload = {};
+      ['question_text', 'question_type', 'difficulty', 'topic', 'blooms_taxonomy', 'correct_answer'].forEach((field) => {
+        if (typeof req.body[field] !== 'undefined') payload[field] = req.body[field];
+      });
+      if (typeof req.body.options !== 'undefined') payload.options = req.body.options;
+      if (typeof req.body.marks !== 'undefined') payload.marks = toNumber(req.body.marks, existing.marks);
+
+      await updateRecord('question_bank', req.params.id, payload);
       res.json({ success: true, message: 'Updated' });
     } catch (error) {
       console.error('Error context:', error);
@@ -195,16 +197,16 @@ router.put(
   }
 );
 
-// Delete
-router.delete('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [param('id').isInt({ min: 1 })], async (req, res) => {
+router.delete('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [param('id').isString().notEmpty()], async (req, res) => {
   const err = handleValidation(req, res); if (err) return;
   try {
-    const id = Number(req.params.id);
-    if (req.user.role === 'teacher') {
-      const own = await dbQuery('SELECT id FROM question_bank WHERE id = $1 AND teacher_id = $2', [id, req.user.id]);
-      if (own.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
+    const existing = await getRecord('question_bank', req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: 'Not found' });
+    if (req.user.role === 'teacher' && existing.teacher_id !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
     }
-    await dbQuery('DELETE FROM question_bank WHERE id = $1', [id]);
+
+    await deleteRecord('question_bank', req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (error) {
     console.error('Error context:', error);
@@ -212,61 +214,74 @@ router.delete('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), [param
   }
 });
 
-// Import from CSV/Excel
 router.post('/import', authMiddleware, roleMiddleware('teacher', 'admin'), importLimiter, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'File is required' });
     const teacher_id = req.user.id;
     const inserted = [];
 
+    const createQuestion = async ({ subject_id, question_text, question_type, difficulty, topic, correct_answer, marks }) => {
+      const record = await createRecord('question_bank', {
+        teacher_id,
+        subject_id: Number(subject_id),
+        question_text: String(question_text).slice(0, 5000),
+        question_type: question_type || 'mcq',
+        difficulty: difficulty || 'easy',
+        topic: topic || null,
+        correct_answer: correct_answer || null,
+        marks: Number(marks || 1),
+        options: []
+      });
+      inserted.push(record.id);
+    };
+
     if (req.file.mimetype === 'text/csv' || req.file.originalname.endsWith('.csv')) {
       await new Promise((resolve, reject) => {
         csv.parse(req.file.buffer, { columns: true, trim: true }, async (err, records) => {
           if (err) return reject(err);
-          for (const r of records) {
-            const { subject_id, question_text, question_type, difficulty, topic, correct_answer, marks } = r;
-            if (!subject_id || !question_text) continue;
-            const result = await dbQuery(
-              `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, correct_answer, marks)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-               RETURNING id`,
-              [teacher_id, Number(subject_id), String(question_text).slice(0, 5000), (question_type||'mcq'), (difficulty||'easy'), topic||null, correct_answer||null, Number(marks||1)]
-            );
-            inserted.push(result[0].id);
+          try {
+            for (const record of records) {
+              if (!record.subject_id || !record.question_text) continue;
+              await createQuestion(record);
+            }
+            resolve();
+          } catch (createError) {
+            reject(createError);
           }
-          resolve();
         });
       });
     } else {
-      const wb = new ExcelJS.Workbook();
-      await wb.xlsx.load(req.file.buffer);
-      const ws = wb.worksheets[0];
-      const headers = ws.getRow(1).values.map(v => String(v||'').toLowerCase());
-      const idx = (name) => headers.findIndex(h => h === name.toLowerCase());
-      for (let r = 2; r <= ws.rowCount; r++) {
-        const row = ws.getRow(r).values;
-        const subject_id = Number(row[idx('subject_id')]);
-        const question_text = row[idx('question_text')];
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(req.file.buffer);
+      const worksheet = workbook.worksheets[0];
+      const headerRow = worksheet.getRow(1).values.map((value) => String(value || '').toLowerCase());
+      const indexOf = (name) => headerRow.findIndex((header) => header === name.toLowerCase());
+
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
+        const row = worksheet.getRow(rowNumber).values;
+        const subject_id = Number(row[indexOf('subject_id')]);
+        const question_text = row[indexOf('question_text')];
         if (!subject_id || !question_text) continue;
-        const question_type = row[idx('question_type')] || 'mcq';
-        const difficulty = row[idx('difficulty')] || 'easy';
-        const topic = row[idx('topic')] || null;
-        const correct_answer = row[idx('correct_answer')] || null;
-        const marks = Number(row[idx('marks')] || 1);
-        const result = await dbQuery(
-          `INSERT INTO question_bank (teacher_id, subject_id, question_text, question_type, difficulty, topic, correct_answer, marks)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           RETURNING id`,
-          [teacher_id, subject_id, String(question_text).slice(0, 5000), question_type, difficulty, topic, correct_answer, marks]
-        );
-        inserted.push(result[0].id);
+        await createQuestion({
+          subject_id,
+          question_text,
+          question_type: row[indexOf('question_type')] || 'mcq',
+          difficulty: row[indexOf('difficulty')] || 'easy',
+          topic: row[indexOf('topic')] || null,
+          correct_answer: row[indexOf('correct_answer')] || null,
+          marks: Number(row[indexOf('marks')] || 1)
+        });
       }
     }
 
-    res.json({ success: true, message: 'Imported', data: { count: inserted.length, ids: inserted } });
+    res.json({
+      success: true,
+      message: 'Import complete',
+      data: { inserted: inserted.length, ids: inserted }
+    });
   } catch (error) {
-    console.error('Error context:', error);
-    res.status(500).json({ success: false, message: 'Import failed', error: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    console.error('Question import error:', error);
+    res.status(500).json({ success: false, message: 'Failed to import question bank data' });
   }
 });
 

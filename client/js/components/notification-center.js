@@ -140,10 +140,9 @@ class NotificationCenter {
    * Initialize Socket.IO for real-time notifications
    */
   initializeSocket() {
-    if (typeof io !== 'undefined') {
-      this.socket = io();
-      
-      this.socket.on('notification:new', (notification) => {
+    if (window.APP?.Socket) {
+      this.socket = window.APP.Socket.connect();
+      window.APP.Socket.on('notification:new', (notification) => {
         this.handleNewNotification(notification);
       });
     }

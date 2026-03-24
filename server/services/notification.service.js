@@ -1,14 +1,14 @@
-const db = require('../database/db');
-
-/**
- * Comprehensive notification service
- * Handles in-app, email, SMS, and push notifications
- */
+const {
+  countRecords,
+  createRecord,
+  deleteRecord,
+  getRecord,
+  listRecords,
+  updateRecord
+} = require('./firebase-data.service');
+const { emitToUser } = require('../socket/socket');
 
 class NotificationService {
-  /**
-   * Create a new notification
-   */
   async create(data) {
     const {
       userId,
@@ -20,27 +20,18 @@ class NotificationService {
     } = data;
 
     try {
-      const rows = await db.query(
-        `INSERT INTO notifications (user_id, title, message, type, link, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, user_id, title, message, type, link, metadata, is_read, created_at`,
-        [userId, title, message, type, link, JSON.stringify(metadata)]
-      );
-      const row = rows[0];
-
-      const notification = {
-        id: row?.id,
-        userId: row?.user_id || userId,
-        title: row?.title || title,
-        message: row?.message || message,
-        type: row?.type || type,
-        link: row?.link || link,
+      const record = await createRecord('notifications', {
+        user_id: userId,
+        title,
+        message,
+        type,
+        link,
         metadata,
-        isRead: row?.is_read || false,
-        createdAt: row?.created_at || new Date()
-      };
+        is_read: false,
+        read_at: null
+      });
 
-      // Emit real-time notification via Socket.IO
+      const notification = this.toClientShape(record);
       await this.emitRealTime(userId, notification);
 
       return {
@@ -56,9 +47,6 @@ class NotificationService {
     }
   }
 
-  /**
-   * Create bulk notifications for multiple users
-   */
   async createBulk(users, data) {
     const results = await Promise.all(users.map((userId) => this.create({ userId, ...data })));
     const successCount = results.filter((result) => result.success).length;
@@ -70,9 +58,6 @@ class NotificationService {
     };
   }
 
-  /**
-   * Get notifications for a user
-   */
   async getForUser(userId, options = {}) {
     const {
       isRead = null,
@@ -81,63 +66,34 @@ class NotificationService {
       pageSize = 20
     } = options;
 
-    let sql = 'SELECT * FROM notifications WHERE user_id = $1';
-    const params = [userId];
-    let nextParam = 2;
-
-    if (isRead !== null) {
-      sql += ` AND is_read = $${nextParam++}`;
-      params.push(isRead);
-    }
-
-    if (type) {
-      sql += ` AND type = $${nextParam++}`;
-      params.push(type);
-    }
-
-    sql += ` ORDER BY created_at DESC LIMIT $${nextParam++} OFFSET $${nextParam++}`;
-    params.push(pageSize, (page - 1) * pageSize);
-
     try {
-      const notifications = await db.query(sql, params);
+      const filters = [{ field: 'user_id', value: userId }];
+      if (isRead !== null) filters.push({ field: 'is_read', value: isRead });
+      if (type) filters.push({ field: 'type', value: type });
 
-      // Get unread count
-      const unreadRows = await db.query(
-        'SELECT COUNT(*) as unreadCount FROM notifications WHERE user_id = $1 AND is_read = FALSE',
-        [userId]
-      );
-      const unreadCount = Number(unreadRows[0]?.unreadcount || unreadRows[0]?.unreadCount || 0);
+      const all = await listRecords('notifications', {
+        filters,
+        orderBy: [{ field: 'created_at', direction: 'desc' }]
+      });
+      const unreadCount = await countRecords('notifications', {
+        filters: [
+          { field: 'user_id', value: userId },
+          { field: 'is_read', value: false }
+        ]
+      });
 
-      // Get total count
-      let countSql = 'SELECT COUNT(*) as total FROM notifications WHERE user_id = $1';
-      const countParams = [userId];
-      nextParam = 2;
-
-      if (isRead !== null) {
-        countSql += ` AND is_read = $${nextParam++}`;
-        countParams.push(isRead);
-      }
-
-      if (type) {
-        countSql += ` AND type = $${nextParam++}`;
-        countParams.push(type);
-      }
-
-      const totalRows = await db.query(countSql, countParams);
-      const total = Number(totalRows[0]?.total || 0);
+      const start = (page - 1) * pageSize;
+      const notifications = all.slice(start, start + pageSize).map((record) => this.toClientShape(record));
 
       return {
         success: true,
-        notifications: notifications.map((n) => ({
-          ...n,
-          metadata: JSON.parse(n.metadata || '{}')
-        })),
+        notifications,
         unreadCount,
         pagination: {
           page,
           pageSize,
-          total,
-          totalPages: Math.ceil(total / pageSize)
+          total: all.length,
+          totalPages: Math.ceil(all.length / pageSize)
         }
       };
     } catch (error) {
@@ -149,19 +105,19 @@ class NotificationService {
     }
   }
 
-  /**
-   * Mark notification as read
-   */
   async markAsRead(notificationId, userId) {
     try {
-      const rows = await db.query(
-        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING id',
-        [notificationId, userId]
-      );
+      const notification = await getRecord('notifications', notificationId);
+      if (!notification || notification.user_id !== userId) {
+        return { success: false };
+      }
 
-      return {
-        success: rows.length > 0
-      };
+      await updateRecord('notifications', notificationId, {
+        is_read: true,
+        read_at: new Date().toISOString()
+      });
+
+      return { success: true };
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
       return {
@@ -171,19 +127,23 @@ class NotificationService {
     }
   }
 
-  /**
-   * Mark all notifications as read for a user
-   */
   async markAllAsRead(userId) {
     try {
-      const rows = await db.query(
-        'UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE user_id = $1 AND is_read = FALSE RETURNING id',
-        [userId]
-      );
+      const notifications = await listRecords('notifications', {
+        filters: [
+          { field: 'user_id', value: userId },
+          { field: 'is_read', value: false }
+        ]
+      });
+
+      await Promise.all(notifications.map((notification) => updateRecord('notifications', notification.id, {
+        is_read: true,
+        read_at: new Date().toISOString()
+      })));
 
       return {
         success: true,
-        count: rows.length
+        count: notifications.length
       };
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
@@ -194,19 +154,15 @@ class NotificationService {
     }
   }
 
-  /**
-   * Delete notification
-   */
   async delete(notificationId, userId) {
     try {
-      const rows = await db.query(
-        'DELETE FROM notifications WHERE id = $1 AND user_id = $2 RETURNING id',
-        [notificationId, userId]
-      );
+      const notification = await getRecord('notifications', notificationId);
+      if (!notification || notification.user_id !== userId) {
+        return { success: false };
+      }
 
-      return {
-        success: rows.length > 0
-      };
+      await deleteRecord('notifications', notificationId);
+      return { success: true };
     } catch (error) {
       console.error('Failed to delete notification:', error);
       return {
@@ -216,19 +172,19 @@ class NotificationService {
     }
   }
 
-  /**
-   * Delete all read notifications for a user
-   */
   async deleteAllRead(userId) {
     try {
-      const rows = await db.query(
-        'DELETE FROM notifications WHERE user_id = $1 AND is_read = TRUE RETURNING id',
-        [userId]
-      );
+      const notifications = await listRecords('notifications', {
+        filters: [
+          { field: 'user_id', value: userId },
+          { field: 'is_read', value: true }
+        ]
+      });
 
+      await Promise.all(notifications.map((notification) => deleteRecord('notifications', notification.id)));
       return {
         success: true,
-        count: rows.length
+        count: notifications.length
       };
     } catch (error) {
       console.error('Failed to delete read notifications:', error);
@@ -239,16 +195,14 @@ class NotificationService {
     }
   }
 
-  /**
-   * Get unread count for a user
-   */
   async getUnreadCount(userId) {
     try {
-      const countRows = await db.query(
-        'SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND is_read = FALSE',
-        [userId]
-      );
-      const count = Number(countRows[0]?.count || 0);
+      const count = await countRecords('notifications', {
+        filters: [
+          { field: 'user_id', value: userId },
+          { field: 'is_read', value: false }
+        ]
+      });
 
       return {
         success: true,
@@ -263,97 +217,66 @@ class NotificationService {
     }
   }
 
-  /**
-   * Emit real-time notification via Socket.IO
-   */
   async emitRealTime(userId, notification) {
     try {
-      // This will be injected by the route/controller
-      if (global.io) {
-        global.io.to(`user:${userId}`).emit('notification:new', notification);
-      }
+      emitToUser(userId, 'notification:new', notification);
     } catch (error) {
       console.error('Failed to emit real-time notification:', error);
     }
   }
 
-  /**
-   * Send email notification (placeholder for nodemailer integration)
-   */
   async sendEmail(userId, data) {
-    // TODO: Implement with nodemailer
     console.log(`Email notification to user ${userId}:`, data);
-    return { success: true, method: 'email' };
+    return { success: true };
   }
 
-  /**
-   * Send SMS notification (placeholder for Twilio integration)
-   */
   async sendSMS(userId, data) {
-    // TODO: Implement with Twilio
     console.log(`SMS notification to user ${userId}:`, data);
-    return { success: true, method: 'sms' };
+    return { success: true };
   }
 
-  /**
-   * Send push notification (placeholder for Web Push API)
-   */
   async sendPush(userId, data) {
-    // TODO: Implement with Web Push API
     console.log(`Push notification to user ${userId}:`, data);
-    return { success: true, method: 'push' };
+    return { success: true };
   }
 
-  /**
-   * Send notification via all enabled channels
-   */
   async sendMultiChannel(userId, data) {
-    const results = {
-      inApp: await this.create({ userId, ...data }),
-      email: null,
-      sms: null,
-      push: null
-    };
-
-    // Check user preferences
     try {
-      const preferencesRows = await db.query(
-        'SELECT email_notifications, sms_notifications, push_notifications FROM user_preferences WHERE user_id = ?',
-        [userId]
-      );
+      const result = await this.create({
+        userId,
+        title: data.title,
+        message: data.message,
+        type: data.type,
+        link: data.link,
+        metadata: data.metadata
+      });
 
-      const preferences = preferencesRows[0];
-      if (preferences) {
-        if (preferences.email_notifications) {
-          results.email = await this.sendEmail(userId, data);
-        }
-        if (preferences.sms_notifications) {
-          results.sms = await this.sendSMS(userId, data);
-        }
-        if (preferences.push_notifications) {
-          results.push = await this.sendPush(userId, data);
-        }
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create in-app notification');
       }
+
+      return { success: true };
     } catch (error) {
       console.error('Failed to send multi-channel notification:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
-
-    return results;
   }
 
-  /**
-   * Clean old notifications (keep last 90 days)
-   */
-  async cleanOld(daysToKeep = 90) {
+  async cleanOld(days = 90) {
     try {
-      const result = await db.query(
-        'DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY) AND is_read = TRUE',
-        [daysToKeep]
-      );
+      const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+      const notifications = await listRecords('notifications', {
+        filters: [{ field: 'is_read', value: true }]
+      });
+      const stale = notifications.filter((notification) => Date.parse(notification.created_at || '') < cutoff);
+      await Promise.all(stale.map((notification) => deleteRecord('notifications', notification.id)));
 
       return {
         success: true,
-        deletedCount: result.affectedRows
+        count: stale.length
       };
     } catch (error) {
       console.error('Failed to clean old notifications:', error);
@@ -364,29 +287,26 @@ class NotificationService {
     }
   }
 
-  /**
-   * Get notification statistics
-   */
   async getStats(userId) {
     try {
-      const statsRows = await db.query(
-        `SELECT 
-          COUNT(*) as total,
-          SUM(CASE WHEN is_read = FALSE THEN 1 ELSE 0 END) as unread,
-          SUM(CASE WHEN is_read = TRUE THEN 1 ELSE 0 END) as read,
-          COUNT(CASE WHEN type = 'attendance' THEN 1 END) as attendance,
-          COUNT(CASE WHEN type = 'marks' THEN 1 END) as marks,
-          COUNT(CASE WHEN type = 'assignment' THEN 1 END) as assignment,
-          COUNT(CASE WHEN type = 'event' THEN 1 END) as event,
-          COUNT(CASE WHEN type = 'announcement' THEN 1 END) as announcement
-        FROM notifications
-        WHERE user_id = ?`,
-        [userId]
-      );
+      const notifications = await listRecords('notifications', {
+        filters: [{ field: 'user_id', value: userId }]
+      });
+
+      const stats = notifications.reduce((acc, notification) => {
+        acc.total += 1;
+        if (!notification.is_read) acc.unread += 1;
+        acc.byType[notification.type] = (acc.byType[notification.type] || 0) + 1;
+        return acc;
+      }, {
+        total: 0,
+        unread: 0,
+        byType: {}
+      });
 
       return {
         success: true,
-        stats: statsRows[0] || { total: 0, unread: 0, read: 0, attendance: 0, marks: 0, assignment: 0, event: 0, announcement: 0 }
+        data: stats
       };
     } catch (error) {
       console.error('Failed to get notification stats:', error);
@@ -395,6 +315,21 @@ class NotificationService {
         error: error.message
       };
     }
+  }
+
+  toClientShape(record) {
+    return {
+      id: record.id,
+      user_id: record.user_id,
+      title: record.title,
+      message: record.message,
+      type: record.type || 'info',
+      link: record.link || null,
+      metadata: record.metadata || {},
+      is_read: record.is_read === true,
+      created_at: record.created_at || new Date().toISOString(),
+      read_at: record.read_at || null
+    };
   }
 }
 
