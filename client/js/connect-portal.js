@@ -329,7 +329,7 @@
 
             clearSensitiveInputs();
             currentSessionId = null;
-            syncStoredUser(response.connection, null, false);
+            syncStoredUser(response.connection, response.data || null, true);
             currentConnection = response.connection || currentConnection;
             renderConnectionStatus();
             resetSessionUi(false);
