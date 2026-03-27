@@ -29,7 +29,7 @@
     "render:schema": "node scripts/db/create-render-schema.js",
     "render:setup": "npm run render:schema && npm run render:seed",
     "test": "jest --coverage",
-    "test:mobile-contracts": "jest --runInBand server/__tests__/demo-auth.service.test.js server/__tests__/soa-data.service.test.js server/__tests__/mobile-parity.service.test.js",
+    "test:mobile-contracts": "jest --runInBand server/__tests__/demo-auth.service.test.js server/__tests__/soa-data.service.test.js server/__tests__/soa-data.persistence.test.js server/__tests__/mobile-parity.service.test.js",
     "test:e2e": "playwright test",
     "test:scraper": "node scripts/tests/test-portal-scraper.js",
     "verify:ai": "node scripts/ops/verify-ai-service.js",

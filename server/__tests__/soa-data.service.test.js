@@ -200,6 +200,58 @@ describe('soa-data.service', () => {
     });
   });
 
+  test('treats structured SOA section snapshots as imported data even without marks or attendance summaries', async () => {
+    const normalized = normalizeSoaPortalData({
+      rawSections: {
+        timetable: {
+          title: 'Class Timetable',
+          tables: [
+            {
+              headers: ['Monday', 'Tuesday'],
+              rows: [
+                ['08:00 AM to 09:00 AM CSE3141 Lab', '10:00 AM to 11:00 AM MTH3003 Room 411']
+              ]
+            }
+          ]
+        },
+        subjects: {
+          title: 'Registered Subjects',
+          tables: [
+            {
+              headers: ['Subject Code', 'Subject Name', 'Credits'],
+              rows: [
+                ['CSE3141', 'Computer Science Workshop 2', '2']
+              ]
+            }
+          ]
+        }
+      },
+      dataSource: 'raw_only_section_test'
+    });
+
+    await persistPortalDataForUser({
+      userId: 'STU20990014',
+      registrationNumber: 'STU20990014',
+      normalizedData: normalized,
+      isVerified: true,
+      portalConnected: true
+    });
+
+    const snapshot = await getPortalSnapshotForUser({
+      userId: 'STU20990014',
+      registrationNumber: 'STU20990014'
+    });
+
+    expect(snapshot.status).toMatchObject({
+      connected: true,
+      isVerified: true,
+      hasImportedData: true,
+      dataSource: 'raw_only_section_test'
+    });
+    expect(snapshot.normalizedData.timetable).toHaveLength(1);
+    expect(snapshot.normalizedData.subjects).toHaveLength(1);
+  });
+
   test('normalizes timetable and subject rows from captured SOA section tables', () => {
     const normalized = normalizeSoaPortalData({
       rawSections: {

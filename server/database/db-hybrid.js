@@ -16,6 +16,7 @@ const queryLogger = winston.createLogger({
 
 // Determine which database to use
 const useVercelPostgres = process.env.VERCEL || process.env.POSTGRES_URL;
+const databaseUrl = process.env.DATABASE_URL;
 
 // Parse DATABASE_URL into individual env vars when present (Render, Heroku, etc.)
 // This must run before pool creation so DB_HOST etc. are populated.
@@ -135,25 +136,47 @@ if (useVercelPostgres) {
   
   const { Pool } = require('pg');
   const dbHost = process.env.DB_HOST;
-  const normalizedHost = (dbHost || '').toLowerCase();
+  let databaseUrlHost = '';
+
+  if (databaseUrl) {
+    try {
+      databaseUrlHost = new URL(databaseUrl).hostname.toLowerCase();
+    } catch (_) {
+      databaseUrlHost = '';
+    }
+  }
+
+  const normalizedHost = (dbHost || databaseUrlHost || '').toLowerCase();
   const isLocalHost = normalizedHost === 'localhost' || normalizedHost === '127.0.0.1';
   const useSsl = process.env.DB_SSL === 'true' || (!isLocalHost && process.env.DB_SSL !== 'false');
   
-  const poolConfig = {
-    host: dbHost,
-    port: parseInt(process.env.DB_PORT) || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'postgres',
-    ssl: useSsl ? { rejectUnauthorized: false } : false,
-    // Serverless-optimized settings
-    max: process.env.VERCEL ? 2 : 20,
-    min: process.env.VERCEL ? 0 : 2,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 30000,
-    query_timeout: 30000,
-    statement_timeout: 30000
-  };
+  const poolConfig = databaseUrl
+    ? {
+      connectionString: databaseUrl,
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
+      // Serverless-optimized settings
+      max: process.env.VERCEL ? 2 : 20,
+      min: process.env.VERCEL ? 0 : 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 30000,
+      query_timeout: 30000,
+      statement_timeout: 30000
+    }
+    : {
+      host: dbHost,
+      port: parseInt(process.env.DB_PORT) || 5432,
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME || 'postgres',
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
+      // Serverless-optimized settings
+      max: process.env.VERCEL ? 2 : 20,
+      min: process.env.VERCEL ? 0 : 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 30000,
+      query_timeout: 30000,
+      statement_timeout: 30000
+    };
   
   pool = new Pool(poolConfig);
   
@@ -163,7 +186,7 @@ if (useVercelPostgres) {
       try {
         const client = await pool.connect();
         console.log('✓ Database connected successfully (Supabase PostgreSQL)');
-        console.log(`Connected to: ${poolConfig.host}:${poolConfig.port}`);
+        console.log(`Connected to: ${databaseUrlHost || poolConfig.host}:${poolConfig.port || 5432}`);
         client.release();
         return true;
       } catch (err) {

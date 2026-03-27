@@ -353,6 +353,15 @@ async function handleImport(req, res) {
 
     const snapshot = await loadSnapshot(req);
 
+    if (!snapshot.status?.hasImportedData || !snapshot.normalizedData) {
+      return res.status(502).json({
+        success: false,
+        status: 'PERSISTENCE_ERROR',
+        message: 'SOA data was fetched, but it could not be saved to your account. Please try again.',
+        officialPortalUrl: OFFICIAL_PORTAL_URL
+      });
+    }
+
     return res.json({
       success: true,
       status: 'SUCCESS',
@@ -363,10 +372,17 @@ async function handleImport(req, res) {
       data: snapshot.normalizedData
     });
   } catch (error) {
-    return res.status(500).json({
+    const isPersistenceError = error?.code === 'PORTAL_PERSIST_FAILED';
+    if (isPersistenceError) {
+      console.error(`[SOA Import] Failed to persist SOA data for ${req.user?.id || regNo}: ${error.message}`);
+    }
+
+    return res.status(isPersistenceError ? 502 : 500).json({
       success: false,
-      status: 'SCRAPE_ERROR',
-      message: 'SOA import failed. Please try again with a fresh CAPTCHA.'
+      status: isPersistenceError ? 'PERSISTENCE_ERROR' : 'SCRAPE_ERROR',
+      message: isPersistenceError
+        ? 'SOA data was fetched, but it could not be saved to your account. Please try again.'
+        : 'SOA import failed. Please try again with a fresh CAPTCHA.'
     });
   }
 }
