@@ -341,13 +341,38 @@ async function handleImport(req, res) {
       ? result.data
       : normalizeSoaPortalData(result.data);
 
-    await persistPortalDataForUser({
-      userId: req.user.id,
-      registrationNumber: regNo,
-      normalizedData,
-      isVerified: true,
-      portalConnected: true
-    });
+    try {
+      await persistPortalDataForUser({
+        userId: req.user.id,
+        registrationNumber: regNo,
+        normalizedData,
+        isVerified: true,
+        portalConnected: true
+      });
+    } catch (error) {
+      if (error?.code === 'PORTAL_PERSIST_FAILED') {
+        const fallbackSnapshot = await getPortalSnapshotForUser({
+          userId: req.user.id,
+          registrationNumber: regNo
+        });
+
+        if (fallbackSnapshot.status?.hasImportedData && fallbackSnapshot.normalizedData) {
+          await invalidateStudentPortalCaches(req.user.id);
+          return res.json({
+            success: true,
+            status: 'SUCCESS_WITH_LOCAL_CACHE',
+            message: 'SOA data imported successfully.',
+            warning: 'SOA data could not be saved to durable storage on the server, but it is available in this session cache now.',
+            officialPortalUrl: OFFICIAL_PORTAL_URL,
+            redirectTo: '/dashboard/student-personal-info',
+            connection: fallbackSnapshot.status,
+            data: fallbackSnapshot.normalizedData
+          });
+        }
+      }
+
+      throw error;
+    }
 
     await invalidateStudentPortalCaches(req.user.id);
 

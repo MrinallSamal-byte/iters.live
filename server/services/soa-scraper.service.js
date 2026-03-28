@@ -1256,13 +1256,20 @@ async function createSessionAndGetCaptcha() {
             };
         }
 
-        const reachability = await checkPortalReachability();
-        if (!reachability.reachable) {
-            console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
-            console.warn('[SOA Scraper] Continuing with browser attempt despite failed reachability check');
-        } else {
-            console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
-        }
+        // Run the lightweight HTTPS reachability probe in the background so it never
+        // adds visible latency to the user's "Start SOA session" action.
+        checkPortalReachability()
+            .then((reachability) => {
+                if (!reachability.reachable) {
+                    console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
+                    console.warn('[SOA Scraper] Continuing with browser attempt despite failed reachability check');
+                } else {
+                    console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
+                }
+            })
+            .catch((error) => {
+                console.warn(`[SOA Scraper] Portal reachability check error: ${error.message}`);
+            });
 
         const resolvedPortalIp = await resolvePortalIpAddress();
         if (resolvedPortalIp) {

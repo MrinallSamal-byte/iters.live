@@ -455,12 +455,55 @@
         user.dataSource = connection?.dataSource || user.dataSource || null;
 
         if (keepLocalPortalData && data) {
-            user.portalData = data;
+            user.portalData = compactPortalDataForClientCache(data);
         } else {
             delete user.portalData;
         }
 
         APP.Storage.set('user', user);
+    }
+
+    function compactPortalDataForClientCache(data) {
+        if (!data || typeof data !== 'object') return data;
+
+        const compactSections = data.raw?.sections && typeof data.raw.sections === 'object'
+            ? Object.entries(data.raw.sections).reduce((acc, [sectionKey, sectionValue]) => {
+                if (!sectionValue || typeof sectionValue !== 'object') return acc;
+
+                const compactSection = {
+                    sectionName: sectionValue.sectionName || sectionKey,
+                    title: sectionValue.title || null,
+                    url: sectionValue.url || null,
+                    headings: Array.isArray(sectionValue.headings) ? sectionValue.headings.slice(0, 24) : [],
+                    fields: sectionValue.fields && typeof sectionValue.fields === 'object' ? sectionValue.fields : {},
+                    tables: Array.isArray(sectionValue.tables)
+                        ? sectionValue.tables.slice(0, 8).map((table) => ({
+                            title: table?.title || null,
+                            headers: Array.isArray(table?.headers) ? table.headers.slice(0, 16) : [],
+                            rows: Array.isArray(table?.rows)
+                                ? table.rows.slice(0, 80).map((row) => Array.isArray(row) ? row.slice(0, 16) : [])
+                                : []
+                        }))
+                        : []
+                };
+
+                if (
+                    compactSection.title ||
+                    compactSection.headings.length ||
+                    Object.keys(compactSection.fields).length ||
+                    compactSection.tables.length
+                ) {
+                    acc[sectionKey] = compactSection;
+                }
+
+                return acc;
+            }, {})
+            : {};
+
+        return {
+            ...data,
+            raw: { sections: compactSections }
+        };
     }
 
     function renderCaptcha(imageSrc) {
