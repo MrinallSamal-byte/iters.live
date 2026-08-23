@@ -1,89 +1,33 @@
 # ITERasn hub
 
-ITERasn hub is a full-stack college portal for students, teachers, and administrators. It combines a vanilla HTML/CSS/JavaScript frontend with a Node.js + Express backend, role-based dashboards, AI-assisted features, demo-mode local login, payment/admit-card flows, real-time notifications, an optional scraper package, and a native Android client under `android-app/`.
+ITERasn hub is a college management system for ITER / SOA university students. It pairs a vanilla HTML/CSS/JavaScript frontend with a Node.js + Express backend, stores data primarily in Firebase Firestore (with optional SQL persistence), and can import a student's official SOA portal data through a headless Playwright scraper that the student authorizes by solving their own CAPTCHA. An AI assistant via OpenRouter/Gemini, PWA offline support, real-time updates over Socket.IO, and Electron/Android wrappers round out the platform.
 
-This README is the single consolidated project document for the repository. It replaces the old scattered setup notes, deployment guides, fix summaries, UI notes, and feature-specific Markdown files that previously lived across the repo.
+## Features
 
-## Contents
+### Student
 
-1. Project Overview
-2. Core Capabilities
-3. System Architecture
-4. Application Workflows
-5. Repository Structure
-6. Frontend Surface Map
-7. Backend Surface Map
-8. Local Development Setup
-9. Demo Accounts for Local Testing
-10. Environment Variables
-11. Database, Seeding, and Demo Data
-12. AI Services
-13. Portal Scraper
-14. Android App
-15. Deployment on Render
-16. Testing and Verification
-17. Troubleshooting
-18. Security Notes
-19. Current Project Status
-
-## Project Overview
-
-### What this project is
-
-ITERasn hub is an academic operations portal designed around three primary roles:
-
-- `Student`: attendance, marks, notes, timetable, payments, events, clubs, hostel menu, admit card, forum, AI assistant
-- `Teacher`: attendance marking, marks upload, assignments, notes, question bank, rubric creation, student management
-- `Admin`: users, approvals, analytics, departments, announcements, settings
-
-### Main technical characteristics
-
-- Frontend: vanilla HTML, CSS, and JavaScript
-- Backend: Node.js with Express
-- Real-time layer: Socket.IO
-- Data layer: Firebase-first backend for auth, dashboard data, files, forum, payments, portal imports, and notifications, with optional Realtime Database mirroring when configured. Some legacy analytics/search utilities still retain SQL compatibility paths.
-- Auth: JWT-based app auth plus Firebase-backed flows where configured
-- AI: OpenRouter and Gemini integration
-- Deployment target: Render
-- Extra delivery targets: native Android app and optional scraper package
-
-### Current branding and UX direction
-
-- Product name: `ITERasn hub`
-- Visual language: minimalist, Nothing-inspired, dark/off-white surfaces with warm coral accents
-- Public routing: direct public routes for home, creator, login, and register
-- Dashboard routing: direct dashboard URLs with protected access and token checks
-
-## Core Capabilities
-
-### Student experience
-
-- Student dashboard overview
-- Attendance tracking
-- Marks and academic performance
-- Timetable
-- Study notes and PYQs
+- Dashboard overview with attendance, marks, timetable, and academic summary
+- Study notes and previous-year questions (PYQs)
 - Admit card view/download
 - Events and clubs
 - Hostel menu
-- Forum
-- AI assistant
-- Payment history, payment details, payment flow
+- Forum (questions and answers)
+- AI assistant and study plans
+- Payment history and payment flow
+- One-click import of official SOA portal data (profile, attendance, marks, timetable, results)
 
-### Teacher experience
+### Teacher
 
-- Teacher dashboard overview
-- Attendance management
+- Attendance management and marking
 - Marks upload
 - Assignment management
 - Notes/material upload
 - Question bank
 - Rubric creator
-- Student list and related workflows
+- Student list workflows
 
-### Admin experience
+### Admin
 
-- Admin dashboard overview
 - User management
 - Approval queue
 - Announcements
@@ -91,819 +35,252 @@ ITERasn hub is an academic operations portal designed around three primary roles
 - Analytics
 - Settings
 
-### Shared platform features
+### Platform
 
-- Direct public-page navigation
-- Theme toggle with persistence
-- Chatbot widget
-- Universal sidebar and profile system
-- Mobile-friendly responsive shell
-- Demo-mode local login fallback
-- Service worker and manifest for app-like behavior
-- Static asset serving plus role dashboards
+- PWA with service-worker caching for offline use (`client/service-worker.js`, `client/manifest.json`)
+- AI tools backed by OpenRouter and/or Gemini
+- SOA portal import pipeline (see [Security model](#security-model) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md))
+- Forum and real-time notifications via Socket.IO (REST polling fallback on serverless)
+- Clubs, payments, analytics modules
+- REST fallbacks for every real-time feature so serverless deployments stay functional
+- Native Android client under `android-app/` and desktop wrapper under `electron/`
 
-## System Architecture
+## Security model
 
-### High-level architecture
+> **SOA portal import — how credentials are handled**
+>
+> The SOA import never sees your password at rest. When you connect your portal:
+>
+> 1. The server opens a fresh headless Playwright session against `soaportals.com` and extracts the CAPTCHA image into an **in-memory** session slot.
+> 2. You type your registration number, password, and the CAPTCHA solution yourself. The credentials are proxied straight into that browser session's login form.
+> 3. Credentials are **never logged, cached, or persisted** — not in the database, not in logs. Only the scraped academic data is normalized and stored.
+> 4. The browser session is closed as soon as extraction finishes (success or error). Idle sessions expire after 4 minutes; hard expiry is 10 minutes.
+> 5. Concurrent sessions are capped (`SOA_MAX_ACTIVE_SESSIONS`, default `2`) so abandoned CAPTCHA slots cannot pile up.
+>
+> If you self-host this software, you are responsible for running it honestly and securely: keep secrets out of the repo, use HTTPS, and do not attempt to automate logins against portals you do not own.
 
-```mermaid
-flowchart LR
-    WB[Web Browser] --> P[Public Pages]
-    WB --> D[Role Dashboards]
-    P --> C[Client JS Layer]
-    D --> C
-    ANDROID[Native Android App] --> API[Express API Server]
-    C --> API
-    C --> WS[Socket.IO]
-    API --> AUTH[Auth + Session Logic]
-    API --> ROUTES[Feature Routes]
-    API --> DATA[(DB / Seeded Data / Demo Data)]
-    API --> AI[OpenRouter / Gemini]
-    API --> FB[Firebase Admin When Configured]
-    API --> SCRAPER[Portal Scraper Services]
-```
+Git-tracked files contain no secrets: `.env`, `server/serviceAccountKey.json`, and uploaded files are gitignored (`uploads/` contains only `.gitkeep`). Firebase configuration is env-var driven.
 
-### Frontend architecture
+## Tech stack
 
-```mermaid
-flowchart TD
-    INDEX[index.html] --> PUBLIC[Public UX Layer]
-    LOGIN[login.html] --> PUBLIC
-    REGISTER[register.html] --> PUBLIC
-    CREATOR[creator.html] --> PUBLIC
+| Layer | Technology |
+| --- | --- |
+| Frontend | Vanilla HTML/CSS/JavaScript, service worker + manifest (PWA) |
+| Backend | Node.js (>= 18), Express 4 |
+| Primary datastore | Firebase Firestore via `firebase-admin`; optional Realtime Database mirroring via `FIREBASE_DATABASE_URL` |
+| Optional SQL | PostgreSQL (`pg`, `@vercel/postgres`) for `portal_snapshots`; MySQL tooling exists for legacy seeding |
+| Cache | Redis (`REDIS_URL`) in production, in-memory (`node-cache`) fallback |
+| Real-time | Socket.IO 4 (degrades to REST polling on Vercel/serverless) |
+| Portal import | Playwright (Chromium) headless scraper |
+| AI | OpenRouter API and Google Gemini (`@google/generative-ai`) |
+| Auth | App-session JWTs (`jsonwebtoken`) + Firebase ID token verification |
+| Testing | Jest (jsdom), Playwright Test |
+| Desktop/Mobile wrappers | Electron, native Android (Kotlin) |
 
-    PUBLIC --> SHARED_CSS[Shared CSS System]
-    PUBLIC --> SHARED_JS[Shared JS System]
-
-    DASH[Dashboard HTML Pages] --> SHARED_CSS
-    DASH --> SHARED_JS
-
-    SHARED_CSS --> STYLE[style.css]
-    SHARED_CSS --> HOME[home-minimal.css]
-    SHARED_CSS --> RESPONSIVE[responsive-universal.css]
-    SHARED_CSS --> SIDEBAR_CSS[universal-sidebar.css]
-    SHARED_CSS --> PROFILE_CSS[universal-profile.css]
-    SHARED_CSS --> CHATBOT_CSS[chatbot.css]
-
-    SHARED_JS --> MAIN[main.js]
-    SHARED_JS --> NAV[url-navigator.js]
-    SHARED_JS --> ENCODE[linkEncoding.js]
-    SHARED_JS --> SIDEBAR_JS[universal-sidebar.js]
-    SHARED_JS --> PROFILE_JS[universal-profile.js]
-    SHARED_JS --> CHATBOT_JS[chatbot.js]
-```
-
-### Backend architecture
-
-```mermaid
-flowchart TD
-    SERVER[server/index.js] --> MIDDLEWARE[Helmet, CORS, Compression, Rate Limits]
-    SERVER --> STATIC[Public File Serving]
-    SERVER --> ROUTESET[API Routes]
-    SERVER --> WEB[Web / Redirect Routes]
-    SERVER --> SOCKET[Socket.IO Init]
-
-    ROUTESET --> AUTH[auth.routes.js]
-    ROUTESET --> USER[user.routes.js]
-    ROUTESET --> PROFILE[profile.routes.js]
-    ROUTESET --> ATT[attendance.routes.js]
-    ROUTESET --> MARKS[marks.routes.js]
-    ROUTESET --> NOTES[notes.routes.js]
-    ROUTESET --> FORUM[forum.routes.js]
-    ROUTESET --> PAY[payment.routes.js]
-    ROUTESET --> ADMIN[admin.routes.js]
-    ROUTESET --> TEACHER[teacher.routes.js]
-    ROUTESET --> AIROUTES[ai.routes.js]
-    ROUTESET --> PORTAL[portal.routes.js]
-    ROUTESET --> ANALYTICS[analytics.routes.js]
-```
-
-## Application Workflows
-
-### Login and role redirect flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant LoginPage
-    participant Backend
-    participant Storage
-    participant Dashboard
-
-    User->>LoginPage: Submit credentials
-    LoginPage->>Backend: POST /api/auth/login
-    Backend-->>LoginPage: User + token + role
-    LoginPage->>Storage: Save accessToken, token, user
-    LoginPage->>LoginPage: Create page access token
-    LoginPage->>Dashboard: Navigate to role dashboard
-```
-
-### Local demo auth fallback
-
-```mermaid
-flowchart TD
-    A[Login Attempt] --> B{Firebase Admin Ready?}
-    B -- Yes --> C[Normal Auth Flow]
-    B -- No --> D{Local Demo Credentials?}
-    D -- Yes --> E[Return demoMode + local-demo auth]
-    D -- No --> F[Reject Login]
-    E --> G[Store tokens and demo role]
-    G --> H[Open student / teacher / admin dashboard]
-```
-
-### Request lifecycle
-
-```mermaid
-flowchart LR
-    Browser --> StaticPage[HTML + CSS + JS]
-    StaticPage --> APIRequest[fetch / XHR]
-    APIRequest --> Middleware
-    Middleware --> RouteHandler
-    RouteHandler --> ServiceLayer
-    ServiceLayer --> DBorProvider[(DB / AI / Firebase / Scraper)]
-    DBorProvider --> ServiceLayer
-    ServiceLayer --> RouteHandler
-    RouteHandler --> Browser
-```
-
-## Repository Structure
+## Architecture
 
 ```text
-.
-├── client/
-│   ├── index.html
-│   ├── login.html
-│   ├── register.html
-│   ├── creator.html
-│   ├── dashboard/
-│   ├── css/
-│   ├── js/
-│   ├── assets/
-│   └── partials/
-├── server/
-│   ├── index.js
-│   ├── routes/
-│   ├── services/
-│   ├── middleware/
-│   ├── database/
-│   ├── seed/
-│   └── scripts/
-├── android-app/
-├── soa-student-scraper/
-├── render.yaml
-├── package.json
-└── .env.example
+                       +---------------------------+
+   Browser / PWA -----> |      Static client        |
+   Electron / Android    |  client/*.html, css, js   |
+                       +-------------+-------------+
+                                     | fetch /api/*
+                                     v
++-------------------+     +--------------------------+
+| Socket.IO         |<--->|      Express API         |
+| user:/role:/dept: |     |   server/index.js        |
++-------------------+     +----+---------+-----+-----+
+                               |         |     |
+             +-----------------+         |     +------------------+
+             v                           v                        v
+   +------------------+     +---------------------+    +----------------+
+   | Firestore        |     | Postgres (optional) |    | Redis cache    |
+   | users, forum, ...|     | portal_snapshots    |    | (in-memory fb) |
+   +------------------+     +---------------------+    +----------------+
+             ^
+             | normalized snapshots
+   +---------+----------------------+
+   | Playwright worker              |
+   | SOA captcha session pool       |
+   | -> login -> section snapshots  |
+   +--------------------------------+
+
+   OpenRouter / Gemini <--- ai.routes.js
 ```
 
-### Important frontend files
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for request lifecycle, the full SOA import pipeline, storage layers, and the design system.
 
-- `client/index.html`: redesigned homepage
-- `client/login.html`: login with demo account quick-fill and Google login path
-- `client/register.html`: registration page
-- `client/creator.html`: creator/about page
-- `client/css/style.css`: main shared visual system
-- `client/css/home-minimal.css`: public-facing home/auth/creator styling layer
-- `client/css/responsive-universal.css`: global responsive rescue layer
-- `client/css/universal-sidebar.css`: shared dashboard sidebar shell
-- `client/css/universal-profile.css`: shared profile/dropdown shell
-- `client/css/chatbot.css`: chatbot widget shell
-- `client/js/main.js`: shared application helpers and theme logic
-- `client/js/linkEncoding.js`: URL handling rules
-- `client/js/url-navigator.js`: safe navigation helpers
-- `client/js/universal-sidebar.js`: sidebar rendering and behavior
-- `client/js/universal-profile.js`: profile UI behavior
-- `client/js/chatbot.js`: chatbot behavior and AI request handling
-
-### Important backend files
-
-- `server/index.js`: server bootstrap, middleware, routes, static serving
-- `server/routes/auth.routes.js`: login, role auth, local demo fallback
-- `server/database/firebase.js`: Firebase admin setup and local fallback compatibility
-- `server/services/ai.service.js`: Gemini AI service
-- `server/services/openrouter.service.js`: OpenRouter service
-- `server/routes/redirect.routes.js`: encoded link redirect support
-- `server/routes/web.routes.js`: web session route handling
-- `server/seed/seed.js`: baseline data seeding
-- `server/seed/comprehensive-seed.js`: broader seed flow
-- `server/scripts/*`: DB and utility scripts
-
-## Frontend Surface Map
-
-### Public pages
-
-- `/` or `/index.html`
-- `/login.html`
-- `/register.html`
-- `/creator.html`
-- `/connect-portal.html`
-
-### Student dashboard pages
-
-- `/dashboard/student.html`
-- `/dashboard/student-attendance.html`
-- `/dashboard/student-marks.html`
-- `/dashboard/student-timetable.html`
-- `/dashboard/student-notes.html`
-- `/dashboard/student-admit-card.html`
-- `/dashboard/student-events.html`
-- `/dashboard/student-clubs.html`
-- `/dashboard/student-hostel-menu.html`
-- `/dashboard/student-forum.html`
-- `/dashboard/student-ai-assistant.html`
-- `/dashboard/student-payment-history.html`
-- `/dashboard/student-payment-details.html`
-- `/dashboard/student-payment-make.html`
-
-### Teacher dashboard pages
-
-- `/dashboard/teacher.html`
-- `/dashboard/teacher-attendance.html`
-- `/dashboard/teacher-marks.html`
-- `/dashboard/teacher-assignments.html`
-- `/dashboard/teacher-notes.html`
-- `/dashboard/teacher-question-bank.html`
-- `/dashboard/teacher-rubric-creator.html`
-- `/dashboard/teacher-students.html`
-
-### Admin dashboard pages
-
-- `/dashboard/admin.html`
-- `/dashboard/admin-users.html`
-- `/dashboard/admin-approvals.html`
-- `/dashboard/admin-analytics.html`
-- `/dashboard/admin-announcements.html`
-- `/dashboard/admin-departments.html`
-- `/dashboard/admin-settings.html`
-
-## Backend Surface Map
-
-### Route groups
-
-- `/api/auth`
-- `/api/users`
-- `/api/profile`
-- `/api/admitcard`
-- `/api/attendance`
-- `/api/marks`
-- `/api/files`
-- `/api/events`
-- `/api/assignments`
-- `/api/timetable`
-- `/api/hostel`
-- `/api/admin`
-- `/api/teacher`
-- `/api/analytics`
-- `/api/notifications`
-- `/api/search`
-- `/api/health`
-- `/api/bulk`
-- `/api/ai`
-- `/api/question-bank`
-- `/api/rubrics`
-- `/api/notes`
-- `/api/forum`
-- `/api/pyq`
-- `/api/portal`
-- `/api/payments`
-- `/api/soa`
-
-### Supporting web routes
-
-- `/web/*`: obfuscated web/session routes retained for legacy flows
-- `/r/*`: encoded redirect handler retained for legacy links
-- direct public routes: `/`, `/index.html`, `/login.html`, `/register.html`, `/creator.html`
-
-## Local Development Setup
+## Quick start
 
 ### Prerequisites
 
-- Node.js `>= 18`
-- npm
-- MySQL if you want full DB-backed local development
-- Optional:
-  - Firebase service account for production-like auth
-  - OpenRouter and/or Gemini keys for AI
-  - Python/portal stack if you plan to use scraper integrations
+- Node.js >= 18 and npm
+- A Firebase project with a service account (for production-like auth/data); without one the app falls back to local demo mode
+- Optional: PostgreSQL (portal snapshot persistence), Redis (production cache)
+- For SOA imports: a runtime where Playwright can launch Chromium (see [Troubleshooting](#troubleshooting))
 
-### Install dependencies
+### Install and configure
 
 ```bash
 npm install
-```
-
-### Configure environment
-
-```bash
 cp .env.example .env
 ```
 
-Then update the values you actually want to use. At minimum:
+Edit `.env`. At minimum set:
 
-- `PORT`
-- `CLIENT_URL`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_USER`
-- `DB_PASSWORD`
-- `DB_NAME`
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
+- `JWT_SECRET` and `JWT_REFRESH_SECRET` (long random strings)
+- `CORS_WHITELIST` with your origins
 
-### Start the app
+Firebase setup:
 
-```bash
-npm run dev
-```
+1. In the Firebase console, create a service account with Firestore access and download its JSON key.
+2. Provide it either as the single JSON string `FIREBASE_SERVICE_ACCOUNT={...}`, or as the three split variables `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`.
+3. Set `FIREBASE_DATABASE_URL` only if you want Realtime Database mirroring in addition to Firestore.
+4. Never commit the key file; `server/serviceAccountKey.json` is gitignored but env vars are the supported path.
 
-Expected local endpoints:
-
-- frontend: `http://localhost:3000`
-- backend: `http://localhost:5000`
-
-### Useful scripts
+### Seed demo data and run
 
 ```bash
-npm run dev
-npm start
-npm run dev:client
 npm run seed
-npm run seed:comprehensive
-npm run db:verify
-npm run verify:ai
-npm test
-npm run test:e2e
+npm run dev
 ```
 
-## Demo Accounts for Local Testing
+The frontend is served at `http://localhost:3000` (client dev server) and the API at `http://localhost:5000`.
 
-If Firebase Admin is not initialized locally, the app supports demo login fallback for all three roles.
+### Demo accounts
 
-### Demo credentials
+`npm run seed` creates demo-only accounts (also available through the local demo-login fallback when Firebase Admin is not configured):
 
-| Role | Registration Number | Password |
+| Role | Registration number | Password |
 | --- | --- | --- |
 | Student | `STU20250001` | `Student@123` |
 | Teacher | `TCH2025001` | `Teacher@123` |
 | Admin | `ADM2025001` | `Admin@123456` |
 
-### What happens in local demo mode
+These are for local development only. Change or remove them before exposing any deployment publicly.
 
-- login succeeds without Firebase Admin
-- `accessToken` and legacy `token` keys are stored
-- `demoMode`/prototype mode behavior is enabled where required
-- role-based dashboard redirect still happens
-- many dashboard pages can fall back to dummy/demo data for local testing
+## Environment variables
 
-## Environment Variables
+The most important variables (full list with comments in [.env.example](.env.example)):
 
-### Core application
+| Variable | Purpose |
+| --- | --- |
+| `NODE_ENV` | `development` enables permissive CORS; production rejects non-whitelisted origins |
+| `PORT` | HTTP port (default `5000`) |
+| `JWT_SECRET` / `JWT_REFRESH_SECRET` | Signing secrets for app-session and refresh tokens. Required in production |
+| `FIREBASE_SERVICE_ACCOUNT` | Full service-account JSON string, or use the three split vars below |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | Split Firebase admin credentials (useful on Render/Vercel) |
+| `FIREBASE_DATABASE_URL` | Optional Realtime Database mirroring |
+| `CORS_WHITELIST` | Comma-separated allowed origins; supports `*` |
+| `RATE_LIMIT_WINDOW_MS` / `RATE_LIMIT_MAX_REQUESTS` | Global `/api` rate limit (default 15 min / 100 req) |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini-powered assistant |
+| `OPENROUTER_API_KEY` (+ `OPENROUTER_CHAT_MODEL`, etc.) | OpenRouter chat/CAPTCHA models |
+| `PORTAL_FEATURES_ENABLED` | Master switch for SOA portal import (`false` disables it cleanly) |
+| `SOA_CRAWL_DEADLINE_MS` | Hard deadline for a full portal crawl (default `90000`; use `50000` on Vercel) |
+| `SOA_CHALLENGE_WAIT_MS` | How long to wait out a Cloudflare challenge before returning `BLOCKED_BY_SITE` (default `20000`) |
+| `SOA_MAX_ACTIVE_SESSIONS` | Max concurrent headless browser sessions (default `2`) |
+| `SOA_PIN_DNS` | Opt-in DNS pinning for the portal host (`1` to enable; usually counterproductive behind Cloudflare) |
+| `REDIS_URL` | Production cache; falls back to in-memory cache when unset |
+| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` / `DATABASE_URL` | SQL connectivity; `DATABASE_URL` (Postgres) drives `portal_snapshots` persistence |
 
-- `NODE_ENV`
-- `PORT`
-- `CLIENT_URL`
-- `CORS_WHITELIST`
-- `SOCKET_CORS_ORIGIN`
-- `SOA_MAX_ACTIVE_SESSIONS`
+## Deployment
 
-### Database
+Detailed step-by-step guides live in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Summary:
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_USER`
-- `DB_PASSWORD`
-- `DB_NAME`
-- `DATABASE_URL` for hosted environments where used
+| Target | Files | Notes |
+| --- | --- | --- |
+| Vercel | `vercel.json`, `api/index.js` | Serverless function reuses the full Express app. Socket.IO degrades to REST polling (`/api/chat/*`); uploads land in ephemeral `/tmp`. Browser download is skipped at install time, so SOA import needs an externally supplied Chromium binary to work there |
+| Render | `render.yaml` + `Dockerfile` | Docker runtime with Playwright Chromium preinstalled, persistent uploads disk, health check on `/health`, keepalive pinger enabled |
+| Docker Compose | `docker-compose.yml`, `Dockerfile`, `nginx/nginx.conf` | MySQL + app + nginx reverse proxy serving the client statically |
+| PM2 | `ecosystem.config.js` | Cluster mode, `max_memory_restart 1G`, logs in `./logs` |
 
-### JWT and auth
-
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
-- `JWT_EXPIRE`
-- `JWT_REFRESH_EXPIRE`
-
-### Firebase Admin
-
-Use either the single JSON string or split variables:
-
-- `FIREBASE_SERVICE_ACCOUNT`
-- `FIREBASE_PROJECT_ID`
-- `FIREBASE_CLIENT_EMAIL`
-- `FIREBASE_PRIVATE_KEY`
-- `FIREBASE_DATABASE_URL` for Realtime Database mirroring
-
-### AI providers
-
-- `OPENROUTER_API_KEY`
-- `GEMINI_API_KEY`
-- `GEMINI_MODEL`
-
-### Optional Google integrations
-
-- `GOOGLE_VISION_API_KEY`
-- `GOOGLE_DRIVE_FOLDER_ID`
-- `GOOGLE_SERVICE_ACCOUNT`
-- `GOOGLE_APPLICATION_CREDENTIALS`
-
-### File and storage
-
-- `UPLOAD_DIR`
-- `MAX_FILE_SIZE`
-- `STORAGE_MODE`
-- `BACKUP_DIR`
-- `BACKUP_RETENTION_COUNT`
-
-### Feature flags and portal integration
-
-- `PORTAL_FEATURES_ENABLED`
-- `FLASK_SCRAPER_URL`
-
-### Redis
-
-- `REDIS_URL`
-- or split host/port/password settings if you use Redis directly
-
-### Important note
-
-Replace any placeholder/example values before deployment. Do not rely on example keys or secrets in committed examples for real environments.
-
-## Database, Seeding, and Demo Data
-
-### Standard seed
+## Testing
 
 ```bash
-npm run seed
+npm test                      # Jest unit/integration tests with coverage
+npm run test:mobile-contracts # Mobile parity contract suites (demo auth, SOA data, persistence)
+npm run test:e2e              # Playwright end-to-end tests (e2e/)
+npm run test:scraper          # SOA scraper status-path checks
 ```
 
-### Comprehensive seed
+## Project structure
 
-```bash
-npm run seed:comprehensive
+```text
+.
+├── api/                  # Vercel serverless entry; reuses the full Express app
+├── client/               # Vanilla HTML/CSS/JS frontend (no build step)
+│   ├── dashboard/        # Role dashboards (student-*, teacher-*, admin-*)
+│   ├── css/              # style.css design system + refined-ui.css overlay
+│   ├── js/               # Shared helpers; page scripts in js/pages/
+│   ├── assets/
+│   └── partials/
+├── server/               # Express API
+│   ├── routes/           # One router per feature area
+│   ├── services/         # SOA scraper, normalization/persistence, AI, chat
+│   ├── middleware/       # Auth (app-session/demo/Firebase), errors
+│   ├── database/         # Firebase admin init, SQL helpers
+│   ├── socket/           # Socket.IO auth and room wiring
+│   ├── seed/             # Demo data seeders
+│   └── scripts/          # Ops and maintenance utilities
+├── e2e/                  # Playwright specs
+├── android-app/          # Native Android client (Kotlin)
+├── electron/             # Desktop wrapper
+├── scripts/              # Setup, build, and test helper scripts
+├── docs/                 # DEPLOYMENT.md, ARCHITECTURE.md
+├── vercel.json           # Vercel config (static output + single function)
+├── render.yaml           # Render blueprint
+├── docker-compose.yml    # Local/self-host stack
+└── ecosystem.config.js   # PM2 cluster config
 ```
 
-### Profile-oriented seed
-
-```bash
-npm run seed:profile
-```
-
-### Verification
-
-```bash
-npm run db:verify
-```
-
-### Local fallback behavior
-
-This project contains multiple layers for local testing:
-
-- regular DB-backed data when configured
-- seeded data after running seed scripts
-- demo auth fallback if Firebase Admin is missing
-- dummy/prototype data in parts of the dashboard when full backends are unavailable
-
-## AI Services
-
-### Available AI providers
-
-- OpenRouter
-- Gemini
-
-### Main AI usage areas
-
-- chatbot responses
-- general Q&A
-- educational assistance
-- some portal/captcha related support paths
-
-### Local AI setup
-
-Set at least one of:
-
-```env
-OPENROUTER_API_KEY=sk-or-v1-your-openrouter-key
-OPENROUTER_CHAT_MODEL=nvidia/nemotron-3-super-120b-a12b:free
-OPENROUTER_CHAT_FALLBACK_MODELS=google/gemma-3-27b-it:free,arcee-ai/trinity-large-preview:free,google/gemma-3-12b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-4b-it:free
-OPENROUTER_CAPTCHA_MODEL=nvidia/nemotron-nano-12b-v2-vl:free
-OPENROUTER_CAPTCHA_FALLBACK_MODELS=google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-12b-it:free,google/gemma-3-4b-it:free
-GEMINI_API_KEY=your-gemini-key
-GEMINI_MODEL=gemini-1.5-flash
-```
-
-For Render, keep `OPENROUTER_API_KEY` as a secret env var in the Render dashboard or `render.yaml` sync settings. Do not commit the real key into `.env.example` or tracked files.
-
-### Validate AI wiring
-
-```bash
-npm run verify:ai
-npm run check:ai
-```
-
-## Portal Scraper
-
-The repository includes scraper-related backend services and a separate scraper package under `soa-student-scraper/`.
-
-### Relevant server-side files
-
-- `server/services/portal-scraper.service.js`
-- `server/services/portal-scraper-server.js`
-- `server/routes/portal.routes.js`
-- `server/routes/soa.routes.js`
-
-### Feature-flag behavior
-
-Portal features are disabled by default in example/local setup through:
-
-```env
-PORTAL_FEATURES_ENABLED=false
-```
-
-### Hosted deployment note
-
-`render.yaml` explicitly disables portal features on free-tier Render deploys:
-
-- `PORTAL_FEATURES_ENABLED=false`
-
-That prevents scraper-heavy behavior from breaking lightweight hosted environments.
-
-## Android App
-
-The canonical Android path in this repository is the native app under `android-app/`. Do not use WebView, TWA, Bubblewrap, or browser-shell guidance from older repo history.
-
-### Audit summary of the pre-migration Android state
-
-- `android-app/app/src/main/java/edu/iter/eduhub/MainActivity.java` loaded the hosted site directly in a `WebView`
-- `android-app/app/build.gradle` previously targeted `minSdk 28`, which did not satisfy the Android 10+ requirement
-- `scripts/build-android.js` previously generated Bubblewrap/TWA output under `releases/android`
-- `build-android.ps1` previously patched a website URL into the Android shell before building
-
-That older wrapper approach was not independent from the website frontend and is no longer the supported Android strategy.
-
-### Native Android architecture
-
-The Android app is intended to be a real client for the same backend, not a packaged website. The target architecture is:
-
-- Kotlin
-- Jetpack Compose for all UI
-- Navigation Compose for role-aware navigation
-- ViewModel + unidirectional state flow
-- Retrofit/OkHttp for API access
-- encrypted or otherwise protected session storage for app tokens
-- native Android file pickers, downloads, and document intents for attachments/PDF flows
-
-The detailed Android audit, parity matrix, backend contract notes, and QA checklist are tracked in `android-app/NATIVE_MIGRATION_AUDIT.md`.
-
-### Android and backend data sources
-
-The Android app uses the same backend/API layer as the website. It does not initialize a separate Firebase client SDK or maintain a second mobile-only database.
-
-- SQL-backed data: attendance, marks, timetable, assignments, analytics, departments, and most admin reporting
-- Firebase-backed data: users/auth records, file metadata, forum questions/answers, payments, AI chat logs/study plans, and stored portal imports under the user document
-- Shared portal normalization: `server/services/soa-data.service.js` converts imported portal data into a stable contract used by both website fallbacks and Android snapshot payloads
-
-For Android parity, configure the backend with the same Firebase Admin project the website/server uses. The native app then reaches that shared data through `/api/*`, not by reading Firestore directly.
-
-### Android information architecture
-
-The native app mirrors the website information architecture with native screens for:
-
-- public: home, login, register, creator, connect-portal
-- student: dashboard, attendance, marks, timetable, notes, admit card, events, clubs, hostel menu, forum, AI assistant, payments
-- teacher: dashboard, attendance, marks, assignments, notes, question bank, rubric creator, students
-- admin: dashboard, users, approvals, analytics, announcements, departments, settings
-- shared: profile/session, notifications, search, file handling, loading/error/retry states
-
-### Build the native app
-
-From the repository root:
-
-```bash
-npm run build:android
-```
-
-That script now builds the native app in `android-app/` and optionally copies the produced APK into `releases/android/`.
-
-Direct Gradle usage is also supported:
-
-```bash
-cd android-app
-./gradlew testDebugUnitTest assembleDebug
-```
-
-For a release build:
-
-```bash
-cd android-app
-./gradlew testDebugUnitTest assembleRelease
-```
-
-PowerShell helper:
-
-```powershell
-./build-android.ps1
-./build-android.ps1 -Release
-```
-
-### Android setup prerequisites
-
-- Android Studio Hedgehog or newer, or a recent command-line Android SDK
-- JDK 17
-- Android SDK / emulator for local device testing
-- backend access to a reachable API URL for the environment you are testing against
-- copy `android-app/local.properties.example` to `android-app/local.properties` if your local SDK path is not auto-generated
-
-### Android verification expectations
-
-Before calling Android parity complete, verify at least:
-
-- fresh install on Android 10+ / API 29+
-- login for student, teacher, and admin roles
-- logout and session restore after app restart
-- role-based navigation to all core screens
-- file upload/download handling
-- admit-card or PDF open/download handling
-- network failure, retry, and slow-loading states
-- back navigation, app resume, and configuration-change behavior
-
-### Parity note
-
-The Android app should use the backend/API layer only. Reusing backend rules is expected; rendering website HTML/CSS/JS inside Android UI is not. If parity gaps remain, document them as backend or Android implementation gaps, not as acceptable wrapper behavior.
-
-## Deployment on Render
-
-### Render service definition
-
-Deployment is configured in `render.yaml`.
-
-### Render defaults in this repo
-
-- service type: `web`
-- environment: `node`
-- start command: `node server/index.js`
-- build command: `npm install --omit=dev`
-- disk mounted for uploads
-
-### Required Render environment variables
-
-At minimum, configure:
-
-- `DATABASE_URL` or equivalent DB connectivity for your environment
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
-- `CORS_WHITELIST`
-- AI vars if you want AI in production
-- Firebase admin variables if you want full production auth flows
-
-### Render deployment flow
-
-```mermaid
-flowchart TD
-    A[Push to GitHub] --> B[Render Build]
-    B --> C[npm install --omit=dev]
-    C --> D[node server/index.js]
-    D --> E[Serve API + Static Client + Dashboards]
-    E --> F[Configured Env Vars Enable DB / AI / Firebase]
-```
-
-### Important Render notes
-
-- uploads volume is mounted through Render disk config
-- portal features are enabled by default in `render.yaml`
-- AI and Firebase require real env vars on Render
-- direct public routes and direct dashboard routes are now important to current navigation behavior
-- the current `render.yaml` uses `plan: starter`
-- SOA browser sessions are capped with `SOA_MAX_ACTIVE_SESSIONS=2` in `render.yaml` to avoid Chromium session pileups exhausting the Render instance
-- this repo now includes `.github/workflows/render-keepalive.yml`, which pings the Render `/health` endpoint every 10 minutes as a best-effort warm-up strategy
-- by default the keepalive targets `https://updated-iters-live.onrender.com/health`; if your Render URL is different, set a GitHub Actions repository variable or secret named `RENDER_HEALTHCHECK_URL`
-- this keepalive reduces cold starts on free tier, but only a paid Render instance can reliably guarantee an always-on service
-
-## Testing and Verification
-
-### Automated commands available
-
-```bash
-npm test
-npm run test:e2e
-npm run test:scraper
-npm run db:verify
-npm run verify:ai
-npm run check:ai
-npm run build:android
-```
-
-### Manual verification checklist
-
-- open home page
-- verify creator, login, register links
-- log in with student demo credentials
-- log in with teacher demo credentials
-- log in with admin demo credentials
-- verify role dashboard loads
-- test theme toggle on public pages and dashboards
-- test chatbot open/close and a general question
-- test mobile navigation and sidebar behavior
-- build `android-app/` with Gradle
-- install the APK on an Android 10+ device or emulator
-- log in on Android as student, teacher, and admin
-- verify Android session restore after app restart
-- verify Android file download/upload and admit-card/PDF handling
-- verify Android error, retry, and back-navigation behavior
+## API overview
+
+Main route mounts registered in `server/index.js`:
+
+| Mount | Area |
+| --- | --- |
+| `GET /health`, `GET /api/health` | Health checks |
+| `/api/auth` | Login, registration, app-session tokens |
+| `/api/soa` | SOA portal import: status, CAPTCHA session, login/resync, disconnect |
+| `/api` + `/api/users` | Profile (`/api/profile/*`, `/api/users/me`) and user management |
+| `/api/attendance` | Attendance records |
+| `/api/marks` | Marks and results |
+| `/api/notes`, `/api/pyq`, `/api/question-bank`, `/api/rubrics` | Academic materials |
+| `/api/timetable`, `/api/agenda`, `/api/calendar.ics` | Scheduling |
+| `/api/assignments`, `/api/admitcard`, `/api/hostel`, `/api/events`, `/api/clubs` | Student services |
+| `/api/forum` | Forum questions/answers |
+| `/api/payments` | Payment flows and history |
+| `/api/ai` | AI assistant endpoints (OpenRouter/Gemini) |
+| `/api/chat` | REST chat endpoints used as polling fallback where Socket.IO is unavailable |
+| `/api/admin`, `/api/teacher` | Role-scoped operations |
+| `/api/analytics`, `/api/search`, `/api/notifications`, `/api/bulk` | Platform utilities |
+| `/api/files` | File upload/download |
+| `/api/portal` | Legacy portal routes |
+| `/api/mobile` | Mobile-client contract endpoints |
+| `/web/*`, `/r/*` | Obfuscated session URLs and encoded-link redirects |
 
 ## Troubleshooting
 
-### Login works but redirects to a broken path
+**Playwright browser missing** — if SOA import reports the scraper unavailable because Chromium is not installed:
 
-Cause:
+```bash
+npx playwright install chromium
+```
 
-- dashboard URLs were historically being encoded/rewritten incorrectly
+On Debian-based images use `node ./node_modules/playwright/cli.js install --with-deps chromium` (as the Dockerfile does). Alternatively point `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` (or `CHROMIUM_PATH`/`CHROME_BIN`) at an existing Chromium binary.
 
-Current expectation:
+**Firebase permission errors** — verify the service account has Firestore access, the env vars match your project (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`), and your Firestore security rules/APIs are enabled. Locally without Firebase configured, use the demo accounts above.
 
-- dashboard routes should resolve directly like `/dashboard/student.html`
+**SOA import returns `BLOCKED_BY_SITE`** — the portal's Cloudflare challenge did not clear within `SOA_CHALLENGE_WAIT_MS`. Raise it (e.g. `30000`), retry later, and avoid `SOA_PIN_DNS=1` unless you know it helps your network; DNS pinning usually backfires behind Cloudflare. Datacenter IPs are more likely to be challenged than residential ones.
 
-### Firebase Admin SDK not initialized
+**Port conflicts** — the API binds `PORT` (default `5000`) and the client dev server uses `3000`. Stop the conflicting process or change `PORT` in `.env`.
 
-For local testing:
+**Uploads on serverless (Vercel)** — runtime uploads are written under `/tmp` and are ephemeral per instance and invocation. Anything users upload will disappear between deploys/instances; use a durable volume or object storage for real deployments. The bundled repo `uploads/` (demo/seed assets) remains readable as a fallback.
 
-- use the demo credentials listed in this README
+## Contributing
 
-For production-like auth:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, branch/commit conventions, and the PR checklist. Security issues: see [SECURITY.md](SECURITY.md) — please report privately instead of opening a public issue.
 
-- provide `FIREBASE_SERVICE_ACCOUNT`
-- or provide split Firebase env vars
-- set `FIREBASE_DATABASE_URL` if you want Firebase Realtime Database mirroring in addition to Firestore
+## License
 
-### AI chatbot gives fallback or unavailable responses
-
-Check:
-
-- `OPENROUTER_API_KEY`
-- `OPENROUTER_CHAT_MODEL`
-- `OPENROUTER_CHAT_FALLBACK_MODELS`
-- `GEMINI_API_KEY`
-- `GEMINI_MODEL`
-- `npm run verify:ai`
-
-### Local app starts but pages look broken
-
-Check:
-
-- run from repo root
-- ensure static frontend is served on `3000`
-- ensure backend is on `5000`
-- hard refresh the browser after major CSS/JS changes
-
-### Database issues
-
-Check:
-
-- `.env` DB settings
-- MySQL availability
-- `npm run seed`
-- `npm run db:verify`
-
-## Security Notes
-
-- replace all placeholder/example secrets before deploying
-- keep Firebase admin credentials out of source control
-- keep AI keys out of source control
-- use strong JWT secrets in production
-- review `.env.example` and clean any sample values before using it as a production baseline
-
-## Current Project Status
-
-### What is already in place
-
-- role-based dashboards
-- direct public routing
-- responsive redesign work across public and dashboard surfaces
-- creator/login/register/home alignment improvements
-- chatbot styling and shorter general-answer behavior
-- local demo auth fallback for all three primary roles
-- Render deployment file
-- native Android app path under `android-app/`
-- scraper-related code and package
-
-### Android status rule
-
-- the supported Android direction is native-only
-- do not regenerate or reintroduce WebView/TWA/Bubblewrap delivery paths
-- if a screen is not implemented natively yet, record it as a parity gap rather than routing users back into the website frontend
-
-### What this README now replaces
-
-This file supersedes the previous scattered repository docs covering:
-
-- setup and quick starts
-- deployment notes
-- UI/UX redesign summaries
-- responsive-fix summaries
-- AI setup notes
-- scraper notes
-- dashboard enhancement summaries
-- dummy-data notes
-- testing checklists
-- architecture references
-
-### Documentation policy going forward
-
-Use this root `README.md` as the canonical project document. If the project evolves, update this file instead of creating new standalone summary Markdown files unless there is a very strong reason to keep documentation in a separate location.
+Released under the [MIT License](LICENSE). Copyright (c) 2026 ITER Development Team.
