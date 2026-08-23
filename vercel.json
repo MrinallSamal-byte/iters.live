@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "client",
+  "installCommand": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install",
+  "buildCommand": "echo 'Client is vanilla HTML/CSS/JS - no build needed'",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "includeFiles": ["client/**", "uploads/**"]
+    }
+  },
+  "routes": [
+    { "src": "/css/(.*)", "dest": "/css/$1", "headers": { "cache-control": "public, max-age=3600" } },
+    { "src": "/js/(.*)", "dest": "/js/$1", "headers": { "cache-control": "public, max-age=3600" } },
+    { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "cache-control": "public, max-age=3600" } },
+    { "src": "/(.*)", "dest": "/api/index" }
+  ]
+}

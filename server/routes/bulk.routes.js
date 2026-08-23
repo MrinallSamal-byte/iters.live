@@ -10,11 +10,12 @@ const path = require('path');
 const { body, query, validationResult } = require('express-validator');
 const { authMiddleware: authenticate, roleMiddleware: authorize } = require('../middleware/auth');
 const bulkOperationsService = require('../services/bulk-operations.service');
+const { ensureUploadsDir } = require('../utils/uploads-dir.util');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads/bulk'));
+    cb(null, ensureUploadsDir('bulk'));
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

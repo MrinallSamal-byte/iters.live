@@ -7,11 +7,12 @@ const crypto = require('crypto');
 const { db } = require('../database/firebase');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const { emitToClass, emitToDepartment, emitToRole } = require('../socket/socket');
+const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads');
+    const uploadDir = getUploadsBaseDir();
     try {
       await fs.mkdir(uploadDir, { recursive: true });
       cb(null, uploadDir);

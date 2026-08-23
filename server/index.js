@@ -44,6 +44,7 @@ const mobileRoutes = require('./routes/mobile.routes');
 const clubsRoutes = require('./routes/clubs.routes');
 const agendaRoutes = require('./routes/agenda.routes');
 const calendarRoutes = require('./routes/calendar.routes');
+const chatRoutes = require('./routes/chat.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -53,7 +54,34 @@ const errorHandler = require('./middleware/errorHandler');
 const { initializeSocket } = require('./socket/socket');
 
 const app = express();
-const server = http.createServer(app);
+
+// On Vercel (serverless) we must not bind ports or hold WebSocket servers.
+// Socket.IO is unavailable there, so routes get a no-op emitter instead.
+// Every REST feature still works; real-time push degrades to polling.
+const IS_SERVERLESS = Boolean(process.env.VERCEL);
+
+function createNoopIo() {
+  const noop = function () {};
+  const chainable = () => {
+    const obj = { emit: noop, to: chainable, in: chainable, join: noop, leave: noop };
+    return obj;
+  };
+  return {
+    emit: noop,
+    to: chainable,
+    in: chainable,
+    use: noop,
+    on: noop,
+    of: () => createNoopIo(),
+    close: noop
+  };
+}
+
+let server = null;
+if (!IS_SERVERLESS) {
+  server = http.createServer(app);
+}
+
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
   'Pragma': 'no-cache',
@@ -94,8 +122,9 @@ function maybeRedirectToEncodedRoute(req, res, targetPath) {
   return true;
 }
 
-// Initialize Socket.IO
-const io = socketIo(server, {
+// Initialize Socket.IO (skipped on Vercel - serverless functions cannot
+// hold WebSocket connections; the no-op shim keeps io.emit() calls safe)
+const io = IS_SERVERLESS ? createNoopIo() : socketIo(server, {
   cors: {
     origin: process.env.SOCKET_CORS_ORIGIN || 'http://localhost:3000',
     methods: ['GET', 'POST'],
@@ -103,7 +132,9 @@ const io = socketIo(server, {
   }
 });
 
-initializeSocket(io);
+if (!IS_SERVERLESS) {
+  initializeSocket(io);
+}
 
 // Make io accessible to routes
 app.set('io', io);
@@ -212,7 +243,18 @@ app.use((req, res, next) => {
 });
 
 // Serve static files (uploads)
-app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
+// On Vercel, runtime uploads land in /tmp; fall through to the bundled
+// repo uploads directory (demo/seed files) for anything not found there.
+const { getUploadsBaseDir } = require('./utils/uploads-dir.util');
+app.use('/static/uploads', express.static(getUploadsBaseDir()));
+if (IS_SERVERLESS) {
+  app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
+}
+// Alias used by controllers when building public file URLs
+app.use('/uploads', express.static(getUploadsBaseDir()));
+if (IS_SERVERLESS) {
+  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+}
 
 // Serve client static assets (CSS, JS, images) - needed for pages served from /web/:sessionId
 const assetsLimiter = rateLimit({
@@ -297,6 +339,8 @@ app.use('/api/mobile', mobileRoutes);
 app.use('/api/clubs', clubsRoutes);
 app.use('/api/agenda', agendaRoutes);
 app.use('/api/calendar.ics', calendarRoutes);
+// REST chat endpoints (used as polling fallback where Socket.IO is unavailable, e.g. Vercel)
+app.use('/api/chat', chatRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
@@ -477,18 +521,19 @@ app.use((err, req, res, next) => {
 const { initRedis, closeRedis, isRedisConnected } = require('./config/redis.config');
 const { startRenderKeepAlive } = require('./utils/render-keepalive');
 
-// Start server
+// Start server (skipped on Vercel - the platform manages the HTTP listener)
 const PORT = process.env.PORT || 5000;
 let stopRenderKeepAlive = () => {};
 
-async function startServer() {
-  try {
-    // Initialize Redis connection (only in production)
-    await initRedis();
-    
-    server.listen(PORT, () => {
-      const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
-      console.log(`
+if (!IS_SERVERLESS) {
+  async function startServer() {
+    try {
+      // Initialize Redis connection (only in production)
+      await initRedis();
+
+      server.listen(PORT, () => {
+        const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
+        console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║   ITERasn hub                                       ║
 ║   Server running on port ${PORT}                        ║
@@ -498,36 +543,37 @@ async function startServer() {
 ╚═══════════════════════════════════════════════════════╝
       `);
 
-      stopRenderKeepAlive = startRenderKeepAlive();
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+        stopRenderKeepAlive = startRenderKeepAlive();
+      });
+    } catch (error) {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+    }
   }
+
+  // Start the server
+  startServer();
+
+  // Graceful shutdown
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received, closing server gracefully...');
+    stopRenderKeepAlive();
+    await closeRedis();
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', async () => {
+    console.log('SIGINT received, closing server gracefully...');
+    stopRenderKeepAlive();
+    await closeRedis();
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
 }
-
-// Start the server
-startServer();
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, closing server gracefully...');
-  stopRenderKeepAlive();
-  await closeRedis();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', async () => {
-  console.log('SIGINT received, closing server gracefully...');
-  stopRenderKeepAlive();
-  await closeRedis();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
 
 module.exports = { app, server, io };

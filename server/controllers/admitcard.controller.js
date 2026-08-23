@@ -41,7 +41,7 @@ async function findAdmitCardFile(studentId, registrationNumber, metadata = null)
     });
   }
 
-  const uploadsDir = path.join(__dirname, '../../uploads/admitcards');
+  const uploadsDir = require('../utils/uploads-dir.util').ensureUploadsDir('admitcards');
   const files = await fs.readdir(uploadsDir).catch(() => []);
   const candidate = files.find((file) => {
     if (!/\.(pdf|png|jpe?g)$/i.test(file)) {

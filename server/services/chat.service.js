@@ -9,9 +9,18 @@ const {
  * Real-Time Chat Service
  * Handles study group chat functionality with Socket.IO
  */
+
+// Safe emitter used when no Socket.IO server exists (REST-only usage,
+// e.g. Vercel serverless). Broadcasts become no-ops instead of crashes.
+function createNoopIo() {
+  const noop = () => {};
+  const chainable = () => ({ emit: noop, to: chainable, in: chainable });
+  return { emit: noop, to: chainable, in: chainable };
+}
+
 class ChatService {
   constructor(io) {
-    this.io = io;
+    this.io = io || createNoopIo();
     this.activeUsers = new Map();
     this.typingUsers = new Map();
   }
@@ -46,24 +55,7 @@ class ChatService {
           return socket.emit('error', { message: 'Message cannot be empty' });
         }
 
-        const user = await getRecord('users', String(userId));
-        if (!user) {
-          return socket.emit('error', { message: 'User not found' });
-        }
-
-        const record = await createRecord('chat_messages', {
-          group_id: String(groupId),
-          user_id: String(userId),
-          message,
-          attachments: Array.isArray(attachments) ? attachments : [],
-          is_deleted: false,
-          is_edited: false
-        });
-
-        const messageData = this.toMessagePayload(record, user);
-        this.io.to(`group_${groupId}`).emit('new_message', messageData);
-        this.removeTypingUser(groupId, userId);
-        await this.notifyOfflineUsers(groupId, userId, message, user.name || user.full_name || 'User');
+        await this.sendMessage({ groupId, userId, message, attachments });
       } catch (error) {
         console.error('Error in send_message:', error);
         socket.emit('error', { message: 'Failed to send message' });
@@ -106,16 +98,7 @@ class ChatService {
     socket.on('delete_message', async (data) => {
       try {
         const { messageId, userId } = data;
-        const message = await getRecord('chat_messages', String(messageId));
-        if (!message || String(message.user_id) !== String(userId)) {
-          return socket.emit('error', { message: 'Cannot delete this message' });
-        }
-
-        await updateRecord('chat_messages', message.id, {
-          is_deleted: true
-        });
-
-        this.io.to(`group_${message.group_id}`).emit('message_deleted', { messageId });
+        await this.deleteMessage({ messageId, userId });
       } catch (error) {
         console.error('Error in delete_message:', error);
         socket.emit('error', { message: 'Failed to delete message' });
@@ -128,22 +111,7 @@ class ChatService {
         if (!newMessage || newMessage.trim() === '') {
           return socket.emit('error', { message: 'Message cannot be empty' });
         }
-
-        const message = await getRecord('chat_messages', String(messageId));
-        if (!message || String(message.user_id) !== String(userId)) {
-          return socket.emit('error', { message: 'Cannot edit this message' });
-        }
-
-        await updateRecord('chat_messages', message.id, {
-          message: newMessage,
-          is_edited: true
-        });
-
-        this.io.to(`group_${message.group_id}`).emit('message_edited', {
-          messageId,
-          newMessage,
-          timestamp: new Date()
-        });
+        await this.editMessage({ messageId, userId, newMessage });
       } catch (error) {
         console.error('Error in edit_message:', error);
         socket.emit('error', { message: 'Failed to edit message' });
@@ -153,24 +121,7 @@ class ChatService {
     socket.on('add_reaction', async (data) => {
       try {
         const { messageId, userId, emoji } = data;
-        const message = await getRecord('chat_messages', String(messageId));
-        if (!message) {
-          return;
-        }
-
-        const reactions = Array.isArray(message.reactions) ? [...message.reactions] : [];
-        reactions.push({
-          user_id: String(userId),
-          emoji,
-          created_at: new Date().toISOString()
-        });
-
-        await updateRecord('chat_messages', message.id, { reactions });
-        this.io.to(`group_${message.group_id}`).emit('reaction_added', {
-          messageId,
-          userId,
-          emoji
-        });
+        await this.addReaction({ messageId, userId, emoji });
       } catch (error) {
         console.error('Error in add_reaction:', error);
       }
@@ -183,6 +134,88 @@ class ChatService {
     socket.on('disconnect', () => {
       this.handleUserLeave(socket);
     });
+  }
+
+  /**
+   * Persist and broadcast a chat message. Shared by the Socket.IO handler
+   * and the REST fallback endpoints (used where WebSockets are unavailable,
+   * e.g. Vercel serverless).
+   */
+  async sendMessage({ groupId, userId, message, attachments }) {
+    const user = await getRecord('users', String(userId));
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const record = await createRecord('chat_messages', {
+      group_id: String(groupId),
+      user_id: String(userId),
+      message,
+      attachments: Array.isArray(attachments) ? attachments : [],
+      is_deleted: false,
+      is_edited: false
+    });
+
+    const messageData = this.toMessagePayload(record, user);
+    this.io.to(`group_${groupId}`).emit('new_message', messageData);
+    this.removeTypingUser(groupId, userId);
+    await this.notifyOfflineUsers(groupId, userId, message, user.name || user.full_name || 'User');
+    return messageData;
+  }
+
+  async deleteMessage({ messageId, userId }) {
+    const message = await getRecord('chat_messages', String(messageId));
+    if (!message || String(message.user_id) !== String(userId)) {
+      throw new Error('Cannot delete this message');
+    }
+
+    await updateRecord('chat_messages', message.id, {
+      is_deleted: true
+    });
+
+    this.io.to(`group_${message.group_id}`).emit('message_deleted', { messageId });
+    return true;
+  }
+
+  async editMessage({ messageId, userId, newMessage }) {
+    const message = await getRecord('chat_messages', String(messageId));
+    if (!message || String(message.user_id) !== String(userId)) {
+      throw new Error('Cannot edit this message');
+    }
+
+    await updateRecord('chat_messages', message.id, {
+      message: newMessage,
+      is_edited: true
+    });
+
+    this.io.to(`group_${message.group_id}`).emit('message_edited', {
+      messageId,
+      newMessage,
+      timestamp: new Date()
+    });
+    return true;
+  }
+
+  async addReaction({ messageId, userId, emoji }) {
+    const message = await getRecord('chat_messages', String(messageId));
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    const reactions = Array.isArray(message.reactions) ? [...message.reactions] : [];
+    reactions.push({
+      user_id: String(userId),
+      emoji,
+      created_at: new Date().toISOString()
+    });
+
+    await updateRecord('chat_messages', message.id, { reactions });
+    this.io.to(`group_${message.group_id}`).emit('reaction_added', {
+      messageId,
+      userId,
+      emoji
+    });
+    return true;
   }
 
   handleUserLeave(socket) {

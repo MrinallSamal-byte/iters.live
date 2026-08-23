@@ -11,10 +11,11 @@ const {
   listRecords,
   deleteRecord
 } = require('../services/firebase-data.service');
+const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../uploads/notes');
+    const uploadDir = path.join(getUploadsBaseDir(), 'notes');
     await fs.mkdir(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
@@ -157,7 +158,7 @@ router.get('/:id/download', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Note not found' });
     }
 
-    const filePath = path.join(__dirname, '../uploads/notes', path.basename(note.file_path));
+    const filePath = path.join(getUploadsBaseDir(), 'notes', path.basename(note.file_path));
     try {
       await fs.access(filePath);
     } catch (_) {

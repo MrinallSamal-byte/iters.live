@@ -7,24 +7,24 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { generateUniqueFilename, sanitizeFilename, ensureDir } = require('../utils/file.util');
+const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 
 // Storage configuration
 const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
-        let uploadPath = 'uploads/';
-        
+        let uploadSubdir = 'misc';
+
         // Determine upload path based on field name
         if (file.fieldname === 'avatar' || file.fieldname === 'photo') {
-            uploadPath = 'uploads/avatars/';
+            uploadSubdir = 'avatars';
         } else if (file.fieldname === 'admitCard') {
-            uploadPath = 'uploads/admitcards/';
+            uploadSubdir = 'admitcards';
         } else if (file.fieldname === 'assignment') {
-            uploadPath = 'uploads/assignments/';
+            uploadSubdir = 'assignments';
         } else if (file.fieldname === 'notes') {
-            uploadPath = 'uploads/notes/';
-        } else {
-            uploadPath = 'uploads/misc/';
+            uploadSubdir = 'notes';
         }
+        const uploadPath = path.join(getUploadsBaseDir(), uploadSubdir);
         try {
             // Ensure directory exists (sync fallback for multer callback)
             await ensureDir(uploadPath);
