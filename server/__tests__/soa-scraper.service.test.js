@@ -181,3 +181,114 @@ describe('soa-scraper.service CAPTCHA extraction', () => {
         service.__private.activeSessions.clear();
     });
 });
+
+describe('soa-scraper.service session lifecycle', () => {
+    beforeEach(() => {
+        jest.resetModules();
+        delete process.env.SOA_MAX_ACTIVE_SESSIONS;
+        delete process.env.SOA_CRAWL_DEADLINE_MS;
+        const { chromium } = require('playwright');
+        chromium.launch.mockReset();
+        chromium.executablePath.mockReset();
+        chromium.executablePath.mockReturnValue('/mock/chromium');
+    });
+
+    it('returns SESSION_EXPIRED and evicts sessions seeded with an old createdAt', async () => {
+        const service = require('../services/soa-scraper.service');
+
+        service.__private.activeSessions.set('stale-session', {
+            browser: { close: async () => {} },
+            context: { close: async () => {} },
+            page: {},
+            createdAt: Date.now() - 11 * 60 * 1000
+        });
+
+        const result = await service.loginAndScrape('stale-session', 'reg-no', 'password-value', 'captcha-value');
+
+        expect(result).toMatchObject({
+            success: false,
+            status: service.STATUS_SESSION_EXPIRED,
+            message: 'Session expired. Please fetch a new CAPTCHA.'
+        });
+        expect(service.__private.activeSessions.has('stale-session')).toBe(false);
+    });
+
+    it('rejects loginAndScrape when the session belongs to a different user', async () => {
+        const service = require('../services/soa-scraper.service');
+
+        service.__private.activeSessions.set('foreign-session', {
+            browser: { close: async () => {} },
+            context: { close: async () => {} },
+            page: {},
+            createdAt: Date.now(),
+            lastActivity: Date.now(),
+            userId: 'user-1'
+        });
+
+        const result = await service.loginAndScrape('foreign-session', 'reg-no', 'password-value', 'captcha-value', { userId: 'user-2' });
+
+        expect(result).toEqual({
+            success: false,
+            status: service.STATUS_AUTH_FAILED,
+            message: 'This SOA session belongs to a different user. Please start a new session.'
+        });
+        expect(service.__private.activeSessions.has('foreign-session')).toBe(false);
+    });
+
+    it('hasSnapshotContent is true only for snapshots with tables or fields', () => {
+        const service = require('../services/soa-scraper.service');
+
+        expect(service.__private.hasSnapshotContent({ tables: [{ headers: ['Subject'], rows: [['Maths']] }] })).toBe(true);
+        expect(service.__private.hasSnapshotContent({ fields: { Name: 'Test Student' } })).toBe(true);
+        expect(service.__private.hasSnapshotContent({ tables: [], fields: {}, headings: ['Heading'] })).toBe(false);
+        expect(service.__private.hasSnapshotContent(null)).toBe(false);
+        expect(service.__private.hasSnapshotContent(undefined)).toBe(false);
+    });
+
+    it('hasMeaningfulPortalData treats rawSections content as usable data', () => {
+        const service = require('../services/soa-scraper.service');
+
+        expect(service.__private.hasMeaningfulPortalData({
+            profile: {},
+            qualifications: [],
+            attendance: {},
+            marks: {},
+            rawSections: {
+                marks: { fields: { 'Register Number': '200101' } }
+            }
+        })).toBe(true);
+
+        expect(service.__private.hasMeaningfulPortalData({
+            profile: {},
+            qualifications: [],
+            attendance: {},
+            marks: {},
+            rawSections: {
+                marks: { tables: [], fields: {} }
+            }
+        })).toBe(false);
+    });
+
+    it('getSessionPoolStats reports active, pending, and max pool slots', () => {
+        process.env.SOA_MAX_ACTIVE_SESSIONS = '3';
+        jest.resetModules();
+
+        const { chromium } = require('playwright');
+        chromium.launch.mockReset();
+        chromium.executablePath.mockReset();
+        chromium.executablePath.mockReturnValue('/mock/chromium');
+
+        const service = require('../services/soa-scraper.service');
+        service.__private.activeSessions.set('pool-session', {
+            createdAt: Date.now(),
+            lastActivity: Date.now(),
+            context: { close: async () => {} },
+            browser: { close: async () => {} }
+        });
+
+        expect(service.getSessionPoolStats()).toEqual({ active: 1, pending: 0, max: 3 });
+        expect(service.__private.getSessionPoolStats()).toEqual({ active: 1, pending: 0, max: 3 });
+
+        service.__private.activeSessions.clear();
+    });
+});

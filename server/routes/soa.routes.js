@@ -213,7 +213,7 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
       });
     }
 
-    const result = await soaScraperService.createSessionAndGetCaptcha();
+    const result = await soaScraperService.createSessionAndGetCaptcha({ userId: req.user.id });
 
     if (!result.success) {
       return res.status(
@@ -330,7 +330,7 @@ async function handleImport(req, res) {
       }
     };
 
-    const result = await soaScraperService.loginAndScrape(sessionId, regNo, password, captcha, { onProgress });
+    const result = await soaScraperService.loginAndScrape(sessionId, regNo, password, captcha, { onProgress, userId: req.user.id });
     req.body.password = null;
 
     if (!result.success) {
@@ -343,7 +343,9 @@ async function handleImport(req, res) {
             ? 503
             : result.status === soaScraperService.STATUS_RUNTIME_UNAVAILABLE
               ? 503
-            : 500;
+              : result.status === 'BLOCKED_BY_SITE'
+                ? 503
+                : 500;
 
       return res.status(statusCode).json({
         ...result,
@@ -373,6 +375,7 @@ async function handleImport(req, res) {
 
         if (fallbackSnapshot.status?.hasImportedData && fallbackSnapshot.normalizedData) {
           await invalidateStudentPortalCaches(req.user.id);
+          onProgress({ stage: 'done' });
           return res.json({
             success: true,
             status: 'SUCCESS_WITH_LOCAL_CACHE',
@@ -401,6 +404,8 @@ async function handleImport(req, res) {
         officialPortalUrl: OFFICIAL_PORTAL_URL
       });
     }
+
+    onProgress({ stage: 'done' });
 
     return res.json({
       success: true,
@@ -453,7 +458,7 @@ router.post('/disconnect', authMiddleware, requireStudent, async (req, res) => {
   }
 });
 
-router.delete('/session/:sessionId', optionalAuth, async (req, res) => {
+router.delete('/session/:sessionId', authMiddleware, async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -465,7 +470,14 @@ router.delete('/session/:sessionId', optionalAuth, async (req, res) => {
       });
     }
 
-    await soaScraperService.closeSession(sessionId);
+    const result = await soaScraperService.closeSession(sessionId, { userId: req.user.id });
+
+    if (result && result.closed === false && result.reason === 'not_owner') {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not own this session.'
+      });
+    }
 
     return res.json({
       success: true,

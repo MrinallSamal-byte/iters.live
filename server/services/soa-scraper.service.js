@@ -54,6 +54,9 @@ const SOA_USER_AGENT = process.env.SOA_USER_AGENT || DEFAULT_SOA_USER_AGENT;
 // DNS pinning (--host-resolver-rules) backfires behind Cloudflare, so it is opt-in via SOA_PIN_DNS=1.
 const SOA_PIN_DNS_ENABLED = process.env.SOA_PIN_DNS === '1';
 const CHALLENGE_CLEAR_TIMEOUT = parsePositiveInteger(process.env.SOA_CHALLENGE_WAIT_MS, 20000);
+// Hard ceiling for a logged-in crawl. When exceeded the session browser is killed so a stuck
+// scrape cannot pin a session slot until the full session TTL elapses.
+const CRAWL_DEADLINE_MS = parsePositiveInteger(process.env.SOA_CRAWL_DEADLINE_MS, 90000);
 const CLOUDFLARE_CHALLENGE_PATTERN = /just a moment|attention required|verify you are human|confirm you are human|cf-chl|challenge-platform|cf-browser-verification|cf-please-wait|checking your browser/i;
 
 function parsePositiveInteger(value, fallback) {
@@ -90,6 +93,10 @@ const SESSION_EXPIRY = 10 * 60 * 1000;
 // captcha sessions do not lock the small session pool for the full TTL.
 const SESSION_IDLE_EXPIRY = 4 * 60 * 1000;
 const MAX_ACTIVE_SESSIONS = parsePositiveInteger(process.env.SOA_MAX_ACTIVE_SESSIONS, 2);
+// Browsers that are mid-launch (navigating + extracting the CAPTCHA) but are not
+// stored in activeSessions yet. Counted against capacity to prevent concurrent
+// requests from racing past MAX_ACTIVE_SESSIONS.
+let pendingSessionLaunches = 0;
 const resolvedPortalIpCache = {
     value: null,
     resolvedAt: 0
@@ -126,10 +133,20 @@ function getEffectiveMaxActiveSessions() {
 function getSessionCapacitySnapshot() {
     const maxActiveSessions = getEffectiveMaxActiveSessions();
     const activeSessionCount = activeSessions.size;
+    const usedSlots = activeSessionCount + pendingSessionLaunches;
     return {
         activeSessionCount,
+        pendingSessionLaunches,
         maxActiveSessions,
-        hasCapacity: activeSessionCount < maxActiveSessions
+        hasCapacity: usedSlots < maxActiveSessions
+    };
+}
+
+function getSessionPoolStats() {
+    return {
+        active: activeSessions.size,
+        pending: pendingSessionLaunches,
+        max: getEffectiveMaxActiveSessions()
     };
 }
 
@@ -475,6 +492,19 @@ function hasTextValue(value) {
     return Boolean(text) && !/^(-+|n\/a|na|null|undefined)$/i.test(text);
 }
 
+function hasSnapshotContent(snapshot) {
+    return Boolean(
+        snapshot &&
+        ((Array.isArray(snapshot.tables) && snapshot.tables.length) ||
+            (snapshot.fields && Object.keys(snapshot.fields).length))
+    );
+}
+
+function rawSectionsHaveContent(rawSections) {
+    if (!rawSections || typeof rawSections !== 'object') return false;
+    return Object.values(rawSections).some((snapshot) => hasSnapshotContent(snapshot));
+}
+
 function hasMeaningfulPortalData(normalized) {
     if (!normalized || typeof normalized !== 'object') return false;
 
@@ -486,7 +516,8 @@ function hasMeaningfulPortalData(normalized) {
         hasTextValue(normalized.profile?.program) ||
         (Array.isArray(normalized.qualifications) && normalized.qualifications.length) ||
         (Array.isArray(normalized.attendance?.records) && normalized.attendance.records.length) ||
-        (Array.isArray(normalized.marks?.records) && normalized.marks.records.length)
+        (Array.isArray(normalized.marks?.records) && normalized.marks.records.length) ||
+        rawSectionsHaveContent(normalized.rawSections)
     );
 }
 
@@ -587,6 +618,13 @@ async function cleanupExpiredSessions() {
         if (now - session.createdAt > SESSION_EXPIRY) {
             console.log(`[SOA Scraper] Cleaning up expired session: ${sessionId}`);
             expiredSessionIds.push(sessionId);
+            continue;
+        }
+
+        const lastActive = session.lastActivity || session.createdAt;
+        if (now - lastActive > SESSION_IDLE_EXPIRY) {
+            console.log(`[SOA Scraper] Cleaning up idle session: ${sessionId}`);
+            expiredSessionIds.push(sessionId);
         }
     }
 
@@ -607,21 +645,30 @@ if (typeof sessionCleanupTimer?.unref === 'function') {
 /**
  * Close and cleanup a session
  */
-async function closeSession(sessionId) {
+async function closeSession(sessionId, { userId } = {}) {
     const session = activeSessions.get(sessionId);
-    if (session) {
-        try {
-            if (session.context) {
-                await session.context.close().catch(() => {});
-            }
-            if (session.browser) {
-                await session.browser.close().catch(() => {});
-            }
-        } catch (error) {
-            console.error(`[SOA Scraper] Error closing session ${sessionId}:`, error.message);
-        }
-        activeSessions.delete(sessionId);
+    if (!session) {
+        return { closed: false };
     }
+
+    // Sessions created without a bound user (or internal cleanup calls) always close.
+    if (userId !== undefined && userId !== null && session.userId && session.userId !== userId) {
+        console.warn(`[SOA Scraper] Refusing to close session ${sessionId}: owned by a different user`);
+        return { closed: false, reason: 'not_owner' };
+    }
+
+    try {
+        if (session.context) {
+            await session.context.close().catch(() => {});
+        }
+        if (session.browser) {
+            await session.browser.close().catch(() => {});
+        }
+    } catch (error) {
+        console.error(`[SOA Scraper] Error closing session ${sessionId}:`, error.message);
+    }
+    activeSessions.delete(sessionId);
+    return { closed: true };
 }
 
 async function waitForPortalUpdate(page, delay = 1200) {
@@ -633,6 +680,17 @@ function createBlockedBySiteError() {
     const error = new Error('The SOA portal blocked this session behind Cloudflare bot protection (cf-mitigated managed challenge).');
     error.code = 'BLOCKED_BY_SITE';
     return error;
+}
+
+function isCloudflareResponse(response) {
+    if (!response || typeof response.status !== 'function') return false;
+    try {
+        const headers = typeof response.headers === 'function' ? response.headers() : null;
+        const cfMitigated = String(headers?.['cf-mitigated'] || '').toLowerCase();
+        return response.status() === 403 || cfMitigated.includes('challenge');
+    } catch (_) {
+        return false;
+    }
 }
 
 async function detectCloudflareChallenge(page) {
@@ -850,6 +908,12 @@ async function resolvePortalIpAddress() {
 }
 
 async function createPortalLookup() {
+    // DNS pinning backfires behind Cloudflare (stale IPs poison the session),
+    // so it only applies when explicitly opted in via SOA_PIN_DNS=1.
+    if (!SOA_PIN_DNS_ENABLED) {
+        return (hostname, options, callback) => dns.lookup(hostname, options, callback);
+    }
+
     const fallbackAddress = await resolvePortalIpAddress();
     return (hostname, options, callback) => {
         if (hostname !== PORTAL_HOSTNAME || !fallbackAddress) {
@@ -873,12 +937,12 @@ async function navigateToPortal(page) {
         for (const attempt of attempts) {
             try {
                 console.log(`[SOA Scraper] Portal navigation attempt to ${url} with waitUntil=${attempt.label}`);
-                await page.goto(url, {
+                const response = await page.goto(url, {
                     waitUntil: attempt.waitUntil,
                     timeout: attempt.timeout
                 });
                 await waitForPortalShell(page);
-                if (await detectCloudflareChallenge(page)) {
+                if (isCloudflareResponse(response) || await detectCloudflareChallenge(page)) {
                     if (!(await waitForCloudflareClearance(page))) {
                         throw createBlockedBySiteError();
                     }
@@ -990,7 +1054,11 @@ async function openPortalSection(page, section) {
                 waitUntil: 'domcontentloaded',
                 timeout: NAVIGATION_TIMEOUT
             });
-            await waitForPortalUpdate(page, 1800);
+            await waitForPortalUpdate(page, 1200);
+            const fragment = section.route.replace(/^#\/?/, '').split('/').pop().toLowerCase();
+            if (fragment) {
+                await page.waitForFunction((frag) => (location.hash || '').toLowerCase().includes(frag), fragment, { timeout: 4000 }).catch(() => {});
+            }
             openedAny = true;
         } catch (_) {
             // Fall back to label-based navigation below.
@@ -1324,16 +1392,33 @@ async function captureSectionSnapshot(page, sectionName) {
     }, sectionName);
 }
 
-async function collectSectionSnapshots(page) {
+async function collectSectionSnapshots(page, onProgress = null) {
     const sections = {
         default: await captureSectionSnapshot(page, 'default')
     };
 
     for (const section of SECTION_NAVIGATION) {
+        emitScrapeProgress(onProgress, 'fetching-sections', section.key);
         const opened = await openPortalSection(page, section);
         if (!opened) continue;
         await prepareSectionForCapture(page, section);
-        sections[section.key] = await captureSectionSnapshot(page, section.key);
+        let snapshot = await captureSectionSnapshot(page, section.key);
+
+        if (!hasSnapshotContent(snapshot)) {
+            // The SPA sometimes needs a second navigation pass before the section
+            // actually renders; keep the richer of the two captures.
+            const reopened = await openPortalSection(page, section);
+            if (reopened) {
+                await prepareSectionForCapture(page, section);
+                await waitForPortalUpdate(page, 1500);
+                const retried = await captureSectionSnapshot(page, section.key);
+                if (hasSnapshotContent(retried)) {
+                    snapshot = retried;
+                }
+            }
+        }
+
+        sections[section.key] = snapshot;
     }
 
     return sections;
@@ -1341,9 +1426,12 @@ async function collectSectionSnapshots(page) {
 
 /**
  * Create a new browser session and get CAPTCHA
+ * @param {Object} [options] Optional options object
+ * @param {string} [options.userId] Owner of the created session
  * @returns {Promise<Object>} Session info with captcha image
  */
-async function createSessionAndGetCaptcha() {
+async function createSessionAndGetCaptcha(options = {}) {
+    const userId = options?.userId || null;
     let browser = null;
     let context = null;
     let page = null;
@@ -1364,86 +1452,97 @@ async function createSessionAndGetCaptcha() {
             };
         }
 
-        const runtimeDiagnostics = await getRuntimeDiagnostics();
-        if (!runtimeDiagnostics.ready) {
-            return {
-                success: false,
-                status: STATUS_RUNTIME_UNAVAILABLE,
-                message: runtimeDiagnostics.message,
-                runtime: runtimeDiagnostics
-            };
-        }
+        // Reserve a pool slot for the whole launch sequence so concurrent requests
+        // cannot race past the cap while browsers are still spinning up.
+        pendingSessionLaunches += 1;
+        try {
+            const runtimeDiagnostics = await getRuntimeDiagnostics();
+            if (!runtimeDiagnostics.ready) {
+                return {
+                    success: false,
+                    status: STATUS_RUNTIME_UNAVAILABLE,
+                    message: runtimeDiagnostics.message,
+                    runtime: runtimeDiagnostics
+                };
+            }
 
-        // Run the lightweight HTTPS reachability probe in the background so it never
-        // adds visible latency to the user's "Start SOA session" action.
-        checkPortalReachability()
-            .then((reachability) => {
-                if (!reachability.reachable) {
-                    console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
-                    console.warn('[SOA Scraper] Continuing with browser attempt despite failed reachability check');
-                } else if (reachability.blockedByBotProtection) {
-                    console.warn(`[SOA Scraper] Portal responded at ${reachability.url} (status ${reachability.statusCode}) behind Cloudflare bot protection; continuing with browser attempt`);
-                } else {
-                    console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
-                }
-            })
-            .catch((error) => {
-                console.warn(`[SOA Scraper] Portal reachability check error: ${error.message}`);
+            // Run the lightweight HTTPS reachability probe in the background so it never
+            // adds visible latency to the user's "Start SOA session" action.
+            checkPortalReachability()
+                .then((reachability) => {
+                    if (!reachability.reachable) {
+                        console.warn(`[SOA Scraper] Portal reachability check failed: ${reachability.error || 'unknown error'}`);
+                        console.warn('[SOA Scraper] Continuing with browser attempt despite failed reachability check');
+                    } else if (reachability.blockedByBotProtection) {
+                        console.warn(`[SOA Scraper] Portal responded at ${reachability.url} (status ${reachability.statusCode}) behind Cloudflare bot protection; continuing with browser attempt`);
+                    } else {
+                        console.log(`[SOA Scraper] Portal reachable via ${reachability.url} (status ${reachability.statusCode || 'unknown'})`);
+                    }
+                })
+                .catch((error) => {
+                    console.warn(`[SOA Scraper] Portal reachability check error: ${error.message}`);
+                });
+
+            // Opt-in only: pinning the portal IP breaks sessions behind Cloudflare
+            // when the edge IP rotates (default OFF, enable with SOA_PIN_DNS=1).
+            const resolvedPortalIp = SOA_PIN_DNS_ENABLED ? await resolvePortalIpAddress() : null;
+            if (resolvedPortalIp) {
+                console.log(`[SOA Scraper] Resolved ${PORTAL_HOSTNAME} via public DNS (pinning enabled): ${resolvedPortalIp}`);
+            }
+
+            browser = await chromium.launch(buildLaunchOptions({
+                executablePath: runtimeDiagnostics.executablePath,
+                resolvedPortalIp
+            }));
+
+            context = await browser.newContext({
+                viewport: { width: 1366, height: 768 },
+                userAgent: SOA_USER_AGENT,
+                locale: 'en-US',
+                timezoneId: 'Asia/Kolkata'
             });
 
-        const resolvedPortalIp = await resolvePortalIpAddress();
-        if (resolvedPortalIp) {
-            console.log(`[SOA Scraper] Resolved ${PORTAL_HOSTNAME} via public DNS: ${resolvedPortalIp}`);
-        }
+            page = await context.newPage();
+            page.setDefaultTimeout(15000);
+            page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT);
 
-        browser = await chromium.launch(buildLaunchOptions({
-            executablePath: runtimeDiagnostics.executablePath,
-            resolvedPortalIp
-        }));
+            // Navigate to portal
+            console.log(`[SOA Scraper] Navigating to portal: ${PORTAL_URL}`);
+            await navigateToPortal(page);
 
-        context = await browser.newContext({
-            viewport: { width: 1366, height: 768 },
-            userAgent: SOA_USER_AGENT,
-            locale: 'en-US',
-            timezoneId: 'Asia/Kolkata'
-        });
+            // Extract CAPTCHA image
+            const captchaImage = await getCaptchaWithRetry(page);
 
-        page = await context.newPage();
-        page.setDefaultTimeout(15000);
-        page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT);
-
-        // Navigate to portal
-        console.log(`[SOA Scraper] Navigating to portal: ${PORTAL_URL}`);
-        await navigateToPortal(page);
-
-        // Extract CAPTCHA image
-        const captchaImage = await getCaptchaWithRetry(page);
-
-        if (!captchaImage) {
-            if (page && await detectCloudflareChallenge(page)) {
-                throw createBlockedBySiteError();
+            if (!captchaImage) {
+                if (page && await detectCloudflareChallenge(page)) {
+                    throw createBlockedBySiteError();
+                }
+                throw new Error('Could not extract CAPTCHA image from portal');
             }
-            throw new Error('Could not extract CAPTCHA image from portal');
+
+            // Store session
+            activeSessions.set(sessionId, {
+                browser,
+                context,
+                page,
+                captchaImage,
+                createdAt: Date.now(),
+                lastActivity: Date.now(),
+                userId
+            });
+
+            console.log(`[SOA Scraper] Session created successfully: ${sessionId}`);
+
+            return {
+                success: true,
+                status: STATUS_CAPTCHA_REQUIRED,
+                sessionId,
+                captchaImage,
+                message: 'CAPTCHA extracted. Please solve and submit with credentials.'
+            };
+        } finally {
+            pendingSessionLaunches -= 1;
         }
-
-        // Store session
-        activeSessions.set(sessionId, {
-            browser,
-            context,
-            page,
-            captchaImage,
-            createdAt: Date.now()
-        });
-
-        console.log(`[SOA Scraper] Session created successfully: ${sessionId}`);
-
-        return {
-            success: true,
-            status: STATUS_CAPTCHA_REQUIRED,
-            sessionId,
-            captchaImage,
-            message: 'CAPTCHA extracted. Please solve and submit with credentials.'
-        };
 
     } catch (error) {
         console.error(`[SOA Scraper] Error creating session:`, error.message);
@@ -1690,10 +1789,12 @@ function emitScrapeProgress(onProgress, stage, detail) {
  * @param {string} captcha User-provided captcha solution
  * @param {Object} [options] Optional options object
  * @param {Function} [options.onProgress] Fire-and-forget stage callback
+ * @param {string} [options.userId] Authenticated owner of the session
  * @returns {Promise<Object>} Scrape result
  */
 async function loginAndScrape(sessionId, regNo, password, captcha, options = {}) {
     const onProgress = options && typeof options.onProgress === 'function' ? options.onProgress : null;
+    const requestUserId = options?.userId || null;
     const session = activeSessions.get(sessionId);
 
     if (!session) {
@@ -1701,6 +1802,24 @@ async function loginAndScrape(sessionId, regNo, password, captcha, options = {})
             success: false,
             status: STATUS_SESSION_EXPIRED,
             message: 'Session expired. Please fetch a new CAPTCHA.'
+        };
+    }
+
+    if (Date.now() - (session.lastActivity || session.createdAt) > SESSION_EXPIRY) {
+        await closeSession(sessionId);
+        return {
+            success: false,
+            status: STATUS_SESSION_EXPIRED,
+            message: 'Session expired. Please fetch a new CAPTCHA.'
+        };
+    }
+
+    if (session.userId && requestUserId && session.userId !== requestUserId) {
+        await closeSession(sessionId);
+        return {
+            success: false,
+            status: STATUS_AUTH_FAILED,
+            message: 'This SOA session belongs to a different user. Please start a new session.'
         };
     }
 
@@ -1729,46 +1848,67 @@ async function loginAndScrape(sessionId, regNo, password, captcha, options = {})
         console.log(`[SOA Scraper] Login successful, scraping data...`);
         emitScrapeProgress(onProgress, 'login-ok');
 
-        // Wait for dashboard to load
-        await page.waitForTimeout(3000);
+        // Kill the session browser when the crawl exceeds the deadline so stuck scrapes
+        // free their pool slot instead of hanging until the full session TTL elapses.
+        const deadlineTimer = setTimeout(() => {
+            console.warn('[SOA Scraper] Crawl deadline exceeded; killing session browser');
+            closeSession(sessionId);
+        }, CRAWL_DEADLINE_MS);
+        if (typeof deadlineTimer.unref === 'function') deadlineTimer.unref();
 
-        // Scrape all available data
-        const studentData = await scrapeAllData(page, onProgress);
-        const normalizedData = normalizeSoaPortalData({
-            ...studentData,
-            loginUserId: regNo,
-            portalRegistrationNumber: regNo
-        });
-        const hasUsableData = hasMeaningfulPortalData(normalizedData);
+        try {
+            // Wait for dashboard to load
+            await page.waitForTimeout(3000);
 
-        if (!hasUsableData) {
+            // Scrape all available data
+            const studentData = await scrapeAllData(page, onProgress);
+            const normalizedData = normalizeSoaPortalData({
+                ...studentData,
+                loginUserId: regNo,
+                portalRegistrationNumber: regNo
+            });
+            const hasUsableData = hasMeaningfulPortalData(normalizedData);
+
+            if (!hasUsableData) {
+                await closeSession(sessionId);
+                return {
+                    success: false,
+                    status: loginSuccess.uncertain ? STATUS_AUTH_FAILED : STATUS_SCRAPE_ERROR,
+                    message: loginSuccess.uncertain
+                        ? 'SOA login could not be confirmed. Please check your registration number, password, and CAPTCHA, then try again.'
+                        : 'SOA login completed but no student data was returned. Please fetch a new CAPTCHA and try again.'
+                };
+            }
+
+            // Close session after successful scrape
+            emitScrapeProgress(onProgress, 'saving');
             await closeSession(sessionId);
+
             return {
-                success: false,
-                status: loginSuccess.uncertain ? STATUS_AUTH_FAILED : STATUS_SCRAPE_ERROR,
-                message: loginSuccess.uncertain
-                    ? 'SOA login could not be confirmed. Please check your registration number, password, and CAPTCHA, then try again.'
-                    : 'SOA login completed but no student data was returned. Please fetch a new CAPTCHA and try again.'
+                success: true,
+                status: STATUS_SUCCESS,
+                message: 'Data fetched successfully from SOA portal',
+                data: normalizedData
             };
+        } finally {
+            clearTimeout(deadlineTimer);
         }
-
-        // Close session after successful scrape
-        emitScrapeProgress(onProgress, 'saving');
-        await closeSession(sessionId);
-        emitScrapeProgress(onProgress, 'done');
-
-        return {
-            success: true,
-            status: STATUS_SUCCESS,
-            message: 'Data fetched successfully from SOA portal',
-            data: normalizedData
-        };
 
     } catch (error) {
         console.error(`[SOA Scraper] Error during login/scrape:`, error.message);
-        
+
         // Close session on error
         await closeSession(sessionId);
+
+        const rawMessage = String(error?.message || '');
+        if (rawMessage.includes('Target closed') || rawMessage.includes('Session closed')) {
+            return {
+                success: false,
+                status: STATUS_PORTAL_UNREACHABLE,
+                message: 'The SOA import took too long and was stopped. Please try again.'
+            };
+        }
+
         const failure = buildScraperErrorResponse(
             error,
             'We could not complete the SOA import. Please fetch a new CAPTCHA and try again.'
@@ -1856,7 +1996,17 @@ async function performLogin(page, regNo, password, captcha) {
             'incorrect password',
             'invalid captcha',
             'captcha error',
-            'wrong captcha'
+            'wrong captcha',
+            'invalid captcha code',
+            'captcha is invalid',
+            'incorrect captcha',
+            'wrong user',
+            'user not found',
+            'account is locked',
+            'account locked',
+            'too many attempts',
+            'attempts remaining',
+            'please try again after'
         ];
 
         const lowerContent = pageContent.toLowerCase();
@@ -1888,13 +2038,28 @@ async function performLogin(page, regNo, password, captcha) {
             'exam result',
             'logout',
             'log out',
-            'sign out'
+            'sign out',
+            'dashboard',
+            'my dashboard',
+            'class attendance',
+            'student result',
+            'time table',
+            'timetable',
+            'registered subjects',
+            'personal info'
         ];
 
         for (const success of successIndicators) {
             if (lowerContent.includes(success) && !loginFormVisible) {
                 return { success: true };
             }
+        }
+
+        // DOM probe: a visible logout control is the strongest signal the SPA
+        // actually authenticated, even when the text checks above miss it.
+        const logoutVisible = await page.locator('a,button').filter({ hasText: /log\s?out|sign\s?out/i }).first().isVisible().catch(() => false);
+        if (logoutVisible && !loginFormVisible) {
+            return { success: true };
         }
 
         const isBaseLoginRoute = /StudentPortalSOA\/#\/?$/.test(currentUrl);
@@ -1960,7 +2125,7 @@ async function scrapeAllData(page, onProgress = null) {
         // Get current page content
         const pageContent = await page.content();
         emitScrapeProgress(onProgress, 'fetching-sections');
-        data.rawSections = await collectSectionSnapshots(page);
+        data.rawSections = await collectSectionSnapshots(page, onProgress);
         data.rawHtml = pageContent;
 
         // Extract profile information
@@ -2572,8 +2737,10 @@ async function refreshCaptcha(sessionId) {
             };
         }
 
-        // Update session
+        // Update session; the refreshed CAPTCHA must not be instantly evicted as idle.
         session.captchaImage = captchaImage;
+        session.lastActivity = Date.now();
+        session.createdAt = Date.now();
         activeSessions.set(sessionId, session);
 
         return {
@@ -2604,6 +2771,7 @@ module.exports = {
     refreshCaptcha,
     closeSession,
     getRuntimeDiagnostics,
+    getSessionPoolStats,
     STATUS_SUCCESS,
     STATUS_AUTH_FAILED,
     STATUS_SCRAPE_ERROR,
@@ -2620,6 +2788,12 @@ module.exports = {
         detectCloudflareChallenge,
         waitForCloudflareClearance,
         createBlockedBySiteError,
-        buildScraperErrorResponse
+        buildScraperErrorResponse,
+        performLogin,
+        hasSnapshotContent,
+        hasMeaningfulPortalData,
+        collectSectionSnapshots,
+        waitForPortalUpdate,
+        getSessionPoolStats
     }
 };

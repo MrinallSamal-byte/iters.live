@@ -92,9 +92,28 @@ function serializeDate(value) {
 function toNumber(value) {
   if (value === null || value === undefined || value === '') return null;
   if (typeof value === 'number' && Number.isFinite(value)) return value;
-  const cleaned = String(value).replace(/[^0-9.-]/g, '');
-  if (!cleaned) return null;
-  const num = Number(cleaned);
+
+  const text = String(value).trim();
+
+  // Fractions such as "18/20": keep the numerator instead of concatenating digits.
+  const fraction = text.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*\d+/);
+  if (fraction) {
+    const numerator = Number(fraction[1]);
+    if (Number.isFinite(numerator)) return numerator;
+  }
+
+  let prepared = text;
+  if (/\d{1,3}(?:,\d{3})+/.test(prepared)) {
+    // Comma thousands separators: "1,234" -> 1234.
+    prepared = prepared.replace(/\d{1,3}(?:,\d{3})+(?:\.\d+)?/g, (part) => part.replace(/,/g, ''));
+  } else {
+    // Single comma acts as a decimal separator: "1,5" -> 1.5.
+    prepared = prepared.replace(/(\d),(\d)/g, '$1.$2');
+  }
+
+  const match = prepared.match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const num = Number(match[0]);
   return Number.isFinite(num) ? num : null;
 }
 
@@ -102,7 +121,7 @@ function toPercentage(value) {
   const text = cleanValue(value);
   if (!text) return null;
   const num = toNumber(text);
-  if (num === null) return null;
+  if (num === null || num < 0 || num > 100) return null;
   return Number(num.toFixed(2));
 }
 
@@ -1046,11 +1065,6 @@ function normalizeTimetableRecords(rawData) {
 }
 
 function normalizeSubjectRecords(rawData) {
-  const directRecords = normalizeStructuredArray(rawData?.subjects || rawData?.courses);
-  if (directRecords.length) {
-    return directRecords;
-  }
-
   const records = collectTables(rawData)
     .filter(isSubjectTable)
     .flatMap((table) => tableToObjects(table))
@@ -1063,7 +1077,12 @@ function normalizeSubjectRecords(rawData) {
     )
     .filter((row) => Object.keys(row).length);
 
-  return dedupeBy(records, (item) => JSON.stringify(item));
+  const tableRecords = dedupeBy(records, (item) => JSON.stringify(item));
+  if (tableRecords.length) {
+    return tableRecords;
+  }
+
+  return normalizeStructuredArray(rawData?.subjects || rawData?.courses);
 }
 
 function buildProfileSummary(rawData) {
@@ -1340,6 +1359,53 @@ function buildFirestoreUpdate(normalized, options = {}) {
     fees_data: storedPortalData.fees,
     updated_at: new Date()
   };
+}
+
+function pickBestArray(nextValue, previousValue) {
+  if (Array.isArray(nextValue) && nextValue.length) {
+    return nextValue;
+  }
+  if (Array.isArray(previousValue) && previousValue.length) {
+    return previousValue;
+  }
+  return Array.isArray(nextValue) ? nextValue : [];
+}
+
+// Array-bearing regions where an empty NEW scrape must never wipe a non-empty PREVIOUS one.
+const PORTAL_MERGE_ARRAY_PATHS = [
+  ['qualifications'],
+  ['attendance', 'records'],
+  ['marks', 'records'],
+  ['results'],
+  ['internalAssessments'],
+  ['timetable'],
+  ['subjects'],
+  ['notifications']
+];
+
+function mergePreservingBest(previousNormalized, nextNormalized) {
+  if (!nextNormalized || typeof nextNormalized !== 'object') {
+    return nextNormalized;
+  }
+  if (!previousNormalized || typeof previousNormalized !== 'object') {
+    return nextNormalized;
+  }
+
+  const merged = { ...nextNormalized };
+  PORTAL_MERGE_ARRAY_PATHS.forEach(([region, subKey]) => {
+    const nextParent = nextNormalized[region];
+    const previousParent = previousNormalized[region];
+    if (subKey) {
+      merged[region] = {
+        ...(nextParent && typeof nextParent === 'object' ? nextParent : {}),
+        [subKey]: pickBestArray(nextParent?.[subKey], previousParent?.[subKey])
+      };
+      return;
+    }
+    merged[region] = pickBestArray(nextParent, previousParent);
+  });
+
+  return merged;
 }
 
 function isSqlPortalSnapshotStorageConfigured() {
@@ -1673,7 +1739,10 @@ async function readUserDoc(userId, registrationNumber) {
 }
 
 async function persistPortalDataForUser({ userId, registrationNumber, normalizedData, isVerified = true, portalConnected = true }) {
-  const updateData = buildFirestoreUpdate(normalizedData, {
+  const previousDoc = await readUserDoc(userId, registrationNumber);
+  const previousNormalized = normalizeStoredPortalData(previousDoc?.data || {});
+  const effectiveNormalized = mergePreservingBest(previousNormalized, normalizedData);
+  const updateData = buildFirestoreUpdate(effectiveNormalized, {
     registrationNumber,
     isVerified,
     portalConnected,
@@ -1913,5 +1982,11 @@ module.exports = {
   buildAttendanceRouteData,
   buildMarksRouteData,
   getDemoPortalData,
-  serializeDate
+  serializeDate,
+  __private: {
+    toNumber,
+    toPercentage,
+    mergePreservingBest,
+    normalizeSubjectRecords
+  }
 };
