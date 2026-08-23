@@ -96,7 +96,7 @@ function createMenu() {
           label: 'About',
           click: () => {
             require('electron').dialog.showMessageBox({
-              title: 'About ITER EduHub',
+              title: 'About ITERasn hub',
               message: 'ITER College Management System',
               detail: 'Version 1.0.0\nA comprehensive solution for college management.',
               type: 'info'

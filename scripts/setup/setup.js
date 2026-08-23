@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Setup Script for ITER EduHub
+ * Setup Script for ITERasn hub
  * Initializes database, creates sample files, and seeds data
  */
 
@@ -260,7 +260,7 @@ async function createEnvFile() {
 
 async function main() {
     log('╔════════════════════════════════════════╗', 'blue');
-    log('║   ITER EduHub - Setup Script          ║', 'blue');
+    log('║   ITERasn hub - Setup Script          ║', 'blue');
     log('╚════════════════════════════════════════╝', 'blue');
     
     await createEnvFile();

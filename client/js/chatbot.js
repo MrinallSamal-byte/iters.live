@@ -315,7 +315,7 @@ class Chatbot {
                 answer: `🎓 <strong>About ITER, SOA University</strong>\n\nITER (Institute of Technical Education & Research) is a premier constituent college of SOA University, Bhubaneswar.\n\n<strong>Highlights:</strong>\n• 🏆 NAAC A++ Accredited\n• 📚 NBA Approved Programs\n• 💼 95%+ Placement Rate\n• 🌍 Global Collaborations\n\n<a href="/#about" class="nav-suggestion">📖 Learn More</a> | <a href="/creator.html" class="nav-suggestion">👨‍💻 About Creator</a>`
             },
             'features': {
-                keywords: ['features', 'what can', 'capabilities', 'services', 'offerings', 'eduhub'],
+                keywords: ['features', 'what can', 'capabilities', 'services', 'offerings', 'iterasn hub', 'hub'],
                 answer: `✨ <strong>ITERasn hub Features</strong>\n\n<strong>For Students:</strong>\n• 📊 Real-time Attendance Tracking\n• 📈 Marks & Performance Analytics\n• 📚 Digital Notes & PYQs\n• 📅 Interactive Timetable\n• 🎫 Admit Card Download\n• 💬 Student Forum\n• 🎉 Events & Clubs\n\n<strong>For Teachers:</strong>\n• 📝 Assignment Management\n• 🎯 Question Bank\n• 📊 Grade Management\n\n<strong>For Admins:</strong>\n• 👥 User Management\n• 📊 Advanced Analytics\n• 📢 Announcements\n\n<a href="/#features" class="nav-suggestion">🔍 Explore All Features</a>`
             },
             'register': {

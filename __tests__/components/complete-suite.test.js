@@ -1,9 +1,9 @@
-/**
- * Comprehensive Test Suite for ITER EduHub
+﻿/**
+ * Component Test Suite for ITERasn hub
  * Jest unit tests for all components
  */
 
-// Phase 9: Student Tools Tests
+// Student Tools Tests
 describe('GPA Calculator', () => {
     let calculator;
 
@@ -95,7 +95,7 @@ describe('Assignment Calendar', () => {
     });
 });
 
-// Phase 10: Teacher Tools Tests
+// Teacher Tools Tests
 describe('Question Bank', () => {
     let questionBank;
 
