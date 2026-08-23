@@ -8,7 +8,8 @@
  * 
  * The service will warn if no folder ID is configured but will not fail initialization.
  */
-const { google } = require('googleapis');
+const { GoogleAuth } = require('google-auth-library');
+const drive = require('googleapis/build/src/apis/drive').drive;
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
@@ -54,12 +55,12 @@ async function initializeAuth() {
       }
     }
 
-    auth = new google.auth.GoogleAuth({
+    auth = new GoogleAuth({
       credentials,
       scopes: SCOPES
     });
 
-    driveClient = google.drive({ version: 'v3', auth });
+    driveClient = drive({ version: 'v3', auth });
 
     console.log('✓ Google Drive Backup service initialized');
     return auth;

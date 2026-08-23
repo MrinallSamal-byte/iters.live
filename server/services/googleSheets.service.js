@@ -4,7 +4,9 @@
  * 
  * Target folder ID is configurable via GOOGLE_DRIVE_FOLDER_ID environment variable
  */
-const { google } = require('googleapis');
+const { GoogleAuth } = require('google-auth-library');
+const sheets = require('googleapis/build/src/apis/sheets').sheets;
+const drive = require('googleapis/build/src/apis/drive').drive;
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
@@ -49,13 +51,13 @@ async function initializeAuth() {
       }
     }
 
-    auth = new google.auth.GoogleAuth({
+    auth = new GoogleAuth({
       credentials,
       scopes: SCOPES
     });
 
-    sheetsClient = google.sheets({ version: 'v4', auth });
-    driveClient = google.drive({ version: 'v3', auth });
+    sheetsClient = sheets({ version: 'v4', auth });
+    driveClient = drive({ version: 'v3', auth });
 
     console.log('✓ Google Sheets service initialized');
     return auth;
