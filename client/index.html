@@ -173,6 +173,7 @@
         })();
     </script>
     <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="stylesheet" href="/css/home-nothing.css">
 </head>
 
 <body class="landing-page nothing-home public-home-page">
@@ -236,321 +237,244 @@
                 <span>Offline-first <b>+</b></span>
             </div>
         </div>
-        <section class="hero-section">
-            <div class="container">
-                <div class="hero-copy reveal-on-scroll">
-                    <div class="r-glyphs" aria-hidden="true" style="margin-bottom:1rem;">
-                        <i class="lit"></i><i></i><i class="lit"></i><i></i><i class="lit"></i><i></i><i></i><i class="lit"></i><i></i><i></i><i></i><i class="lit"></i>
-                    </div>
-                    <p class="micro-label">BUILT FOR ITER STUDENTS</p>
-                    <h1 class="hero-title">Attendance. Marks. Timetable. One quiet place.</h1>
-                    <p class="hero-description">
-                        Import your official SOA portal data once - ITERasn hub keeps attendance, marks,
-                        timetable, notes and deadlines in a fast, distraction-free dashboard built for daily use.
-                    </p>
 
-                    <div class="hero-buttons">
-                        <a href="/login.html" class="btn btn-primary btn-large">Portal Login</a>
-                        <a href="/register.html" class="btn btn-outline btn-large">Register</a>
-                    </div>
-
-                    <div class="hero-notes">
-                        <div class="hero-note">
-                            <span class="note-dot"></span>
-                            <span>Works offline after the first load.</span>
-                        </div>
-                        <div class="hero-note">
-                            <span class="note-dot"></span>
-                            <span>You solve the CAPTCHA yourself. Credentials never touch our servers.</span>
-                        </div>
-                    </div>
+        <section class="nh-hero">
+            <div class="nh-container">
+                <div class="nh-hero-meta reveal-on-scroll">
+                    <span class="nh-meta-tag">001 / PORTAL</span>
+                    <span class="r-glyphs" aria-hidden="true"><i class="lit"></i><i></i><i class="lit"></i><i></i><i class="lit"></i><i></i><i></i><i class="lit"></i><i></i><i></i><i></i><i class="lit"></i></span>
+                    <span class="nh-meta-tag nh-meta-right"><span id="liveStatus">System ready.</span></span>
                 </div>
+                <h1 class="nh-hero-title reveal-on-scroll">
+                    <span>Attendance.</span>
+                    <span>Marks.</span>
+                    <span>Timetable.</span>
+                    <span class="nh-hero-quiet">One quiet place.</span>
+                </h1>
+                <p class="nh-hero-copy reveal-on-scroll">
+                    Import your official SOA portal data once. ITERasn hub keeps attendance, marks,
+                    timetable, notes and deadlines in one fast, distraction-free dashboard built for daily use.
+                </p>
+                <div class="nh-hero-actions reveal-on-scroll">
+                    <a href="/login.html" class="nh-btn nh-btn-solid">Portal Login</a>
+                    <a href="/register.html" class="nh-btn nh-btn-ghost">Register</a>
+                </div>
+                <div class="nh-hero-foot reveal-on-scroll">
+                    <span>Offline after first load</span>
+                    <span>You solve the CAPTCHA yourself</span>
+                    <span>Credentials never touch our servers</span>
+                </div>
+            </div>
+        </section>
 
-                <div class="hero-panel reveal-on-scroll">
-                    <div class="device-frame">
-                        <div class="device-topbar">
-                            <span class="device-dot"></span>
-                            <span class="micro-label">PORTAL SURFACE</span>
-                            <span class="device-status">READY</span>
+        <section id="features" class="nh-section">
+            <div class="nh-container">
+                <header class="nh-section-head reveal-on-scroll">
+                    <span class="nh-index">01</span>
+                    <h2 class="nh-section-title">Daily tools</h2>
+                    <span class="nh-section-note">Import once. Check in seconds.</span>
+                </header>
+                <div class="nh-rows">
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">01</span>
+                        <div class="nh-row-body">
+                            <h3>Offline after first load</h3>
+                            <p>Attendance, marks and the timetable are cached on your device. Open the dashboard where campus Wi-Fi fails and the numbers are still there.</p>
                         </div>
-
-                        <div class="device-screen">
-                            <div class="screen-card screen-card-primary">
-                                <p class="micro-label">QUICK ENTRY</p>
-                                <h2>Your day, at a glance</h2>
-                                <p>Attendance standing, today's timetable, and pending deadlines without digging through the portal.</p>
-                                <div class="shortcut-list">
-                                    <a href="/login.html" class="shortcut-item">
-                                        <span>Student Portal</span>
-                                        <span>Open</span>
-                                    </a>
-                                    <a href="/register.html" class="shortcut-item">
-                                        <span>New Registration</span>
-                                        <span>Open</span>
-                                    </a>
-                                    <a href="#academics" class="shortcut-item">
-                                        <span>Programs</span>
-                                        <span>Scroll</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="screen-grid">
-                                <div class="screen-card">
-                                    <p class="micro-label">ACADEMICS</p>
-                                    <h3>Programs</h3>
-                                    <p>Browse disciplines, labs, and high-demand engineering tracks.</p>
-                                </div>
-                                <div class="screen-card">
-                                    <p class="micro-label">OPERATIONS</p>
-                                    <h3>Portal Tools</h3>
-                                    <p>Attendance, marks, notes, announcements, and academic workflows.</p>
-                                </div>
-                                <div class="screen-card">
-                                    <p class="micro-label">CAMPUS</p>
-                                    <h3>Contact</h3>
-                                    <p>Reach the institute directly through verified campus contact details.</p>
-                                </div>
-                                <div class="screen-card">
-                                    <p class="micro-label">STATUS</p>
-                                    <h3 id="liveStatus">Attendance first.</h3>
-                                    <p>The numbers you actually check, kept current from your last SOA import.</p>
-                                </div>
-                            </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </div>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">02</span>
+                        <div class="nh-row-body">
+                            <h3>One-click SOA import</h3>
+                            <p>You sign in on the official SOA portal page and solve the CAPTCHA yourself. Credentials pass straight through and never touch our servers.</p>
                         </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </div>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">03</span>
+                        <div class="nh-row-body">
+                            <h3>AI study assistant</h3>
+                            <p>Summaries, revision plans and plain-language explanations sit beside your notes and deadlines, ready between classes.</p>
+                        </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </div>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">04</span>
+                        <div class="nh-row-body">
+                            <h3>Forum, clubs and events</h3>
+                            <p>Coursework is only half the day. The hub carries the student forum, club pages, event listings and the weekly mess menu.</p>
+                        </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </div>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">05</span>
+                        <div class="nh-row-body">
+                            <h3>Notes and PYQs</h3>
+                            <p>Approved study material and previous-year papers, searchable by subject, shared by faculty and seniors.</p>
+                        </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </div>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">06</span>
+                        <div class="nh-row-body">
+                            <h3>Payments and dues</h3>
+                            <p>Fees, receipts and payment history in one place, without standing in a queue or digging through the portal.</p>
+                        </div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="metrics-section" aria-label="Institution highlights">
-            <div class="container">
-                <div class="metrics-grid">
-                    <article class="metric-card reveal-on-scroll">
-                        <p class="micro-label">STUDENT COMMUNITY</p>
+        <section class="nh-section nh-section-alt" aria-label="Institution highlights">
+            <div class="nh-container">
+                <header class="nh-section-head reveal-on-scroll">
+                    <span class="nh-index">02</span>
+                    <h2 class="nh-section-title">In numbers</h2>
+                    <span class="nh-section-note">ITER, SOA University</span>
+                </header>
+                <div class="nh-metrics reveal-on-scroll">
+                    <div class="nh-metric">
                         <strong class="metric-value counter" data-target="10000" data-suffix="+">0</strong>
-                        <p>One digital layer for access, progress, and updates.</p>
-                    </article>
-                    <article class="metric-card reveal-on-scroll">
-                        <p class="micro-label">FACULTY STRENGTH</p>
+                        <span class="nh-metric-label">Student community</span>
+                    </div>
+                    <div class="nh-metric">
                         <strong class="metric-value counter" data-target="500" data-suffix="+">0</strong>
-                        <p>Teaching, mentoring, evaluation, and resources on a unified system.</p>
-                    </article>
-                    <article class="metric-card reveal-on-scroll">
-                        <p class="micro-label">ACADEMIC TRACKS</p>
+                        <span class="nh-metric-label">Faculty strength</span>
+                    </div>
+                    <div class="nh-metric">
                         <strong class="metric-value counter" data-target="20" data-suffix="+">0</strong>
-                        <p>Programs aligned to current engineering and management demands.</p>
-                    </article>
-                    <article class="metric-card reveal-on-scroll">
-                        <p class="micro-label">OUTCOME SIGNAL</p>
+                        <span class="nh-metric-label">Academic tracks</span>
+                    </div>
+                    <div class="nh-metric">
                         <strong class="metric-value counter" data-target="95" data-suffix="%">0</strong>
-                        <p>Strong placement momentum supported by practical training and industry links.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="features" class="features-section">
-            <div class="container">
-                <div class="section-heading reveal-on-scroll">
-                    <p class="micro-label">YOUR DATA IMPORTED ONCE</p>
-                    <h2 class="section-title">Built for the daily grind.</h2>
-                    <p class="section-copy">
-                        One import pulls your official SOA portal records into the hub. After that, everything you check
-                        between classes loads instantly and stays available offline.
-                    </p>
-                </div>
-
-                <div class="features-grid">
-                    <article class="feature-card glass-card reveal-on-scroll">
-                        <p class="micro-label">01</p>
-                        <h3>Offline after first load</h3>
-                        <p>Attendance, marks, and the timetable are cached on your device. Open the dashboard where campus Wi-Fi fails and the numbers are still there.</p>
-                    </article>
-                    <article class="feature-card glass-card reveal-on-scroll">
-                        <p class="micro-label">02</p>
-                        <h3>One-click SOA import</h3>
-                        <p>You sign in on the official SOA portal page and solve the CAPTCHA yourself. Credentials pass straight through and never touch our servers.</p>
-                    </article>
-                    <article class="feature-card glass-card reveal-on-scroll">
-                        <p class="micro-label">03</p>
-                        <h3>AI study assistant</h3>
-                        <p>Summaries, revision plans, and plain-language explanations sit beside your notes and deadlines, ready between classes.</p>
-                    </article>
-                </div>
-
-                <div class="experience-board reveal-on-scroll">
-                    <div class="experience-copy">
-                        <p class="micro-label">CAMPUS LIFE, SAME TAB</p>
-                        <h3>Forum, clubs, events, and the hostel menu.</h3>
-                        <p>
-                            Coursework is only half the day. The hub also carries the student forum, club pages, event
-                            listings, and the weekly mess menu, so the rest of campus life stays one click away.
-                        </p>
-                    </div>
-
-                    <div class="route-list">
-                        <a href="/login.html" class="route-item">
-                            <span>Portal Login</span>
-                            <span>Launch</span>
-                        </a>
-                        <a href="/register.html" class="route-item">
-                            <span>Registration</span>
-                            <span>Launch</span>
-                        </a>
-                        <a href="#features" class="route-item">
-                            <span>Daily Tools</span>
-                            <span>Scroll</span>
-                        </a>
-                        <a href="#academics" class="route-item">
-                            <span>Academic Programs</span>
-                            <span>Scroll</span>
-                        </a>
-                        <a href="#contact" class="route-item">
-                            <span>Campus Contact</span>
-                            <span>Scroll</span>
-                        </a>
+                        <span class="nh-metric-label">Placement momentum</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="about-section">
-            <div class="container about-grid">
-                <div class="about-copy reveal-on-scroll">
-                    <p class="micro-label">ABOUT ITER</p>
-                    <h2 class="section-title">The institute behind the dashboard.</h2>
-                    <p class="section-copy">
-                        ITER, a constituent institute of Siksha 'O' Anusandhan (Deemed to be University), has built its
-                        reputation on academic rigor, applied learning, and technical excellence. ITERasn hub applies the
-                        same discipline to the software students open every morning.
-                    </p>
-                    <p class="section-copy">
-                        Official records always remain on the SOA portal. The hub mirrors what matters day to day:
-                        attendance standing, due submissions, and the next class.
-                    </p>
-                </div>
-
-                <div class="about-panels">
-                    <article class="principle-card glass-card reveal-on-scroll">
-                        <p class="micro-label">ACCREDITATION</p>
-                        <h3>NAAC A++</h3>
-                        <p>Quality, consistency, and academic performance remain central to the institution identity.</p>
-                    </article>
-                    <article class="principle-card glass-card reveal-on-scroll">
-                        <p class="micro-label">RESEARCH</p>
-                        <h3>Applied learning</h3>
-                        <p>Labs, projects, and industry-facing programs shape the student experience beyond the classroom.</p>
-                    </article>
-                    <article class="principle-card glass-card reveal-on-scroll">
-                        <p class="micro-label">PLACEMENTS</p>
-                        <h3>Career readiness</h3>
-                        <p>Students move from academics to opportunity with stronger visibility across campus workflows.</p>
-                    </article>
-                    <article class="principle-card glass-card reveal-on-scroll">
-                        <p class="micro-label">DIGITAL SYSTEM</p>
-                        <h3>One portal layer</h3>
-                        <p>Attendance, marks, notes, payments, events, and admin actions stay connected through ITERasn hub.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section id="academics" class="academics-section">
-            <div class="container">
-                <div class="section-heading reveal-on-scroll">
-                    <p class="micro-label">PROGRAM OVERVIEW</p>
-                    <h2 class="section-title">Academic programs with strong technical depth.</h2>
-                    <p class="section-copy">
-                        Six tracks, condensed to essentials. Full syllabi, regulations, and faculty details stay inside the portal.
-                    </p>
-                </div>
-
-                <div class="program-grid">
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">01</span>
-                        <h3>Computer Science</h3>
-                        <p>AI, data science, cloud, cyber security, software systems, and applied computing.</p>
-                    </article>
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">02</span>
-                        <h3>Electronics</h3>
-                        <p>Embedded systems, communication, VLSI, IoT, and next-generation hardware pathways.</p>
-                    </article>
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">03</span>
-                        <h3>Mechanical</h3>
-                        <p>Design, manufacturing, robotics, thermal systems, and modern industrial tooling.</p>
-                    </article>
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">04</span>
-                        <h3>Civil</h3>
-                        <p>Infrastructure, construction systems, structural thinking, and sustainable development.</p>
-                    </article>
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">05</span>
-                        <h3>Electrical</h3>
-                        <p>Power systems, control, renewable energy, machines, and grid-focused engineering.</p>
-                    </article>
-                    <article class="program-card reveal-on-scroll">
-                        <span class="program-index">06</span>
-                        <h3>Management &amp; IT</h3>
-                        <p>Technology-enabled management, digital operations, and interdisciplinary business readiness.</p>
-                    </article>
-                </div>
-
-                <div class="program-footer reveal-on-scroll">
-                    <p>For notes, attendance, marks, payments, and other live modules, continue into the portal.</p>
-                    <a href="/login.html" class="btn btn-primary">Go to Portal</a>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="contact-section">
-            <div class="container contact-shell">
-                <div class="contact-copy reveal-on-scroll">
-                    <p class="micro-label">CONTACT</p>
-                    <h2 class="section-title">Reach the campus directly.</h2>
-                    <p class="section-copy">
-                        Contact information stays visible and straightforward so visitors can move from browsing to action
-                        without hunting through the site.
-                    </p>
-                </div>
-
-                <div class="contact-card glass-card reveal-on-scroll">
-                    <a href="tel:+916742350171" class="contact-row">
-                        <span class="contact-label">Phone</span>
-                        <span class="contact-value">+91 674 2350171</span>
+        <section id="academics" class="nh-section">
+            <div class="nh-container">
+                <header class="nh-section-head reveal-on-scroll">
+                    <span class="nh-index">03</span>
+                    <h2 class="nh-section-title">Programs</h2>
+                    <span class="nh-section-note">Full syllabi stay inside the portal</span>
+                </header>
+                <div class="nh-rows">
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">CSE</span>
+                        <div class="nh-row-body"><h3>Computer Science</h3><p>AI, data science, cloud, cyber security, software systems and applied computing.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
                     </a>
-                    <div class="contact-row contact-row-static">
-                        <span class="contact-label">Address</span>
-                        <span class="contact-value">Jagamohan Nagar, Khandagiri, Bhubaneswar, Odisha 751030</span>
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">ECE</span>
+                        <div class="nh-row-body"><h3>Electronics</h3><p>Embedded systems, communication, VLSI, IoT and next-generation hardware pathways.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">MEC</span>
+                        <div class="nh-row-body"><h3>Mechanical</h3><p>Design, manufacturing, robotics, thermal systems and modern industrial tooling.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">CIV</span>
+                        <div class="nh-row-body"><h3>Civil</h3><p>Infrastructure, construction systems, structural thinking and sustainable development.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">EEE</span>
+                        <div class="nh-row-body"><h3>Electrical</h3><p>Power systems, control, renewable energy, machines and grid-focused engineering.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                    <a class="nh-row nh-row-link" href="/login.html">
+                        <span class="nh-row-num">MIT</span>
+                        <div class="nh-row-body"><h3>Management &amp; IT</h3><p>Technology-enabled management, digital operations and interdisciplinary business readiness.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="nh-section nh-section-alt">
+            <div class="nh-container">
+                <header class="nh-section-head reveal-on-scroll">
+                    <span class="nh-index">04</span>
+                    <h2 class="nh-section-title">The institute</h2>
+                    <span class="nh-section-note">Behind the dashboard</span>
+                </header>
+                <div class="nh-about-grid">
+                    <div class="nh-about-copy reveal-on-scroll">
+                        <p>ITER, a constituent institute of Siksha 'O' Anusandhan (Deemed to be University), has built its reputation on academic rigor, applied learning and technical excellence.</p>
+                        <p>Official records always remain on the SOA portal. The hub mirrors what matters day to day: attendance standing, due submissions and the next class.</p>
                     </div>
-                    <div class="contact-actions">
-                        <a href="/register.html" class="btn btn-outline">Start Registration</a>
-                        <a href="/login.html" class="btn btn-primary">Portal Login</a>
+                    <ul class="nh-facts reveal-on-scroll">
+                        <li><span>Accreditation</span><strong>NAAC A++</strong></li>
+                        <li><span>Learning</span><strong>Applied, lab-first</strong></li>
+                        <li><span>Placements</span><strong>Career readiness</strong></li>
+                        <li><span>Digital layer</span><strong>One portal, ITERasn hub</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="nh-section">
+            <div class="nh-container">
+                <header class="nh-section-head reveal-on-scroll">
+                    <span class="nh-index">05</span>
+                    <h2 class="nh-section-title">Contact</h2>
+                    <span class="nh-section-note">Reach the campus directly</span>
+                </header>
+                <div class="nh-rows">
+                    <a class="nh-row nh-row-link" href="tel:+916742350171">
+                        <span class="nh-row-num">TEL</span>
+                        <div class="nh-row-body"><h3>+91 674 2350171</h3><p>Institute office, working hours.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
+                    </a>
+                    <div class="nh-row reveal-on-scroll">
+                        <span class="nh-row-num">ADD</span>
+                        <div class="nh-row-body"><h3>Jagamohan Nagar, Khandagiri</h3><p>Bhubaneswar, Odisha 751030.</p></div>
+                        <span class="nh-row-arrow" aria-hidden="true">+</span>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="nh-cta">
+            <div class="nh-container">
+                <div class="r-glyphs" aria-hidden="true"><i class="lit"></i><i></i><i class="lit"></i><i></i><i class="lit"></i><i></i><i></i><i class="lit"></i></div>
+                <h2 class="nh-cta-title">Ready when you are.</h2>
+                <p>One import. Everything you actually check, in seconds.</p>
+                <div class="nh-hero-actions">
+                    <a href="/login.html" class="nh-btn nh-btn-solid">Portal Login</a>
+                    <a href="/register.html" class="nh-btn nh-btn-ghost">Register</a>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="container footer-shell">
-            <div>
-                <p class="micro-label">ITERASN HUB</p>
-                <p class="footer-copy">Attendance, marks, timetable, notes, and deadlines - imported once from the SOA portal, checked in seconds.</p>
+    <footer class="nh-footer">
+        <div class="nh-container nh-footer-top">
+            <div class="nh-footer-brand">
+                <span class="nh-footer-logo">ITERASN HUB</span>
+                <p>Imported once from the SOA portal. Checked in seconds.</p>
             </div>
-            <div class="footer-links">
+            <nav class="nh-footer-links" aria-label="Footer">
                 <a href="#about">About</a>
                 <a href="#features">Features</a>
                 <a href="#academics">Programs</a>
-                <a href="/creator.html">Meet the creator</a>
+                <a href="/creator.html">Creator</a>
                 <a href="#contact">Contact</a>
-            </div>
-            <p class="footer-year">&copy; <span id="currentYear"></span> ITERasn hub</p>
+            </nav>
+        </div>
+        <div class="nh-container nh-footer-bottom">
+            <span>&copy; <span id="currentYear"></span> ITERASN HUB</span>
+            <span>INSTITUTE OF TECHNICAL EDUCATION &amp; RESEARCH, SOA</span>
+            <span class="nh-footer-dot" aria-hidden="true"></span>
         </div>
     </footer>
+
 
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
         <span class="theme-icon">🌙</span>

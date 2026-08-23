@@ -1,0 +1,639 @@
+/* ============================================================
+   HOME - NOTHING EDITION
+   Structural redesign of the landing page: spec-sheet sections,
+   dot-matrix display type, monochrome + signature red.
+   Scoped to body.nothing-home and .nh-* components.
+   ============================================================ */
+
+body.nothing-home {
+    --nh-bg: #000000;
+    --nh-panel: #0a0a0a;
+    --nh-line: #1f1f1f;
+    --nh-line-strong: #333333;
+    --nh-text: #f4f4f4;
+    --nh-text-2: #b0b0b0;
+    --nh-text-3: #757575;
+    --nh-red: #d71921;
+    --nh-red-deep: #a31016;
+    --nh-font-display: "Doto", "Space Grotesk", sans-serif;
+    --nh-font-body: "Space Grotesk", "Segoe UI", sans-serif;
+    --nh-font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    background: var(--nh-bg);
+}
+
+body.nothing-home.light-theme {
+    --nh-bg: #ffffff;
+    --nh-panel: #fafafa;
+    --nh-line: #e6e6e6;
+    --nh-line-strong: #cfcfcf;
+    --nh-text: #0d0d0d;
+    --nh-text-2: #4a4a4a;
+    --nh-text-3: #8a8a8a;
+    background: var(--nh-bg);
+}
+
+/* kill the old backdrop ornaments - the dot grid from refined-ui is enough */
+body.nothing-home .bg-animation {
+    display: none;
+}
+
+body.nothing-home::after {
+    display: none;
+}
+
+body.nothing-home .home-main {
+    padding: 0;
+}
+
+.nh-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ------------------------------------------------------------
+   Nav - sharp bordered bar
+   ------------------------------------------------------------ */
+
+body.nothing-home .navbar {
+    background: rgba(0, 0, 0, 0.85);
+    border: none;
+    border-bottom: 1px solid var(--nh-line);
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+body.nothing-home.light-theme .navbar {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+body.nothing-home .nav-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0.85rem 24px;
+}
+
+body.nothing-home .nav-logo .logo-text {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nh-text);
+}
+
+body.nothing-home .nav-logo .logo-subtext {
+    font-family: var(--nh-font-mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+body.nothing-home .nav-link {
+    font-family: var(--nh-font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nh-text-2);
+}
+
+body.nothing-home .nav-link:hover {
+    color: var(--nh-text);
+}
+
+body.nothing-home .nav-links .btn {
+    padding: 0.5rem 1rem;
+}
+
+/* ------------------------------------------------------------
+   Hero
+   ------------------------------------------------------------ */
+
+.nh-hero {
+    padding: clamp(4rem, 9vw, 7.5rem) 0 clamp(3.5rem, 7vw, 6rem);
+    border-bottom: 1px solid var(--nh-line);
+}
+
+.nh-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: clamp(1.75rem, 4vw, 3rem);
+}
+
+.nh-meta-tag {
+    font-family: var(--nh-font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+.nh-meta-right {
+    margin-left: auto;
+    color: var(--nh-red);
+}
+
+.nh-hero-title {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 8.5vw, 6.5rem);
+    line-height: 0.98;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--nh-text);
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.nh-hero-title span {
+    display: block;
+}
+
+.nh-hero-title .nh-hero-quiet {
+    color: var(--nh-red);
+}
+
+.nh-hero-copy {
+    max-width: 560px;
+    font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+    line-height: 1.65;
+    color: var(--nh-text-2);
+    margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.nh-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.nh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.6rem;
+    font-family: var(--nh-font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 0;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.nh-btn-solid {
+    background: var(--nh-red);
+    border-color: var(--nh-red);
+    color: #ffffff;
+}
+
+.nh-btn-solid:hover {
+    background: var(--nh-red-deep);
+    border-color: var(--nh-red-deep);
+}
+
+.nh-btn-ghost {
+    background: transparent;
+    border-color: var(--nh-line-strong);
+    color: var(--nh-text);
+}
+
+.nh-btn-ghost:hover {
+    border-color: var(--nh-text);
+}
+
+.nh-hero-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px dotted var(--nh-line-strong);
+}
+
+.nh-hero-foot span {
+    font-family: var(--nh-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+.nh-hero-foot span::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--nh-red);
+    margin-right: 0.5rem;
+    vertical-align: 1px;
+}
+
+/* ------------------------------------------------------------
+   Sections - spec-sheet headers
+   ------------------------------------------------------------ */
+
+.nh-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+    border-bottom: 1px solid var(--nh-line);
+}
+
+.nh-section-alt {
+    background: var(--nh-panel);
+}
+
+.nh-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+    border-bottom: 1px solid var(--nh-line);
+}
+
+.nh-index {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--nh-red);
+}
+
+.nh-section-title {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--nh-text);
+    margin: 0;
+}
+
+.nh-section-note {
+    margin-left: auto;
+    font-family: var(--nh-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+    text-align: right;
+}
+
+/* ------------------------------------------------------------
+   Rows - list instead of card grids
+   ------------------------------------------------------------ */
+
+.nh-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.nh-row {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.35rem 0.75rem;
+    border-bottom: 1px dotted var(--nh-line-strong);
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    transition: background 150ms ease, border-color 150ms ease;
+}
+
+.nh-row:first-child {
+    border-top: 1px dotted var(--nh-line-strong);
+}
+
+.nh-row:hover {
+    background: rgba(215, 25, 33, 0.05);
+    border-left-color: var(--nh-red);
+}
+
+.nh-row-num {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--nh-text-3);
+    transition: color 150ms ease;
+}
+
+.nh-row:hover .nh-row-num {
+    color: var(--nh-red);
+}
+
+.nh-row-body h3 {
+    font-family: var(--nh-font-body);
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--nh-text);
+    margin: 0 0 0.3rem;
+}
+
+.nh-row-body p {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--nh-text-3);
+    margin: 0;
+    max-width: 640px;
+}
+
+.nh-row-arrow {
+    font-family: var(--nh-font-mono);
+    font-size: 1.1rem;
+    color: var(--nh-text-3);
+    transition: color 150ms ease, transform 150ms ease;
+}
+
+.nh-row:hover .nh-row-arrow {
+    color: var(--nh-red);
+    transform: rotate(45deg);
+}
+
+.nh-row-link {
+    cursor: pointer;
+}
+
+/* ------------------------------------------------------------
+   Metrics
+   ------------------------------------------------------------ */
+
+.nh-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.nh-metric {
+    padding: 0.5rem 1.5rem;
+    border-left: 1px solid var(--nh-line);
+}
+
+.nh-metric:first-child {
+    border-left: none;
+    padding-left: 0;
+}
+
+.nh-metric .metric-value {
+    display: block;
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    line-height: 1;
+    color: var(--nh-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.nh-metric-label {
+    display: block;
+    margin-top: 0.7rem;
+    font-family: var(--nh-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+/* ------------------------------------------------------------
+   About - copy + fact list
+   ------------------------------------------------------------ */
+
+.nh-about-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+}
+
+.nh-about-copy p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--nh-text-2);
+    margin: 0 0 1.1rem;
+}
+
+.nh-facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nh-facts li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 0.25rem;
+    border-bottom: 1px dotted var(--nh-line-strong);
+}
+
+.nh-facts li:first-child {
+    border-top: 1px dotted var(--nh-line-strong);
+}
+
+.nh-facts span {
+    font-family: var(--nh-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+.nh-facts strong {
+    font-family: var(--nh-font-body);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--nh-text);
+    text-align: right;
+}
+
+/* ------------------------------------------------------------
+   CTA band
+   ------------------------------------------------------------ */
+
+.nh-cta {
+    padding: clamp(4.5rem, 9vw, 7.5rem) 0;
+    text-align: center;
+    border-bottom: 1px solid var(--nh-line);
+}
+
+.nh-cta .r-glyphs {
+    justify-content: center;
+    display: flex;
+    margin-bottom: 1.75rem;
+}
+
+.nh-cta-title {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--nh-text);
+    margin: 0 0 1rem;
+}
+
+.nh-cta p {
+    font-size: 0.95rem;
+    color: var(--nh-text-2);
+    margin: 0 0 2rem;
+}
+
+.nh-cta .nh-hero-actions {
+    justify-content: center;
+    margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------ */
+
+.nh-footer {
+    background: var(--nh-bg);
+}
+
+.nh-footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-top: 3rem;
+    padding-bottom: 2.5rem;
+}
+
+.nh-footer-logo {
+    font-family: var(--nh-font-display);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nh-text);
+}
+
+.nh-footer-brand p {
+    margin: 0.6rem 0 0;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--nh-text-3);
+    max-width: 320px;
+}
+
+.nh-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+}
+
+.nh-footer-links a {
+    font-family: var(--nh-font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--nh-text-2);
+    transition: color 140ms ease;
+}
+
+.nh-footer-links a:hover {
+    color: var(--nh-red);
+}
+
+.nh-footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 2rem;
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+    border-top: 1px dotted var(--nh-line-strong);
+}
+
+.nh-footer-bottom span {
+    font-family: var(--nh-font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nh-text-3);
+}
+
+.nh-footer-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--nh-red);
+    margin-left: auto;
+}
+
+/* ------------------------------------------------------------
+   Light theme adjustments
+   ------------------------------------------------------------ */
+
+body.nothing-home.light-theme .nh-row:hover {
+    background: rgba(215, 25, 33, 0.04);
+}
+
+body.nothing-home.light-theme .navbar .btn-primary,
+body.nothing-home.light-theme .nh-btn-solid {
+    color: #ffffff;
+}
+
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
+
+@media (max-width: 960px) {
+    .nh-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem 0;
+    }
+
+    .nh-metric:nth-child(3) {
+        border-left: none;
+        padding-left: 0;
+    }
+
+    .nh-about-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .nh-row {
+        grid-template-columns: 48px 1fr;
+        gap: 1rem;
+    }
+
+    .nh-row-arrow {
+        display: none;
+    }
+
+    .nh-section-head {
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+    }
+
+    .nh-section-note {
+        margin-left: 0;
+        width: 100%;
+        text-align: left;
+    }
+
+    .nh-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .nh-metric {
+        border-left: none;
+        padding: 0.75rem 0;
+        border-bottom: 1px dotted var(--nh-line-strong);
+    }
+
+    .nh-hero-foot {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+}
