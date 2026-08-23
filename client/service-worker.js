@@ -1,75 +1,60 @@
-// Enhanced Service Worker for PWA with Advanced Caching Strategies
-const CACHE_VERSION = 'v3';
-const CACHE_NAME = `iter-edu-${CACHE_VERSION}`;
+// ITERasn hub service worker — offline-first caching strategies
+const CACHE_VERSION = 'v5';
+const CACHE_NAME = `iter-core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `iter-runtime-${CACHE_VERSION}`;
-const API_CACHE = `iter-api-${CACHE_VERSION}`;
+const RUNTIME_MAX_ENTRIES = 200;
 
-// Static assets to precache
+// Every path below was verified to exist under client/ and be served by Express:
+// '/', '/manifest.json', '/assets/*', '/css/*', '/js/*' all map to client/ files.
 const PRECACHE_URLS = [
   '/',
-  '/index.html',
-  '/login.html',
+  '/manifest.json',
+  '/assets/icon.png',
+  '/assets/soa-logo.png',
   '/css/style.css',
-  '/css/animations.css',
+  '/css/home-minimal.css',
+  '/css/mobile.css',
   '/js/main.js',
   '/js/landing.js',
-  '/manifest.json',
-  '/assets/icon-192.png',
-  '/assets/icon-512.png'
+  '/js/mobile-fixes.js',
+  '/js/toast.js'
 ];
 
-// API endpoints that can be cached with stale-while-revalidate
-const CACHEABLE_API_PATTERNS = [
-  /\/api\/analytics\//,
-  /\/api\/user\/profile/,
-  /\/api\/timetable/,
-  /\/api\/files\/list/,
-  /\/api\/hostel\/menu/
-];
+const STATIC_ASSET_RE = /\.(css|js|mjs|png|jpe?g|gif|svg|webp|avif|ico|woff2?|ttf|otf|eot)$/i;
 
-// Max age for different cache types (in milliseconds)
-const CACHE_MAX_AGE = {
-  static: 7 * 24 * 60 * 60 * 1000,  // 7 days
-  api: 5 * 60 * 1000,                 // 5 minutes
-  runtime: 24 * 60 * 60 * 1000        // 1 day
-};
-const NON_CACHEABLE_HTML_PATHS = new Set([
-  '/login',
-  '/login.html',
-  '/register',
-  '/register.html',
-  '/creator',
-  '/creator.html',
-  '/connect-portal',
-  '/connect-portal.html',
-  '/clear-session.html'
-]);
+const OFFLINE_HTML = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+  '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+  '<title>ITERasn hub — Offline</title><style>' +
+  'html,body{margin:0;height:100%}' +
+  'body{display:flex;align-items:center;justify-content:center;background:#0a0a0a;color:#eaeaea;' +
+  'font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;padding:24px;box-sizing:border-box}' +
+  '.dot{width:10px;height:10px;border-radius:50%;background:#ff5a4f;margin:0 auto 18px;animation:pulse 1.6s ease-in-out infinite}' +
+  '@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}' +
+  'p{font-size:13px;line-height:1.7;letter-spacing:.08em;text-transform:uppercase;margin:0}' +
+  '</style></head><body><div><div class="dot"></div>' +
+  "<p>OFFLINE — showing cached content isn't available for this page yet</p></div></body></html>";
 
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Precaching static assets');
-        return cache.addAll(PRECACHE_URLS);
-      })
+      .then((cache) => cache.addAll(PRECACHE_URLS))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
-  const currentCaches = [CACHE_NAME, RUNTIME_CACHE, API_CACHE];
+  const currentCaches = [CACHE_NAME, RUNTIME_CACHE];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (!currentCaches.includes(cacheName)) {
+          if (cacheName.startsWith('iter-') && !currentCaches.includes(cacheName)) {
             console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
+          return null;
         })
       );
     }).then(() => self.clients.claim())
@@ -77,6 +62,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+
   if (!event.data || event.data.type !== 'CLEAR_APP_CACHE') {
     return;
   }
@@ -92,214 +82,103 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Helper function to check if API endpoint should be cached
-function shouldCacheAPI(url) {
-  return CACHEABLE_API_PATTERNS.some(pattern => pattern.test(url.pathname));
+async function pruneCache(name, max) {
+  const cache = await caches.open(name);
+  const keys = await cache.keys();
+  if (keys.length <= max) return;
+  await Promise.all(keys.slice(0, keys.length - max).map((key) => cache.delete(key)));
 }
 
-// Helper function to check cache freshness
-async function isCacheFresh(request, cacheName, maxAge) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
-  
-  if (!cachedResponse) return false;
-  
-  const cachedDate = cachedResponse.headers.get('sw-cache-date');
-  if (!cachedDate) return false;
-  
-  const cacheAge = Date.now() - parseInt(cachedDate);
-  return cacheAge < maxAge;
+async function handleNavigation(request) {
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, response.clone())
+        .then(() => pruneCache(RUNTIME_CACHE, RUNTIME_MAX_ENTRIES))
+        .catch(() => {});
+    }
+    return response;
+  } catch (err) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response(OFFLINE_HTML, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    });
+  }
 }
 
-async function putWithTimestamp(cache, request, response) {
-  const responseToCache = response.clone();
-  const headers = new Headers(responseToCache.headers);
-  headers.set('sw-cache-date', Date.now().toString());
-
-  const responseWithTimestamp = new Response(responseToCache.body, {
-    status: responseToCache.status,
-    statusText: responseToCache.statusText,
-    headers
-  });
-
-  await cache.put(request, responseWithTimestamp);
+async function handleApiGet(request) {
+  try {
+    return await fetch(request);
+  } catch (err) {
+    return new Response(JSON.stringify({ success: false, offline: true }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
-// Stale-while-revalidate strategy
-async function staleWhileRevalidate(request, cacheName, maxAge) {
-  const cache = await caches.open(cacheName);
-  
-  // Try to get from cache first
-  const cachedResponse = await cache.match(request);
-  
-  // Fetch from network in background
-  const fetchPromise = fetch(request).then(async (response) => {
-    if (response.status === 200) {
-      await putWithTimestamp(cache, request, response);
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+
+  const network = fetch(request).then(async (response) => {
+    if (response && response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      await cache.put(request, response.clone());
+      await pruneCache(RUNTIME_CACHE, RUNTIME_MAX_ENTRIES);
     }
     return response;
   }).catch(() => null);
-  
-  // Return cached response immediately if fresh, otherwise wait for network
-  if (cachedResponse && await isCacheFresh(request, cacheName, maxAge)) {
-    // Return cached and update in background (fire-and-forget)
-    // Intentionally not awaiting to allow background update
-    fetchPromise.catch(() => {}); // Handle promise rejection silently
-    return cachedResponse;
+
+  if (cached) {
+    network.catch(() => {});
+    return cached;
   }
-  
-  // Wait for network response
-  const networkResponse = await fetchPromise;
-  return networkResponse || cachedResponse || new Response(JSON.stringify({
-    success: false,
-    message: 'Network error - you are offline'
-  }), {
-    headers: { 'Content-Type': 'application/json' },
-    status: 503
-  });
+
+  const fresh = await network;
+  if (fresh) return fresh;
+  return new Response('', { status: 503, statusText: 'Offline' });
 }
 
-// Fetch event - enhanced with multiple caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+
+  // Never intercept or cache non-GET traffic.
+  if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
 
-  // Skip cross-origin requests
-  if (url.origin !== location.origin) {
+  // Skip cross-origin requests.
+  if (url.origin !== location.origin) return;
+
+  // Navigation requests: network-first, cached match, branded offline page.
+  if (request.mode === 'navigate') {
+    event.respondWith(handleNavigation(request));
     return;
   }
 
-  // API requests - stale-while-revalidate for cacheable endpoints
+  // Same-origin API reads: network-first; responses are never cached.
   if (url.pathname.startsWith('/api/')) {
-    if (shouldCacheAPI(url)) {
-      // Use stale-while-revalidate for cacheable API endpoints
-      event.respondWith(
-        staleWhileRevalidate(request, API_CACHE, CACHE_MAX_AGE.api)
-      );
-    } else {
-      // Network only for other API requests (auth, mutations, etc.)
-      event.respondWith(
-        fetch(request).catch(() => {
-          return new Response(JSON.stringify({
-            success: false,
-            message: 'Network error - you are offline'
-          }), {
-            headers: { 'Content-Type': 'application/json' },
-            status: 503
-          });
-        })
-      );
-    }
+    event.respondWith(handleApiGet(request));
     return;
   }
 
-  // Static assets - cache first with network fallback
-  if (PRECACHE_URLS.includes(url.pathname) || 
-      url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff|woff2|ico|webp)$/)) {
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Check if cache is stale and update in background
-          isCacheFresh(request, CACHE_NAME, CACHE_MAX_AGE.static).then((isFresh) => {
-            if (isFresh) return;
-
-            fetch(request).then((response) => {
-              if (response.status === 200) {
-                caches.open(CACHE_NAME).then((cache) => {
-                  putWithTimestamp(cache, request, response).catch(() => {});
-                });
-              }
-            }).catch(() => {});
-          }).catch(() => {});
-          return cachedResponse;
-        }
-        
-        // Not in cache, fetch from network
-        return caches.open(RUNTIME_CACHE).then((cache) => {
-          return fetch(request).then((response) => {
-            if (response.status === 200) {
-              putWithTimestamp(cache, request, response.clone()).catch(() => {});
-            }
-            return response;
-          }).catch(() => {
-            // Return offline page for failed requests
-            return caches.match('/index.html');
-          });
-        });
-      })
-    );
-    return;
-  }
-
-  // HTML pages - network first with cache fallback
-  if (request.mode === 'navigate' && NON_CACHEABLE_HTML_PATHS.has(url.pathname)) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match('/index.html'))
-    );
-    return;
-  }
-
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(request).then((cachedResponse) => {
-          return cachedResponse || caches.match('/index.html');
-        });
-      })
-  );
-});
-
-// Background sync for offline uploads
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-uploads') {
-    event.waitUntil(syncUploads());
+  // Static assets (css/js/img/fonts): stale-while-revalidate.
+  if (STATIC_ASSET_RE.test(url.pathname)) {
+    event.respondWith(staleWhileRevalidate(request));
   }
 });
 
-async function syncUploads() {
-  console.log('[SW] Syncing uploads...');
-  // Implementation for syncing queued uploads when online
-  const uploads = await getQueuedUploads();
-  
-  for (const upload of uploads) {
-    try {
-      await fetch('/api/files/upload', {
-        method: 'POST',
-        body: upload.data
-      });
-      await removeFromQueue(upload.id);
-    } catch (error) {
-      console.error('[SW] Failed to sync upload:', error);
-    }
-  }
-}
-
-async function getQueuedUploads() {
-  // Get uploads from IndexedDB
-  return [];
-}
-
-async function removeFromQueue(id) {
-  // Remove from IndexedDB
-}
-
-// Push notifications
+// Push notifications (only existing icon assets referenced).
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'ITERasn hub';
   const options = {
     body: data.body || 'You have a new notification',
-    icon: '/assets/icon-192.png',
-    badge: '/assets/icon-96.png',
+    icon: '/assets/icon.png',
+    badge: '/assets/icon.png',
     vibrate: [200, 100, 200],
     data: data.url || '/',
     actions: [
@@ -315,7 +194,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
+
   if (event.action === 'open' || !event.action) {
     event.waitUntil(
       clients.openWindow(event.notification.data || '/')

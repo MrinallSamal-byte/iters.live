@@ -396,37 +396,27 @@
     if (!tbody) return;
 
     try {
-      let response;
-      try {
-        response = await APP.API.get('/admin/approvals');
-      } catch(error) {
-        if (typeof DummyData !== 'undefined') {
-          response = DummyData.getAdminApprovals();
-        } else {
-          // Hardcoded fallback
-          response = {
-            success: true,
-            data: [
-              { id: 1, type: 'notes', title: 'Data Structures Unit 5 Notes', uploaded_by: 'Dr. Priya Sharma', created_at: new Date().toISOString(), status: 'pending' },
-              { id: 2, type: 'assignment', title: 'Algorithms Assignment 3', uploaded_by: 'Dr. Raj Kumar', created_at: new Date().toISOString(), status: 'pending' },
-              { id: 3, type: 'pyq', title: 'DBMS 2024 Question Paper', uploaded_by: 'Dr. Anita Verma', created_at: new Date().toISOString(), status: 'pending' },
-              { id: 4, type: 'notes', title: 'Operating Systems Lab Manual', uploaded_by: 'Dr. Vikram Singh', created_at: new Date().toISOString(), status: 'pending' },
-              { id: 5, type: 'announcement', title: 'Mid-term Exam Schedule', uploaded_by: 'Dr. Meera Reddy', created_at: new Date().toISOString(), status: 'pending' }
-            ]
-          };
-        }
-      }
+      const response = await APP.API.get('/admin/approvals');
+      var approvals = response.data || [];
+    } catch(err) {
+      console.error('Error loading approvals:', err);
+      if (countBadge) countBadge.textContent = '';
+      tbody.innerHTML = `
+        <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--error);">
+          Error loading approvals
+          <button class="btn-small btn-secondary" onclick="loadPendingApprovals()" style="margin-left: 0.75rem;">Retry</button>
+        </td></tr>`;
+      return;
+    }
 
-      const approvals = response.data || [];
-      
-      if (countBadge) countBadge.textContent = approvals.length;
+    if (countBadge) countBadge.textContent = approvals.length;
 
-      if (approvals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-secondary);">No pending approvals</td></tr>';
-        return;
-      }
+    if (approvals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">NO PENDING ITEMS</td></tr>';
+      return;
+    }
 
-      tbody.innerHTML = approvals.map(a => {
+    tbody.innerHTML = approvals.map(a => {
         const date = new Date(a.created_at);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const typeColors = {
@@ -436,19 +426,19 @@
           announcement: 'info'
         };
         const typeColor = typeColors[a.type] || 'primary';
-        
+
         return `
           <tr>
-            <td><span class="badge badge-${typeColor}">${a.type.toUpperCase()}</span></td>
-            <td>${a.uploaded_by}</td>
-            <td><strong>${a.title}</strong></td>
-            <td>${dateStr}</td>
+            <td><span class="badge badge-${typeColor}">${escapeHtml(String(a.type || 'file').toUpperCase())}</span></td>
+            <td>${escapeHtml(a.uploaded_by_name || a.uploaded_by || 'Unknown')}</td>
+            <td><strong>${escapeHtml(a.title || a.file_name || 'Untitled')}</strong></td>
+            <td>${escapeHtml(dateStr)}</td>
             <td>
               <div style="display: flex; gap: 0.5rem;">
-                <button class="btn-small btn-success" onclick="approveItem(${a.id})" title="Approve">
+                <button class="btn-small btn-success" onclick="approveItem('${escapeHtml(String(a.id))}')" title="Approve">
                   ✓
                 </button>
-                <button class="btn-small btn-danger" onclick="rejectItem(${a.id})" title="Reject">
+                <button class="btn-small btn-danger" onclick="rejectItem('${escapeHtml(String(a.id))}')" title="Reject">
                   ✕
                 </button>
               </div>
@@ -456,11 +446,6 @@
           </tr>
         `;
       }).join('');
-
-    } catch(err) {
-      console.error('Error loading approvals:', err);
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--error);">Error loading approvals</td></tr>';
-    }
   }
 
   function loadRecentActivity(){
@@ -489,24 +474,34 @@
   }
 
   // Make functions global for onclick handlers
-  window.approveItem = function(id) {
-    if (typeof Toast !== 'undefined') {
-      Toast.success('Item approved successfully', 'Success');
-    } else {
-      alert('Item approved successfully');
+  window.approveItem = async function(id) {
+    try {
+      await APP.API.post(`/files/approve/${encodeURIComponent(id)}`, {});
+      if (typeof Toast !== 'undefined') {
+        Toast.success('Item approved successfully', 'Success');
+      } else {
+        showToast('Item approved successfully', 'success');
+      }
+      setTimeout(loadPendingApprovals, 800);
+    } catch (err) {
+      console.error('Approve failed:', err);
+      showToast(`Approve failed: ${err.message || 'request failed'}`, 'error');
     }
-    // Reload approvals after a short delay
-    setTimeout(loadPendingApprovals, 1000);
   };
 
-  window.rejectItem = function(id) {
-    if (typeof Toast !== 'undefined') {
-      Toast.warning('Item rejected', 'Rejected');
-    } else {
-      alert('Item rejected');
+  window.rejectItem = async function(id) {
+    try {
+      await APP.API.post(`/admin/approvals/${encodeURIComponent(id)}/reject`, {});
+      if (typeof Toast !== 'undefined') {
+        Toast.warning('Item rejected', 'Rejected');
+      } else {
+        showToast('Item rejected', 'success');
+      }
+      setTimeout(loadPendingApprovals, 800);
+    } catch (err) {
+      console.error('Reject failed:', err);
+      showToast(`Reject failed: ${err.message || 'request failed'}`, 'error');
     }
-    // Reload approvals after a short delay
-    setTimeout(loadPendingApprovals, 1000);
   };
 
 })();

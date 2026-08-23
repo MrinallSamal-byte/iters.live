@@ -27,6 +27,16 @@
             console.error('Failed to load timetable from server:', error);
         }
 
+        if (serverData) {
+            await offlineCachePut('timetable', serverData);
+        } else {
+            const cachedSnapshot = await offlineCacheGet('timetable');
+            if (cachedSnapshot && buildTimetableModel(cachedSnapshot)) {
+                serverData = cachedSnapshot;
+                await showCachedBadge();
+            }
+        }
+
         // Fall back to locally-cached portal data when the server has no data
         // (covers server restart + in-memory cache eviction before SQL was populated).
         if (!serverData && !buildTimetableModel(serverData)) {
@@ -53,6 +63,91 @@
         renderTimetableTable(model);
         renderTodaySchedule(model);
         updateStats(model);
+    }
+
+    function offlineCacheReady() {
+        try {
+            return Boolean(window.APP && window.APP.OfflineCache && window.APP.OfflineCache.available && window.APP.OfflineCache.available());
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function offlineCachePut(key, value) {
+        if (!offlineCacheReady()) return;
+        try {
+            await window.APP.OfflineCache.put(key, value);
+            await window.APP.OfflineCache.setStamp(key, new Date().toISOString());
+        } catch (_) { }
+    }
+
+    async function offlineCacheGet(key) {
+        if (!offlineCacheReady()) return null;
+        try {
+            return await window.APP.OfflineCache.get(key);
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function offlineCacheStamp(key) {
+        if (!offlineCacheReady()) return null;
+        try {
+            return await window.APP.OfflineCache.getStamp(key);
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function showCachedBadge() {
+        const hero = document.querySelector('.page-hero .hero-content-inline');
+        if (!hero || document.getElementById('timetableCacheBadge')) return;
+        const stamp = await offlineCacheStamp('timetable');
+        const badge = document.createElement('div');
+        badge.id = 'timetableCacheBadge';
+        badge.className = 'cache-badge';
+        badge.textContent = formatStampLabel(stamp);
+        hero.appendChild(badge);
+    }
+
+    function formatStampLabel(stamp) {
+        const date = typeof stamp === 'string' && stamp ? new Date(stamp) : null;
+        if (!date || Number.isNaN(date.getTime())) return 'CACHED';
+        const pad = (value) => String(value).padStart(2, '0');
+        return `CACHED \u00b7 SYNCED ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function istFormatter(options) {
+        return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: 'Asia/Kolkata' }, options));
+    }
+
+    function istDayName() {
+        const fallback = DAY_NAMES[new Date().getDay()];
+        try {
+            const part = istFormatter({ weekday: 'long' }).formatToParts(new Date()).find((item) => item.type === 'weekday');
+            return part && DAY_NAMES.includes(part.value) ? part.value : fallback;
+        } catch (_) {
+            return fallback;
+        }
+    }
+
+    function istMinutesOfDay() {
+        try {
+            const parts = istFormatter({ hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+            const hourPart = parts.find((item) => item.type === 'hour');
+            const minutePart = parts.find((item) => item.type === 'minute');
+            const hour = Number(hourPart && hourPart.value);
+            const minute = Number(minutePart && minutePart.value);
+            if (Number.isFinite(hour) && Number.isFinite(minute)) {
+                return (hour % 24) * 60 + minute;
+            }
+        } catch (_) { }
+        const now = new Date();
+        return now.getHours() * 60 + now.getMinutes();
+    }
+
+    function reconnectCtaHtml() {
+        return '<a class="reconnect-cta" href="/connect-portal.html">RECONNECT SOA PORTAL</a>';
     }
 
     function buildTimetableModel(data) {
@@ -108,7 +203,7 @@
         const table = document.getElementById('timetableTable');
         if (!table) return;
 
-        const currentDay = DAY_NAMES[new Date().getDay()];
+        const currentDay = istDayName();
         const currentDayIndex = findDayIndex(model.headers, currentDay);
 
         table.innerHTML = `
@@ -152,7 +247,7 @@
         const currentClassName = document.getElementById('currentClassName');
         if (!todaySchedule) return;
 
-        const today = DAY_NAMES[new Date().getDay()];
+        const today = istDayName();
         if (todayDate) {
             todayDate.textContent = new Date().toLocaleDateString('en-IN', {
                 weekday: 'long',
@@ -171,9 +266,9 @@
             return;
         }
 
-        const now = Date.now();
-        const activeEntry = entries.find((entry) => entry.startTime && entry.endTime && now >= entry.startTime && now <= entry.endTime);
-        const nextEntry = entries.find((entry) => entry.startTime && entry.startTime > now);
+        const now = istMinutesOfDay();
+        const activeEntry = entries.find((entry) => entry.startTime != null && entry.endTime != null && now >= entry.startTime && now <= entry.endTime);
+        const nextEntry = activeEntry ? null : entries.find((entry) => entry.startTime != null && entry.startTime > now);
         if (currentClassName) {
             currentClassName.textContent = activeEntry?.subject || nextEntry?.subject || 'No class now';
         }
@@ -192,12 +287,12 @@
     }
 
     function updateStats(model) {
-        const today = DAY_NAMES[new Date().getDay()];
+        const today = istDayName();
         const todayEntries = extractTodayEntries(model, today);
         const allEntries = extractAllEntries(model);
         const uniqueSubjects = new Set(allEntries.map((entry) => entry.subjectCode || entry.subject).filter(Boolean));
-        const now = Date.now();
-        const nextEntry = todayEntries.find((entry) => entry.startTime && entry.startTime > now);
+        const now = istMinutesOfDay();
+        const nextEntry = todayEntries.find((entry) => entry.startTime != null && entry.startTime > now);
 
         setText('todayClasses', String(todayEntries.length));
         setText('weeklyClasses', String(allEntries.length));
@@ -288,9 +383,7 @@
             hours = 0;
         }
 
-        const date = new Date();
-        date.setHours(hours, minutes, 0, 0);
-        return date.getTime();
+        return hours * 60 + minutes;
     }
 
     function showEmptyTimetable(message) {
@@ -298,14 +391,14 @@
         if (table) {
             table.innerHTML = `
                 <tbody>
-                    <tr><td style="text-align:center; padding:3rem;">${escapeHtml(message)}</td></tr>
+                    <tr><td style="text-align:center; padding:3rem;">${escapeHtml(message)}<div>${reconnectCtaHtml()}</div></td></tr>
                 </tbody>
             `;
         }
 
         const todaySchedule = document.getElementById('todaySchedule');
         if (todaySchedule) {
-            todaySchedule.innerHTML = `<div class="schedule-item"><div>${escapeHtml(message)}</div></div>`;
+            todaySchedule.innerHTML = `<div class="schedule-item"><div>${escapeHtml(message)}<br>${reconnectCtaHtml()}</div></div>`;
         }
 
         setText('todayClasses', '--');

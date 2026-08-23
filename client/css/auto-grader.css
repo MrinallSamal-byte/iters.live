@@ -60,14 +60,14 @@
 }
 
 .tab-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: var(--primary,#ff5a4f);
+    color: var(--primary,#ff5a4f);
 }
 
 .tab-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary,#ff5a4f);
     color: white;
-    border-color: #667eea;
+    border-color: var(--primary,#ff5a4f);
 }
 
 .ag-content {
@@ -109,8 +109,8 @@
 }
 
 .quiz-card:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    border-color: var(--primary,#ff5a4f);
+    box-shadow: 0 4px 12px rgba(255,90,79,0.15);
     transform: translateY(-2px);
 }
 
@@ -156,7 +156,7 @@
 }
 
 .qc-stats .stat i {
-    color: #667eea;
+    color: var(--primary,#ff5a4f);
 }
 
 .qc-description {
@@ -250,7 +250,7 @@
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary,#ff5a4f);
     color: white;
     padding: 24px;
     border-radius: 10px;

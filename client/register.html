@@ -17,7 +17,8 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/assets/soa-logo.png">
+    <link rel="icon" href="/assets/icon.png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
 </head>
 <body class="nothing-home public-auth-page register-page">
     <div class="bg-animation">
@@ -57,10 +58,10 @@
 
                 <div class="role-selection">
                     <button class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">
-                        🎓 Student
+                        Student
                     </button>
                     <button class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">
-                        👨‍🏫 Teacher
+                        Teacher
                     </button>
                 </div>
 
@@ -88,18 +89,19 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="CSE">Computer Science & Engineering</option>
+                            <option value="ECE">Electronics & Communication</option>
+                            <option value="MECH">Mechanical Engineering</option>
+                            <option value="CIVIL">Civil Engineering</option>
+                            <option value="EEE">Electrical Engineering</option>
+                        </select>
+                    </div>
+
                     <div class="form-row" id="studentFields">
-                        <div class="form-group">
-                            <label for="department">Department</label>
-                            <select id="department" name="department" required>
-                                <option value="">Select Department</option>
-                                <option value="CSE">Computer Science & Engineering</option>
-                                <option value="ECE">Electronics & Communication</option>
-                                <option value="MECH">Mechanical Engineering</option>
-                                <option value="CIVIL">Civil Engineering</option>
-                                <option value="EEE">Electrical Engineering</option>
-                            </select>
-                        </div>
                         <div class="form-group">
                             <label for="year">Year</label>
                             <select id="year" name="year" required>
@@ -110,35 +112,45 @@
                                 <option value="4">4th Year</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="form-group" id="sectionField">
-                        <label for="section">Section</label>
-                        <select id="section" name="section" required>
-                            <option value="">Select Section</option>
-                            <option value="A">Section A</option>
-                            <option value="B">Section B</option>
-                            <option value="C">Section C</option>
-                            <option value="D">Section D</option>
-                        </select>
+                        <div class="form-group">
+                            <label for="section">Section</label>
+                            <select id="section" name="section" required>
+                                <option value="">Select Section</option>
+                                <option value="A">Section A</option>
+                                <option value="B">Section B</option>
+                                <option value="C">Section C</option>
+                                <option value="D">Section D</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter strong password" required>
-                        <small class="form-hint">Min 10 characters, with uppercase, lowercase, number & symbol</small>
+                        <div class="password-field">
+                            <input type="password" id="password" name="password" placeholder="Enter strong password"
+                                required>
+                            <button type="button" class="password-toggle-btn" data-password-toggle="password"
+                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
+                        </div>
+                        <small class="form-hint">Min 10 characters, with uppercase, lowercase, number and at least one
+                            of these symbols: @$!%*?&amp;</small>
                     </div>
 
                     <div class="form-group">
                         <label for="confirm_password">Confirm Password</label>
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                        <div class="password-field">
+                            <input type="password" id="confirm_password" name="confirm_password"
+                                placeholder="Re-enter password" required>
+                            <button type="button" class="password-toggle-btn" data-password-toggle="confirm_password"
+                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
                         Register
                     </button>
 
-                    <div class="error-message" id="errorMessage" style="display: none;"></div>
+                    <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
                 </form>
 
                 <div class="login-footer">
@@ -156,7 +168,6 @@
     <script src="/js/mobile-fixes.js"></script>
     <script src="/js/prevent-empty-hash.js"></script>
     <script src="/js/scroll-fix.js"></script>
-    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/mobile-nav.js"></script>
     <script>
@@ -169,18 +180,15 @@
             });
             document.querySelector(`[data-role="${role}"]`).classList.add('active');
 
-            // Show/hide fields based on role
+            // Show/hide fields based on role (Department stays visible for both roles)
             const studentFields = document.getElementById('studentFields');
-            const sectionField = document.getElementById('sectionField');
-            
+
             if (role === 'student') {
                 studentFields.style.display = 'grid';
-                sectionField.style.display = 'block';
                 document.getElementById('year').required = true;
                 document.getElementById('section').required = true;
             } else {
                 studentFields.style.display = 'none';
-                sectionField.style.display = 'none';
                 document.getElementById('year').required = false;
                 document.getElementById('section').required = false;
             }
@@ -188,6 +196,23 @@
 
         // Make selectRole global
         window.selectRole = selectRole;
+
+        function initPasswordToggles() {
+            document.querySelectorAll('[data-password-toggle]').forEach((btn) => {
+                if (btn.dataset.toggleBound === 'true') return;
+                btn.dataset.toggleBound = 'true';
+                const input = document.getElementById(btn.getAttribute('data-password-toggle'));
+                if (!input) return;
+                btn.addEventListener('click', () => {
+                    const willShow = input.type === 'password';
+                    input.type = willShow ? 'text' : 'password';
+                    btn.textContent = willShow ? '[ HIDE ]' : '[ SHOW ]';
+                    btn.setAttribute('aria-pressed', String(willShow));
+                });
+            });
+        }
+
+        initPasswordToggles();
 
         const registerForm = document.getElementById('registerForm');
         const errorMessage = document.getElementById('errorMessage');
@@ -205,10 +230,10 @@
                 return;
             }
 
-            // Validate password strength
+            // Validate password strength (symbols allowed: @$!%*?&)
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
             if (!passwordRegex.test(data.password)) {
-                showError('Password must be at least 10 characters with uppercase, lowercase, number and symbol');
+                showError('Password must be at least 10 characters with uppercase, lowercase, number and at least one of these symbols: @$!%*?&');
                 return;
             }
 
@@ -227,14 +252,12 @@
 
                 if (response.success) {
                     APP.showToast('Registration successful! Redirecting to login...', 'success');
-                    setTimeout(() => {
-                        // Use encoded URL for navigation
-                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                            window.LinkEncoding.navigateTo('/login.html');
-                        } else {
-                            window.location.href = '/login.html';
-                        }
-                    }, 1500);
+                    // Use encoded URL for navigation
+                    if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                        window.LinkEncoding.navigateTo('/login.html');
+                    } else {
+                        window.location.href = '/login.html';
+                    }
                 } else {
                     showError(response.message || 'Registration failed');
                 }
@@ -302,12 +325,7 @@
 
         // Register service worker (optional)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('✓ Service worker registered'))
-                .catch(err => {
-                    // Silent fail - service worker is optional
-                    console.log('Service worker not available (optional feature)');
-                });
+            navigator.serviceWorker.register('/service-worker.js').catch(() => { });
         }
     </script>
     <script src="/js/linkEncoding.js"></script>

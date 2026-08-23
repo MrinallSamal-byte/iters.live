@@ -104,7 +104,7 @@
 
 .glass-card:hover {
     border-color: var(--primary-light);
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 4px 16px rgba(255,90,79,0.1);
 }
 
 /* Disable gradient orbs animation */

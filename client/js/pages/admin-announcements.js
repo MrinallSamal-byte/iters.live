@@ -31,76 +31,39 @@
 
   async function loadAnnouncements() {
     try {
-      let result;
-      try {
-        const response = await fetch('/api/admin/announcements', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` }
-        });
-        if (response.ok) result = await response.json();
-      } catch (error) {
-        console.log('API not available, loading dummy data');
-      }
-      
-      if (!result || !result.success) result = generateDummyAnnouncements();
-      
+      const result = await APP.API.get('/admin/announcements');
       announcements = result.data || [];
       updateStats();
       applyFilters();
     } catch (error) {
       console.error('Error loading announcements:', error);
       announcements = [];
-      renderAnnouncements();
+      updateStats();
+      renderLoadError(error);
     }
   }
 
-  function generateDummyAnnouncements() {
-    const priorities = ['urgent', 'normal', 'info'];
-    const audiences = ['all', 'students', 'teachers', 'department'];
-    const departments = ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'];
-    
-    const sampleTitles = [
-      'Mid-Semester Examination Schedule Released',
-      'Campus Placement Drive - October 2025',
-      'Annual Technical Fest Registration Open',
-      'Holiday Notice - Diwali Break',
-      'Workshop on Machine Learning and AI',
-      'Library Timing Changes',
-      'Sports Meet 2025 - Registrations Open',
-      'Guest Lecture by Industry Expert',
-      'Internal Assessment Schedule',
-      'New Course Registration Period'
-    ];
-
-    const data = [];
-    const now = new Date();
-
-    for (let i = 0; i < 10; i++) {
-      const createdDate = new Date(now);
-      createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 30));
-      
-      data.push({
-        id: i + 1,
-        title: sampleTitles[i],
-        content: `Important information regarding ${sampleTitles[i].toLowerCase()}. All concerned students/faculty members are requested to take note.`,
-        priority: priorities[Math.floor(Math.random() * priorities.length)],
-        target_audience: audiences[Math.floor(Math.random() * audiences.length)],
-        department: audiences[Math.floor(Math.random() * audiences.length)] === 'department' ? departments[Math.floor(Math.random() * departments.length)] : null,
-        created_at: createdDate.toISOString(),
-        created_by: 'Admin',
-        pinned: Math.random() > 0.8,
-        status: Math.random() > 0.2 ? 'active' : 'archived',
-        send_email: true
-      });
-    }
-
-    return { success: true, data };
+  function renderLoadError(error) {
+    if (!elements.list) return;
+    elements.list.style.display = 'block';
+    if (elements.empty) elements.empty.style.display = 'none';
+    elements.list.innerHTML = `
+      <div class="announcement-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+        <p style="color: var(--error, #ff6b6b); margin-bottom: 1rem;">Failed to load announcements${error && error.message ? `: ${escapeHtml(error.message)}` : ''}</p>
+        <button class="btn btn-primary" id="annRetryBtn">Retry</button>
+      </div>
+    `;
+    document.getElementById('annRetryBtn')?.addEventListener('click', () => {
+      elements.list.innerHTML = '<div class="announcement-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">Loading...</div>';
+      loadAnnouncements();
+    });
   }
 
   function updateStats() {
     elements.totalAnnouncements.textContent = announcements.length;
     elements.activeAnnouncements.textContent = announcements.filter(a => a.status === 'active').length;
     elements.urgentAnnouncements.textContent = announcements.filter(a => a.priority === 'urgent').length;
-    
+
     const thisMonth = announcements.filter(a => {
       const date = new Date(a.created_at);
       const now = new Date();
@@ -116,11 +79,11 @@
     const status = elements.filterStatus?.value || '';
 
     filteredAnnouncements = announcements.filter(ann => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         ann.title.toLowerCase().includes(searchQuery) ||
         ann.content.toLowerCase().includes(searchQuery);
-      
-      return matchesSearch && 
+
+      return matchesSearch &&
         (!priority || ann.priority === priority) &&
         (!audience || ann.target_audience === audience) &&
         (!status || ann.status === status);
@@ -159,27 +122,27 @@
     const audienceIcon = {all: '👥', students: '👨‍🎓', teachers: '👨‍🏫', department: '🎓'}[ann.target_audience] || '👥';
 
     return `
-      <div class="announcement-card" data-priority="${ann.priority}" data-id="${ann.id}">
+      <div class="announcement-card" data-priority="${escapeHtml(String(ann.priority || ''))}" data-id="${escapeHtml(String(ann.id))}">
         ${ann.pinned ? '<div class="pinned-badge">📌 Pinned</div>' : ''}
-        
+
         <h3 class="announcement-title">${escapeHtml(ann.title)}</h3>
-        
+
         <div class="announcement-meta">
           <span class="announcement-meta-item">📅 ${dateStr}</span>
           <span class="announcement-meta-item">🕐 ${timeStr}</span>
-          <span class="announcement-meta-item">👤 ${ann.created_by}</span>
+          <span class="announcement-meta-item">👤 ${escapeHtml(ann.created_by || 'Admin')}</span>
         </div>
-        
+
         <p class="announcement-content">${escapeHtml(ann.content)}</p>
-        
+
         <div class="announcement-badges">
-          <span class="priority-badge ${ann.priority}">${priorityIcon} ${ann.priority}</span>
-          <span class="audience-badge">${audienceIcon} ${formatAudience(ann)}</span>
+          <span class="priority-badge ${escapeHtml(String(ann.priority || ''))}">${priorityIcon} ${escapeHtml(String(ann.priority || ''))}</span>
+          <span class="audience-badge">${audienceIcon} ${escapeHtml(formatAudience(ann))}</span>
         </div>
-        
+
         <div class="announcement-actions">
-          <button class="btn btn-sm btn-primary" onclick="editAnnouncement(${ann.id})">✏️ Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement(${ann.id})">🗑️ Delete</button>
+          <button class="btn btn-sm btn-primary" onclick="editAnnouncement('${escapeHtml(String(ann.id))}')">✏️ Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement('${escapeHtml(String(ann.id))}', this)">🗑️ Delete</button>
         </div>
       </div>
     `;
@@ -196,6 +159,11 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function notify(message, type) {
+    if (typeof showToast === 'function') showToast(message, type);
+    else if (window.Toast?.show) window.Toast.show({ type, message });
   }
 
   function bindEvents() {
@@ -250,7 +218,7 @@
     const audience = document.getElementById('annAudience').value;
     const deptRow = document.getElementById('departmentRow');
     const deptSelect = document.getElementById('annDepartment');
-    
+
     if (audience === 'department') {
       deptRow.style.display = 'flex';
       deptSelect.required = true;
@@ -260,19 +228,39 @@
     }
   };
 
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     e.preventDefault();
-    if (typeof showToast === 'function') {
-      showToast('Announcement saved successfully!', 'success');
+
+    const submitBtn = elements.form.querySelector('[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const payload = {
+      title: document.getElementById('annTitle').value.trim(),
+      content: document.getElementById('annContent').value.trim(),
+      priority: document.getElementById('annPriority').value,
+      target_audience: document.getElementById('annAudience').value,
+      department: document.getElementById('annDepartment').value || null,
+      pinned: document.getElementById('annPinned')?.checked || false,
+      status: 'active'
+    };
+
+    try {
+      await APP.API.post('/admin/announcements', payload);
+      notify('Announcement published successfully!', 'success');
+      window.closeAnnouncementModal();
+      await loadAnnouncements();
+    } catch (error) {
+      console.error('Error creating announcement:', error);
+      notify(`Failed to publish announcement: ${error.message || 'request failed'}`, 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
-    window.closeAnnouncementModal();
-    setTimeout(() => loadAnnouncements(), 500);
   }
 
   window.editAnnouncement = function(id) {
-    const ann = announcements.find(a => a.id === id);
+    const ann = announcements.find(a => String(a.id) === String(id));
     if (!ann) return;
-    
+
     elements.modal.classList.add('active');
     document.getElementById('modalTitleText').textContent = 'Edit Announcement';
     document.getElementById('annTitle').value = ann.title;
@@ -282,12 +270,59 @@
     window.toggleDepartmentField();
   };
 
-  window.deleteAnnouncement = function(id) {
-    if (!confirm('Are you sure you want to delete this announcement?')) return;
-    if (typeof showToast === 'function') {
-      showToast('Announcement deleted successfully!', 'success');
+  window.deleteAnnouncement = function(id, btn) {
+    if (!btn.dataset.confirming) {
+      btn.dataset.confirming = 'true';
+      btn.textContent = 'Click again to confirm';
+      setTimeout(() => {
+        if (btn.isConnected) {
+          delete btn.dataset.confirming;
+          btn.textContent = '🗑️ Delete';
+        }
+      }, 4000);
+      return;
     }
-    setTimeout(() => loadAnnouncements(), 500);
+
+    const card = btn.closest('.announcement-card');
+    if (card) card.remove();
+    announcements = announcements.filter(a => String(a.id) !== String(id));
+    updateStats();
+
+    APP.API.delete(`/admin/announcements/${encodeURIComponent(id)}`)
+      .then(() => {
+        notify('Announcement deleted successfully!', 'success');
+      })
+      .catch((error) => {
+        console.error('Error deleting announcement:', error);
+        notify(`Failed to delete announcement: ${error.message || 'request failed'}`, 'error');
+        loadAnnouncements();
+      });
+  };
+
+  window.exportAnnouncements = function() {
+    if (!announcements.length) {
+      notify('No announcements to export', 'warning');
+      return;
+    }
+    const rows = [['ID', 'Title', 'Content', 'Priority', 'Audience', 'Department', 'Status', 'Pinned', 'Created By', 'Created At']]
+      .concat(announcements.map(a => [
+        a.id, a.title, a.content, a.priority, a.target_audience,
+        a.department || '', a.status || '', a.pinned ? 'yes' : 'no',
+        a.created_by || '', a.created_at || ''
+      ]));
+    const csv = rows.map(row => row.map(cell => {
+      const val = String(cell ?? '');
+      return /[",\n]/.test(val) ? '"' + val.replace(/"/g, '""') + '"' : val;
+    }).join(',')).join('\n');
+    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `announcements-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+    notify('Announcements exported to CSV', 'success');
   };
 
 })();

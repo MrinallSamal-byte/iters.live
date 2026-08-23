@@ -157,7 +157,7 @@ class StudentDashboardCharts {
       // Fetch attendance data
       const response = await fetch('/api/attendance/summary', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         }
       });
 
@@ -188,7 +188,7 @@ class StudentDashboardCharts {
       // Fetch marks data
       const response = await fetch('/api/marks/summary', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         }
       });
 
@@ -241,7 +241,7 @@ class StudentDashboardCharts {
       // Fetch assignment data
       const response = await fetch('/api/assignments/statistics', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         }
       });
 
@@ -266,7 +266,7 @@ class StudentDashboardCharts {
     try {
       const response = await fetch(`/api/marks/summary?filter=${filter}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         }
       });
 

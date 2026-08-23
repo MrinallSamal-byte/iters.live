@@ -12,7 +12,7 @@
 
 /* Sidebar */
 .builder-sidebar {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: rgba(255,255,255,0.04);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 24px;
@@ -25,7 +25,7 @@
 .sidebar-header h2 {
   font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary,#ff5a4f);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -65,17 +65,17 @@
 
 .template-option:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 8px 16px rgba(255,90,79,0.2);
 }
 
 .template-option.active {
-  border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-color: var(--primary,#ff5a4f);
+  background: rgba(255,255,255,0.04);
 }
 
 .template-option i {
   font-size: 28px;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   display: block;
   margin-bottom: 8px;
 }
@@ -111,23 +111,23 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary,#ff5a4f);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 16px rgba(255,90,79,0.35);
 }
 
 .btn-secondary {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(255,255,255,0.05);
+  color: var(--primary,#ff5a4f);
 }
 
 .btn-secondary:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(255,90,79,0.2);
   transform: translateY(-2px);
 }
 
@@ -181,7 +181,7 @@
 .section-header h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -189,7 +189,7 @@
 }
 
 .btn-icon {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(255,255,255,0.05);
   border: none;
   width: 40px;
   height: 40px;
@@ -199,12 +199,12 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   font-size: 16px;
 }
 
 .btn-icon:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(255,90,79,0.2);
   transform: scale(1.05);
 }
 
@@ -242,8 +242,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.02);
+  border-color: var(--primary,#ff5a4f);
+  background: rgba(255,90,79,0.02);
 }
 
 .form-group textarea {
@@ -258,7 +258,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px;
-  background: rgba(102, 126, 234, 0.03);
+  background: rgba(255,255,255,0.05);
   border-radius: 12px;
   margin-bottom: 16px;
   transition: all 0.2s ease;
@@ -266,7 +266,7 @@
 }
 
 .list-item:hover {
-  background: rgba(102, 126, 234, 0.05);
+  background: rgba(255,90,79,0.05);
   transform: translateX(4px);
 }
 
@@ -305,7 +305,7 @@
 }
 
 .btn-icon-sm {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(255,255,255,0.05);
   border: none;
   width: 32px;
   height: 32px;
@@ -315,12 +315,12 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   font-size: 14px;
 }
 
 .btn-icon-sm:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(255,90,79,0.2);
   transform: scale(1.05);
 }
 
@@ -350,12 +350,12 @@
 
 .skills-input input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary,#ff5a4f);
 }
 
 .btn-add {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary,#ff5a4f);
   color: white;
   border: none;
   border-radius: 10px;
@@ -366,7 +366,7 @@
 
 .btn-add:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(255,90,79,0.3);
 }
 
 .skills-list {
@@ -380,8 +380,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(255,255,255,0.05);
+  color: var(--primary,#ff5a4f);
   border-radius: 50px;
   font-size: 14px;
   font-weight: 600;
@@ -389,7 +389,7 @@
 }
 
 .skill-tag:hover {
-  background: rgba(102, 126, 234, 0.15);
+  background: rgba(255,90,79,0.15);
 }
 
 .btn-remove {
@@ -440,13 +440,13 @@
   align-items: center;
   padding: 24px 32px;
   border-bottom: 2px solid #e5e7eb;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  background: rgba(255,255,255,0.04);
 }
 
 .preview-header h3 {
   font-size: 22px;
   font-weight: 700;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   margin: 0;
 }
 
@@ -467,7 +467,7 @@
 .resume-header {
   text-align: center;
   padding-bottom: 24px;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid var(--primary,#ff5a4f);
   margin-bottom: 32px;
 }
 
@@ -494,7 +494,7 @@
 }
 
 .resume-contact i {
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
 }
 
 .resume-section {
@@ -504,7 +504,7 @@
 .resume-section h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 16px 0;
@@ -558,7 +558,7 @@
 }
 
 .resume-item a {
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   text-decoration: none;
 }
 
@@ -572,7 +572,7 @@
 }
 
 .resume-preview.creative .resume-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary,#ff5a4f);
   color: white;
   padding: 32px;
   border-radius: 16px 16px 0 0;
@@ -640,7 +640,7 @@
 }
 
 .dark .list-item {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(255,255,255,0.05);
 }
 
 .dark .item-content strong,

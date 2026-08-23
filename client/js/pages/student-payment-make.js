@@ -9,6 +9,15 @@
 
     const user = APP.Storage.get('user') || {};
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function notify(message, type) {
+        if (window.Toast?.show) window.Toast.show({ type, message });
+        else console.log(`[${type}] ${message}`);
+    }
+
     document.addEventListener('DOMContentLoaded', init);
 
     function init() {
@@ -65,12 +74,12 @@
 
         // Validation
         if (!formData.amount || formData.amount <= 0) {
-            APP.Toast.error('Please enter a valid amount');
+            notify('Please enter a valid amount', 'error');
             return;
         }
 
         if (!formData.semester || !formData.category || !formData.paymentMethod) {
-            APP.Toast.error('Please fill in all required fields');
+            notify('Please fill in all required fields', 'error');
             return;
         }
 
@@ -85,7 +94,7 @@
 
             if (response.success) {
                 // Show success message
-                APP.Toast.success('Payment processed successfully!');
+                notify('Payment processed successfully!', 'success');
 
                 // Show payment details in a modal-like manner
                 showPaymentSuccess(response.data);
@@ -103,7 +112,7 @@
             }
         } catch (error) {
             console.error('Payment error:', error);
-            APP.Toast.error(error.message || 'Failed to process payment. Please try again.');
+            notify(error.message || 'Failed to process payment. Please try again.', 'error');
         } finally {
             // Hide loading state
             submitBtn.disabled = false;
@@ -161,11 +170,11 @@
                 ">
                     <div style="margin-bottom: 1rem;">
                         <small style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Payment ID</small>
-                        <strong style="color: var(--text-primary);">${paymentData.paymentId}</strong>
+                        <strong style="color: var(--text-primary);">${esc(paymentData.paymentId)}</strong>
                     </div>
                     <div style="margin-bottom: 1rem;">
                         <small style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Transaction ID</small>
-                        <strong style="color: var(--text-primary);">${paymentData.transactionId}</strong>
+                        <strong style="color: var(--text-primary);">${esc(paymentData.transactionId)}</strong>
                     </div>
                     <div>
                         <small style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Amount</small>

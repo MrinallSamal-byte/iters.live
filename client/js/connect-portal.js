@@ -3,11 +3,23 @@
 
     const REMEMBERED_REG_KEY = 'soaRememberedRegNo';
     const IMPORT_TARGET = '/dashboard/student-personal-info';
+    const IMPORT_PROGRESS_STAGES = [
+        ['captcha-ok', 'CAPTCHA OK'],
+        ['login-start', 'LOGGING IN'],
+        ['fetching-sections', 'FETCHING ATTENDANCE'],
+        ['fetching-attendance', 'FETCHING ATTENDANCE'],
+        ['fetching-marks', 'FETCHING MARKS'],
+        ['fetching-timetable', 'FETCHING TIMETABLE'],
+        ['saving', 'SAVING']
+    ];
 
     let portalEnabled = true;
     let currentSessionId = null;
     let currentConnection = null;
     let currentRuntime = null;
+    let importProgressListenerAttached = false;
+    let importProgressAwaiting = false;
+    let importProgressActiveIndex = -1;
 
     let statusBanner;
     let startSessionBtn;
@@ -96,6 +108,27 @@
         demoBtn?.addEventListener('click', loadDemoData);
         useCachedDataBtn?.addEventListener('click', openImportedData);
         clearRememberedBtn?.addEventListener('click', clearRememberedRegistrationNumber);
+        bindPasswordToggles();
+    }
+
+    function bindPasswordToggles() {
+        document.querySelectorAll('[data-password-toggle]').forEach((btn) => {
+            if (btn.dataset.toggleBound === 'true') return;
+            btn.dataset.toggleBound = 'true';
+            const input = document.getElementById(btn.getAttribute('data-password-toggle'));
+            if (!input) return;
+            btn.addEventListener('click', () => {
+                const willShow = input.type === 'password';
+                input.type = willShow ? 'text' : 'password';
+                btn.textContent = willShow ? '[ HIDE ]' : '[ SHOW ]';
+                btn.setAttribute('aria-pressed', String(willShow));
+            });
+        });
+    }
+
+    function rememberedRegKey(user) {
+        const scope = user?.id || user?._id || '';
+        return scope ? `${REMEMBERED_REG_KEY}:${scope}` : null;
     }
 
     function showPortalOfflineMessage() {
@@ -107,12 +140,27 @@
     }
 
     function hydrateRegistrationNumber(user) {
+        const scopedKey = rememberedRegKey(user);
         let rememberedValue = null;
 
         try {
-            rememberedValue = JSON.parse(localStorage.getItem(REMEMBERED_REG_KEY) || 'null');
+            const legacyValue = localStorage.getItem(REMEMBERED_REG_KEY);
+            if (scopedKey && legacyValue !== null && localStorage.getItem(scopedKey) === null) {
+                localStorage.setItem(scopedKey, legacyValue);
+            }
+            if (legacyValue !== null) {
+                localStorage.removeItem(REMEMBERED_REG_KEY);
+            }
         } catch (_) {
-            rememberedValue = null;
+            // Storage may be unavailable. The live flow still works without remembering the value.
+        }
+
+        if (scopedKey) {
+            try {
+                rememberedValue = JSON.parse(localStorage.getItem(scopedKey) || 'null');
+            } catch (_) {
+                rememberedValue = null;
+            }
         }
 
         if (rememberedValue && regNumberInput) {
@@ -256,6 +304,8 @@
             }
             if (payload.status === 'PORTAL_UNREACHABLE') {
                 showPortalOfflineMessage();
+            } else if (payload.status === 'BLOCKED_BY_SITE') {
+                setStatus('error', 'The SOA portal is blocking automated access.', payload.message || "The portal's bot protection rejected this session. Please try again later or use demo data.");
             } else if (payload.status === 'SCRAPER_BUSY') {
                 setStatus('warning', 'Live SOA import is temporarily busy.', payload.message || 'Please wait a minute, then fetch a new CAPTCHA session.');
             } else if (payload.status === 'SCRAPER_UNAVAILABLE') {
@@ -318,6 +368,7 @@
         rememberRegistrationNumber(regNo);
         setButtonLoading(importBtn, 'Importing SOA data');
         setStatus('info', 'Importing your SOA data.', 'This can take a short while while we log in, collect the available sections, and save them to your account.');
+        beginImportProgressTracking();
 
         try {
             const response = await APP.API.post('/soa/login', {
@@ -351,6 +402,8 @@
                 currentConnection = payload.connection || currentConnection;
                 renderConnectionStatus();
                 showPortalOfflineMessage();
+            } else if (payload.status === 'BLOCKED_BY_SITE') {
+                setStatus('error', 'The SOA portal is blocking automated access.', payload.message || "The portal's bot protection rejected this import attempt. Please try again later or use demo data.");
             } else if (payload.status === 'PORTAL_DISABLED' || payload.status === 'SCRAPER_UNAVAILABLE' || payload.status === 'SCRAPER_BUSY') {
                 portalEnabled = payload.status === 'SCRAPER_BUSY' ? true : false;
                 currentRuntime = payload.runtime || currentRuntime;
@@ -372,8 +425,68 @@
                 setStatus('error', 'SOA import failed.', payload.message || error.message || 'Fetch a fresh CAPTCHA and try again.');
             }
         } finally {
+            importProgressAwaiting = false;
             resetButton(importBtn);
         }
+    }
+
+    function beginImportProgressTracking() {
+        ensureImportProgressListener();
+        importProgressAwaiting = true;
+        renderImportProgressLine(1);
+    }
+
+    function resolveImportStageIndex(stage) {
+        switch (stage) {
+            case 'captcha-ok': return 0;
+            case 'login-start': return 1;
+            case 'login-ok':
+            case 'fetching-sections':
+            case 'fetching-profile':
+            case 'fetching-attendance': return 2;
+            case 'fetching-marks': return 3;
+            case 'fetching-timetable': return 4;
+            case 'saving': return 5;
+            default: return -1;
+        }
+    }
+
+    function ensureImportProgressListener() {
+        if (importProgressListenerAttached) return;
+        const socketAccessor = window.APP && window.APP.Socket;
+        if (!socketAccessor || typeof socketAccessor.on !== 'function') return;
+
+        importProgressListenerAttached = true;
+        socketAccessor.on('soa-import-progress', (payload) => {
+            if (!importProgressAwaiting || !payload || typeof payload.stage !== 'string') return;
+            const stageIndex = resolveImportStageIndex(payload.stage);
+            if (stageIndex < 0) return;
+            if (stageIndex > importProgressActiveIndex) {
+                importProgressActiveIndex = stageIndex;
+                renderImportProgressLine(stageIndex);
+            }
+        });
+    }
+
+    function renderImportProgressLine(activeIndex) {
+        importProgressActiveIndex = activeIndex;
+        if (!statusBanner) return;
+
+        const stageMarkup = IMPORT_PROGRESS_STAGES.map(([, label], index) => {
+            const state = index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'pending';
+            const style = state === 'active'
+                ? 'color:var(--stage-active,#ff5a4f);font-weight:700'
+                : state === 'done'
+                    ? 'color:var(--stage-done,rgba(255,255,255,0.45))'
+                    : '';
+            return `<span style="${style}">${escapeHtml(label)}</span>`;
+        }).join('<span style="color:var(--stage-sep,rgba(255,255,255,0.35))"> &#8250; </span>');
+
+        statusBanner.className = 'status-banner info visible';
+        statusBanner.innerHTML = `
+            <strong>Importing your SOA data.</strong>
+            <span style="font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;letter-spacing:.05em">${stageMarkup}</span>
+        `;
     }
 
     async function loadDemoData() {
@@ -420,13 +533,16 @@
     function rememberRegistrationNumber(regNo) {
         if (!rememberRegNo) return;
 
+        const scopedKey = rememberedRegKey(APP.Storage.get('user'));
+        if (!scopedKey) return;
+
         try {
             if (!rememberRegNo.checked) {
-                localStorage.removeItem(REMEMBERED_REG_KEY);
+                localStorage.removeItem(scopedKey);
                 return;
             }
 
-            localStorage.setItem(REMEMBERED_REG_KEY, JSON.stringify(regNo));
+            localStorage.setItem(scopedKey, JSON.stringify(regNo));
         } catch (_) {
             // Storage may be unavailable. The live flow still works without remembering the value.
         }
@@ -434,6 +550,8 @@
 
     function clearRememberedRegistrationNumber() {
         try {
+            const scopedKey = rememberedRegKey(APP.Storage.get('user'));
+            if (scopedKey) localStorage.removeItem(scopedKey);
             localStorage.removeItem(REMEMBERED_REG_KEY);
         } catch (_) {
             // Ignore storage errors.

@@ -186,7 +186,7 @@ class GlobalSearch {
 
     async performSearch(query, filter) {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch(
                 `/api/search?q=${encodeURIComponent(query)}&filter=${filter}`,
                 {

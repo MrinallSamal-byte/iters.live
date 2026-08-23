@@ -6,6 +6,12 @@
     let myClubs = new Set();
     let currentUser = null;
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    const CATEGORY_ICONS = { tech: '💻', cultural: '🎭', sports: '🏏', academic: '📚', hobby: '📸', social: '🌱', general: '🏛️' };
+
     // Sample clubs data
     const sampleClubs = [
         {
@@ -138,7 +144,7 @@
 
     async function loadUserData() {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             
             // Check authentication - use APP if available
             if (typeof APP !== 'undefined') {
@@ -176,7 +182,7 @@
     async function loadClubs() {
         // Try to fetch from API
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch('/api/clubs', {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -190,6 +196,8 @@
         } catch (error) {
             console.log('Using sample data');
         }
+
+        myClubs = new Set(allClubs.filter(c => c.joined).map(c => c.id));
 
         // Use sample data for demonstration
         if (allClubs.length === 0) {
@@ -219,28 +227,28 @@
 
             html += `
                 <div class="club-card">
-                    <div class="club-header ${club.category}">
-                        <span style="z-index: 1;">${club.icon}</span>
+                    <div class="club-header ${esc(club.category)}">
+                        <span style="z-index: 1;">${esc(club.icon || CATEGORY_ICONS[club.category] || '🏛️')}</span>
                     </div>
                     <div class="club-content">
-                        <div class="club-name">${club.name}</div>
-                        <div class="club-category">${club.category}</div>
-                        <div class="club-description">${club.description}</div>
+                        <div class="club-name">${esc(club.name)}</div>
+                        <div class="club-category">${esc(club.category)}</div>
+                        <div class="club-description">${esc(club.description)}</div>
                         <div class="club-stats">
                             <div class="club-stat">
                                 <span>👥</span>
-                                <span>${club.members} members</span>
+                                <span>${esc(club.members)} members</span>
                             </div>
                             <div class="club-stat">
                                 <span>📅</span>
-                                <span>${club.events} events</span>
+                                <span>${esc(club.events)} events</span>
                             </div>
                         </div>
                         <div class="club-footer">
                             <button 
                                 class="join-btn ${isJoined ? 'joined' : ''}" 
-                                data-club-id="${club.id}"
-                                onclick="handleClubAction(${club.id}, ${isJoined})"
+                                data-club-id="${esc(club.id)}"
+                                onclick="handleClubAction(${JSON.stringify(club.id)}, ${isJoined})"
                             >
                                 ${isJoined ? '✓ Joined' : 'Join Club'}
                             </button>
@@ -272,14 +280,14 @@
         joinedClubs.forEach(club => {
             html += `
                 <div class="my-club-item">
-                    <div class="my-club-icon ${club.category}">
-                        ${club.icon}
+                    <div class="my-club-icon ${esc(club.category)}">
+                        ${esc(club.icon || CATEGORY_ICONS[club.category] || '🏛️')}
                     </div>
                     <div class="my-club-info">
-                        <div class="my-club-name">${club.name}</div>
+                        <div class="my-club-name">${esc(club.name)}</div>
                         <div class="my-club-role">Member since ${new Date().getFullYear()}</div>
                     </div>
-                    <button class="leave-btn" onclick="handleLeaveClub(${club.id})">
+                    <button class="leave-btn" onclick="handleLeaveClub(${JSON.stringify(club.id)}, this)">
                         Leave
                     </button>
                 </div>
@@ -310,7 +318,7 @@
         }
 
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch(`/api/clubs/${clubId}/join`, {
                 method: 'POST',
                 headers: {
@@ -351,13 +359,22 @@
         }
     };
 
-    window.handleLeaveClub = async function(clubId) {
-        if (!confirm('Are you sure you want to leave this club?')) {
+    window.handleLeaveClub = async function(clubId, btn) {
+        if (!btn.dataset.confirming) {
+            btn.dataset.confirming = 'true';
+            btn.textContent = 'Confirm?';
+            setTimeout(() => {
+                if (btn.isConnected) {
+                    delete btn.dataset.confirming;
+                    btn.textContent = 'Leave';
+                }
+            }, 4000);
             return;
         }
+        btn.disabled = true;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch(`/api/clubs/${clubId}/leave`, {
                 method: 'POST',
                 headers: {

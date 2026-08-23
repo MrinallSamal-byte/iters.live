@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -386,7 +389,7 @@
                             <div class="action-icon">💾</div>
                             <h4>Backup Database</h4>
                             <p>Create a complete backup of all system data</p>
-                            <button class="btn btn-primary" onclick="backupDatabase()">
+                            <button class="btn btn-primary" onclick="backupDatabase()" disabled title="Database backup is not available on the server yet (no /api/admin/database endpoints)">
                                 <span>⬇️</span> Create Backup
                             </button>
                         </div>
@@ -394,7 +397,7 @@
                             <div class="action-icon">🔄</div>
                             <h4>Restore Database</h4>
                             <p>Restore from a previous backup file</p>
-                            <button class="btn btn-warning" onclick="restoreDatabase()">
+                            <button class="btn btn-warning" onclick="restoreDatabase()" disabled title="Database restore is not available on the server yet (no /api/admin/database endpoints)">
                                 <span>⬆️</span> Restore Backup
                             </button>
                         </div>
@@ -402,7 +405,7 @@
                             <div class="action-icon">🗑️</div>
                             <h4>Clear Cache</h4>
                             <p>Clear all cached data to improve performance</p>
-                            <button class="btn btn-secondary" onclick="clearCache()">
+                            <button class="btn btn-secondary" onclick="clearCache()" disabled title="Server cache clearing is not available on the server yet">
                                 <span>🗑️</span> Clear Cache
                             </button>
                         </div>
@@ -410,7 +413,7 @@
                             <div class="action-icon">🔧</div>
                             <h4>Optimize Database</h4>
                             <p>Run optimization and cleanup tasks</p>
-                            <button class="btn btn-info" onclick="optimizeDatabase()">
+                            <button class="btn btn-info" onclick="optimizeDatabase()" disabled title="Database optimization is not available on the server yet">
                                 <span>⚡</span> Optimize Now
                             </button>
                         </div>

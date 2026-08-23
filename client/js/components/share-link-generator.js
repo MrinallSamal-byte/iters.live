@@ -247,7 +247,7 @@ class ShareLinkGenerator {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         },
         body: JSON.stringify({
           expires_at: expiresAt,
@@ -317,7 +317,7 @@ class ShareLinkGenerator {
       const response = await fetch(`${this.options.apiUrl}/files/${this.fileId}/share/${this.shareData.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
         }
       });
 

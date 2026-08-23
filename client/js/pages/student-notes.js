@@ -79,7 +79,7 @@
 
     async function loadUserData() {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             
             // Check authentication - use APP if available
             if (typeof APP !== 'undefined') {
@@ -148,7 +148,7 @@
         
         try {
             // Try to fetch from API first
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch(`/api/files?file_type=${currentResourceType}&approved=true`, {
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -3,8 +3,8 @@
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --sidebar-bg: rgba(17, 24, 39, 0.95);
-    --sidebar-hover: rgba(99, 102, 241, 0.1);
-    --sidebar-active: rgba(99, 102, 241, 0.2);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --sidebar-active: rgba(255,255,255,0.08);
     --sidebar-text: rgba(255, 255, 255, 0.7);
     --sidebar-text-active: #ffffff;
     --sidebar-border: rgba(255, 255, 255, 0.1);
@@ -14,8 +14,8 @@
 /* Light Theme Sidebar Variables */
 body.light-theme {
     --sidebar-bg: rgba(255, 255, 255, 0.95);
-    --sidebar-hover: rgba(99, 102, 241, 0.08);
-    --sidebar-active: rgba(99, 102, 241, 0.15);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --sidebar-active: rgba(255,255,255,0.05);
     --sidebar-text: rgba(15, 23, 42, 0.7);
     --sidebar-text-active: #0f172a;
     --sidebar-border: rgba(0, 0, 0, 0.1);
@@ -104,14 +104,14 @@ body.light-theme {
     cursor: pointer;
     color: white;
     font-size: 0.875rem;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     transition: all 0.3s ease;
     z-index: 10;
 }
 
 .sidebar-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 4px 12px rgba(255,90,79,0.35);
 }
 
 /* Navigation Links */
@@ -225,7 +225,7 @@ body.light-theme {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary,#ff5a4f);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -337,7 +337,7 @@ body.light-theme {
         cursor: pointer;
         color: white;
         font-size: 1.5rem;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         z-index: 999;
         transition: all 0.3s ease;
     }
@@ -373,7 +373,7 @@ body.light-theme {
 
 /* Section badges and improvements */
 .sidebar-badge {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(255,255,255,0.08);
     color: var(--primary);
     padding: 2px 8px;
     border-radius: 10px;

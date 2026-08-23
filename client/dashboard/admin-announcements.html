@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -287,13 +290,6 @@
             <input type="date" id="annEndDate" name="end_date" class="form-input">
             <small class="form-hint">Leave empty for no expiration</small>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-checkbox">
-            <input type="checkbox" id="annSendEmail" name="send_email">
-            <span>📧 Send email notification to recipients</span>
-          </label>
         </div>
 
         <div class="form-group">

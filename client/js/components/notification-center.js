@@ -153,7 +153,7 @@ class NotificationCenter {
    */
   async loadNotifications(append = false) {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       if (!token) return;
 
       const response = await fetch(
@@ -312,7 +312,7 @@ class NotificationCenter {
    */
   async markAsRead(id) {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       if (!token) return;
 
       const response = await fetch(`/api/notifications/${id}/read`, {
@@ -343,7 +343,7 @@ class NotificationCenter {
    */
   async markAllAsRead() {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       if (!token) return;
 
       const response = await fetch('/api/notifications/read-all', {
@@ -373,7 +373,7 @@ class NotificationCenter {
    */
   async clearReadNotifications() {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       if (!token) return;
 
       const response = await fetch('/api/notifications/read/all', {

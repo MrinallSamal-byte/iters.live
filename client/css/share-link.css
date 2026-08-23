@@ -131,7 +131,7 @@
 }
 
 .form-group label i {
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   font-size: 16px;
 }
 
@@ -139,7 +139,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--primary,#ff5a4f);
 }
 
 .form-control {
@@ -154,8 +154,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
+  border-color: var(--primary,#ff5a4f);
+  background: rgba(255,90,79,0.1);
 }
 
 select.form-control {
@@ -185,13 +185,13 @@ select.form-control {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary,#ff5a4f);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 16px rgba(255,90,79,0.3);
 }
 
 .btn-secondary {
@@ -342,7 +342,7 @@ select.form-control {
 }
 
 .detail-label i {
-  color: #667eea;
+  color: var(--primary,#ff5a4f);
   width: 16px;
 }
 
@@ -438,7 +438,7 @@ body:not(.dark-theme) .share-detail-item {
 .btn:focus-visible,
 .btn-close:focus-visible,
 .form-control:focus-visible {
-  outline: 2px solid #667eea;
+  outline: 2px solid var(--primary,#ff5a4f);
   outline-offset: 2px;
 }
 

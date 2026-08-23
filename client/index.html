@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script>document.documentElement.classList.add('js');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
@@ -9,13 +10,11 @@
     <meta name="keywords"
         content="ITERasn hub, ITER, SOA University, student portal, technical education, Bhubaneswar, Odisha">
     <meta name="author" content="ITER - Institute of Technical Education & Research">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#ff5a4f">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="ITERasn hub | Simplified Campus Portal">
+    <meta property="og:title" content="ITERasn hub | Attendance. Marks. Timetable. One quiet place.">
     <meta property="og:description"
-        content="A cleaner, faster homepage for ITERasn hub with direct access to the portal, registration, programs, and campus contact details.">
-    <meta property="og:url" content="https://iter.ac.in">
-    <link rel="canonical" href="/">
+        content="Import your official SOA portal data once - ITERasn hub keeps attendance, marks, timetable, notes and deadlines in a fast, distraction-free dashboard built for daily use.">
     <title>ITERasn hub | Simplified Campus Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +32,8 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/assets/soa-logo.png">
+    <link rel="icon" href="/assets/icon.png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
     <script>
         (function() {
             'use strict';
@@ -218,27 +218,26 @@
         <section class="hero-section">
             <div class="container">
                 <div class="hero-copy reveal-on-scroll">
-                    <p class="micro-label">REDESIGNED HOME EXPERIENCE</p>
-                    <h1 class="hero-title">Cleaner campus access with a sharper, simpler interface.</h1>
+                    <p class="micro-label">BUILT FOR ITER STUDENTS</p>
+                    <h1 class="hero-title">Attendance. Marks. Timetable. One quiet place.</h1>
                     <p class="hero-description">
-                        The homepage is now focused on clarity first: quick portal entry, cleaner hierarchy, a more
-                        premium visual rhythm, and direct paths to the pages visitors actually need.
+                        Import your official SOA portal data once - ITERasn hub keeps attendance, marks,
+                        timetable, notes and deadlines in a fast, distraction-free dashboard built for daily use.
                     </p>
 
                     <div class="hero-buttons">
-                        <a href="/login.html" class="btn btn-primary btn-large">Open Portal</a>
-                        <a href="/register.html" class="btn btn-outline btn-large">Create Account</a>
-                        <a href="/creator.html" class="btn btn-secondary btn-large">Meet the Creator</a>
+                        <a href="/login.html" class="btn btn-primary btn-large">Portal Login</a>
+                        <a href="/register.html" class="btn btn-outline btn-large">Register</a>
                     </div>
 
                     <div class="hero-notes">
                         <div class="hero-note">
                             <span class="note-dot"></span>
-                            <span>Student, teacher, and admin flows remain unchanged behind the cleaner entry point.</span>
+                            <span>Works offline after the first load.</span>
                         </div>
                         <div class="hero-note">
                             <span class="note-dot"></span>
-                            <span>Every homepage link points to a real destination or a valid on-page section.</span>
+                            <span>You solve the CAPTCHA yourself. Credentials never touch our servers.</span>
                         </div>
                     </div>
                 </div>
@@ -254,8 +253,8 @@
                         <div class="device-screen">
                             <div class="screen-card screen-card-primary">
                                 <p class="micro-label">QUICK ENTRY</p>
-                                <h2>Direct paths into ITERasn hub</h2>
-                                <p>Minimal friction for portal login, registration, and campus discovery.</p>
+                                <h2>Your day, at a glance</h2>
+                                <p>Attendance standing, today's timetable, and pending deadlines without digging through the portal.</p>
                                 <div class="shortcut-list">
                                     <a href="/login.html" class="shortcut-item">
                                         <span>Student Portal</span>
@@ -265,9 +264,9 @@
                                         <span>New Registration</span>
                                         <span>Open</span>
                                     </a>
-                                    <a href="/creator.html" class="shortcut-item">
-                                        <span>Creator Page</span>
-                                        <span>Open</span>
+                                    <a href="#academics" class="shortcut-item">
+                                        <span>Programs</span>
+                                        <span>Scroll</span>
                                     </a>
                                 </div>
                             </div>
@@ -290,8 +289,8 @@
                                 </div>
                                 <div class="screen-card">
                                     <p class="micro-label">STATUS</p>
-                                    <h3 id="liveStatus">Simple. Useful. Fast.</h3>
-                                    <p>A homepage designed to feel premium without becoming noisy.</p>
+                                    <h3 id="liveStatus">Attendance first.</h3>
+                                    <p>The numbers you actually check, kept current from your last SOA import.</p>
                                 </div>
                             </div>
                         </div>
@@ -330,39 +329,39 @@
         <section id="features" class="features-section">
             <div class="container">
                 <div class="section-heading reveal-on-scroll">
-                    <p class="micro-label">WHY THE NEW UI WORKS</p>
-                    <h2 class="section-title">Less visual noise, better decision making.</h2>
+                    <p class="micro-label">YOUR DATA IMPORTED ONCE</p>
+                    <h2 class="section-title">Built for the daily grind.</h2>
                     <p class="section-copy">
-                        The updated layout uses restraint instead of clutter. It keeps the modern feel, but with cleaner
-                        spacing, stronger hierarchy, and obvious next actions.
+                        One import pulls your official SOA portal records into the hub. After that, everything you check
+                        between classes loads instantly and stays available offline.
                     </p>
                 </div>
 
                 <div class="features-grid">
                     <article class="feature-card glass-card reveal-on-scroll">
                         <p class="micro-label">01</p>
-                        <h3>Focused first screen</h3>
-                        <p>The hero now leads directly to portal login, account creation, and the creator page without distractions.</p>
+                        <h3>Offline after first load</h3>
+                        <p>Attendance, marks, and the timetable are cached on your device. Open the dashboard where campus Wi-Fi fails and the numbers are still there.</p>
                     </article>
                     <article class="feature-card glass-card reveal-on-scroll">
                         <p class="micro-label">02</p>
-                        <h3>Minimal, premium styling</h3>
-                        <p>A Nothing-inspired visual language built with monochrome surfaces, crisp borders, and a restrained red accent.</p>
+                        <h3>One-click SOA import</h3>
+                        <p>You sign in on the official SOA portal page and solve the CAPTCHA yourself. Credentials pass straight through and never touch our servers.</p>
                     </article>
                     <article class="feature-card glass-card reveal-on-scroll">
                         <p class="micro-label">03</p>
-                        <h3>Safer navigation</h3>
-                        <p>Broken placeholder links were removed so the homepage only surfaces destinations that actually exist.</p>
+                        <h3>AI study assistant</h3>
+                        <p>Summaries, revision plans, and plain-language explanations sit beside your notes and deadlines, ready between classes.</p>
                     </article>
                 </div>
 
                 <div class="experience-board reveal-on-scroll">
                     <div class="experience-copy">
-                        <p class="micro-label">PRIMARY JOURNEYS</p>
-                        <h3>Visitors can understand the system in seconds.</h3>
+                        <p class="micro-label">CAMPUS LIFE, SAME TAB</p>
+                        <h3>Forum, clubs, events, and the hostel menu.</h3>
                         <p>
-                            Instead of stacking too many modules at once, the homepage now introduces the product clearly
-                            and hands users the right route quickly.
+                            Coursework is only half the day. The hub also carries the student forum, club pages, event
+                            listings, and the weekly mess menu, so the rest of campus life stays one click away.
                         </p>
                     </div>
 
@@ -375,9 +374,9 @@
                             <span>Registration</span>
                             <span>Launch</span>
                         </a>
-                        <a href="/creator.html" class="route-item">
-                            <span>Creator Page</span>
-                            <span>Launch</span>
+                        <a href="#features" class="route-item">
+                            <span>Daily Tools</span>
+                            <span>Scroll</span>
                         </a>
                         <a href="#academics" class="route-item">
                             <span>Academic Programs</span>
@@ -396,15 +395,15 @@
             <div class="container about-grid">
                 <div class="about-copy reveal-on-scroll">
                     <p class="micro-label">ABOUT ITER</p>
-                    <h2 class="section-title">A strong institution deserves a homepage with discipline.</h2>
+                    <h2 class="section-title">The institute behind the dashboard.</h2>
                     <p class="section-copy">
                         ITER, a constituent institute of Siksha 'O' Anusandhan (Deemed to be University), has built its
-                        reputation on academic rigor, applied learning, and technical excellence. The new homepage reflects
-                        that with a calmer, sharper digital front door.
+                        reputation on academic rigor, applied learning, and technical excellence. ITERasn hub applies the
+                        same discipline to the software students open every morning.
                     </p>
                     <p class="section-copy">
-                        Instead of overloading visitors with every detail at once, the page now builds trust first and guides
-                        them into the right system flow.
+                        Official records always remain on the SOA portal. The hub mirrors what matters day to day:
+                        attendance standing, due submissions, and the next class.
                     </p>
                 </div>
 
@@ -439,7 +438,7 @@
                     <p class="micro-label">PROGRAM OVERVIEW</p>
                     <h2 class="section-title">Academic programs with strong technical depth.</h2>
                     <p class="section-copy">
-                        A condensed overview keeps the homepage useful without turning it back into a long wall of content.
+                        Six tracks, condensed to essentials. Full syllabi, regulations, and faculty details stay inside the portal.
                     </p>
                 </div>
 
@@ -495,10 +494,6 @@
                 </div>
 
                 <div class="contact-card glass-card reveal-on-scroll">
-                    <a href="mailto:info@iter.ac.in" class="contact-row">
-                        <span class="contact-label">Email</span>
-                        <span class="contact-value">info@iter.ac.in</span>
-                    </a>
                     <a href="tel:+916742350171" class="contact-row">
                         <span class="contact-label">Phone</span>
                         <span class="contact-value">+91 674 2350171</span>
@@ -520,13 +515,13 @@
         <div class="container footer-shell">
             <div>
                 <p class="micro-label">ITERASN HUB</p>
-                <p class="footer-copy">A cleaner campus homepage with real links, calmer hierarchy, and faster entry into the system.</p>
+                <p class="footer-copy">Attendance, marks, timetable, notes, and deadlines - imported once from the SOA portal, checked in seconds.</p>
             </div>
             <div class="footer-links">
                 <a href="#about">About</a>
                 <a href="#features">Features</a>
                 <a href="#academics">Programs</a>
-                <a href="/creator.html">Creator</a>
+                <a href="/creator.html">Meet the creator</a>
                 <a href="#contact">Contact</a>
             </div>
             <p class="footer-year">&copy; <span id="currentYear"></span> ITERasn hub</p>

@@ -26,7 +26,7 @@ class FlashcardSystem {
    */
   async loadDecks() {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       const response = await fetch('/api/flashcards/my-decks', {
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -25,7 +25,10 @@
                     sessionStorage.setItem('loginMessage', 'Please log in to access payments.');
                 } catch (e) {}
                 window.location.replace('/login.html');
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>

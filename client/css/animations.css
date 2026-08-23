@@ -287,13 +287,13 @@ body.animations-ready .scroll-reveal:not(.revealed) {
 /* Glow Animation */
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 5px rgba(99, 102, 241, 0.5),
-                    0 0 10px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 0 5px rgba(0,0,0,0.5),
+                    0 0 10px rgba(0,0,0,0.3);
     }
     50% {
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.8),
-                    0 0 30px rgba(99, 102, 241, 0.5),
-                    0 0 40px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 0 20px rgba(0,0,0,0.8),
+                    0 0 30px rgba(0,0,0,0.5),
+                    0 0 40px rgba(255,255,255,0.08);
     }
 }
 
@@ -411,10 +411,10 @@ body.animations-ready .scroll-reveal:not(.revealed) {
 
 @keyframes glow {
     0%, 100% {
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
     50% {
-        box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+        box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
 }
 
@@ -702,12 +702,12 @@ html {
 
 @keyframes borderGlow {
     0%, 100% {
-        border-color: rgba(99, 102, 241, 0.5);
-        box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        border-color: rgba(255,255,255,0.08);
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
     50% {
-        border-color: rgba(99, 102, 241, 1);
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+        border-color: #141414;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
     }
 }
 
@@ -799,7 +799,7 @@ html {
 }
 
 .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 30px rgba(255,90,79,0.35);
 }
 
 .hover-bounce {
@@ -921,11 +921,11 @@ html {
 @keyframes fabPulse {
     0%, 100% {
         transform: scale(1);
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
     50% {
         transform: scale(1.05);
-        box-shadow: 0 6px 30px rgba(99, 102, 241, 0.6);
+        box-shadow: 0 6px 30px rgba(0,0,0,0.6);
     }
 }
 
@@ -948,9 +948,9 @@ body {
 
 /* Hover Glow Effect */
 .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
-                0 0 60px rgba(99, 102, 241, 0.3),
-                0 0 90px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 30px rgba(255,90,79,0.35),
+                0 0 60px rgba(255,90,79,0.3),
+                0 0 90px rgba(255,90,79,0.1);
     animation: glow-pulse 2s ease-in-out infinite;
 }
 
@@ -988,7 +988,7 @@ body {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+    background: var(--primary,#ff5a4f);
     border-radius: 10px;
     transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -1110,17 +1110,17 @@ body {
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary,#ff5a4f);
+    box-shadow: 0 0 0 3px rgba(255,90,79,0.1);
     animation: input-glow 0.3s ease-out;
 }
 
 @keyframes input-glow {
     0% {
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+        box-shadow: 0 0 0 0 rgba(255,90,79,0.3);
     }
     100% {
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 3px rgba(255,90,79,0.1);
     }
 }
 
@@ -1133,7 +1133,7 @@ body {
 .form-group textarea:focus + label,
 .form-group select:focus + label {
     transform: translateY(-2px);
-    color: #6366f1;
+    color: var(--primary,#ff5a4f);
 }
 
 /* Error Shake Enhanced */
@@ -1225,7 +1225,7 @@ body {
 .stat-card:hover,
 .feature-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 12px 40px rgba(255,90,79,0.2);
 }
 
 /* Notification Badge Pulse */
@@ -1304,12 +1304,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.5);
+    background: rgba(255,255,255,0.08);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(99, 102, 241, 0.7);
+    background: rgba(255,90,79,0.45);
 }
 
 /* Reduce Motion */

@@ -10,9 +10,12 @@
 
   // Client-side cache with TTL (5 minutes)
   const CACHE_TTL = 5 * 60 * 1000;
-  // Auto-refresh interval (30 seconds - balances freshness with performance)
-  const AUTO_REFRESH_INTERVAL = 30000;
+  // Auto-refresh interval (120 seconds - balances freshness with performance)
+  const AUTO_REFRESH_INTERVAL = 120000;
   let autoRefreshTimer = null;
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  let deadlineFailures = 0;
+  let deadlineRetryLink = null;
   
   const dataCache = {
     get(key) {
@@ -59,7 +62,10 @@
     renderSoaPortalBanner();
 
     // Fetch all data in parallel for faster loading
-    await refreshDashboardData();
+    await Promise.all([
+      refreshDashboardData(),
+      loadNextDeadline()
+    ]);
 
     // Start auto-refresh for charts
     startAutoRefresh();
@@ -82,7 +88,7 @@
         await refreshChartsData();
       }
     }, AUTO_REFRESH_INTERVAL);
-    console.log('Dashboard auto-refresh started (every 30 seconds)');
+    console.log('Dashboard auto-refresh started (every 120 seconds)');
   }
 
   /**
@@ -119,15 +125,26 @@
       getEvents()
     ]);
 
-    // Update stats as soon as data is available
-    setText('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '85%');
-    setText('currentCGPA', marks.gpa != null ? String(marks.gpa) : '8.5');
-    setText('pendingAssignments', String(assignments.pendingCount || 5));
-    setText('upcomingEvents', String(events.count || 8));
+    setStat('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '--');
+    setStat('currentCGPA', marks.gpa != null ? String(marks.gpa) : '--');
+    setStat('pendingAssignments', assignments.pendingCount != null ? String(assignments.pendingCount) : '--');
+    setStat('upcomingEvents', events.count != null ? String(events.count) : '--');
 
-    // Charts
-    renderAttendanceChart(attendance.present || 320, attendance.absent || 45);
-    renderPerformanceChart(marks.summary || []);
+    updateStripAttendance(attendance);
+
+    if (attendance.total > 0) {
+      clearChartEmpty('attendanceChart');
+      renderAttendanceChart(attendance.present, attendance.absent);
+    } else {
+      markChartEmpty('attendanceChart');
+    }
+
+    if (Array.isArray(marks.summary) && marks.summary.length) {
+      clearChartEmpty('performanceChart');
+      renderPerformanceChart(marks.summary);
+    } else {
+      markChartEmpty('performanceChart');
+    }
   }
 
   /**
@@ -143,13 +160,16 @@
       getMarks(true)
     ]);
 
-    // Update charts with new data
-    updateAttendanceChart(attendance.present || 320, attendance.absent || 45);
-    updatePerformanceChart(marks.summary || []);
-    
-    // Also update stats
-    setText('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '85%');
-    setText('currentCGPA', marks.gpa != null ? String(marks.gpa) : '8.5');
+    setStat('overallAttendance', attendance.percent != null ? attendance.percent + '%' : '--');
+    setStat('currentCGPA', marks.gpa != null ? String(marks.gpa) : '--');
+    updateStripAttendance(attendance);
+
+    if (attendance.total > 0) {
+      updateAttendanceChart(attendance.present, attendance.absent);
+    }
+    if (Array.isArray(marks.summary) && marks.summary.length) {
+      updatePerformanceChart(marks.summary);
+    }
   }
 
   function showLoadingStates() {
@@ -163,12 +183,137 @@
     });
   }
 
-  function setText(id, txt) { 
-    const el = document.getElementById(id); 
+  function setText(id, txt) {
+    const el = document.getElementById(id);
     if (el) {
       el.textContent = txt;
       el.classList.remove('loading-skeleton');
     }
+  }
+
+  function setStat(id, txt) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = txt;
+    el.classList.remove('loading-skeleton');
+    const box = el.closest('.stat-box');
+    if (!box) return;
+    let link = box.querySelector('.stat-connect-link');
+    if (txt === '--') {
+      el.classList.add('stat-muted');
+      if (!link) {
+        link = document.createElement('a');
+        link.className = 'stat-connect-link';
+        link.href = '/connect-portal.html';
+        link.textContent = 'CONNECT SOA PORTAL \u2192';
+        box.appendChild(link);
+      }
+    } else {
+      el.classList.remove('stat-muted');
+      if (link) link.remove();
+    }
+  }
+
+  function offlineCacheReady() {
+    try {
+      return Boolean(window.APP && window.APP.OfflineCache && window.APP.OfflineCache.available && window.APP.OfflineCache.available());
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function offlineCachePut(key, value) {
+    if (!offlineCacheReady()) return;
+    try {
+      await window.APP.OfflineCache.put(key, value);
+      await window.APP.OfflineCache.setStamp(key, new Date().toISOString());
+    } catch (_) { }
+  }
+
+  async function offlineCacheGet(key) {
+    if (!offlineCacheReady()) return null;
+    try {
+      return await window.APP.OfflineCache.get(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function offlineCacheStamp(key) {
+    if (!offlineCacheReady()) return null;
+    try {
+      return await window.APP.OfflineCache.getStamp(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function showCachedBadge() {
+    const hero = document.querySelector('.page-hero .hero-content-inline > div');
+    if (!hero || document.getElementById('dashboardCacheBadge')) return;
+    const stamp = await offlineCacheStamp('attendance');
+    const badge = document.createElement('div');
+    badge.id = 'dashboardCacheBadge';
+    badge.className = 'cache-badge';
+    badge.textContent = formatStampLabel(stamp);
+    hero.appendChild(badge);
+  }
+
+  function formatStampLabel(stamp) {
+    const date = typeof stamp === 'string' && stamp ? new Date(stamp) : null;
+    if (!date || Number.isNaN(date.getTime())) return 'CACHED';
+    const pad = (value) => String(value).padStart(2, '0');
+    return `CACHED \u00b7 SYNCED ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  function istFormatter(options) {
+    return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: 'Asia/Kolkata' }, options));
+  }
+
+  function istDayName() {
+    const fallback = DAY_NAMES[new Date().getDay()];
+    try {
+      const part = istFormatter({ weekday: 'long' }).formatToParts(new Date()).find((item) => item.type === 'weekday');
+      return part && DAY_NAMES.includes(part.value) ? part.value : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function istMinutesOfDay() {
+    try {
+      const parts = istFormatter({ hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+      const hourPart = parts.find((item) => item.type === 'hour');
+      const minutePart = parts.find((item) => item.type === 'minute');
+      const hour = Number(hourPart && hourPart.value);
+      const minute = Number(minutePart && minutePart.value);
+      if (Number.isFinite(hour) && Number.isFinite(minute)) {
+        return (hour % 24) * 60 + minute;
+      }
+    } catch (_) { }
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+
+  function markChartEmpty(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas.parentElement) return;
+    const wrapper = canvas.parentElement;
+    canvas.style.display = 'none';
+    if (wrapper.querySelector('.chart-empty')) return;
+    const empty = document.createElement('div');
+    empty.className = 'chart-empty';
+    empty.innerHTML = '<div class="chart-empty-label">NO DATA YET</div><a class="stat-connect-link" href="/connect-portal.html">CONNECT SOA PORTAL \u2192</a>';
+    wrapper.appendChild(empty);
+  }
+
+  function clearChartEmpty(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas.parentElement) return;
+    const wrapper = canvas.parentElement;
+    const empty = wrapper.querySelector('.chart-empty');
+    if (empty) empty.remove();
+    canvas.style.display = '';
   }
 
   function formatDateTime(value) {
@@ -190,20 +335,21 @@
       const cached = dataCache.get('attendance');
       if (cached) return cached;
     }
-    
+
     try {
       const r = await APP.API.get(`/attendance/student/${user.id}`);
       const result = normalizeAttendance(r.data);
       dataCache.set('attendance', result);
+      await offlineCachePut('attendance', r.data);
       return result;
     } catch (_) {
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getStudentAttendance();
-        const result = normalizeAttendance(r.data);
-        dataCache.set('attendance', result);
+      const cachedSnapshot = await offlineCacheGet('attendance');
+      if (cachedSnapshot && Array.isArray(cachedSnapshot.summary) && cachedSnapshot.summary.length) {
+        const result = normalizeAttendance(cachedSnapshot);
+        await showCachedBadge();
         return result;
       }
-      return { present: 320, absent: 45, total: 365, percent: 88, summary: [] };
+      return { present: 0, absent: 0, total: 0, percent: null, summary: [] };
     }
   }
 
@@ -215,8 +361,8 @@
       total += Number(s.total_classes || 0);
     });
     const absent = Math.max(0, total - present);
-    const percent = total ? Math.round((present / total) * 100) : 88;
-    return { present: present || 320, total: total || 365, absent: absent || 45, percent, summary };
+    const percent = total ? Math.round((present / total) * 100) : null;
+    return { present, total, absent, percent, summary };
   }
 
   async function getMarks(forceFresh = false) {
@@ -225,45 +371,35 @@
       const cached = dataCache.get('marks');
       if (cached) return cached;
     }
-    
+
     try {
       const r = await APP.API.get(`/marks/student/${user.id}`);
       const result = normalizeMarks(r.data);
       dataCache.set('marks', result);
+      await offlineCachePut('marks', r.data);
       return result;
     } catch (_) {
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getStudentMarks();
-        const result = normalizeMarks(r.data);
-        dataCache.set('marks', result);
+      const cachedSnapshot = await offlineCacheGet('marks');
+      if (cachedSnapshot && ((Array.isArray(cachedSnapshot.summary) && cachedSnapshot.summary.length) || cachedSnapshot.cgpa != null)) {
+        const result = normalizeMarks(cachedSnapshot);
+        await showCachedBadge();
         return result;
       }
-      return { gpa: 8.5, summary: [] };
+      return { gpa: null, summary: [] };
     }
   }
 
   function normalizeMarks(data) {
     const summary = data?.summary || [];
     if (!summary.length) {
-      // Return dummy data if no summary
-      return {
-        gpa: 8.14,
-        summary: [
-          { subject: 'Data Structures', avg_marks: 85, avg_total: 100 },
-          { subject: 'Algorithms', avg_marks: 88, avg_total: 100 },
-          { subject: 'Database Systems', avg_marks: 82, avg_total: 100 },
-          { subject: 'Operating Systems', avg_marks: 90, avg_total: 100 },
-          { subject: 'Computer Networks', avg_marks: 78, avg_total: 100 },
-          { subject: 'Web Development', avg_marks: 92, avg_total: 100 }
-        ]
-      };
+      return { gpa: data?.cgpa != null ? Number(data.cgpa) : null, summary };
     }
     let totalPct = 0;
     summary.forEach(s => {
       totalPct += (Number(s.avg_marks || 0) / Number(s.avg_total || 100)) * 100;
     });
-    const avgPct = summary.length ? totalPct / summary.length : 85;
-    const gpa = Number((avgPct / 10).toFixed(2));
+    const avgPct = totalPct / summary.length;
+    const gpa = data?.cgpa != null ? Number(data.cgpa) : Number((avgPct / 10).toFixed(2));
     return { gpa, summary };
   }
 
@@ -271,26 +407,21 @@
     // Check cache first
     const cached = dataCache.get('assignments');
     if (cached) return cached;
-    
+
     try {
       const r = await APP.API.get('/assignments/student');
       const result = normalizeAssignments(r.data);
       dataCache.set('assignments', result);
       return result;
     } catch (_) {
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getAssignments();
-        const result = normalizeAssignments(r.data);
-        dataCache.set('assignments', result);
-        return result;
-      }
-      return { pendingCount: 5 };
+      return { pendingCount: null };
     }
   }
 
   function normalizeAssignments(list) {
     const arr = Array.isArray(list) ? list : (list?.data || []);
-    const pendingCount = arr.filter(a => /pending|not submitted/i.test(String(a.submission_status || ''))).length || 5;
+    if (!arr.length) return { pendingCount: null };
+    const pendingCount = arr.filter(a => /pending|not submitted/i.test(String(a.submission_status || ''))).length;
     return { pendingCount };
   }
 
@@ -298,20 +429,14 @@
     // Check cache first
     const cached = dataCache.get('events');
     if (cached) return cached;
-    
+
     try {
       const r = await APP.API.get('/events');
-      const result = { count: (r.data || []).length || 8 };
+      const result = { count: Array.isArray(r.data) ? r.data.length : null };
       dataCache.set('events', result);
       return result;
     } catch (_) {
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getEvents();
-        const result = { count: (r.data || []).length || 8 };
-        dataCache.set('events', result);
-        return result;
-      }
-      return { count: 8 };
+      return { count: null };
     }
   }
 
@@ -319,9 +444,22 @@
   let attendanceChartInstance = null;
   let performanceChartInstance = null;
 
+  function isLightTheme() {
+    return document.body.classList.contains('light-theme');
+  }
+
+  function chartTextColor() {
+    return isLightTheme() ? '#1d1d20' : '#f6f3ee';
+  }
+
+  function chartGridColor() {
+    return isLightTheme() ? 'rgba(29, 29, 32, 0.1)' : 'rgba(255,255,255,0.1)';
+  }
+
   function renderAttendanceChart(present, absent) {
     const el = document.getElementById('attendanceChart');
     if (!el) return;
+    clearChartEmpty('attendanceChart');
     
     // Destroy existing chart if it exists
     if (attendanceChartInstance) {
@@ -352,7 +490,7 @@
             legend: {
               display: true,
               position: 'bottom',
-              labels: { color: '#fff' }
+              labels: { color: chartTextColor() }
             }
           },
           animation: {
@@ -382,6 +520,7 @@
   function renderPerformanceChart(summary) {
     const el = document.getElementById('performanceChart');
     if (!el) return;
+    clearChartEmpty('performanceChart');
 
     // Destroy existing chart if it exists
     if (performanceChartInstance) {
@@ -395,24 +534,8 @@
       existingChart.destroy();
     }
 
-    // Use dummy data if summary is empty
     if (!summary || !summary.length) {
-      summary = [
-        { subject: 'Structural Analysis', avg_marks: 78, avg_total: 100 },
-        { subject: 'Concrete Technology', avg_marks: 85, avg_total: 100 },
-        { subject: 'Surveying', avg_marks: 88, avg_total: 100 },
-        { subject: 'Fluid Mechanics', avg_marks: 82, avg_total: 100 },
-        { subject: 'Geotechnical Eng', avg_marks: 80, avg_total: 100 },
-        { subject: 'Computer Aided Design', avg_marks: 75, avg_total: 100 },
-        { subject: 'Const. Management', avg_marks: 92, avg_total: 100 },
-        { subject: 'A.I. & ML', avg_marks: 86, avg_total: 100 },
-        { subject: 'Big Data Analytics', avg_marks: 83, avg_total: 100 },
-        { subject: 'Discrete Mathematics', avg_marks: 89, avg_total: 100 },
-        { subject: 'Database Mgmt Systems', avg_marks: 81, avg_total: 100 },
-        { subject: 'Operating Systems', avg_marks: 87, avg_total: 100 },
-        { subject: 'Computer Networks', avg_marks: 84, avg_total: 100 },
-        { subject: 'Machine Learning', avg_marks: 91, avg_total: 100 }
-      ];
+      return;
     }
 
     const labels = summary.map(s => s.subject || 'Unknown');
@@ -430,7 +553,7 @@
           datasets: [{
             label: 'Percentage',
             data,
-            backgroundColor: '#6366f1',
+            backgroundColor: '#ff5a4f',
             borderRadius: 6
           }]
         },
@@ -442,11 +565,11 @@
             y: {
               beginAtZero: true,
               max: 100,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: chartTextColor() },
+              grid: { color: chartGridColor() }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: chartTextColor() },
               grid: { display: false }
             }
           },
@@ -465,14 +588,7 @@
    */
   function updatePerformanceChart(summary) {
     if (!summary || !summary.length) {
-      summary = [
-        { subject: 'Structural Analysis', avg_marks: 78, avg_total: 100 },
-        { subject: 'Concrete Technology', avg_marks: 85, avg_total: 100 },
-        { subject: 'Surveying', avg_marks: 88, avg_total: 100 },
-        { subject: 'Fluid Mechanics', avg_marks: 82, avg_total: 100 },
-        { subject: 'Geotechnical Eng', avg_marks: 80, avg_total: 100 },
-        { subject: 'Computer Aided Design', avg_marks: 75, avg_total: 100 }
-      ];
+      return;
     }
 
     const data = summary.map(s => {
@@ -491,22 +607,52 @@
     }
   }
 
-  function renderTodaySchedule() {
+  async function renderTodaySchedule() {
     const container = document.getElementById('todaySchedule');
     if (!container) return;
 
-    let res;
+    let serverData = null;
     try {
-      if (typeof DummyData !== 'undefined') {
-        res = DummyData.getTimetable();
-      }
+      const r = await APP.API.get('/soa/me');
+      serverData = r?.data || null;
     } catch (_) { }
 
-    const items = res?.data || [];
-    const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
-    const today = items.filter(x => x.day_of_week === day);
+    if (!serverData) {
+      const cachedSnapshot = await offlineCacheGet('timetable');
+      if (cachedSnapshot && buildTimetableModel(cachedSnapshot)) {
+        serverData = cachedSnapshot;
+        await showCachedBadge();
+      }
+    }
 
-    if (!today.length) {
+    if (serverData) {
+      await offlineCachePut('timetable', serverData);
+    }
+
+    const model = serverData ? buildTimetableModel(serverData) : null;
+    if (!model) {
+      updateStripNextClass(null);
+      container.innerHTML = `
+        <div class="schedule-item">
+          <div>
+            <strong>NO TIMETABLE YET</strong>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.25rem 0 0.6rem 0;">IMPORT YOUR TIMETABLE TO SEE TODAY</p>
+            <a class="stat-connect-link" href="/connect-portal.html">CONNECT SOA PORTAL \u2192</a>
+          </div>
+          <div style="color: var(--text-secondary);">—</div>
+        </div>
+      `;
+      return;
+    }
+
+    const day = istDayName();
+    const entries = extractTodayEntries(model, day);
+    const nowMinutes = istMinutesOfDay();
+    const activeEntry = entries.find((entry) => entry.startTime != null && entry.endTime != null && nowMinutes >= entry.startTime && nowMinutes <= entry.endTime);
+    const nextEntry = activeEntry ? null : entries.find((entry) => entry.startTime != null && entry.startTime > nowMinutes);
+    updateStripNextClass(activeEntry ? Object.assign({}, activeEntry, { isNow: true }) : nextEntry);
+
+    if (!entries.length) {
       container.innerHTML = `
         <div class="schedule-item">
           <div>
@@ -519,43 +665,242 @@
       return;
     }
 
-    container.innerHTML = today.map(s => `
-      <div class="schedule-item">
+    container.innerHTML = entries.map((entry) => renderScheduleItem(entry, nowMinutes)).join('');
+  }
+
+  function renderScheduleItem(entry, nowMinutes) {
+    const isNow = entry.startTime != null && entry.endTime != null && nowMinutes >= entry.startTime && nowMinutes <= entry.endTime;
+    return `
+      <div class="schedule-item"${isNow ? ' style="border-left: 2px solid var(--primary);"' : ''}>
         <div>
-          <strong>${APP.sanitize(s.subject)}</strong>
+          <strong>${isNow ? '<span style="color: var(--primary);">NOW</span> \u00b7 ' : ''}${APP.sanitize(entry.subject || 'Saved class')}</strong>
           <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0 0;">
-            ${APP.sanitize(s.teacher_name)} • Room ${APP.sanitize(s.room_number)}
+            ${APP.sanitize(entry.details || entry.rawText)}
           </p>
         </div>
-        <div style="color: var(--primary); font-weight: 600;">${s.time_slot}</div>
+        <div style="color: var(--primary); font-weight: 600;">${APP.sanitize(entry.timeLabel || '')}</div>
       </div>
-    `).join('');
+    `;
+  }
+
+  function buildTimetableModel(data) {
+    const rawSection = data?.raw?.sections?.timetable || null;
+    const rawTable = Array.isArray(rawSection?.tables)
+      ? rawSection.tables.find((table) => Array.isArray(table.rows) && table.rows.length)
+      : null;
+
+    if (rawTable) {
+      const headers = Array.isArray(rawTable.headers) && rawTable.headers.length
+        ? rawTable.headers.map((header) => String(header || '').trim())
+        : Array.from({ length: Math.max(...rawTable.rows.map((row) => Array.isArray(row) ? row.length : 0), 0) }, (_, index) => `Column ${index + 1}`);
+      const rows = rawTable.rows
+        .filter((row) => Array.isArray(row) && row.some((cell) => hasText(cell)))
+        .map((row) => headers.map((_, index) => String(row[index] || '').trim()));
+
+      if (rows.length) {
+        return { headers, rows };
+      }
+    }
+
+    const timetable = Array.isArray(data?.timetable) ? data.timetable : [];
+    if (!timetable.length) {
+      return null;
+    }
+
+    if (Array.isArray(timetable[0])) {
+      const width = Math.max(...timetable.map((row) => Array.isArray(row) ? row.length : 0), 0);
+      return {
+        headers: Array.from({ length: width }, (_, index) => `Column ${index + 1}`),
+        rows: timetable.map((row) => Array.from({ length: width }, (_, index) => String((row || [])[index] || '').trim()))
+      };
+    }
+
+    const headers = Array.from(timetable.reduce((set, row) => {
+      Object.keys(row || {}).forEach((key) => set.add(key));
+      return set;
+    }, new Set()));
+
+    if (!headers.length) {
+      return null;
+    }
+
+    return {
+      headers,
+      rows: timetable.map((row) => headers.map((header) => String(row?.[header] || '').trim()))
+    };
+  }
+
+  function extractTodayEntries(model, today) {
+    const normalizeLabel = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const headerDayIndex = model.headers.findIndex((header) => normalizeLabel(header) === normalizeLabel(today));
+    let cells = [];
+
+    if (headerDayIndex !== -1) {
+      cells = model.rows.map((row) => row[headerDayIndex]);
+    } else {
+      const rowForToday = model.rows.find((row) => normalizeLabel(row[0]) === normalizeLabel(today));
+      if (rowForToday) {
+        cells = rowForToday.slice(1).map((cell, index) => [cell, model.headers[index + 1]]).map(pair => pair.join(' \u2014 '));
+      }
+    }
+
+    return cells.map(parseTimetableCell).filter(Boolean);
+  }
+
+  function parseTimetableCell(text) {
+    const rawText = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!hasText(rawText) || /^(-|break|lunch|free)$/i.test(rawText)) {
+      return null;
+    }
+
+    const timeMatch = rawText.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)\s*(?:to|-)\s*(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
+    const subjectCodeMatch = rawText.match(/\b[A-Z]{2,}\d{3,}[A-Z]?\b/);
+    const roomMatch = rawText.match(/\b[A-Z]-\d+(?:\/[A-Z ]+)?\b|\bCLASS ROOM\b|\bLAB\b/i);
+    const timeLabel = timeMatch ? `${timeMatch[1]} - ${timeMatch[2]}` : null;
+    const startTime = timeMatch ? parseTodayTime(timeMatch[1]) : null;
+    const endTime = timeMatch ? parseTodayTime(timeMatch[2]) : null;
+    const withoutTime = timeMatch ? rawText.replace(timeMatch[0], '').trim() : rawText;
+    const subject = subjectCodeMatch ? subjectCodeMatch[0] : withoutTime.slice(0, 80);
+
+    return {
+      rawText,
+      timeLabel,
+      startTime,
+      endTime,
+      endLabel: timeMatch ? timeMatch[2].trim() : null,
+      subject,
+      details: roomMatch ? `${withoutTime} | ${roomMatch[0]}` : withoutTime
+    };
+  }
+
+  function parseTodayTime(value) {
+    const match = String(value || '').trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!match) return null;
+
+    let hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    const meridian = (match[3] || '').toUpperCase();
+
+    if (meridian === 'PM' && hours < 12) {
+      hours += 12;
+    } else if (meridian === 'AM' && hours === 12) {
+      hours = 0;
+    }
+
+    return hours * 60 + minutes;
+  }
+
+  function hasText(value) {
+    return Boolean(String(value || '').trim());
+  }
+
+  function updateStripNextClass(entry) {
+    const labelEl = document.getElementById('stripNextClass');
+    if (entry && entry.isNow) {
+      setText('stripNextClass', entry.subject ? `NOW: ${entry.subject}` : 'NOW');
+      const timeEl = document.getElementById('stripNextClassTime');
+      if (timeEl) {
+        timeEl.textContent = entry.endLabel ? `until ${entry.endLabel}` : (entry.timeLabel || '');
+      }
+      if (labelEl) {
+        labelEl.style.color = 'var(--primary)';
+      }
+      return;
+    }
+    setText('stripNextClass', entry?.subject || 'NO CLASS');
+    const timeEl = document.getElementById('stripNextClassTime');
+    if (timeEl) {
+      timeEl.textContent = entry?.timeLabel || '';
+    }
+    if (labelEl) {
+      labelEl.style.color = '';
+    }
+  }
+
+  function updateStripAttendance(attendance) {
+    setText('stripAttendance', attendance.percent != null ? attendance.percent + '%' : '--');
+    const subEl = document.getElementById('stripAttendanceSub');
+    if (subEl) {
+      subEl.textContent = attendance.total > 0
+        ? `${attendance.present}/${attendance.total} classes`
+        : '';
+    }
+  }
+
+  async function loadNextDeadline() {
+    try {
+      const r = await APP.API.get('/agenda');
+      deadlineFailures = 0;
+      clearDeadlineRetry();
+      const items = Array.isArray(r?.items) ? r.items : [];
+      const now = Date.now();
+      const next = items.find(item => item && item.dueAt && new Date(item.dueAt).getTime() > now);
+      if (!next) {
+        setDeadlineState('NONE', false);
+        return;
+      }
+      setDeadlineState(next.title || 'Untitled', false);
+      const dueEl = document.getElementById('stripDeadlineDue');
+      if (dueEl) {
+        dueEl.textContent = formatDueIn(new Date(next.dueAt).getTime());
+      }
+    } catch (_) {
+      deadlineFailures += 1;
+      const dueEl = document.getElementById('stripDeadlineDue');
+      if (dueEl && !dueEl.textContent) {
+        dueEl.textContent = '';
+      }
+      setDeadlineState(deadlineFailures >= 2 ? 'UNAVAILABLE' : '--', true);
+      attachDeadlineRetry();
+    }
+  }
+
+  function setDeadlineState(text, muted) {
+    const el = document.getElementById('stripDeadline');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle('stat-muted', Boolean(muted));
+  }
+
+  function attachDeadlineRetry() {
+    const el = document.getElementById('stripDeadline');
+    if (!el || deadlineRetryLink || !el.isConnected) return;
+    const retry = document.createElement('a');
+    retry.className = 'stat-connect-link';
+    retry.href = '#';
+    retry.style.marginLeft = '0.4rem';
+    retry.textContent = 'RETRY';
+    retry.addEventListener('click', (event) => {
+      event.preventDefault();
+      loadNextDeadline();
+    });
+    el.insertAdjacentElement('afterend', retry);
+    deadlineRetryLink = retry;
+  }
+
+  function clearDeadlineRetry() {
+    if (deadlineRetryLink) {
+      deadlineRetryLink.remove();
+      deadlineRetryLink = null;
+    }
+  }
+
+  function formatDueIn(dueTime) {
+    const diff = dueTime - Date.now();
+    if (diff <= 0) return 'now';
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `due in ${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `due in ${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `due in ${days}d`;
   }
 
   function renderRecentActivity() {
     const container = document.getElementById('recentActivity');
     if (!container) return;
-
-    const activities = [
-      { icon: '📝', title: 'Assignment Submitted', description: 'Data Structures Assignment 3', time: '2 hours ago' },
-      { icon: '✅', title: 'Attendance Marked', description: 'Present in Database Systems', time: '3 hours ago' },
-      { icon: '📊', title: 'Marks Updated', description: 'Algorithms Mid-term results', time: '1 day ago' },
-      { icon: '📢', title: 'New Announcement', description: 'Mid-term exam schedule released', time: '2 days ago' },
-      { icon: '📚', title: 'Notes Downloaded', description: 'Operating Systems Unit 4', time: '3 days ago' }
-    ];
-
-    container.innerHTML = activities.map(a => `
-      <div class="activity-item">
-        <div style="display: flex; gap: 1rem; align-items: flex-start;">
-          <div style="font-size: 1.5rem;">${a.icon}</div>
-          <div style="flex: 1;">
-            <h4 style="margin: 0; color: var(--text-primary); font-size: 0.95rem;">${APP.sanitize(a.title)}</h4>
-            <p style="margin: 0.25rem 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">${APP.sanitize(a.description)}</p>
-          </div>
-          <span style="color: var(--text-secondary); font-size: 0.75rem; white-space: nowrap;">${a.time}</span>
-        </div>
-      </div>
-    `).join('');
+    const section = container.closest('.dashboard-section') || container;
+    section.style.display = 'none';
   }
 
   async function renderSoaPortalBanner() {

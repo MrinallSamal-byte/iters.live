@@ -980,6 +980,11 @@ body.nothing-home.nav-open {
     transform: translateY(0);
 }
 
+html:not(.js) .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+}
+
 .nothing-home .metrics-grid .metric-card:nth-child(2),
 .nothing-home .features-grid .feature-card:nth-child(2),
 .nothing-home .about-panels .principle-card:nth-child(2),

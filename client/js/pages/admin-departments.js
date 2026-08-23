@@ -41,7 +41,7 @@
     try{
       let res;
       try{
-        res = await fetch('/api/admin/departments', { headers: { Authorization: `Bearer ${localStorage.getItem('token')||''}` }}).then(r=>r.ok?r.json():null);
+        res = await fetch('/api/admin/departments', { headers: { Authorization: `Bearer ${APP.Storage.get('accessToken')||''}` }}).then(r=>r.ok?r.json():null);
       }catch(_){ res = null; }
       if(!res || !res.success){ res = window.DummyData?.getDepartments?.(); }
       const items = res?.data || [];
@@ -53,6 +53,56 @@
 
   searchEl?.addEventListener('input', debounce(load, 250));
   function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
+
+  const modalEl = document.getElementById('departmentModal');
+  let warnedNoEndpoint = false;
+
+  function openDepartmentModal(){
+    if (!modalEl) { console.warn('Department modal not found'); return; }
+    document.getElementById('modalTitleText').textContent = 'Add New Department';
+    modalEl.style.display = 'flex';
+  }
+
+  window.closeDepartmentModal = function(){
+    if (modalEl) modalEl.style.display = 'none';
+  };
+
+  window.exportDepartments = function(){
+    fetch('/api/admin/departments', { headers: { Authorization: `Bearer ${APP.Storage.get('accessToken')||''}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(res => {
+        const items = res?.data || [];
+        if (!items.length) { console.warn('No departments to export'); return; }
+        const rows = [['Code','Name','HOD','Students','Faculty','Courses']].concat(
+          items.map(d => [d.code, d.name, d.hod || '', d.total_students || 0, d.total_teachers || 0, d.active_courses || 0])
+        );
+        const csv = rows.map(row => row.map(cell => {
+          const val = String(cell ?? '');
+          return /[",\n]/.test(val) ? '"' + val.replace(/"/g, '""') + '"' : val;
+        }).join(',')).join('\n');
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `departments-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      })
+      .catch(err => console.error('Export departments failed', err));
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('addDeptBtn')?.addEventListener('click', openDepartmentModal);
+    const form = document.getElementById('departmentForm');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!warnedNoEndpoint) {
+        warnedNoEndpoint = true;
+        console.warn('Department creation is not available: the server has no POST /api/admin/departments endpoint yet.');
+      }
+    });
+  });
 
   document.addEventListener('DOMContentLoaded', load);
 })();

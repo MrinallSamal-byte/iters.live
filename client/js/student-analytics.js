@@ -42,7 +42,7 @@
         try {
             const response = await fetch(`/api/attendance/student/${user.id}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -66,7 +66,7 @@
         try {
             const response = await fetch(`/api/marks/student/${user.id}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -89,7 +89,7 @@
         try {
             const response = await fetch('/api/events', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -112,7 +112,7 @@
         try {
             const response = await fetch('/api/clubs', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -136,7 +136,7 @@
             const today = new Date().toISOString().split('T')[0];
             const response = await fetch(`/api/hostel/menu?date=${today}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -159,7 +159,7 @@
         try {
             const response = await fetch('/api/timetable', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             
@@ -182,7 +182,7 @@
         try {
             const response = await fetch('/api/assignments/student', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${APP.Storage.get('accessToken')}`
                 }
             });
             

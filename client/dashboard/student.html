@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -45,16 +48,8 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Welcome Section -->
@@ -71,6 +66,25 @@
 
         <section class="dashboard-section glass-card hover-lift scroll-reveal soa-portal-banner" id="soaPortalBanner">
             <div class="loading-text">Checking SOA portal connection...</div>
+        </section>
+
+        <!-- Today Strip -->
+        <section class="today-strip" id="todayStrip" aria-label="Today at a glance">
+            <div class="today-cell">
+                <span class="today-label">NEXT CLASS</span>
+                <span class="today-value" id="stripNextClass">--</span>
+                <span class="today-sub" id="stripNextClassTime"></span>
+            </div>
+            <div class="today-cell">
+                <span class="today-label">ATTENDANCE</span>
+                <span class="today-value" id="stripAttendance">--</span>
+                <span class="today-sub" id="stripAttendanceSub"></span>
+            </div>
+            <div class="today-cell">
+                <span class="today-label">NEXT DEADLINE</span>
+                <span class="today-value today-value-sm" id="stripDeadline">--</span>
+                <span class="today-sub" id="stripDeadlineDue"></span>
+            </div>
         </section>
 
         <!-- Quick Stats -->
@@ -155,38 +169,11 @@
                         <span class="title-icon">📢</span>
                         Announcements
                     </h3>
-                    <span class="notification-badge">3 New</span>
                 </div>
                 <div id="announcementsList" class="announcements-list">
-                    <div class="announcement-item">
-                        <div class="announcement-header">
-                            <span class="priority-badge priority-urgent">Urgent</span>
-                            <span class="announcement-date">2 hours ago</span>
-                        </div>
-                        <div class="announcement-content">
-                            <h4 class="announcement-title">Mid-Term Examination Schedule</h4>
-                            <p class="announcement-text">Mid-term examinations will commence from next week. Check your timetable for details.</p>
-                        </div>
-                    </div>
-                    <div class="announcement-item">
-                        <div class="announcement-header">
-                            <span class="priority-badge priority-info">Info</span>
-                            <span class="announcement-date">5 hours ago</span>
-                        </div>
-                        <div class="announcement-content">
-                            <h4 class="announcement-title">Library Hours Extended</h4>
-                            <p class="announcement-text">Central library hours extended till 10 PM during examination period.</p>
-                        </div>
-                    </div>
-                    <div class="announcement-item">
-                        <div class="announcement-header">
-                            <span class="priority-badge priority-reminder">Reminder</span>
-                            <span class="announcement-date">1 day ago</span>
-                        </div>
-                        <div class="announcement-content">
-                            <h4 class="announcement-title">Fee Payment Deadline</h4>
-                            <p class="announcement-text">Semester fee payment deadline is approaching. Pay before the due date to avoid penalties.</p>
-                        </div>
+                    <div class="empty-state">
+                        <div class="empty-state-label">NO ANNOUNCEMENTS YET</div>
+                        <p class="empty-state-hint">Notices from your institute will appear here once published.</p>
                     </div>
                 </div>
             </section>
@@ -200,35 +187,9 @@
                     </h3>
                 </div>
                 <div id="deadlinesList" class="deadlines-list">
-                    <div class="deadline-item">
-                        <div class="deadline-header">
-                            <span class="deadline-type">Assignment</span>
-                            <span class="time-remaining urgent">2 days</span>
-                        </div>
-                        <h4 class="deadline-title">Data Structures Project</h4>
-                        <div class="deadline-details">
-                            <span class="deadline-date">📅 Due: Oct 15, 2025</span>
-                        </div>
-                    </div>
-                    <div class="deadline-item">
-                        <div class="deadline-header">
-                            <span class="deadline-type">Exam</span>
-                            <span class="time-remaining warning">5 days</span>
-                        </div>
-                        <h4 class="deadline-title">Database Systems Mid-Term</h4>
-                        <div class="deadline-details">
-                            <span class="deadline-date">📅 Exam: Oct 18, 2025</span>
-                        </div>
-                    </div>
-                    <div class="deadline-item">
-                        <div class="deadline-header">
-                            <span class="deadline-type">Submission</span>
-                            <span class="time-remaining normal">1 week</span>
-                        </div>
-                        <h4 class="deadline-title">Lab Report - Computer Networks</h4>
-                        <div class="deadline-details">
-                            <span class="deadline-date">📅 Due: Oct 20, 2025</span>
-                        </div>
+                    <div class="empty-state">
+                        <div class="empty-state-label">NO UPCOMING DEADLINES</div>
+                        <p class="empty-state-hint">Assignments and events with due dates will show up here.</p>
                     </div>
                 </div>
             </section>
@@ -350,16 +311,17 @@
     </button>
 
     <!-- Scripts - Load in specific order -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
+    <script src="/js/offline-cache.js"></script>
     <script src="/js/pages/student-dashboard.js"></script>
+    <script src="/js/components/mobile-navigation.js"></script>
     <script src="/js/student.js"></script>
     <script src="/js/chatbot.js"></script>
     
@@ -553,6 +515,139 @@
             text-align: center;
             padding: 2rem;
             color: var(--text-secondary);
+        }
+
+        .today-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.8rem;
+            overflow: hidden;
+        }
+
+        .today-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            padding: 1.1rem 1.25rem;
+            min-width: 0;
+        }
+
+        .today-cell + .today-cell {
+            border-left: 1px solid var(--glass-border);
+        }
+
+        .today-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .today-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.15;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .today-value-sm {
+            font-size: 1.05rem;
+            white-space: normal;
+        }
+
+        .today-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .today-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .today-cell + .today-cell {
+                border-left: none;
+                border-top: 1px solid var(--glass-border);
+            }
+        }
+
+        .stat-muted {
+            color: var(--text-secondary);
+            opacity: 0.65;
+        }
+
+        .stat-connect-link {
+            display: inline-block;
+            margin-top: 0.4rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .stat-connect-link:hover {
+            text-decoration: underline;
+        }
+
+        .chart-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .chart-empty-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+        }
+
+        .empty-state-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-hint {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .cache-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 360px) {
+            .theme-toggle {
+                bottom: 80px !important;
+            }
         }
     </style>
 </body>

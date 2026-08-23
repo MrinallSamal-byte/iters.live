@@ -23,7 +23,7 @@ class ChatComponent {
     }
 
     connectSocket() {
-        const token = localStorage.getItem('token');
+        const token = APP.Storage.get('accessToken');
         if (!token) {
             this.showError('Authentication required');
             return;

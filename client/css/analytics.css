@@ -23,8 +23,8 @@
 
 .analytics-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 12px 24px rgba(255,90,79,0.2);
+    border-color: rgba(255,90,79,0.3);
 }
 
 .analytics-card h3 {
@@ -40,7 +40,7 @@
     content: '';
     width: 4px;
     height: 24px;
-    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    background: var(--primary,#ff5a4f);
     border-radius: 2px;
 }
 
@@ -100,19 +100,19 @@
 }
 
 .legend-box[data-level="1"] {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(255,255,255,0.08);
 }
 
 .legend-box[data-level="2"] {
-    background: rgba(99, 102, 241, 0.5);
+    background: rgba(255,255,255,0.08);
 }
 
 .legend-box[data-level="3"] {
-    background: rgba(99, 102, 241, 0.7);
+    background: #141414;
 }
 
 .legend-box[data-level="4"] {
-    background: rgba(99, 102, 241, 0.9);
+    background: #141414;
 }
 
 /* Heatmap Months */
@@ -158,26 +158,26 @@
 }
 
 .heatmap-day[data-level="1"] {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(255,255,255,0.08);
 }
 
 .heatmap-day[data-level="2"] {
-    background: rgba(99, 102, 241, 0.5);
+    background: rgba(255,255,255,0.08);
 }
 
 .heatmap-day[data-level="3"] {
-    background: rgba(99, 102, 241, 0.7);
+    background: #141414;
 }
 
 .heatmap-day[data-level="4"] {
-    background: rgba(99, 102, 241, 0.9);
-    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+    background: #141414;
+    box-shadow: 0 0 8px rgba(0,0,0,0.6);
 }
 
 .heatmap-day:hover {
     transform: scale(1.3);
     z-index: 10;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 4px 12px rgba(255,90,79,0.35);
 }
 
 /* Analytics Stats */
@@ -251,7 +251,7 @@
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    background: var(--primary,#ff5a4f);
     border-radius: var(--radius-full);
     transition: width 1s ease-out;
     position: relative;
@@ -282,7 +282,7 @@
 .analytics-insights {
     margin-top: var(--spacing-xl);
     padding: var(--spacing-lg);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(255,255,255,0.05);
     border-left: 4px solid var(--primary);
     border-radius: var(--radius-md);
 }
@@ -374,7 +374,7 @@
     content: '';
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(99, 102, 241, 0.2);
+    border: 4px solid rgba(255,255,255,0.08);
     border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;

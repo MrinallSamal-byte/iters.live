@@ -40,7 +40,7 @@ class StudyScheduleGenerator {
    */
   async loadUpcomingTasks() {
     try {
-      const token = localStorage.getItem('token');
+      const token = APP.Storage.get('accessToken');
       
       // Get assignments
       const assignmentsRes = await fetch('/api/assignments/my-assignments', {
@@ -408,7 +408,7 @@ class StudyScheduleGenerator {
   }
 
   getUserId() {
-    const token = localStorage.getItem('token');
+    const token = APP.Storage.get('accessToken');
     if (!token) return null;
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.id;

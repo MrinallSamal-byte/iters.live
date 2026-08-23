@@ -3,6 +3,17 @@
  * Bottom navigation bar for mobile devices with gesture support
  */
 
+const MOBILE_NAV_ICONS = (() => {
+  const svg = (paths) => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+  return {
+    home: svg('<path d="M4.5 11l7.5-6.5L19.5 11"/><path d="M6.5 9.25V19.5h11V9.25"/>'),
+    attendance: svg('<circle cx="12" cy="12" r="8.75"/><path d="M8.25 12.3l2.5 2.5 5-5.2"/>'),
+    marks: svg('<path d="M5.5 20v-6"/><path d="M12 20V9.5"/><path d="M18.5 20V4.5"/>'),
+    timetable: svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4"/><path d="M16 3v4"/>'),
+    more: svg('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>')
+  };
+})();
+
 class MobileNavigation {
   constructor() {
     this.currentRoute = 'dashboard';
@@ -17,13 +28,14 @@ class MobileNavigation {
    */
   init() {
     if (!this.isMobileDevice()) return;
+    if (document.getElementById('mobile-bottom-nav')) return;
 
     this.createBottomNav();
     this.setupGestures();
     this.setupMenuToggle();
     this.makeElementsTouchFriendly();
     
-    console.log('✓ Mobile navigation initialized');
+    console.log('Mobile navigation initialized');
   }
 
   /**
@@ -42,18 +54,17 @@ class MobileNavigation {
     nav.className = 'mobile-bottom-nav';
     nav.id = 'mobile-bottom-nav';
     
-    const userRole = localStorage.getItem('userRole') || 'student';
-    
+    const userRole = this.getCurrentUserRole();
     const navItems = this.getNavItemsForRole(userRole);
+    const currentPath = window.location.pathname;
     
     nav.innerHTML = `
       ${navItems.map(item => `
         <a href="${item.href}" 
-           class="nav-item ${item.id === this.currentRoute ? 'active' : ''}" 
+           class="nav-item ${item.href === currentPath ? 'active' : ''}" 
            data-route="${item.id}">
-          <i class="${item.icon}"></i>
+          <span class="icon">${item.icon}</span>
           <span>${item.label}</span>
-          ${item.badge ? `<span class="badge">${item.badge}</span>` : ''}
         </a>
       `).join('')}
     `;
@@ -70,60 +81,88 @@ class MobileNavigation {
     nav.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.preventDefault();
-        this.navigateTo(item.dataset.route);
+        const route = item.dataset.route;
+        if (route === 'more') {
+          this.openSidebar();
+          return;
+        }
+        const link = navItems.find(n => n.id === route);
+        if (link && link.href) {
+          this.navigateTo(link.href);
+        }
       });
     });
   }
 
-  /**
-   * Get navigation items based on user role
-   */
-  getNavItemsForRole(role) {
-    const commonItems = [
-      { id: 'dashboard', label: 'Home', icon: 'fas fa-home', href: '/dashboard/student.html' },
-      { id: 'search', label: 'Search', icon: 'fas fa-search', href: '#search' },
-      { id: 'notifications', label: 'Alerts', icon: 'fas fa-bell', href: '#notifications', badge: '3' },
-      { id: 'profile', label: 'Profile', icon: 'fas fa-user', href: '#profile' }
-    ];
-
-    const roleSpecific = {
-      student: [
-        { id: 'attendance', label: 'Attend', icon: 'fas fa-calendar-check', href: '#attendance' }
-      ],
-      teacher: [
-        { id: 'classes', label: 'Classes', icon: 'fas fa-chalkboard-teacher', href: '#classes' }
-      ],
-      admin: [
-        { id: 'analytics', label: 'Stats', icon: 'fas fa-chart-line', href: '#analytics' }
-      ]
-    };
-
-    return [
-      commonItems[0],
-      ...(roleSpecific[role] || []),
-      ...commonItems.slice(1)
-    ];
+  getCurrentUserRole() {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role) return user.role;
+    } catch (e) { }
+    return localStorage.getItem('userRole') || 'student';
   }
 
   /**
+   * Get navigation items based on user role
+   * Exactly five destinations: Home · Attendance · Marks · Timetable · More
+   */
+  getNavItemsForRole(role) {
+    const roleLinks = {
+      student: {
+        home: '/dashboard/student.html',
+        attendance: '/dashboard/student-attendance.html',
+        marks: '/dashboard/student-marks.html',
+        timetable: '/dashboard/student-timetable.html'
+      },
+      teacher: {
+        home: '/dashboard/teacher.html',
+        attendance: '/dashboard/teacher-attendance.html',
+        marks: '/dashboard/teacher-marks.html',
+        timetable: null
+      },
+      admin: {
+        home: '/dashboard/admin.html',
+        attendance: null,
+        marks: null,
+        timetable: null
+      }
+    };
+
+    const links = roleLinks[role] || roleLinks.student;
+
+    return [
+      { id: 'home', label: 'Home', icon: MOBILE_NAV_ICONS.home, href: links.home },
+      { id: 'attendance', label: 'Attendance', icon: MOBILE_NAV_ICONS.attendance, href: links.attendance || links.home },
+      { id: 'marks', label: 'Marks', icon: MOBILE_NAV_ICONS.marks, href: links.marks || links.home },
+      { id: 'timetable', label: 'Timetable', icon: MOBILE_NAV_ICONS.timetable, href: links.timetable || links.home },
+      { id: 'more', label: 'More', icon: MOBILE_NAV_ICONS.more, href: '#' }
+    ];
+  }
+  
+  /**
    * Navigate to route
    */
-  navigateTo(route) {
+  navigateTo(href) {
     // Remove active class from all items
     document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(item => {
       item.classList.remove('active');
     });
 
     // Add active class to current item
-    const activeItem = document.querySelector(`[data-route="${route}"]`);
+    const activeItem = Array.from(document.querySelectorAll('.mobile-bottom-nav .nav-item'))
+      .find(item => item.getAttribute('href') === href);
     if (activeItem) {
       activeItem.classList.add('active');
     }
 
-    this.currentRoute = route;
-
     // Trigger route change event
-    window.dispatchEvent(new CustomEvent('mobileNavChange', { detail: { route } }));
+    window.dispatchEvent(new CustomEvent('mobileNavChange', { detail: { href } }));
+
+    if (typeof UniversalSidebar !== 'undefined' && typeof UniversalSidebar.navigateWithinApp === 'function') {
+      UniversalSidebar.navigateWithinApp(href);
+    } else {
+      window.location.href = href;
+    }
   }
 
   /**
@@ -167,7 +206,7 @@ class MobileNavigation {
       menuBtn = document.createElement('button');
       menuBtn.id = 'mobile-menu-toggle';
       menuBtn.className = 'mobile-menu-toggle';
-      menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+      menuBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>';
       menuBtn.setAttribute('aria-label', 'Toggle menu');
       
       const header = document.querySelector('header, .header, .top-nav');
@@ -199,6 +238,13 @@ class MobileNavigation {
    * Open sidebar
    */
   openSidebar() {
+    // Prefer the universal sidebar's own toggle so its state stays in sync
+    const universalToggle = document.getElementById('mobileSidebarToggle');
+    if (universalToggle) {
+      universalToggle.click();
+      return;
+    }
+
     const sidebar = document.querySelector('.sidebar, .side-nav, aside');
     if (!sidebar) return;
 
@@ -240,37 +286,25 @@ class MobileNavigation {
   }
 
   /**
-   * Make all interactive elements touch-friendly (44px minimum)
+   * Make nav items touch-friendly (44px minimum)
    */
   makeElementsTouchFriendly() {
     if (!this.isMobileDevice()) return;
 
-    const selectors = [
-      'button',
-      'a',
-      'input[type="checkbox"]',
-      'input[type="radio"]',
-      '.clickable',
-      '.btn',
-      '.nav-item'
-    ];
-
-    selectors.forEach(selector => {
-      document.querySelectorAll(selector).forEach(element => {
-        const rect = element.getBoundingClientRect();
-        
-        // Ensure minimum 44px touch target
-        if (rect.height < 44) {
-          element.style.minHeight = '44px';
-          element.style.display = 'inline-flex';
-          element.style.alignItems = 'center';
-          element.style.justifyContent = 'center';
-        }
-        
-        if (rect.width < 44) {
-          element.style.minWidth = '44px';
-        }
-      });
+    document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(element => {
+      const rect = element.getBoundingClientRect();
+      
+      // Ensure minimum 44px touch target
+      if (rect.height < 44) {
+        element.style.minHeight = '44px';
+        element.style.display = 'inline-flex';
+        element.style.alignItems = 'center';
+        element.style.justifyContent = 'center';
+      }
+      
+      if (rect.width < 44) {
+        element.style.minWidth = '44px';
+      }
     });
   }
 
@@ -311,65 +345,48 @@ class PullToRefresh {
   constructor(options = {}) {
     this.threshold = options.threshold || 80;
     this.resistance = options.resistance || 2.5;
-    this.onRefresh = options.onRefresh || (() => window.location.reload());
-    
+
     this.startY = 0;
     this.currentY = 0;
     this.isDragging = false;
-    this.isRefreshing = false;
-    this.lastRefreshAt = 0; // cooldown guard
-    this.cooldownMs = options.cooldownMs || 3000; // minimum time between refreshes
+    this.hasReloaded = false; // honest guard: one reload per gesture session
     this.touchStartX = 0; // prevent triggering on horizontal swipes
     this.verticalOnlyTolerance = 12; // px
-    
+
     this.init();
   }
 
   init() {
     if (!/Mobi|Android/i.test(navigator.userAgent)) return;
 
-    this.createPullIndicator();
     this.setupListeners();
   }
 
-  createPullIndicator() {
-    const indicator = document.createElement('div');
-    indicator.id = 'pull-to-refresh-indicator';
-    indicator.className = 'pull-to-refresh-indicator';
-    indicator.innerHTML = `
-      <div class="spinner"></div>
-      <span class="text">Pull to refresh</span>
-    `;
-    document.body.insertBefore(indicator, document.body.firstChild);
-    this.indicator = indicator;
-  }
-
   setupListeners() {
-    // Start gesture only when at the very top and not in cooldown
+    // Start gesture only when at the very top and not already reloading
     document.addEventListener('touchstart', (e) => {
       const atTop = (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0) <= 0;
       const isScrollable = document.documentElement.scrollHeight > document.documentElement.clientHeight;
-      const now = Date.now();
 
-      if (atTop && isScrollable && (now - this.lastRefreshAt > this.cooldownMs) && !this.isRefreshing) {
+      if (atTop && isScrollable && !this.hasReloaded) {
         this.startY = e.touches[0].clientY;
         this.touchStartX = e.touches[0].clientX;
+        this.currentY = this.startY;
         this.isDragging = true;
       } else {
         this.isDragging = false;
       }
     }, { passive: true });
 
-    // Track movement and update indicator; ignore mostly horizontal swipes
+    // Track movement; ignore mostly horizontal swipes
     document.addEventListener('touchmove', (e) => {
-      if (!this.isDragging || this.isRefreshing) return;
+      if (!this.isDragging || this.hasReloaded) return;
 
       this.currentY = e.touches[0].clientY;
       const currentX = e.touches[0].clientX;
 
       // If horizontal movement dominates, cancel the gesture
       if (Math.abs(currentX - this.touchStartX) > this.verticalOnlyTolerance && Math.abs(this.currentY - this.startY) < 2 * Math.abs(currentX - this.touchStartX)) {
-        this.reset();
         this.isDragging = false;
         return;
       }
@@ -378,73 +395,29 @@ class PullToRefresh {
 
       if (diff > 0) {
         e.preventDefault();
-        const translateY = Math.min(diff, this.threshold + 40);
-        this.indicator.style.transform = `translateY(${translateY}px)`;
-
-        if (diff >= this.threshold) {
-          this.indicator.classList.add('ready');
-          this.indicator.querySelector('.text').textContent = 'Release to refresh';
-        } else {
-          this.indicator.classList.remove('ready');
-          this.indicator.querySelector('.text').textContent = 'Pull to refresh';
-        }
       }
-    }, { passive: false });
-
-    // End gesture: trigger refresh only if threshold clearly exceeded
-    document.addEventListener('touchend', () => {
-      if (!this.isDragging || this.isRefreshing) return;
-
-      const diff = (this.currentY - this.startY) / this.resistance;
 
       if (diff >= (this.threshold + 10)) {
         this.refresh();
-      } else {
-        this.reset();
       }
+    }, { passive: false });
 
+    document.addEventListener('touchend', () => {
       this.isDragging = false;
     });
   }
 
-  async refresh() {
-    if (this.isRefreshing) return;
-    this.isRefreshing = true;
-    this.indicator.classList.add('refreshing');
-    this.indicator.querySelector('.text').textContent = 'Refreshing...';
-
-    try {
-      await this.onRefresh();
-    } catch (error) {
-      console.error('Refresh failed:', error);
-    }
-
-    setTimeout(() => {
-      this.reset();
-      this.isRefreshing = false;
-      this.lastRefreshAt = Date.now();
-    }, 1000);
-  }
-
-  reset() {
-    this.indicator.style.transform = 'translateY(-100%)';
-    this.indicator.classList.remove('ready', 'refreshing');
-    this.indicator.querySelector('.text').textContent = 'Pull to refresh';
+  refresh() {
+    if (this.hasReloaded) return;
+    this.hasReloaded = true;
+    window.location.reload();
   }
 }
 
 // Initialize mobile features
 const mobileNav = new MobileNavigation();
-const pullToRefresh = new PullToRefresh({
-  onRefresh: async () => {
-    // Optional: refresh logic disabled to prevent accidental reload loops
-    // Implement soft refresh here if needed (e.g., re-fetch data without full reload)
-    await new Promise(resolve => setTimeout(resolve, 600));
-  }
-});
+const pullToRefresh = new PullToRefresh();
 
 // Export for external use
 window.mobileNav = mobileNav;
 window.pullToRefresh = pullToRefresh;
-
-export { MobileNavigation, PullToRefresh };

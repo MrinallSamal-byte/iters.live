@@ -164,6 +164,10 @@
     let filteredQuestions = [...forumData.questions];
     let currentCategory = 'all';
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     // Initialize page
     function init() {
         loadStats();
@@ -227,16 +231,16 @@
         container.innerHTML = questions.map(q => `
             <div class="question-card" onclick="openQuestionDetail(${q.id})">
                 <div class="question-header">
-                    <h3 class="question-title">${q.title}</h3>
+                    <h3 class="question-title">${esc(q.title)}</h3>
                     <span class="question-status ${q.status === 'answered' ? 'status-answered' : 'status-open'}">
                         ${q.status === 'answered' ? '✅ Answered' : '❓ Open'}
                     </span>
                 </div>
-                <p class="question-excerpt">${q.description}</p>
+                <p class="question-excerpt">${esc(q.description)}</p>
                 <div class="question-meta">
                     <div class="question-author">
-                        <span class="author-avatar">${q.author.avatar}</span>
-                        <span>${q.author.name}</span>
+                        <span class="author-avatar">${esc(q.author.avatar)}</span>
+                        <span>${esc(q.author.name)}</span>
                     </div>
                     <div class="question-stats">
                         <span class="stat-item">💬 ${q.answers} answers</span>
@@ -244,7 +248,7 @@
                         <span class="stat-item">👍 ${q.upvotes}</span>
                     </div>
                     <div class="question-tags">
-                        ${q.tags.map(tag => `<span class="question-tag">${tag}</span>`).join('')}
+                        ${q.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
                     </div>
                 </div>
             </div>
@@ -460,18 +464,18 @@
             <div class="question-detail">
                 <div class="question-meta" style="margin-bottom: 1rem;">
                     <div class="question-author">
-                        <span class="author-avatar">${question.author.avatar}</span>
-                        <span>${question.author.name}</span>
+                        <span class="author-avatar">${esc(question.author.avatar)}</span>
+                        <span>${esc(question.author.name)}</span>
                         <span style="color: var(--text-secondary); font-size: 0.85rem;">
                             • ${formatTimeAgo(question.createdAt)}
                         </span>
                     </div>
                 </div>
                 <p style="color: var(--text-primary); line-height: 1.7; margin-bottom: 1rem;">
-                    ${question.description}
+                    ${esc(question.description)}
                 </p>
                 <div class="question-tags" style="margin-bottom: 1rem;">
-                    ${question.tags.map(tag => `<span class="question-tag">${tag}</span>`).join('')}
+                    ${question.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
                 </div>
                 <div class="question-stats" style="margin-bottom: 1.5rem;">
                     <span class="stat-item">👁️ ${question.views} views</span>

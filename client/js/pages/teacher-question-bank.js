@@ -1,238 +1,474 @@
-class TeacherQuestionBankPage {
-  constructor() {
-    this.page = 1;
-    this.limit = 20;
-    this.skeleton = new SkeletonLoader();
-    this.state = { editingId: null };
-    this.init();
-  }
+(function () {
+    'use strict';
 
-  init() {
-    this.cacheEls();
-    this.bindEvents();
-    this.loadSubjects();
-    this.loadQuestions();
-  }
+    const QB_SUBJECTS_KEY = 'qbSubjects';
+    const TYPE_LABELS = { mcq: 'MCQ', short_answer: 'Short Answer', essay: 'Essay' };
+    let questions = [];
+    let page = 1;
+    const limit = 20;
+    let total = 0;
+    let editingId = null;
+    let typeFilter = 'all';
+    let warnedSubjectRegistry = false;
 
-  cacheEls() {
-    this.els = {
-      search: document.getElementById('qbSearch'),
-      diff: document.getElementById('qbDifficulty'),
-      subj: document.getElementById('qbSubject'),
-      grid: document.getElementById('qbGrid'),
-      pag: document.getElementById('qbPagination'),
-      addBtn: document.getElementById('qbAddBtn'),
-      modal: document.getElementById('qbModal'),
-      modalTitle: document.getElementById('qbModalTitle'),
-      modalClose: document.getElementById('qbModalClose'),
-      form: document.getElementById('qbForm'),
-      formId: document.getElementById('qbId'),
-      formSubj: document.getElementById('qbFormSubject'),
-      formDiff: document.getElementById('qbFormDifficulty'),
-      formMarks: document.getElementById('qbFormMarks'),
-      formText: document.getElementById('qbFormText'),
-      formCancel: document.getElementById('qbFormCancel'),
+    const els = {};
+
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function jsId(id) { return String(id ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+
+    function authHeaders() {
+        const t = window.APP?.Storage?.get?.('accessToken');
+        return t ? { Authorization: `Bearer ${t}` } : {};
+    }
+
+    function notify(message, type) {
+        if (window.Toast?.show) window.Toast.show({ type, message });
+        else console.log(`[${type}] ${message}`);
+    }
+
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(null, a), ms); }; }
+
+    function loadSubjectRegistry() {
+        try {
+            const raw = localStorage.getItem(QB_SUBJECTS_KEY);
+            if (raw) return JSON.parse(raw);
+        } catch (_) { }
+        return {
+            'Data Structures': 101,
+            'Operating Systems': 102,
+            'Database Management Systems': 103
+        };
+    }
+
+    function saveSubjectRegistry(registry) {
+        try { localStorage.setItem(QB_SUBJECTS_KEY, JSON.stringify(registry)); } catch (_) { }
+    }
+
+    function resolveSubjectId(name) {
+        const registry = loadSubjectRegistry();
+        const key = String(name || '').trim();
+        if (!key) return 0;
+        if (registry[key]) return Number(registry[key]);
+        const nextId = Math.max(100, ...Object.values(registry).map(Number)) + 1;
+        registry[key] = nextId;
+        saveSubjectRegistry(registry);
+        if (!warnedSubjectRegistry) {
+            warnedSubjectRegistry = true;
+            console.warn('No /api/subjects endpoint exists server-side; subject IDs are assigned from a local registry.');
+        }
+        return nextId;
+    }
+
+    function refreshSubjectOptions() {
+        const registry = loadSubjectRegistry();
+        const options = ['<option value="">All Subjects</option>']
+            .concat(Object.keys(registry).sort().map(name => `<option value="${esc(name)}">${esc(name)}</option>`));
+        if (els.subjectFilter) els.subjectFilter.innerHTML = options.join('');
+    }
+
+    function cacheEls() {
+        els.search = document.getElementById('questionSearch');
+        els.subjectFilter = document.getElementById('subjectFilter');
+        els.difficultyFilter = document.getElementById('difficultyFilter');
+        els.list = document.getElementById('questionsList');
+        els.addForm = document.getElementById('addQuestionForm');
+        els.paperForm = document.getElementById('generatePaperForm');
+        els.modal = document.getElementById('questionModal');
+        els.modalBody = document.getElementById('questionModalBody');
+        els.mcqOptions = document.getElementById('mcqOptions');
+    }
+
+    function bindEvents() {
+        els.search?.addEventListener('input', debounce(() => loadQuestions(1), 400));
+        els.subjectFilter?.addEventListener('change', () => loadQuestions(1));
+        els.difficultyFilter?.addEventListener('change', () => loadQuestions(1));
+
+        document.querySelectorAll('.filter-tabs .tab-btn[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                typeFilter = btn.dataset.filter || 'all';
+                renderGrid(filterQuestionsByType());
+            });
+        });
+
+        els.addForm?.addEventListener('submit', onSubmitQuestion);
+        els.paperForm?.addEventListener('submit', (e) => { e.preventDefault(); buildPaper(); });
+    }
+
+    async function loadQuestions(targetPage = 1) {
+        page = targetPage;
+        if (!els.list) return;
+        els.list.innerHTML = '<div class="loading-text">Loading questions...</div>';
+        try {
+            const q = new URLSearchParams();
+            const search = els.search?.value?.trim();
+            const diff = els.difficultyFilter?.value;
+            const subjectName = els.subjectFilter?.value;
+            if (search) q.set('q', search);
+            if (diff) q.set('difficulty', diff);
+            if (subjectName) q.set('subject_id', String(resolveSubjectId(subjectName)));
+            q.set('page', String(page));
+            q.set('limit', String(limit));
+
+            const resp = await fetch(`/api/question-bank?${q.toString()}`, { headers: authHeaders() });
+            if (!resp.ok) throw new Error('Request failed');
+            const payload = await resp.json();
+            questions = payload?.data?.items ?? [];
+            total = Number(payload?.data?.total ?? questions.length);
+            renderGrid(filterQuestionsByType());
+            renderPagination();
+            updateStats();
+        } catch (err) {
+            console.error('Failed to load questions:', err);
+            questions = [];
+            els.list.innerHTML = '<div class="loading-text">Failed to load questions. Is the API server running?</div>';
+        }
+    }
+
+    function filterQuestionsByType() {
+        if (typeFilter === 'all') return questions;
+        return questions.filter(q => q.question_type === typeFilter);
+    }
+
+    function updateStats() {
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('totalQuestions', total);
+        setEl('subjectCovered', new Set(questions.map(q => q.subject_id)).size);
+        const diffs = questions.map(q => q.difficulty);
+        setEl('avgDifficulty', diffs.length ? diffs[0] ? diffs[0].charAt(0).toUpperCase() + diffs[0].slice(1) : '--' : '--');
+        setEl('questionPapers', localStorage.getItem('qbPaperCount') || 0);
+    }
+
+    function renderGrid(items) {
+        if (!els.list) return;
+        if (!items.length) {
+            els.list.innerHTML = '<div class="loading-text">No questions found</div>';
+            return;
+        }
+        els.list.innerHTML = items.map(q => `
+            <div class="card hover-lift" data-id="${esc(q.id)}">
+                <div class="card-header">
+                    <strong>${esc(q.topic || 'General')}</strong>
+                    <span>${TYPE_LABELS[q.question_type] || esc(q.question_type)} • <span class="badge">${esc(q.difficulty || 'unknown')}</span> • ${Number(q.marks || 0)} marks</span>
+                </div>
+                <div class="card-body">${esc(truncate(q.question_text, 220))}</div>
+                <div class="card-footer">
+                    <button class="btn btn-sm" onclick="editQuestion('${jsId(q.id)}')">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${jsId(q.id)}', this)">Delete</button>
+                    <button class="btn btn-sm" onclick="showQuestionDetail('${jsId(q.id)}')">Details</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function truncate(text, max) {
+        const t = String(text || '');
+        return t.length > max ? `${t.slice(0, max)}…` : t;
+    }
+
+    function renderPagination() {
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+        let pager = document.getElementById('qbPager');
+        if (!pager && els.list?.parentElement) {
+            pager = document.createElement('div');
+            pager.id = 'qbPager';
+            pager.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:1rem;';
+            els.list.parentElement.appendChild(pager);
+        }
+        if (!pager) return;
+        if (totalPages <= 1) { pager.innerHTML = ''; return; }
+        let html = '';
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="view-btn ${i === page ? 'active' : ''}" data-pg="${i}">${i}</button>`;
+        }
+        pager.innerHTML = html;
+        pager.querySelectorAll('button').forEach(b => b.addEventListener('click', () => loadQuestions(Number(b.dataset.pg))));
+    }
+
+    window.toggleMCQOptions = window.toggleMCQOptions || function () {
+        const type = document.getElementById('questionType')?.value;
+        const box = document.getElementById('mcqOptions');
+        if (box) box.style.display = type === 'mcq' ? 'block' : 'none';
     };
-  }
 
-  bindEvents() {
-    this.els.search?.addEventListener('input', this.debounce(() => this.loadQuestions(1), 400));
-    this.els.diff?.addEventListener('change', () => this.loadQuestions(1));
-    this.els.subj?.addEventListener('change', () => this.loadQuestions(1));
-    this.els.addBtn?.addEventListener('click', () => this.openAddModal());
+    function collectFormPayload() {
+        const subject = document.getElementById('subject')?.value?.trim();
+        const unit = document.getElementById('unit')?.value?.trim();
+        const topic = document.getElementById('topic')?.value?.trim();
+        const questionType = document.getElementById('questionType')?.value;
+        const difficulty = document.getElementById('difficulty')?.value;
+        const marks = document.getElementById('marks')?.value;
+        const bloom = document.getElementById('bloomLevel')?.value;
+        const questionText = document.getElementById('question')?.value?.trim();
+        const answer = document.getElementById('answer')?.value?.trim();
 
-    // Modal wiring
-    this.els.form?.addEventListener('submit', (e) => this.onSubmit(e));
-    this.els.formCancel?.addEventListener('click', () => this.hideModal());
-    this.els.modalClose?.addEventListener('click', () => this.hideModal());
-    this.els.modal?.addEventListener('click', (e) => { if (e.target === this.els.modal) this.hideModal(); });
-  }
+        const payload = {
+            subject_id: resolveSubjectId(subject),
+            question_text: questionText,
+            question_type: questionType,
+            difficulty,
+            topic: [unit, topic].filter(Boolean).join(' • ').slice(0, 100) || undefined,
+            blooms_taxonomy: bloom || undefined,
+            marks: Number(marks || 1)
+        };
 
-  async loadSubjects() {
-    try {
-      const resp = await fetch('/api/subjects', { headers: this.authHeaders() });
-      let items = [];
-      if (resp.ok) {
-        const data = await resp.json();
-        items = data.items || data.data || data || [];
-      } else {
-        items = [
-          { id: 101, name: 'Data Structures' },
-          { id: 102, name: 'Algorithms' },
-          { id: 103, name: 'Operating Systems' }
-        ];
-      }
-      const filterOpts = ['<option value="">All Subjects</option>'].concat(
-        items.map(s => `<option value="${s.id}">${this.escape(s.name || s.title || ('Subject ' + s.id))}</option>`) 
-      );
-      if (this.els.subj) this.els.subj.innerHTML = filterOpts.join('');
-      const formOpts = ['<option value="">Select Subject</option>'].concat(
-        items.map(s => `<option value="${s.id}">${this.escape(s.name || s.title || ('Subject ' + s.id))}</option>`) 
-      );
-      if (this.els.formSubj) this.els.formSubj.innerHTML = formOpts.join('');
-    } catch (e) {
-      console.warn('Subjects load failed');
+        if (questionType === 'mcq') {
+            const letters = ['A', 'B', 'C', 'D'];
+            const correctLetter = (document.querySelector('input[name="correctOption"]:checked') || {}).value;
+            payload.options = letters.map(l => ({
+                letter: l,
+                text: document.getElementById(`option${l}`)?.value?.trim() || ''
+            }));
+            if (correctLetter) payload.correct_answer = correctLetter;
+        } else if (answer) {
+            payload.correct_answer = answer;
+        }
+        return payload;
     }
-  }
 
-  async loadQuestions(page = this.page) {
-    this.page = page;
-    this.skeleton.show(this.els.grid, 'list');
-    try {
-      const q = new URLSearchParams();
-      const search = this.els.search?.value?.trim();
-      const diff = this.els.diff?.value;
-      const subj = this.els.subj?.value;
-      if (search) q.set('q', search);
-      if (diff) q.set('difficulty', diff);
-      if (subj) q.set('subject_id', subj);
-      q.set('page', String(this.page));
-      q.set('limit', String(this.limit));
+    async function onSubmitQuestion(e) {
+        e.preventDefault();
+        const payload = collectFormPayload();
 
-      const resp = await fetch(`/api/question-bank?${q.toString()}`, { headers: this.authHeaders() });
-      if (!resp.ok) throw new Error('Request failed');
-      const payload = await resp.json();
-      const items = (payload?.data?.items) ?? payload?.items ?? payload?.data ?? [];
-      const total = Number(payload?.data?.total ?? payload?.total ?? items.length);
-      const pageNum = Number(payload?.data?.page ?? payload?.page ?? this.page);
-      const limitNum = Number(payload?.data?.limit ?? payload?.limit ?? this.limit);
-      this.renderGrid(items || []);
-      this.renderPagination(total || 0, pageNum || 1, limitNum || this.limit);
-    } catch (error) {
-      console.error('Error context:', error);
-      this.renderError('Failed to load questions');
-    } finally {
-      this.skeleton.hide(this.els.grid);
+        if (!payload.subject_id || !payload.question_text || !payload.question_type || !payload.difficulty) {
+            notify('Subject, type, difficulty, and question text are required', 'error');
+            return;
+        }
+        if (payload.question_type === 'mcq' && !(payload.options || []).every(o => o.text)) {
+            notify('Please fill in all four MCQ options', 'error');
+            return;
+        }
+
+        try {
+            const method = editingId ? 'PUT' : 'POST';
+            const url = editingId ? `/api/question-bank/${encodeURIComponent(editingId)}` : '/api/question-bank';
+            const resp = await fetch(url, {
+                method,
+                headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!resp.ok) {
+                const errPayload = await resp.json().catch(() => null);
+                throw new Error(errPayload?.message || `Request failed (${resp.status})`);
+            }
+            notify(editingId ? 'Question updated successfully!' : 'Question added successfully!', 'success');
+            resetQuestionForm();
+            loadQuestions(editingId ? page : 1);
+        } catch (err) {
+            console.error('Save question failed:', err);
+            notify(err.message || 'Failed to save question', 'error');
+        }
     }
-  }
 
-  renderGrid(items) {
-    const grid = this.els.grid;
-    if (!grid) return;
-    if (!items.length) { grid.innerHTML = '<div class="empty">No questions found</div>'; return; }
-    const badge = (d) => `<span class="badge" style="text-transform:capitalize;">${this.escape(d||'unknown')}</span>`;
-    const truncate = (s, n=220) => { const t = String(s||''); return t.length>n ? `${this.escape(t.slice(0,n))}…` : this.escape(t); };
-    grid.innerHTML = items.map(q => `
-      <div class="card hover-lift" data-id="${q.id}">
-        <div class="card-header">${this.escape(q.topic || 'General')} • ${badge(q.difficulty)}</div>
-        <div class="card-body">${truncate(q.question_text)}</div>
-        <div class="card-footer">
-          <button class="btn btn-sm" data-action="edit">Edit</button>
-          <button class="btn btn-sm btn-danger" data-action="delete">Delete</button>
-        </div>
-      </div>
-    `).join('');
-
-    grid.querySelectorAll('.card [data-action="delete"]').forEach(btn => btn.addEventListener('click', (e) => this.handleDelete(e)));
-    grid.querySelectorAll('.card [data-action="edit"]').forEach(btn => btn.addEventListener('click', (e) => this.handleEdit(e)));
-  }
-
-  renderPagination(total, page, limit) {
-    const el = document.getElementById('qbPagination');
-    if (!el) return;
-    const pages = Math.max(1, Math.ceil(total / limit));
-    let html = '';
-    for (let i = 1; i <= pages; i++) {
-      html += `<button class="btn btn-sm ${i===page?'btn-primary':''}" data-pg="${i}">${i}</button>`;
-    }
-    el.innerHTML = html;
-    el.querySelectorAll('button').forEach(b => b.addEventListener('click', () => this.loadQuestions(Number(b.dataset.pg))));
-  }
-
-  async handleDelete(e) {
-    const card = e.target.closest('.card');
-    const id = card?.dataset.id;
-    if (!id) return;
-    if (!confirm('Delete this question?')) return;
-    try {
-      const resp = await fetch(`/api/question-bank/${id}`, { method: 'DELETE', headers: this.authHeaders() });
-      if (!resp.ok) throw new Error('Request failed');
-      this.loadQuestions();
-    } catch (error) {
-      console.error('Error context:', error);
-      alert('Failed to delete');
-    }
-  }
-
-  handleEdit(e) {
-    const card = e.target.closest('.card');
-    const id = card?.dataset.id;
-    if (!id) return;
-    const current = card.querySelector('.card-body')?.textContent || '';
-    this.state.editingId = id;
-    if (this.els.modalTitle) this.els.modalTitle.textContent = 'Edit Question';
-    if (this.els.formId) this.els.formId.value = id;
-    if (this.els.formText) this.els.formText.value = current;
-    this.showModal();
-  }
-
-  async updateQuestion(id, payload) {
-    try {
-      const resp = await fetch(`/api/question-bank/${id}`, {
-        method: 'PUT',
-        headers: { ...this.authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!resp.ok) throw new Error('Request failed');
-      // Caller refreshes
-    } catch (error) {
-      console.error('Error context:', error);
-      alert('Update failed');
-    }
-  }
-
-  openAddModal() {
-    this.state.editingId = null;
-    if (this.els.modalTitle) this.els.modalTitle.textContent = 'Add Question';
-    this.els.form?.reset();
-    if (this.els.formDiff) this.els.formDiff.value = 'easy';
-    if (this.els.formMarks) this.els.formMarks.value = 1;
-    this.showModal();
-  }
-
-  showModal() { this.els.modal?.classList.add('show'); }
-  hideModal() { this.els.modal?.classList.remove('show'); }
-
-  async onSubmit(e) {
-    e.preventDefault();
-    const payload = {
-      subject_id: Number(this.els.formSubj?.value || 0),
-      question_text: this.els.formText?.value?.trim(),
-      difficulty: this.els.formDiff?.value || 'easy',
-      question_type: 'mcq',
-      marks: Number(this.els.formMarks?.value || 1)
+    window.resetQuestionForm = function () {
+        els.addForm?.reset();
+        if (els.mcqOptions) els.mcqOptions.style.display = 'none';
+        editingId = null;
+        document.querySelectorAll('#addQuestionForm button[type="submit"]').forEach(btn => {
+            const span = btn.querySelector('span');
+            if (span) span.textContent = '✓';
+            btn.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) node.textContent = ' Add Question ';
+            });
+        });
     };
-    if (!payload.subject_id || !payload.question_text) {
-      if (typeof Toast !== 'undefined') Toast.error('Subject and question are required');
-      return;
-    }
-    if (this.state.editingId) {
-      await this.updateQuestion(this.state.editingId, payload);
-    } else {
-      await this.createQuestion(payload);
-    }
-    this.hideModal();
-    this.loadQuestions(this.page);
-  }
 
-  async createQuestion(payload) {
-    try {
-      const resp = await fetch('/api/question-bank', {
-        method: 'POST',
-        headers: { ...this.authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!resp.ok) throw new Error('Request failed');
-      // Caller refreshes
-    } catch (error) {
-      console.error('Error context:', error);
-      alert('Create failed');
+    window.editQuestion = function (id) {
+        const q = questions.find(item => String(item.id) === String(id));
+        if (!q) return;
+        editingId = id;
+
+        const topicParts = String(q.topic || '').split('•').map(p => p.trim());
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        setVal('unit', topicParts.length > 1 ? topicParts[0] : '');
+        setVal('topic', topicParts.length > 1 ? topicParts.slice(1).join(' • ') : (q.topic || ''));
+        setVal('questionType', q.question_type);
+        setVal('difficulty', q.difficulty);
+        setVal('marks', q.marks);
+        setVal('bloomLevel', q.blooms_taxonomy || '');
+        setVal('question', q.question_text || '');
+        setVal('answer', typeof q.correct_answer === 'string' && !['A', 'B', 'C', 'D'].includes(q.correct_answer) ? q.correct_answer : '');
+
+        toggleMCQOptions();
+        (q.options || []).forEach(opt => {
+            const input = document.getElementById(`option${opt.letter}`);
+            if (input) input.value = opt.text || '';
+        });
+        if (['A', 'B', 'C', 'D'].includes(q.correct_answer)) {
+            const radio = document.querySelector(`input[name="correctOption"][value="${q.correct_answer}"]`);
+            if (radio) radio.checked = true;
+        }
+
+        els.addForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        notify('Editing existing question — submit to save changes', 'info');
+    };
+
+    window.deleteQuestion = function (id, btn) {
+        if (!btn.dataset.confirming) {
+            btn.dataset.confirming = 'true';
+            btn.textContent = 'Confirm?';
+            setTimeout(() => {
+                if (btn.isConnected) {
+                    delete btn.dataset.confirming;
+                    btn.textContent = 'Delete';
+                }
+            }, 4000);
+            return;
+        }
+        fetch(`/api/question-bank/${encodeURIComponent(id)}`, { method: 'DELETE', headers: authHeaders() })
+            .then(resp => {
+                if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
+                notify('Question deleted', 'success');
+                loadQuestions(page);
+            })
+            .catch(err => {
+                console.error('Delete question failed:', err);
+                notify(err.message || 'Failed to delete question', 'error');
+            });
+    };
+
+    window.showQuestionDetail = function (id) {
+        const q = questions.find(item => String(item.id) === String(id));
+        if (!q || !els.modalBody) return;
+        const optionRows = (q.options || []).map(o => `
+            <div style="padding:0.35rem 0;">
+                ${o.letter === q.correct_answer ? '✅' : '▫️'} <strong>${esc(o.letter)})</strong> ${esc(o.text)}
+            </div>
+        `).join('');
+        els.modalBody.innerHTML = `
+            <p><strong>Type:</strong> ${TYPE_LABELS[q.question_type] || esc(q.question_type)} &nbsp; <strong>Difficulty:</strong> ${esc(q.difficulty)} &nbsp; <strong>Marks:</strong> ${Number(q.marks || 0)}</p>
+            <p><strong>Topic:</strong> ${esc(q.topic || '-')}</p>
+            <p style="line-height:1.6;">${esc(q.question_text)}</p>
+            ${optionRows ? `<div style="margin-top:0.75rem;">${optionRows}</div>` : ''}
+            ${q.correct_answer && !optionRows ? `<p style="margin-top:0.75rem;"><strong>Answer:</strong> ${esc(q.correct_answer)}</p>` : ''}
+        `;
+        if (els.modal) els.modal.style.display = 'flex';
+    };
+
+    window.closeQuestionModal = function () {
+        if (els.modal) els.modal.style.display = 'none';
+    };
+
+    window.importQuestions = function () {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv,text/csv';
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const resp = await fetch('/api/question-bank/import', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: formData
+                });
+                const payload = await resp.json().catch(() => null);
+                if (!resp.ok) throw new Error(payload?.message || `Import failed (${resp.status})`);
+                notify(`Imported ${(payload?.inserted || payload?.data?.inserted || []).length || 'some'} questions`, 'success');
+                loadQuestions(1);
+            } catch (err) {
+                console.error('Import failed:', err);
+                notify(err.message || 'Import failed', 'error');
+            }
+        };
+        input.click();
+    };
+
+    window.exportQuestions = function () {
+        if (!questions.length) {
+            notify('No questions loaded to export', 'warning');
+            return;
+        }
+        const rows = [['ID', 'Type', 'Difficulty', 'Marks', 'Topic', 'Question', 'Correct Answer']].concat(
+            questions.map(q => [
+                q.id, q.question_type, q.difficulty, q.marks, q.topic, q.question_text, q.correct_answer
+            ])
+        );
+        const csv = rows.map(row => row.map(cell => {
+            const val = String(cell ?? '');
+            return /[",\n]/.test(val) ? '"' + val.replace(/"/g, '""') + '"' : val;
+        }).join(',')).join('\n');
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `question-bank-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        notify('Questions exported to CSV', 'success');
+    };
+
+    window.previewPaper = buildPaper;
+
+    function buildPaper() {
+        if (!els.paperForm) return;
+        if (!els.paperForm.reportValidity()) return;
+
+        const subject = document.getElementById('paperSubject')?.value?.trim();
+        const examType = document.getElementById('examType')?.value;
+        const totalMarks = Number(document.getElementById('totalMarks')?.value || 0);
+        const duration = Number(document.getElementById('duration')?.value || 0);
+        const wanted = {
+            easy: Number(document.getElementById('easyCount')?.value || 0),
+            medium: Number(document.getElementById('mediumCount')?.value || 0),
+            hard: Number(document.getElementById('hardCount')?.value || 0)
+        };
+        const wantedTotal = wanted.easy + wanted.medium + wanted.hard;
+        if (!wantedTotal) {
+            notify('Set how many easy/medium/hard questions you need', 'warning');
+            return;
+        }
+
+        const pool = questions.filter(q => !subject || String(q.topic || '').toLowerCase().includes(subject.toLowerCase()));
+        const picked = [];
+        Object.keys(wanted).forEach(diff => {
+            picked.push(...pool.filter(q => q.difficulty === diff).slice(0, wanted[diff]));
+        });
+
+        if (!picked.length) {
+            notify('No matching questions in your bank yet — add questions first or widen the subject match', 'warning');
+            return;
+        }
+
+        const paperMarks = picked.reduce((sum, q) => sum + Number(q.marks || 0), 0);
+        const sectionsHtml = picked.map((q, idx) => `
+            <div style="margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--glass-border);">
+                <strong>Q${idx + 1}.</strong> ${esc(q.question_text)}
+                <div style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.25rem;">
+                    [${TYPE_LABELS[q.question_type] || esc(q.question_type)} • ${esc(q.difficulty)} • ${Number(q.marks || 0)} marks]
+                </div>
+            </div>
+        `).join('');
+
+        if (els.modalBody) {
+            els.modalBody.innerHTML = `
+                <div style="text-align:center; margin-bottom:1rem;">
+                    <h4>${esc(subject || 'Question Paper')}</h4>
+                    <p>${esc(examType || '')} • Total Marks: ${paperMarks}${totalMarks ? ` / ${totalMarks}` : ''} • Duration: ${duration} mins</p>
+                </div>
+                ${sectionsHtml}
+                ${paperMarks !== totalMarks ? `<p style="color:var(--warning, orange);">⚠️ Paper totals ${paperMarks} marks vs a target of ${totalMarks}. Adjust counts or question marks.</p>` : ''}
+            `;
+        }
+        if (els.modal) els.modal.style.display = 'flex';
+
+        try {
+            localStorage.setItem('qbPaperCount', String(Number(localStorage.getItem('qbPaperCount') || 0) + 1));
+        } catch (_) { }
+        updateStats();
     }
-  }
 
-  escape(str) { return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s])); }
-  debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, a), ms); }; }
-  authHeaders() { const t = localStorage.getItem('token'); return t ? { Authorization: `Bearer ${t}` } : {}; }
-}
-
-document.addEventListener('DOMContentLoaded', () => new TeacherQuestionBankPage());
+    document.addEventListener('DOMContentLoaded', () => {
+        cacheEls();
+        bindEvents();
+        refreshSubjectOptions();
+        loadQuestions(1);
+    });
+})();

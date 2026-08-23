@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -37,18 +40,13 @@
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/clean-dashboard.css">
     <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/mobile.css">
+    <link rel="stylesheet" href="/css/responsive-universal.css">
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
@@ -111,6 +109,7 @@
                     <button class="btn btn-sm btn-secondary" onclick="syncToCalendar()">
                         🔄 Sync to Calendar
                     </button>
+                    <a class="btn btn-sm btn-primary calendar-cta" href="/api/calendar.ics" download="iterasn-timetable.ics">ADD TO CALENDAR</a>
                 </div>
             </div>
             <div class="timetable-wrapper">
@@ -162,8 +161,9 @@
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
-    <script src="/js/dummy-data.js"></script>
+    <script src="/js/offline-cache.js"></script>
     <script src="/js/pages/student-timetable.js"></script>
+    <script src="/js/components/mobile-navigation.js"></script>
     <script src="/js/chatbot.js"></script>
     
     <style>
@@ -235,6 +235,16 @@
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
+        }
+
+        .calendar-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
         }
         
         .timetable-wrapper {
@@ -331,13 +341,49 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .timetable-controls {
                 width: 100%;
             }
-            
+
             .timetable-controls .btn {
                 flex: 1;
+            }
+        }
+
+        .reconnect-cta {
+            display: inline-block;
+            margin-top: 0.6rem;
+            padding: 0.5rem 0.9rem;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            color: var(--primary);
+            text-decoration: none;
+            background: transparent;
+        }
+
+        .reconnect-cta:hover {
+            background: rgba(255, 90, 79, 0.08);
+        }
+
+        .cache-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 360px) {
+            .theme-toggle {
+                bottom: 80px !important;
             }
         }
     </style>

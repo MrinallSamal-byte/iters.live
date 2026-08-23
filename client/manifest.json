@@ -1,23 +1,68 @@
 {
-  "name": "ITER",
-  "short_name": "ITER",
+  "name": "ITERasn hub",
+  "short_name": "ITERasn",
   "description": "ITERasn hub academic workspace for students, teachers, and administrators",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ff5a4f",
   "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "assets/soa-logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
   "categories": [
     "education",
     "productivity"
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Attendance",
+      "short_name": "Attendance",
+      "url": "/dashboard/student-attendance.html",
+      "icons": [
+        {
+          "src": "/assets/icon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Marks",
+      "short_name": "Marks",
+      "url": "/dashboard/student-marks.html",
+      "icons": [
+        {
+          "src": "/assets/icon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Timetable",
+      "short_name": "Timetable",
+      "url": "/dashboard/student-timetable.html",
+      "icons": [
+        {
+          "src": "/assets/icon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
 }

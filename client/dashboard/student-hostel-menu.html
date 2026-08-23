@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -104,7 +107,7 @@
                     <span class="title-icon">📋</span>
                     Today's Menu
                 </h3>
-                <span class="section-badge" id="menuDate Badge">Loading...</span>
+                <span class="section-badge" id="menuDateBadge">Loading...</span>
             </div>
             <div class="menu-container" id="menuContainer">
                 <!-- Menu will be loaded here -->
@@ -112,6 +115,11 @@
                     <div class="empty-state-icon">🍽️</div>
                     <p>Loading menu...</p>
                 </div>
+            </div>
+            <div class="empty-state" id="noMenuMessage" style="display: none;">
+                <div class="empty-state-icon">📭</div>
+                <h3>No menu published</h3>
+                <p>No hostel menu has been published for <span id="selectedBlock">Block A</span> on <span id="selectedDate"></span> yet. Please check back later.</p>
             </div>
         </section>
 

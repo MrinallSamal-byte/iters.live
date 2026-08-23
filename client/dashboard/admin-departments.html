@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -40,7 +43,6 @@
   <link rel="stylesheet" href="/css/universal-profile.css" />
     <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="stylesheet" href="/css/chatbot.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- Background -->
@@ -292,7 +294,7 @@
         <input type="hidden" id="deptId" name="id">
         
         <div class="modal-actions">
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" disabled title="Saving departments is not available on the server yet (no POST /api/admin/departments endpoint)">
             <span>✓</span> Save Department
           </button>
           <button type="button" class="btn btn-secondary" onclick="closeDepartmentModal()">
@@ -309,6 +311,7 @@
   </button>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/js/universal-sidebar.js"></script>
   <script src="/js/universal-profile.js"></script>
   <script src="/js/toast.js"></script>

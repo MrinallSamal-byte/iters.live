@@ -25,12 +25,12 @@
 
 .profile-avatar-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(255,90,79,0.2);
 }
 
 .profile-avatar-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 0 3px rgba(255,90,79,0.35);
 }
 
 .profile-avatar-btn:active {
@@ -140,7 +140,7 @@
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(99, 102, 241, 0.2);
+    border: 2px solid rgba(255,255,255,0.08);
     transition: transform 0.3s ease;
 }
 
@@ -234,7 +234,7 @@
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(255,255,255,0.05);
     transform: translate(-50%, -50%);
     transition: width 0.3s ease, height 0.3s ease;
 }
@@ -246,14 +246,14 @@
 }
 
 .profile-menu-item:hover {
-    background: rgba(99, 102, 241, 0.08);
-    color: #6366f1;
+    background: rgba(255,90,79,0.08);
+    color: var(--primary,#ff5a4f);
 }
 
 .profile-menu-item:focus {
     outline: none;
-    background: rgba(99, 102, 241, 0.1);
-    box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.3);
+    background: rgba(255,90,79,0.1);
+    box-shadow: inset 0 0 0 2px rgba(255,90,79,0.3);
 }
 
 .profile-menu-item:active {
@@ -284,8 +284,8 @@
     }
     
     .profile-menu-item:hover {
-        background: rgba(139, 92, 246, 0.15);
-        color: #a78bfa;
+        background: rgba(255,90,79,0.15);
+        color: var(--primary,#ff5a4f);
     }
 }
 
@@ -451,8 +451,8 @@
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--primary,#ff5a4f);
+    box-shadow: 0 0 0 3px rgba(255,90,79,0.1);
 }
 
 .form-row {
@@ -475,8 +475,8 @@
     
     .form-group input:focus,
     .form-group select:focus {
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        border-color: var(--primary,#ff5a4f);
+        box-shadow: 0 0 0 3px rgba(255,90,79,0.2);
     }
 }
 
@@ -512,14 +512,14 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: var(--primary,#ff5a4f);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 16px rgba(255,90,79,0.35);
 }
 
 .btn-primary:active {
@@ -615,7 +615,7 @@
     width: 24px;
     height: 24px;
     stroke-width: 2;
-    color: #6366f1;
+    color: var(--primary,#ff5a4f);
 }
 
 #uploadProgressText {
@@ -634,7 +634,7 @@
 
 .upload-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: var(--primary,#ff5a4f);
     border-radius: 10px;
     width: 0%;
     transition: width 0.3s ease;
@@ -839,7 +839,7 @@
     width: 24px;
     height: 24px;
     stroke-width: 2;
-    color: #6366f1;
+    color: var(--primary,#ff5a4f);
 }
 
 .idcard-modal-close {
@@ -917,7 +917,7 @@
 }
 
 .idcard-loader-spinner circle {
-    stroke: #6366f1;
+    stroke: var(--primary,#ff5a4f);
     stroke-dasharray: 90;
     stroke-dashoffset: 60;
 }
@@ -1173,6 +1173,6 @@
 .profile-avatar-btn:focus-visible,
 .profile-menu-item:focus-visible,
 .btn:focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid var(--primary,#ff5a4f);
     outline-offset: 2px;
 }

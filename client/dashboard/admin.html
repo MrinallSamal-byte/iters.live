@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -41,7 +44,6 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Background -->
@@ -293,13 +295,12 @@
     </button>
 
     <!-- Scripts - Load in specific order -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/prototype-mode.js"></script>
@@ -511,7 +512,7 @@
         }
 
         .ai-service-pill-neutral {
-            color: #a78bfa;
+            color: var(--primary, #ff5a4f);
             background: rgba(167, 139, 250, 0.12);
             border-color: rgba(167, 139, 250, 0.28);
         }

@@ -50,6 +50,18 @@
         allNotes: [],
         filteredNotes: [],
 
+        esc(str) {
+            return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        },
+
+        jsId(id) {
+            return String(id ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        },
+
+        findNote(noteId) {
+            return this.allNotes.find(n => String(n.id) === String(noteId));
+        },
+
         init() {
             this.setupEventListeners();
             this.handleUrlParams();
@@ -185,14 +197,14 @@
                 if (typeof Toast !== 'undefined') {
                     Toast.error('Please enter subject name and year');
                 } else {
-                    alert('Please enter subject name and year');
+                    console.warn('Please enter subject name and year');
                 }
                 return;
             }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/pyq/request', {
+                const token = APP.Storage.get('accessToken');
+                const response = await fetch('/api/pyq/requests', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -228,7 +240,7 @@
             this.showLoading();
             
             try {
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 const response = await fetch('/api/notes', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1366,17 +1378,17 @@
 
             // Subject code badge
             const subjectCodeBadge = note.subjectCode 
-                ? `<span class="subject-code-badge">${note.subjectCode}</span>` 
+                ? `<span class="subject-code-badge">${this.esc(note.subjectCode)}</span>` 
                 : '';
 
             // Exam type info for PYQs
             const examTypeInfo = (note.type === 'pyqs' && note.examType) 
-                ? `<span class="resource-meta-item"><span>📝</span> ${examTypeLabels[note.examType] || note.examType}</span>` 
+                ? `<span class="resource-meta-item"><span>📝</span> ${examTypeLabels[note.examType] || this.esc(note.examType)}</span>` 
                 : '';
 
             // Drive path info
             const drivePathInfo = note.isGoogleDrive && note.drivePath
-                ? `<span class="resource-meta-item drive-path"><span>📂</span> ${note.drivePath}</span>`
+                ? `<span class="resource-meta-item drive-path"><span>📂</span> ${this.esc(note.drivePath)}</span>`
                 : '';
 
             // Action buttons - different for Google Drive files and unavailable links
@@ -1393,7 +1405,7 @@
                 // Primary action - Open in Drive (using root link)
                 const rootLink = note.links?.root;
                 const primaryButton = rootLink 
-                    ? `<button class="btn btn-primary" onclick="NotesManager.openInDrive(${note.id})">
+                    ? `<button class="btn btn-primary" onclick="NotesManager.openInDrive('${this.jsId(note.id)}')">
                            🔗 Open in Drive
                        </button>`
                     : '';
@@ -1406,8 +1418,8 @@
                         if (url && VALID_LINK_TYPES.includes(key)) {
                             const typeInfo = LINK_TYPE_LABELS[key];
                             quickAccessButtons += `<button class="btn btn-quick-access" 
-                                onclick="NotesManager.openTypeLink(${note.id}, '${key}')" 
-                                title="${typeInfo.tooltip}">
+                                onclick="NotesManager.openTypeLink('${this.jsId(note.id)}', '${key}')" 
+                                title="${this.esc(typeInfo.tooltip)}">
                                 ${typeInfo.icon} ${typeInfo.label}
                             </button>`;
                         }
@@ -1420,23 +1432,23 @@
                         ${primaryButton}
                     </div>
                     ${quickAccessButtons ? `<div class="quick-access-container">${quickAccessButtons}</div>` : ''}
-                    <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${note.semester})">
-                        📂 Open Semester ${note.semester} Folder
+                    <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${Number(note.semester) || 0})">
+                        📂 Open Semester ${this.esc(note.semester)} Folder
                     </button>`;
             } else {
                 actionButtons = `
                     <div class="${actionRowClass}">
-                        <button class="btn btn-primary" onclick="NotesManager.downloadNote(${note.id})">
+                        <button class="btn btn-primary" onclick="NotesManager.downloadNote('${this.jsId(note.id)}')">
                             📥 Download
                         </button>
-                        <button class="btn btn-secondary" onclick="NotesManager.viewNote(${note.id})">
+                        <button class="btn btn-secondary" onclick="NotesManager.viewNote('${this.jsId(note.id)}')">
                             👁️ Preview
                         </button>
                     </div>`;
             }
 
             return `
-                <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''} ${note.noLinkAvailable ? 'no-link' : ''}" data-id="${note.id}" ${note.isGoogleDrive && !note.noLinkAvailable ? `onclick="NotesManager.openInDrive(${note.id})"` : ''}>
+                <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''} ${note.noLinkAvailable ? 'no-link' : ''}" data-id="${this.esc(note.id)}" ${note.isGoogleDrive && !note.noLinkAvailable ? `onclick="NotesManager.openInDrive('${this.jsId(note.id)}')"` : ''}>
                     <div class="resource-header">
                         <div class="resource-icon-shell">
                             <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
@@ -1450,20 +1462,20 @@
                         </div>
                     </div>
                     <div class="resource-context">
-                        ${note.subject} • ${note.branch} • Semester ${note.semester}
+                        ${this.esc(note.subject)} • ${this.esc(note.branch)} • Semester ${this.esc(note.semester)}
                     </div>
-                    <h4 class="resource-title">${note.title}</h4>
+                    <h4 class="resource-title">${this.esc(note.title)}</h4>
                     <div class="resource-meta-grid">
                         <span class="resource-meta-item">
-                            <span>📚</span> ${note.subject}
+                            <span>📚</span> ${this.esc(note.subject)}
                         </span>
                         <span class="resource-meta-item">
-                            <span>🎓</span> ${note.branch} - Sem ${note.semester}
+                            <span>🎓</span> ${this.esc(note.branch)} - Sem ${this.esc(note.semester)}
                         </span>
                         ${examTypeInfo}
                         ${drivePathInfo}
                         <span class="resource-meta-item">
-                            <span>📊</span> ${note.file_type} - ${note.file_size}
+                            <span>📊</span> ${this.esc(note.file_type)} - ${this.esc(note.file_size)}
                         </span>
                         <span class="resource-meta-item">
                             <span>📥</span> ${this.formatDownloads(note.downloads)} downloads
@@ -1478,7 +1490,7 @@
 
         // Open file directly in Google Drive using subject-specific folder
         openInDrive(noteId) {
-            const note = this.allNotes.find(n => n.id === noteId);
+            const note = this.findNote(noteId);
             if (!note || !note.isGoogleDrive) return;
 
             // Check if note has no link available (use links.root)
@@ -1504,7 +1516,7 @@
 
         // Open a specific type link (PYQ, Notes, Mid-Term)
         openTypeLink(noteId, typeKey) {
-            const note = this.allNotes.find(n => n.id === noteId);
+            const note = this.findNote(noteId);
             if (!note || !note.isGoogleDrive || !note.links?.types) return;
 
             // Security: Validate typeKey against whitelist
@@ -1594,12 +1606,12 @@
             if (typeof Toast !== 'undefined') {
                 Toast.error(message);
             } else {
-                alert(message);
+                console.warn(message);
             }
         },
 
         async downloadNote(noteId) {
-            const note = this.allNotes.find(n => n.id === noteId);
+            const note = this.findNote(noteId);
             if (!note) return;
 
             try {
@@ -1607,7 +1619,7 @@
                     Toast.info(`Downloading ${note.title}...`);
                 }
 
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 const response = await fetch(`/api/notes/${noteId}/download`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1643,11 +1655,11 @@
         },
 
         async viewNote(noteId) {
-            const note = this.allNotes.find(n => n.id === noteId);
+            const note = this.findNote(noteId);
             if (!note) return;
 
             try {
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 const response = await fetch(`/api/notes/${noteId}/view`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1704,7 +1716,7 @@
                 <div class="recent-item">
                     <div class="recent-icon">📥</div>
                     <div class="recent-details">
-                        <div class="recent-name">${note.title}</div>
+                        <div class="recent-name">${this.esc(note.title)}</div>
                         <div class="recent-time">${this.formatDate(note.downloadedAt)}</div>
                     </div>
                 </div>
@@ -1713,7 +1725,7 @@
 
         async loadStats() {
             try {
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 const response = await fetch('/api/notes/stats', {
                     headers: {
                         'Authorization': `Bearer ${token}`

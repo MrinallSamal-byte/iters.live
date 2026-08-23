@@ -29,7 +29,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -136,10 +139,8 @@
                         <select id="questionType" name="questionType" class="form-select" required onchange="toggleMCQOptions()">
                             <option value="">Select Type</option>
                             <option value="mcq">Multiple Choice (MCQ)</option>
-                            <option value="short">Short Answer</option>
-                            <option value="long">Long Answer/Essay</option>
-                            <option value="numerical">Numerical</option>
-                            <option value="true-false">True/False</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="essay">Long Answer/Essay</option>
                         </select>
                     </div>
 
@@ -343,9 +344,8 @@
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
                     <button class="tab-btn" data-filter="mcq">MCQ</button>
-                    <button class="tab-btn" data-filter="short">Short</button>
-                    <button class="tab-btn" data-filter="long">Long</button>
-                    <button class="tab-btn" data-filter="numerical">Numerical</button>
+                    <button class="tab-btn" data-filter="short_answer">Short</button>
+                    <button class="tab-btn" data-filter="essay">Long</button>
                 </div>
             </div>
 

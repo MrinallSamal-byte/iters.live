@@ -1,6 +1,6 @@
 /**
  * Toast Notification System
- * Modern, animated toast notifications with GSAP support
+ * Minimal dark toasts with coral accent rule; GSAP optional
  */
 
 class ToastNotification {
@@ -18,6 +18,8 @@ class ToastNotification {
             this.container = document.createElement('div');
             this.container.id = 'toast-container';
             this.container.className = 'toast-container';
+            this.container.setAttribute('role', 'status');
+            this.container.setAttribute('aria-live', 'polite');
             document.body.appendChild(this.container);
         } else {
             this.container = document.getElementById('toast-container');
@@ -45,72 +47,70 @@ class ToastNotification {
             }
 
             .toast {
+                --toast-surface: #111111;
+                --toast-border: rgba(255, 255, 255, 0.08);
+                --toast-text: #f6f3ee;
+                --toast-text-muted: rgba(246, 243, 238, 0.62);
+                --toast-accent: var(--primary, #ff5a4f);
+                --toast-shadow: rgba(0, 0, 0, 0.4);
+
+                position: relative;
+                overflow: hidden;
                 min-width: 300px;
                 max-width: 420px;
-                padding: 16px 20px;
-                border-radius: 12px;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-                border: 1px solid rgba(255, 255, 255, 0.3);
+                padding: 14px 18px 16px;
+                background: var(--toast-surface);
+                border: 1px solid var(--toast-border);
+                border-left: 3px solid var(--toast-accent);
+                border-radius: 10px;
+                box-shadow: 0 12px 32px var(--toast-shadow);
+                color: var(--toast-text);
                 display: flex;
-                align-items: center;
+                align-items: flex-start;
                 gap: 12px;
                 pointer-events: all;
                 cursor: pointer;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
             }
 
+            body.light-theme .toast {
+                --toast-surface: #fcfaf6;
+                --toast-border: rgba(19, 19, 19, 0.1);
+                --toast-text: #161616;
+                --toast-text-muted: rgba(22, 22, 22, 0.6);
+                --toast-shadow: rgba(19, 19, 19, 0.16);
+            }
+
             .toast:hover {
                 transform: translateX(-4px);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+                box-shadow: 0 16px 40px var(--toast-shadow);
             }
 
             .toast-success {
-                border-left: 4px solid #10b981;
+                --toast-accent: var(--success, #2cc37b);
             }
 
             .toast-error {
-                border-left: 4px solid #ef4444;
+                --toast-accent: var(--danger, #ff6b6b);
             }
 
             .toast-warning {
-                border-left: 4px solid #f59e0b;
+                --toast-accent: var(--warning, #f1b34a);
             }
 
             .toast-info {
-                border-left: 4px solid #3b82f6;
+                --toast-accent: var(--primary, #ff5a4f);
             }
 
             .toast-icon {
-                width: 24px;
-                height: 24px;
                 flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                font-size: 14px;
-            }
-
-            .toast-success .toast-icon {
-                background: #10b981;
-                color: white;
-            }
-
-            .toast-error .toast-icon {
-                background: #ef4444;
-                color: white;
-            }
-
-            .toast-warning .toast-icon {
-                background: #f59e0b;
-                color: white;
-            }
-
-            .toast-info .toast-icon {
-                background: #3b82f6;
-                color: white;
+                min-width: 18px;
+                padding-top: 1px;
+                font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 13px;
+                font-weight: 500;
+                line-height: 1.5;
+                color: var(--toast-accent);
             }
 
             .toast-content {
@@ -119,47 +119,50 @@ class ToastNotification {
             }
 
             .toast-title {
-                font-weight: 600;
-                font-size: 14px;
-                color: #1f2937;
+                font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 11px;
+                font-weight: 500;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--toast-text-muted);
                 margin-bottom: 4px;
             }
 
             .toast-message {
                 font-size: 13px;
-                color: #6b7280;
-                line-height: 1.4;
+                line-height: 1.45;
+                color: var(--toast-text);
                 word-wrap: break-word;
             }
 
             .toast-close {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: rgba(0, 0, 0, 0.05);
+                flex-shrink: 0;
+                width: 22px;
+                height: 22px;
+                background: transparent;
                 border: none;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                flex-shrink: 0;
-                transition: background 0.2s ease;
-                color: #6b7280;
-                font-size: 16px;
+                color: var(--toast-text-muted);
+                font-size: 15px;
                 line-height: 1;
+                transition: color 0.2s ease;
             }
 
             .toast-close:hover {
-                background: rgba(0, 0, 0, 0.1);
+                color: var(--toast-text);
             }
 
             .toast-progress {
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                height: 3px;
-                background: linear-gradient(90deg, #6366f1, #8b5cf6);
-                border-radius: 0 0 12px 12px;
+                height: 2px;
+                width: 100%;
+                background: var(--toast-accent);
+                opacity: 0.9;
                 transition: width linear;
             }
 
@@ -176,7 +179,9 @@ class ToastNotification {
             }
 
             @media (prefers-reduced-motion: reduce) {
-                .toast {
+                .toast,
+                .toast-progress,
+                .toast-close {
                     transition: none;
                 }
             }
@@ -199,10 +204,10 @@ class ToastNotification {
             this.remove(this.toasts[0]);
         }
 
-        // Create toast element
+        // Create toast element (built via DOM APIs so dynamic strings are never parsed as HTML)
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        
+
         const icons = {
             success: '✓',
             error: '✕',
@@ -210,15 +215,46 @@ class ToastNotification {
             info: 'i'
         };
 
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type] || icons.info}</div>
-            <div class="toast-content">
-                ${title ? `<div class="toast-title">${title}</div>` : ''}
-                ${message ? `<div class="toast-message">${message}</div>` : ''}
-            </div>
-            ${closable ? '<button class="toast-close" aria-label="Close">×</button>' : ''}
-            ${showProgress && duration > 0 ? '<div class="toast-progress"></div>' : ''}
-        `;
+        const iconEl = document.createElement('div');
+        iconEl.className = 'toast-icon';
+        iconEl.textContent = icons[type] || icons.info;
+        toast.appendChild(iconEl);
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'toast-content';
+
+        if (title) {
+            const titleEl = document.createElement('div');
+            titleEl.className = 'toast-title';
+            titleEl.textContent = title;
+            contentEl.appendChild(titleEl);
+        }
+
+        if (message) {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'toast-message';
+            messageEl.textContent = message;
+            contentEl.appendChild(messageEl);
+        }
+
+        toast.appendChild(contentEl);
+
+        let closeBtn = null;
+        if (closable) {
+            closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'toast-close';
+            closeBtn.setAttribute('aria-label', 'Close');
+            closeBtn.textContent = '×';
+            toast.appendChild(closeBtn);
+        }
+
+        let progressBar = null;
+        if (showProgress && duration > 0) {
+            progressBar = document.createElement('div');
+            progressBar.className = 'toast-progress';
+            toast.appendChild(progressBar);
+        }
 
         // Add to container
         this.container.appendChild(toast);
@@ -228,8 +264,7 @@ class ToastNotification {
         this.animateIn(toast);
 
         // Setup close button
-        if (closable) {
-            const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.remove(toast);
@@ -242,8 +277,7 @@ class ToastNotification {
         });
 
         // Setup progress bar
-        if (showProgress && duration > 0) {
-            const progressBar = toast.querySelector('.toast-progress');
+        if (progressBar) {
             progressBar.style.width = '100%';
             progressBar.style.transitionDuration = `${duration}ms`;
             setTimeout(() => {

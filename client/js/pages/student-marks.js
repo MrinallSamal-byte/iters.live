@@ -9,6 +9,8 @@
     const user = APP.Storage.get('user') || {};
     let performanceChart = null;
     let gradeChart = null;
+    let lastProjectionTarget = null;
+    let projectionDefaulted = false;
 
     document.addEventListener('DOMContentLoaded', async () => {
         if (typeof NavLoader !== 'undefined') {
@@ -23,8 +25,98 @@
             });
         }
 
+        initCgpaPlanner();
         await loadMarksData();
     });
+
+    function initCgpaPlanner() {
+        const form = document.getElementById('projectionForm');
+        const input = document.getElementById('targetCgpaInput');
+
+        if (!form || !input || form.dataset.projectionBound === 'true') return;
+        form.dataset.projectionBound = 'true';
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            runCgpaProjection(input.value);
+        });
+    }
+
+    function setCgpaPlannerDefault(cgpa) {
+        if (projectionDefaulted) return;
+        const input = document.getElementById('targetCgpaInput');
+        if (!input || !Number.isFinite(cgpa) || cgpa <= 0) return;
+        input.value = (Math.ceil(cgpa * 2) / 2).toFixed(1);
+        projectionDefaulted = true;
+    }
+
+    async function runCgpaProjection(rawValue) {
+        const resultEl = document.getElementById('projectionResult');
+        const button = document.getElementById('projectButton');
+        if (!resultEl || !button) return;
+
+        const target = Number(rawValue);
+        if (!Number.isFinite(target) || target < 0 || target > 10) {
+            showProjectionMessage('Enter a target CGPA between 0 and 10.');
+            return;
+        }
+
+        lastProjectionTarget = target;
+        button.disabled = true;
+        resultEl.classList.add('is-visible');
+        resultEl.innerHTML = '<span class="projection-muted">PROJECTING...</span>';
+
+        try {
+            const response = await APP.API.get(`/marks/projection?target=${encodeURIComponent(String(target))}`);
+            if (response && response.success) {
+                renderCgpaProjection(response);
+            } else {
+                showProjectionMessage((response && response.message) || 'Credit information unavailable for projection');
+            }
+        } catch (error) {
+            console.error('CGPA projection failed:', error);
+            showProjectionError(error && error.message ? error.message : 'Projection could not be loaded.');
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function renderCgpaProjection(data) {
+        const resultEl = document.getElementById('projectionResult');
+        if (!resultEl) return;
+
+        const current = Number(data.currentCgpa).toFixed(2);
+        const target = Number(data.targetCgpa).toFixed(1);
+        const needed = Number(data.requiredAverageSgpa).toFixed(2);
+        const feasible = Boolean(data.feasible);
+
+        resultEl.innerHTML = `
+            <span class="projection-line">CURRENT ${escapeHtml(current)} / TARGET ${escapeHtml(target)} / NEED AVG SGPA ${escapeHtml(needed)} NEXT SEM</span>
+            <span class="${feasible ? 'proj-tag feasible' : 'proj-tag not-feasible'}">${feasible ? 'FEASIBLE' : 'NOT FEASIBLE'}</span>
+        `;
+    }
+
+    function showProjectionMessage(message) {
+        const resultEl = document.getElementById('projectionResult');
+        if (!resultEl) return;
+        resultEl.classList.add('is-visible');
+        resultEl.innerHTML = `<span class="projection-muted">${escapeHtml(message)}</span>`;
+    }
+
+    function showProjectionError(message) {
+        const resultEl = document.getElementById('projectionResult');
+        if (!resultEl) return;
+        resultEl.classList.add('is-visible');
+        resultEl.innerHTML = `
+            <span class="projection-muted">${escapeHtml(message)}</span>
+            <button type="button" id="projectionRetry" class="projection-retry">RETRY</button>
+        `;
+
+        const retry = document.getElementById('projectionRetry');
+        if (retry) {
+            retry.addEventListener('click', () => runCgpaProjection(lastProjectionTarget));
+        }
+    }
 
     async function loadMarksData() {
         const studentId = user.id || user.registration_number;
@@ -118,6 +210,7 @@
         renderSemesterHistory(semesterResults, resolvedCgpa, resolvedSgpa);
         renderPerformanceChart(semesterResults, resolvedSgpa);
         renderGradeChart(summary);
+        setCgpaPlannerDefault(resolvedCgpa);
     }
 
     function buildSubjectStats(summary) {
@@ -323,13 +416,21 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#fff',
+                            color: chartTextColor(),
                             font: { size: 12 }
                         }
                     }
                 }
             }
         });
+    }
+
+    function isLightTheme() {
+        return document.body.classList.contains('light-theme');
+    }
+
+    function chartTextColor() {
+        return isLightTheme() ? '#1d1d20' : '#f6f3ee';
     }
 
     function destroyCharts() {

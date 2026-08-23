@@ -30,7 +30,10 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -42,18 +45,9 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
-    <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
@@ -209,6 +203,21 @@
                 <div class="loading-text">Loading semester history...</div>
             </div>
         </section>
+
+        <!-- CGPA Planner -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal" id="cgpaPlanner">
+            <div class="projection-head">
+                <span class="mono-eyebrow">CGPA PLANNER</span>
+                <span class="section-badge">Next Semester Projection</span>
+            </div>
+            <form id="projectionForm" class="projection-form" autocomplete="off">
+                <label class="mono-eyebrow" for="targetCgpaInput">TARGET CGPA</label>
+                <input type="number" id="targetCgpaInput" class="projection-input" step="0.1" min="0" max="10" inputmode="decimal" placeholder="8.5" />
+                <button type="submit" id="projectButton" class="projection-btn">PROJECT</button>
+            </form>
+            <p class="mono-eyebrow projection-hint">AVERAGE SGPA NEEDED NEXT SEMESTER TO HIT THE TARGET</p>
+            <div id="projectionResult" class="projection-result"></div>
+        </section>
     </main>
 
     <!-- Theme Toggle -->
@@ -217,6 +226,7 @@
     </button>
 
     <!-- Scripts - Load in specific order -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
@@ -349,6 +359,139 @@
             text-align: center;
             padding: 2rem;
             color: var(--text-secondary);
+        }
+
+        .mono-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .projection-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .projection-form {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
+        }
+
+        .projection-input {
+            width: 8.5rem;
+            padding: 0.65rem 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md, 8px);
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+        }
+
+        .projection-btn {
+            padding: 0.65rem 1.5rem;
+            background: var(--primary);
+            color: #ffffff;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-md, 8px);
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .projection-btn:hover {
+            filter: brightness(1.08);
+        }
+
+        .projection-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .projection-hint {
+            margin: 0.9rem 0 0 0;
+        }
+
+        .projection-result {
+            margin-top: 1.25rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding-top: 1.1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .projection-result.is-visible {
+            display: flex;
+        }
+
+        .projection-line {
+            display: inline-flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+        }
+
+        .projection-muted {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+        }
+
+        .proj-tag {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.64rem;
+            letter-spacing: 0.14em;
+        }
+
+        .proj-tag.feasible {
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .proj-tag.not-feasible {
+            border: 1px solid var(--primary);
+            background: rgba(255, 90, 79, 0.12);
+            color: var(--primary);
+        }
+
+        .projection-retry {
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--primary);
+            color: var(--primary);
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.14em;
+        }
+
+        body.light-theme .projection-input {
+            background: rgba(19, 19, 19, 0.02);
+            border-color: rgba(19, 19, 19, 0.12);
+        }
+
+        body.light-theme .projection-result {
+            border-top-color: rgba(19, 19, 19, 0.1);
         }
 
         body.light-theme .insight-item,

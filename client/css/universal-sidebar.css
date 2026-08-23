@@ -164,6 +164,40 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     margin: 0;
 }
 
+/* Nav Section Labels (mono micro-labels with hairline dividers) */
+.sidebar-nav-section {
+    margin: 0.9rem 0 0.35rem;
+    padding: 0.75rem 1rem 0.25rem;
+    border-top: 1px solid var(--sidebar-border);
+}
+
+.sidebar-nav-list > .sidebar-nav-section:first-child {
+    border-top: none;
+    margin-top: 0.25rem;
+}
+
+.sidebar-nav-section-label {
+    display: block;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sidebar-text);
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.universal-sidebar.collapsed .sidebar-nav-section {
+    padding: 0.6rem 0.35rem 0.2rem;
+}
+
+.universal-sidebar.collapsed .sidebar-nav-section-label {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
 .sidebar-nav-item {
     margin: 0.25rem 0;
 }
@@ -225,7 +259,7 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
 
 /* Badge */
 .sidebar-badge {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(255, 90, 79, 0.14);
     color: var(--primary);
     padding: 2px 8px;
     border-radius: 10px;
@@ -277,13 +311,13 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     font-size: 1.25rem;
     cursor: pointer;
     border: 3px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 90, 79, 0.22);
     transition: all 0.3s ease;
 }
 
 .profile-icon:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 16px rgba(255, 90, 79, 0.3);
 }
 
 .profile-icon img {
@@ -414,7 +448,7 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
         cursor: pointer;
         color: white;
         font-size: 1.5rem;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 4px 12px rgba(255, 90, 79, 0.28);
         z-index: 999;
         transition: all 0.3s ease;
     }

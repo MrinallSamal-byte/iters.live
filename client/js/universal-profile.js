@@ -342,7 +342,7 @@
             formData.append('avatar', this.selectedFile);
 
             try {
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 const response = await fetch('/api/profile/photo', {
                     method: 'POST',
                     headers: {
@@ -585,7 +585,7 @@
             }
 
             try {
-                const token = localStorage.getItem('token');
+                const token = APP.Storage.get('accessToken');
                 // Update name and phone only for self via profile controller
                 const updateData = { name, phone };
 

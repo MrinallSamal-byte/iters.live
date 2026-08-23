@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     'use strict';
 
     // Auth check
@@ -9,6 +9,15 @@
 
     const user = APP.Storage.get('user') || {};
     let currentPayment = null;
+
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function notify(message, type) {
+        if (window.Toast?.show) window.Toast.show({ type, message });
+        else console.log(`[${type}] ${message}`);
+    }
 
     document.addEventListener('DOMContentLoaded', init);
 
@@ -119,9 +128,9 @@
         }
 
         // Student Information
-        setText('studentName', payment.studentName);
-        setText('studentRegNo', payment.studentRegNo);
-        setText('studentEmail', payment.studentEmail);
+        setText('studentName', payment.studentName || user.name || '--');
+        setText('studentRegNo', payment.studentRegNo || user.registration_number || '--');
+        setText('studentEmail', payment.studentEmail || user.email || '--');
 
         // Payment Details
         setText('semester', payment.semester);
@@ -150,14 +159,13 @@
         if (!currentPayment) return;
 
         try {
-            APP.Toast.info('Downloading receipt...');
+            notify('Downloading receipt...', 'info');
 
             // Get the access token
             const accessToken = APP.Storage.get('accessToken');
-            const apiUrl = APP.Config.getApiUrl();
 
             // Create a download link
-            const url = `${apiUrl}/payments/${currentPayment.id}/receipt`;
+            const url = `/api/payments/${encodeURIComponent(currentPayment.id)}/receipt`;
 
             // Download using fetch
             const response = await fetch(url, {
@@ -183,10 +191,10 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(downloadUrl);
 
-            APP.Toast.success('Receipt downloaded successfully');
+            notify('Receipt downloaded successfully', 'success');
         } catch (error) {
             console.error('Download receipt error:', error);
-            APP.Toast.error('Failed to download receipt');
+            notify('Failed to download receipt', 'error');
         }
     }
 
@@ -196,7 +204,7 @@
         // Create a printable version
         const printWindow = window.open('', '_blank');
         if (!printWindow) {
-            APP.Toast.error('Please allow popups to print receipt');
+            notify('Please allow popups to print receipt', 'error');
             return;
         }
 
@@ -215,7 +223,7 @@
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Payment Receipt - ${currentPayment.paymentId}</title>
+                <title>Payment Receipt - ${esc(currentPayment.paymentId)}</title>
                 <style>
                     body {
                         font-family: Arial, sans-serif;
@@ -298,11 +306,11 @@
                     <h3>Receipt Details</h3>
                     <div class="detail-row">
                         <label>Payment ID:</label>
-                        <span>${currentPayment.paymentId}</span>
+                        <span>${esc(currentPayment.paymentId)}</span>
                     </div>
                     <div class="detail-row">
                         <label>Transaction ID:</label>
-                        <span>${currentPayment.transactionId}</span>
+                        <span>${esc(currentPayment.transactionId)}</span>
                     </div>
                     <div class="detail-row">
                         <label>Date:</label>
@@ -318,15 +326,15 @@
                     <h3>Student Information</h3>
                     <div class="detail-row">
                         <label>Name:</label>
-                        <span>${currentPayment.studentName}</span>
+                        <span>${esc(currentPayment.studentName || user.name || '--')}</span>
                     </div>
                     <div class="detail-row">
                         <label>Registration Number:</label>
-                        <span>${currentPayment.studentRegNo}</span>
+                        <span>${esc(currentPayment.studentRegNo || user.registration_number || '--')}</span>
                     </div>
                     <div class="detail-row">
                         <label>Email:</label>
-                        <span>${currentPayment.studentEmail}</span>
+                        <span>${esc(currentPayment.studentEmail || user.email || '--')}</span>
                     </div>
                 </div>
 
@@ -334,29 +342,29 @@
                     <h3>Payment Details</h3>
                     <div class="detail-row">
                         <label>Semester:</label>
-                        <span>${currentPayment.semester}</span>
+                        <span>${esc(currentPayment.semester)}</span>
                     </div>
                     <div class="detail-row">
                         <label>Category:</label>
-                        <span>${currentPayment.category}</span>
+                        <span>${esc(currentPayment.category)}</span>
                     </div>
                     <div class="detail-row">
                         <label>Payment Method:</label>
-                        <span>${currentPayment.paymentMethod}</span>
+                        <span>${esc(currentPayment.paymentMethod)}</span>
                     </div>
                     <div class="detail-row">
                         <label>Description:</label>
-                        <span>${currentPayment.description || 'N/A'}</span>
+                        <span>${esc(currentPayment.description) || 'N/A'}</span>
                     </div>
                     <div class="detail-row">
                         <label>Status:</label>
-                        <span style="text-transform: uppercase;">${currentPayment.status}</span>
+                        <span style="text-transform: uppercase;">${esc(currentPayment.status)}</span>
                     </div>
                 </div>
 
                 <div class="amount-box">
                     <div class="label">Amount Paid</div>
-                    <div class="value">₹ ${currentPayment.amount.toFixed(2)}</div>
+                    <div class="value">₹ ${Number(currentPayment.amount || 0).toFixed(2)}</div>
                 </div>
 
                 <div class="footer">

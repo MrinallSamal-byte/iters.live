@@ -54,16 +54,34 @@
     renderPerformanceChart();
 
     // Load all data in parallel for faster loading
-    const [stats, _] = await Promise.all([
+    const [result] = await Promise.all([
       getTeacherStats(),
       loadPendingSubmissions()
     ]);
-    
+
     // Update stats as soon as data is available
-    setText('totalStudents', stats.totalStudents || 120);
-    setText('avgAttendance', (stats.avgAttendance || 87) + '%');
-    setText('pendingSubmissions', stats.pendingSubmissions || 15);
-    setText('classAverage', (stats.classAverage || 78) + '%');
+    const stats = result.stats || {};
+    setText('totalStudents', stats.totalStudents ?? '--');
+    setText('avgAttendance', stats.avgAttendance != null ? stats.avgAttendance + '%' : '--');
+    setText('pendingSubmissions', stats.pendingSubmissions ?? '--');
+    setText('classAverage', stats.classAverage != null ? stats.classAverage + '%' : '--');
+
+    if (!result.ok) {
+      showConnectHint('totalStudents', '/dashboard/teacher-students.html', 'Connect: Students \u2192');
+      showConnectHint('avgAttendance', '/dashboard/teacher-attendance.html', 'Connect: Attendance \u2192');
+    }
+  }
+
+  function showConnectHint(statId, href, label){
+    const el = document.getElementById(statId);
+    if (!el || !el.parentElement) return;
+    if (el.parentElement.querySelector('.stat-connect-hint')) return;
+    const link = document.createElement('a');
+    link.className = 'stat-connect-hint';
+    link.href = href;
+    link.textContent = label;
+    link.style.cssText = 'display:inline-block;margin-top:0.35rem;font-size:0.72rem;color:var(--text-secondary);text-decoration:underline dotted;';
+    el.parentElement.appendChild(link);
   }
 
   function setText(id, txt){ 
@@ -74,27 +92,15 @@
   async function getTeacherStats(){
     // Check cache first
     const cached = dataCache.get('stats');
-    if (cached) return cached;
-    
-    try { 
+    if (cached) return { stats: cached, ok: true };
+
+    try {
       const r = await APP.API.get('/teacher/stats');
       const stats = r.data || {};
       dataCache.set('stats', stats);
-      return stats;
-    } catch(_) { 
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getTeacherStats();
-        const stats = r.data || {};
-        dataCache.set('stats', stats);
-        return stats;
-      }
-      return {
-        totalStudents: 120,
-        avgAttendance: 87,
-        pendingSubmissions: 15,
-        classAverage: 78,
-        totalClasses: 5
-      };
+      return { stats, ok: true };
+    } catch(_) {
+      return { stats: {}, ok: false };
     }
   }
 
@@ -190,29 +196,9 @@
     if (!tbody) return;
 
     try {
-      let response;
-      try {
-        response = await APP.API.get('/teacher/submissions?status=pending');
-      } catch(error) {
-        if (typeof DummyData !== 'undefined') {
-          response = DummyData.getTeacherSubmissions('pending');
-        } else {
-          // Hardcoded fallback
-          response = {
-            success: true,
-            data: [
-              { id: 1, assignment_title: 'Data Structures Assignment 3', student_name: 'Aarav Sharma', student_reg: 'STU20250001', submitted_at: new Date().toISOString(), file_name: 'assignment.pdf', status: 'pending' },
-              { id: 2, assignment_title: 'Algorithms Lab Report', student_name: 'Diya Patel', student_reg: 'STU20250002', submitted_at: new Date().toISOString(), file_name: 'report.pdf', status: 'pending' },
-              { id: 3, assignment_title: 'DBMS Project', student_name: 'Rohan Kumar', student_reg: 'STU20250003', submitted_at: new Date().toISOString(), file_name: 'project.zip', status: 'pending' },
-              { id: 4, assignment_title: 'OS Assignment 2', student_name: 'Ananya Singh', student_reg: 'STU20250004', submitted_at: new Date().toISOString(), file_name: 'os_assignment.pdf', status: 'pending' },
-              { id: 5, assignment_title: 'Networks Lab Work', student_name: 'Vikram Reddy', student_reg: 'STU20250005', submitted_at: new Date().toISOString(), file_name: 'networks.pdf', status: 'pending' }
-            ]
-          };
-        }
-      }
-
+      const response = await APP.API.get('/teacher/submissions?status=pending');
       const submissions = response.data || [];
-      
+
       if (countBadge) countBadge.textContent = submissions.length;
 
       if (submissions.length === 0) {
@@ -223,18 +209,18 @@
       tbody.innerHTML = submissions.map(s => {
         const date = new Date(s.submitted_at);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        
+
         return `
           <tr>
-            <td><strong>${s.assignment_title}</strong></td>
+            <td><strong>${escapeHtml(s.assignment_title)}</strong></td>
             <td>
-              <div>${s.student_name}</div>
-              <div style="font-size: 0.85rem; color: var(--text-secondary);">${s.student_reg}</div>
+              <div>${escapeHtml(s.student_name)}</div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(s.student_reg)}</div>
             </td>
             <td>Data Structures</td>
             <td>${dateStr}</td>
             <td>
-              <button class="btn-small btn-primary" onclick="gradeSubmission(${s.id})">
+              <button class="btn-small btn-primary" disabled title="Grading is not available yet">
                 Grade
               </button>
             </td>
@@ -244,16 +230,21 @@
 
     } catch(err) {
       console.error('Error loading submissions:', err);
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--error);">Error loading submissions</td></tr>';
+      if (countBadge) countBadge.textContent = '--';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Submissions unavailable - no teacher submissions endpoint exists.</td></tr>';
     }
   }
 
+  function escapeHtml(value){
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[ch]
+    ));
+  }
+
   // Make function global for onclick handlers
-  window.gradeSubmission = function(id) {
-    if (typeof Toast !== 'undefined') {
-      Toast.info('Grade submission feature coming soon', 'Info');
-    } else {
-      alert('Grade submission feature coming soon');
+  window.gradeSubmission = function() {
+    if (window.Toast && typeof window.Toast.show === 'function') {
+      window.Toast.show({ type: 'warning', title: 'Coming soon', message: 'Grading from the dashboard is not available yet.' });
     }
   };
 

@@ -23,7 +23,7 @@
         min-width: 44px;
         padding: 12px 20px;
         position: relative;
-        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+        -webkit-tap-highlight-color: rgba(255,255,255,0.08);
         cursor: pointer;
     }
 
@@ -96,7 +96,7 @@
         background: transparent;
         border: none;
         cursor: pointer;
-        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.3);
+        -webkit-tap-highlight-color: rgba(255,255,255,0.08);
     }
 
     .mobile-menu-btn span,
@@ -201,7 +201,7 @@ body {
 @media (max-width: 900px) {
     a {
         touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+        -webkit-tap-highlight-color: rgba(255,255,255,0.08);
     }
 
     /* Nav links in mobile menu */
@@ -216,7 +216,7 @@ body {
     }
 
     .nav-links a:active {
-        background: rgba(99, 102, 241, 0.15);
+        background: rgba(255,90,79,0.15);
         transform: scale(0.98);
     }
 }
@@ -354,7 +354,7 @@ body {
         padding: 14px 24px;
         gap: 12px;
         touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+        -webkit-tap-highlight-color: rgba(255,255,255,0.08);
     }
 
     .back-to-top-btn {
@@ -395,7 +395,7 @@ body.debug-mode .btn {
         .btn,
         a {
             cursor: pointer;
-            -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+            -webkit-tap-highlight-color: rgba(255,255,255,0.08);
             -webkit-touch-callout: none;
         }
 
@@ -422,7 +422,7 @@ body.debug-mode .btn {
         button,
         .btn,
         a {
-            -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+            -webkit-tap-highlight-color: rgba(255,255,255,0.08);
         }
     }
 }

@@ -151,7 +151,16 @@
                             <span class="filter-icon">📖</span>
                             Subject
                         </label>
-                        <input type="text" id="subject" name="subject" class="filter-input" placeholder="e.g., Data Structures" required>
+                        <input type="text" id="subject" name="subject" class="filter-input" list="subjectOptions" placeholder="e.g., Data Structures" required>
+                        <datalist id="subjectOptions"></datalist>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="attDate" class="filter-label">
+                            <span class="filter-icon">📅</span>
+                            Date
+                        </label>
+                        <input type="date" id="attDate" name="attendance_date" class="filter-input" required>
                     </div>
                 </div>
                 
@@ -189,7 +198,9 @@
                 </div>
             </div>
             
-            <div class="table-responsive">
+                <div id="demoNotice" class="demo-warning" style="display:none;"></div>
+
+                <div class="table-responsive">
                 <table class="data-table modern-table">
                     <thead>
                         <tr>

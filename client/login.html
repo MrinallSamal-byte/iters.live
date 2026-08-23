@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="stylesheet" href="/css/home-minimal.css">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/assets/soa-logo.png">
+    <link rel="icon" href="/assets/icon.png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
 </head>
 
 <body class="nothing-home public-auth-page login-page">
@@ -62,16 +63,23 @@
 
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required
-                            autocomplete="current-password">
+                        <div class="password-field">
+                            <input type="password" id="password" name="password" placeholder="Enter your password"
+                                required autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" data-password-toggle="password"
+                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
+                        </div>
                     </div>
 
                     <div class="form-options">
                         <label class="checkbox-label">
                             <input type="checkbox" name="remember"> Remember me
                         </label>
-                        <a href="#forgot-password" class="forgot-link">Forgot Password?</a>
+                        <button type="button" id="forgotPasswordBtn" class="forgot-link forgot-link-btn">Forgot
+                            Password?</button>
                     </div>
+                    <p class="forgot-hint" id="forgotPasswordHint" hidden>Password resets are handled by the college
+                        admin office.</p>
 
                     <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
                         Login
@@ -88,15 +96,20 @@
                         Sign in with Google
                     </button>
 
-                    <div class="error-message" id="errorMessage" style="display: none;"></div>
+                    <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
+                    <div class="status-message" id="statusMessage" role="status" aria-live="polite"
+                        style="display: none;"></div>
                 </form>
 
                 <div class="demo-hint-compact">
-                    <p>🎭 <strong>Quick Demo Access:</strong></p>
+                    <p><strong>Quick Demo Access</strong></p>
                     <div class="demo-chips">
-                        <div class="demo-chip" onclick="fillDemo('STU20250001', 'Student@123')">Student</div>
-                        <div class="demo-chip" onclick="fillDemo('TCH2025001', 'Teacher@123')">Teacher</div>
-                        <div class="demo-chip" onclick="fillDemo('ADM2025001', 'Admin@123456')">Admin</div>
+                        <button type="button" class="demo-chip" data-demo-user="STU20250001"
+                            data-demo-pass="Student@123">[ DEMO · STUDENT ]</button>
+                        <button type="button" class="demo-chip" data-demo-user="TCH2025001"
+                            data-demo-pass="Teacher@123">[ DEMO · TEACHER ]</button>
+                        <button type="button" class="demo-chip" data-demo-user="ADM2025001"
+                            data-demo-pass="Admin@123456">[ DEMO · ADMIN ]</button>
                     </div>
                 </div>
 
@@ -112,7 +125,6 @@
         <span class="theme-icon">🌙</span>
     </button>
 
-    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="/js/mobile-fixes.js"></script>
     <script src="/js/prevent-empty-hash.js"></script>
     <script src="/js/scroll-fix.js"></script>
@@ -151,8 +163,6 @@
                     const result = await signInWithPopup(auth, provider);
                     const user = result.user;
                     const idToken = await user.getIdToken();
-
-                    console.log('Google Sign-In successful, verifying with backend...');
 
                     // Send to backend
                     const response = await APP.API.post('/auth/google-login', { idToken });
@@ -222,6 +232,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
             const errorMessage = document.getElementById('errorMessage');
+            const statusMessage = document.getElementById('statusMessage');
             const loginBtn = document.getElementById('loginBtn');
 
             // Check for logout reason and display appropriate message
@@ -229,18 +240,17 @@
             if (logoutReason) {
                 sessionStorage.removeItem('logoutReason');
                 const messages = {
-                    'session_timeout': '⏰ Your session has expired due to inactivity. Please log in again.',
-                    'session_invalid': '⚠️ Your session is no longer valid. Please log in again.',
-                    'not_authenticated': '🔒 Please log in to access the dashboard.',
-                    'logged_out_other_tab': '📱 You were logged out from another tab.',
-                    'user_initiated': '👋 You have been logged out successfully.'
+                    'session_timeout': 'Your session has expired due to inactivity. Please log in again.',
+                    'session_invalid': 'Your session is no longer valid. Please log in again.',
+                    'not_authenticated': 'Please log in to access the dashboard.',
+                    'logged_out_other_tab': 'You were logged out from another tab.',
+                    'user_initiated': 'You have been logged out successfully.'
                 };
                 const message = messages[logoutReason] || 'Please log in to continue.';
-                showError(message);
                 if (logoutReason === 'user_initiated') {
-                    errorMessage.style.color = '#10b981'; // Green for voluntary logout
+                    showStatus(message, 'success');
                 } else {
-                    errorMessage.style.color = '#f59e0b'; // Amber for session issues
+                    showStatus(message);
                 }
             }
 
@@ -251,16 +261,27 @@
                 return;
             }
 
-            console.log('Login form initialized. APP object loaded:', !!APP);
+            initPasswordToggles();
+
+            const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+            const forgotPasswordHint = document.getElementById('forgotPasswordHint');
+            if (forgotPasswordBtn && forgotPasswordHint) {
+                forgotPasswordBtn.addEventListener('click', () => {
+                    forgotPasswordHint.hidden = !forgotPasswordHint.hidden;
+                });
+            }
+
+            document.querySelectorAll('.demo-chip[data-demo-user]').forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    fillDemo(chip.dataset.demoUser, chip.dataset.demoPass);
+                });
+            });
 
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                console.log('Login form submitted');
 
                 const registration_number = document.getElementById('registration_number').value;
                 const password = document.getElementById('password').value;
-
-                console.log('Registration:', registration_number);
 
                 // Validate
                 if (!registration_number || !password) {
@@ -273,20 +294,16 @@
                 loginBtn.textContent = 'Logging in...';
                 loginBtn.disabled = true;
                 errorMessage.style.display = 'none';
+                statusMessage.style.display = 'none';
 
                 try {
-                    console.log('Sending login request...');
                     const response = await APP.API.post('/auth/login', {
                         registration_number,
                         password,
                         skipPortalSync: true  // Skip auto-sync, redirect to portal page instead
                     });
 
-                    console.log('Login response:', response);
-
                     if (response.success) {
-                        console.log('Login successful, storing tokens...');
-
                         const isLocalDemoMode = response.data.authMode === 'local-demo' || response.data.demoMode === true;
                         if (isLocalDemoMode) {
                             try {
@@ -307,7 +324,6 @@
                         // If backend returns a custom token (accessToken), sign in to Firebase Client SDK
                         if (!isLocalDemoMode && response.data.accessToken && window.firebaseAuth && window.signInWithCustomToken) {
                             try {
-                                console.log('Signing in to Firebase with custom token...');
                                 const userCredential = await window.signInWithCustomToken(window.firebaseAuth, response.data.accessToken);
                                 const idToken = await userCredential.user.getIdToken();
                                 const appAccessToken = response.data.appAccessToken || response.data.accessToken || idToken;
@@ -345,44 +361,31 @@
                         APP.Storage.set('refreshToken', response.data.refreshToken);
                         APP.Storage.set('user', response.data.user);
 
-                        // Verify storage
-                        console.log('Verifying stored data...');
-                        console.log('Access token stored:', !!APP.Storage.get('accessToken'));
-                        console.log('User stored:', APP.Storage.get('user'));
-                        console.log('Is authenticated:', APP.isAuthenticated());
-                        console.log('User role:', APP.getUserRole());
-
                         let redirectUrl;
                         const userRole = response.data.user.role;
-                        
+
                         // All users go directly to their respective dashboards
                         if (userRole === 'student') {
-                            // Students go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting to dashboard...');
-                            errorMessage.style.color = '#10b981';
-                            
+                            showStatus('Login successful! Redirecting to dashboard...', 'success');
+
                             // Redirect to student dashboard
                             redirectUrl = '/dashboard/student.html';
                         } else if (userRole === 'teacher') {
-                            // Teachers go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting...');
-                            errorMessage.style.color = '#10b981';
-                            
+                            showStatus('Login successful! Redirecting...', 'success');
+
                             redirectUrl = '/dashboard/teacher.html';
                         } else if (userRole === 'admin') {
-                            // Admins go directly to dashboard
                             if (typeof APP.showToast === 'function') {
                                 APP.showToast('Login successful!', 'success');
                             }
-                            showError('✅ Login successful! Redirecting...');
-                            errorMessage.style.color = '#10b981';
-                            
+                            showStatus('Login successful! Redirecting...', 'success');
+
                             redirectUrl = '/dashboard/admin.html';
                         } else {
                             // Unknown role - clear storage and show error
@@ -399,18 +402,16 @@
                             return;
                         }
 
-                        setTimeout(() => {
-                            // Create page access token for the next page
-                            if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
-                                window.PageAccessToken.createPageAccessToken(redirectUrl);
-                            }
-                            // Use encoded URL for navigation
-                            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                                window.LinkEncoding.navigateTo(redirectUrl);
-                            } else {
-                                window.location.href = redirectUrl;
-                            }
-                        }, 1500);
+                        // Create page access token for the next page
+                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                            window.PageAccessToken.createPageAccessToken(redirectUrl);
+                        }
+                        // Use encoded URL for navigation
+                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                            window.LinkEncoding.navigateTo(redirectUrl);
+                        } else {
+                            window.location.href = redirectUrl;
+                        }
                     } else {
                         showError(response.message || 'Login failed');
                         loginBtn.textContent = originalText;
@@ -476,10 +477,47 @@
         });
 
         function showError(message) {
+            const statusEl = document.getElementById('statusMessage');
+            if (statusEl) {
+                statusEl.textContent = '';
+                statusEl.style.display = 'none';
+                statusEl.classList.remove('status-success');
+            }
             const errorEl = document.getElementById('errorMessage');
             if (!errorEl) return;
             errorEl.textContent = message;
             errorEl.style.display = 'block';
+        }
+
+        function showStatus(message, tone) {
+            const errorEl = document.getElementById('errorMessage');
+            if (errorEl) {
+                errorEl.textContent = '';
+                errorEl.style.display = 'none';
+            }
+            const statusEl = document.getElementById('statusMessage');
+            if (!statusEl) return;
+            statusEl.classList.remove('status-success');
+            if (tone === 'success') {
+                statusEl.classList.add('status-success');
+            }
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+        }
+
+        function initPasswordToggles() {
+            document.querySelectorAll('[data-password-toggle]').forEach((btn) => {
+                if (btn.dataset.toggleBound === 'true') return;
+                btn.dataset.toggleBound = 'true';
+                const input = document.getElementById(btn.getAttribute('data-password-toggle'));
+                if (!input) return;
+                btn.addEventListener('click', () => {
+                    const willShow = input.type === 'password';
+                    input.type = willShow ? 'text' : 'password';
+                    btn.textContent = willShow ? '[ HIDE ]' : '[ SHOW ]';
+                    btn.setAttribute('aria-pressed', String(willShow));
+                });
+            });
         }
 
         /**
@@ -492,7 +530,6 @@
             const currentAttempts = parseInt(localStorage.getItem(RETRY_KEY) || '0', 10);
             const newAttempts = currentAttempts + 1;
             localStorage.setItem(RETRY_KEY, newAttempts.toString());
-            console.log(`Portal sync failed (${status}). Attempt ${newAttempts} recorded.`);
             return newAttempts;
         }
 
@@ -507,12 +544,7 @@
 
         // Register service worker (optional)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('✓ Service worker registered'))
-                .catch(err => {
-                    // Silent fail - service worker is optional
-                    console.log('Service worker not available (optional feature)');
-                });
+            navigator.serviceWorker.register('/service-worker.js').catch(() => { });
         }
     </script>
     <script src="/js/page-access-token.js"></script>

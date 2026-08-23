@@ -2,16 +2,8 @@
 console.log('Admin Analytics Page Loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
-    seedPrototypeIfNeeded();
     loadAnalytics();
 });
-
-function seedPrototypeIfNeeded() {
-    // ensure DummyData/prototype available
-    if (!localStorage.getItem('accessToken')) {
-        try { localStorage.setItem('accessToken', JSON.stringify('demo-token')); } catch(e) {}
-    }
-}
 
 async function loadAnalytics() {
     let res;

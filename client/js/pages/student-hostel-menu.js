@@ -5,6 +5,10 @@
     let selectedBlock = 'A';
     let selectedDate = new Date();
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function init() {
         setupEventListeners();
         setTodayDate();
@@ -63,7 +67,7 @@
 
     async function loadMenu() {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const dateStr = selectedDate.toISOString().split('T')[0];
             
             const response = await fetch(`/api/hostel/menu?date=${dateStr}`, {
@@ -78,6 +82,10 @@
 
             const data = await response.json();
             displayMenu(data.data);
+            const badge = document.getElementById('menuDateBadge');
+            if (badge) {
+                badge.textContent = selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            }
         } catch (error) {
             console.error('Error loading menu:', error);
             showNoMenuMessage();
@@ -124,7 +132,7 @@
                         <div class="meal-type">${mealTypes[mealType]}</div>
                         <div class="meal-items">
                             ${groupedMenu[mealType].map(item => 
-                                `<div class="meal-item">${item.menu_items || item.description}</div>`
+                                `<div class="meal-item">${esc(item.menu_items || item.description)}</div>`
                             ).join('')}
                         </div>
                     </div>

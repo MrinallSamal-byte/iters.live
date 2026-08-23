@@ -25,7 +25,10 @@
                     sessionStorage.setItem('loginMessage', 'Please log in to access payment details.');
                 } catch (e) {}
                 window.location.replace('/login.html');
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
             }
         })();
     </script>
@@ -363,8 +366,8 @@
         }
 
         .status-refunded {
-            background: rgba(168, 85, 247, 0.1);
-            color: #a855f7;
+            background: rgba(255, 90, 79, 0.1);
+            color: var(--primary, #ff5a4f);
         }
 
         .actions-container {

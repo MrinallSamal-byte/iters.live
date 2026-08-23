@@ -959,7 +959,7 @@ class ProfileControl {
      * Get auth token from storage
      */
     getAuthToken() {
-        return localStorage.getItem('token') || sessionStorage.getItem('token');
+        return APP.Storage.get('accessToken');
     }
     
     /**

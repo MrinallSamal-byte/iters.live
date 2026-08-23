@@ -184,8 +184,8 @@ body {
     display: inline-flex !important;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
     padding: 0.75rem 1.5rem;
     border-radius: 50px;
     margin-bottom: 1rem;
@@ -694,7 +694,7 @@ img {
    =================================== */
 .about-creator-section {
     padding: 4rem 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: rgba(255,255,255,0.04);
     position: relative;
 }
 
@@ -769,7 +769,7 @@ img {
     border-color: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 24px rgba(255,90,79,0.3);
 }
 
 .creator-link-icon {
@@ -781,7 +781,7 @@ img {
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 2rem;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: var(--primary,#ff5a4f);
     color: white;
     text-decoration: none;
     border-radius: var(--radius-full);
@@ -792,7 +792,7 @@ img {
 
 .back-to-top-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 24px rgba(255,90,79,0.35);
 }
 
 @media (max-width: 768px) {

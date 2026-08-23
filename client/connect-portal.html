@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#0a0a0a">
     <title>Connect SOA Portal - ITERasn hub</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
@@ -15,6 +15,36 @@
     <link rel="stylesheet" href="/css/button-fixes.css">
     <link rel="manifest" href="/manifest.json">
     <style>
+        :root {
+            --status-info: #a5bfe4;
+            --status-info-bg: rgba(120, 155, 210, 0.10);
+            --status-info-border: rgba(120, 155, 210, 0.28);
+            --status-success: #9fd2b3;
+            --status-success-bg: rgba(85, 165, 120, 0.10);
+            --status-success-border: rgba(85, 165, 120, 0.28);
+            --status-danger: #e2a49e;
+            --status-danger-bg: rgba(215, 110, 100, 0.10);
+            --status-danger-border: rgba(215, 110, 100, 0.28);
+            --status-warning: #ddc191;
+            --status-warning-bg: rgba(205, 160, 80, 0.10);
+            --status-warning-border: rgba(205, 160, 80, 0.28);
+        }
+
+        body.light-theme {
+            --status-info: #38598c;
+            --status-info-bg: rgba(70, 110, 170, 0.08);
+            --status-info-border: rgba(70, 110, 170, 0.30);
+            --status-success: #2f6f4d;
+            --status-success-bg: rgba(55, 135, 90, 0.08);
+            --status-success-border: rgba(55, 135, 90, 0.30);
+            --status-danger: #96352d;
+            --status-danger-bg: rgba(185, 75, 65, 0.08);
+            --status-danger-border: rgba(185, 75, 65, 0.30);
+            --status-warning: #82601f;
+            --status-warning-bg: rgba(170, 125, 45, 0.10);
+            --status-warning-border: rgba(170, 125, 45, 0.32);
+        }
+
         .portal-page {
             min-height: 100vh;
             padding: 32px 20px 48px;
@@ -30,11 +60,10 @@
         .support-card,
         .status-card,
         .demo-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(18px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
-            box-shadow: 0 18px 45px var(--glass-shadow);
+            background: var(--bg-secondary, #141414);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            border-radius: var(--radius-lg);
+            box-shadow: none;
         }
 
         .hero-card {
@@ -53,12 +82,16 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 0.9rem;
-            border-radius: 999px;
-            background: rgba(99, 102, 241, 0.14);
-            color: #c7d2fe;
-            font-size: 0.85rem;
-            font-weight: 600;
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(255, 90, 79, 0.18);
+            border-radius: 4px;
+            background: rgba(255, 90, 79, 0.08);
+            color: var(--primary, #ff5a4f);
+            font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
             margin-bottom: 1rem;
         }
 
@@ -87,8 +120,8 @@
         .hero-note {
             padding: 1.2rem 1.3rem;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(15, 23, 42, 0.15));
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
         }
 
         .hero-note h2 {
@@ -144,18 +177,17 @@
         .step-card {
             padding: 1.15rem;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(10, 16, 30, 0.26);
-            transition: border-color 0.2s ease, transform 0.2s ease;
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
+            transition: border-color 0.2s ease;
         }
 
         .step-card.active {
-            border-color: rgba(99, 102, 241, 0.45);
-            transform: translateY(-1px);
+            border-color: rgba(255, 90, 79, 0.4);
         }
 
         .step-card.complete {
-            border-color: rgba(34, 197, 94, 0.45);
+            border-color: var(--status-success-border);
         }
 
         .step-header {
@@ -169,17 +201,19 @@
             width: 34px;
             height: 34px;
             flex-shrink: 0;
-            border-radius: 50%;
+            border-radius: 6px;
             display: grid;
             place-items: center;
-            background: rgba(99, 102, 241, 0.16);
-            color: #c7d2fe;
-            font-weight: 700;
+            background: rgba(255, 90, 79, 0.1);
+            border: 1px solid rgba(255, 90, 79, 0.2);
+            color: var(--primary, #ff5a4f);
+            font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-weight: 500;
         }
 
         .step-card.complete .step-number {
-            background: rgba(34, 197, 94, 0.16);
-            color: #bbf7d0;
+            background: var(--status-success-bg);
+            color: var(--status-success);
         }
 
         .step-header h3 {
@@ -208,7 +242,7 @@
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            transition: opacity 0.2s ease, border-color 0.2s ease, background 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -218,16 +252,21 @@
 
         .btn-primary {
             border: none;
-            color: white;
+            color: #ffffff;
             padding: 0.95rem 1.1rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary, #ff5a4f);
             min-width: 210px;
         }
 
         .btn-primary:hover:not(:disabled),
         .btn-secondary:hover:not(:disabled),
         .btn-ghost:hover:not(:disabled) {
-            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark, #e2493f);
+            opacity: 1;
         }
 
         .btn-primary:disabled,
@@ -235,19 +274,18 @@
         .btn-ghost:disabled {
             opacity: 0.65;
             cursor: not-allowed;
-            transform: none;
         }
 
         .btn-secondary {
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            color: var(--text-primary, #f6f3ee);
             padding: 0.9rem 1rem;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
         }
 
         .btn-ghost {
             border: none;
-            color: #c7d2fe;
+            color: var(--primary, #ff5a4f);
             padding: 0.25rem 0;
             background: transparent;
             font-size: 0.88rem;
@@ -268,27 +306,38 @@
         }
 
         .status-banner.info {
-            background: rgba(59, 130, 246, 0.12);
-            border: 1px solid rgba(59, 130, 246, 0.35);
-            color: #bfdbfe;
+            background: var(--status-info-bg);
+            border: 1px solid var(--status-info-border);
+            color: var(--status-info);
         }
 
         .status-banner.success {
-            background: rgba(34, 197, 94, 0.12);
-            border: 1px solid rgba(34, 197, 94, 0.35);
-            color: #bbf7d0;
+            background: var(--status-success-bg);
+            border: 1px solid var(--status-success-border);
+            color: var(--status-success);
         }
 
         .status-banner.error {
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.35);
-            color: #fecaca;
+            background: var(--status-danger-bg);
+            border: 1px solid var(--status-danger-border);
+            color: var(--status-danger);
         }
 
         .status-banner.warning {
-            background: rgba(245, 158, 11, 0.12);
-            border: 1px solid rgba(245, 158, 11, 0.35);
-            color: #fde68a;
+            background: var(--status-warning-bg);
+            border: 1px solid var(--status-warning-border);
+            color: var(--status-warning);
+        }
+
+        #statusBanner {
+            --stage-active: var(--primary, #ff5a4f);
+            --stage-done: rgba(255, 255, 255, 0.45);
+            --stage-sep: rgba(255, 255, 255, 0.35);
+        }
+
+        body.light-theme #statusBanner {
+            --stage-done: rgba(10, 10, 10, 0.5);
+            --stage-sep: rgba(10, 10, 10, 0.35);
         }
 
         .status-banner strong {
@@ -301,8 +350,8 @@
             margin-top: 1rem;
             padding: 1rem;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            background: rgba(99, 102, 241, 0.06);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
         }
 
         .captcha-shell.visible {
@@ -346,24 +395,37 @@
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.88rem;
+            color: var(--text-secondary, #c5c0b7);
+            font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
 
         .form-group input {
             width: 100%;
             padding: 0.9rem 1rem;
             border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-primary);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
+            color: var(--text-primary, #f6f3ee);
             font-size: 0.95rem;
+        }
+
+        body.light-theme .form-group input {
+            border-color: rgba(19, 19, 19, 0.12);
+            background: rgba(19, 19, 19, 0.03);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: rgba(99, 102, 241, 0.55);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+            border-color: var(--primary, #ff5a4f);
+            box-shadow: 0 0 0 3px rgba(255, 90, 79, 0.12);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted, #8b857e);
         }
 
         .form-meta {
@@ -397,25 +459,31 @@
             align-items: center;
             gap: 0.45rem;
             padding: 0.42rem 0.72rem;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            letter-spacing: 0.01em;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
         }
 
         .connection-pill.connected {
-            background: rgba(34, 197, 94, 0.14);
-            color: #bbf7d0;
+            background: var(--status-success-bg);
+            border-color: var(--status-success-border);
+            color: var(--status-success);
         }
 
         .connection-pill.cached {
-            background: rgba(245, 158, 11, 0.14);
-            color: #fde68a;
+            background: var(--status-warning-bg);
+            border-color: var(--status-warning-border);
+            color: var(--status-warning);
         }
 
         .connection-pill.disconnected {
-            background: rgba(148, 163, 184, 0.14);
-            color: #cbd5f5;
+            background: var(--glass-bg, rgba(255, 255, 255, 0.04));
+            border-color: var(--glass-border, rgba(255, 255, 255, 0.08));
+            color: var(--text-secondary, #c5c0b7);
         }
 
         .status-list,
@@ -429,8 +497,8 @@
         .support-item {
             padding: 0.95rem 1rem;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+            background: var(--glass-bg, rgba(255, 255, 255, 0.03));
         }
 
         .status-item h4,
@@ -495,8 +563,8 @@
         .spinner {
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
+            border: 2px solid rgba(128, 128, 128, 0.35);
+            border-top-color: currentColor;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -504,6 +572,19 @@
         @keyframes spin {
             to {
                 transform: rotate(360deg);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .btn-primary,
+            .btn-secondary,
+            .btn-ghost,
+            .step-card {
+                transition: none;
+            }
+
+            .spinner {
+                animation-duration: 1.6s;
             }
         }
 
@@ -632,7 +713,11 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="portalPassword">SOA portal password</label>
-                                        <input type="password" id="portalPassword" name="portalPassword" placeholder="Enter your SOA portal password" required>
+                                        <div class="password-field">
+                                            <input type="password" id="portalPassword" name="portalPassword" placeholder="Enter your SOA portal password" required>
+                                            <button type="button" class="password-toggle-btn" data-password-toggle="portalPassword"
+                                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-row">

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignments - ITERasn hub</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            // Check if user is authenticated before showing any content
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            // If not authenticated, redirect immediately
+            if (!checkAuth()) {
+                // Store intended destination
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access the Student Assignments.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                // Stop script execution and prevent any content from loading
+                document.documentElement.innerHTML = '';
+                var redirectFallbackNotice = document.createElement('p');
+                redirectFallbackNotice.textContent = 'Redirecting to login...';
+                document.documentElement.appendChild(redirectFallbackNotice); return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card scroll-reveal">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">📝</span>
+                        Assignments
+                    </h1>
+                    <p class="page-subtitle">Everything shared for your class, plus what is due next</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Deadlines -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">⏳</span>
+                    Upcoming Deadlines
+                </h3>
+                <span class="mono-eyebrow">NEXT 6 ITEMS</span>
+            </div>
+            <div class="deadlines-list" id="deadlinesList">
+                <div class="loading-text">Loading deadlines...</div>
+            </div>
+        </section>
+
+        <!-- My Assignments -->
+        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <div class="section-header-formal">
+                <h3 class="section-title-formal">
+                    <span class="title-icon">📚</span>
+                    My Assignments
+                </h3>
+                <span class="section-badge" id="assignmentCountBadge">Loading...</span>
+            </div>
+            <div class="assignments-grid" id="assignmentsList">
+                <div class="loading-text">Loading assignments...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
+    <script src="/js/pages/student-assignments.js"></script>
+    <script src="/js/chatbot.js"></script>
+
+    <style>
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-xl);
+        }
+
+        .hero-content-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .title-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.2rem;
+            height: 3.2rem;
+            border-radius: 1.15rem;
+            background: rgba(255, 90, 79, 0.1);
+            border: 1px solid rgba(255, 90, 79, 0.18);
+            font-size: 1.45rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .mono-eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .deadlines-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .deadline-item {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+            padding: 0.9rem 1.1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: 3px solid transparent;
+            border-radius: var(--radius-lg, 14px);
+        }
+
+        .deadline-item.is-urgent {
+            border-left-color: var(--primary);
+        }
+
+        .deadline-date {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 3.4rem;
+            padding: 0.45rem 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .deadline-month {
+            font-size: 0.6rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .deadline-day {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .deadline-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .deadline-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 0.98rem;
+            overflow-wrap: anywhere;
+        }
+
+        .deadline-type {
+            align-self: flex-start;
+            padding: 0.18rem 0.55rem;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.58rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .deadline-due {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .empty-deadlines,
+        .empty-assignments {
+            padding: 2rem;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .state-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 2rem;
+        }
+
+        .state-text {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .reconnect-cta {
+            display: inline-block;
+            padding: 0.5rem 0.9rem;
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-md, 8px);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+            color: var(--primary);
+            text-decoration: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .reconnect-cta:hover {
+            background: rgba(255, 90, 79, 0.08);
+        }
+
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .assignment-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg, 14px);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 90, 79, 0.25);
+        }
+
+        .assignment-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .assignment-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.02rem;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        .status-pill {
+            flex-shrink: 0;
+            padding: 0.22rem 0.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.58rem;
+            letter-spacing: 0.14em;
+            color: var(--text-secondary);
+        }
+
+        .status-pill.submitted {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-pill.graded {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .assignment-meta {
+            display: flex;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.64rem;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .assignment-desc {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        body.light-theme .deadline-item,
+        body.light-theme .assignment-card {
+            background: rgba(19, 19, 19, 0.02);
+            border-color: rgba(19, 19, 19, 0.08);
+        }
+
+        body.light-theme .deadline-date,
+        body.light-theme .deadline-type,
+        body.light-theme .status-pill {
+            border-color: rgba(19, 19, 19, 0.12);
+        }
+
+        @media (max-width: 640px) {
+            .page-hero {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .deadline-due {
+                display: none;
+            }
+        }
+    </style>
+</body>
+</html>

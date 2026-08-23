@@ -7,6 +7,26 @@
     let registeredEvents = new Set();
     let currentFilter = 'all';
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    const CATEGORY_ICONS = { competition: '🏆', cultural: '🎭', workshop: '🛠️', seminar: '🎤', sports: '🏏', technical: '⚡', general: '🎪' };
+
+    function normalizeEvent(ev) {
+        if (ev.date && ev.venue !== undefined) return ev;
+        return {
+            ...ev,
+            date: ev.event_date || ev.date || null,
+            time: ev.event_time || ev.time || '',
+            venue: ev.location || ev.venue || 'TBA',
+            participants: ev.participants ?? ev.registration_count ?? 0,
+            max_participants: ev.max_participants ?? null,
+            organizer: ev.organizer || 'TBA',
+            registration_open: ev.registration_open ?? true
+        };
+    }
+
     // Sample events data
     const sampleEvents = [
         {
@@ -132,7 +152,7 @@
 
     async function loadUserData() {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             
             // Check authentication - use APP if available
             if (typeof APP !== 'undefined') {
@@ -169,7 +189,7 @@
 
     async function loadEvents() {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch('/api/events', {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -178,7 +198,7 @@
 
             if (response.ok) {
                 const data = await response.json();
-                allEvents = data.data || [];
+                allEvents = (data.data || []).map(normalizeEvent);
             }
         } catch (error) {
             console.log('Using sample data');
@@ -227,46 +247,46 @@
         let html = '';
         filteredEvents.forEach(event => {
             const isRegistered = registeredEvents.has(event.id);
-            const isFull = event.participants >= event.max_participants;
+            const isFull = event.max_participants != null && event.participants >= event.max_participants;
             const eventDate = new Date(event.date);
             const isToday = eventDate.toDateString() === new Date().toDateString();
 
             html += `
                 <div class="event-card">
                     <div class="event-banner">
-                        <span style="font-size: 3rem; z-index: 1;">${event.icon}</span>
-                        <span class="event-category-badge">${event.category}</span>
+                        <span style="font-size: 3rem; z-index: 1;">${esc(event.icon || CATEGORY_ICONS[event.category] || '🎪')}</span>
+                        <span class="event-category-badge">${esc(event.category)}</span>
                     </div>
                     <div class="event-content">
-                        <div class="event-title">${event.title}</div>
+                        <div class="event-title">${esc(event.title)}</div>
                         <div class="event-meta">
                             <div class="event-meta-item">
                                 <span>📅</span>
-                                <span>${formatDate(event.date)}${isToday ? ' (Today)' : ''}</span>
+                                <span>${esc(formatDate(event.date))}${isToday ? ' (Today)' : ''}</span>
                             </div>
                             <div class="event-meta-item">
                                 <span>⏰</span>
-                                <span>${event.time}</span>
+                                <span>${esc(event.time || 'TBA')}</span>
                             </div>
                             <div class="event-meta-item">
                                 <span>📍</span>
-                                <span>${event.venue}</span>
+                                <span>${esc(event.venue)}</span>
                             </div>
                             <div class="event-meta-item">
                                 <span>👤</span>
-                                <span>${event.organizer}</span>
+                                <span>${esc(event.organizer)}</span>
                             </div>
                         </div>
-                        <div class="event-description">${event.description}</div>
+                        <div class="event-description">${esc(event.description)}</div>
                         <div class="event-footer">
                             <div class="event-participants">
                                 <span>👥</span>
-                                <span>${event.participants}/${event.max_participants}</span>
+                                <span>${esc(event.participants)}${event.max_participants != null ? '/' + esc(event.max_participants) : ''}</span>
                             </div>
                             <button 
                                 class="register-btn ${isRegistered ? 'registered' : ''}" 
-                                data-event-id="${event.id}"
-                                ${!event.registration_open || isFull ? 'disabled' : ''}
+                                data-event-id="${esc(event.id)}"
+                                ${(!event.registration_open || isFull) ? 'disabled' : ''}
                             >
                                 ${isRegistered ? '✓ Registered' : (isFull ? 'Full' : 'Register')}
                             </button>
@@ -282,8 +302,9 @@
         const registerButtons = grid.querySelectorAll('.register-btn:not(.registered):not(:disabled)');
         registerButtons.forEach(btn => {
             btn.addEventListener('click', function() {
-                const eventId = parseInt(this.dataset.eventId);
-                handleRegistration(eventId);
+                const eventId = this.dataset.eventId;
+                const event = allEvents.find(e => String(e.id) === String(eventId));
+                handleRegistration(event ? event.id : eventId);
             });
         });
     }
@@ -299,7 +320,7 @@
 
     async function handleRegistration(eventId) {
         try {
-            const token = localStorage.getItem('token');
+            const token = APP.Storage.get('accessToken');
             const response = await fetch(`/api/events/${eventId}/register`, {
                 method: 'POST',
                 headers: {

@@ -10,6 +10,15 @@
     const user = APP.Storage.get('user') || {};
     let allPayments = [];
 
+    function esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function notify(message, type) {
+        if (window.Toast?.show) window.Toast.show({ type, message });
+        else console.log(`[${type}] ${message}`);
+    }
+
     document.addEventListener('DOMContentLoaded', init);
 
     async function init() {
@@ -81,7 +90,7 @@
             }
         } catch (error) {
             console.error('Failed to load payment history:', error);
-            APP.Toast.error('Failed to load payment history');
+            notify('Failed to load payment history', 'error');
             
             // Show empty state on error
             if (loadingState) loadingState.style.display = 'none';
@@ -114,15 +123,15 @@
             const statusClass = `status-${payment.status}`;
 
             row.innerHTML = `
-                <td><strong>${payment.paymentId}</strong></td>
+                <td><strong>${esc(payment.paymentId)}</strong></td>
                 <td>
-                    <div>${dateStr}</div>
-                    <small style="color: var(--text-secondary);">${timeStr}</small>
+                    <div>${esc(dateStr)}</div>
+                    <small style="color: var(--text-secondary);">${esc(timeStr)}</small>
                 </td>
-                <td>${payment.category}</td>
-                <td>${payment.semester}</td>
-                <td><strong>₹ ${payment.amount.toFixed(2)}</strong></td>
-                <td><span class="status-badge ${statusClass}">${payment.status}</span></td>
+                <td>${esc(payment.category)}</td>
+                <td>${esc(payment.semester)}</td>
+                <td><strong>₹ ${Number(payment.amount || 0).toFixed(2)}</strong></td>
+                <td><span class="status-badge ${statusClass}">${esc(payment.status)}</span></td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-small btn-view" data-payment-id="${payment.id}">
@@ -193,14 +202,13 @@
 
     async function downloadReceipt(paymentId) {
         try {
-            APP.Toast.info('Downloading receipt...');
+            notify('Downloading receipt...', 'info');
             
             // Get the access token
             const accessToken = APP.Storage.get('accessToken');
-            const apiUrl = APP.Config.getApiUrl();
             
             // Create a download link
-            const url = `${apiUrl}/payments/${paymentId}/receipt`;
+            const url = `/api/payments/${encodeURIComponent(paymentId)}/receipt`;
             
             // Download using fetch
             const response = await fetch(url, {
@@ -226,10 +234,10 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(downloadUrl);
 
-            APP.Toast.success('Receipt downloaded successfully');
+            notify('Receipt downloaded successfully', 'success');
         } catch (error) {
             console.error('Download receipt error:', error);
-            APP.Toast.error('Failed to download receipt');
+            notify('Failed to download receipt', 'error');
         }
     }
 
