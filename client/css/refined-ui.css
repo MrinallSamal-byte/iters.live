@@ -1,0 +1,716 @@
+/* ============================================================
+   REFINED UI - design system overlay
+   Loads LAST on every page. Brings dashboards up to the same
+   editorial standard as the landing page: flat surfaces with
+   hairline borders, IBM Plex Mono micro-labels and figures,
+   Space Grotesk display type, coral used sparingly.
+   ============================================================ */
+
+:root {
+    --r-font-display: "Space Grotesk", "Segoe UI", sans-serif;
+    --r-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* dark theme surfaces (flat, not glassy) */
+    --r-bg: #0a0a0a;
+    --r-panel: #101010;
+    --r-panel-raised: #151515;
+    --r-panel-inset: rgba(255, 255, 255, 0.03);
+    --r-line: rgba(255, 255, 255, 0.09);
+    --r-line-strong: rgba(255, 255, 255, 0.16);
+    --r-text: #f5f3ee;
+    --r-text-2: #c9c5bc;
+    --r-text-3: #8f8a81;
+
+    --r-accent: #ff5a4f;
+    --r-accent-deep: #e2493f;
+    --r-accent-wash: rgba(255, 90, 79, 0.1);
+    --r-ok: #34d399;
+    --r-warn: #fbbf24;
+    --r-bad: #f87171;
+}
+
+body.light-theme {
+    --r-bg: #f4f1ea;
+    --r-panel: #ffffff;
+    --r-panel-raised: #ffffff;
+    --r-panel-inset: rgba(20, 18, 14, 0.035);
+    --r-line: rgba(24, 21, 17, 0.12);
+    --r-line-strong: rgba(24, 21, 17, 0.22);
+    --r-text: #17150f;
+    --r-text-2: #4d473e;
+    --r-text-3: #7d766b;
+    --r-accent-wash: rgba(226, 73, 63, 0.09);
+}
+
+/* ------------------------------------------------------------
+   Foundations
+   ------------------------------------------------------------ */
+
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+body::selection,
+body *::selection {
+    background: rgba(255, 90, 79, 0.28);
+}
+
+:focus-visible {
+    outline: 2px solid var(--r-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: var(--r-line-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--r-text-3); background-clip: padding-box; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ------------------------------------------------------------
+   Dashboard shell
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .dashboard-main {
+    max-width: 1280px;
+}
+
+/* ------------------------------------------------------------
+   Cards & panels - flat editorial surfaces replace glass blur
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .glass-card,
+body:not(.nothing-home) .dashboard-section,
+body:not(.nothing-home) .widget {
+    background: var(--r-panel);
+    border: 1px solid var(--r-line);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 10px;
+    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+body:not(.nothing-home) .glass-card:hover,
+body:not(.nothing-home) .dashboard-section:hover {
+    border-color: var(--r-line-strong);
+    box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+body:not(.nothing-home) .hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+body.light-theme .glass-card,
+body.light-theme .dashboard-section,
+body.light-theme .widget {
+    box-shadow: 0 1px 2px rgba(25, 20, 12, 0.05), 0 10px 28px -20px rgba(25, 20, 12, 0.25);
+}
+
+/* ------------------------------------------------------------
+   Page header - editorial masthead instead of greeting card
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .page-hero {
+    background: linear-gradient(180deg, var(--r-panel-raised), var(--r-panel));
+    border: 1px solid var(--r-line);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+body:not(.nothing-home) .page-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--r-accent);
+    opacity: 0.9;
+}
+
+body:not(.nothing-home) .page-title {
+    font-family: var(--r-font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+}
+
+body:not(.nothing-home) .page-subtitle {
+    color: var(--r-text-3);
+    font-family: var(--r-font-mono);
+    font-size: 0.78rem;
+    margin-top: 0.45rem;
+}
+
+body:not(.nothing-home) .page-eyebrow {
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--r-accent);
+    margin-bottom: 0.5rem;
+}
+
+/* section headers -> rule + display type, like the landing page */
+
+body:not(.nothing-home) .section-header-formal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--r-line);
+}
+
+body:not(.nothing-home) .section-title-formal {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-family: var(--r-font-display);
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--r-text);
+}
+
+/* mute emoji glyphs into quiet accents */
+.title-icon,
+.quick-link-icon,
+.stat-icon-large {
+    filter: grayscale(1);
+    opacity: 0.55;
+}
+
+body:not(.nothing-home) .title-icon { font-size: 0.95em; }
+
+body:not(.nothing-home) .section-badge {
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--r-text-3);
+    background: var(--r-panel-inset);
+    border: 1px solid var(--r-line);
+    border-radius: 999px;
+    padding: 0.28rem 0.6rem;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   Stat blocks - figures set in mono, color as a top tick
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .stat-box {
+    position: relative;
+    overflow: hidden;
+    background: var(--r-panel);
+    border: 1px solid var(--r-line);
+    border-radius: 10px;
+    padding: 1.1rem 1.15rem 1rem;
+    transition: border-color 160ms ease, transform 160ms ease;
+}
+
+body:not(.nothing-home) .stat-box::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--r-line-strong);
+    transition: background 160ms ease;
+}
+
+body:not(.nothing-home) .stat-box.success::before { background: var(--r-ok); }
+body:not(.nothing-home) .stat-box.info::before    { background: var(--r-accent); }
+body:not(.nothing-home) .stat-box.warning::before { background: var(--r-warn); }
+
+body:not(.nothing-home) .stat-box:hover {
+    transform: translateY(-2px);
+    border-color: var(--r-line-strong);
+}
+
+body:not(.nothing-home) .stat-number {
+    font-family: var(--r-font-mono);
+    font-size: clamp(1.7rem, 3vw, 2.1rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--r-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+body:not(.nothing-home) .stat-icon-large {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.95rem;
+    font-size: 1.15rem;
+}
+
+body:not(.nothing-home) .stat-text {
+    margin-top: 0.45rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--r-text-2);
+}
+
+body:not(.nothing-home) .stat-subtext {
+    margin-top: 0.2rem;
+    font-size: 0.78rem;
+    color: var(--r-text-3);
+}
+
+/* ------------------------------------------------------------
+   Today strip - status-bar aesthetic
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .today-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background: var(--r-panel);
+    border: 1px solid var(--r-line);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+body:not(.nothing-home) .today-cell {
+    position: relative;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+body:not(.nothing-home) .today-cell + .today-cell::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 14%;
+    height: 72%;
+    width: 1px;
+    background: var(--r-line);
+}
+
+body:not(.nothing-home) .today-label {
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--r-text-3);
+}
+
+body:not(.nothing-home) .today-value {
+    font-family: var(--r-font-mono);
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--r-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body:not(.nothing-home) .today-sub {
+    font-size: 0.76rem;
+    color: var(--r-text-3);
+}
+
+/* ------------------------------------------------------------
+   Quick links - index-card grid instead of icon tiles
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 0.65rem;
+}
+
+body:not(.nothing-home) .quick-link-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--r-panel-inset);
+    border: 1px solid var(--r-line);
+    border-radius: 8px;
+    padding: 0.75rem 0.85rem;
+    text-decoration: none;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+body:not(.nothing-home) .quick-link-card:hover {
+    background: var(--r-accent-wash);
+    border-color: rgba(255, 90, 79, 0.35);
+    transform: translateY(-1px);
+}
+
+body:not(.nothing-home) .quick-link-card h4 {
+    font-family: var(--r-font-display);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--r-text);
+}
+
+body:not(.nothing-home) .quick-link-card p {
+    font-size: 0.74rem;
+    color: var(--r-text-3);
+    margin-top: 0.1rem;
+    line-height: 1.35;
+}
+
+body:not(.nothing-home) .quick-link-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    font-size: 0.95rem;
+    background: var(--r-panel);
+    border: 1px solid var(--r-line);
+    border-radius: 7px;
+}
+
+/* ------------------------------------------------------------
+   Buttons - crisp, no scale tricks
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .btn {
+    font-family: var(--r-font-mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border-radius: 7px;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+body:not(.nothing-home) .btn-primary {
+    background: var(--r-accent);
+    border: 1px solid var(--r-accent-deep);
+    color: #fff;
+    box-shadow: 0 6px 18px -8px rgba(255, 90, 79, 0.55);
+}
+
+body:not(.nothing-home) .btn-primary:hover {
+    background: var(--r-accent-deep);
+    border-color: var(--r-accent-deep);
+    box-shadow: 0 8px 22px -8px rgba(255, 90, 79, 0.65);
+}
+
+body:not(.nothing-home) .btn-outline {
+    background: transparent;
+    border: 1px solid var(--r-line-strong);
+    color: var(--r-text);
+}
+
+body:not(.nothing-home) .btn-outline:hover {
+    border-color: var(--r-accent);
+    color: var(--r-accent);
+    background: var(--r-accent-wash);
+}
+
+body:not(.nothing-home) .btn:active { transform: translateY(1px); }
+body:not(.nothing-home) .btn:hover  { transform: none; }
+
+/* ------------------------------------------------------------
+   Forms
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) input[type="text"],
+body:not(.nothing-home) input[type="email"],
+body:not(.nothing-home) input[type="password"],
+body:not(.nothing-home) input[type="number"],
+body:not(.nothing-home) input[type="date"],
+body:not(.nothing-home) input[type="time"],
+body:not(.nothing-home) input[type="search"],
+body:not(.nothing-home) select,
+body:not(.nothing-home) textarea,
+.form-control {
+    background: var(--r-panel-inset);
+    border: 1px solid var(--r-line);
+    border-radius: 8px;
+    color: var(--r-text);
+    transition: border-color 140ms ease, background 140ms ease;
+}
+
+body:not(.nothing-home) input:focus,
+body:not(.nothing-home) select:focus,
+body:not(.nothing-home) textarea:focus,
+.form-control:focus {
+    outline: none;
+    border-color: rgba(255, 90, 79, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 90, 79, 0.12);
+}
+
+body:not(.nothing-home) label,
+.form-label {
+    font-family: var(--r-font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--r-text-3);
+}
+
+/* ------------------------------------------------------------
+   Tables - mono column heads, hairline rows
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) table th {
+    font-family: var(--r-font-mono);
+    font-size: 0.64rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--r-text-3);
+    border-bottom: 1px solid var(--r-line-strong);
+    white-space: nowrap;
+}
+
+body:not(.nothing-home) table td {
+    border-bottom: 1px solid var(--r-line);
+    color: var(--r-text-2);
+}
+
+body:not(.nothing-home) table tbody tr {
+    transition: background 120ms ease;
+}
+
+body:not(.nothing-home) table tbody tr:hover {
+    background: var(--r-panel-inset);
+}
+
+/* ------------------------------------------------------------
+   Status pills - squared, readable
+   ------------------------------------------------------------ */
+
+.status-badge,
+.badge {
+    font-family: var(--r-font-mono);
+    font-size: 0.64rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    border-radius: 5px;
+    padding: 0.24rem 0.55rem;
+    border: 1px solid transparent;
+}
+
+.status-good   { background: rgba(52, 211, 153, 0.12); color: var(--r-ok);   border-color: rgba(52, 211, 153, 0.3); }
+.status-warning{ background: rgba(251, 191, 36, 0.12);  color: var(--r-warn); border-color: rgba(251, 191, 36, 0.3); }
+.status-danger { background: rgba(248, 113, 113, 0.12); color: var(--r-bad); border-color: rgba(248, 113, 113, 0.3); }
+
+/* ------------------------------------------------------------
+   Sidebar - flatter, typographic, coral tick on active
+   ------------------------------------------------------------ */
+
+body .universal-sidebar {
+    background: #0c0c0c;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-right: 1px solid var(--r-line);
+}
+
+body.light-theme .universal-sidebar {
+    background: #fbfaf7;
+}
+
+body .nav-link-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 3px;
+    border-radius: 999px;
+    background: var(--r-accent);
+}
+
+/* ------------------------------------------------------------
+   Empty states & loading - quiet, on-brand
+   ------------------------------------------------------------ */
+
+.empty-state-label {
+    font-family: var(--r-font-mono);
+    font-size: 0.66rem !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--r-text-3);
+}
+
+.empty-state-hint {
+    color: var(--r-text-3);
+    font-size: 0.82rem;
+}
+
+.loading-text {
+    font-family: var(--r-font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--r-text-3);
+}
+
+/* ------------------------------------------------------------
+   Theme toggle - quiet square, not a floating blob
+   ------------------------------------------------------------ */
+
+body:not(.nothing-home) .theme-toggle {
+    background: var(--r-panel);
+    border: 1px solid var(--r-line);
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+body:not(.nothing-home) .theme-toggle:hover {
+    border-color: rgba(255, 90, 79, 0.4);
+}
+
+/* ------------------------------------------------------------
+   Landing page refinements (scoped to .nothing-home)
+   ------------------------------------------------------------ */
+
+/* metric cards get the same top-tick treatment as dashboard stats */
+.nothing-home .metric-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.nothing-home .metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 34px;
+    height: 2px;
+    background: var(--r-accent);
+    opacity: 0.85;
+}
+
+.nothing-home .metric-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--home-border-strong);
+}
+
+.nothing-home .metric-value {
+    font-family: var(--r-font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+/* feature + principle cards lift subtly with a coral hairline */
+.nothing-home .feature-card:hover,
+.nothing-home .principle-card:hover {
+    border-color: rgba(255, 90, 79, 0.32);
+    transform: translateY(-2px);
+}
+
+.nothing-home .feature-card,
+.nothing-home .principle-card {
+    transition: transform 180ms ease, border-color 180ms ease;
+}
+
+/* program cards - index numeral in mono */
+.nothing-home .program-index {
+    font-family: var(--r-font-mono);
+    color: var(--r-text-3);
+}
+
+.nothing-home .program-card {
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.nothing-home .program-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 90, 79, 0.35);
+}
+
+/* route list rows respond like terminal links */
+.nothing-home .route-item {
+    transition: background 140ms ease, border-color 140ms ease, padding-left 140ms ease;
+}
+
+.nothing-home .route-item:hover {
+    padding-left: 1rem;
+}
+
+/* shortcut rows inside hero device panel */
+.nothing-home .shortcut-item {
+    transition: background 140ms ease, border-color 140ms ease;
+}
+
+.nothing-home .shortcut-item:hover {
+    border-color: rgba(255, 90, 79, 0.4);
+    background: rgba(255, 90, 79, 0.07);
+}
+
+/* nav links get an underline that draws in from the left */
+.nothing-home .nav-link {
+    position: relative;
+}
+
+.nothing-home .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    height: 1px;
+    width: 100%;
+    background: var(--r-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 180ms ease;
+}
+
+.nothing-home .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* footer links breathe on hover */
+.nothing-home footer a {
+    transition: color 140ms ease;
+}
+
+/* ------------------------------------------------------------
+   Auth pages (login / register share dashboard shell classes)
+   ------------------------------------------------------------ */
+
+.public-auth-page .btn-primary {
+    box-shadow: 0 8px 20px -8px rgba(255, 90, 79, 0.5);
+}
+
+/* ------------------------------------------------------------
+   Small-screen safety
+   ------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+    body:not(.nothing-home) .today-strip {
+        grid-template-columns: 1fr;
+    }
+
+    body:not(.nothing-home) .today-cell + .today-cell::before {
+        display: none;
+    }
+
+    body:not(.nothing-home) .today-cell + .today-cell {
+        border-top: 1px solid var(--r-line);
+    }
+
+    body:not(.nothing-home) .section-badge {
+        display: none;
+    }
+}
+
+
