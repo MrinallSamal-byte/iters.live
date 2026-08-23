@@ -20,7 +20,7 @@
 .calendar-header h2 {
   font-size: 28px;
   font-weight: 700;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -62,11 +62,11 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .btn-nav:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: scale(1.05);
 }
 
@@ -81,7 +81,7 @@
 
 .btn-today {
   padding: 10px 20px;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   border: none;
   border-radius: 10px;
@@ -92,7 +92,7 @@
 
 .btn-today:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,90,79,0.3);
+  box-shadow: 0 4px 12px rgba(215, 25, 33,0.3);
 }
 
 .calendar-filters {
@@ -114,7 +114,7 @@
 
 .calendar-select:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
 }
 
 /* Month View */
@@ -137,7 +137,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 14px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 12px;
@@ -166,7 +166,7 @@
 }
 
 .date-cell:hover {
-  background: rgba(255,90,79,0.05);
+  background: rgba(215, 25, 33,0.05);
   transform: translateY(-2px);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .date-cell.today {
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
   background: rgba(255,255,255,0.05);
 }
 
@@ -187,7 +187,7 @@
 }
 
 .date-cell.today .date-number {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .date-assignments {
@@ -260,7 +260,7 @@
 }
 
 .week-day-header.today {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
 }
 
@@ -372,7 +372,7 @@
 .day-header h3 {
   font-size: 24px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   margin: 0 0 24px 0;
 }
 
@@ -459,7 +459,7 @@
 
 .course-badge {
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .priority-badge {
@@ -530,7 +530,7 @@
 .upcoming-deadlines h3 {
   font-size: 18px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   margin: 0 0 20px 0;
   display: flex;
   align-items: center;
@@ -605,7 +605,7 @@
   font-size: 13px;
   font-weight: 700;
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .deadline-badge.urgent {
@@ -673,7 +673,7 @@
 .modal-header h3 {
   font-size: 22px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -714,7 +714,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
 }
 
 .form-group textarea {
@@ -733,7 +733,7 @@
   height: 18px;
   margin-right: 8px;
   cursor: pointer;
-  accent-color: var(--primary,#ff5a4f);
+  accent-color: var(--primary,#d71921);
 }
 
 .form-group label:has(input[type="checkbox"]) {
@@ -763,22 +763,22 @@
 
 .btn-secondary {
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .btn-secondary:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
 }
 
 .btn-primary {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255,90,79,0.35);
+  box-shadow: 0 6px 16px rgba(215, 25, 33,0.35);
 }
 
 /* Dark Mode */

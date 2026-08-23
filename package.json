@@ -97,6 +97,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",
+    "@vercel/nft": "^1.11.0",
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",

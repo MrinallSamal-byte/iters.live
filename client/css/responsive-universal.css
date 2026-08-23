@@ -490,8 +490,8 @@ pre, code, .code-block {
     }
     
     .mobile-bottom-nav .nav-item.active {
-        color: var(--primary,#ff5a4f);
-        background: rgba(255,90,79,0.1);
+        color: var(--primary,#d71921);
+        background: rgba(215, 25, 33,0.1);
     }
 }
 

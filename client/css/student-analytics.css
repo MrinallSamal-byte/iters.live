@@ -1,7 +1,7 @@
 /* Student Analytics Dashboard - Comprehensive Overview */
 
 :root {
-    --primary-gradient: var(--primary,#ff5a4f);
+    --primary-gradient: var(--primary,#d71921);
     --success-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -93,7 +93,7 @@
 
 .analytics-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255,90,79,0.2);
+    box-shadow: 0 10px 30px rgba(215, 25, 33,0.2);
 }
 
 .card-header {
@@ -118,7 +118,7 @@
 
 .card-badge {
     background: rgba(255,255,255,0.08);
-    color: var(--primary,#ff5a4f);
+    color: var(--primary,#d71921);
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 0.85rem;
@@ -233,7 +233,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border: 3px solid rgba(255,255,255,0.08);
 }
 
@@ -253,7 +253,7 @@
 
 .timeline-time {
     font-size: 0.85rem;
-    color: var(--primary,#ff5a4f);
+    color: var(--primary,#d71921);
     font-weight: 600;
     margin-bottom: 5px;
 }
@@ -369,7 +369,7 @@
 }
 
 .progress-value {
-    color: var(--primary,#ff5a4f);
+    color: var(--primary,#d71921);
     font-weight: 600;
 }
 

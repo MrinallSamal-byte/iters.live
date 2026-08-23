@@ -765,7 +765,7 @@ function showToast(message, type = 'info') {
         background: #111111;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-left: 3px solid var(--primary, #ff5a4f);
+        border-left: 3px solid var(--primary, #d71921);
         border-radius: 10px;
         color: var(--text-primary, #f6f3ee);
         font-family: 'IBM Plex Mono', ui-monospace, monospace;

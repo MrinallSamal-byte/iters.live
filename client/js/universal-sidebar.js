@@ -803,7 +803,7 @@
             const actions = document.createElement('div');
             actions.style.cssText = 'display:flex; gap:10px; justify-content:flex-end; margin-top:12px;';
             actions.innerHTML = `
-                <button id="idCardDownload" class="btn btn-primary" style="padding:10px 14px; border-radius:8px; border:none; background:#ff5a4f; color:white; cursor:pointer;">Download PNG</button>
+                <button id="idCardDownload" class="btn btn-primary" style="padding:10px 14px; border-radius:8px; border:none; background:#d71921; color:white; cursor:pointer;">Download PNG</button>
                 <button id="idCardPrint" class="btn" style="padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:transparent; color:inherit; cursor:pointer;">Print</button>
             `;
 
@@ -846,7 +846,7 @@
             const palette = isLightTheme ? {
                 bg: '#f4efe7',
                 panel: '#ffffff',
-                accent: '#ff5a4f',
+                accent: '#d71921',
                 onAccent: '#ffffff',
                 text: '#161616',
                 muted: 'rgba(22,22,22,0.55)',
@@ -855,7 +855,7 @@
             } : {
                 bg: '#0a0a0a',
                 panel: '#141414',
-                accent: '#ff5a4f',
+                accent: '#d71921',
                 onAccent: '#ffffff',
                 text: '#f6f3ee',
                 muted: 'rgba(246,243,238,0.55)',

@@ -553,7 +553,7 @@
           datasets: [{
             label: 'Percentage',
             data,
-            backgroundColor: '#ff5a4f',
+            backgroundColor: '#d71921',
             borderRadius: 6
           }]
         },

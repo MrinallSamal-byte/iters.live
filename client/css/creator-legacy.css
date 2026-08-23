@@ -76,7 +76,7 @@
     background: var(--primary);
     border-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,90,79,0.3);
+    box-shadow: 0 8px 24px rgba(215, 25, 33,0.3);
 }
 
 .creator-link-icon {
@@ -88,7 +88,7 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-xl);
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border: none;
     border-radius: var(--radius-full);
     color: white;
@@ -100,7 +100,7 @@
 
 .back-to-top-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,90,79,0.35);
+    box-shadow: 0 8px 24px rgba(215, 25, 33,0.35);
 }
 
 .back-to-top-btn span:first-child {

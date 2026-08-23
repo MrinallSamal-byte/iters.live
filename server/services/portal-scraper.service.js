@@ -12,7 +12,14 @@
  */
 
 const axios = require('axios');
-const Tesseract = require('tesseract.js');
+// OCR is optional: loaded through a non-static require so serverless bundlers
+// (which cannot run a browser anyway) can exclude the ~30MB tesseract stack.
+let Tesseract = null;
+try {
+    Tesseract = require(process.env.TESSERACT_MODULE || 'tesseract.js');
+} catch (error) {
+    console.warn('[Portal Scraper] tesseract.js not available - CAPTCHA OCR disabled');
+}
 const sharp = require('sharp');
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');

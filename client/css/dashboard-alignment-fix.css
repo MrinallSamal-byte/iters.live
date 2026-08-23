@@ -24,7 +24,7 @@
 .hamburger-menu .line {
     width: 24px;
     height: 3px;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border-radius: 2px;
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform-origin: center;

@@ -475,7 +475,7 @@
         const stageMarkup = IMPORT_PROGRESS_STAGES.map(([, label], index) => {
             const state = index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'pending';
             const style = state === 'active'
-                ? 'color:var(--stage-active,#ff5a4f);font-weight:700'
+                ? 'color:var(--stage-active,#d71921);font-weight:700'
                 : state === 'done'
                     ? 'color:var(--stage-done,rgba(255,255,255,0.45))'
                     : '';

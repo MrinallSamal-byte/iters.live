@@ -55,7 +55,7 @@
     right: -2px;
     bottom: -2px;
     border-radius: 50%;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -149,7 +149,7 @@ body:not(.light-theme) .profile-dropdown {
 
 .stat-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 40px rgba(255,90,79,0.3);
+    box-shadow: 0 12px 40px rgba(215, 25, 33,0.3);
 }
 
 .stat-icon {
@@ -172,7 +172,7 @@ body:not(.light-theme) .profile-dropdown {
 
 .progress-fill {
     height: 100%;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border-radius: 10px;
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -209,7 +209,7 @@ body:not(.light-theme) .profile-dropdown {
     right: 0;
     bottom: 0;
     border-radius: inherit;
-    box-shadow: 0 8px 24px rgba(255,90,79,0.2);
+    box-shadow: 0 8px 24px rgba(215, 25, 33,0.2);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -321,7 +321,7 @@ body:not(.light-theme) .profile-dropdown {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border: none;
     color: white;
     font-size: 1.75rem;
@@ -336,7 +336,7 @@ body:not(.light-theme) .profile-dropdown {
 
 .fab:hover {
     transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 8px 30px rgba(255,90,79,0.35);
+    box-shadow: 0 8px 30px rgba(215, 25, 33,0.35);
 }
 
 .fab:active {
@@ -512,7 +512,7 @@ body:not(.light-theme) .profile-dropdown {
 
 /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
 .focus-visible:focus {
-    outline: 2px solid var(--primary,#ff5a4f);
+    outline: 2px solid var(--primary,#d71921);
     outline-offset: 2px;
 }
 

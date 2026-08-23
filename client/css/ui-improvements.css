@@ -95,7 +95,7 @@ html {
 }
 
 .data-table tbody tr:hover {
-    background: rgba(255,90,79,0.1);
+    background: rgba(215, 25, 33,0.1);
     transform: scale(1.01);
 }
 
@@ -169,7 +169,7 @@ body.light-theme .stat-card::before {
     transform: translateX(-50%) scaleX(0);
     width: 80%;
     height: 2px;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     transition: transform 0.3s ease;
 }
 
@@ -179,7 +179,7 @@ body.light-theme .stat-card::before {
 }
 
 .nav-links a.active {
-    background: rgba(255,90,79,0.2);
+    background: rgba(215, 25, 33,0.2);
     color: #fff;
 }
 
@@ -238,7 +238,7 @@ body.light-theme .stat-card::before {
 .dashboard-section h3 {
     margin-bottom: 20px;
     font-size: 1.4rem;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -306,14 +306,14 @@ body.light-theme .stat-card::before {
 
 /* Better Focus States for Accessibility */
 *:focus-visible {
-    outline: 2px solid var(--primary,#ff5a4f);
+    outline: 2px solid var(--primary,#d71921);
     outline-offset: 2px;
     border-radius: 4px;
 }
 
 button:focus-visible,
 a:focus-visible {
-    outline-color: var(--primary,#ff5a4f);
+    outline-color: var(--primary,#d71921);
 }
 
 /* Improved Tooltips */
@@ -333,12 +333,12 @@ a:focus-visible {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
 }
 
 /* Print Styles */

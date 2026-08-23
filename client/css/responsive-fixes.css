@@ -769,7 +769,7 @@ img {
     border-color: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,90,79,0.3);
+    box-shadow: 0 8px 24px rgba(215, 25, 33,0.3);
 }
 
 .creator-link-icon {
@@ -781,7 +781,7 @@ img {
     align-items: center;
     gap: 0.5rem;
     padding: 0.875rem 2rem;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     color: white;
     text-decoration: none;
     border-radius: var(--radius-full);
@@ -792,7 +792,7 @@ img {
 
 .back-to-top-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,90,79,0.35);
+    box-shadow: 0 8px 24px rgba(215, 25, 33,0.35);
 }
 
 @media (max-width: 768px) {

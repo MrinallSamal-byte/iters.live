@@ -6,7 +6,8 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "includeFiles": "{client,uploads}/**"
+      "includeFiles": "{client,uploads}/**",
+      "excludeFiles": "node_modules/{tesseract.js,tesseract.js-core,firebase,@img/sharp-darwin-*,@img/sharp-win32-*,@img/sharp-linux-arm*}/**"
     }
   },
   "routes": [

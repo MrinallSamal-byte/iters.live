@@ -7,21 +7,21 @@
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --sidebar-bg: rgba(17, 24, 39, 0.95);
-    --sidebar-hover: rgba(255, 90, 79, 0.1);
-    --sidebar-active: rgba(255, 90, 79, 0.18);
+    --sidebar-hover: rgba(215, 25, 33, 0.1);
+    --sidebar-active: rgba(215, 25, 33, 0.18);
     --sidebar-border: rgba(255, 255, 255, 0.1);
     --sidebar-text: rgba(255, 255, 255, 0.7);
     --sidebar-text-active: #ffffff;
     --sidebar-scrollbar-thumb: rgba(255, 255, 255, 0.2);
-    --primary: #ff5a4f;
-    --primary-dark: #e2493f;
+    --primary: #d71921;
+    --primary-dark: #a31016;
 }
 
 /* Light Theme Overrides - using body.light-theme for consistency */
 body.light-theme {
     --sidebar-bg: rgba(255, 255, 255, 0.95);
-    --sidebar-hover: rgba(255, 90, 79, 0.08);
-    --sidebar-active: rgba(255, 90, 79, 0.15);
+    --sidebar-hover: rgba(215, 25, 33, 0.08);
+    --sidebar-active: rgba(215, 25, 33, 0.15);
     --sidebar-border: rgba(0, 0, 0, 0.1);
     --sidebar-text: rgba(15, 23, 42, 0.7);
     --sidebar-text-active: #0f172a;
@@ -259,7 +259,7 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
 
 /* Badge */
 .sidebar-badge {
-    background: rgba(255, 90, 79, 0.14);
+    background: rgba(215, 25, 33, 0.14);
     color: var(--primary);
     padding: 2px 8px;
     border-radius: 10px;
@@ -311,13 +311,13 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     font-size: 1.25rem;
     cursor: pointer;
     border: 3px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(255, 90, 79, 0.22);
+    box-shadow: 0 4px 12px rgba(215, 25, 33, 0.22);
     transition: all 0.3s ease;
 }
 
 .profile-icon:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(255, 90, 79, 0.3);
+    box-shadow: 0 6px 16px rgba(215, 25, 33, 0.3);
 }
 
 .profile-icon img {
@@ -448,7 +448,7 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
         cursor: pointer;
         color: white;
         font-size: 1.5rem;
-        box-shadow: 0 4px 12px rgba(255, 90, 79, 0.28);
+        box-shadow: 0 4px 12px rgba(215, 25, 33, 0.28);
         z-index: 999;
         transition: all 0.3s ease;
     }
@@ -593,8 +593,8 @@ body.light-theme .sidebar-nav-link.active {
 /* ITERasn hub workspace refresh */
 body:not(.nothing-home) {
     --sidebar-bg: rgba(10, 10, 10, 0.92);
-    --sidebar-hover: rgba(255, 90, 79, 0.1);
-    --sidebar-active: rgba(255, 90, 79, 0.16);
+    --sidebar-hover: rgba(215, 25, 33, 0.1);
+    --sidebar-active: rgba(215, 25, 33, 0.16);
     --sidebar-border: rgba(255, 255, 255, 0.08);
     --sidebar-text: rgba(245, 244, 239, 0.7);
     --sidebar-text-active: #f5f4ef;
@@ -606,8 +606,8 @@ body:not(.nothing-home) {
 
 body.light-theme {
     --sidebar-bg: rgba(255, 255, 255, 0.9);
-    --sidebar-hover: rgba(255, 90, 79, 0.08);
-    --sidebar-active: rgba(255, 90, 79, 0.14);
+    --sidebar-hover: rgba(215, 25, 33, 0.08);
+    --sidebar-active: rgba(215, 25, 33, 0.14);
     --sidebar-border: rgba(19, 19, 19, 0.08);
     --sidebar-text: rgba(22, 22, 22, 0.68);
     --sidebar-text-active: #131313;
@@ -622,7 +622,7 @@ body:not(.nothing-home) .universal-sidebar {
     border: 1px solid var(--sidebar-border);
     border-radius: 30px;
     background:
-        linear-gradient(180deg, rgba(255, 90, 79, 0.08), transparent 22%),
+        linear-gradient(180deg, rgba(215, 25, 33, 0.08), transparent 22%),
         var(--sidebar-bg);
     box-shadow: 0 26px 60px rgba(0, 0, 0, 0.28);
 }
@@ -667,7 +667,7 @@ body:not(.nothing-home) .sidebar-toggle {
     border-radius: 12px;
     border-color: var(--sidebar-border);
     background:
-        linear-gradient(135deg, rgba(255, 90, 79, 0.12), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, rgba(215, 25, 33, 0.12), rgba(255, 255, 255, 0.04)),
         rgba(255, 255, 255, 0.03);
     color: var(--sidebar-text-active);
     font-size: 1.1rem;
@@ -675,8 +675,8 @@ body:not(.nothing-home) .sidebar-toggle {
 }
 
 body:not(.nothing-home) .sidebar-toggle:hover {
-    background: rgba(255, 90, 79, 0.1);
-    border-color: rgba(255, 90, 79, 0.24);
+    background: rgba(215, 25, 33, 0.1);
+    border-color: rgba(215, 25, 33, 0.24);
 }
 
 body:not(.nothing-home) .sidebar-nav {
@@ -690,8 +690,8 @@ body:not(.nothing-home) .sidebar-mode-pill {
     margin: 0 0.75rem 0.9rem;
     padding: 0.6rem 0.8rem;
     border-radius: 999px;
-    background: rgba(255, 90, 79, 0.12);
-    border: 1px solid rgba(255, 90, 79, 0.18);
+    background: rgba(215, 25, 33, 0.12);
+    border: 1px solid rgba(215, 25, 33, 0.18);
     color: var(--sidebar-text-active);
     font-size: 0.78rem;
     font-weight: 600;
@@ -704,7 +704,7 @@ body:not(.nothing-home) .sidebar-mode-dot {
     height: 8px;
     border-radius: 50%;
     background: var(--primary);
-    box-shadow: 0 0 14px rgba(255, 90, 79, 0.45);
+    box-shadow: 0 0 14px rgba(215, 25, 33, 0.45);
     flex-shrink: 0;
 }
 
@@ -731,9 +731,9 @@ body:not(.nothing-home) .sidebar-nav-link:hover {
 }
 
 body:not(.nothing-home) .sidebar-nav-link.active {
-    background: linear-gradient(135deg, rgba(255, 90, 79, 0.18), rgba(255, 255, 255, 0.05));
+    background: linear-gradient(135deg, rgba(215, 25, 33, 0.18), rgba(255, 255, 255, 0.05));
     color: var(--sidebar-text-active);
-    box-shadow: inset 0 0 0 1px rgba(255, 90, 79, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(215, 25, 33, 0.16);
 }
 
 body:not(.nothing-home) .sidebar-nav-link .sidebar-nav-icon {
@@ -747,9 +747,9 @@ body:not(.nothing-home) .sidebar-nav-link.active .sidebar-nav-icon {
 }
 
 body:not(.nothing-home) .sidebar-badge {
-    background: rgba(255, 90, 79, 0.12);
+    background: rgba(215, 25, 33, 0.12);
     color: var(--sidebar-text-active);
-    border: 1px solid rgba(255, 90, 79, 0.16);
+    border: 1px solid rgba(215, 25, 33, 0.16);
 }
 
 body:not(.nothing-home) .sidebar-nav-link.active::before {
@@ -781,7 +781,7 @@ body:not(.nothing-home) .sidebar-nav-text {
 body:not(.nothing-home) .mobile-sidebar-toggle {
     border-radius: 16px;
     background: linear-gradient(135deg, #ff6b5e 0%, #e24e43 100%);
-    box-shadow: 0 20px 36px rgba(255, 90, 79, 0.24);
+    box-shadow: 0 20px 36px rgba(215, 25, 33, 0.24);
 }
 
 body:not(.nothing-home) .sidebar-overlay {

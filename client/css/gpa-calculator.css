@@ -30,7 +30,7 @@
 }
 
 .gpa-header h2 i {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .gpa-system-selector {
@@ -83,7 +83,7 @@
 
 .gpa-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(255,90,79,0.2);
+  box-shadow: 0 12px 24px rgba(215, 25, 33,0.2);
 }
 
 .cgpa-card {
@@ -113,7 +113,7 @@
 .gpa-value {
   font-size: 48px;
   font-weight: 800;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -170,13 +170,13 @@
 }
 
 .btn-primary {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(255,90,79,0.3);
+  box-shadow: 0 8px 16px rgba(215, 25, 33,0.3);
 }
 
 .btn-secondary {
@@ -250,7 +250,7 @@
 }
 
 .semester-header h3 i {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .semester-sgpa {
@@ -258,7 +258,7 @@
   padding: 6px 12px;
   background: rgba(255,255,255,0.08);
   border-radius: 8px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   font-weight: 700;
 }
 
@@ -282,8 +282,8 @@
 }
 
 .btn-icon:hover {
-  background: rgba(255,90,79,0.2);
-  color: var(--primary,#ff5a4f);
+  background: rgba(215, 25, 33,0.2);
+  color: var(--primary,#d71921);
   transform: scale(1.1);
 }
 
@@ -343,8 +343,8 @@
 .courses-table input:focus,
 .courses-table select:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
-  background: rgba(255,90,79,0.1);
+  border-color: var(--primary,#d71921);
+  background: rgba(215, 25, 33,0.1);
 }
 
 .course-name-input {
@@ -362,7 +362,7 @@
 
 .course-points {
   font-weight: 600;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   text-align: center;
 }
 
@@ -415,7 +415,7 @@
 }
 
 .summary-item strong {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   font-size: 18px;
   font-weight: 700;
 }
@@ -452,8 +452,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
-  background: rgba(255,90,79,0.1);
+  border-color: var(--primary,#d71921);
+  background: rgba(215, 25, 33,0.1);
 }
 
 /* Mobile Responsive */
@@ -548,7 +548,7 @@ body:not(.dark-theme) .courses-table select {
 .btn-icon:focus-visible,
 .btn-icon-sm:focus-visible,
 .form-control:focus-visible {
-  outline: 2px solid var(--primary,#ff5a4f);
+  outline: 2px solid var(--primary,#d71921);
   outline-offset: 2px;
 }
 

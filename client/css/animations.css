@@ -799,7 +799,7 @@ html {
 }
 
 .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(255,90,79,0.35);
+    box-shadow: 0 0 30px rgba(215, 25, 33,0.35);
 }
 
 .hover-bounce {
@@ -948,9 +948,9 @@ body {
 
 /* Hover Glow Effect */
 .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(255,90,79,0.35),
-                0 0 60px rgba(255,90,79,0.3),
-                0 0 90px rgba(255,90,79,0.1);
+    box-shadow: 0 0 30px rgba(215, 25, 33,0.35),
+                0 0 60px rgba(215, 25, 33,0.3),
+                0 0 90px rgba(215, 25, 33,0.1);
     animation: glow-pulse 2s ease-in-out infinite;
 }
 
@@ -988,7 +988,7 @@ body {
 
 .progress-fill {
     height: 100%;
-    background: var(--primary,#ff5a4f);
+    background: var(--primary,#d71921);
     border-radius: 10px;
     transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -1110,17 +1110,17 @@ body {
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-    border-color: var(--primary,#ff5a4f);
-    box-shadow: 0 0 0 3px rgba(255,90,79,0.1);
+    border-color: var(--primary,#d71921);
+    box-shadow: 0 0 0 3px rgba(215, 25, 33,0.1);
     animation: input-glow 0.3s ease-out;
 }
 
 @keyframes input-glow {
     0% {
-        box-shadow: 0 0 0 0 rgba(255,90,79,0.3);
+        box-shadow: 0 0 0 0 rgba(215, 25, 33,0.3);
     }
     100% {
-        box-shadow: 0 0 0 3px rgba(255,90,79,0.1);
+        box-shadow: 0 0 0 3px rgba(215, 25, 33,0.1);
     }
 }
 
@@ -1133,7 +1133,7 @@ body {
 .form-group textarea:focus + label,
 .form-group select:focus + label {
     transform: translateY(-2px);
-    color: var(--primary,#ff5a4f);
+    color: var(--primary,#d71921);
 }
 
 /* Error Shake Enhanced */
@@ -1225,7 +1225,7 @@ body {
 .stat-card:hover,
 .feature-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(255,90,79,0.2);
+    box-shadow: 0 12px 40px rgba(215, 25, 33,0.2);
 }
 
 /* Notification Badge Pulse */
@@ -1309,7 +1309,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,90,79,0.45);
+    background: rgba(215, 25, 33,0.45);
 }
 
 /* Reduce Motion */

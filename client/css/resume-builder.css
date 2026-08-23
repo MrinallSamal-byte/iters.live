@@ -25,7 +25,7 @@
 .sidebar-header h2 {
   font-size: 24px;
   font-weight: 700;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -65,17 +65,17 @@
 
 .template-option:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(255,90,79,0.2);
+  box-shadow: 0 8px 16px rgba(215, 25, 33,0.2);
 }
 
 .template-option.active {
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
   background: rgba(255,255,255,0.04);
 }
 
 .template-option i {
   font-size: 28px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   display: block;
   margin-bottom: 8px;
 }
@@ -111,23 +111,23 @@
 }
 
 .btn-primary {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255,90,79,0.35);
+  box-shadow: 0 6px 16px rgba(215, 25, 33,0.35);
 }
 
 .btn-secondary {
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .btn-secondary:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: translateY(-2px);
 }
 
@@ -181,7 +181,7 @@
 .section-header h3 {
   font-size: 20px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -199,12 +199,12 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   font-size: 16px;
 }
 
 .btn-icon:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: scale(1.05);
 }
 
@@ -242,8 +242,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
-  background: rgba(255,90,79,0.02);
+  border-color: var(--primary,#d71921);
+  background: rgba(215, 25, 33,0.02);
 }
 
 .form-group textarea {
@@ -266,7 +266,7 @@
 }
 
 .list-item:hover {
-  background: rgba(255,90,79,0.05);
+  background: rgba(215, 25, 33,0.05);
   transform: translateX(4px);
 }
 
@@ -315,12 +315,12 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   font-size: 14px;
 }
 
 .btn-icon-sm:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: scale(1.05);
 }
 
@@ -350,12 +350,12 @@
 
 .skills-input input:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
 }
 
 .btn-add {
   padding: 12px 24px;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   border: none;
   border-radius: 10px;
@@ -366,7 +366,7 @@
 
 .btn-add:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,90,79,0.3);
+  box-shadow: 0 4px 12px rgba(215, 25, 33,0.3);
 }
 
 .skills-list {
@@ -381,7 +381,7 @@
   gap: 8px;
   padding: 10px 16px;
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   border-radius: 50px;
   font-size: 14px;
   font-weight: 600;
@@ -389,7 +389,7 @@
 }
 
 .skill-tag:hover {
-  background: rgba(255,90,79,0.15);
+  background: rgba(215, 25, 33,0.15);
 }
 
 .btn-remove {
@@ -446,7 +446,7 @@
 .preview-header h3 {
   font-size: 22px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   margin: 0;
 }
 
@@ -467,7 +467,7 @@
 .resume-header {
   text-align: center;
   padding-bottom: 24px;
-  border-bottom: 3px solid var(--primary,#ff5a4f);
+  border-bottom: 3px solid var(--primary,#d71921);
   margin-bottom: 32px;
 }
 
@@ -494,7 +494,7 @@
 }
 
 .resume-contact i {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .resume-section {
@@ -504,7 +504,7 @@
 .resume-section h2 {
   font-size: 20px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 16px 0;
@@ -558,7 +558,7 @@
 }
 
 .resume-item a {
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   text-decoration: none;
 }
 
@@ -572,7 +572,7 @@
 }
 
 .resume-preview.creative .resume-header {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   padding: 32px;
   border-radius: 16px 16px 0 0;

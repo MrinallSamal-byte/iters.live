@@ -51,7 +51,7 @@ class ToastNotification {
                 --toast-border: rgba(255, 255, 255, 0.08);
                 --toast-text: #f6f3ee;
                 --toast-text-muted: rgba(246, 243, 238, 0.62);
-                --toast-accent: var(--primary, #ff5a4f);
+                --toast-accent: var(--primary, #d71921);
                 --toast-shadow: rgba(0, 0, 0, 0.4);
 
                 position: relative;
@@ -99,7 +99,7 @@ class ToastNotification {
             }
 
             .toast-info {
-                --toast-accent: var(--primary, #ff5a4f);
+                --toast-accent: var(--primary, #d71921);
             }
 
             .toast-icon {

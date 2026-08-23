@@ -8,14 +8,14 @@
     --home-text: #f5f4ef;
     --home-muted: #b2b1ab;
     --home-muted-strong: #d7d5ce;
-    --home-accent: #ff5a4f;
-    --home-accent-soft: rgba(255, 90, 79, 0.18);
+    --home-accent: #d71921;
+    --home-accent-soft: rgba(215, 25, 33, 0.18);
     --home-shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
 }
 
 body.nothing-home {
     background:
-        radial-gradient(circle at top left, rgba(255, 90, 79, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(215, 25, 33, 0.08), transparent 28%),
         radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.07), transparent 24%),
         linear-gradient(180deg, #050505 0%, var(--home-bg) 100%);
     color: var(--home-text);
@@ -35,7 +35,7 @@ body.nothing-home.light-theme {
     --home-muted-strong: #403a34;
     --home-shadow: 0 20px 60px rgba(36, 25, 18, 0.12);
     background:
-        radial-gradient(circle at top left, rgba(255, 90, 79, 0.14), transparent 26%),
+        radial-gradient(circle at top left, rgba(215, 25, 33, 0.14), transparent 26%),
         radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.78), transparent 24%),
         linear-gradient(180deg, #faf7f1 0%, var(--home-bg) 100%);
     color-scheme: light;
@@ -61,7 +61,7 @@ body.nothing-home::after {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 20% 18%, rgba(255, 90, 79, 0.14) 0%, transparent 28%),
+        radial-gradient(circle at 20% 18%, rgba(215, 25, 33, 0.14) 0%, transparent 28%),
         radial-gradient(circle at 78% 24%, rgba(255, 255, 255, 0.08) 0%, transparent 26%);
     filter: blur(22px);
     z-index: -2;
@@ -108,7 +108,7 @@ body.nothing-home.light-theme::after {
 }
 
 .nothing-home .bg-spot-left {
-    background: radial-gradient(circle, rgba(255, 90, 79, 0.16) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(215, 25, 33, 0.16) 0%, transparent 60%);
     top: -10%;
     left: -16%;
 }
@@ -159,7 +159,7 @@ body.nothing-home.light-theme::after {
 
 .nothing-home.public-auth-page .login-brand-section {
     background:
-        linear-gradient(180deg, rgba(255, 90, 79, 0.16), transparent 55%),
+        linear-gradient(180deg, rgba(215, 25, 33, 0.16), transparent 55%),
         rgba(255, 255, 255, 0.03);
 }
 
@@ -203,8 +203,8 @@ body.nothing-home.light-theme::after {
 
 .nothing-home.public-auth-page .form-group input:focus,
 .nothing-home.public-auth-page .form-group select:focus {
-    border-color: rgba(255, 90, 79, 0.38);
-    box-shadow: 0 0 0 4px rgba(255, 90, 79, 0.12);
+    border-color: rgba(215, 25, 33, 0.38);
+    box-shadow: 0 0 0 4px rgba(215, 25, 33, 0.12);
     outline: none;
 }
 
@@ -237,7 +237,7 @@ body.nothing-home.light-theme::after {
 
 .nothing-home.public-auth-page.light-theme .login-brand-section {
     background:
-        linear-gradient(180deg, rgba(255, 90, 79, 0.14), transparent 55%),
+        linear-gradient(180deg, rgba(215, 25, 33, 0.14), transparent 55%),
         rgba(255, 255, 255, 0.5);
 }
 
@@ -551,7 +551,7 @@ body.nothing-home.nav-open {
     margin-top: 0.45rem;
     border-radius: 999px;
     background: var(--home-accent);
-    box-shadow: 0 0 18px rgba(255, 90, 79, 0.4);
+    box-shadow: 0 0 18px rgba(215, 25, 33, 0.4);
 }
 
 .nothing-home .hero-panel {
@@ -598,7 +598,7 @@ body.nothing-home.nav-open {
     height: 12px;
     border-radius: 999px;
     background: var(--home-accent);
-    box-shadow: 0 0 20px rgba(255, 90, 79, 0.45);
+    box-shadow: 0 0 20px rgba(215, 25, 33, 0.45);
 }
 
 .nothing-home .device-status {
@@ -633,7 +633,7 @@ body.nothing-home.nav-open {
 .nothing-home .screen-card-primary {
     padding: 22px;
     background:
-        linear-gradient(135deg, rgba(255, 90, 79, 0.12), transparent 50%),
+        linear-gradient(135deg, rgba(215, 25, 33, 0.12), transparent 50%),
         rgba(255, 255, 255, 0.04);
 }
 
@@ -829,7 +829,7 @@ body.nothing-home.nav-open {
     width: 180px;
     height: 180px;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(255, 90, 79, 0.16), transparent 66%);
+    background: radial-gradient(circle, rgba(215, 25, 33, 0.16), transparent 66%);
     pointer-events: none;
 }
 
@@ -940,8 +940,8 @@ body.nothing-home.nav-open {
 }
 
 .nothing-home .theme-toggle:hover {
-    border-color: rgba(255, 90, 79, 0.42);
-    box-shadow: 0 18px 36px rgba(255, 90, 79, 0.18);
+    border-color: rgba(215, 25, 33, 0.42);
+    box-shadow: 0 18px 36px rgba(215, 25, 33, 0.18);
 }
 
 .nothing-home.light-theme .theme-toggle {

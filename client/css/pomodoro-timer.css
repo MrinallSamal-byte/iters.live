@@ -20,7 +20,7 @@
 .pomodoro-header h2 {
   font-size: 28px;
   font-weight: 700;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: flex;
@@ -41,11 +41,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 18px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .btn-icon:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: scale(1.05);
 }
 
@@ -67,19 +67,19 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(255,90,79,0.2);
+  box-shadow: 0 12px 24px rgba(215, 25, 33,0.2);
 }
 
 .stat-card i {
   font-size: 28px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   margin-bottom: 12px;
 }
 
 .stat-value {
   font-size: 36px;
   font-weight: 800;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
@@ -109,7 +109,7 @@
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   animation: badgePulse 2s ease-in-out infinite;
@@ -173,7 +173,7 @@ svg defs linearGradient {
 .time-display {
   font-size: 64px;
   font-weight: 800;
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
@@ -236,11 +236,11 @@ svg defs linearGradient {
 
 .btn-reset {
   background: rgba(255,255,255,0.05);
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .btn-reset:hover {
-  background: rgba(255,90,79,0.2);
+  background: rgba(215, 25, 33,0.2);
   transform: translateY(-2px);
 }
 
@@ -274,8 +274,8 @@ svg defs linearGradient {
 
 .task-input input:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
-  background: rgba(255,90,79,0.05);
+  border-color: var(--primary,#d71921);
+  background: rgba(215, 25, 33,0.05);
 }
 
 .task-input input::placeholder {
@@ -290,7 +290,7 @@ svg defs linearGradient {
 .pomodoro-sessions h3 {
   font-size: 20px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -321,7 +321,7 @@ svg defs linearGradient {
 }
 
 .sessions-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,90,79,0.45);
+  background: rgba(215, 25, 33,0.45);
 }
 
 .session-item {
@@ -336,7 +336,7 @@ svg defs linearGradient {
 }
 
 .session-item:hover {
-  background: rgba(255,90,79,0.1);
+  background: rgba(215, 25, 33,0.1);
   transform: translateX(4px);
 }
 
@@ -371,7 +371,7 @@ svg defs linearGradient {
 
 .session-meta i {
   margin-right: 4px;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
 }
 
 .session-check {
@@ -440,7 +440,7 @@ svg defs linearGradient {
 .settings-header h3 {
   font-size: 22px;
   font-weight: 700;
-  color: var(--primary,#ff5a4f);
+  color: var(--primary,#d71921);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -474,7 +474,7 @@ svg defs linearGradient {
 
 .setting-group input[type="number"]:focus {
   outline: none;
-  border-color: var(--primary,#ff5a4f);
+  border-color: var(--primary,#d71921);
 }
 
 .setting-group input[type="checkbox"] {
@@ -482,7 +482,7 @@ svg defs linearGradient {
   height: 20px;
   margin-right: 12px;
   cursor: pointer;
-  accent-color: var(--primary,#ff5a4f);
+  accent-color: var(--primary,#d71921);
 }
 
 .setting-group label:has(input[type="checkbox"]) {
@@ -509,14 +509,14 @@ svg defs linearGradient {
 }
 
 .btn-primary {
-  background: var(--primary,#ff5a4f);
+  background: var(--primary,#d71921);
   color: white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255,90,79,0.35);
+  box-shadow: 0 6px 16px rgba(215, 25, 33,0.35);
 }
 
 /* Dark Mode */
@@ -547,7 +547,7 @@ svg defs linearGradient {
 }
 
 .dark .session-item:hover {
-  background: rgba(255,90,79,0.15);
+  background: rgba(215, 25, 33,0.15);
 }
 
 .dark .session-task {

@@ -127,7 +127,7 @@
     background: rgba(0, 0, 0, 0.5);
     border-color: var(--primary);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(255,90,79,0.2);
+    box-shadow: 0 0 0 2px rgba(215, 25, 33,0.2);
 }
 
 .form-options {
@@ -342,16 +342,16 @@ body.light-theme .login-wrapper {
 }
 
 body.light-theme .login-brand-section {
-    background: linear-gradient(135deg, rgba(255, 90, 79, 0.15), rgba(255, 179, 107, 0.12));
+    background: linear-gradient(135deg, rgba(215, 25, 33, 0.15), rgba(255, 179, 107, 0.12));
     border-right-color: rgba(0, 0, 0, 0.1);
 }
 
 body.light-theme .brand-title {
-    background: linear-gradient(135deg, #e2493f, #ff7f56);
+    background: linear-gradient(135deg, #a31016, #ff7f56);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: #e2493f; /* Fallback for browsers that don't support background-clip: text */
+    color: #a31016; /* Fallback for browsers that don't support background-clip: text */
 }
 
 body.light-theme .brand-subtitle {
@@ -386,8 +386,8 @@ body.light-theme .form-group input::placeholder {
 
 body.light-theme .form-group input:focus {
     background: rgba(255, 255, 255, 1);
-    border-color: #ff5a4f;
-    box-shadow: 0 0 0 3px rgba(255, 90, 79, 0.15);
+    border-color: #d71921;
+    box-shadow: 0 0 0 3px rgba(215, 25, 33, 0.15);
 }
 
 body.light-theme .checkbox-label {
@@ -395,11 +395,11 @@ body.light-theme .checkbox-label {
 }
 
 body.light-theme .forgot-link {
-    color: #ff5a4f;
+    color: #d71921;
 }
 
 body.light-theme .forgot-link:hover {
-    color: #e2493f;
+    color: #a31016;
 }
 
 body.light-theme .divider span {
@@ -412,8 +412,8 @@ body.light-theme .divider::before {
 }
 
 body.light-theme .demo-hint-compact {
-    background: rgba(255, 90, 79, 0.05);
-    border-color: rgba(255, 90, 79, 0.16);
+    background: rgba(215, 25, 33, 0.05);
+    border-color: rgba(215, 25, 33, 0.16);
 }
 
 body.light-theme .demo-hint-compact p {
@@ -421,15 +421,15 @@ body.light-theme .demo-hint-compact p {
 }
 
 body.light-theme .demo-chip {
-    background: rgba(255, 90, 79, 0.1);
-    border-color: rgba(255, 90, 79, 0.16);
-    color: #e2493f;
+    background: rgba(215, 25, 33, 0.1);
+    border-color: rgba(215, 25, 33, 0.16);
+    color: #a31016;
 }
 
 body.light-theme .demo-chip:hover {
-    background: #ff5a4f;
+    background: #d71921;
     color: white;
-    border-color: #ff5a4f;
+    border-color: #d71921;
 }
 
 body.light-theme .login-footer {
@@ -437,11 +437,11 @@ body.light-theme .login-footer {
 }
 
 body.light-theme .login-footer a {
-    color: #ff5a4f;
+    color: #d71921;
 }
 
 body.light-theme .login-footer a:hover {
-    color: #e2493f;
+    color: #a31016;
 }
 
 body.light-theme .error-message {
@@ -554,8 +554,8 @@ body.light-theme .mobile-brand-title {
     min-width: 34px;
     height: 34px;
     border-radius: 12px;
-    background: rgba(255, 90, 79, 0.12);
-    border: 1px solid rgba(255, 90, 79, 0.16);
+    background: rgba(215, 25, 33, 0.12);
+    border: 1px solid rgba(215, 25, 33, 0.16);
     color: var(--text-primary);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.78rem;
