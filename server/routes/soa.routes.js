@@ -315,7 +315,22 @@ async function handleImport(req, res) {
   }
 
   try {
-    const result = await soaScraperService.loginAndScrape(sessionId, regNo, password, captcha);
+    const io = req.app.get('io');
+    const progressRoom = req.user?.id ? `user:${req.user.id}` : null;
+    const onProgress = ({ stage, detail } = {}) => {
+      if (!io || !progressRoom || !stage) return;
+      try {
+        io.to(progressRoom).emit('soa-import-progress', {
+          stage,
+          detail: detail || null,
+          at: Date.now()
+        });
+      } catch (_) {
+        return;
+      }
+    };
+
+    const result = await soaScraperService.loginAndScrape(sessionId, regNo, password, captcha, { onProgress });
     req.body.password = null;
 
     if (!result.success) {

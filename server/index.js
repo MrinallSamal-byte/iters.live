@@ -42,6 +42,8 @@ const paymentRoutes = require('./routes/payment.routes');
 const soaRoutes = require('./routes/soa.routes');
 const mobileRoutes = require('./routes/mobile.routes');
 const clubsRoutes = require('./routes/clubs.routes');
+const agendaRoutes = require('./routes/agenda.routes');
+const calendarRoutes = require('./routes/calendar.routes');
 
 // Import utilities
 const urlRouter = require('./utils/url-router.util');
@@ -114,17 +116,39 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const corsWhitelist = (process.env.CORS_WHITELIST || '').split(',');
+const corsWhitelist = (process.env.CORS_WHITELIST || '')
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean);
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || corsWhitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Allow all in development
+    // Requests without an Origin header (curl, health checks, mobile apps,
+    // same-origin) must always pass.
+    if (!origin) {
+      return callback(null, true);
     }
+
+    const wildcard = corsWhitelist.includes('*');
+    const whitelisted = corsWhitelist.includes(origin);
+
+    if (whitelisted || wildcard) {
+      return callback(null, true);
+    }
+
+    // In production, reject origins that are not explicitly whitelisted.
+    // In development, keep the permissive allow-all behavior.
+    if (process.env.NODE_ENV === 'production') {
+      return callback(null, false);
+    }
+
+    return callback(null, true);
   },
   credentials: true
 }));
+
+// Trust the first proxy hop (Render/nginx) so rate limiting keys on the
+// real client IP instead of the proxy IP.
+app.set('trust proxy', 1);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -136,8 +160,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Ensure all API responses are JSON
 app.use('/api', (req, res, next) => {
@@ -188,14 +212,28 @@ app.use((req, res, next) => {
 });
 
 // Serve static files (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Serve client static assets (CSS, JS, images) - needed for pages served from /web/:sessionId
-app.use('/css', express.static(path.join(__dirname, '../client/css')));
-app.use('/js', express.static(path.join(__dirname, '../client/js')));
-app.use('/assets', express.static(path.join(__dirname, '../client/assets')));
-app.use('/partials', express.static(path.join(__dirname, '../client/partials')));
+const assetsLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 600,
+  message: 'Too many requests, please try again later.'
+});
+
+function setStaticAssetCacheHeaders(res) {
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+}
+
+app.use('/css', assetsLimiter, express.static(path.join(__dirname, '../client/css'), {
+  setHeaders: setStaticAssetCacheHeaders
+}));
+app.use('/js', assetsLimiter, express.static(path.join(__dirname, '../client/js'), {
+  setHeaders: setStaticAssetCacheHeaders
+}));
+app.use('/assets', assetsLimiter, express.static(path.join(__dirname, '../client/assets'), {
+  setHeaders: setStaticAssetCacheHeaders
+}));
 
 // Rate limiter for static file routes
 const staticFileLimiter = rateLimit({
@@ -257,6 +295,8 @@ app.use('/api/portal', portalRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/mobile', mobileRoutes);
 app.use('/api/clubs', clubsRoutes);
+app.use('/api/agenda', agendaRoutes);
+app.use('/api/calendar.ics', calendarRoutes);
 
 // Web routes for obfuscated URLs (/web/:sessionId)
 app.use('/web', webRoutes);
@@ -350,6 +390,8 @@ app.get('/contact', (req, res) => {
 });
 
 // Serve dashboard pages directly (needed for login redirects)
+const dashboardPageExistsCache = new Map();
+
 app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
   const page = req.params.page;
   const canonicalPage = page.endsWith('.html') ? page.slice(0, -5) : page;
@@ -376,7 +418,13 @@ app.get('/dashboard/:page', staticFileLimiter, (req, res) => {
     });
   }
 
-  if (!fs.existsSync(resolvedPath)) {
+  let pageExists = dashboardPageExistsCache.get(resolvedPath);
+  if (pageExists === undefined) {
+    pageExists = fs.existsSync(resolvedPath);
+    dashboardPageExistsCache.set(resolvedPath, pageExists);
+  }
+
+  if (!pageExists) {
     return res.status(404).json({
       success: false,
       message: 'Dashboard page not found'

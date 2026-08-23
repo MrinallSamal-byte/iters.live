@@ -99,6 +99,124 @@ function calculateCgpa(records = []) {
   return Number((sum / eligible.length).toFixed(2));
 }
 
+async function loadStudentMarks(studentId) {
+  const marks = sortMarks(await listRecords('marks', {
+    filters: [{ field: 'student_id', value: studentId }]
+  }));
+
+  if (marks.length > 0) {
+    return marks;
+  }
+
+  const snapshot = await getPortalSnapshotForUser({ userId: studentId });
+  const fallbackData = buildMarksRouteData(snapshot.normalizedData);
+  return fallbackData.marks || [];
+}
+
+function gradePointOf(record) {
+  const total = toNumber(record.total_marks, 0);
+  if (!(total > 0)) return null;
+  return (toNumber(record.marks_obtained, 0) / total) * 10;
+}
+
+function creditsOf(record) {
+  const parsed = Number(record.credits);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+router.get('/projection', authMiddleware, async (req, res, next) => {
+  try {
+    const targetCgpa = Number(req.query.target);
+    if (!Number.isFinite(targetCgpa) || targetCgpa < 0 || targetCgpa > 10) {
+      return res.status(400).json({ success: false, message: 'target must be a number between 0 and 10' });
+    }
+
+    const completedCreditsOverride = Number(req.query.completedCredits);
+    const totalCreditsOverride = Number(req.query.totalCredits);
+
+    const records = await loadStudentMarks(String(req.user.id));
+    const withPoints = records.filter((record) => gradePointOf(record) !== null);
+    if (withPoints.length === 0) {
+      return res.json({ success: false, message: 'Credit information unavailable for projection' });
+    }
+
+    const creditRecords = withPoints.filter((record) => creditsOf(record) !== null);
+    let currentCgpa;
+    let completedCredits;
+    let creditWeighted = false;
+    let averageSemesterCredits = null;
+
+    if (creditRecords.length > 0) {
+      const semesters = new Map();
+      for (const record of creditRecords) {
+        const semester = record.semester || 'Unknown';
+        if (!semesters.has(semester)) {
+          semesters.set(semester, { qualityPoints: 0, credits: 0 });
+        }
+        const item = semesters.get(semester);
+        const credits = creditsOf(record);
+        item.qualityPoints += gradePointOf(record) * credits;
+        item.credits += credits;
+      }
+
+      const items = Array.from(semesters.values());
+      const qualityPoints = items.reduce((sum, item) => sum + item.qualityPoints, 0);
+      completedCredits = items.reduce((sum, item) => sum + item.credits, 0);
+      currentCgpa = Number((qualityPoints / completedCredits).toFixed(2));
+      creditWeighted = true;
+      averageSemesterCredits = completedCredits / items.length;
+    } else {
+      currentCgpa = calculateCgpa(withPoints);
+      completedCredits = Number.isFinite(completedCreditsOverride) && completedCreditsOverride > 0
+        ? completedCreditsOverride
+        : null;
+    }
+
+    if (Number.isFinite(completedCreditsOverride) && completedCreditsOverride > 0) {
+      completedCredits = completedCreditsOverride;
+    }
+    if (!creditWeighted && completedCredits === null) {
+      return res.json({ success: false, message: 'Credit information unavailable for projection' });
+    }
+
+    const response = {
+      success: true,
+      currentCgpa,
+      targetCgpa,
+      feasible: true,
+      creditWeighted,
+      completedCredits,
+      creditBasis: creditWeighted ? 'payload_credits' : 'query_override'
+    };
+
+    let futureCredits;
+    if (Number.isFinite(totalCreditsOverride) && totalCreditsOverride > completedCredits) {
+      futureCredits = totalCreditsOverride - completedCredits;
+      response.totalCreditsProjected = completedCredits + futureCredits;
+      if (creditWeighted && averageSemesterCredits > 0) {
+        response.semestersRemaining = Math.ceil(futureCredits / averageSemesterCredits);
+      }
+    } else if (creditWeighted && averageSemesterCredits > 0) {
+      futureCredits = averageSemesterCredits;
+      response.semestersRemaining = 1;
+      response.assumedFutureCredits = Number(futureCredits.toFixed(2));
+    } else {
+      return res.json({ success: false, message: 'Credit information unavailable for projection' });
+    }
+
+    const projectedTotal = completedCredits + futureCredits;
+    const requiredRaw = ((projectedTotal * targetCgpa) - (currentCgpa * completedCredits)) / futureCredits;
+    response.requiredAverageSgpa = Number(Math.max(0, requiredRaw).toFixed(2));
+    response.feasible = requiredRaw <= 10;
+
+    res.json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
+
 // Upload marks
 router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
@@ -160,6 +278,14 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
     const studentId = req.params.id;
+
+    if (req.user.role === 'student' && studentId !== String(req.user.id) && studentId !== String(req.user.registration_number)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - students can only view their own marks'
+      });
+    }
+
     const cached = await cacheService.getMarks(studentId);
     if (cached && !req.variationSeed) {
       return res.json({ success: true, data: cached });

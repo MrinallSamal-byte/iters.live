@@ -21,15 +21,20 @@ class SearchService {
       files: [],
       events: [],
       announcements: [],
-      assignments: []
+      assignments: [],
+      notes: [],
+      clubs: []
     };
 
     try {
-      const [users, files, events, assignments] = await Promise.all([
+      const [users, files, events, assignments, announcements, notes, clubs] = await Promise.all([
         listRecords('users'),
         listRecords('files'),
         listRecords('events'),
-        listRecords('assignments')
+        listRecords('assignments'),
+        listRecords('announcements'),
+        listRecords('notes'),
+        listRecords('clubs')
       ]);
 
       if (types.includes('all') || types.includes('users')) {
@@ -112,12 +117,71 @@ class SearchService {
           }));
       }
 
+      if (types.includes('all') || types.includes('announcements')) {
+        results.announcements = announcements
+          .filter((announcement) => announcement.is_active !== false && announcement.status !== 'archived')
+          .filter((announcement) =>
+            String(announcement.title || '').toLowerCase().includes(q)
+            || String(announcement.content || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((announcement) => ({
+            id: announcement.id,
+            name: announcement.title,
+            description: announcement.content,
+            priority: announcement.priority,
+            created_at: announcement.created_at,
+            type: 'announcement'
+          }));
+      }
+
+      if (types.includes('all') || types.includes('notes')) {
+        results.notes = notes
+          .filter((note) => note.status !== 'rejected')
+          .filter((note) =>
+            String(note.title || '').toLowerCase().includes(q)
+            || String(note.description || '').toLowerCase().includes(q)
+            || String(note.subject || '').toLowerCase().includes(q)
+            || String(note.tags || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((note) => ({
+            id: note.id,
+            name: note.title,
+            description: note.description,
+            subject: note.subject,
+            created_at: note.created_at,
+            uploaded_by_name: note.uploaded_by_name || null,
+            type: 'note'
+          }));
+      }
+
+      if (types.includes('all') || types.includes('clubs')) {
+        results.clubs = clubs
+          .filter((club) => club.is_active !== false)
+          .filter((club) =>
+            String(club.name || '').toLowerCase().includes(q)
+            || String(club.description || '').toLowerCase().includes(q)
+          )
+          .slice(0, 20)
+          .map((club) => ({
+            id: club.id,
+            name: club.name,
+            description: club.description,
+            category: club.category,
+            created_at: club.created_at,
+            type: 'club'
+          }));
+      }
+
       const allResults = [
         ...results.users,
         ...results.files,
         ...results.events,
         ...results.announcements,
-        ...results.assignments
+        ...results.assignments,
+        ...results.notes,
+        ...results.clubs
       ];
 
       const scoredResults = allResults.map((item) => {
@@ -129,6 +193,8 @@ class SearchService {
         if (item.type === 'file') score += 10;
         if (item.type === 'event') score += 8;
         if (item.type === 'announcement') score += 5;
+        if (item.type === 'note') score += 6;
+        if (item.type === 'club') score += 4;
         return { ...item, score };
       });
 
@@ -150,7 +216,9 @@ class SearchService {
           files: results.files.length,
           events: results.events.length,
           announcements: results.announcements.length,
-          assignments: results.assignments.length
+          assignments: results.assignments.length,
+          notes: results.notes.length,
+          clubs: results.clubs.length
         },
         pagination: {
           page,

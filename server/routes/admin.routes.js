@@ -4,10 +4,13 @@ const bcrypt = require('bcrypt');
 const { auth, db } = require('../database/firebase');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const parityService = require('../services/mobile-parity.service');
+const notificationService = require('../services/notification.service');
 const {
   createRecord,
   listRecords,
-  updateRecord
+  getRecord,
+  updateRecord,
+  deleteRecord
 } = require('../services/firebase-data.service');
 
 function toNumber(value, fallback = 0) {
@@ -214,6 +217,107 @@ router.put('/users/:id/toggle-active', authMiddleware, roleMiddleware('admin'), 
   }
 });
 
+router.patch('/users/:id/status', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'isActive must be a boolean' });
+    }
+
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', value: req.params.id }]
+    });
+    const user = users[0];
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    await updateRecord('users', req.params.id, {
+      is_active: isActive
+    });
+    await db.collection('users').doc(req.params.id).set({
+      is_active: isActive,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    res.json({ success: true, isActive });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/users/:id', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { name, email, role, department } = req.body;
+    const updates = {};
+
+    if (name !== undefined) {
+      if (!String(name).trim()) {
+        return res.status(400).json({ success: false, message: 'Name cannot be empty' });
+      }
+      updates.name = String(name).trim();
+    }
+
+    if (email !== undefined) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+        return res.status(400).json({ success: false, message: 'Invalid email format' });
+      }
+      updates.email = String(email);
+    }
+
+    if (role !== undefined) {
+      if (!['student', 'teacher', 'admin'].includes(role)) {
+        return res.status(400).json({ success: false, message: 'Role must be one of student, teacher, admin' });
+      }
+      updates.role = role;
+    }
+
+    if (department !== undefined) {
+      updates.department = department || null;
+    }
+
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', value: req.params.id }]
+    });
+    const user = users[0];
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await updateRecord('users', req.params.id, updates);
+      await db.collection('users').doc(req.params.id).set({
+        ...updates,
+        updated_at: new Date().toISOString()
+      }, { merge: true });
+    }
+
+    const updated = { ...user, ...updates };
+
+    res.json({
+      success: true,
+      data: {
+        id: updated.id,
+        name: updated.name,
+        registration_number: updated.registration_number,
+        email: updated.email,
+        phone_number: updated.phone_number || null,
+        role: updated.role,
+        department: updated.department || null,
+        year: updated.year ?? null,
+        section: updated.section || null,
+        is_active: updated.is_active !== false,
+        created_at: updated.created_at || null
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Approvals queue
 router.get('/approvals/files', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
@@ -252,6 +356,43 @@ router.get('/approvals', authMiddleware, roleMiddleware('admin'), async (req, re
         uploaded_by_name: userNameById.get(file.uploaded_by) || null
       }))
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/approvals/:id/reject', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const file = await getRecord('files', req.params.id);
+
+    if (!file) {
+      return res.status(404).json({ success: false, message: 'File not found' });
+    }
+
+    const reason = req.body.reason || null;
+
+    await updateRecord('files', req.params.id, {
+      approved: false,
+      status: 'rejected',
+      rejection_reason: reason,
+      reviewed_by: req.user.id,
+      reviewed_at: new Date().toISOString()
+    });
+
+    try {
+      await notificationService.create({
+        userId: file.uploaded_by,
+        title: 'File Rejected',
+        message: `Your file "${file.original_name}" was rejected by a moderator.${reason ? ` Reason: ${reason}` : ''}`,
+        type: 'file',
+        link: '/dashboard/files.html',
+        metadata: { fileId: req.params.id, reason }
+      });
+    } catch (_) {
+      void 0;
+    }
+
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }
@@ -314,7 +455,38 @@ router.get('/announcements', authMiddleware, roleMiddleware('admin'), async (req
 router.post('/announcements', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
     const data = await parityService.createAnnouncement(req.body, req.user);
+
+    try {
+      const io = req.app.get('io');
+      if (io) {
+        io.to('role:student').to('role:teacher').emit('announcement:new', {
+          id: data.id,
+          title: data.title,
+          message: data.content,
+          createdAt: data.created_at
+        });
+      }
+    } catch (_) {
+      void 0;
+    }
+
     res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/announcements/:id', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const announcement = await getRecord('announcements', req.params.id);
+
+    if (!announcement) {
+      return res.status(404).json({ success: false, message: 'Announcement not found' });
+    }
+
+    await deleteRecord('announcements', req.params.id);
+
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }

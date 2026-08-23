@@ -204,6 +204,39 @@ data class ContentSection(
 )
 
 @Serializable
+data class BunkSubject(
+    val subject: String? = null,
+    val attended: Int? = null,
+    val total: Int? = null,
+    val percentage: Double? = null,
+    val canMiss: Int? = null,
+    val recoverNeeded: Int? = null
+)
+
+@Serializable
+data class BunkPlan(
+    val threshold: Int? = null,
+    val subjects: List<BunkSubject> = emptyList(),
+    val overallPercentage: Double? = null
+)
+
+@Serializable
+data class AgendaItem(
+    val id: String? = null,
+    val type: String? = null,
+    val title: String? = null,
+    val dueAt: String? = null
+)
+
+@Serializable
+data class CgpaProjection(
+    val currentCgpa: Double? = null,
+    val targetCgpa: Double? = null,
+    val requiredAverageSgpa: Double? = null,
+    val feasible: Boolean? = null
+)
+
+@Serializable
 data class MobileSnapshot(
     val generatedAt: String? = null,
     val user: SessionUser,
@@ -214,7 +247,11 @@ data class MobileSnapshot(
     val student: StudentPayload? = null,
     val teacher: TeacherPayload? = null,
     val admin: AdminPayload? = null,
-    val shared: SharedPayload = SharedPayload()
+    val shared: SharedPayload = SharedPayload(),
+    val bunkPlan: BunkPlan? = null,
+    val agendaUpcoming: List<AgendaItem> = emptyList(),
+    val cgpaProjection: CgpaProjection? = null,
+    val calendarUrl: String? = null
 )
 
 @Serializable

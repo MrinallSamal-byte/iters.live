@@ -54,6 +54,37 @@ function sortAttendanceRecords(records = []) {
   return [...records].sort((left, right) => String(right.date || '').localeCompare(String(left.date || '')));
 }
 
+async function loadAttendanceData(studentId, useCache = true) {
+  if (useCache) {
+    const cached = await cacheService.getAttendance(studentId);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  const attendance = sortAttendanceRecords(await listRecords('attendance', {
+    filters: [{ field: 'student_id', value: studentId }]
+  }));
+
+  let data;
+  if (attendance.length > 0) {
+    data = {
+      records: attendance,
+      summary: buildAttendanceSummary(attendance),
+      source: 'firebase'
+    };
+  } else {
+    const snapshot = await getPortalSnapshotForUser({ userId: studentId });
+    const fallbackData = buildAttendanceRouteData(snapshot.normalizedData);
+    data = fallbackData.summary.length
+      ? fallbackData
+      : { records: [], summary: [], source: 'none' };
+  }
+
+  await cacheService.setAttendance(studentId, data, null, 300);
+  return data;
+}
+
 // Mark attendance
 router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
@@ -107,31 +138,15 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
     const studentId = req.params.id;
-    const cached = await cacheService.getAttendance(studentId);
-    if (cached && !req.variationSeed) {
-      return res.json({ success: true, data: cached });
+
+    if (req.user.role === 'student' && studentId !== String(req.user.id) && studentId !== String(req.user.registration_number)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - students can only view their own attendance'
+      });
     }
 
-    const attendance = sortAttendanceRecords(await listRecords('attendance', {
-      filters: [{ field: 'student_id', value: studentId }]
-    }));
-
-    let data;
-    if (attendance.length > 0) {
-      data = {
-        records: attendance,
-        summary: buildAttendanceSummary(attendance),
-        source: 'firebase'
-      };
-    } else {
-      const snapshot = await getPortalSnapshotForUser({ userId: studentId });
-      const fallbackData = buildAttendanceRouteData(snapshot.normalizedData);
-      data = fallbackData.summary.length
-        ? fallbackData
-        : { records: [], summary: [], source: 'none' };
-    }
-
-    await cacheService.setAttendance(studentId, data, null, 300);
+    const data = await loadAttendanceData(studentId, !req.variationSeed);
 
     if (req.variationSeed) {
       const varied = varyStudentSnapshot({ summary: data.summary || [] }, req.variationSeed);
@@ -202,6 +217,53 @@ router.get('/summary', authMiddleware, async (req, res, next) => {
         subjectWise,
         overall
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/bunk-plan', authMiddleware, async (req, res, next) => {
+  try {
+    const parsedThreshold = Number(req.query.threshold);
+    const threshold = Number.isFinite(parsedThreshold)
+      ? Math.min(100, Math.max(1, parsedThreshold))
+      : 75;
+    const ratio = threshold / 100;
+
+    const data = await loadAttendanceData(String(req.user.id));
+    const subjects = (data.summary || [])
+      .filter((item) => item.total_classes > 0)
+      .map((item) => {
+        const attended = item.present_count;
+        const total = item.total_classes;
+        const canMiss = Math.max(0, Math.floor((attended / ratio) - total + 1e-9));
+        const deficit = (ratio * total) - attended;
+        const recoverNeeded = deficit <= 0
+          ? 0
+          : Math.ceil((deficit / (1 - ratio)) - 1e-9);
+
+        return {
+          subject: item.subject,
+          attended,
+          total,
+          percentage: item.percentage,
+          canMiss,
+          recoverNeeded
+        };
+      });
+
+    const totalAttended = subjects.reduce((sum, item) => sum + item.attended, 0);
+    const totalClasses = subjects.reduce((sum, item) => sum + item.total, 0);
+    const overallPercentage = totalClasses
+      ? Number(((totalAttended * 100) / totalClasses).toFixed(2))
+      : 0;
+
+    res.json({
+      success: true,
+      threshold,
+      subjects,
+      overallPercentage
     });
   } catch (error) {
     next(error);

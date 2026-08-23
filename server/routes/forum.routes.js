@@ -343,23 +343,42 @@ router.post('/questions/:id/answers', verifyToken, async (req, res) => {
 router.post('/questions/:id/upvote', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        
+        const userId = getUserId(req.user);
+
         try {
             const questionRef = db.collection('forum_questions').doc(id);
             const questionDoc = await questionRef.get();
-            
+
             if (questionDoc.exists) {
+                const data = questionDoc.data();
+                const upvotedBy = Array.isArray(data.upvotedBy) ? data.upvotedBy : [];
+                const hasUpvoted = upvotedBy.includes(userId);
+                const updatedUpvotedBy = hasUpvoted
+                    ? upvotedBy.filter((voterId) => voterId !== userId)
+                    : [...upvotedBy, userId];
+                const updatedUpvotes = Math.max(0, (data.upvotes || 0) + (hasUpvoted ? -1 : 1));
+
                 await questionRef.update({
-                    upvotes: (questionDoc.data().upvotes || 0) + 1
+                    upvotes: updatedUpvotes,
+                    upvotedBy: updatedUpvotedBy
+                });
+
+                return res.json({
+                    success: true,
+                    message: hasUpvoted ? 'Question upvote removed' : 'Question upvoted',
+                    upvotes: updatedUpvotes,
+                    userHasUpvoted: !hasUpvoted
                 });
             }
         } catch (firestoreError) {
             console.warn('Firestore error:', firestoreError.message);
         }
-        
+
         res.json({
             success: true,
-            message: 'Question upvoted'
+            message: 'Question upvoted',
+            upvotes: 0,
+            userHasUpvoted: false
         });
     } catch (error) {
         console.error('Upvote error:', error);
@@ -378,14 +397,31 @@ router.post('/questions/:id/upvote', verifyToken, async (req, res) => {
 router.post('/answers/:id/upvote', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        
+        const userId = getUserId(req.user);
+
         try {
             const answerRef = db.collection('forum_answers').doc(id);
             const answerDoc = await answerRef.get();
-            
+
             if (answerDoc.exists) {
+                const data = answerDoc.data();
+                const upvotedBy = Array.isArray(data.upvotedBy) ? data.upvotedBy : [];
+                const hasUpvoted = upvotedBy.includes(userId);
+                const updatedUpvotedBy = hasUpvoted
+                    ? upvotedBy.filter((voterId) => voterId !== userId)
+                    : [...upvotedBy, userId];
+                const updatedUpvotes = Math.max(0, (data.upvotes || 0) + (hasUpvoted ? -1 : 1));
+
                 await answerRef.update({
-                    upvotes: (answerDoc.data().upvotes || 0) + 1
+                    upvotes: updatedUpvotes,
+                    upvotedBy: updatedUpvotedBy
+                });
+
+                return res.json({
+                    success: true,
+                    message: hasUpvoted ? 'Answer upvote removed' : 'Answer upvoted',
+                    upvotes: updatedUpvotes,
+                    userHasUpvoted: !hasUpvoted
                 });
             }
         } catch (firestoreError) {
@@ -394,7 +430,9 @@ router.post('/answers/:id/upvote', verifyToken, async (req, res) => {
         
         res.json({
             success: true,
-            message: 'Answer upvoted'
+            message: 'Answer upvoted',
+            upvotes: 0,
+            userHasUpvoted: false
         });
     } catch (error) {
         console.error('Upvote error:', error);
@@ -413,9 +451,52 @@ router.post('/answers/:id/upvote', verifyToken, async (req, res) => {
 router.post('/answers/:id/accept', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = getUserId(req.user);
         
         try {
-            await db.collection('forum_answers').doc(id).update({
+            const answerDoc = await db.collection('forum_answers').doc(id).get();
+            
+            if (!answerDoc.exists) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Answer not found'
+                });
+            }
+            
+            const answer = answerDoc.data();
+            
+            const questionDoc = await db.collection('forum_questions').doc(answer.question_id).get();
+            
+            if (!questionDoc.exists) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Question not found'
+                });
+            }
+            
+            if ((questionDoc.data().user_id || null) !== userId) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only the question author can accept an answer'
+                });
+            }
+            
+            const siblingsSnapshot = await db.collection('forum_answers')
+                .where('question_id', '==', answer.question_id)
+                .get();
+            
+            const batch = db.batch();
+            siblingsSnapshot.docs.forEach((doc) => {
+                if (doc.id !== id && doc.data().is_accepted) {
+                    batch.update(doc.ref, { is_accepted: false });
+                }
+            });
+            batch.update(answerDoc.ref, { is_accepted: true });
+            await batch.commit();
+            
+            return res.json({
+                success: true,
+                message: 'Answer accepted',
                 is_accepted: true
             });
         } catch (firestoreError) {
@@ -424,7 +505,8 @@ router.post('/answers/:id/accept', verifyToken, async (req, res) => {
         
         res.json({
             success: true,
-            message: 'Answer accepted'
+            message: 'Answer accepted',
+            is_accepted: true
         });
     } catch (error) {
         console.error('Accept answer error:', error);

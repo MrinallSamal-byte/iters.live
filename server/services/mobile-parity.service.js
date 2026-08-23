@@ -1130,6 +1130,162 @@ function buildPortalTimetable(normalizedData) {
   });
 }
 
+function buildBunkPlan(summaryRows, threshold = 75) {
+  const ratio = threshold / 100;
+  const subjects = asArray(summaryRows)
+    .filter((item) => toNumber(item.total_classes, 0) > 0)
+    .map((item) => {
+      const attended = toNumber(item.present_count, 0);
+      const total = toNumber(item.total_classes, 0);
+      const canMiss = Math.max(0, Math.floor((attended / ratio) - total + 1e-9));
+      const deficit = (ratio * total) - attended;
+      const recoverNeeded = deficit <= 0
+        ? 0
+        : Math.ceil((deficit / (1 - ratio)) - 1e-9);
+
+      return {
+        subject: item.subject || 'Subject',
+        attended,
+        total,
+        percentage: toNumber(item.percentage, 0),
+        canMiss,
+        recoverNeeded
+      };
+    });
+
+  const totalAttended = subjects.reduce((sum, item) => sum + item.attended, 0);
+  const totalClasses = subjects.reduce((sum, item) => sum + item.total, 0);
+  const overallPercentage = totalClasses
+    ? Number(((totalAttended * 100) / totalClasses).toFixed(2))
+    : 0;
+
+  return { threshold, subjects, overallPercentage };
+}
+
+function parseAgendaTimestamp(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function resolveEventDueAt(event) {
+  const deadlineTimestamp = parseAgendaTimestamp(event.registration_deadline);
+  if (deadlineTimestamp !== null) {
+    return deadlineTimestamp;
+  }
+
+  const time = String(event.event_time || '');
+  if (/^\d{1,2}:\d{2}/.test(time)) {
+    const combinedTimestamp = parseAgendaTimestamp(`${String(event.event_date)}T${time.slice(0, 5)}:00`);
+    if (combinedTimestamp !== null) {
+      return combinedTimestamp;
+    }
+  }
+
+  return parseAgendaTimestamp(event.event_date);
+}
+
+async function buildUpcomingAgenda(user, eventRows = []) {
+  const now = Date.now();
+  const graceWindow = 12 * 60 * 60 * 1000;
+  const items = [];
+
+  try {
+    const assignments = await listRecords('assignments', {
+      filters: [
+        { field: 'department', value: user.department },
+        { field: 'year', value: user.year }
+      ]
+    });
+
+    for (const assignment of asArray(assignments)) {
+      if (assignment.is_active === false) continue;
+      const dueAt = parseAgendaTimestamp(assignment.deadline);
+      if (dueAt === null || dueAt < now - graceWindow) continue;
+      items.push({
+        id: toId(assignment.id, 'assignment'),
+        type: 'assignment',
+        title: assignment.title || 'Assignment',
+        dueAt: new Date(dueAt).toISOString()
+      });
+    }
+  } catch (_) {
+    void 0;
+  }
+
+  for (const event of asArray(eventRows)) {
+    if (event.is_active === false) continue;
+    const dueAt = resolveEventDueAt(event);
+    if (dueAt === null || dueAt < now - graceWindow) continue;
+    items.push({
+      id: toId(event.id, 'event'),
+      type: 'event',
+      title: event.title || 'Event',
+      dueAt: new Date(dueAt).toISOString()
+    });
+  }
+
+  items.sort((left, right) => left.dueAt.localeCompare(right.dueAt));
+  return items.slice(0, 10);
+}
+
+function gradePointOfMark(record) {
+  const total = toNumber(record.total_marks, 0);
+  if (!(total > 0)) return null;
+  return (toNumber(record.marks_obtained, 0) / total) * 10;
+}
+
+function creditsOfMark(record) {
+  const parsed = Number(record.credits);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function buildCgpaProjection(markRows, targetCgpa = 8.5) {
+  const withPoints = asArray(markRows).filter((record) => gradePointOfMark(record) !== null);
+  if (withPoints.length === 0) return null;
+
+  const creditRecords = withPoints.filter((record) => creditsOfMark(record) !== null);
+  let currentCgpa;
+  let completedCredits;
+  let averageSemesterCredits = null;
+
+  if (creditRecords.length > 0) {
+    const semesters = new Map();
+    for (const record of creditRecords) {
+      const semester = record.semester || 'Unknown';
+      if (!semesters.has(semester)) {
+        semesters.set(semester, { qualityPoints: 0, credits: 0 });
+      }
+      const item = semesters.get(semester);
+      const credits = creditsOfMark(record);
+      item.qualityPoints += gradePointOfMark(record) * credits;
+      item.credits += credits;
+    }
+
+    const entries = Array.from(semesters.values());
+    const qualityPoints = entries.reduce((sum, item) => sum + item.qualityPoints, 0);
+    completedCredits = entries.reduce((sum, item) => sum + item.credits, 0);
+    currentCgpa = Number((qualityPoints / completedCredits).toFixed(2));
+    averageSemesterCredits = completedCredits / entries.length;
+  } else {
+    currentCgpa = Number((withPoints.reduce((total, record) => total + gradePointOfMark(record), 0) / withPoints.length).toFixed(2));
+    completedCredits = null;
+  }
+
+  if (!(averageSemesterCredits > 0)) return null;
+
+  const futureCredits = averageSemesterCredits;
+  const projectedTotalCredits = completedCredits + futureCredits;
+  const requiredRaw = ((projectedTotalCredits * targetCgpa) - (currentCgpa * completedCredits)) / futureCredits;
+
+  return {
+    currentCgpa,
+    targetCgpa,
+    requiredAverageSgpa: Number(Math.max(0, requiredRaw).toFixed(2)),
+    feasible: requiredRaw <= 10
+  };
+}
+
 async function getStudentSnapshot(user) {
   const portalSnapshot = await getPortalStudentData(user);
   const attendanceRecords = await safeQuery(
@@ -1324,6 +1480,27 @@ async function getStudentSnapshot(user) {
     ? Number((effectiveMarkSummary.reduce((acc, row) => acc + (toNumber(row.avg_marks, 0) / Math.max(toNumber(row.avg_total, 100), 1)) * 10, 0) / effectiveMarkSummary.length).toFixed(2))
     : 0;
 
+  let bunkPlan = null;
+  try {
+    bunkPlan = buildBunkPlan(effectiveAttendanceSummary);
+  } catch (_) {
+    void 0;
+  }
+
+  let agendaUpcoming = [];
+  try {
+    agendaUpcoming = await buildUpcomingAgenda(user, events);
+  } catch (_) {
+    void 0;
+  }
+
+  let cgpaProjection = null;
+  try {
+    cgpaProjection = buildCgpaProjection(portalMarksData.marks);
+  } catch (_) {
+    void 0;
+  }
+
   return {
     dashboardMetrics: [
       { title: 'Attendance', value: `${attendancePercent}%`, detail: 'Overall attendance' },
@@ -1338,6 +1515,10 @@ async function getStudentSnapshot(user) {
       lastSynced: portalSnapshot?.status?.lastSynced || null,
       dataSource: portalSnapshot?.status?.dataSource || null
     },
+    bunkPlan,
+    agendaUpcoming,
+    cgpaProjection,
+    calendarUrl: '/api/calendar.ics',
     student: {
       attendance: {
         records: normalizedAttendanceRecords,
@@ -1597,6 +1778,18 @@ async function buildSnapshot(user) {
 
   if (rolePayload.student) {
     snapshot.student = rolePayload.student;
+  }
+  if (rolePayload.bunkPlan) {
+    snapshot.bunkPlan = rolePayload.bunkPlan;
+  }
+  if (rolePayload.agendaUpcoming) {
+    snapshot.agendaUpcoming = rolePayload.agendaUpcoming;
+  }
+  if (rolePayload.cgpaProjection) {
+    snapshot.cgpaProjection = rolePayload.cgpaProjection;
+  }
+  if (rolePayload.calendarUrl) {
+    snapshot.calendarUrl = rolePayload.calendarUrl;
   }
   if (rolePayload.teacher) {
     snapshot.teacher = rolePayload.teacher;
