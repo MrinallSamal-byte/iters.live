@@ -91,7 +91,7 @@
 .legend-box {
     width: 16px;
     height: 16px;
-    border-radius: 3px;
+    border-radius: 0;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -147,7 +147,7 @@
 .heatmap-day {
     width: 14px;
     height: 14px;
-    border-radius: 3px;
+    border-radius: 0;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);

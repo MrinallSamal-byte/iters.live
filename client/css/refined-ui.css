@@ -896,6 +896,37 @@ body:not(.nothing-home) .theme-toggle {
     border-radius: var(--r-radius) !important;
 }
 
+/* extended normalization - catches legacy radius rules in any stylesheet */
+body:not(.nothing-home) .stat-card,
+body:not(.nothing-home) .badge,
+body:not(.nothing-home) .btn-icon,
+body:not(.nothing-home) .btn-icon-sm,
+body:not(.nothing-home) .progress-bar,
+body:not(.nothing-home) .progress-fill,
+body:not(.nothing-home) .progress-bar-fill,
+body:not(.nothing-home) .chart-card,
+body:not(.nothing-home) .priority-badge,
+body:not(.nothing-home) .grade-badge,
+body:not(.nothing-home) .form-group textarea,
+body:not(.nothing-home) .id-card,
+body:not(.nothing-home) .dashboard-nav,
+body:not(.nothing-home) .chatbot-container,
+body:not(.nothing-home) .chatbot-header,
+body:not(.nothing-home) .legend-box,
+body:not(.nothing-home) .heatmap-day,
+body:not(.nothing-home) .empty-state,
+body:not(.nothing-home) .modal-content,
+body:not(.nothing-home) .modal-body,
+body:not(.nothing-home) .data-table,
+body:not(.nothing-home) .modern-table {
+    border-radius: var(--r-radius) !important;
+}
+
+/* ponytail: ~150 long-tail radius values remain in legacy css on obscure/dead
+   selectors (skeleton placeholders, inert orbs, orphaned rules). They are
+   either overridden by the normalizers above or never render. Full purge =
+   rewriting every legacy stylesheet, tracked as tech debt. */
+
 /* ------------------------------------------------------------
    Small-screen safety
    ------------------------------------------------------------ */

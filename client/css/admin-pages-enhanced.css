@@ -1034,3 +1034,11 @@
 .modal-overlay {
   backdrop-filter: none !important;
 }
+
+/* view toggles, checkboxes, announcement cards - squared */
+.view-toggle,
+.view-btn,
+.form-checkbox,
+.announcement-card {
+  border-radius: 0;
+}

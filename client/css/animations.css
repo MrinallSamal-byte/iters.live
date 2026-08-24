@@ -155,7 +155,7 @@ body.animations-ready .scroll-reveal:not(.revealed) {
     );
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s ease-in-out infinite;
-    border-radius: 8px;
+    border-radius: 2px;
     min-height: 20px;
 }
 
@@ -770,7 +770,7 @@ html {
 
 .skeleton-input {
     height: 44px;
-    border-radius: 8px;
+    border-radius: 2px;
     margin-bottom: 1rem;
 }
 
