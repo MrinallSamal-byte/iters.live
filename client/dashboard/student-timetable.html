@@ -56,7 +56,7 @@
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📅</span> Class Timetable </h1>
+                    <h1 class="page-title">Class Timetable</h1>
                     <p class="page-subtitle">Your weekly schedule at a glance</p>
                 </div>
                 <div class="current-class-badge" id="currentClassBadge">
@@ -168,7 +168,6 @@
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
         }
         
         .hero-content-inline {
@@ -189,10 +188,6 @@
             gap: 1rem;
         }
         
-        .title-icon {
-            font-size: 2.5rem;
-        }
-        
         .page-subtitle {
             font-size: 1.125rem;
             color: var(--text-secondary);
@@ -203,9 +198,9 @@
             align-items: center;
             gap: 1rem;
             padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-            border: 2px solid rgba(99, 102, 241, 0.4);
-            border-radius: var(--radius-lg);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 0;
         }
         
         .badge-icon {
@@ -218,11 +213,13 @@
         }
         
         .badge-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 0.16em;
+            color: #757575;
             text-transform: uppercase;
         }
-        
+
         .badge-value {
             font-size: 1.125rem;
             font-weight: 600;
@@ -258,15 +255,19 @@
         }
         
         .timetable-table thead tr {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            background: transparent;
         }
-        
+
         .timetable-table th {
             padding: 1rem 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.62rem;
             font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #757575;
             text-align: center;
             border: 1px solid var(--glass-border);
-            font-size: 0.9rem;
         }
         
         .timetable-table td {
@@ -278,30 +279,41 @@
         
         .day-column {
             font-weight: 700;
-            background: rgba(99, 102, 241, 0.15);
+            background: rgba(255, 255, 255, 0.04);
             position: sticky;
             left: 0;
             z-index: 10;
         }
-        
+
         .break-column {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(255, 255, 255, 0.02);
         }
-        
+
         .class-cell {
             background: var(--glass-bg);
-            border-left: 3px solid var(--primary);
+            border-left: 2px solid var(--primary);
             cursor: pointer;
         }
-        
+
         .class-cell:hover {
-            background: rgba(99, 102, 241, 0.15);
-            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.06);
         }
-        
+
+        body.light-theme .day-column {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        body.light-theme .break-column {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        body.light-theme .class-cell:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
         .class-name {
-            font-weight: 600;
-            color: var(--primary);
+            font-weight: 700;
+            color: var(--text-primary);
             display: block;
             margin-bottom: 0.25rem;
         }
@@ -324,14 +336,17 @@
             padding: 1.5rem;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            transition: all 0.3s ease;
+            border-radius: 0;
+            transition: border-color 0.15s ease, background 0.15s ease;
         }
-        
+
         .schedule-item:hover {
-            transform: translateX(10px);
             border-color: var(--primary);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        body.light-theme .schedule-item:hover {
+            background: rgba(0, 0, 0, 0.03);
         }
         
         @media (max-width: 768px) {
@@ -354,7 +369,7 @@
             margin-top: 0.6rem;
             padding: 0.5rem 0.9rem;
             border: 1px solid var(--primary);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.68rem;
             letter-spacing: 0.12em;
@@ -364,7 +379,7 @@
         }
 
         .reconnect-cta:hover {
-            background: rgba(255, 90, 79, 0.08);
+            background: rgba(215, 25, 33, 0.08);
         }
 
         .cache-badge {
@@ -372,7 +387,7 @@
             margin-top: 0.5rem;
             padding: 0.25rem 0.6rem;
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.66rem;
             letter-spacing: 0.12em;

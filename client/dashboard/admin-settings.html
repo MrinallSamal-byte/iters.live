@@ -618,5 +618,473 @@
     <script src="/js/chatbot.js"></script>
 
     <link rel="stylesheet" href="/css/admin-pages-enhanced.css">
+
+    <style>
+        /* ---- NOTHING EDITION - page-local normalization (overrides admin-pages-enhanced.css) ---- */
+
+        .page-hero {
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--r-radius, 2px);
+        }
+
+        .page-title {
+            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            margin-bottom: 0.5rem;
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .title-icon {
+            font-size: 0.8em;
+        }
+
+        .page-subtitle {
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--r-text-3, #757575);
+        }
+
+        .stat-subtext {
+            font-size: 0.76rem;
+            color: var(--r-text-3, #757575);
+            margin-top: 0.25rem;
+        }
+
+        /* hero actions - Save All is the page's primary action */
+        .btn-success {
+            background: var(--r-accent, #d71921);
+            border: 1px solid var(--r-accent, #d71921);
+            color: #ffffff;
+            border-radius: var(--r-radius, 2px);
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            box-shadow: none;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: var(--r-accent-deep, #a31016);
+            border-color: var(--r-accent-deep, #a31016);
+        }
+
+        /* settings tabs - squared mono */
+        .settings-tabs {
+            border-bottom: 1px dotted var(--r-line-strong, #333);
+        }
+
+        .settings-tab {
+            border: 1px solid var(--r-line-strong, #333);
+            border-radius: var(--r-radius, 2px);
+            color: var(--r-text-2, #b0b0b0);
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.66rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+        }
+
+        .tab-icon {
+            font-size: 1rem;
+        }
+
+        .settings-tab:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--r-text, #f4f4f4);
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .settings-tab.active {
+            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
+            border-color: rgba(215, 25, 33, 0.4);
+            color: var(--r-accent, #d71921);
+        }
+
+        /* sections - hairline panels */
+        .settings-section {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: var(--r-radius, 2px);
+        }
+
+        .settings-section-title {
+            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            color: var(--r-text, #f4f4f4);
+            border-bottom: 1px dotted var(--r-line-strong, #333);
+        }
+
+        .settings-section-title .title-icon {
+            font-family: inherit;
+        }
+
+        /* forms - sharp hairline inputs */
+        .form-label {
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.64rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--r-text-3, #757575);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: var(--r-radius, 2px);
+            color: var(--r-text, #f4f4f4);
+            font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+            box-shadow: none;
+            transition: border-color 140ms ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--r-accent, #d71921);
+            box-shadow: none;
+        }
+
+        .form-hint {
+            font-style: normal;
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--r-text-3, #757575);
+        }
+
+        /* toggles - squared switch, red when on */
+        .toggle-label {
+            background: transparent;
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: var(--r-radius, 2px);
+            transition: border-color 140ms ease, background 140ms ease;
+        }
+
+        .toggle-label:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 20px;
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.08));
+            border: 1px solid var(--r-line-strong, #333);
+            border-radius: 0;
+            transition: background 140ms ease, border-color 140ms ease;
+        }
+
+        .toggle-switch::before {
+            width: 14px;
+            height: 14px;
+            border-radius: 0;
+            background: var(--r-text-3, #757575);
+            top: 2px;
+            left: 2px;
+            transition: transform 140ms ease, background 140ms ease;
+        }
+
+        .toggle-input:checked + .toggle-switch {
+            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
+            border-color: var(--r-accent, #d71921);
+        }
+
+        .toggle-input:checked + .toggle-switch::before {
+            transform: translateX(20px);
+            background: var(--r-accent, #d71921);
+        }
+
+        .toggle-text strong {
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .toggle-text small {
+            color: var(--r-text-3, #757575);
+        }
+
+        /* database action cards / info grid / activity log - sharp hairlines */
+        .action-card {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: var(--r-radius, 2px);
+            transition: border-color 140ms ease, transform 140ms ease;
+        }
+
+        .action-card:hover {
+            transform: none;
+            border-color: var(--r-accent, #d71921);
+        }
+
+        .action-card h4 {
+            font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+            font-weight: 600;
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .action-card p {
+            color: var(--r-text-3, #757575);
+        }
+
+        .action-card .btn {
+            border-radius: var(--r-radius, 2px);
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.66rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .btn-warning {
+            background: transparent;
+            border: 1px solid rgba(215, 25, 33, 0.4);
+            color: var(--r-accent, #d71921);
+        }
+
+        .btn-info,
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--r-line-strong, #333);
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .info-item {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: var(--r-radius, 2px);
+        }
+
+        .info-label {
+            display: block;
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--r-text-3, #757575);
+            margin-bottom: 0.35rem;
+        }
+
+        .info-value {
+            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            text-transform: uppercase;
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .activity-item {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-left: 2px solid var(--r-line-strong, #333);
+            border-radius: var(--r-radius, 2px);
+        }
+
+        .activity-icon {
+            background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
+            border: 1px solid var(--r-line, #1f1f1f);
+            border-radius: 0;
+        }
+
+        .activity-details strong {
+            color: var(--r-text, #f4f4f4);
+        }
+
+        .activity-details small {
+            color: var(--r-text-3, #757575);
+        }
+
+        .activity-time {
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--r-text-3, #757575);
+            white-space: nowrap;
+        }
+
+        /* file upload - dashed hairline */
+        .file-upload-area {
+            border: 1px dashed var(--r-line-strong, #333);
+            border-radius: var(--r-radius, 2px);
+            transition: border-color 140ms ease, background 140ms ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--r-accent, #d71921);
+            background: var(--r-accent-wash, rgba(215, 25, 33, 0.05));
+        }
+
+        .file-upload-label span {
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--r-text-2, #b0b0b0);
+        }
+
+        .file-upload-label small {
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--r-text-3, #757575);
+        }
+
+        /* re-point legacy tokens */
+        :root {
+            --error: #d71921;
+            --success: #e8e8e8;
+            --warning: #d71921;
+        }
+
+        /* Dark theme improvements */
+        [data-theme="dark"] .page-title,
+        [data-theme="dark"] .page-subtitle,
+        [data-theme="dark"] .settings-section-title,
+        [data-theme="dark"] .toggle-text strong,
+        [data-theme="dark"] .activity-details strong,
+        [data-theme="dark"] .info-value,
+        [data-theme="dark"] .action-card h4 {
+            color: #f4f4f4;
+        }
+
+        [data-theme="dark"] .settings-tab,
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] .form-hint,
+        [data-theme="dark"] .stat-subtext,
+        [data-theme="dark"] .toggle-text small,
+        [data-theme="dark"] .activity-details small,
+        [data-theme="dark"] .activity-time,
+        [data-theme="dark"] .info-label,
+        [data-theme="dark"] .action-card p {
+            color: #b0b0b0;
+        }
+
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background: #0a0a0a !important;
+            border-color: #1f1f1f;
+            color: #f4f4f4;
+        }
+
+        /* Light theme normalization */
+        body.light-theme .page-title,
+        body.light-theme .settings-section-title,
+        body.light-theme .toggle-text strong,
+        body.light-theme .activity-details strong,
+        body.light-theme .info-value,
+        body.light-theme .action-card h4 {
+            color: #0d0d0d;
+        }
+
+        body.light-theme .page-subtitle,
+        body.light-theme .settings-tab,
+        body.light-theme .form-label,
+        body.light-theme .form-hint,
+        body.light-theme .stat-subtext,
+        body.light-theme .toggle-text small,
+        body.light-theme .activity-details small,
+        body.light-theme .activity-time,
+        body.light-theme .info-label,
+        body.light-theme .action-card p,
+        body.light-theme .file-upload-label span,
+        body.light-theme .file-upload-label small {
+            color: #757575;
+        }
+
+        body.light-theme .settings-tab:hover {
+            border-color: #0d0d0d;
+            color: #0d0d0d;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        body.light-theme .settings-tab.active {
+            background: rgba(215, 25, 33, 0.07);
+            border-color: rgba(215, 25, 33, 0.4);
+            color: #d71921;
+        }
+
+        body.light-theme .settings-section {
+            background: #ffffff;
+            border-color: #e4e4e4;
+        }
+
+        body.light-theme .settings-section-title {
+            border-bottom-color: #e4e4e4;
+        }
+
+        body.light-theme .settings-tabs {
+            border-bottom-color: #e4e4e4;
+        }
+
+        body.light-theme .form-input,
+        body.light-theme .form-select,
+        body.light-theme .form-textarea {
+            background: #ffffff;
+            border-color: #e4e4e4;
+            color: #0d0d0d;
+        }
+
+        body.light-theme .form-input:focus,
+        body.light-theme .form-select:focus,
+        body.light-theme .form-textarea:focus {
+            border-color: #d71921;
+        }
+
+        body.light-theme .toggle-label,
+        body.light-theme .action-card,
+        body.light-theme .info-item {
+            background: #ffffff;
+            border-color: #e4e4e4;
+        }
+
+        body.light-theme .toggle-label:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        body.light-theme .activity-item {
+            background: #ffffff;
+            border-color: #e4e4e4;
+            border-left-color: #c9c9c9;
+        }
+
+        body.light-theme .activity-icon {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: #e4e4e4;
+        }
+
+        body.light-theme .toggle-switch {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: #c9c9c9;
+        }
+
+        body.light-theme .toggle-switch::before {
+            background: #8a8a8a;
+        }
+
+        body.light-theme .btn-secondary,
+        body.light-theme .btn-info {
+            border-color: #c9c9c9;
+            color: #0d0d0d;
+        }
+
+        body.light-theme .file-upload-area {
+            border-color: #c9c9c9;
+        }
+    </style>
 </body>
 </html>

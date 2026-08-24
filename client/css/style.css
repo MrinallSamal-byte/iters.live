@@ -49,9 +49,9 @@
 
 /* Light Theme */
 body.light-theme {
-    --bg-primary: #f4efe7;
-    --bg-secondary: #fcfaf6;
-    --bg-tertiary: #ebe4da;
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-tertiary: #f0f0f0;
     --text-primary: #161616;
     --text-secondary: #5b544d;
     --text-muted: #7b746d;
@@ -198,7 +198,7 @@ body.light-theme [style*="rgba(255,255,255"] {
 
 /* Sidebar and menu hover states */
 body.light-theme .sidebar-nav {
-    background: linear-gradient(180deg, rgba(215, 25, 33, 0.08) 0%, rgba(215, 25, 33, 0.08) 100%);
+    background: #fbfbfb;
     border-right-color: rgba(2, 6, 23, 0.08);
 }
 body.light-theme .sidebar-menu-item:hover {
@@ -2577,7 +2577,7 @@ body:not(.nothing-home)::after {
     z-index: -1;
     pointer-events: none;
     background:
-        linear-gradient(180deg, rgba(215, 25, 33, 0.08), transparent 24%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 24%),
         linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 52%, transparent 100%);
     opacity: 0.85;
 }
@@ -2644,7 +2644,7 @@ body:not(.nothing-home) .timetable-wrapper {
     position: relative;
     overflow: hidden;
     background:
-        linear-gradient(180deg, rgba(215, 25, 33, 0.08), transparent 20%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 20%),
         rgba(14, 14, 14, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 28px;
@@ -2677,7 +2677,7 @@ body.light-theme:not(.nothing-home) .summary-item,
 body.light-theme:not(.nothing-home) .table-container,
 body.light-theme:not(.nothing-home) .timetable-wrapper {
     background:
-        linear-gradient(180deg, rgba(215, 25, 33, 0.08), transparent 20%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 20%),
         rgba(255, 255, 255, 0.86);
     border-color: rgba(19, 19, 19, 0.08);
     box-shadow: 0 22px 48px rgba(44, 33, 21, 0.12);

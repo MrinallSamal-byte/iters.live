@@ -156,58 +156,59 @@
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
         }
-        
+
         .page-title {
             font-size: 2.5rem;
-            font-weight: 700;
             margin-bottom: 0.5rem;
-            color: var(--text-primary);
+            color: var(--r-text);
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
+
         .title-icon {
             font-size: 2.5rem;
         }
-        
+
         .page-subtitle {
             font-size: 1.125rem;
-            color: var(--text-secondary);
+            color: var(--r-text-3);
         }
-        
+
         .block-tabs {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
             margin-top: 1.5rem;
         }
-        
+
         .block-tab {
-            padding: 1rem 2rem;
-            background: var(--glass-bg);
-            border: 2px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            color: var(--text-secondary);
-            font-weight: 600;
+            padding: 0.7rem 1.6rem;
+            background: transparent;
+            border: 1px solid var(--r-line-strong);
+            border-radius: 2px;
+            color: var(--r-text-2);
+            font-family: var(--r-font-mono);
+            font-size: 0.68rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
         }
-        
+
         .block-tab:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
+            border-color: var(--r-accent);
+            color: var(--r-text);
         }
-        
+
         .block-tab.active {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-color: var(--primary);
-            color: white;
+            background: var(--r-accent);
+            border-color: var(--r-accent);
+            color: #ffffff;
         }
-        
+
         .date-selector {
             display: flex;
             align-items: center;
@@ -215,149 +216,168 @@
             flex-wrap: wrap;
             margin-top: 1.5rem;
         }
-        
+
         .date-input {
             flex: 1;
             min-width: 200px;
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--glass-border);
-            background: var(--glass-bg);
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            padding: 0.85rem 1.25rem;
+            border-radius: 2px;
+            border: 1px solid var(--r-line-strong);
+            background: var(--r-panel-inset);
+            color: var(--r-text);
+            font-family: var(--r-font-mono);
+            font-size: 0.85rem;
+            transition: border-color 160ms ease;
         }
-        
+
         .date-input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--r-accent);
         }
-        
+
         .date-nav-btn {
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius-lg);
-            background: var(--glass-bg);
-            border: 2px solid var(--glass-border);
-            color: var(--text-primary);
-            font-weight: 600;
+            padding: 0.85rem 1.4rem;
+            border-radius: 2px;
+            background: transparent;
+            border: 1px solid var(--r-line-strong);
+            color: var(--r-text-2);
+            font-family: var(--r-font-mono);
+            font-size: 0.66rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
         }
-        
+
         .date-nav-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-            transform: translateY(-2px);
+            background: transparent;
+            border-color: var(--r-accent);
+            color: var(--r-accent);
         }
-        
+
         .menu-container {
             margin-top: 1.5rem;
         }
-        
+
         .meal-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
+            background: var(--r-panel-raised);
+            border: 1px solid var(--r-line);
+            border-radius: 2px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
+            transition: border-color 160ms ease;
         }
-        
+
         .meal-card:hover {
-            transform: translateX(5px);
-            border-color: var(--primary);
+            border-color: var(--r-line-strong);
         }
-        
+
         .meal-type {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-family: var(--r-font-display);
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding-bottom: 0.75rem;
             margin-bottom: 1rem;
-            color: var(--primary);
+            border-bottom: 1px dotted var(--r-line-strong);
+            color: var(--r-text);
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-        
+
         .meal-icon {
-            font-size: 2rem;
+            font-size: 1.6rem;
         }
-        
+
         .meal-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
+            display: block;
         }
-        
+
         .meal-item {
-            background: rgba(99, 102, 241, 0.1);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-full);
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: block;
+            width: 100%;
+            padding: 0.65rem 0;
+            border-bottom: 1px dotted var(--r-line-strong);
+            font-size: 0.92rem;
+            color: var(--r-text-2);
+            background: transparent;
+            border-radius: 0;
         }
-        
+
+        .meal-item:last-child {
+            border-bottom: none;
+        }
+
         .info-card {
             display: flex;
             gap: 1.5rem;
             padding: 1.5rem;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
-            border-left: 4px solid var(--primary);
-            border-radius: var(--radius-lg);
+            background: var(--r-panel-raised);
+            border: 1px solid var(--r-line);
+            border-left: 2px solid var(--r-accent);
+            border-radius: 0;
         }
-        
+
         .info-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             flex-shrink: 0;
         }
-        
+
         .info-content h4 {
-            color: var(--primary);
+            color: var(--r-text);
             margin-bottom: 0.75rem;
-            font-size: 1.125rem;
+            font-family: var(--r-font-mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
         }
-        
+
         .info-content ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .info-content li {
-            padding: 0.5rem 0;
+            padding: 0.45rem 0;
             padding-left: 1.5rem;
             position: relative;
-            color: var(--text-secondary);
+            color: var(--r-text-2);
+            font-size: 0.92rem;
         }
-        
+
         .info-content li::before {
-            content: "•";
+            content: "+";
             position: absolute;
             left: 0;
-            color: var(--primary);
+            top: 0.42rem;
+            color: var(--r-accent);
+            font-family: var(--r-font-mono);
             font-weight: bold;
-            font-size: 1.25rem;
+            font-size: 0.8rem;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
-            color: var(--text-secondary);
+            color: var(--r-text-3);
         }
-        
+
         .empty-state-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
-        
+
         @media (max-width: 768px) {
             .date-selector {
                 flex-direction: column;
             }
-            
+
             .date-input, .date-nav-btn {
                 width: 100%;
             }

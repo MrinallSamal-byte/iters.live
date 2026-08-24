@@ -287,6 +287,11 @@
     <script src="/js/chatbot.js"></script>
     
     <style>
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+        }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -303,19 +308,6 @@
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
-        }
-
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .page-subtitle {
-            font-size: 1.125rem;
-            color: var(--text-secondary);
         }
 
         .chart-wrapper {
@@ -323,78 +315,38 @@
         }
 
         .quick-links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
             margin-top: 1rem;
-        }
-
-        .quick-link-card {
-            padding: 1.5rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .quick-link-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
-        }
-
-        .quick-link-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-
-        .quick-link-content h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 1rem;
-        }
-
-        .quick-link-content p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .stat-subtext {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
         }
 
         .schedule-list {
             margin-top: 1rem;
             display: grid;
-            gap: 1rem;
+            gap: 0.65rem;
         }
 
         .schedule-item {
-            padding: 1rem;
-            background: var(--glass-bg);
-            border-left: 4px solid var(--primary);
-            border-radius: var(--radius-md);
+            padding: 0.9rem 1rem;
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line);
+            border-radius: var(--r-radius);
             display: flex;
             gap: 1rem;
-            transition: all 0.2s ease;
+            transition: border-color 140ms ease;
         }
 
         .schedule-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            border-color: var(--r-line-strong);
         }
 
         .schedule-time {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 0.875rem;
+            font-family: var(--r-font-mono);
+            font-weight: 500;
+            color: var(--r-text-2);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
             white-space: nowrap;
+            padding-top: 0.2rem;
         }
 
         .schedule-details {
@@ -402,72 +354,129 @@
         }
 
         .schedule-subject {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
+            color: var(--r-text);
+            margin-bottom: 0.2rem;
         }
 
         .schedule-info {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+            font-size: 0.78rem;
+            color: var(--r-text-3);
+        }
+
+        .notification-badge {
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--r-warn);
+            background: var(--r-accent-wash);
+            border: 1px solid rgba(215, 25, 33, 0.4);
+            border-radius: 0;
+            padding: 0.22rem 0.55rem;
+        }
+
+        .announcements-list {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .announcement-item {
+            padding: 0.9rem 1rem;
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line);
+            border-radius: var(--r-radius);
+        }
+
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            font-family: var(--r-font-mono);
+            font-size: 0.6rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            border-radius: 0;
+            padding: 0.22rem 0.55rem;
+            border: 1px solid transparent;
+        }
+
+        .priority-info {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--r-text-2);
+            border-color: var(--r-line-strong);
+        }
+
+        .priority-reminder {
+            background: var(--r-accent-wash);
+            color: var(--r-warn);
+            border-color: rgba(215, 25, 33, 0.4);
+        }
+
+        body.light-theme .priority-info {
+            background: rgba(0, 0, 0, 0.05);
+            color: #0d0d0d;
+        }
+
+        .announcement-date {
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--r-text-3);
+        }
+
+        .announcement-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--r-text);
+            margin-bottom: 0.25rem;
+        }
+
+        .announcement-text {
+            font-size: 0.84rem;
+            color: var(--r-text-2);
         }
 
         .loading-text {
             text-align: center;
             padding: 2rem;
-            color: var(--text-secondary);
+            color: var(--r-text-3);
         }
 
         .modern-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
         }
 
-        .modern-table thead tr {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border-radius: var(--r-radius);
+            border: 1px solid transparent;
+            cursor: pointer;
         }
 
-        .modern-table th {
-            padding: 1rem;
-            font-weight: 600;
-            text-align: left;
-            border-bottom: 2px solid var(--glass-border);
-            color: var(--text-primary);
-        }
-
-        .modern-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--glass-border);
-            color: var(--text-primary);
-        }
-
-        .modern-table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .modern-table tbody tr:hover {
-            background: var(--glass-bg);
-        }
-
-        /* Dark theme improvements */
-        [data-theme="dark"] .modern-table th,
-        [data-theme="dark"] .modern-table td,
-        [data-theme="dark"] .quick-link-content h4,
-        [data-theme="dark"] .schedule-subject {
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .quick-link-content p,
-        [data-theme="dark"] .stat-subtext,
-        [data-theme="dark"] .schedule-info {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        [data-theme="dark"] .schedule-time {
-            color: rgba(99, 102, 241, 0.9);
+        .btn-small:disabled {
+            background: transparent !important;
+            border-color: var(--r-line) !important;
+            color: var(--r-text-3) !important;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
     </style>
 </body>

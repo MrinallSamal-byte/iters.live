@@ -41,6 +41,7 @@
     <link rel="stylesheet" href="/css/responsive.css">
     <link rel="stylesheet" href="/css/mobile.css">
     <link rel="stylesheet" href="/css/responsive-universal.css">
+    <link rel="stylesheet" href="/css/table-responsive-global.css">
     <link rel="manifest" href="/manifest.json">
     <style>
         .soa-page-main {
@@ -50,6 +51,7 @@
         .soa-hero {
             padding: 2rem;
             margin-bottom: 1.5rem;
+            border-radius: 0;
         }
 
         .soa-hero-grid {
@@ -63,24 +65,28 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            padding: 0.45rem 0.78rem;
-            border-radius: 999px;
-            background: rgba(99, 102, 241, 0.14);
-            color: #c7d2fe;
-            font-size: 0.82rem;
-            font-weight: 700;
+            padding: 0.35rem 0.7rem;
+            border-radius: 0;
+            background: transparent;
+            border: 1px dotted var(--r-accent);
+            color: var(--r-accent);
+            font-family: var(--r-font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
             margin-bottom: 0.9rem;
         }
 
         .soa-title {
             margin: 0 0 0.65rem;
-            color: var(--text-primary);
+            color: var(--r-text);
             font-size: clamp(1.8rem, 2.8vw, 2.35rem);
         }
 
         .soa-copy {
             margin: 0;
-            color: var(--text-secondary);
+            color: var(--r-text-3);
             line-height: 1.7;
             max-width: 760px;
         }
@@ -96,25 +102,43 @@
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            padding: 0.45rem 0.8rem;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 0;
+            background: transparent;
+            border: 1px solid var(--r-line-strong);
+            color: var(--r-text-2);
+            font-family: var(--r-font-mono);
+            font-size: 0.6rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .soa-pill.connected::before,
+        .soa-pill.cached::before,
+        .soa-pill.demo::before {
+            content: "";
+            width: 5px;
+            height: 5px;
+            border-radius: 1px;
+            background: currentColor;
         }
 
         .soa-pill.connected {
-            background: rgba(34, 197, 94, 0.15);
-            color: #bbf7d0;
+            color: var(--r-text);
+            border-color: var(--r-line-strong);
+        }
+
+        .soa-pill.connected::before {
+            background: var(--r-accent);
         }
 
         .soa-pill.cached {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fde68a;
+            color: var(--r-text-2);
         }
 
         .soa-pill.demo {
-            background: rgba(148, 163, 184, 0.15);
-            color: #dbeafe;
+            color: var(--r-text-3);
         }
 
         .soa-actions {
@@ -131,44 +155,49 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.85rem 1rem;
-            border-radius: var(--radius-md);
-            border: none;
+            padding: 0.75rem 1.15rem;
+            border-radius: 2px;
+            border: 1px solid transparent;
             text-decoration: none;
             cursor: pointer;
-            font-size: 0.92rem;
-            font-weight: 700;
-            transition: transform 0.2s ease, opacity 0.2s ease;
+            font-family: var(--r-font-mono);
+            font-size: 0.66rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            transition: opacity 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease;
         }
 
         .soa-btn:hover,
         .soa-btn-secondary:hover,
         .soa-btn-danger:hover {
-            transform: translateY(-1px);
+            transform: none;
+            opacity: 0.85;
         }
 
         .soa-btn {
-            color: white;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #ffffff;
+            background: var(--r-accent);
+            border-color: var(--r-accent);
         }
 
         .soa-btn-secondary {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
+            color: var(--r-text);
+            background: transparent;
+            border: 1px solid var(--r-line-strong);
         }
 
         .soa-btn-danger {
-            color: #fecaca;
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.28);
+            color: var(--r-accent);
+            background: transparent;
+            border: 1px solid var(--r-accent);
         }
 
         .soa-profile-card {
             padding: 1.4rem;
-            border-radius: var(--radius-xl);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.04);
+            border-radius: 0;
+            border: 1px solid var(--r-line);
+            background: var(--r-panel-raised);
             text-align: center;
         }
 
@@ -176,13 +205,15 @@
             width: 108px;
             height: 108px;
             margin: 0 auto 1rem;
-            border-radius: 28px;
+            border-radius: 2px;
             overflow: hidden;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(15, 23, 42, 0.7));
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line-strong);
             display: grid;
             place-items: center;
-            color: white;
-            font-size: 2rem;
+            color: var(--r-text);
+            font-family: var(--r-font-display);
+            font-size: 2.4rem;
             font-weight: 800;
         }
 
@@ -194,15 +225,20 @@
 
         .soa-profile-card h2 {
             margin: 0 0 0.3rem;
-            color: var(--text-primary);
-            font-size: 1.1rem;
+            color: var(--r-text);
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .soa-profile-card p {
             margin: 0;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.55;
+            color: var(--r-text-3);
+            font-family: var(--r-font-mono);
+            font-size: 0.66rem;
+            line-height: 1.65;
+            letter-spacing: 0.06em;
         }
 
         .soa-meta-grid {
@@ -218,26 +254,32 @@
         .soa-loading,
         .soa-section-card {
             padding: 1.3rem;
-            border-radius: var(--radius-xl);
-            background: var(--glass-bg);
-            backdrop-filter: blur(18px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 14px 36px var(--glass-shadow);
+            border-radius: 0;
+            background: var(--r-panel-raised);
+            border: 1px solid var(--r-line);
+            box-shadow: none;
+            backdrop-filter: none;
         }
 
         .soa-meta-card h3,
         .soa-section-card h3,
         .soa-empty h2 {
-            margin: 0 0 0.35rem;
-            color: var(--text-primary);
-            font-size: 1rem;
+            margin: 0 0 0.55rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 1px dotted var(--r-line-strong);
+            color: var(--r-text);
+            font-family: var(--r-font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .soa-meta-card p,
         .soa-section-card p,
         .soa-empty p {
             margin: 0;
-            color: var(--text-secondary);
+            color: var(--r-text-2);
             line-height: 1.6;
             font-size: 0.9rem;
         }
@@ -250,25 +292,30 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.7rem;
+            padding-bottom: 1rem;
             margin-bottom: 1rem;
+            border-bottom: 1px solid var(--r-line);
         }
 
         .soa-tab-btn {
-            padding: 0.72rem 0.95rem;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-secondary);
+            padding: 0.6rem 0.95rem;
+            border-radius: 2px;
+            border: 1px solid var(--r-line-strong);
+            background: transparent;
+            color: var(--r-text-2);
             cursor: pointer;
-            font-size: 0.88rem;
-            font-weight: 700;
-            transition: all 0.2s ease;
+            font-family: var(--r-font-mono);
+            font-size: 0.64rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
         }
 
         .soa-tab-btn.active {
-            background: rgba(99, 102, 241, 0.16);
-            color: #e0e7ff;
-            border-color: rgba(99, 102, 241, 0.32);
+            background: var(--r-accent-wash);
+            color: var(--r-text);
+            border-color: var(--r-accent);
         }
 
         .soa-tab-panel {
@@ -287,22 +334,24 @@
 
         .soa-field {
             padding: 0.95rem 1rem;
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0;
+            border-bottom: 1px dotted var(--r-line-strong);
+            background: transparent;
         }
 
         .soa-field-label {
             display: block;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-bottom: 0.3rem;
+            color: var(--r-text-3);
+            font-family: var(--r-font-mono);
+            font-size: 0.6rem;
+            font-weight: 500;
+            margin-bottom: 0.35rem;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.18em;
         }
 
         .soa-field-value {
-            color: var(--text-primary);
+            color: var(--r-text);
             font-size: 0.95rem;
             line-height: 1.45;
             word-break: break-word;
@@ -310,9 +359,9 @@
 
         .soa-table-wrap {
             overflow-x: auto;
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0;
+            border: 1px solid var(--r-line-strong);
+            background: var(--r-panel-inset);
         }
 
         .soa-table {
@@ -325,22 +374,33 @@
         .soa-table td {
             padding: 0.9rem 1rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            color: var(--text-secondary);
+            border-bottom: 1px dotted var(--r-line-strong);
+            color: var(--r-text-2);
             font-size: 0.9rem;
             vertical-align: top;
         }
 
-        .soa-table th {
-            color: var(--text-primary);
-            font-size: 0.84rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+        .soa-table tbody tr:hover td {
             background: rgba(255, 255, 255, 0.04);
         }
 
+        body.light-theme .soa-table tbody tr:hover td {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .soa-table th {
+            color: var(--r-text-3);
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            background: transparent;
+            border-bottom: 1px solid var(--r-line-strong);
+        }
+
         .soa-table td strong {
-            color: var(--text-primary);
+            color: var(--r-text);
         }
 
         .soa-panel-stack {
@@ -362,13 +422,13 @@
         }
 
         .soa-muted {
-            color: var(--text-secondary);
+            color: var(--r-text-3);
             font-size: 0.9rem;
         }
 
         .soa-disconnect-note {
             margin-top: 0.9rem;
-            color: var(--text-secondary);
+            color: var(--r-text-3);
             font-size: 0.85rem;
             line-height: 1.55;
         }

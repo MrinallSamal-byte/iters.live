@@ -1,653 +1,885 @@
-/* Split Layout Container */
-.login-container {
+/* ============================================================
+   AUTH SPLIT LAYOUT - NOTHING EDITION
+   Monochrome surfaces, dot-matrix display type, sharp edges,
+   dotted hairlines, accent red #d71921 used sparingly.
+   Selectors are body-prefixed so they outrank home-minimal.css
+   and refined-ui.css, which load after this file.
+   ============================================================ */
+
+/* Auth palette tokens */
+body.nothing-home.public-auth-page {
+    --au-bg: #000000;
+    --au-panel: #0a0a0a;
+    --au-panel-raised: #111111;
+    --au-inset: rgba(255, 255, 255, 0.04);
+    --au-line: #1f1f1f;
+    --au-line-strong: #333333;
+    --au-text: #f4f4f4;
+    --au-text-2: #b0b0b0;
+    --au-text-3: #757575;
+    --au-accent: #d71921;
+    --au-accent-deep: #a31016;
+    --au-accent-wash: rgba(215, 25, 33, 0.08);
+    --au-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23757575' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+
+body.nothing-home.public-auth-page.light-theme {
+    --au-bg: #ffffff;
+    --au-panel: #fafafa;
+    --au-panel-raised: #fafafa;
+    --au-inset: rgba(0, 0, 0, 0.03);
+    --au-line: #e4e4e4;
+    --au-line-strong: #c9c9c9;
+    --au-text: #0d0d0d;
+    --au-text-2: #4a4a4a;
+    --au-text-3: #8a8a8a;
+    --au-accent-wash: rgba(215, 25, 33, 0.06);
+    --au-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238a8a8a' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+
+/* Flat black backdrop + dot-matrix grid; kill legacy glows */
+body.nothing-home.public-auth-page {
+    background-color: var(--au-bg);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    color: var(--au-text);
+}
+
+body.nothing-home.public-auth-page.light-theme {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1.4px);
+}
+
+body.nothing-home.public-auth-page::before,
+body.nothing-home.public-auth-page::after {
+    content: none;
+}
+
+.nothing-home.public-auth-page .bg-animation {
+    display: none;
+}
+
+/* ------------------------------------------------------------
+   Split container
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-lg);
+    padding: clamp(1rem, 3vw, 2.5rem);
     position: relative;
     z-index: 1;
 }
 
-.login-wrapper {
+body.nothing-home.public-auth-page .login-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     width: 100%;
-    max-width: 1000px;
-    min-height: 600px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 20px 40px var(--glass-shadow);
+    max-width: 1080px;
+    min-height: 660px;
+    background: var(--au-panel);
+    border: 1px solid var(--au-line);
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     overflow: hidden;
-    animation: fade-in-up 0.6s ease-out;
+    animation: au-fade-in 0.24s ease-out;
 }
 
-/* Left Side - Branding */
-.login-brand-section {
-    background: rgba(255,255,255,0.04);
+/* ------------------------------------------------------------
+   Left brand panel - pure black, dot-matrix wordmark
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-brand-section {
+    position: relative;
+    background: var(--au-bg);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: var(--spacing-2xl);
-    text-align: center;
-    position: relative;
-    border-right: 1px solid var(--glass-border);
+    padding: clamp(2rem, 4vw, 3.25rem);
+    text-align: left;
+    border-right: 1px solid var(--au-line);
 }
 
-.brand-content {
+/* crosshair decoration */
+body.nothing-home.public-auth-page .login-brand-section::before {
+    content: "+";
+    position: absolute;
+    top: 0.85rem;
+    left: 1rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--au-line-strong);
+}
+
+/* vertical meta strip */
+body.nothing-home.public-auth-page .login-brand-section::after {
+    content: "SOA \00B7  ITERASN HUB \2014  SECURE ACCESS";
+    position: absolute;
+    right: 0.95rem;
+    bottom: 1.1rem;
+    writing-mode: vertical-rl;
+    font-family: var(--r-font-mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--au-text-3);
+}
+
+body.nothing-home.public-auth-page .brand-content {
     position: relative;
     z-index: 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 26rem;
 }
 
-.brand-logo {
-    width: 140px;
-    height: 140px;
-    margin-bottom: var(--spacing-xl);
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
-    animation: float 6s ease-in-out infinite;
+body.nothing-home.public-auth-page .brand-logo {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 1.6rem;
+    padding: 9px;
     object-fit: contain;
+    background: var(--au-inset);
+    border: 1px solid var(--au-line);
+    border-radius: 0;
+    filter: grayscale(1) contrast(1.05);
+    animation: none;
 }
 
-.brand-title {
-    font-size: 2.5rem;
+/* mono kicker: glyph strip + label */
+body.nothing-home.public-auth-page .brand-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+body.nothing-home.public-auth-page .brand-kicker .r-glyphs i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+body.nothing-home.public-auth-page .brand-kicker-text,
+body.nothing-home.public-auth-page .brand-kicker .r-glyphs + span {
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--au-text-3);
+}
+
+/* dot-matrix wordmark */
+body.nothing-home.public-auth-page .brand-title {
+    font-family: var(--r-font-display);
     font-weight: 800;
-    margin-bottom: var(--spacing-md);
-    background: linear-gradient(135deg, #fff, #cbd5e1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: clamp(2.6rem, 4.2vw, 3.8rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--au-text);
+    margin: 0 0 1.1rem;
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: currentColor;
+    background-clip: initial;
 }
 
-.brand-subtitle {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 300px;
-    margin: 0 auto;
+body.nothing-home.public-auth-page .brand-subtitle {
+    font-family: var(--r-font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 2;
+    color: var(--au-text-3);
+    max-width: 34ch;
+    margin: 0;
 }
 
-/* Right Side - Form */
-.login-form-section {
-    padding: var(--spacing-2xl);
+/* dotted rule under the wordmark block */
+body.nothing-home.public-auth-page .brand-title + .brand-subtitle {
+    border-top: 1px dotted var(--au-line-strong);
+    padding-top: 1.1rem;
+}
+
+/* ------------------------------------------------------------
+   Right form panel
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-form-section {
+    position: relative;
+    padding: clamp(2rem, 3.6vw, 3rem);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
-    position: relative;
+    background: var(--au-panel);
 }
 
-.login-header {
+body.nothing-home.public-auth-page .login-form-section::before {
+    content: "+";
+    position: absolute;
+    top: 0.85rem;
+    right: 1rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--au-line-strong);
+}
+
+body.nothing-home.public-auth-page .login-form-section::after {
+    content: "+";
+    position: absolute;
+    bottom: 0.85rem;
+    left: 1rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--au-line-strong);
+}
+
+/* dot-matrix heading */
+body.nothing-home.public-auth-page .login-header {
     text-align: left;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: 1.75rem;
 }
 
-.login-header h2 {
-    font-size: 2rem;
+body.nothing-home.public-auth-page .login-header h1,
+body.nothing-home.public-auth-page .login-header h2 {
+    font-family: var(--r-font-display);
+    font-weight: 800;
+    font-size: clamp(2.1rem, 3vw, 2.9rem);
+    line-height: 0.98;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--au-text);
+    margin: 0 0 0.7rem;
+}
+
+body.nothing-home.public-auth-page .login-header p {
+    font-family: var(--r-font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--au-text-3);
+    margin: 0;
+}
+
+body.nothing-home.public-auth-page .mobile-brand-title {
+    font-family: var(--r-font-display);
     font-weight: 700;
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-primary);
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--au-text);
 }
 
-.login-header p {
-    color: var(--text-secondary);
-    font-size: 1rem;
+/* ------------------------------------------------------------
+   Form fields
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-form {
+    display: grid;
+    gap: 1.05rem;
 }
 
-/* Form Styles Override */
-.form-group {
-    margin-bottom: var(--spacing-lg);
+body.nothing-home.public-auth-page .form-group {
+    margin-bottom: 0;
 }
 
-.form-group label {
+body.nothing-home.public-auth-page .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.05rem;
+}
+
+body.nothing-home.public-auth-page .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.55rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
     font-weight: 500;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--au-text-2);
 }
 
-.form-group input {
+body.nothing-home.public-auth-page .form-group input,
+body.nothing-home.public-auth-page .form-group select {
     width: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--glass-border);
-    padding: 1rem;
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    transition: all 0.3s ease;
+    background: var(--au-inset);
+    border: 1px solid var(--au-line);
+    border-radius: 0;
+    padding: 0.85rem 1rem;
+    color: var(--au-text);
+    font-family: var(--r-font-body);
+    font-size: 0.92rem;
+    caret-color: var(--au-accent);
+    transition: border-color 140ms ease, background-color 140ms ease;
+    box-shadow: none;
 }
 
-.form-group input:focus {
-    background: rgba(0, 0, 0, 0.5);
-    border-color: var(--primary);
+/* keep clear space for the [SHOW] toggle */
+body.nothing-home.public-auth-page .password-field input {
+    padding-right: 5.5rem;
+}
+
+body.nothing-home.public-auth-page .form-group input::placeholder {
+    color: var(--au-text-3);
+    opacity: 1;
+}
+
+body.nothing-home.public-auth-page .form-group input:focus,
+body.nothing-home.public-auth-page .form-group select:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(215, 25, 33,0.2);
+    background: var(--au-inset);
+    border-color: var(--au-accent);
+    box-shadow: none;
 }
 
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xl);
-    font-size: 0.9rem;
+body.nothing-home.public-auth-page .form-group input:-webkit-autofill,
+body.nothing-home.public-auth-page .form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--au-text);
+    -webkit-box-shadow: 0 0 0 1000px var(--au-panel) inset;
+    caret-color: var(--au-accent);
+    transition: background-color 999999s ease-out;
 }
 
-.checkbox-label {
-    color: var(--text-secondary);
+/* selects: sharp, mono chevron, readable options */
+body.nothing-home.public-auth-page .form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: var(--au-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.6rem;
     cursor: pointer;
 }
 
-.forgot-link {
-    color: var(--primary-light);
-    text-decoration: none;
+body.nothing-home.public-auth-page .form-group select option {
+    background: var(--au-panel);
+    color: var(--au-text);
+}
+
+body.nothing-home.public-auth-page .form-hint {
+    display: block;
+    margin-top: 0.55rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    line-height: 1.8;
+    color: var(--au-text-3);
+}
+
+/* password visibility toggle */
+body.nothing-home.public-auth-page .password-toggle-btn {
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--au-text-3);
+}
+
+body.nothing-home.public-auth-page .password-toggle-btn:hover {
+    color: var(--au-text);
+    background: transparent;
+}
+
+/* ------------------------------------------------------------
+   Options row: remember me + forgot password
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+}
+
+body.nothing-home.public-auth-page .checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--au-text-2);
+}
+
+body.nothing-home.public-auth-page .checkbox-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    background: transparent;
+    border: 1px solid var(--au-line-strong);
+    border-radius: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+}
+
+body.nothing-home.public-auth-page .checkbox-label input[type="checkbox"]:checked {
+    background: var(--au-accent);
+    border-color: var(--au-accent);
+}
+
+body.nothing-home.public-auth-page .checkbox-label input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: #ffffff;
+    clip-path: polygon(14% 44%, 0 60%, 40% 100%, 100% 18%, 84% 4%, 38% 70%);
+}
+
+body.nothing-home.public-auth-page .forgot-link {
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
     font-weight: 500;
-}
-
-.forgot-link:hover {
-    color: var(--primary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--au-text-2);
     text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--au-line-strong);
 }
 
-/* Buttons */
-.btn-block {
+body.nothing-home.public-auth-page .forgot-link:hover {
+    color: var(--au-text);
+    text-decoration-color: var(--au-text);
+}
+
+body.nothing-home.public-auth-page .forgot-hint {
+    margin: 0;
+    padding: 0.5rem 0 0 0.85rem;
+    border-left: 1px dotted var(--au-line-strong);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-align: left;
+    color: var(--au-text-3);
+}
+
+/* ------------------------------------------------------------
+   Buttons - rectangular, mono uppercase, no transforms
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .btn-block {
     width: 100%;
-    padding: 1rem;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
+    min-height: 52px;
+    padding: 0 1.25rem;
+    border-radius: 0;
+    font-family: var(--r-font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
-.divider {
-    margin: 1.5rem 0;
+/* primary: the one red surface */
+body.nothing-home.public-auth-page .btn-primary.btn-block,
+body.nothing-home.public-auth-page .btn-primary {
+    background: var(--au-accent);
+    border: 1px solid var(--au-accent);
+    color: #ffffff;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+body.nothing-home.public-auth-page .btn-primary.btn-block:hover,
+body.nothing-home.public-auth-page .btn-primary.btn-block:focus-visible,
+body.nothing-home.public-auth-page .btn-primary:hover {
+    background: var(--au-accent-deep);
+    border-color: var(--au-accent-deep);
+    color: #ffffff;
+    transform: none;
+    box-shadow: none;
+}
+
+body.nothing-home.public-auth-page .btn-primary:disabled {
+    background: var(--au-accent-deep);
+    border-color: var(--au-accent-deep);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: wait;
+}
+
+/* ghost: google sign-in */
+body.nothing-home.public-auth-page #googleLoginBtn {
+    background: transparent;
+    border: 1px solid var(--au-line-strong);
+    color: var(--au-text);
+    font-weight: 500;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+body.nothing-home.public-auth-page #googleLoginBtn:hover {
+    background: var(--au-inset);
+    border-color: var(--au-text);
+    color: var(--au-text);
+    transform: none;
+    box-shadow: none;
+}
+
+/* ghost: role switcher */
+body.nothing-home.public-auth-page .role-selection {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.4rem;
+}
+
+body.nothing-home.public-auth-page .role-btn {
+    background: transparent;
+    border: 1px solid var(--au-line-strong);
+    border-radius: 0;
+    color: var(--au-text-2);
+    font-family: var(--r-font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.8rem 1.4rem;
+    box-shadow: none;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+body.nothing-home.public-auth-page .role-btn:hover {
+    border-color: var(--au-text);
+    color: var(--au-text);
+    transform: none;
+}
+
+/* active role: monochrome invert, red stays reserved */
+body.nothing-home.public-auth-page .role-btn.active {
+    background: var(--au-text);
+    border-color: var(--au-text);
+    color: var(--au-panel);
+}
+
+body.nothing-home.public-auth-page .role-btn.active:hover {
+    border-color: var(--au-text);
+    color: var(--au-panel);
+}
+
+/* ------------------------------------------------------------
+   Divider
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .divider {
+    margin: 1.4rem 0;
     text-align: center;
     position: relative;
 }
 
-.divider::before {
-    content: '';
+body.nothing-home.public-auth-page .divider::before {
+    content: "";
     position: absolute;
     top: 50%;
     left: 0;
     right: 0;
-    height: 1px;
-    background: var(--glass-border);
+    height: 0;
+    border-top: 1px dotted var(--au-line-strong);
+    background: none;
 }
 
-.divider span {
+body.nothing-home.public-auth-page .divider span {
     position: relative;
-    background: var(--bg-primary);
-    /* Fallback */
-    background: #1e293b;
-    /* Match dark theme bg approx if needed, but transparent is better if we can match parent */
+    background: var(--au-panel);
     padding: 0 1rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
+    color: var(--au-text-3);
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     z-index: 1;
-    border-radius: 10px;
+    border-radius: 0;
 }
 
-/* Google Button */
-#googleLoginBtn {
-    background: white;
-    color: #1f2937;
-    font-weight: 600;
+/* ------------------------------------------------------------
+   Status / error messages
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .error-message {
+    border: 1px solid rgba(215, 25, 33, 0.4);
+    background: var(--au-accent-wash);
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    line-height: 1.8;
+    text-transform: uppercase;
+    color: var(--au-accent);
+}
+
+body.nothing-home.public-auth-page .status-message {
+    border: 1px solid var(--au-line);
+    background: var(--au-inset);
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    line-height: 1.8;
+    text-transform: uppercase;
+    color: var(--au-text-2);
+}
+
+body.nothing-home.public-auth-page .status-message.status-success {
+    border-color: var(--au-line-strong);
+    border-left: 2px solid var(--au-accent);
+    background: var(--au-inset);
+    color: var(--au-text);
+}
+
+/* ------------------------------------------------------------
+   Demo access - squared mono chips
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .demo-hint-compact {
+    margin-top: 1.6rem;
+    padding: 1.1rem 0 0;
+    background: transparent;
     border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-top: 1px dotted var(--au-line-strong);
+    border-radius: 0;
 }
 
-#googleLoginBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: #f9fafb;
+body.nothing-home.public-auth-page .demo-hint-compact p {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--r-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--au-text-3);
+    text-align: left;
+    margin: 0 0 0.75rem;
 }
 
-/* Footer */
-.login-footer {
-    margin-top: var(--spacing-xl);
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+body.nothing-home.public-auth-page .demo-hint-compact p::before {
+    content: "+";
+    color: var(--au-text-3);
 }
 
-.login-footer a {
-    color: var(--primary-light);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.login-footer a:hover {
-    color: var(--primary);
-}
-
-/* Demo Hint - Compact */
-.demo-hint-compact {
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
-}
-
-.demo-hint-compact p {
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-muted);
-    text-align: center;
-}
-
-.demo-chips {
+body.nothing-home.public-auth-page .demo-chips {
     display: flex;
     gap: 0.5rem;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
 }
 
-.demo-chip {
-    padding: 0.25rem 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+body.nothing-home.public-auth-page .demo-chip {
+    padding: 0.45rem 0.8rem;
+    background: transparent;
+    border: 1px solid var(--au-line);
+    border-radius: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--au-text-2);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
-.demo-chip:hover {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+body.nothing-home.public-auth-page .demo-chip:hover {
+    background: var(--au-text);
+    border-color: var(--au-text);
+    color: var(--au-panel);
+    transform: none;
 }
 
-/* Animations */
+/* ------------------------------------------------------------
+   Register highlights - numbered mono rows
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .register-highlights {
+    margin-top: 1.8rem;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+body.nothing-home.public-auth-page .register-highlights ul {
+    display: grid;
+    gap: 0;
+    list-style: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body.nothing-home.public-auth-page .register-highlights li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding: 0.85rem 0;
+    border-top: 1px dotted var(--au-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--au-text-2);
+    font-size: 0.82rem;
+    line-height: 1.7;
+}
+
+body.nothing-home.public-auth-page .register-highlights li:last-child {
+    border-bottom: 1px dotted var(--au-line);
+}
+
+body.nothing-home.public-auth-page .register-highlights li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 22px;
+    padding: 0 0.35rem;
+    border: 1px solid var(--au-line-strong);
+    border-radius: 0;
+    background: transparent;
+    color: var(--au-text-2);
+    font-family: var(--r-font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    align-self: center;
+}
+
+body.nothing-home.public-auth-page .register-highlights strong {
+    color: var(--au-text);
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-footer {
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px dotted var(--au-line-strong);
+    text-align: center;
+    color: var(--au-text-3);
+    font-size: 0.82rem;
+}
+
+body.nothing-home.public-auth-page .login-footer a {
+    font-family: var(--r-font-mono);
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--au-text);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--au-line-strong);
+}
+
+body.nothing-home.public-auth-page .login-footer a:hover {
+    color: var(--au-accent);
+    text-decoration-color: var(--au-accent);
+}
+
+/* ------------------------------------------------------------
+   Mobile header
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .mobile-brand-header {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-bottom: 1.6rem;
+}
+
+body.nothing-home.public-auth-page .mobile-brand-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: grayscale(1);
+}
+
+/* ------------------------------------------------------------
+   Motion
+   ------------------------------------------------------------ */
+
 @keyframes fade-in-up {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
+@keyframes au-fade-in {
+    from {
+        opacity: 0;
     }
 
-    50% {
-        transform: translateY(-10px);
+    to {
+        opacity: 1;
     }
 }
 
-/* Responsive */
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
+
 @media (max-width: 900px) {
-    .login-wrapper {
+    body.nothing-home.public-auth-page .login-wrapper {
         grid-template-columns: 1fr;
-        max-width: 500px;
+        max-width: 520px;
         min-height: auto;
     }
 
-    .login-brand-section {
-        padding: var(--spacing-xl);
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
+    body.nothing-home.public-auth-page .login-brand-section {
         display: none;
-        /* Hide branding on mobile to save space, or keep small */
+        border-right: none;
     }
 
-    /* Option: Show simplified header on mobile instead of full brand section */
-    .mobile-brand-header {
+    body.nothing-home.public-auth-page .mobile-brand-header {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .mobile-brand-logo {
-        width: 50px;
-        height: 50px;
-    }
-
-    .mobile-brand-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-}
-
-@media (min-width: 901px) {
-    .mobile-brand-header {
-        display: none;
-    }
-}
-
-/* ========================================
-   Light Theme Overrides for Login Page
-   ======================================== */
-body.light-theme .login-wrapper {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-body.light-theme .login-brand-section {
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.15), rgba(255, 179, 107, 0.12));
-    border-right-color: rgba(0, 0, 0, 0.1);
-}
-
-body.light-theme .brand-title {
-    background: linear-gradient(135deg, #a31016, #ff7f56);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: #a31016; /* Fallback for browsers that don't support background-clip: text */
-}
-
-body.light-theme .brand-subtitle {
-    color: #475569;
-}
-
-body.light-theme .login-form-section {
-    background: rgba(255, 255, 255, 0.9);
-}
-
-body.light-theme .login-header h2 {
-    color: #0f172a;
-}
-
-body.light-theme .login-header p {
-    color: #475569;
-}
-
-body.light-theme .form-group label {
-    color: #334155;
-}
-
-body.light-theme .form-group input {
-    background: rgba(241, 245, 249, 0.8);
-    border-color: rgba(0, 0, 0, 0.15);
-    color: #0f172a;
-}
-
-body.light-theme .form-group input::placeholder {
-    color: #94a3b8;
-}
-
-body.light-theme .form-group input:focus {
-    background: rgba(255, 255, 255, 1);
-    border-color: #d71921;
-    box-shadow: 0 0 0 3px rgba(215, 25, 33, 0.15);
-}
-
-body.light-theme .checkbox-label {
-    color: #475569;
-}
-
-body.light-theme .forgot-link {
-    color: #d71921;
-}
-
-body.light-theme .forgot-link:hover {
-    color: #a31016;
-}
-
-body.light-theme .divider span {
-    background: rgba(255, 255, 255, 0.95);
-    color: #64748b;
-}
-
-body.light-theme .divider::before {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-body.light-theme .demo-hint-compact {
-    background: rgba(215, 25, 33, 0.05);
-    border-color: rgba(215, 25, 33, 0.16);
-}
-
-body.light-theme .demo-hint-compact p {
-    color: #475569;
-}
-
-body.light-theme .demo-chip {
-    background: rgba(215, 25, 33, 0.1);
-    border-color: rgba(215, 25, 33, 0.16);
-    color: #a31016;
-}
-
-body.light-theme .demo-chip:hover {
-    background: #d71921;
-    color: white;
-    border-color: #d71921;
-}
-
-body.light-theme .login-footer {
-    color: #475569;
-}
-
-body.light-theme .login-footer a {
-    color: #d71921;
-}
-
-body.light-theme .login-footer a:hover {
-    color: #a31016;
-}
-
-body.light-theme .error-message {
-    color: #ef4444;
-}
-
-body.light-theme .mobile-brand-title {
-    color: #0f172a;
-}
-
-/* ITERasn hub auth refresh */
-.nothing-home.public-auth-page .login-wrapper {
-    max-width: 1180px;
-    min-height: 680px;
-    border-radius: 34px;
-}
-
-.nothing-home.public-auth-page .login-brand-section {
-    padding: clamp(2rem, 4vw, 3rem);
-    align-items: flex-start;
-    text-align: left;
-}
-
-.nothing-home.public-auth-page .brand-content {
-    width: 100%;
-    align-items: flex-start;
-}
-
-.nothing-home.public-auth-page .brand-logo {
-    width: 96px;
-    height: 96px;
-    margin-bottom: 1.5rem;
-    padding: 10px;
-    border-radius: 28px;
-    background: rgba(255, 255, 255, 0.9);
-}
-
-.nothing-home.public-auth-page .brand-title {
-    font-size: clamp(2.4rem, 4vw, 3.6rem);
-    line-height: 0.95;
-}
-
-.nothing-home.public-auth-page .brand-subtitle {
-    max-width: 34ch;
-    color: var(--text-secondary);
-}
-
-.nothing-home.public-auth-page .login-form-section {
-    padding: clamp(1.5rem, 3.6vw, 3rem);
-}
-
-.nothing-home.public-auth-page .login-header h1,
-.nothing-home.public-auth-page .login-header h2 {
-    font-size: clamp(2rem, 3vw, 2.8rem);
-    line-height: 0.98;
-}
-
-.nothing-home.public-auth-page .login-form {
-    display: grid;
-    gap: 0.95rem;
-}
-
-.nothing-home.public-auth-page .form-group {
-    margin-bottom: 0;
-}
-
-.nothing-home.public-auth-page .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-}
-
-.nothing-home.public-auth-page .btn-block {
-    min-height: 52px;
-    border-radius: 999px;
-}
-
-.nothing-home.public-auth-page .demo-hint-compact {
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.nothing-home.public-auth-page .register-highlights {
-    margin-top: 1.5rem;
-}
-
-.nothing-home.public-auth-page .register-highlights ul {
-    display: grid;
-    gap: 0.75rem;
-    list-style: none;
-    width: 100%;
-    padding: 0;
-}
-
-.nothing-home.public-auth-page .register-highlights li {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    padding: 0.9rem 1rem;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-secondary);
-}
-
-.nothing-home.public-auth-page .register-highlights li span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 34px;
-    height: 34px;
-    border-radius: 12px;
-    background: rgba(215, 25, 33, 0.12);
-    border: 1px solid rgba(215, 25, 33, 0.16);
-    color: var(--text-primary);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.78rem;
-}
-
-.nothing-home.public-auth-page .register-highlights strong {
-    color: var(--text-primary);
-    font-weight: 600;
-}
-
-.nothing-home.public-auth-page .mobile-brand-header {
-    margin-bottom: 1.25rem;
-}
-
-.nothing-home.public-auth-page.login-page .login-brand-section {
-    align-items: center;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.login-page .brand-content {
-    max-width: 30rem;
-    margin: 0 auto;
-    align-items: center;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.login-page .brand-logo {
-    margin-inline: auto;
-    margin-bottom: 1.2rem;
-}
-
-.nothing-home.public-auth-page.login-page .brand-title {
-    margin: 0 auto 0.8rem;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.login-page .brand-subtitle {
-    max-width: 26ch;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.register-page .login-brand-section {
-    align-items: center;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.register-page .brand-content {
-    max-width: 32rem;
-    margin: 0 auto;
-    align-items: center;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.register-page .brand-logo {
-    margin-inline: auto;
-    margin-bottom: 1.2rem;
-}
-
-.nothing-home.public-auth-page.register-page .brand-title {
-    margin: 0 auto 0.8rem;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.register-page .brand-subtitle {
-    max-width: 28ch;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.nothing-home.public-auth-page.register-page .register-highlights {
-    width: 100%;
-}
-
-@media (max-width: 900px) {
-    .nothing-home.public-auth-page .login-wrapper {
-        grid-template-columns: 1fr;
-        min-height: auto;
-    }
-
-    .nothing-home.public-auth-page .login-brand-section {
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
     }
 }
 
 @media (max-width: 640px) {
-    .nothing-home.public-auth-page .form-row {
+    body.nothing-home.public-auth-page .login-container {
+        padding: 1rem;
+    }
+
+    body.nothing-home.public-auth-page .login-form-section {
+        padding: 1.75rem 1.25rem;
+    }
+
+    body.nothing-home.public-auth-page .form-row {
         grid-template-columns: 1fr;
     }
 
-    .nothing-home.public-auth-page .login-wrapper {
-        border-radius: 24px;
+    body.nothing-home.public-auth-page .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    body.nothing-home.public-auth-page .forgot-link-btn {
+        text-align: left;
+    }
+
+    body.nothing-home.public-auth-page .demo-chips {
+        justify-content: flex-start;
     }
 }

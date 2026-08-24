@@ -14,6 +14,8 @@
 
         body {
             overflow-x: hidden;
+            background-color: var(--r-bg);
+            color: var(--r-text);
         }
 
         .ai-container {
@@ -25,20 +27,29 @@
         .ai-header {
             text-align: center;
             margin-bottom: 2rem;
-            background: #161616;
+            background: var(--r-panel);
+            border: 1px solid var(--r-line);
+            border-left: 2px solid var(--r-accent);
             padding: 2rem;
-            border-radius: 15px;
-            color: white;
+            border-radius: 0;
+            color: var(--r-text);
         }
 
         .ai-header h1 {
+            font-family: var(--r-font-display);
             font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
             margin-bottom: 0.5rem;
         }
 
         .ai-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-family: var(--r-font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--r-text-3);
         }
 
         .feature-grid {
@@ -49,41 +60,103 @@
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
+            background: var(--r-panel-raised);
+            border: 1px solid var(--r-line);
+            border-radius: 2px;
             padding: 1.5rem;
-            transition: all 0.3s ease;
+            transition: border-color 160ms ease;
             cursor: pointer;
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            transform: none;
+            box-shadow: none;
+            border-color: var(--r-accent);
         }
 
         .feature-icon {
-            font-size: 3rem;
+            font-size: 2.4rem;
             margin-bottom: 1rem;
         }
 
         .feature-card h3 {
-            color: var(--primary, #ff5a4f);
+            font-family: var(--r-font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--r-text);
             margin-bottom: 0.5rem;
         }
 
         .feature-card p {
-            color: #666;
+            color: var(--r-text-2);
             line-height: 1.6;
         }
 
         .prediction-card, .recommendations-card {
-            background: white;
-            border-radius: 15px;
+            background: var(--r-panel);
+            border: 1px solid var(--r-line);
+            border-radius: 0;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: none;
+        }
+
+        .study-plan-section {
+            background: var(--r-panel);
+            border: 1px solid var(--r-line);
+            border-radius: 0;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: none;
+        }
+
+        .prediction-card h2,
+        .recommendations-card h2,
+        .study-plan-section h2 {
+            font-family: var(--r-font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            padding-bottom: 0.85rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px dotted var(--r-line-strong);
+        }
+
+        .prediction-card h3,
+        .recommendations-card h3,
+        .study-plan-section h3 {
+            font-family: var(--r-font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .prediction-card h4,
+        .recommendations-card h4,
+        .study-plan-section h4,
+        .day-schedule h4,
+        .factor-item h4 {
+            font-family: var(--r-font-mono);
+            font-size: 0.64rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--r-text-2);
+        }
+
+        .prediction-card h5,
+        .recommendations-card h5,
+        .study-plan-section h5 {
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--r-text-3);
         }
 
         .prediction-header {
@@ -94,27 +167,33 @@
         }
 
         .prediction-score {
+            font-family: var(--r-font-display);
             font-size: 3rem;
-            font-weight: bold;
-            color: var(--primary, #ff5a4f);
+            font-weight: 800;
+            color: var(--r-text);
+            font-variant-numeric: tabular-nums;
         }
 
         .prediction-grade {
-            font-size: 2rem;
-            color: #6b645c;
+            font-family: var(--r-font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--r-text-3);
         }
 
         .confidence-bar {
             height: 10px;
-            background: #e0e0e0;
-            border-radius: 5px;
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line-strong);
+            border-radius: 0;
             overflow: hidden;
             margin: 1rem 0;
         }
 
         .confidence-fill {
             height: 100%;
-            background: var(--primary, #ff5a4f);
+            background: var(--r-accent);
             transition: width 0.5s ease;
         }
 
@@ -127,23 +206,23 @@
 
         .factor-item {
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 0;
             text-align: center;
         }
 
         .factor-item.positive {
-            background: rgba(76, 175, 80, 0.1);
-            border: 1px solid #4CAF50;
+            background: var(--r-panel-raised);
+            border: 1px solid var(--r-line-strong);
         }
 
         .factor-item.neutral {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid #FFC107;
+            background: var(--r-panel-inset);
+            border: 1px dotted var(--r-line-strong);
         }
 
         .factor-item.negative {
-            background: rgba(244, 67, 54, 0.1);
-            border: 1px solid #F44336;
+            background: var(--r-accent-wash);
+            border: 1px solid var(--r-accent);
         }
 
         .recommendations-list {
@@ -152,33 +231,43 @@
         }
 
         .recommendations-list li {
-            background: rgba(0, 0, 0, 0.03);
+            background: var(--r-panel-inset);
             padding: 1rem;
             margin: 0.5rem 0;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary, #ff5a4f);
+            border-radius: 0;
+            border-left: 2px solid var(--r-accent);
         }
 
         .btn-primary {
-            background: var(--primary, #ff5a4f);
-            color: white;
+            background: var(--r-accent);
+            color: #ffffff;
             padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 25px;
+            border: 1px solid var(--r-accent);
+            border-radius: 2px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-family: var(--r-font-mono);
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            transition: background 160ms ease, border-color 160ms ease;
         }
 
         .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: none;
+            box-shadow: none;
+            background: var(--r-accent-deep);
+            border-color: var(--r-accent-deep);
         }
 
         .loading {
             text-align: center;
             padding: 2rem;
-            color: var(--primary, #ff5a4f);
+            color: var(--r-text-3);
+            font-family: var(--r-font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
         }
 
         .loading::after {
@@ -201,40 +290,37 @@
 
         .risk-badge {
             display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: bold;
+            padding: 0.45rem 0.85rem;
+            border-radius: 0;
+            font-family: var(--r-font-mono);
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
             margin: 0.5rem 0;
         }
 
-        .risk-low { background: #4CAF50; color: white; }
-        .risk-medium { background: #FFC107; color: #333; }
-        .risk-high { background: #F44336; color: white; }
-
-        .study-plan-section {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
+        .risk-low { background: transparent; color: var(--r-text); border: 1px solid var(--r-line-strong); }
+        .risk-medium { background: transparent; color: var(--r-text-2); border: 1px dotted var(--r-line-strong); }
+        .risk-high { background: var(--r-accent); color: #ffffff; border: 1px solid var(--r-accent); }
 
         .week-container {
             margin: 1.5rem 0;
         }
 
         .day-schedule {
-            background: rgba(0, 0, 0, 0.03);
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line);
             padding: 1rem;
             margin: 0.5rem 0;
-            border-radius: 8px;
+            border-radius: 0;
         }
 
         .session-item {
             display: flex;
             justify-content: space-between;
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px dotted var(--r-line-strong);
         }
 
         .session-item:last-child {
@@ -249,7 +335,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.75);
             z-index: 9999;
             align-items: center;
             justify-content: center;
@@ -260,12 +346,13 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--r-panel);
+            border: 1px solid var(--r-line-strong);
             padding: 2rem;
-            border-radius: 15px;
+            border-radius: 0;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: none;
         }
 
         .modal-header {
@@ -273,7 +360,12 @@
         }
 
         .modal-header h3 {
-            color: var(--primary, #ff5a4f);
+            font-family: var(--r-font-display);
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--r-text);
             margin-bottom: 0.5rem;
         }
 
@@ -284,24 +376,30 @@
         .modal-body label {
             display: block;
             margin-bottom: 0.5rem;
+            font-family: var(--r-font-mono);
+            font-size: 0.64rem;
             font-weight: 600;
-            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--r-text-2);
         }
 
         .modal-body input[type="number"],
         .modal-body select {
             width: 100%;
             padding: 0.8rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border: 1px solid var(--r-line-strong);
+            border-radius: 2px;
+            background: var(--r-panel-inset);
+            color: var(--r-text);
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: border-color 160ms ease;
         }
 
         .modal-body input[type="number"]:focus,
         .modal-body select:focus {
             outline: none;
-            border-color: var(--primary, #ff5a4f);
+            border-color: var(--r-accent);
         }
 
         .modal-footer {
@@ -311,18 +409,24 @@
         }
 
         .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
+            background: transparent;
+            color: var(--r-text-2);
+            border: 1px solid var(--r-line-strong);
             padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 25px;
+            border-radius: 2px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-family: var(--r-font-mono);
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            transition: border-color 160ms ease, color 160ms ease;
         }
 
         .btn-secondary:hover {
-            background: #d0d0d0;
+            background: transparent;
+            border-color: var(--r-accent);
+            color: var(--r-text);
         }
 
         @media (max-width: 1024px) {
@@ -367,10 +471,6 @@
 
             .prediction-score {
                 font-size: 2.35rem;
-            }
-
-            .prediction-grade {
-                font-size: 1.45rem;
             }
 
             .btn-primary,
@@ -502,7 +602,7 @@
             <div class="modal-body">
                 <label for="studyHoursInput">How many hours do you study per day on average?</label>
                 <input type="number" id="studyHoursInput" min="0" max="24" step="0.5" value="4" placeholder="Enter hours (e.g., 4)">
-                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--r-text-3, #757575); margin-top: 0.5rem;">
                     💡 Be honest - this helps us give you accurate predictions!
                 </p>
             </div>
@@ -573,7 +673,7 @@
                 }
             } catch (error) {
                 console.error('Prediction error:', error);
-                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
             }
         }
 
@@ -654,7 +754,7 @@
                 }
             } catch (error) {
                 console.error('Tutor recommendations error:', error);
-                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
             }
         }
 
@@ -748,7 +848,7 @@
                 }
             } catch (error) {
                 console.error('Study plan error:', error);
-                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
             }
         }
 
@@ -758,7 +858,7 @@
 
             // Overall Strategy
             if (plan.overallStrategy) {
-                html += `<div style="background: rgba(0, 0, 0, 0.04); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                html += `<div style="background: var(--r-panel-inset, rgba(255,255,255,0.04)); border: 1px solid var(--r-line, #1f1f1f); padding: 1rem; margin-bottom: 1rem;">
                     <h4>🎯 Overall Strategy</h4>
                     <p>${plan.overallStrategy}</p>
                 </div>`;

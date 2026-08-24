@@ -48,20 +48,13 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📊</span> Attendance Tracker </h1>
+                    <h1 class="page-title">Attendance Tracker</h1>
                     <p class="page-subtitle">Monitor your attendance across all subjects in real-time</p>
                 </div>
             </div>
@@ -207,7 +200,6 @@
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
         }
         
         .page-title {
@@ -218,10 +210,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-        
-        .title-icon {
-            font-size: 2.5rem;
         }
         
         .page-subtitle {
@@ -236,28 +224,53 @@
         }
         
         .modern-table thead tr {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            background: transparent;
         }
-        
+
         .modern-table th {
-            padding: 1rem;
+            padding: 0.85rem 1rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.62rem;
             font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #757575;
             text-align: left;
-            border-bottom: 2px solid var(--glass-border);
+            border-bottom: 1px solid #333;
         }
-        
+
         .modern-table td {
             padding: 1rem;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px dotted #1f1f1f;
         }
-        
+
         .modern-table tbody tr {
-            transition: all 0.2s ease;
+            transition: background 0.15s ease;
         }
-        
+
         .modern-table tbody tr:hover {
-            background: var(--glass-bg);
-            transform: scale(1.01);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        body.light-theme .modern-table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        body.light-theme .modern-table td {
+            border-bottom-color: #e4e4e4;
+        }
+
+        .stat-number {
+            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #attendanceTableBody td:nth-child(5),
+        #bunkTableBody td:nth-child(3) {
+            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
         }
         
         .insights-grid {
@@ -270,12 +283,12 @@
         .insight-card {
             padding: 1.5rem;
             text-align: center;
-            transition: all 0.3s ease;
+            border-radius: 0;
+            transition: border-color 0.15s ease;
         }
-        
+
         .insight-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+            border-color: #333;
         }
         
         .insight-icon {
@@ -284,9 +297,13 @@
         }
         
         .insight-card h4 {
-            color: var(--primary);
             margin-bottom: 0.5rem;
-            font-size: 1.125rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #f4f4f4;
         }
         
         .insight-card p {
@@ -352,8 +369,13 @@
             color: var(--text-primary);
             background: transparent;
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             padding: 0.2rem 0.4rem;
+        }
+
+        .bunk-threshold-select:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .bunk-breakdown-toggle {
@@ -381,13 +403,15 @@
 
         .bunk-table th {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.66rem;
-            letter-spacing: 0.12em;
-            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.62rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #757575;
+            border-bottom: 1px solid #333;
         }
 
         .bunk-table td {
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px dotted #1f1f1f;
         }
 
         .bunk-needs {
@@ -399,7 +423,7 @@
             margin-top: 0.6rem;
             padding: 0.5rem 0.9rem;
             border: 1px solid var(--primary);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.68rem;
             letter-spacing: 0.12em;
@@ -409,7 +433,7 @@
         }
 
         .reconnect-cta:hover {
-            background: rgba(255, 90, 79, 0.08);
+            background: rgba(215, 25, 33, 0.08);
         }
 
         .cache-badge {
@@ -417,7 +441,7 @@
             margin-top: 0.5rem;
             padding: 0.25rem 0.6rem;
             border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.66rem;
             letter-spacing: 0.12em;

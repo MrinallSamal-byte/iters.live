@@ -52,7 +52,7 @@
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📝</span> Assignments </h1>
+                    <h1 class="page-title">Assignments</h1>
                     <p class="page-subtitle">Everything shared for your class, plus what is due next</p>
                 </div>
             </div>
@@ -106,7 +106,6 @@
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
-            border-radius: var(--radius-xl);
         }
 
         .hero-content-inline {
@@ -131,12 +130,10 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 3.2rem;
-            height: 3.2rem;
-            border-radius: 1.15rem;
-            background: rgba(255, 90, 79, 0.1);
-            border: 1px solid rgba(255, 90, 79, 0.18);
-            font-size: 1.45rem;
+            border-radius: 0;
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
         }
 
         .page-subtitle {
@@ -171,9 +168,9 @@
             gap: 1.1rem;
             padding: 0.9rem 1.1rem;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-left: 3px solid transparent;
-            border-radius: var(--radius-lg, 14px);
+            border: 1px solid #1f1f1f;
+            border-left: 2px solid transparent;
+            border-radius: 0;
         }
 
         .deadline-item.is-urgent {
@@ -186,8 +183,8 @@
             align-items: center;
             min-width: 3.4rem;
             padding: 0.45rem 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-md, 8px);
+            border: 1px solid #1f1f1f;
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
         }
 
@@ -198,9 +195,12 @@
         }
 
         .deadline-day {
-            font-size: 1.15rem;
-            font-weight: 700;
+            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 800;
+            line-height: 1.1;
             color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
         }
 
         .deadline-body {
@@ -222,7 +222,7 @@
             align-self: flex-start;
             padding: 0.18rem 0.55rem;
             border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 999px;
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.58rem;
             letter-spacing: 0.14em;
@@ -265,7 +265,7 @@
             display: inline-block;
             padding: 0.5rem 0.9rem;
             border: 1px solid var(--primary);
-            border-radius: var(--radius-md, 8px);
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.66rem;
             letter-spacing: 0.12em;
@@ -276,7 +276,7 @@
         }
 
         .reconnect-cta:hover {
-            background: rgba(255, 90, 79, 0.08);
+            background: rgba(215, 25, 33, 0.08);
         }
 
         .assignments-grid {
@@ -292,14 +292,14 @@
             gap: 0.7rem;
             padding: 1.25rem;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-lg, 14px);
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            border: 1px solid #1f1f1f;
+            border-radius: 0;
+            transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .assignment-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 90, 79, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(215, 25, 33, 0.45);
         }
 
         .assignment-card-top {
@@ -321,7 +321,7 @@
             flex-shrink: 0;
             padding: 0.22rem 0.6rem;
             border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 999px;
+            border-radius: 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.58rem;
             letter-spacing: 0.14em;
@@ -358,7 +358,16 @@
         body.light-theme .deadline-item,
         body.light-theme .assignment-card {
             background: rgba(19, 19, 19, 0.02);
-            border-color: rgba(19, 19, 19, 0.08);
+            border-color: rgba(19, 19, 19, 0.1);
+        }
+
+        body.light-theme .deadline-item.is-urgent {
+            border-left-color: var(--primary);
+        }
+
+        body.light-theme .assignment-card:hover {
+            background: rgba(19, 19, 19, 0.04);
+            border-color: rgba(215, 25, 33, 0.5);
         }
 
         body.light-theme .deadline-date,

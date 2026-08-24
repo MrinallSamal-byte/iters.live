@@ -1,7 +1,7 @@
 /* About Creator Section Styles (Legacy - moved to creator-page.css) */
 .about-creator-section {
     padding: var(--spacing-2xl) 0;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.03);
 }
 
 .creator-content {
@@ -9,23 +9,26 @@
     margin: 0 auto;
     text-align: center;
     padding: var(--spacing-xl);
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--glass-border);
+    background: var(--r-panel, #0a0a0a);
+    backdrop-filter: none;
+    border-radius: var(--r-radius, 2px);
+    border: 1px solid var(--r-line, #1f1f1f);
 }
 
 .creator-title {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-family: var(--r-font-display, "Doto", "Space Grotesk", sans-serif);
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     margin-bottom: var(--spacing-xl);
-    color: var(--primary);
+    color: var(--r-text, #f4f4f4);
 }
 
 .creator-description {
     font-size: 1.125rem;
     line-height: 1.8;
-    color: var(--text-secondary);
+    color: var(--r-text-2, #b0b0b0);
     margin-bottom: var(--spacing-2xl);
 }
 
@@ -36,17 +39,17 @@
 
 .creator-info p {
     font-size: 1rem;
-    color: var(--text-secondary);
+    color: var(--r-text-2, #b0b0b0);
     margin-bottom: var(--spacing-md);
     padding-left: var(--spacing-lg);
     position: relative;
 }
 
 .creator-info p::before {
-    content: '•';
+    content: '+';
     position: absolute;
     left: 0;
-    color: var(--primary);
+    color: var(--r-accent, #d71921);
     font-weight: bold;
 }
 
@@ -63,20 +66,25 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-xl);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
-    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--r-line-strong, #333333);
+    border-radius: var(--r-radius, 2px);
+    color: var(--r-text, #f4f4f4);
     text-decoration: none;
-    font-weight: 600;
+    font-family: var(--r-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     transition: all var(--transition-base);
 }
 
 .creator-link:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33,0.3);
+    background: rgba(215, 25, 33, 0.08);
+    border-color: var(--r-accent, #d71921);
+    color: var(--r-text, #f4f4f4);
+    transform: none;
+    box-shadow: none;
 }
 
 .creator-link-icon {
@@ -88,19 +96,25 @@
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-xl);
-    background: var(--primary,#d71921);
-    border: none;
-    border-radius: var(--radius-full);
+    background: var(--r-accent, #d71921);
+    border: 1px solid var(--r-accent, #d71921);
+    border-radius: var(--r-radius, 2px);
     color: white;
     text-decoration: none;
-    font-weight: 600;
+    font-family: var(--r-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     transition: all var(--transition-base);
     cursor: pointer;
 }
 
 .back-to-top-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33,0.35);
+    background: var(--r-accent-deep, #a31016);
+    border-color: var(--r-accent-deep, #a31016);
+    transform: none;
+    box-shadow: none;
 }
 
 .back-to-top-btn span:first-child {
@@ -114,7 +128,7 @@
     }
 
     .creator-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .creator-description {
