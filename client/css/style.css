@@ -2498,7 +2498,7 @@ body:not(.nothing-home) .dashboard-main canvas {
     filter: saturate(0.98) contrast(1.02);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
     body:not(.nothing-home) .dashboard-main .dashboard-grid {
         grid-template-columns: 1fr;
     }
@@ -3087,17 +3087,18 @@ body:not(.nothing-home) .theme-toggle {
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
     body:not(.nothing-home) .dashboard-main {
-        width: calc(100vw - 18px) !important;
-        max-width: calc(100vw - 18px) !important;
+        /* 100vw includes the scrollbar width, causing horizontal overflow;
+           min(1560px,100%) keeps it fluid and scrollbar-safe */
+        width: auto !important;
+        max-width: min(1560px, 100%) !important;
         min-width: 0 !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         padding: 5.4rem 0.95rem 1rem !important;
     }
 
     body:not(.nothing-home) .dashboard-grid,
-    body:not(.nothing-home) .quick-stats,
     body:not(.nothing-home) .quick-links-grid,
     body:not(.nothing-home) .analytics-grid,
     body:not(.nothing-home) .details-grid,

@@ -163,7 +163,9 @@ body *::selection {
    ------------------------------------------------------------ */
 
 body:not(.nothing-home) .dashboard-main {
-    max-width: 1280px;
+    /* match style.css layout width (1560px) - a 1280px cap left large
+       dead space on wide screens */
+    max-width: min(1560px, 100%);
 }
 
 /* ------------------------------------------------------------
@@ -980,28 +982,6 @@ body:not(.nothing-home) .modern-table {
 
 
 /* Skip link - visually hidden until keyboard focus */
-.skip-link {
-  position: absolute;
-  top: -48px;
-  left: 16px;
-  z-index: 10001;
-  padding: 10px 18px;
-  background: #000000;
-  color: #f6f3ee;
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: top 0.15s ease;
-}
-.skip-link:focus {
-  top: 12px;
-  outline: 1px solid rgba(255, 255, 255, 0.5);
-  outline-offset: 2px;
-}
-
 /* === dashboard consistency pass === */
 /* Scope: /dashboard/*.html pages. Append-only block from the dashboard-wide
    visual consistency + readability sweep. Do not reorder above rules. */

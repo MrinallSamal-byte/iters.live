@@ -36,6 +36,16 @@ img, video, iframe, embed, object {
     height: auto;
 }
 
+/* Fluid canvases (charts) even outside media queries */
+canvas {
+    max-width: 100%;
+}
+
+/* Unbreakable strings never force horizontal scroll */
+body, td, th, .stat-number, .page-title {
+    overflow-wrap: break-word;
+}
+
 pre, code, .code-block {
     max-width: 100%;
     overflow-x: auto;
@@ -945,9 +955,8 @@ pre, code, .code-block {
    Hardens pages with inline desktop-first grids and fixed-width panels.
    ============================================================================ */
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
     .dashboard-grid,
-    .quick-stats,
     .quick-links-grid,
     .analytics-grid,
     .details-grid,
