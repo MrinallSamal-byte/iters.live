@@ -15,10 +15,7 @@ body.creator-page {
     --creator-shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
     --creator-shell-padding: clamp(22px, 2.8vw, 38px);
     --creator-shell-radius: clamp(24px, 3vw, 36px);
-    background:
-        radial-gradient(circle at 14% 16%, rgba(185, 120, 69, 0.16), transparent 28%),
-        radial-gradient(circle at 82% 12%, rgba(246, 238, 228, 0.08), transparent 26%),
-        linear-gradient(180deg, #040302 0%, var(--creator-bg) 100%);
+    background: #040302;
     color: var(--creator-text);
     font-family: "Sora", "Space Grotesk", "Segoe UI", sans-serif;
     overflow-x: clip;
@@ -32,12 +29,12 @@ body.creator-page::before {
     opacity: 0.18;
 }
 
-body.creator-page::after {
-    background:
-        radial-gradient(circle at 20% 18%, rgba(185, 120, 69, 0.12) 0%, transparent 24%),
-        radial-gradient(circle at 76% 22%, rgba(255, 244, 233, 0.08) 0%, transparent 24%),
-        radial-gradient(circle at 58% 72%, rgba(185, 120, 69, 0.08) 0%, transparent 28%);
-    filter: blur(34px);
+body.creator-page::before {
+    background-image:
+        linear-gradient(rgba(255, 244, 233, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 244, 233, 0.035) 1px, transparent 1px);
+    background-size: 88px 88px;
+    opacity: 0.18;
 }
 
 body.creator-page.light-theme {
@@ -52,19 +49,12 @@ body.creator-page.light-theme {
     --creator-muted-strong: #4a392f;
     --creator-accent-soft: rgba(185, 120, 69, 0.12);
     --creator-shadow: 0 24px 60px rgba(76, 50, 33, 0.12);
-    background:
-        radial-gradient(circle at 14% 16%, rgba(185, 120, 69, 0.12), transparent 28%),
-        radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.78), transparent 26%),
-        linear-gradient(180deg, #fcf7f0 0%, var(--creator-bg) 100%);
+    background: #fcf7f0;
     color-scheme: light;
 }
 
 body.creator-page.light-theme::before {
     opacity: 0.1;
-}
-
-body.creator-page.light-theme::after {
-    filter: blur(24px);
 }
 
 .creator-page a {
@@ -84,9 +74,7 @@ body.creator-page.light-theme::after {
 .creator-page .creator-note-strip,
 .creator-page .contact-creator-shell,
 .creator-page .principle-item {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 100%),
-        var(--creator-surface);
+    background: var(--creator-surface);
     border: 1px solid var(--creator-border);
     box-shadow: var(--creator-shadow);
     backdrop-filter: blur(22px);
@@ -110,7 +98,7 @@ body.creator-page.light-theme::after {
 
 .creator-page .nav-link.active::after,
 .creator-page .nav-link:hover::after {
-    background: linear-gradient(90deg, var(--creator-accent), var(--creator-accent-strong));
+    background: var(--creator-accent);
 }
 
 .creator-page .btn,
@@ -120,7 +108,7 @@ body.creator-page.light-theme::after {
 }
 
 .creator-page .btn-primary {
-    background: linear-gradient(135deg, var(--creator-accent) 0%, var(--creator-accent-strong) 100%);
+    background: var(--creator-accent);
     border-color: transparent;
     color: #fff6ef;
     box-shadow: 0 14px 30px rgba(185, 120, 69, 0.24);
@@ -128,7 +116,7 @@ body.creator-page.light-theme::after {
 
 .creator-page .btn-primary:hover,
 .creator-page .project-link:hover {
-    background: linear-gradient(135deg, #c9874f 0%, #e3a46b 100%);
+    background: #c9874f;
     border-color: transparent;
     color: #fff9f4;
 }
@@ -159,7 +147,7 @@ body.creator-page.light-theme::after {
 
 .creator-page .gradient-orb {
     position: absolute;
-    filter: blur(56px);
+    display: none;
     opacity: 0.55;
     border-radius: 999px;
     will-change: transform;
@@ -195,10 +183,8 @@ body.creator-page.light-theme::after {
     height: 420px;
     border: 1px solid rgba(221, 186, 150, 0.08);
     border-radius: 40px;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 62%),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02), transparent 46%, rgba(185, 120, 69, 0.08));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background: none;
+    box-shadow: none;
 }
 
 .creator-page .creator-noise {
@@ -225,10 +211,7 @@ body.creator-page.light-theme::after {
     isolation: isolate;
     padding: clamp(24px, 3vw, 44px);
     border-radius: calc(var(--creator-shell-radius) + 8px);
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.03), transparent 58%),
-        linear-gradient(180deg, rgba(185, 120, 69, 0.06), transparent 35%),
-        rgba(16, 11, 8, 0.44);
+    background: rgba(16, 11, 8, 0.44);
     border: 1px solid rgba(221, 186, 150, 0.08);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
@@ -242,13 +225,6 @@ body.creator-page.light-theme::after {
     inset: 0;
     border-radius: inherit;
     pointer-events: none;
-}
-
-.creator-page .creator-hero-grid::before {
-    background:
-        radial-gradient(circle at top right, rgba(214, 151, 96, 0.12), transparent 30%),
-        radial-gradient(circle at 14% 12%, rgba(255, 244, 233, 0.08), transparent 22%);
-    z-index: -1;
 }
 
 .creator-page .creator-story {
@@ -287,7 +263,7 @@ body.creator-page.light-theme::after {
     content: "";
     width: 42px;
     height: 1px;
-    background: linear-gradient(90deg, rgba(185, 120, 69, 0.12), var(--creator-accent));
+    background: var(--creator-accent);
 }
 
 .creator-page .hero-badge.creator-badge {
@@ -397,7 +373,7 @@ body.creator-page.light-theme::after {
     position: absolute;
     inset: 0 0 auto;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(221, 186, 150, 0.32), transparent);
+    background: rgba(221, 186, 150, 0.32);
     pointer-events: none;
 }
 
@@ -440,10 +416,7 @@ body.creator-page.light-theme::after {
     width: min(100%, 760px);
     padding: clamp(18px, 2.4vw, 24px);
     border-radius: 28px;
-    background:
-        linear-gradient(135deg, rgba(185, 120, 69, 0.12), transparent 55%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 100%),
-        var(--creator-surface);
+    background: var(--creator-surface);
 }
 
 .creator-page .creator-note-label {
@@ -477,10 +450,7 @@ body.creator-page.light-theme::after {
     min-height: 0;
     height: fit-content;
     justify-self: end;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 38%),
-        radial-gradient(circle at top, rgba(185, 120, 69, 0.12), transparent 52%),
-        var(--creator-surface);
+    background: var(--creator-surface);
 }
 
 @media (min-width: 1101px) {
@@ -518,9 +488,7 @@ body.creator-page.light-theme::after {
     place-items: center;
     min-height: clamp(220px, 26vw, 300px);
     border-radius: 30px;
-    background:
-        radial-gradient(circle at center, rgba(185, 120, 69, 0.18) 0%, rgba(185, 120, 69, 0.08) 26%, transparent 62%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+    background: rgba(185, 120, 69, 0.18);
     border: 1px solid rgba(221, 186, 150, 0.1);
     overflow: hidden;
 }
@@ -556,9 +524,7 @@ body.creator-page.light-theme::after {
     width: 156px;
     height: 156px;
     border-radius: 50%;
-    background:
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08), transparent 40%),
-        linear-gradient(135deg, rgba(185, 120, 69, 0.18), rgba(255, 244, 233, 0.06));
+    background: rgba(185, 120, 69, 0.18);
     border: 1px solid rgba(221, 186, 150, 0.2);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 42px rgba(0, 0, 0, 0.18);
     color: var(--creator-text);
@@ -614,7 +580,7 @@ body.creator-page.light-theme::after {
 .creator-page .creator-metric {
     padding: 18px;
     border-radius: 22px;
-    background: linear-gradient(180deg, rgba(185, 120, 69, 0.1), rgba(255, 244, 233, 0.03));
+    background: rgba(185, 120, 69, 0.1);
     border: 1px solid rgba(221, 186, 150, 0.12);
 }
 
@@ -645,10 +611,7 @@ body.creator-page.light-theme::after {
     padding: var(--creator-shell-padding);
     border-radius: var(--creator-shell-radius);
     overflow: hidden;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 28%),
-        linear-gradient(145deg, rgba(185, 120, 69, 0.08), transparent 52%),
-        var(--creator-surface);
+    background: var(--creator-surface);
 }
 
 .creator-page .creator-overview-section {
@@ -664,19 +627,13 @@ body.creator-page.light-theme::after {
     padding: clamp(24px, 2.8vw, 36px);
     border-radius: var(--creator-shell-radius);
     overflow: hidden;
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.03), transparent 55%),
-        linear-gradient(180deg, rgba(185, 120, 69, 0.08), transparent 34%),
-        var(--creator-surface);
+    background: var(--creator-surface);
 }
 
 .creator-page .creator-section-shell::after,
 .creator-page .creator-overview-shell::after,
 .creator-page .contact-creator-shell::after {
-    background:
-        radial-gradient(circle at top right, var(--creator-accent-glow), transparent 28%);
-    opacity: 0.8;
-    z-index: 0;
+    content: none;
 }
 
 .creator-page .creator-section-shell > *,
@@ -749,7 +706,7 @@ body.creator-page.light-theme::after {
 .creator-page .creator-section-link:hover,
 .creator-page .creator-section-link:focus-visible,
 .creator-page .creator-section-link.is-active {
-    background: linear-gradient(135deg, rgba(185, 120, 69, 0.18), rgba(255, 244, 233, 0.08));
+    background: rgba(185, 120, 69, 0.18);
     border-color: rgba(221, 186, 150, 0.24);
     color: var(--creator-text);
     transform: translateY(-2px);
@@ -840,7 +797,7 @@ body.creator-page.light-theme::after {
 
 .creator-page .education-timeline::before {
     left: 36px;
-    background: linear-gradient(180deg, rgba(185, 120, 69, 0.6), rgba(185, 120, 69, 0));
+    background: rgba(185, 120, 69, 0.6);
     width: 1px;
 }
 
@@ -871,7 +828,7 @@ body.creator-page.light-theme::after {
     width: 72px;
     height: 72px;
     border-radius: 24px;
-    background: linear-gradient(180deg, rgba(185, 120, 69, 0.16), rgba(255, 244, 233, 0.05));
+    background: rgba(185, 120, 69, 0.16);
     border: 1px solid rgba(221, 186, 150, 0.14);
     color: var(--creator-text);
     font-size: 1.02rem;
@@ -1164,7 +1121,7 @@ body.creator-page.light-theme::after {
 }
 
 .creator-page .tech-tag-pill:hover {
-    background: linear-gradient(135deg, rgba(185, 120, 69, 0.16), rgba(185, 120, 69, 0.08));
+    background: rgba(185, 120, 69, 0.16);
     border-color: rgba(221, 186, 150, 0.2);
     color: var(--creator-text);
     transform: translateY(-2px);
@@ -1226,7 +1183,7 @@ body.creator-page.light-theme::after {
     height: 40px;
     margin-right: 14px;
     border-radius: 14px;
-    background: linear-gradient(180deg, rgba(185, 120, 69, 0.18), rgba(255, 244, 233, 0.06));
+    background: rgba(185, 120, 69, 0.18);
     color: var(--creator-text);
     font-size: 0.82rem;
     font-weight: 700;

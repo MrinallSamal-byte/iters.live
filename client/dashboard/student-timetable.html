@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timetable - ITERasn hub</title>
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="/assets/icon.png">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
     <script>
         (function() {
@@ -92,7 +95,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📆</span>
                     Weekly Schedule
                 </h3>
                 <div class="timetable-controls">
@@ -131,7 +133,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
                     Today's Schedule
                 </h3>
                 <span class="section-badge" id="todayDate">Loading...</span>
@@ -429,7 +430,7 @@
 
         .timetable-wrapper::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 4px;
+            border-radius: 0;
         }
 
         /* Stat boxes: auto-fit -> 2-col <=900 -> 1-col <=520 */

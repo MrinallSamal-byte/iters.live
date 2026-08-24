@@ -191,7 +191,7 @@ select.form-control {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(215, 25, 33,0.3);
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -204,13 +204,13 @@ select.form-control {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #d71921;
   color: white;
 }
 
 .btn-danger:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+  box-shadow: none;
 }
 
 .btn:active {
@@ -276,8 +276,9 @@ select.form-control {
 }
 
 #copy-link-btn.copied {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: #f4f4f4;
+  color: #111;
+  border: 1px solid #111;
 }
 
 /* QR Code */

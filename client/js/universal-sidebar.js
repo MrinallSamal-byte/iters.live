@@ -443,7 +443,7 @@
             window.addEventListener('resize', () => {
                 this.syncSidebarState();
 
-                if (window.innerWidth > 968) {
+                if (window.innerWidth > 1023) {
                     const overlay = document.getElementById('sidebarOverlay');
                     if (sidebar) sidebar.classList.remove('mobile-open');
                     if (overlay) overlay.classList.remove('active');
@@ -561,7 +561,7 @@
             if (!sidebar) return;
 
             const isCollapsed = sidebar.classList.contains('collapsed');
-            const isMobile = window.innerWidth <= 968;
+            const isMobile = window.innerWidth <= 1023;
 
             if (toggleBtn) {
                 const icon = toggleBtn.querySelector('.sidebar-toggle-icon');
@@ -607,7 +607,7 @@
             const sidebar = document.getElementById('universalSidebar');
             const overlay = document.getElementById('sidebarOverlay');
 
-            if (window.innerWidth <= 968) {
+            if (window.innerWidth <= 1023) {
                 if (sidebar) sidebar.classList.remove('mobile-open');
                 if (overlay) overlay.classList.remove('active');
             }

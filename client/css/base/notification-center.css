@@ -30,7 +30,7 @@
   position: absolute;
   top: -5px;
   right: -5px;
-  background: linear-gradient(135deg, #f06, #f79);
+  background: #f06;
   color: white;
   border-radius: 10px;
   padding: 2px 6px;
@@ -86,7 +86,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .filter-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
 }
 
@@ -208,11 +208,11 @@
 }
 
 .notification-item.unread {
-  background: linear-gradient(to right, rgba(102, 126, 234, 0.1), white);
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .notification-item.unread::before {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
 }
 
 /* Type-specific colors */
@@ -364,7 +364,7 @@
 .notification-footer .btn-primary {
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border: none;
   border-radius: 8px;
@@ -435,7 +435,7 @@
   }
 
   .notification-item.unread {
-    background: linear-gradient(to right, rgba(102, 126, 234, 0.2), #2a2a2a);
+    background: rgba(102, 126, 234, 0.2);
   }
 
   .notification-title {

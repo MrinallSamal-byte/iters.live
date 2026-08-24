@@ -111,7 +111,7 @@ body.light-theme {
 
 .sidebar-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(215, 25, 33,0.35);
+    box-shadow: none;
 }
 
 /* Navigation Links */

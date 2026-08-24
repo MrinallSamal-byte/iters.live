@@ -98,15 +98,15 @@ body {
 .gradient-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.45; /* slightly reduced to prevent washing out text */
-    animation: float 20s infinite ease-in-out;
+    filter: none;
+    opacity: 0; /* inert: orbs are flattened out of the Nothing theme */
+    animation: none;
 }
 
 .orb-1 {
     width: 500px;
     height: 500px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: transparent;
     top: -250px;
     left: -250px;
     animation-delay: 0s;
@@ -115,7 +115,7 @@ body {
 .orb-2 {
     width: 400px;
     height: 400px;
-    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    background: transparent;
     bottom: -200px;
     right: -200px;
     animation-delay: -7s;
@@ -124,7 +124,7 @@ body {
 .orb-3 {
     width: 350px;
     height: 350px;
-    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    background: transparent;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -251,7 +251,7 @@ body.light-theme .profile-dropdown {
 }
 
 .nav-logo:hover .logo-img {
-    box-shadow: 0 4px 16px rgba(215, 25, 33, 0.3);
+    box-shadow: none;
     transform: rotate(5deg);
 }
 
@@ -284,7 +284,7 @@ body.light-theme .profile-dropdown {
     transform: translateX(-50%);
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
+    background: var(--primary);
     transition: width var(--transition-base);
     border-radius: 2px;
 }
@@ -416,13 +416,13 @@ body.light-theme select optgroup {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background: var(--primary);
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33, 0.4);
+    box-shadow: none;
 }
 
 .btn-secondary {
@@ -446,7 +446,7 @@ body.light-theme select optgroup {
     background: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33, 0.3);
+    box-shadow: none;
 }
 
 .btn-large {
@@ -460,7 +460,7 @@ body.light-theme select optgroup {
 }
 
 .btn-glow {
-    box-shadow: 0 0 30px rgba(215, 25, 33, 0.5);
+    box-shadow: none;
 }
 
 .btn-copy {
@@ -510,7 +510,7 @@ body.light-theme select optgroup {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.2), rgba(215, 25, 33, 0.2));
+    background: rgba(215, 25, 33, 0.2);
     border: 1px solid rgba(215, 25, 33, 0.3);
     padding: 0.65rem 1.25rem;
     border-radius: 50px;
@@ -550,7 +550,7 @@ body.light-theme select optgroup {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+    background: var(--primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -659,11 +659,11 @@ body.light-theme select optgroup {
     transform: translate(-50%, -50%);
     width: 80%;
     height: 80%;
-    background: radial-gradient(circle, rgba(215, 25, 33, 0.4) 0%, rgba(215, 25, 33, 0.2) 40%, transparent 70%);
+    display: none;
     border-radius: 50%;
-    filter: blur(40px);
+    filter: none;
     z-index: 1;
-    animation: pulse-glow 4s ease-in-out infinite;
+    animation: none;
 }
 
 @keyframes float {
@@ -780,7 +780,7 @@ body.light-theme select optgroup {
 .coming-soon-badge {
     font-size: 0.75rem;
     padding: 0.25rem 0.75rem;
-    background: linear-gradient(135deg, var(--warning), var(--secondary));
+    background: var(--warning);
     color: white;
     border-radius: var(--radius-full);
     font-weight: 600;
@@ -801,7 +801,7 @@ body.light-theme select optgroup {
 
 /* About Section */
 .about-section {
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.05) 0%, rgba(215, 25, 33, 0.05) 100%);
+    background: rgba(215, 25, 33, 0.05);
 }
 
 .about-content {
@@ -863,7 +863,7 @@ body.light-theme select optgroup {
 
 .academic-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(215, 25, 33, 0.15);
+    box-shadow: none;
 }
 
 .academic-icon {
@@ -907,7 +907,7 @@ body.light-theme select optgroup {
 
 /* Contact Section */
 .contact-section {
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.05) 0%, rgba(215, 25, 33, 0.05) 100%);
+    background: rgba(215, 25, 33, 0.05);
 }
 
 .contact-grid {
@@ -926,7 +926,7 @@ body.light-theme select optgroup {
 
 .contact-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(215, 25, 33, 0.12);
+    box-shadow: none;
 }
 
 .contact-icon {
@@ -1030,7 +1030,7 @@ body.light-theme select optgroup {
 
 .theme-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 8px 24px rgba(215, 25, 33, 0.3);
+    box-shadow: none;
     border-color: var(--primary);
 }
 
@@ -1204,7 +1204,7 @@ body:has(.modal.show) .mobile-bottom-nav {
     width: 100%;
     height: 100%;
     z-index: -1;
-    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    background: var(--bg-primary);
 }
 
 /* Unified ITERasn hub visual language across public and dashboard pages */
@@ -1213,11 +1213,6 @@ body:not(.nothing-home) .bg-animation {
     inset: 0;
     z-index: -1;
     pointer-events: none;
-}
-
-body:not(.nothing-home) .gradient-orb {
-    opacity: 0.22;
-    filter: blur(100px);
 }
 
 body:not(.nothing-home) .gradient-orb {
@@ -1445,7 +1440,7 @@ body.light-theme .data-table th {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.1), rgba(215, 25, 33, 0.1));
+    background: rgba(215, 25, 33, 0.1);
     opacity: 0;
     transition: opacity 0.4s;
 }
@@ -1456,8 +1451,7 @@ body.light-theme .data-table th {
 
 .stat-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(215, 25, 33, 0.3),
-                0 0 0 1px rgba(215, 25, 33, 0.2);
+    box-shadow: 0 0 0 1px rgba(215, 25, 33, 0.2);
     border-color: rgba(215, 25, 33, 0.5);
 }
 
@@ -1751,7 +1745,7 @@ body.light-theme .data-table th {
 /* Why Choose Section */
 .why-choose-section {
     padding: var(--spacing-2xl) 0;
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.05), rgba(215, 25, 33, 0.05));
+    background: rgba(215, 25, 33, 0.05);
 }
 
 .why-choose-grid {
@@ -1981,7 +1975,7 @@ body.light-theme .data-table th {
     background: var(--primary);
     border-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(215, 25, 33, 0.3);
+    box-shadow: none;
 }
 
 /* Enhanced Hero Stats */
@@ -2168,9 +2162,7 @@ body:not(.nothing-home) .dashboard-main .forum-main,
 body:not(.nothing-home) .dashboard-main .request-section,
 body:not(.nothing-home) .dashboard-main .rubric-list,
 body:not(.nothing-home) .dashboard-main .question-bank-grid {
-    background:
-        linear-gradient(180deg, rgba(215, 25, 33, 0.06), transparent 30%),
-        rgba(14, 14, 14, 0.82);
+    background: rgba(14, 14, 14, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 28px;
     box-shadow: 0 22px 56px rgba(0, 0, 0, 0.3);
@@ -2194,26 +2186,13 @@ body.light-theme .dashboard-main .forum-main,
 body.light-theme .dashboard-main .request-section,
 body.light-theme .dashboard-main .rubric-list,
 body.light-theme .dashboard-main .question-bank-grid {
-    background:
-        linear-gradient(180deg, rgba(215, 25, 33, 0.06), transparent 30%),
-        rgba(255, 255, 255, 0.84);
+    background: rgba(255, 255, 255, 0.84);
     border-color: rgba(19, 19, 19, 0.08);
 }
 
 body:not(.nothing-home) .dashboard-main .page-hero {
     padding: clamp(1.4rem, 3vw, 2rem);
     overflow: hidden;
-}
-
-body:not(.nothing-home) .dashboard-main .page-hero::after {
-    content: "";
-    position: absolute;
-    inset: auto -10% -45% auto;
-    width: 220px;
-    height: 220px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(215, 25, 33, 0.18), transparent 68%);
-    pointer-events: none;
 }
 
 body:not(.nothing-home) .dashboard-main .hero-content-inline {
@@ -2285,7 +2264,7 @@ body:not(.nothing-home) .dashboard-main .stat-box::before {
     inset: 0 auto 0 0;
     width: 4px;
     border-radius: 999px;
-    background: linear-gradient(180deg, var(--primary), rgba(215, 25, 33, 0.14));
+    background: var(--primary);
 }
 
 body:not(.nothing-home) .dashboard-main .stat-number {
@@ -2451,9 +2430,9 @@ body:not(.nothing-home) .dashboard-main .btn {
 }
 
 body:not(.nothing-home) .dashboard-main .btn-primary {
-    background: linear-gradient(135deg, #ff6b5e 0%, #e24e43 100%);
+    background: var(--primary);
     color: #fff;
-    box-shadow: 0 18px 34px rgba(215, 25, 33, 0.24);
+    box-shadow: none;
 }
 
 body:not(.nothing-home) .dashboard-main .btn-outline,
@@ -2552,10 +2531,7 @@ body:not(.nothing-home) .dashboard-main canvas {
 body:not(.nothing-home) {
     position: relative;
     min-height: 100vh;
-    background:
-        radial-gradient(circle at 12% 10%, rgba(215, 25, 33, 0.14), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.07), transparent 20%),
-        linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+    background: #050505;
 }
 
 body:not(.nothing-home)::before {
@@ -2570,23 +2546,8 @@ body:not(.nothing-home)::before {
     mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.18));
 }
 
-body:not(.nothing-home)::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 24%),
-        linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 52%, transparent 100%);
-    opacity: 0.85;
-}
-
 body.light-theme:not(.nothing-home) {
-    background:
-        radial-gradient(circle at 12% 10%, rgba(215, 25, 33, 0.13), transparent 24%),
-        radial-gradient(circle at 88% 12%, rgba(19, 19, 19, 0.05), transparent 20%),
-        linear-gradient(180deg, #f8f4ed 0%, #efe7db 100%);
+    background: #f8f4ed;
 }
 
 body.light-theme:not(.nothing-home)::before {
@@ -2643,9 +2604,7 @@ body:not(.nothing-home) .table-container,
 body:not(.nothing-home) .timetable-wrapper {
     position: relative;
     overflow: hidden;
-    background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 20%),
-        rgba(14, 14, 14, 0.82);
+    background: rgba(14, 14, 14, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 28px;
     box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28);
@@ -2676,9 +2635,7 @@ body.light-theme:not(.nothing-home) .info-item,
 body.light-theme:not(.nothing-home) .summary-item,
 body.light-theme:not(.nothing-home) .table-container,
 body.light-theme:not(.nothing-home) .timetable-wrapper {
-    background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.03), transparent 20%),
-        rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.86);
     border-color: rgba(19, 19, 19, 0.08);
     box-shadow: 0 22px 48px rgba(44, 33, 21, 0.12);
 }
@@ -2778,7 +2735,7 @@ body:not(.nothing-home) .stat-box::before {
     inset: 0 auto auto 0;
     width: 100%;
     height: 1px;
-    background: linear-gradient(90deg, rgba(215, 25, 33, 0.42), transparent 68%);
+    background: rgba(215, 25, 33, 0.42);
 }
 
 body:not(.nothing-home) .stat-icon-large {
@@ -2936,10 +2893,10 @@ body:not(.nothing-home) .view-btn.active,
 body:not(.nothing-home) .settings-tab.active,
 body:not(.nothing-home) .block-tab.active,
 body:not(.nothing-home) .role-btn.active {
-    background: linear-gradient(135deg, rgba(215, 25, 33, 0.18), rgba(255, 255, 255, 0.05));
+    background: rgba(215, 25, 33, 0.18);
     border-color: rgba(215, 25, 33, 0.22);
     color: var(--text-primary);
-    box-shadow: inset 0 0 0 1px rgba(215, 25, 33, 0.14);
+    box-shadow: none;
 }
 
 body:not(.nothing-home) .tab-btn:hover,

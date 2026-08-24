@@ -65,7 +65,7 @@
 
 .template-option:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(215, 25, 33,0.2);
+  box-shadow: none;
 }
 
 .template-option.active {
@@ -118,7 +118,7 @@
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(215, 25, 33,0.35);
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -366,7 +366,7 @@
 
 .btn-add:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(215, 25, 33,0.3);
+  box-shadow: none;
 }
 
 .skills-list {
@@ -606,7 +606,7 @@
 
 /* Dark Mode */
 .dark .builder-sidebar {
-  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.9) 100%);
+  background: rgba(30, 30, 30, 0.9);
 }
 
 .dark .builder-editor {
