@@ -42,7 +42,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   padding: 8px 12px;
-  border-radius: 12px;
+  border-radius: 0; /* ponytail: was 12px */
   margin: 0 4px;
 }
 
@@ -110,7 +110,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   font-size: 10px;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 10px;
+  border-radius: 2px; /* ponytail: was 10px pill */
   min-width: 18px;
   height: 18px;
   display: flex;
@@ -148,7 +148,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   width: 100%;
   height: 3px;
   background: white;
-  border-radius: 3px;
+  border-radius: 2px; /* ponytail: was 3px */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
 }
@@ -178,15 +178,12 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
     width: 85%;
     max-width: 320px;
     height: calc(100vh - 60px);
-    background: rgba(15, 23, 42, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--bg-primary, #0a0a0a); /* ponytail: was rgba(15,23,42,.98) + blur */
     flex-direction: column;
     padding: 24px 16px;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow-y: auto;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    border-right: 1px solid var(--border-color, rgba(128, 128, 128, 0.25)); /* ponytail: replaces blur + glow shadow */
   }
   
   .nav-links.active {
@@ -201,7 +198,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   .nav-links a {
     display: block;
     padding: 16px 20px;
-    border-radius: 12px;
+    border-radius: 0; /* ponytail: was 12px */
     transition: all 0.3s ease;
     font-size: 16px;
     margin-bottom: 8px;
@@ -286,7 +283,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
 .mobile-menu-toggle:active {
   transform: scale(0.95);
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
+  border-radius: 0; /* ponytail: was 8px */
 }
 
 /* ===================================
@@ -445,9 +442,9 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
     }
 
     .table-card-mobile tr {
-      border: 1px solid #e2e8f0;
+      border: 1px solid #e5e5e5; /* ponytail: was slate #e2e8f0 */
       margin-bottom: 12px;
-      border-radius: 8px;
+      border-radius: 0; /* ponytail: was 8px */
     }
 
     .table-card-mobile td {
@@ -475,7 +472,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   .card,
   .chart-card {
     margin: 12px;
-    border-radius: 12px;
+    border-radius: 0; /* ponytail: was 12px */
   }
 
   .card-grid {
@@ -521,7 +518,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   .dialog {
     max-width: 100%;
     margin: 0;
-    border-radius: 16px 16px 0 0;
+    border-radius: 0; /* ponytail: was 16px sheet corners */
     position: fixed;
     bottom: 0;
     left: 0;
@@ -548,7 +545,7 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
     transform: translateX(-50%);
     width: 40px;
     height: 4px;
-    background: #cbd5e1;
+    background: var(--text-muted, #e5e5e5); /* ponytail: was slate #cbd5e1 */
     border-radius: 2px;
   }
 }
@@ -591,15 +588,15 @@ body.light-theme .mobile-bottom-nav .nav-item.active {
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  background: #ef4444;
+  background: var(--primary, #d71921); /* ponytail: was coral #ef4444 */
 }
 
 .swipeable-card .swipe-actions button {
   background: white;
-  color: #ef4444;
+  color: var(--primary, #d71921);
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 0; /* ponytail: was 6px */
   font-weight: 600;
   min-height: 44px;
 }

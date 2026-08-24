@@ -519,6 +519,144 @@
                 padding: 1rem;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Standalone layout (no universal sidebar on this page): content
+           panels are fluid and never offset by a fixed rail.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Result panels + chat/strategy blocks always full-width */
+        .prediction-card,
+        .recommendations-card,
+        .study-plan-section,
+        .strategy-block,
+        .day-schedule,
+        .feature-card,
+        .factor-item {
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .prediction-card p,
+        .recommendations-card p,
+        .study-plan-section p,
+        .strategy-block p,
+        .feature-card p {
+            overflow-wrap: anywhere;
+        }
+
+        .ai-container {
+            width: 100%;
+        }
+
+        /* Feature card grid tightens on mid screens */
+        @media (max-width: 1024px) {
+            body .main-content .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            }
+        }
+
+        /* Feature card grid: 2 columns */
+        @media (max-width: 900px) {
+            body .main-content .feature-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* Stacking, 16px inputs, >=44px touch targets */
+        @media (max-width: 768px) {
+            .ai-header h1 {
+                font-size: clamp(1.75rem, 8vw, 2.25rem);
+            }
+
+            .ai-header p {
+                letter-spacing: 0.1em;
+            }
+
+            .modal-overlay {
+                padding: 0.5rem;
+            }
+
+            /* Modal: bounded width + internal scroll */
+            .modal-content {
+                width: min(560px, calc(100vw - 32px));
+                max-width: min(560px, calc(100vw - 32px));
+                max-height: calc(100vh - 32px);
+                max-height: calc(100dvh - 32px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+
+            .modal-body input[type="number"],
+            .modal-body select {
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                min-height: 44px;
+            }
+
+            .session-item small {
+                display: block;
+                margin-top: 0.2rem;
+            }
+        }
+
+        /* Feature card grid: 1 column + modal near-fullscreen */
+        @media (max-width: 560px) {
+            body .main-content .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .factor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: calc(100vw - 16px);
+                max-width: calc(100vw - 16px);
+                max-height: calc(100vh - 16px);
+                max-height: calc(100dvh - 16px);
+            }
+
+            .prediction-score {
+                font-size: 2.1rem;
+            }
+
+            .risk-badge {
+                align-self: flex-start;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .ai-container {
+                padding-left: 0.6rem;
+                padding-right: 0.6rem;
+            }
+
+            .ai-header,
+            .prediction-card,
+            .recommendations-card,
+            .study-plan-section,
+            .modal-content,
+            .feature-card,
+            .day-schedule,
+            .strategy-block {
+                padding-left: 0.85rem;
+                padding-right: 0.85rem;
+            }
+        }
     </style>
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>

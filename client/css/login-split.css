@@ -836,8 +836,89 @@ body.nothing-home.public-auth-page .mobile-brand-logo {
 }
 
 /* ------------------------------------------------------------
+   HARD GUARANTEES - Nothing look must survive late loaders
+   (home-minimal.css and refined-ui.css load AFTER this file and
+   re-target these exact nodes with pill radii / gradients /
+   sans-serif fallbacks). Specificity already wins by a hair;
+   these !important flags make it deterministic.
+   ------------------------------------------------------------ */
+
+body.nothing-home.public-auth-page .login-wrapper {
+    border-radius: 0 !important;
+}
+
+body.nothing-home.public-auth-page .brand-title,
+body.nothing-home.public-auth-page .mobile-brand-title,
+body.nothing-home.public-auth-page .login-header h1,
+body.nothing-home.public-auth-page .login-header h2 {
+    font-family: var(--r-font-display, "Doto", "Space Grotesk", sans-serif) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em;
+    -webkit-text-fill-color: currentColor;
+}
+
+body.nothing-home.public-auth-page .btn,
+body.nothing-home.public-auth-page .btn-primary,
+body.nothing-home.public-auth-page .btn-outline,
+body.nothing-home.public-auth-page .btn-secondary,
+body.nothing-home.public-auth-page .role-btn,
+body.nothing-home.public-auth-page .demo-chip,
+body.nothing-home.public-auth-page .password-toggle-btn,
+body.nothing-home.public-auth-page .forgot-link-btn {
+    border-radius: 0 !important;
+}
+
+/* the one red surface - kill surviving gradients/shadows */
+body.nothing-home.public-auth-page .btn-primary.btn-block,
+body.nothing-home.public-auth-page .btn-primary {
+    background: var(--au-accent) !important;
+    border: 1px solid var(--au-accent) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.nothing-home.public-auth-page .btn-primary.btn-block:hover:not(:disabled),
+body.nothing-home.public-auth-page .btn-primary.btn-block:focus-visible,
+body.nothing-home.public-auth-page .btn-primary:hover:not(:disabled),
+body.nothing-home.public-auth-page .btn-primary:focus-visible {
+    background: var(--au-accent-deep) !important;
+    border-color: var(--au-accent-deep) !important;
+    color: #ffffff !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+body.nothing-home.public-auth-page .form-group input,
+body.nothing-home.public-auth-page .form-group select {
+    border-radius: 0 !important;
+    box-shadow: none;
+}
+
+body.nothing-home.public-auth-page .form-group input:focus,
+body.nothing-home.public-auth-page .form-group select:focus {
+    border-color: var(--au-accent) !important;
+    box-shadow: none !important;
+}
+
+/* theme toggle: squared, flat */
+body.nothing-home.public-auth-page .theme-toggle {
+    border-radius: 0;
+    background: var(--au-panel);
+    border: 1px solid var(--au-line-strong);
+    box-shadow: none;
+}
+
+/* ------------------------------------------------------------
    Responsive
    ------------------------------------------------------------ */
+
+/* large desktop: let the card breathe wider than 1080 on big panels */
+@media (min-width: 1440px) {
+    body.nothing-home.public-auth-page .login-wrapper {
+        max-width: 1160px;
+    }
+}
 
 @media (max-width: 900px) {
     body.nothing-home.public-auth-page .login-wrapper {
@@ -851,14 +932,30 @@ body.nothing-home.public-auth-page .mobile-brand-logo {
         border-right: none;
     }
 
+    /* compact brand header replaces the tall brand panel */
     body.nothing-home.public-auth-page .mobile-brand-header {
         display: flex;
+        justify-content: flex-start;
+        padding-bottom: 1.1rem;
+        border-bottom: 1px dotted var(--au-line-strong);
+    }
+
+    body.nothing-home.public-auth-page .mobile-brand-title {
+        font-size: 1.25rem;
+    }
+
+    body.nothing-home.public-auth-page .mobile-brand-logo {
+        padding: 4px;
+        border: 1px solid var(--au-line);
+        background: var(--au-inset);
     }
 }
 
 @media (max-width: 640px) {
     body.nothing-home.public-auth-page .login-container {
         padding: 1rem;
+        /* clear the fixed theme toggle / chatbot FAB zone */
+        padding-bottom: 6rem;
     }
 
     body.nothing-home.public-auth-page .login-form-section {
@@ -877,9 +974,89 @@ body.nothing-home.public-auth-page .mobile-brand-logo {
 
     body.nothing-home.public-auth-page .forgot-link-btn {
         text-align: left;
+        min-height: 44px;
     }
 
     body.nothing-home.public-auth-page .demo-chips {
         justify-content: flex-start;
+    }
+
+    /* 16px inputs stop iOS Safari zoom-on-focus */
+    body.nothing-home.public-auth-page .form-group input,
+    body.nothing-home.public-auth-page .form-group select {
+        font-size: 16px;
+        min-height: 48px;
+    }
+
+    /* >=44px touch targets */
+    body.nothing-home.public-auth-page .demo-chip {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    body.nothing-home.public-auth-page .password-toggle-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    body.nothing-home.public-auth-page .checkbox-label {
+        min-height: 44px;
+    }
+
+    body.nothing-home.public-auth-page .login-footer {
+        line-height: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    body.nothing-home.public-auth-page .login-form-section {
+        padding: 1.5rem 1rem;
+    }
+
+    body.nothing-home.public-auth-page .login-header h1,
+    body.nothing-home.public-auth-page .login-header h2 {
+        font-size: clamp(1.85rem, 8.4vw, 2.35rem);
+    }
+
+    body.nothing-home.public-auth-page .role-selection {
+        flex-direction: column;
+    }
+
+    body.nothing-home.public-auth-page .role-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    body.nothing-home.public-auth-page .demo-chips {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    body.nothing-home.public-auth-page .register-highlights li {
+        font-size: 0.78rem;
+    }
+}
+
+@media (max-width: 360px) {
+    body.nothing-home.public-auth-page .login-container {
+        padding: 0.75rem 0.6rem 5.5rem;
+    }
+
+    body.nothing-home.public-auth-page .login-form-section {
+        padding: 1.35rem 0.85rem;
+    }
+
+    body.nothing-home.public-auth-page .brand-title {
+        font-size: 2.2rem;
+    }
+
+    body.nothing-home.public-auth-page .mobile-brand-title {
+        font-size: 1.1rem;
+    }
+
+    body.nothing-home.public-auth-page .login-header p,
+    body.nothing-home.public-auth-page .brand-subtitle {
+        letter-spacing: 0.08em;
     }
 }

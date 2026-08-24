@@ -435,6 +435,106 @@
                 width: 100%;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .summary-row span,
+        .form-hint,
+        .info-list li {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* Form rows: 2 columns on mid screens */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* Stacking, 16px inputs, >=44px touch targets */
+        @media (max-width: 768px) {
+            body:not(.nothing-home) .dashboard-main .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                min-height: auto;
+            }
+
+            .page-title {
+                font-size: clamp(1.75rem, 7vw, 2.25rem);
+            }
+
+            .payment-form {
+                padding: 1.15rem;
+            }
+
+            /* 16px prevents iOS zoom-on-focus */
+            .form-input,
+            .form-select,
+            .form-textarea {
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .btn {
+                min-height: 44px;
+            }
+
+            .info-list {
+                padding: 0 1.15rem 1.15rem;
+            }
+        }
+
+        /* Amount display scales down */
+        @media (max-width: 560px) {
+            .payment-summary {
+                padding: 1.1rem;
+            }
+
+            .summary-row.total {
+                font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+            }
+
+            .form-actions {
+                gap: 0.55rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero {
+                padding: 1.25rem;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding: 1rem;
+            }
+
+            .payment-form {
+                padding: 0.95rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>

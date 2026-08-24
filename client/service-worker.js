@@ -1,5 +1,5 @@
 // ITERasn hub service worker — offline-first caching strategies
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6-nothing';
 const CACHE_NAME = `iter-core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `iter-runtime-${CACHE_VERSION}`;
 const RUNTIME_MAX_ENTRIES = 200;

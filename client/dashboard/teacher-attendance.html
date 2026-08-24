@@ -525,6 +525,139 @@
                 gap: 0.5rem;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE FIXES (1920 / 1440 / 1024 / 768 / 480 / 360)
+           Sidebar breakpoints mirror client/css/universal-sidebar.css:
+           off-canvas drawer at <=968px, floating rail at <=560px.
+           ============================================================ */
+
+        /* Present/Absent toggle columns stay pinned while the roster
+           scrolls horizontally on small screens */
+        .modern-table th:nth-child(4),
+        .modern-table td:nth-child(4),
+        .modern-table th:nth-child(5),
+        .modern-table td:nth-child(5) {
+            width: 76px;
+            min-width: 76px;
+            text-align: center;
+        }
+
+        /* Page-level overflow guard + sidebar margin release */
+        @media (max-width: 968px) {
+            html,
+            body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .dashboard-main {
+                margin-left: 0 !important;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* Sticky right-hand toggle columns (solid panel background) */
+            .modern-table th:nth-child(4),
+            .modern-table td:nth-child(4) {
+                position: sticky;
+                right: 76px;
+                z-index: 3;
+                background: var(--r-panel);
+                border-left: 1px solid var(--r-line);
+            }
+
+            .modern-table th:nth-child(5),
+            .modern-table td:nth-child(5) {
+                position: sticky;
+                right: 0;
+                z-index: 3;
+                background: var(--r-panel);
+                border-left: 1px solid var(--r-line);
+            }
+
+            .modern-table thead th:nth-child(n+4) {
+                z-index: 13;
+            }
+
+            /* Attendance toggle hit areas >= 44px */
+            .modern-table td input[type="radio"] {
+                width: 44px;
+                height: 44px;
+            }
+        }
+
+        /* Stat grid: 4 -> 2 -> 1 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-hero {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .filter-container {
+                padding: 0 1rem 1.25rem;
+            }
+
+            .recent-records {
+                padding: 0 1rem 1.25rem;
+            }
+
+            .demo-warning {
+                margin: 0 1rem 1rem;
+            }
+
+            .section-header-formal {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+        }
+
+        /* Filter bar wraps; controls full width; inputs 16px */
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-input,
+            .filter-select {
+                width: 100%;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .btn,
+            .btn-lg {
+                min-height: 44px;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .summary-item {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .record-item {
+                flex-wrap: wrap;
+            }
+
+            .record-stats {
+                gap: 0.6rem;
+            }
+        }
     </style>
 </body>
 </html>

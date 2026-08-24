@@ -6,14 +6,14 @@
 /* Base skeleton styles */
 .skeleton,
 .loading-skeleton {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.05) 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
     rgba(255, 255, 255, 0.05) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: 4px;
+  border-radius: 0; /* ponytail: was 4px — shimmer kept (loading affordance) */
   display: inline-block;
 }
 
@@ -74,7 +74,7 @@ body:not(.dark-theme) .skeleton {
 .skeleton-image {
   width: 100%;
   height: 200px;
-  border-radius: 8px;
+  border-radius: 0; /* ponytail: was 8px */
 }
 
 .skeleton-number {
@@ -86,10 +86,9 @@ body:not(.dark-theme) .skeleton {
 /* Card skeleton */
 .skeleton-card {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 0; /* ponytail: was 12px + backdrop blur (glass) */
   padding: 16px;
   margin-bottom: 16px;
-  backdrop-filter: blur(10px);
 }
 
 .skeleton-content {
@@ -103,7 +102,7 @@ body:not(.dark-theme) .skeleton {
   padding: 16px;
   margin-bottom: 8px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 0; /* ponytail: was 8px */
 }
 
 .skeleton-list-content {
@@ -116,7 +115,7 @@ body:not(.dark-theme) .skeleton {
 /* Table skeleton */
 .skeleton-table {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 0; /* ponytail: was 12px */
   padding: 16px;
 }
 
@@ -141,7 +140,7 @@ body:not(.dark-theme) .skeleton {
   text-align: center;
   padding: 24px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 0; /* ponytail: was 12px */
 }
 
 .skeleton-profile-image {
@@ -168,7 +167,7 @@ body:not(.dark-theme) .skeleton {
 /* Chart skeleton */
 .skeleton-chart {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 0; /* ponytail: was 12px */
   padding: 24px;
 }
 
@@ -228,7 +227,7 @@ body:not(.dark-theme) .skeleton {
   background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 0; /* ponytail: was 4px */
   font-size: 12px;
 }
 
@@ -273,15 +272,15 @@ img[data-src], img[data-lazy] {
 
 .swipe-action-left {
   left: 0;
-  background: linear-gradient(to right, #ef4444, transparent);
-  border-radius: 12px 0 0 12px;
+  background: var(--primary, #d71921); /* ponytail: was coral #ef4444 gradient */
+  border-radius: 0; /* ponytail: was 12px */
   color: white;
 }
 
 .swipe-action-right {
   right: 0;
-  background: linear-gradient(to left, #10b981, transparent);
-  border-radius: 0 12px 12px 0;
+  background: #111111; /* ponytail: was green #10b981 gradient — off-palette */
+  border-radius: 0; /* ponytail: was 12px */
   color: white;
 }
 

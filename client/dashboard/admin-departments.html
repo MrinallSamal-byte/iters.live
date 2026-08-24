@@ -736,6 +736,219 @@
     body.light-theme .department-stat-value {
       color: #0d0d0d;
     }
+
+    /* ==========================================================
+       RESPONSIVE FIXES - 1920 / 1440 / 1024 / 768 / 480 / 360
+       ========================================================== */
+
+    /* Modal: fits any viewport, scrolls internally */
+    .modal-content {
+      width: min(560px, calc(100vw - 32px));
+      max-height: min(88vh, calc(100vh - 32px));
+      overflow-y: auto;
+    }
+
+    /* <=1024: charts collapse to one column; stat band 4 -> 2 */
+    @media (max-width: 1024px) {
+      body:not(.nothing-home) .dashboard-main .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      body:not(.nothing-home) .dashboard-main .quick-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    /* <=968: universal sidebar goes off-canvas (see universal-sidebar.css);
+       release its reserved margin so content spans full width */
+    @media (max-width: 968px) {
+      .dashboard-main {
+        margin-left: 0 !important;
+      }
+    }
+
+    /* <=900: hero stacks; department cards 3-col -> 2 */
+    @media (max-width: 900px) {
+      .hero-content-inline {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-actions {
+        width: 100%;
+      }
+
+      .hero-actions .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .departments-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    /* <=768: type scale, full-width controls, iOS zoom guard */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: clamp(1.6rem, 7vw, 2rem);
+        overflow-wrap: anywhere;
+      }
+
+      .page-hero,
+      .dashboard-section,
+      .chart-wrapper {
+        padding: 1.25rem;
+      }
+
+      .filter-input,
+      .filter-select,
+      .form-input,
+      .form-select,
+      .form-textarea {
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .filter-row,
+      .form-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .modal {
+        padding: 16px;
+      }
+
+      .modal-header {
+        padding: 1.25rem 1.25rem 0.85rem;
+      }
+
+      .modal-body {
+        padding: 1.25rem;
+      }
+    }
+
+    /* <=640: stat band -> 1; cards -> 1; dept table becomes stacked cards */
+    @media (max-width: 640px) {
+      body:not(.nothing-home) .dashboard-main .quick-stats,
+      .departments-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .table-responsive::after {
+        content: none;
+      }
+
+      .modern-table,
+      .data-table,
+      .modern-table tbody,
+      .data-table tbody,
+      .modern-table tr,
+      .data-table tr {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        background: transparent;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      .modern-table thead,
+      .data-table thead {
+        display: none;
+      }
+
+      .modern-table td[colspan],
+      .data-table td[colspan] {
+        text-align: center;
+      }
+
+      .modern-table td[colspan]::before,
+      .data-table td[colspan]::before {
+        content: none !important;
+      }
+
+      #deptTableBody tr {
+        margin-bottom: 0.75rem;
+        padding: 0.9rem 0.85rem;
+        border: 1px solid var(--r-line, #1f1f1f);
+        border-left: 2px solid var(--r-line-strong, #333);
+        background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+      }
+
+      #deptTableBody tr:hover {
+        transform: none;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      #deptTableBody td {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.3rem 0;
+        border-bottom: none;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        text-align: left;
+      }
+
+      #deptTableBody td::before {
+        font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+        font-size: 0.56rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--r-text-3, #757575);
+      }
+
+      #deptTableBody td:nth-child(1)::before { content: "CODE"; }
+      #deptTableBody td:nth-child(2)::before { content: "NAME"; }
+      #deptTableBody td:nth-child(3)::before { content: "HOD"; }
+      #deptTableBody td:nth-child(4)::before { content: "STUDENTS"; }
+      #deptTableBody td:nth-child(5)::before { content: "FACULTY"; }
+      #deptTableBody td:nth-child(6)::before { content: "COURSES"; }
+
+      #deptTableBody td:nth-child(2) {
+        font-weight: 600;
+        color: var(--r-text, #f4f4f4);
+      }
+    }
+
+    /* <=480: modal actions stack; card stats keep 3-up with tighter type */
+    @media (max-width: 480px) {
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .department-stat-value {
+        font-size: 1.2rem;
+      }
+
+      .department-actions {
+        flex-wrap: wrap;
+      }
+
+      .view-toggle {
+        align-self: flex-start;
+      }
+    }
+
+    /* <=360: last-resort compression - zero horizontal scroll */
+    @media (max-width: 360px) {
+      .page-title {
+        font-size: 1.45rem;
+      }
+
+      .page-subtitle {
+        letter-spacing: 0.1em;
+      }
+
+      .department-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+    }
   </style>
 </body>
 </html>

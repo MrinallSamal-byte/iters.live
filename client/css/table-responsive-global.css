@@ -16,17 +16,7 @@
     -webkit-overflow-scrolling: touch;
     /* Smooth scrolling on iOS */
     margin-bottom: 1.5rem;
-    border-radius: var(--radius-md, 8px);
-    /* Add scroll indicator shadow */
-    background:
-        linear-gradient(to right, var(--bg-primary, #fff) 30%, rgba(255, 255, 255, 0)),
-        linear-gradient(to right, rgba(255, 255, 255, 0), var(--bg-primary, #fff) 70%) 0 100%,
-        radial-gradient(farthest-side at 0% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)),
-        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)) 0 100%;
-    background-repeat: no-repeat;
-    background-color: transparent;
-    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
-    background-attachment: local, local, scroll, scroll;
+    border-radius: 0; /* ponytail: was var(--radius-md,8px); gradient scroll-hint shadows removed (fights flat design) */
 }
 
 /* Auto-wrap tables that aren't already in a responsive container */
@@ -57,8 +47,23 @@ table {
     border-collapse: separate;
     border-spacing: 0;
     background: var(--glass-bg, rgba(255, 255, 255, 0.05));
-    border-radius: var(--radius-md, 8px);
+    border-radius: 0; /* ponytail: was var(--radius-md,8px) */
     overflow: hidden;
+}
+
+/* ============================================
+   GLOBAL OVERFLOW GUARANTEE
+   Every known table wrapper scrolls at every breakpoint.
+   !important guards against older responsive sheets.
+   ============================================ */
+.table-responsive,
+.table-container,
+.timetable-wrapper,
+.data-table-wrapper,
+.modern-table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
 }
 
 /* Table headers */
@@ -220,7 +225,7 @@ table tbody tr:hover {
         margin-bottom: 1rem;
         padding: 1rem;
         background: var(--glass-bg, rgba(255, 255, 255, 0.05));
-        border-radius: var(--radius-md, 8px);
+        border-radius: 0; /* ponytail: was var(--radius-md,8px) */
         border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
     }
 
@@ -250,7 +255,7 @@ table tbody tr:hover {
 .tag {
     display: inline-block;
     padding: 0.25rem 0.625rem;
-    border-radius: 12px;
+    border-radius: 2px; /* ponytail: was 12px pill */
     font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;

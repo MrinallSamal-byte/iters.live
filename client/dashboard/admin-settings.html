@@ -1025,6 +1025,133 @@
         body.light-theme .file-upload-area {
             border-color: #c9c9c9;
         }
+
+        /* ==========================================================
+           RESPONSIVE FIXES - 1920 / 1440 / 1024 / 768 / 480 / 360
+           ========================================================== */
+
+        /* <=1024: stat band 4 -> 2 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* <=968: universal sidebar goes off-canvas (see universal-sidebar.css);
+           release its reserved margin so content spans full width */
+        @media (max-width: 968px) {
+            .dashboard-main {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* <=900: hero stacks; tab bar horizontal-scrolls instead of overflowing */
+        @media (max-width: 900px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-actions {
+                width: 100%;
+            }
+
+            .hero-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .settings-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                padding: 1rem;
+                gap: 0.4rem;
+            }
+
+            .settings-tab {
+                flex: 0 0 auto;
+                padding: 0.6rem 1rem;
+            }
+
+            .action-cards,
+            .info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* <=768: type scale, single-column forms, iOS zoom guard */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: clamp(1.6rem, 7vw, 2rem);
+                overflow-wrap: anywhere;
+            }
+
+            .page-hero,
+            .dashboard-section,
+            .settings-section,
+            .tab-content {
+                padding: 1.25rem;
+            }
+
+            .form-input,
+            .form-select,
+            .form-textarea {
+                font-size: 16px;
+                line-height: 1.45;
+            }
+
+            .settings-form .form-row {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /* <=640: stat band -> 1; info/action grids -> 1 */
+        @media (max-width: 640px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats,
+            .action-cards,
+            .info-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .activity-item {
+                align-items: flex-start;
+            }
+        }
+
+        /* <=480: toggle rows stack label above switch */
+        @media (max-width: 480px) {
+            .toggle-label {
+                flex-direction: column-reverse;
+                align-items: flex-start;
+                gap: 0.6rem;
+            }
+
+            .file-upload-area {
+                padding: 1.25rem;
+            }
+
+            .info-item {
+                padding: 1.1rem;
+            }
+        }
+
+        /* <=360: last-resort compression - zero horizontal scroll */
+        @media (max-width: 360px) {
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .page-subtitle {
+                letter-spacing: 0.1em;
+            }
+
+            .activity-time {
+                white-space: normal;
+            }
+        }
     </style>
 </body>
 </html>

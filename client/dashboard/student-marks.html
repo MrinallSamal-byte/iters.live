@@ -517,6 +517,83 @@
                 padding: 1rem;
             }
         }
+
+        /* ============================================
+           RESPONSIVE AUDIT FIXES (1920/1440/1024/768/480/360)
+           Content offset is owned by universal-sidebar.css
+           (fixed rail >=969px, off-canvas overlay <=968px),
+           so no page-level margin-left is set here.
+           ============================================ */
+
+        body:not(.nothing-home) .dashboard-main .page-title {
+            font-size: clamp(1.5rem, 1rem + 2.75vw, 2.5rem);
+            line-height: 1.08;
+            overflow-wrap: anywhere;
+        }
+
+        body:not(.nothing-home) .dashboard-main .page-subtitle {
+            font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1.125rem);
+        }
+
+        body:not(.nothing-home) .dashboard-main .section-header-formal {
+            flex-wrap: wrap;
+        }
+
+        /* Chart wrappers stay fluid; Chart.js resizes the canvas */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .chart-wrapper canvas {
+            max-width: 100%;
+        }
+
+        .semester-timeline {
+            grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+        }
+
+        .projection-input {
+            min-width: 0;
+        }
+
+        /* Stat boxes: auto-fit -> 2-col <=900 -> 1-col <=520 */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+
+        /* Tablet band: restore multi-column grids that global
+           <=1024px rules collapse to a single column */
+        @media (min-width: 901px) and (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+            }
+
+            body:not(.nothing-home) .dashboard-main .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .projection-input {
+                font-size: 16px;
+                flex: 1 1 10rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: 1fr !important;
+            }
+
+            .projection-btn {
+                width: 100%;
+            }
+        }
     </style>
 </body>
 

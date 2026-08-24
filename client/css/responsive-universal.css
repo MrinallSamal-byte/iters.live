@@ -4,6 +4,10 @@
  * Optimized for ALL screen sizes and devices (320px to 4K displays)
  * ============================================================================
  */
+/* ponytail: landscape-hero, print, reduced-motion, safe-area and mobile-utility
+   blocks are near/exact duplicates of the same blocks in responsive.css /
+   responsive-enhanced.css / responsive-fixes.css. Left in place (same values);
+   cross-file dedup is a bigger refactor. */
 
 /* ============================================================================
    BASE RESPONSIVE FOUNDATION
@@ -119,12 +123,11 @@ pre, code, .code-block {
         width: 100%;
         max-width: 320px;
         height: calc(100vh - 60px);
-        background: var(--bg-secondary, rgba(15, 23, 42, 0.98));
-        backdrop-filter: blur(20px);
+        background: var(--bg-primary, #0a0a0a); /* ponytail: was rgba(15,23,42,.98) glass */
         flex-direction: column;
         padding: 1.5rem 1rem;
         overflow-y: auto;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        border-right: 1px solid var(--border-color, rgba(128, 128, 128, 0.25)); /* ponytail: replaces glow shadow + blur */
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 999;
@@ -144,7 +147,7 @@ pre, code, .code-block {
         display: block;
         width: 100%;
         padding: 1rem 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: 0; /* ponytail: was 0.5rem */
         margin-bottom: 0.5rem;
     }
     
@@ -164,7 +167,7 @@ pre, code, .code-block {
         width: 100%;
         height: 3px;
         background: var(--text-primary, #fff);
-        border-radius: 3px;
+        border-radius: 2px; /* ponytail: was 3px */
         transition: all 0.3s ease;
     }
     
@@ -199,13 +202,9 @@ pre, code, .code-block {
     .mobile-menu-btn, .hamburger-menu {
         display: none !important;
     }
-    
-    .navbar {
-        top: 1rem;
-        width: calc(100% - 2rem);
-        max-width: 1200px;
-        margin: 1rem auto;
-    }
+
+    /* ponytail: removed floating pill navbar overrides (top/width/max-width/margin) —
+       navbar stays the full-bleed bar defined by the design layer */
 }
 
 /* ============================================================================
@@ -455,15 +454,13 @@ pre, code, .code-block {
         left: 0;
         right: 0;
         height: 70px;
-        background: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        background: var(--bg-primary, #111111); /* ponytail: was rgba(15,23,42,.98) + blur */
+        border-top: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
         justify-content: space-around;
         align-items: center;
         z-index: 1000;
     }
-    
+
     .mobile-bottom-nav .nav-item {
         display: flex;
         flex-direction: column;
@@ -472,10 +469,10 @@ pre, code, .code-block {
         flex: 1;
         min-height: 56px;
         text-decoration: none;
-        color: rgba(255, 255, 255, 0.6);
+        color: var(--text-muted, rgba(255, 255, 255, 0.6));
         transition: all 0.3s ease;
         padding: 0.5rem;
-        border-radius: 0.75rem;
+        border-radius: 0; /* ponytail: was 0.75rem */
         margin: 0 0.25rem;
     }
     
@@ -611,7 +608,7 @@ pre, code, .code-block {
     .data-table-stacked tr {
         border: 1px solid var(--glass-border, #e2e8f0);
         margin-bottom: 1rem;
-        border-radius: 0.5rem;
+        border-radius: 0; /* ponytail: was 0.5rem */
         padding: 1rem;
         background: var(--glass-bg, rgba(255, 255, 255, 0.05));
     }
@@ -775,7 +772,7 @@ pre, code, .code-block {
     .modal, .dialog, .popup {
         max-width: 100%;
         margin: 0;
-        border-radius: 1rem 1rem 0 0;
+        border-radius: 0; /* ponytail: was 1rem sheet-style top corners */
         position: fixed;
         bottom: 0;
         left: 0;
@@ -1123,7 +1120,7 @@ pre, code, .code-block {
     .skill-category,
     .project-card,
     .contact-card {
-        border-radius: 20px !important;
+        border-radius: 0 !important; /* ponytail: was 20px — sharp corners at every breakpoint */
         padding: 0.9rem !important;
     }
 

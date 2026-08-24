@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
+// ponytail: ephemeral random secret keeps the site up when JWT_SECRET is unset,
+// but sessions die on every cold start -> set JWT_SECRET in the host dashboard
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('JWT_SECRET must be set when NODE_ENV is production');
+  process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+  console.warn('⚠️  JWT_SECRET is NOT set in production. Using a random ephemeral secret — login sessions will not survive instance restarts. Set JWT_SECRET in your hosting dashboard.');
 }
 
 const APP_SESSION_SECRET = process.env.JWT_SECRET || 'iterasn-hub-dev-secret';

@@ -718,6 +718,215 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ==========================================================
+           RESPONSIVE FIXES - 1920 / 1440 / 1024 / 768 / 480 / 360
+           ========================================================== */
+
+        /* Modal: fits any viewport, scrolls internally */
+        .modal-content {
+            width: min(560px, calc(100vw - 32px));
+            max-height: min(88vh, calc(100vh - 32px));
+            overflow-y: auto;
+        }
+
+        /* <=968: universal sidebar goes off-canvas (see universal-sidebar.css);
+           release its reserved margin so content spans full width */
+        @media (max-width: 968px) {
+            .dashboard-main {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* <=900: hero stacks, actions go edge-to-edge */
+        @media (max-width: 900px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-actions {
+                width: 100%;
+            }
+
+            .hero-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+        }
+
+        /* <=768: type scale, full-width controls, iOS zoom guard */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: clamp(1.6rem, 7vw, 2rem);
+                overflow-wrap: anywhere;
+            }
+
+            .page-hero,
+            .dashboard-section {
+                padding: 1.25rem;
+            }
+
+            .filter-input,
+            .filter-select,
+            .form-input,
+            .form-select {
+                font-size: 16px;
+                line-height: 1.45;
+            }
+
+            .filter-row,
+            .form-row {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .modal {
+                padding: 16px;
+            }
+
+            .modal-header {
+                padding: 1.25rem 1.25rem 0.85rem;
+            }
+
+            .modal-body {
+                padding: 1.25rem;
+            }
+        }
+
+        /* <=640: wide user table becomes stacked cards - no page-level
+           horizontal scroll; action buttons wrap under the row content */
+        @media (max-width: 640px) {
+            .table-responsive::after {
+                content: none;
+            }
+
+            .modern-table,
+            .modern-table tbody,
+            .modern-table tr {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
+            }
+
+            .modern-table thead {
+                display: none;
+            }
+
+            .modern-table td[colspan] {
+                text-align: center;
+            }
+
+            .modern-table td[colspan]::before {
+                content: none !important;
+            }
+
+            #usersTableBody tr {
+                margin-bottom: 0.75rem;
+                padding: 0.9rem 0.85rem;
+                border: 1px solid var(--r-line, #1f1f1f);
+                border-left: 2px solid var(--r-line-strong, #333);
+                background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+            }
+
+            #usersTableBody tr:hover {
+                transform: none;
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            #usersTableBody td {
+                display: flex;
+                flex-direction: column;
+                gap: 0.15rem;
+                padding: 0.3rem 0;
+                border-bottom: none;
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                text-align: left;
+            }
+
+            #usersTableBody td::before {
+                font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+                font-size: 0.56rem;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.14em;
+                color: var(--r-text-3, #757575);
+            }
+
+            #usersTableBody td:nth-child(1)::before { content: "REG NO"; }
+            #usersTableBody td:nth-child(2)::before { content: "NAME"; }
+            #usersTableBody td:nth-child(3)::before { content: "ROLE"; }
+            #usersTableBody td:nth-child(4)::before { content: "DEPARTMENT"; }
+            #usersTableBody td:nth-child(5)::before { content: "EMAIL"; }
+            #usersTableBody td:nth-child(6)::before { content: "STATUS"; }
+
+            #usersTableBody td:nth-child(2) {
+                font-weight: 600;
+                color: var(--r-text, #f4f4f4);
+            }
+
+            #usersTableBody td.action-btns {
+                flex-direction: row;
+                flex-flow: row wrap;
+                gap: 0.5rem;
+                margin-top: 0.65rem;
+                padding-top: 0.65rem;
+                border-top: 1px dotted var(--r-line-strong, #333);
+            }
+
+            #usersTableBody td.action-btns::before {
+                content: "ACTIONS";
+                width: 100%;
+            }
+
+            #usersTableBody td.action-btns .btn {
+                flex: 1 1 calc(50% - 0.25rem);
+                justify-content: center;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            #usersTableBody td .form-input,
+            #usersTableBody td .form-select {
+                width: 100%;
+                margin-top: 0.15rem;
+            }
+
+            #usersPagination {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* <=480: stacked actions, full-width buttons */
+        @media (max-width: 480px) {
+            .hero-actions,
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+        }
+
+        /* <=360: last-resort compression - zero horizontal scroll */
+        @media (max-width: 360px) {
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .page-subtitle {
+                letter-spacing: 0.1em;
+            }
+
+            #usersTableBody td.action-btns .btn {
+                flex: 1 1 100%;
+            }
+        }
     </style>
 </body>
 </html>

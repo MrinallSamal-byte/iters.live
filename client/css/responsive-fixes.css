@@ -2,6 +2,9 @@
  * CRITICAL RESPONSIVE FIXES & IMPROVEMENTS
  * Fixes scroll bugs, navigation issues, and responsive layout problems
  */
+/* ponytail: mobile-utility block below duplicates responsive-universal.css (same
+   selectors/values); landscape-hero + print blocks duplicate responsive.css.
+   Left in place — cross-file dedup is a bigger refactor. */
 
 /* ===================================
    CRITICAL: Fix Scroll Jump Bug
@@ -52,14 +55,13 @@ body {
     border-radius: 0 !important;
     z-index: 1000 !important;
     padding: 1rem 2rem;
-    background: rgba(15, 23, 42, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-primary, #0a0a0a) !important; /* ponytail: was rgba(15,23,42,.95) + blur(20px) glass */
+    border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
 }
 
 /* Navbar scrolled state */
 .navbar.scrolled {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: none; /* ponytail: was glow shadow */
 }
 
 .nav-container {
@@ -83,10 +85,9 @@ body {
 .logo-img {
     width: 45px;
     height: 45px;
-    border-radius: 50%;
+    border-radius: 0; /* ponytail: was white circle chip (radius 50% + white bg) */
     object-fit: contain;
-    background: white;
-    padding: 3px;
+    background: transparent;
 }
 
 /* ===================================
@@ -138,8 +139,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.7); /* ponytail: removed blur(4px) glass */
     z-index: 999;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -184,12 +184,11 @@ body {
     display: inline-flex !important;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--glass-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--glass-border, rgba(128, 128, 128, 0.25));
     padding: 0.75rem 1.5rem;
-    border-radius: 50px;
+    border-radius: 0; /* ponytail: was 50px pill + blur */
     margin-bottom: 1rem;
-    backdrop-filter: blur(10px);
     width: fit-content;
 }
 
@@ -241,8 +240,7 @@ body {
     padding: 1.5rem;
     text-align: center;
     background: var(--glass-bg);
-    border-radius: var(--radius-md);
-    backdrop-filter: blur(10px);
+    border-radius: 0; /* ponytail: was var(--radius-md)=8px */
     border: 1px solid var(--glass-border);
     transition: transform 0.3s ease;
 }
@@ -318,14 +316,13 @@ body {
         width: 85%;
         max-width: 320px;
         height: 100vh;
-        background: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(20px);
+        background: var(--bg-primary, #0a0a0a); /* ponytail: was rgba(15,23,42,.98) + blur */
         flex-direction: column;
         padding: 5rem 1.5rem 2rem;
         transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
         z-index: 1000;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        border-right: 1px solid var(--border-color, rgba(128, 128, 128, 0.25)); /* ponytail: replaces glow shadow */
         align-items: flex-start !important;
         gap: 0.5rem !important;
     }
@@ -343,7 +340,7 @@ body {
         justify-content: flex-start;
         text-align: left;
         padding: 1rem 1.5rem;
-        border-radius: 12px;
+        border-radius: 0; /* ponytail: was 12px */
     }
 
     .mobile-menu-btn {
@@ -704,12 +701,11 @@ img {
 
 .creator-content {
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
+    border-radius: 0; /* ponytail: was var(--radius-xl)=24px glass card */
     padding: 3rem;
     text-align: center;
-    box-shadow: 0 8px 32px var(--glass-shadow);
+    box-shadow: none; /* ponytail: was 0 8px 32px glass glow */
 }
 
 .creator-title {
@@ -757,7 +753,7 @@ img {
     padding: 0.75rem 1.5rem;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
+    border-radius: 0; /* ponytail: was var(--radius-full) pill */
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 600;
@@ -769,7 +765,7 @@ img {
     border-color: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33,0.3);
+    box-shadow: none; /* ponytail: was red glow */
 }
 
 .creator-link-icon {
@@ -784,7 +780,7 @@ img {
     background: var(--primary,#d71921);
     color: white;
     text-decoration: none;
-    border-radius: var(--radius-full);
+    border-radius: 0; /* ponytail: was var(--radius-full) pill */
     font-weight: 600;
     transition: all var(--transition-base);
     margin-top: 1rem;
@@ -792,7 +788,7 @@ img {
 
 .back-to-top-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(215, 25, 33,0.35);
+    box-shadow: none; /* ponytail: was red glow */
 }
 
 @media (max-width: 768px) {

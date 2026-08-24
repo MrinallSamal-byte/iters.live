@@ -465,6 +465,108 @@
                 width: 100%;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .soa-field-value,
+        .soa-copy {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* SOA tables stay inside an overflow-x wrapper (stacked cards would
+           require JS-built data-labels, which are outside ownership scope). */
+        .soa-table-wrap {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+
+        @media (max-width: 1024px) {
+            .soa-avatar {
+                width: 92px;
+                height: 92px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Touch targets + comfortable controls */
+        @media (max-width: 768px) {
+            .soa-tab-btn {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .soa-btn,
+            .soa-btn-secondary,
+            .soa-btn-danger {
+                min-height: 44px;
+            }
+
+            .soa-table th,
+            .soa-table td {
+                padding: 0.75rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .soa-hero-grid {
+                gap: 1.1rem;
+            }
+
+            .soa-profile-card h2 {
+                font-size: 0.95rem;
+            }
+
+            .soa-status-badges {
+                gap: 0.5rem;
+            }
+
+            .soa-pill {
+                max-width: 100%;
+            }
+
+            .soa-pill span,
+            .soa-pill {
+                overflow-wrap: anywhere;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .soa-title {
+                font-size: clamp(1.45rem, 7vw, 1.9rem);
+            }
+
+            .soa-avatar {
+                width: 76px;
+                height: 76px;
+                font-size: 1.7rem;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .soa-hero,
+            .soa-meta-card,
+            .soa-tab-shell,
+            .soa-section-card {
+                padding: 0.9rem;
+            }
+
+            .soa-actions {
+                gap: 0.55rem;
+            }
+        }
     </style>
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>

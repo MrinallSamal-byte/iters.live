@@ -358,6 +358,129 @@
                 width: 100%;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .meal-type {
+            min-width: 0;
+        }
+
+        .meal-item {
+            overflow-wrap: anywhere;
+        }
+
+        /* Filter/tab bars: keep comfortable spacing on mid screens */
+        @media (max-width: 1024px) {
+            .block-tab {
+                padding: 0.7rem 1.2rem;
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content-inline {
+                gap: 0.75rem;
+            }
+
+            .page-title {
+                font-size: clamp(1.75rem, 7vw, 2.25rem);
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            /* 16px inputs prevent iOS zoom-on-focus */
+            .date-input {
+                font-size: 16px;
+            }
+
+            .date-nav-btn {
+                min-height: 44px;
+            }
+
+            .block-tabs {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.6rem;
+            }
+
+            .block-tab {
+                width: 100%;
+            }
+
+            .meal-card {
+                padding: 1.15rem;
+                margin-bottom: 1.15rem;
+            }
+
+            .meal-type {
+                font-size: 1.15rem;
+            }
+
+            .info-card {
+                padding: 1.15rem;
+            }
+        }
+
+        @media (max-width: 560px) {
+            /* Day/block tab strip scrolls horizontally instead of overflowing */
+            .block-tabs {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                padding-bottom: 0.4rem;
+            }
+
+            .block-tab {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                min-height: 44px;
+            }
+
+            /* Meal rows stack cleanly */
+            .meal-item {
+                padding: 0.75rem 0;
+            }
+
+            .empty-state {
+                padding: 2rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero {
+                padding: 1.25rem;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding: 1rem;
+            }
+
+            .meal-card,
+            .info-card {
+                padding: 0.95rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>

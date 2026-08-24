@@ -1003,6 +1003,79 @@
                 margin-top: 0.65rem;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no page-level margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .recent-name,
+        .recent-time,
+        .drive-path {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* Notes tile grid: 2 columns (beats the global <=860px 1-column
+           collapse from style.css so tiles stay paired until 560px) */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .resources-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* Notes tile grid: 1 column */
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Touch targets */
+        @media (max-width: 768px) {
+            .subject-tag {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .filter-apply-btn,
+            .filter-reset-btn {
+                min-height: 44px;
+            }
+
+            .btn-quick-access {
+                min-height: 44px;
+            }
+
+            .recent-item {
+                flex-wrap: wrap;
+                gap: 0.65rem;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .filter-row {
+                gap: 0.75rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>

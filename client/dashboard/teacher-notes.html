@@ -886,6 +886,134 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE FIXES (1920 / 1440 / 1024 / 768 / 480 / 360)
+           Sidebar breakpoints mirror client/css/universal-sidebar.css:
+           off-canvas drawer at <=968px, floating rail at <=560px.
+           ============================================================ */
+
+        /* Material cards: exact 3 -> 2 -> 1 ladder */
+        .popular-materials {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: 1180px) {
+            .popular-materials {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .popular-materials {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Page-level overflow guard + sidebar margin release */
+        @media (max-width: 968px) {
+            html,
+            body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .dashboard-main {
+                margin-left: 0 !important;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Stat grid: 4 -> 2 -> 1 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-hero {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .page-title {
+                gap: 0.6rem;
+            }
+
+            .file-upload-area {
+                padding: 1.5rem 1rem;
+            }
+
+            .section-header-formal {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+        }
+
+        /* Search/filter bar stacks; controls full width; inputs 16px */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .search-input,
+            .filter-select-small,
+            .form-input,
+            .form-select,
+            .form-textarea {
+                width: 100%;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .btn,
+            .btn-lg,
+            .tab-btn {
+                min-height: 44px;
+            }
+
+            /* Modals fit small screens and scroll internally */
+            .modal {
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .modal-content {
+                width: min(560px, calc(100vw - 32px));
+                max-width: 100%;
+                max-height: calc(100vh - 32px);
+                overflow-y: auto;
+            }
+
+            .modal-close {
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .file-preview.active {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+        }
     </style>
 </body>
 </html>

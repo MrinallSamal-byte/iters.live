@@ -744,6 +744,141 @@
                 width: 100%;
             }
         }
+
+        /* ------------------------------------------------------------
+           Responsive coverage (1440 / 1024 / 768 / 480 / 360)
+           ------------------------------------------------------------ */
+
+        /* 1920+: widen the shell slightly */
+        @media (min-width: 1600px) {
+            .portal-shell {
+                max-width: 1280px;
+            }
+
+            .hero-title {
+                font-size: clamp(2.1rem, 2.6vw, 3rem);
+            }
+        }
+
+        /* tablets and down: single-column flow, zoom-proof inputs */
+        @media (max-width: 980px) {
+            .section-title {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* 16px input font stops iOS Safari focus zoom */
+            .form-group input {
+                font-size: 16px;
+                min-height: 48px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                min-height: 48px;
+            }
+
+            /* ghost control is a real button - give it a hit target */
+            .btn-ghost {
+                min-height: 44px;
+                justify-content: flex-start;
+            }
+
+            .password-toggle-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            .remember-check {
+                min-height: 44px;
+            }
+
+            .remember-check span {
+                font-size: 0.8rem;
+                line-height: 1.5;
+            }
+
+            /* fixed theme toggle sits bottom-right; keep content clear */
+            .portal-page {
+                padding-bottom: 108px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portal-page {
+                padding: 16px 12px 104px;
+            }
+
+            .hero-card,
+            .flow-card,
+            .support-card,
+            .status-card,
+            .demo-card {
+                padding: 1.05rem;
+            }
+
+            .hero-title {
+                font-size: clamp(1.55rem, 7.4vw, 2rem);
+            }
+
+            /* CAPTCHA shrinks with the frame but stays legible */
+            .captcha-shell {
+                padding: 0.85rem;
+            }
+
+            .captcha-frame {
+                min-height: 84px;
+                padding: 8px;
+            }
+
+            .captcha-frame img {
+                max-height: 62px;
+            }
+
+            /* long values must wrap instead of forcing page width */
+            .status-data div {
+                flex-wrap: wrap;
+                gap: 0.25rem 1rem;
+            }
+
+            .status-data strong,
+            .connection-pill {
+                overflow-wrap: anywhere;
+            }
+
+            .step-header {
+                gap: 0.65rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .portal-page {
+                padding: 14px 9px 100px;
+            }
+
+            .hero-card {
+                border-left-width: 2px;
+            }
+
+            .hero-kicker,
+            .footer-link a {
+                letter-spacing: 0.12em;
+            }
+
+            .form-row,
+            .step-actions,
+            .status-actions,
+            .support-actions,
+            .demo-actions,
+            .hero-actions {
+                gap: 0.6rem;
+            }
+
+            .captcha-frame img {
+                max-height: 56px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>

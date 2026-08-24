@@ -2,6 +2,10 @@
  * Enhanced Responsive Design System - Complete Mobile & Desktop Support
  * Fixes all screen sizes from 320px to 4K displays
  */
+/* ponytail: known exact/near duplicates of landscape-hero, print, reduced-motion
+   and mobile-utility blocks also exist in responsive.css / responsive-fixes.css /
+   responsive-universal.css. Left in place (harmless, same values) — full dedup is
+   a bigger cross-file refactor. */
 
 /* ===================================
    CRITICAL: Base Reset & Foundation
@@ -418,7 +422,7 @@ svg {
         gap: 0.5rem;
         cursor: pointer;
         border: none;
-        border-radius: 8px;
+        border-radius: 0; /* ponytail: was 8px — Nothing design is sharp-cornered */
         transition: all 0.2s ease;
     }
 
@@ -517,7 +521,7 @@ svg {
 
     /* Glass Cards */
     .glass-card {
-        border-radius: 12px;
+        border-radius: 0; /* ponytail: was 12px */
         padding: 1.25rem;
     }
 }
@@ -589,9 +593,11 @@ svg {
     }
 
     .navbar {
-        width: calc(100% - 2rem);
-        top: 1rem;
-        border-radius: 16px;
+        position: sticky;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        border-radius: 0; /* ponytail: was floating 16px-radius pill — full-bleed bar */
     }
 
     .hero-section .container {

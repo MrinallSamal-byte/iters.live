@@ -344,6 +344,61 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================
+           RESPONSIVE AUDIT FIXES (1920/1440/1024/768/480/360)
+           Content offset is owned by universal-sidebar.css
+           (fixed rail >=969px, off-canvas overlay <=968px),
+           so no page-level margin-left is set here.
+           ============================================ */
+
+        body:not(.nothing-home) .dashboard-main .page-title {
+            font-size: clamp(1.5rem, 1rem + 2.75vw, 2.5rem);
+            line-height: 1.08;
+            overflow-wrap: anywhere;
+        }
+
+        body:not(.nothing-home) .dashboard-main .page-subtitle {
+            font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1.125rem);
+        }
+
+        body:not(.nothing-home) .dashboard-main .section-header-formal {
+            flex-wrap: wrap;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+        }
+
+        /* Tablet band: restore multi-column info grid that global
+           <=1024px rules collapse to a single column */
+        @media (min-width: 721px) and (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .info-grid {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-select {
+                font-size: 16px;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exam-form .btn-large {
+                width: 100%;
+            }
+
+            .note-card {
+                gap: 1rem;
+                padding: 1.1rem;
+            }
+
+            .info-item {
+                padding: 1.1rem;
+            }
+        }
     </style>
 </body>
 </html>

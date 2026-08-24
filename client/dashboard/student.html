@@ -318,7 +318,7 @@
     <style>
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -370,7 +370,7 @@
 
         .quick-links-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -634,6 +634,72 @@
         @media (max-width: 360px) {
             .theme-toggle {
                 bottom: 80px !important;
+            }
+        }
+
+        /* ============================================
+           RESPONSIVE AUDIT FIXES (1920/1440/1024/768/480/360)
+           Content offset is owned by universal-sidebar.css
+           (fixed rail >=969px, off-canvas overlay <=968px),
+           so no page-level margin-left is set here.
+           ============================================ */
+
+        body:not(.nothing-home) .dashboard-main .page-title {
+            font-size: clamp(1.4rem, 1rem + 1.8vw, 2rem);
+            line-height: 1.08;
+            overflow-wrap: anywhere;
+        }
+
+        body:not(.nothing-home) .dashboard-main .page-subtitle {
+            font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1.125rem);
+        }
+
+        body:not(.nothing-home) .dashboard-main .section-header-formal {
+            flex-wrap: wrap;
+        }
+
+        /* Chart wrappers stay fluid; Chart.js resizes the canvas */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .chart-wrapper canvas {
+            max-width: 100%;
+        }
+
+        /* Stat boxes: auto-fit -> 2-col <=900 -> 1-col <=520 */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+
+        /* Tablet band: restore multi-column grids that global
+           <=1024px rules collapse to a single column */
+        @media (min-width: 901px) and (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats,
+            body:not(.nothing-home) .dashboard-main .quick-links-grid,
+            body:not(.nothing-home) .dashboard-main .today-strip {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: 1fr !important;
+            }
+
+            .soa-banner-actions {
+                width: 100%;
+            }
+
+            .soa-banner-actions .soa-banner-btn,
+            .soa-banner-actions .soa-banner-link {
+                flex: 1 1 100%;
+                justify-content: center;
             }
         }
     </style>

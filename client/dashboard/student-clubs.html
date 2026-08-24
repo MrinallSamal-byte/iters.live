@@ -346,6 +346,139 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .club-name,
+        .club-description,
+        .my-club-name {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* Wide screens: cap card columns */
+        @media (min-width: 1440px) {
+            body:not(.nothing-home) .dashboard-main .clubs-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /* Card grid: 2 columns */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .clubs-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .page-hero {
+                padding: 1.75rem;
+            }
+        }
+
+        /* Stacking, 16px inputs, >=44px touch targets */
+        @media (max-width: 768px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.25rem;
+            }
+
+            .page-title {
+                font-size: clamp(1.75rem, 7vw, 2.25rem);
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .leave-btn {
+                min-height: 44px;
+            }
+
+            .join-btn {
+                min-height: 44px;
+            }
+
+            .club-content {
+                padding: 1.15rem;
+            }
+
+            .my-club-item {
+                padding: 1.15rem;
+            }
+        }
+
+        /* Card grid: 1 column + stacked rows */
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .clubs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .my-club-item {
+                flex-wrap: wrap;
+                gap: 0.85rem;
+            }
+
+            .my-club-info {
+                flex: 1 1 calc(100% - 76px);
+                min-width: 0;
+            }
+
+            .my-club-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.9rem;
+            }
+
+            .leave-btn {
+                width: 100%;
+            }
+
+            .club-header {
+                height: 96px;
+                font-size: 2.6rem;
+            }
+
+            .club-stats {
+                flex-wrap: wrap;
+                gap: 0.75rem 1.25rem;
+            }
+
+            .empty-state {
+                padding: 2rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero {
+                padding: 1.25rem;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding: 1rem;
+            }
+
+            .club-content,
+            .my-club-item {
+                padding: 0.95rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>

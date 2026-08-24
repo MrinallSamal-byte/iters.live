@@ -800,6 +800,185 @@
                 text-align: center;
             }
         }
+
+        /* ==========================================================
+           RESPONSIVE FIXES - 1920 / 1440 / 1024 / 768 / 480 / 360
+           ========================================================== */
+
+        /* Charts never exceed their panel */
+        .chart-wrapper canvas {
+            max-width: 100%;
+        }
+
+        /* <=1024: chart/section bands collapse; stat band 4 -> 2 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .dashboard-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* <=968: universal sidebar goes off-canvas (see universal-sidebar.css);
+           release its reserved margin so content spans full width */
+        @media (max-width: 968px) {
+            .dashboard-main {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* <=900: hero stacks */
+        @media (max-width: 900px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-hero {
+                padding: 1.5rem;
+            }
+        }
+
+        /* <=768: type scale, tighter panels */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: clamp(1.6rem, 7vw, 2rem);
+                overflow-wrap: anywhere;
+            }
+
+            .page-hero,
+            .dashboard-section,
+            .chart-wrapper {
+                padding: 1.25rem;
+            }
+        }
+
+        /* <=640: stat band -> 1; pending-approvals queue becomes stacked
+           cards - no page-level horizontal scroll; buttons wrap under row */
+        @media (max-width: 640px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .table-responsive::after {
+                content: none;
+            }
+
+            .modern-table,
+            .modern-table tbody,
+            .modern-table tr {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
+            }
+
+            .modern-table thead {
+                display: none;
+            }
+
+            .modern-table td[colspan] {
+                text-align: center;
+            }
+
+            .modern-table td[colspan]::before {
+                content: none !important;
+            }
+
+            #approvalsTableBody tr {
+                margin-bottom: 0.75rem;
+                padding: 0.9rem 0.85rem;
+                border: 1px solid var(--r-line, #1f1f1f);
+                border-left: 2px solid var(--r-line-strong, #333);
+                background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+            }
+
+            #approvalsTableBody tr:hover {
+                transform: none;
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            #approvalsTableBody td {
+                display: flex;
+                flex-direction: column;
+                gap: 0.15rem;
+                padding: 0.3rem 0;
+                border-bottom: none;
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                text-align: left;
+            }
+
+            #approvalsTableBody td::before {
+                font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+                font-size: 0.56rem;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.14em;
+                color: var(--r-text-3, #757575);
+            }
+
+            #approvalsTableBody td:nth-child(1)::before { content: "TYPE"; }
+            #approvalsTableBody td:nth-child(2)::before { content: "UPLOADED BY"; }
+            #approvalsTableBody td:nth-child(3)::before { content: "TITLE"; }
+            #approvalsTableBody td:nth-child(4)::before { content: "DATE"; }
+
+            #approvalsTableBody td:nth-child(3) {
+                font-weight: 600;
+                color: var(--r-text, #f4f4f4);
+            }
+
+            #approvalsTableBody td.action-btns {
+                flex-flow: row wrap;
+                gap: 0.5rem;
+                margin-top: 0.65rem;
+                padding-top: 0.65rem;
+                border-top: 1px dotted var(--r-line-strong, #333);
+            }
+
+            #approvalsTableBody td.action-btns::before {
+                content: "ACTIONS";
+                width: 100%;
+            }
+
+            #approvalsTableBody td.action-btns .btn {
+                flex: 1 1 calc(50% - 0.25rem);
+                justify-content: center;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .activity-item:hover {
+                transform: none;
+            }
+        }
+
+        /* <=480: AI tiles single column */
+        @media (max-width: 480px) {
+            .ai-status-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /* <=360: last-resort compression - zero horizontal scroll */
+        @media (max-width: 360px) {
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .page-subtitle {
+                letter-spacing: 0.1em;
+            }
+
+            #approvalsTableBody td.action-btns .btn {
+                flex: 1 1 100%;
+            }
+        }
     </style>
 </body>
 </html>

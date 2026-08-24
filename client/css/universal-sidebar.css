@@ -414,73 +414,132 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     color: #dc2626;
 }
 
-/* Mobile Responsive */
-@media (max-width: 968px) {
+/* ============================================
+   MOBILE / OFF-CANVAS RESPONSIVE
+   STANDARD BREAKPOINT: sidebar becomes an off-canvas
+   overlay below 1024px; docked above it.
+   ponytail: was max-width 968px — universal-sidebar.js still
+   guards mobile mode at innerWidth <= 968 (syncSidebarState,
+   closeMobileSidebar, resize cleanup). Sync JS to 1024 when
+   that file is next touched.
+   ============================================ */
+@media (max-width: 1023px) {
     .universal-sidebar {
         transform: translateX(-100%);
+        /* Off-canvas drawer: flush full-height, notch-aware */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        height: 100dvh;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
     }
-    
+
+    /* Match refresh-layer specificity so the docked floating-card look
+       (radius 30px / red gradient / drop shadow) never bleeds into the drawer */
+    body:not(.nothing-home) .universal-sidebar {
+        top: 0;
+        left: 0;
+        width: min(320px, calc(100vw - 56px));
+        height: 100vh;
+        height: 100dvh;
+        max-width: 85vw;
+        border-radius: 0; /* ponytail: was 30px floating card */
+        background: var(--sidebar-bg); /* ponytail: was layered red gradient */
+        box-shadow: none; /* ponytail: was 0 26px 60px glow */
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
     .universal-sidebar.mobile-open {
         transform: translateX(0);
     }
-    
+
+    /* Kill the desktop slideIn entrance so the hidden drawer doesn't flash open on load */
+    .universal-sidebar {
+        animation: none;
+    }
+
+    /* Content margin release — matches this exact breakpoint */
     .dashboard-main {
         margin-left: 0 !important;
         padding: 1rem;
     }
-    
+
     .sidebar-toggle {
         display: none;
     }
-    
+
+    /* Hide the floating open button on desktop widths (base rule so the
+       JS-injected ☰ never leaks into the flow above 1023px) */
     .mobile-sidebar-toggle {
         position: fixed;
-        top: 1rem;
-        left: 1rem;
+        top: calc(1rem + env(safe-area-inset-top));
+        left: calc(1rem + env(safe-area-inset-left));
         width: 48px;
         height: 48px;
         background: var(--primary);
         border: none;
-        border-radius: 12px;
+        border-radius: 0; /* ponytail: was 12px + red glow shadow */
+        box-shadow: none;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         color: white;
         font-size: 1.5rem;
-        box-shadow: 0 4px 12px rgba(215, 25, 33, 0.28);
         z-index: 999;
         transition: all 0.3s ease;
     }
-    
+
     .mobile-sidebar-toggle:hover {
         transform: scale(1.05);
     }
-    
+
+    /* Backdrop: plain scrim, no blur glass */
     .sidebar-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.6); /* ponytail: removed backdrop-filter blur(4px) */
         z-index: 999;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
     }
-    
+
     .sidebar-overlay.active {
         opacity: 1;
         pointer-events: all;
+        cursor: pointer;
     }
-    
+
+    /* Reachable close affordance: the overlay itself closes on tap anywhere;
+       draw an ✕ target in its free corner so that is discoverable.
+       ponytail: real fix is a dedicated ✕ button + toggle-off on ☰ in
+       universal-sidebar.js (not owned here). */
+    .sidebar-overlay.active::before {
+        content: '\2715';
+        position: absolute;
+        top: calc(4.5rem + env(safe-area-inset-top));
+        right: calc(1rem + env(safe-area-inset-right));
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #ffffff;
+        font-size: 1.125rem;
+    }
+
     .top-profile-container {
         top: 1rem;
         right: 1rem;
     }
-    
+
     .profile-icon {
         width: 44px;
         height: 44px;
@@ -492,11 +551,11 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     }
 
     body:not(.nothing-home) .mobile-sidebar-toggle {
-        top: 0.8rem;
-        left: 0.8rem;
+        top: calc(0.8rem + env(safe-area-inset-top));
+        left: calc(0.8rem + env(safe-area-inset-left));
         width: 44px;
         height: 44px;
-        border-radius: 14px;
+        border-radius: 0;
     }
 
     body:not(.nothing-home) .top-profile-container {
@@ -505,18 +564,20 @@ body.light-theme .sidebar-nav::-webkit-scrollbar-thumb {
     }
 }
 
+/* Small phones: drawer stays flush (was a floating rounded card) */
 @media (max-width: 560px) {
     body:not(.nothing-home) .universal-sidebar {
-        top: 8px;
-        left: 8px;
-        width: min(300px, calc(100vw - 16px));
-        height: calc(100vh - 16px);
-        border-radius: 24px;
+        top: 0;
+        left: 0;
+        width: min(300px, calc(100vw - 56px));
+        height: 100vh;
+        height: 100dvh;
+        border-radius: 0; /* ponytail: was 24px floating card */
     }
 
     body:not(.nothing-home) .mobile-sidebar-toggle {
-        top: 0.65rem;
-        left: 0.65rem;
+        top: calc(0.65rem + env(safe-area-inset-top));
+        left: calc(0.65rem + env(safe-area-inset-left));
         width: 42px;
         height: 42px;
         font-size: 1.35rem;
@@ -779,25 +840,26 @@ body:not(.nothing-home) .sidebar-nav-text {
 }
 
 body:not(.nothing-home) .mobile-sidebar-toggle {
-    border-radius: 16px;
-    background: linear-gradient(135deg, #ff6b5e 0%, #e24e43 100%);
-    box-shadow: 0 20px 36px rgba(215, 25, 33, 0.24);
+    border-radius: 0; /* ponytail: was 16px + coral #ff6b5e gradient — solid brand red */
+    background: var(--primary);
+    box-shadow: none; /* ponytail: was red glow */
 }
 
 body:not(.nothing-home) .sidebar-overlay {
     background: rgba(0, 0, 0, 0.58);
 }
 
-@media (max-width: 968px) {
+@media (max-width: 1023px) {
     body:not(.nothing-home) .universal-sidebar {
-        top: 10px;
-        left: 10px;
-        height: calc(100vh - 20px);
-        width: min(320px, calc(100vw - 20px));
+        top: 0;
+        left: 0;
+        height: 100vh;
+        height: 100dvh;
+        width: min(320px, calc(100vw - 56px));
     }
 }
 
-@media (max-width: 968px) {
+@media (max-width: 1023px) {
     body:not(.nothing-home) .sidebar-header {
         grid-template-columns: auto minmax(0, 1fr);
     }

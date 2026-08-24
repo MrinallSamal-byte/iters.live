@@ -757,6 +757,146 @@
                 grid-template-columns: 96px 1fr 48px;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE FIXES (1920 / 1440 / 1024 / 768 / 480 / 360)
+           Sidebar breakpoints mirror client/css/universal-sidebar.css:
+           off-canvas drawer at <=968px, floating rail at <=560px.
+           ============================================================ */
+
+        /* Page-level overflow guard + sidebar margin release */
+        @media (max-width: 968px) {
+            html,
+            body {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .dashboard-main {
+                margin-left: 0 !important;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* Sticky first column (Roll No) while marks table scrolls */
+            .modern-table th:first-child,
+            .modern-table td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 3;
+                background: var(--np-panel);
+                box-shadow: 1px 0 0 var(--np-line-strong);
+            }
+
+            .modern-table thead th:first-child {
+                z-index: 13;
+            }
+        }
+
+        /* Stat grid: 4 -> 2 -> 1 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-hero {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .filter-container,
+            .marks-distribution {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .recent-records {
+                padding: 0 1rem 1.25rem;
+            }
+
+            .section-header-formal {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .grade-item {
+                grid-template-columns: 88px minmax(0, 1fr) 44px;
+                gap: 0.6rem;
+            }
+        }
+
+        /* Filter bar wraps; controls full width; inputs 16px */
+        @media (max-width: 768px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-input,
+            .filter-select {
+                width: 100%;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            /* Score entry stays thumb-friendly without iOS zoom */
+            .marks-input {
+                width: 84px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .btn,
+            .btn-lg {
+                min-height: 44px;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .summary-item {
+                padding: 0.5rem 0.75rem;
+            }
+
+            /* Modals fit small screens and scroll internally */
+            .modal {
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .modal-content {
+                width: min(560px, calc(100vw - 32px));
+                max-width: 100%;
+                max-height: calc(100vh - 32px);
+                overflow-y: auto;
+            }
+
+            .modal-close {
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+            }
+
+            .upload-area {
+                padding: 2rem 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .record-item {
+                flex-wrap: wrap;
+            }
+
+            .record-stats {
+                gap: 0.6rem;
+            }
+        }
     </style>
 </body>
 </html>

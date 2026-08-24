@@ -336,6 +336,134 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .event-title,
+        .event-description,
+        .event-meta-item {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* Wide screens: cap card columns */
+        @media (min-width: 1440px) {
+            body:not(.nothing-home) .dashboard-main .events-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /* Card grid: 2 columns */
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .events-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .page-hero {
+                padding: 1.75rem;
+            }
+        }
+
+        /* Stacking, 16px inputs, >=44px touch targets */
+        @media (max-width: 768px) {
+            .hero-content-inline {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.25rem;
+            }
+
+            .page-title {
+                font-size: clamp(1.75rem, 7vw, 2.25rem);
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            .event-filters {
+                gap: 0.5rem;
+            }
+
+            .filter-chip {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .register-btn {
+                min-height: 44px;
+            }
+
+            .event-content {
+                padding: 1.15rem;
+            }
+        }
+
+        /* Card grid: 1 column */
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.85rem;
+            }
+
+            .event-participants {
+                justify-content: center;
+            }
+
+            .register-btn {
+                width: 100%;
+            }
+
+            .event-banner {
+                height: 118px;
+                font-size: 2.4rem;
+            }
+
+            .empty-state {
+                padding: 2rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero {
+                padding: 1.25rem;
+            }
+
+            .filter-chip {
+                padding: 0.55rem 0.9rem;
+                letter-spacing: 0.1em;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding: 1rem;
+            }
+
+            .event-content {
+                padding: 0.95rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>

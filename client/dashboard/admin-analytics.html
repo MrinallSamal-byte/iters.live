@@ -301,6 +301,135 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ==========================================================
+           RESPONSIVE FIXES - 1920 / 1440 / 1024 / 768 / 480 / 360
+           ========================================================== */
+
+        /* Charts never exceed their panel */
+        .chart-wrapper canvas {
+            max-width: 100%;
+        }
+
+        /* <=1024: chart band collapses; stat band 4 -> 2 */
+        @media (max-width: 1024px) {
+            body:not(.nothing-home) .dashboard-main .dashboard-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* <=968: universal sidebar goes off-canvas (see universal-sidebar.css);
+           release its reserved margin so content spans full width */
+        @media (max-width: 968px) {
+            .dashboard-main {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* <=768: type scale, iOS zoom guard, tighter panels */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: clamp(1.6rem, 7vw, 2rem);
+                overflow-wrap: anywhere;
+            }
+
+            .page-hero,
+            .dashboard-section,
+            .chart-wrapper {
+                padding: 1.25rem;
+            }
+        }
+
+        /* <=640: stat band -> 1; activity log becomes stacked cards
+           (bare table scrolls internally above this width) */
+        @media (max-width: 640px) {
+            body:not(.nothing-home) .dashboard-main .quick-stats {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .data-table,
+            .data-table tbody,
+            .data-table tr {
+                display: block;
+                width: 100%;
+                min-width: 0;
+                background: transparent;
+                border-radius: 0;
+                overflow: visible;
+                white-space: normal;
+            }
+
+            .data-table thead {
+                display: none;
+            }
+
+            .data-table td[colspan] {
+                text-align: center;
+            }
+
+            .data-table td[colspan]::before {
+                content: none !important;
+            }
+
+            #activityLogBody tr {
+                margin-bottom: 0.75rem;
+                padding: 0.9rem 0.85rem;
+                border: 1px solid var(--r-line, #1f1f1f);
+                border-left: 2px solid var(--r-line-strong, #333);
+                background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+            }
+
+            #activityLogBody tr:hover {
+                transform: none;
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            #activityLogBody td {
+                display: flex;
+                flex-direction: column;
+                gap: 0.15rem;
+                padding: 0.3rem 0;
+                border-bottom: none;
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                text-align: left;
+            }
+
+            #activityLogBody td::before {
+                font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+                font-size: 0.56rem;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.14em;
+                color: var(--r-text-3, #757575);
+            }
+
+            #activityLogBody td:nth-child(1)::before { content: "TIME"; }
+            #activityLogBody td:nth-child(2)::before { content: "USER"; }
+            #activityLogBody td:nth-child(3)::before { content: "ACTION"; }
+            #activityLogBody td:nth-child(4)::before { content: "DETAILS"; }
+
+            #activityLogBody td:nth-child(2) {
+                font-weight: 600;
+                color: var(--r-text, #f4f4f4);
+            }
+        }
+
+        /* <=360: last-resort compression - zero horizontal scroll */
+        @media (max-width: 360px) {
+            .page-title {
+                font-size: 1.45rem;
+            }
+
+            .page-subtitle {
+                letter-spacing: 0.1em;
+            }
+        }
     </style>
 </body>
 </html>

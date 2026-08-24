@@ -919,6 +919,205 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* ============================================================
+           RESPONSIVE OVERRIDES (1920 / 1440 / 1024 / 900 / 768 / 560 / 480 / 360)
+           Sidebar offset is handled by universal-sidebar.css (released <=968px);
+           this page hardcodes no margin-left of its own.
+           ============================================================ */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .question-title,
+        .question-excerpt,
+        .answer-content,
+        .contributor-name {
+            overflow-wrap: anywhere;
+            min-width: 0;
+        }
+
+        /* Modals: bounded width + scrollable body */
+        body:not(.nothing-home) .modal .modal-content {
+            width: min(560px, calc(100vw - 32px));
+            max-width: min(560px, calc(100vw - 32px));
+            max-height: calc(100vh - 32px);
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        body:not(.nothing-home) .modal .modal-content.modal-large {
+            width: min(800px, calc(100vw - 32px));
+            max-width: min(800px, calc(100vw - 32px));
+        }
+
+        /* Contributors grid: 2 columns on mid-small screens */
+        @media (max-width: 1024px) {
+            .hero-content-inline {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 900px) {
+            body:not(.nothing-home) .dashboard-main .contributors-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .page-hero {
+                padding: 1.75rem;
+            }
+        }
+
+        /* Stacking, full-width controls, 16px inputs, >=44px touch targets */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: clamp(1.6rem, 7vw, 2rem);
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+            }
+
+            /* Search overlay row becomes a stacked, full-width control bar */
+            .forum-controls {
+                padding: 1rem;
+            }
+
+            .search-filter-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .search-box-forum,
+            #filterStatus,
+            #sortOrder {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .search-input,
+            .filter-select {
+                font-size: 16px;
+                min-height: 44px;
+            }
+
+            .filter-tag {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .page-btn {
+                min-width: 44px;
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .vote-btn {
+                min-height: 44px;
+            }
+
+            .modal-close {
+                width: 44px;
+                height: 44px;
+                flex-shrink: 0;
+            }
+
+            .form-input,
+            .form-select,
+            .form-textarea {
+                font-size: 16px;
+            }
+
+            .form-actions .btn {
+                min-height: 44px;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+
+            .question-card {
+                padding: 1.15rem;
+            }
+        }
+
+        /* Thread list fully stacked + modals near-fullscreen */
+        @media (max-width: 560px) {
+            body:not(.nothing-home) .dashboard-main .contributors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .category-btn {
+                padding: 1rem 0.75rem;
+            }
+
+            .modal {
+                padding: 0.5rem;
+                align-items: center;
+            }
+
+            body:not(.nothing-home) .modal .modal-content,
+            body:not(.nothing-home) .modal .modal-content.modal-large {
+                width: calc(100vw - 16px);
+                max-width: calc(100vw - 16px);
+                max-height: calc(100vh - 16px);
+                max-height: calc(100dvh - 16px);
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.15rem;
+            }
+
+            .answer-actions {
+                flex-wrap: wrap;
+            }
+
+            .loading-text {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero {
+                padding: 1.25rem;
+            }
+
+            .filter-tags {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        /* 360px: no horizontal page scroll */
+        @media (max-width: 360px) {
+            .page-hero {
+                padding: 1rem;
+            }
+
+            .forum-controls,
+            .question-card,
+            .answer-card {
+                padding-left: 0.9rem;
+                padding-right: 0.9rem;
+            }
+
+            .section-badge {
+                display: none;
+            }
+        }
     </style>
 </body>
 </html>
