@@ -896,6 +896,33 @@ body:not(.nothing-home) .theme-toggle {
     border-radius: var(--r-radius) !important;
 }
 
+/* chatbot widget - square, no shadow, on every page */
+.chatbot-toggle {
+    border-radius: var(--r-radius) !important;
+    box-shadow: none !important;
+}
+
+.chatbot-container {
+    border-radius: var(--r-radius) !important;
+    box-shadow: none !important;
+    border: 1px solid var(--r-line, #1f1f1f) !important;
+}
+
+.chatbot-header {
+    border-radius: var(--r-radius) var(--r-radius) 0 0 !important;
+}
+
+/* theme toggle squared on nothing-home pages too */
+.nothing-home .theme-toggle {
+    border-radius: var(--r-radius) !important;
+    box-shadow: none !important;
+}
+
+/* password toggles and utility buttons */
+.password-toggle-btn {
+    border-radius: var(--r-radius) !important;
+}
+
 /* extended normalization - catches legacy radius rules in any stylesheet */
 body:not(.nothing-home) .stat-card,
 body:not(.nothing-home) .badge,

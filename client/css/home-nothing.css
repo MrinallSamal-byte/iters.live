@@ -19,6 +19,7 @@ body.nothing-home {
     --nh-font-body: "Space Grotesk", "Segoe UI", sans-serif;
     --nh-font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
     background: var(--nh-bg);
+    overflow-x: clip;
 }
 
 body.nothing-home.light-theme {

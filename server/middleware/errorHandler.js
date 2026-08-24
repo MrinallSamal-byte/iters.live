@@ -56,6 +56,11 @@ const errorHandler = (err, req, res, next) => {
   // Ensure Content-Type is set to JSON
   res.setHeader('Content-Type', 'application/json');
 
+  // Generic message for 5xx in production (don't leak internals)
+  if (process.env.NODE_ENV === 'production' && statusCode >= 500) {
+    message = 'Internal Server Error';
+  }
+
   // Send error response as JSON
   try {
     res.status(statusCode).json({

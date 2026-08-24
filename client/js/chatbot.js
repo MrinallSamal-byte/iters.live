@@ -118,28 +118,28 @@ class Chatbot {
         // Role-specific quick actions
         this.quickActionsConfig = {
             student: [
-                { text: '📊 Attendance', query: 'Check my attendance' },
-                { text: '📈 Marks', query: 'View my marks' },
-                { text: '📝 Study Notes', query: 'Study materials and PYQs' },
-                { text: '💡 Solve Question', query: 'Help me solve a question' }
+                { text: ' Attendance', query: 'Check my attendance' },
+                { text: ' Marks', query: 'View my marks' },
+                { text: ' Study Notes', query: 'Study materials and PYQs' },
+                { text: ' Solve Question', query: 'Help me solve a question' }
             ],
             teacher: [
-                { text: '📊 Mark Attendance', query: 'How to mark attendance?' },
-                { text: '📈 Upload Marks', query: 'How to upload student marks?' },
-                { text: '📝 Assignments', query: 'Create and manage assignments' },
-                { text: '👥 My Students', query: 'View my students' }
+                { text: ' Mark Attendance', query: 'How to mark attendance?' },
+                { text: ' Upload Marks', query: 'How to upload student marks?' },
+                { text: ' Assignments', query: 'Create and manage assignments' },
+                { text: ' My Students', query: 'View my students' }
             ],
             admin: [
-                { text: '👥 Users', query: 'Manage users' },
-                { text: '✅ Approvals', query: 'Pending approvals' },
-                { text: '📊 Analytics', query: 'System analytics' },
-                { text: '📢 Announcements', query: 'Create announcements' }
+                { text: ' Users', query: 'Manage users' },
+                { text: ' Approvals', query: 'Pending approvals' },
+                { text: ' Analytics', query: 'System analytics' },
+                { text: ' Announcements', query: 'Create announcements' }
             ],
             guest: [
-                { text: '🎓 About ITER', query: 'Tell me about ITER' },
-                { text: '✨ Features', query: 'What features does ITERasn hub have?' },
-                { text: '📱 How to Register', query: 'How to register?' },
-                { text: '🔐 Login Help', query: 'How to login?' }
+                { text: ' About ITER', query: 'Tell me about ITER' },
+                { text: ' Features', query: 'What features does ITERasn hub have?' },
+                { text: ' How to Register', query: 'How to register?' },
+                { text: ' Login Help', query: 'How to login?' }
             ]
         };
 
@@ -155,76 +155,76 @@ class Chatbot {
             // Attendance
             'attendance': {
                 keywords: ['attendance', 'present', 'absent', 'percentage', 'classes', 'check attendance'],
-                answer: `📊 <strong>Attendance Tracking</strong>\n\nView your attendance in the <a href="/dashboard/student-attendance.html" class="nav-suggestion">📊 Attendance Section</a>.\n\n<strong>Features:</strong>\n• Subject-wise attendance breakdown\n• Heatmap calendar visualization\n• Low attendance alerts (below 75%)\n• Attendance prediction\n\n<strong>Tip:</strong> Minimum 75% attendance is required for exam eligibility!`
+                answer: ` <strong>Attendance Tracking</strong>\n\nView your attendance in the <a href="/dashboard/student-attendance.html" class="nav-suggestion"> Attendance Section</a>.\n\n<strong>Features:</strong>\n• Subject-wise attendance breakdown\n• Heatmap calendar visualization\n• Low attendance alerts (below 75%)\n• Attendance prediction\n\n<strong>Tip:</strong> Minimum 75% attendance is required for exam eligibility!`
             },
             'low attendance': {
                 keywords: ['low attendance', 'shortage', 'attendance issue', 'below 75', 'attendance problem'],
-                answer: `⚠️ <strong>Low Attendance Alert</strong>\n\nIf your attendance is below 75%:\n1. Submit an attendance regularization form\n2. Contact your department HOD\n3. Provide medical certificates if applicable\n4. Attend extra classes if available\n\nCheck your status: <a href="/dashboard/student-attendance.html" class="nav-suggestion">📊 Attendance Section</a>`
+                answer: ` <strong>Low Attendance Alert</strong>\n\nIf your attendance is below 75%:\n1. Submit an attendance regularization form\n2. Contact your department HOD\n3. Provide medical certificates if applicable\n4. Attend extra classes if available\n\nCheck your status: <a href="/dashboard/student-attendance.html" class="nav-suggestion"> Attendance Section</a>`
             },
             // Marks & Performance
             'marks': {
                 keywords: ['marks', 'grades', 'result', 'cgpa', 'sgpa', 'performance', 'view marks', 'my marks'],
-                answer: `📈 <strong>Academic Performance</strong>\n\nView your marks in <a href="/dashboard/student-marks.html" class="nav-suggestion">📈 Marks Section</a>.\n\n<strong>Available:</strong>\n• Subject-wise marks breakdown\n• SGPA/CGPA calculation\n• Performance trends & analytics\n• Grade distribution charts\n• Semester comparison\n\n<strong>Tip:</strong> Track your progress regularly to identify areas for improvement!`
+                answer: ` <strong>Academic Performance</strong>\n\nView your marks in <a href="/dashboard/student-marks.html" class="nav-suggestion"> Marks Section</a>.\n\n<strong>Available:</strong>\n• Subject-wise marks breakdown\n• SGPA/CGPA calculation\n• Performance trends & analytics\n• Grade distribution charts\n• Semester comparison\n\n<strong>Tip:</strong> Track your progress regularly to identify areas for improvement!`
             },
             // Study & Learning
             'solve': {
                 keywords: ['solve', 'question', 'problem', 'help me', 'answer', 'solution', 'doubt', 'stuck'],
-                answer: `💡 <strong>I'd love to help you solve problems!</strong>\n\nHere's how I can assist:\n\n1. <strong>Share your question</strong> - Type it out or describe the topic\n2. <strong>Tell me the subject</strong> - Math, Physics, Programming, etc.\n3. <strong>Show your attempt</strong> - I can guide you from where you're stuck\n\n<strong>Resources:</strong>\n• <a href="/dashboard/student-notes.html" class="nav-suggestion">📚 Study Notes</a> - Reference materials\n• <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a> - Ask peers & faculty\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📝 PYQs</a> - Practice problems\n\nGo ahead, share your question! 🎯`
+                answer: ` <strong>I'd love to help you solve problems!</strong>\n\nHere's how I can assist:\n\n1. <strong>Share your question</strong> - Type it out or describe the topic\n2. <strong>Tell me the subject</strong> - Math, Physics, Programming, etc.\n3. <strong>Show your attempt</strong> - I can guide you from where you're stuck\n\n<strong>Resources:</strong>\n• <a href="/dashboard/student-notes.html" class="nav-suggestion"> Study Notes</a> - Reference materials\n• <a href="/dashboard/student-forum.html" class="nav-suggestion"> Forum</a> - Ask peers & faculty\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion"> PYQs</a> - Practice problems\n\nGo ahead, share your question! `
             },
             'notes': {
                 keywords: ['notes', 'study material', 'pdf', 'lecture notes', 'materials', 'study'],
-                answer: `📚 <strong>Study Materials</strong>\n\nAccess resources in <a href="/dashboard/student-notes.html" class="nav-suggestion">📚 Study Notes</a>.\n\n<strong>Available:</strong>\n• Subject-wise lecture notes\n• PDF presentations\n• Video lecture links\n• Reference materials\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📝 Previous Year Questions (PYQs)</a>\n\n<strong>Tip:</strong> Download notes for offline study!`
+                answer: ` <strong>Study Materials</strong>\n\nAccess resources in <a href="/dashboard/student-notes.html" class="nav-suggestion"> Study Notes</a>.\n\n<strong>Available:</strong>\n• Subject-wise lecture notes\n• PDF presentations\n• Video lecture links\n• Reference materials\n• <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion"> Previous Year Questions (PYQs)</a>\n\n<strong>Tip:</strong> Download notes for offline study!`
             },
             'pyq': {
                 keywords: ['pyq', 'previous year', 'question papers', 'old papers', 'question bank', 'past papers'],
-                answer: `📝 <strong>Previous Year Questions</strong>\n\nAccess PYQs in <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📚 PYQ Section</a>.\n\n<strong>Features:</strong>\n• Filter by subject, year & exam type\n• Download question papers\n• View solutions (where available)\n• Practice mode\n\n<strong>Pro Tip:</strong> Solve PYQs to understand exam patterns!`
+                answer: ` <strong>Previous Year Questions</strong>\n\nAccess PYQs in <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion"> PYQ Section</a>.\n\n<strong>Features:</strong>\n• Filter by subject, year & exam type\n• Download question papers\n• View solutions (where available)\n• Practice mode\n\n<strong>Pro Tip:</strong> Solve PYQs to understand exam patterns!`
             },
             // Timetable
             'timetable': {
                 keywords: ['timetable', 'schedule', 'classes', 'timings', 'lecture', 'class schedule'],
-                answer: `📅 <strong>Class Schedule</strong>\n\nView your timetable in <a href="/dashboard/student-timetable.html" class="nav-suggestion">📅 Timetable</a>.\n\n<strong>Features:</strong>\n• Daily/weekly class schedule\n• Current class highlight\n• Subject & faculty details\n• Room numbers\n• Break timings\n\n<strong>Tip:</strong> Check for any schedule changes in announcements!`
+                answer: ` <strong>Class Schedule</strong>\n\nView your timetable in <a href="/dashboard/student-timetable.html" class="nav-suggestion"> Timetable</a>.\n\n<strong>Features:</strong>\n• Daily/weekly class schedule\n• Current class highlight\n• Subject & faculty details\n• Room numbers\n• Break timings\n\n<strong>Tip:</strong> Check for any schedule changes in announcements!`
             },
             // Exams
             'exam': {
                 keywords: ['exam', 'examination', 'test', 'mid term', 'end term', 'semester'],
-                answer: `📝 <strong>Examination Information</strong>\n\n<strong>Before Exam:</strong>\n• Download admit card: <a href="/dashboard/student-admit-card.html" class="nav-suggestion">🎫 Admit Card</a>\n• Check exam schedule on notice board\n• Review <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion">📝 PYQs</a>\n\n<strong>On Exam Day:</strong>\n• Carry college ID & admit card\n• Report 30 mins before exam\n• Bring necessary stationery\n\nGood luck! 🍀`
+                answer: ` <strong>Examination Information</strong>\n\n<strong>Before Exam:</strong>\n• Download admit card: <a href="/dashboard/student-admit-card.html" class="nav-suggestion"> Admit Card</a>\n• Check exam schedule on notice board\n• Review <a href="/dashboard/student-notes.html?type=pyqs" class="nav-suggestion"> PYQs</a>\n\n<strong>On Exam Day:</strong>\n• Carry college ID & admit card\n• Report 30 mins before exam\n• Bring necessary stationery\n\nGood luck! `
             },
             'admit card': {
                 keywords: ['admit card', 'hall ticket', 'exam card', 'download admit'],
-                answer: `🎫 <strong>Admit Card</strong>\n\nDownload from <a href="/dashboard/student-admit-card.html" class="nav-suggestion">🎫 Admit Card Section</a>.\n\n<strong>Includes:</strong>\n• Your photo & details\n• Exam schedule\n• Examination center\n• Important instructions\n• QR code verification\n\n<strong>Important:</strong> Print and keep it safe!`
+                answer: ` <strong>Admit Card</strong>\n\nDownload from <a href="/dashboard/student-admit-card.html" class="nav-suggestion"> Admit Card Section</a>.\n\n<strong>Includes:</strong>\n• Your photo & details\n• Exam schedule\n• Examination center\n• Important instructions\n• QR code verification\n\n<strong>Important:</strong> Print and keep it safe!`
             },
             // Events & Activities
             'events': {
                 keywords: ['events', 'fest', 'competition', 'activities', 'techfest', 'cultural'],
-                answer: `🎉 <strong>Events & Activities</strong>\n\nExplore events in <a href="/dashboard/student-events.html" class="nav-suggestion">🎉 Events Section</a>.\n\n<strong>Upcoming:</strong>\n• Technical fests\n• Cultural events\n• Workshops & seminars\n• Competitions\n• Sports events\n\n<strong>Tip:</strong> Register early - seats fill up fast!`
+                answer: ` <strong>Events & Activities</strong>\n\nExplore events in <a href="/dashboard/student-events.html" class="nav-suggestion"> Events Section</a>.\n\n<strong>Upcoming:</strong>\n• Technical fests\n• Cultural events\n• Workshops & seminars\n• Competitions\n• Sports events\n\n<strong>Tip:</strong> Register early - seats fill up fast!`
             },
             'clubs': {
                 keywords: ['clubs', 'society', 'join', 'member', 'technical club', 'cultural club'],
-                answer: `🎭 <strong>Student Clubs</strong>\n\nExplore clubs in <a href="/dashboard/student-clubs.html" class="nav-suggestion">🎭 Clubs Section</a>.\n\n<strong>Categories:</strong>\n• Technical clubs (Coding, Robotics, AI/ML)\n• Cultural societies (Music, Dance, Drama)\n• Sports teams\n• Professional chapters (IEEE, ACM)\n\n<strong>Tip:</strong> Join clubs to build skills & network!`
+                answer: ` <strong>Student Clubs</strong>\n\nExplore clubs in <a href="/dashboard/student-clubs.html" class="nav-suggestion"> Clubs Section</a>.\n\n<strong>Categories:</strong>\n• Technical clubs (Coding, Robotics, AI/ML)\n• Cultural societies (Music, Dance, Drama)\n• Sports teams\n• Professional chapters (IEEE, ACM)\n\n<strong>Tip:</strong> Join clubs to build skills & network!`
             },
             // Hostel
             'hostel': {
                 keywords: ['hostel', 'room', 'accommodation', 'hostel fee', 'room complaint'],
-                answer: `🏨 <strong>Hostel Services</strong>\n\nAccess hostel info in <a href="/dashboard/student-hostel-menu.html" class="nav-suggestion">🏨 Hostel Section</a>.\n\n<strong>Features:</strong>\n• Weekly mess menu\n• Room complaint form\n• Hostel rules & guidelines\n• Leave application\n• Room allocation details`
+                answer: ` <strong>Hostel Services</strong>\n\nAccess hostel info in <a href="/dashboard/student-hostel-menu.html" class="nav-suggestion"> Hostel Section</a>.\n\n<strong>Features:</strong>\n• Weekly mess menu\n• Room complaint form\n• Hostel rules & guidelines\n• Leave application\n• Room allocation details`
             },
             'mess': {
                 keywords: ['mess', 'menu', 'food', 'canteen', 'lunch', 'dinner', 'breakfast'],
-                answer: `🍽️ <strong>Mess Menu</strong>\n\nCheck weekly menu at <a href="/dashboard/student-hostel-menu.html" class="nav-suggestion">🍽️ Mess Menu</a>.\n\n<strong>Includes:</strong>\n• Breakfast, Lunch, Snacks, Dinner\n• Special weekend menu\n• Nutritional information\n\n<strong>Feedback:</strong> Share your suggestions to improve mess quality!`
+                answer: ` <strong>Mess Menu</strong>\n\nCheck weekly menu at <a href="/dashboard/student-hostel-menu.html" class="nav-suggestion"> Mess Menu</a>.\n\n<strong>Includes:</strong>\n• Breakfast, Lunch, Snacks, Dinner\n• Special weekend menu\n• Nutritional information\n\n<strong>Feedback:</strong> Share your suggestions to improve mess quality!`
             },
             // Forum
             'forum': {
                 keywords: ['forum', 'discussion', 'ask question', 'doubt', 'query', 'help from students'],
-                answer: `💬 <strong>Student Forum</strong>\n\nJoin discussions in <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a>.\n\n<strong>Features:</strong>\n• Ask academic questions\n• Get answers from peers & faculty\n• Join study discussions\n• Share resources\n• Upvote helpful answers\n\n<strong>Tip:</strong> Search before asking - your question might be answered!`
+                answer: ` <strong>Student Forum</strong>\n\nJoin discussions in <a href="/dashboard/student-forum.html" class="nav-suggestion"> Forum</a>.\n\n<strong>Features:</strong>\n• Ask academic questions\n• Get answers from peers & faculty\n• Join study discussions\n• Share resources\n• Upvote helpful answers\n\n<strong>Tip:</strong> Search before asking - your question might be answered!`
             },
             // Fee
             'fee': {
                 keywords: ['fee', 'fees', 'payment', 'tuition', 'scholarship', 'fee payment', 'pay fee'],
-                answer: `💰 <strong>Fee Information</strong>\n\n<strong>Fee Payment:</strong>\n• Login to parent portal for fee details\n• Payment via online banking/UPI/Card\n• Download fee receipts\n\n<strong>Scholarships:</strong>\n• Apply through admin office\n• Check eligibility criteria\n• Merit-based & need-based available\n\n<strong>Contact:</strong> Accounts section for queries.`
+                answer: ` <strong>Fee Information</strong>\n\n<strong>Fee Payment:</strong>\n• Login to parent portal for fee details\n• Payment via online banking/UPI/Card\n• Download fee receipts\n\n<strong>Scholarships:</strong>\n• Apply through admin office\n• Check eligibility criteria\n• Merit-based & need-based available\n\n<strong>Contact:</strong> Accounts section for queries.`
             },
             // Dashboard
             'dashboard': {
                 keywords: ['dashboard', 'home', 'main page', 'overview', 'my dashboard'],
-                answer: `🏠 <strong>Student Dashboard</strong>\n\nGo to <a href="/dashboard/student.html" class="nav-suggestion">🏠 Dashboard</a>.\n\n<strong>Quick Overview:</strong>\n• Attendance summary\n• Upcoming deadlines\n• Recent announcements\n• Quick links to all features\n• Performance metrics`
+                answer: ` <strong>Student Dashboard</strong>\n\nGo to <a href="/dashboard/student.html" class="nav-suggestion"> Dashboard</a>.\n\n<strong>Quick Overview:</strong>\n• Attendance summary\n• Upcoming deadlines\n• Recent announcements\n• Quick links to all features\n• Performance metrics`
             }
         };
     }
@@ -236,35 +236,35 @@ class Chatbot {
         return {
             'attendance': {
                 keywords: ['attendance', 'mark attendance', 'take attendance', 'class attendance'],
-                answer: `📊 <strong>Mark Attendance</strong>\n\nTake attendance in <a href="/dashboard/teacher-attendance.html" class="nav-suggestion">📊 Attendance Section</a>.\n\n<strong>Features:</strong>\n• Mark student attendance (Present/Absent/Late)\n• Bulk attendance marking\n• View attendance reports\n• Export attendance data\n• Send low attendance alerts\n\n<strong>Tip:</strong> Take attendance at the start of each class!`
+                answer: ` <strong>Mark Attendance</strong>\n\nTake attendance in <a href="/dashboard/teacher-attendance.html" class="nav-suggestion"> Attendance Section</a>.\n\n<strong>Features:</strong>\n• Mark student attendance (Present/Absent/Late)\n• Bulk attendance marking\n• View attendance reports\n• Export attendance data\n• Send low attendance alerts\n\n<strong>Tip:</strong> Take attendance at the start of each class!`
             },
             'marks': {
                 keywords: ['marks', 'upload marks', 'enter marks', 'grades', 'grading', 'student marks'],
-                answer: `📈 <strong>Upload Marks</strong>\n\nEnter marks in <a href="/dashboard/teacher-marks.html" class="nav-suggestion">📈 Marks Section</a>.\n\n<strong>Features:</strong>\n• Subject-wise marks entry\n• Bulk upload via Excel\n• Grade calculation\n• Performance analytics\n• Generate mark sheets\n\n<strong>Deadline:</strong> Submit marks within 7 days of exam!`
+                answer: ` <strong>Upload Marks</strong>\n\nEnter marks in <a href="/dashboard/teacher-marks.html" class="nav-suggestion"> Marks Section</a>.\n\n<strong>Features:</strong>\n• Subject-wise marks entry\n• Bulk upload via Excel\n• Grade calculation\n• Performance analytics\n• Generate mark sheets\n\n<strong>Deadline:</strong> Submit marks within 7 days of exam!`
             },
             'assignments': {
                 keywords: ['assignment', 'homework', 'create assignment', 'manage assignments', 'submissions'],
-                answer: `📝 <strong>Assignments Management</strong>\n\nManage in <a href="/dashboard/teacher-assignments.html" class="nav-suggestion">📝 Assignments</a>.\n\n<strong>Features:</strong>\n• Create new assignments\n• Set deadlines\n• Review submissions\n• Grade assignments\n• Provide feedback\n• Plagiarism check\n\n<strong>Tip:</strong> Set clear rubrics for fair grading!`
+                answer: ` <strong>Assignments Management</strong>\n\nManage in <a href="/dashboard/teacher-assignments.html" class="nav-suggestion"> Assignments</a>.\n\n<strong>Features:</strong>\n• Create new assignments\n• Set deadlines\n• Review submissions\n• Grade assignments\n• Provide feedback\n• Plagiarism check\n\n<strong>Tip:</strong> Set clear rubrics for fair grading!`
             },
             'notes': {
                 keywords: ['notes', 'study material', 'upload notes', 'share materials', 'lecture notes'],
-                answer: `📚 <strong>Study Materials</strong>\n\nUpload in <a href="/dashboard/teacher-notes.html" class="nav-suggestion">📚 Study Materials</a>.\n\n<strong>Features:</strong>\n• Upload lecture notes (PDF, DOC, PPT)\n• Organize by subject & topic\n• Share with specific batches\n• Track download stats\n• Version control\n\n<strong>Formats:</strong> PDF, DOC, PPT, ZIP (max 50MB)`
+                answer: ` <strong>Study Materials</strong>\n\nUpload in <a href="/dashboard/teacher-notes.html" class="nav-suggestion"> Study Materials</a>.\n\n<strong>Features:</strong>\n• Upload lecture notes (PDF, DOC, PPT)\n• Organize by subject & topic\n• Share with specific batches\n• Track download stats\n• Version control\n\n<strong>Formats:</strong> PDF, DOC, PPT, ZIP (max 50MB)`
             },
             'question bank': {
                 keywords: ['question bank', 'questions', 'create questions', 'exam questions', 'quiz'],
-                answer: `🎯 <strong>Question Bank</strong>\n\nManage in <a href="/dashboard/teacher-question-bank.html" class="nav-suggestion">🎯 Question Bank</a>.\n\n<strong>Features:</strong>\n• Create MCQ/Descriptive questions\n• Organize by topic & difficulty\n• Generate question papers\n• Auto-shuffle options\n• Import/Export questions\n\n<strong>Tip:</strong> Tag questions with difficulty level for balanced papers!`
+                answer: ` <strong>Question Bank</strong>\n\nManage in <a href="/dashboard/teacher-question-bank.html" class="nav-suggestion"> Question Bank</a>.\n\n<strong>Features:</strong>\n• Create MCQ/Descriptive questions\n• Organize by topic & difficulty\n• Generate question papers\n• Auto-shuffle options\n• Import/Export questions\n\n<strong>Tip:</strong> Tag questions with difficulty level for balanced papers!`
             },
             'rubric': {
                 keywords: ['rubric', 'grading rubric', 'evaluation criteria', 'create rubric'],
-                answer: `📋 <strong>Rubric Creator</strong>\n\nDesign rubrics in <a href="/dashboard/teacher-rubric-creator.html" class="nav-suggestion">📋 Rubric Creator</a>.\n\n<strong>Features:</strong>\n• Create custom rubrics\n• Define criteria & point values\n• Save rubric templates\n• Apply to assignments\n• Consistent grading\n\n<strong>Benefit:</strong> Ensures fair & transparent evaluation!`
+                answer: ` <strong>Rubric Creator</strong>\n\nDesign rubrics in <a href="/dashboard/teacher-rubric-creator.html" class="nav-suggestion"> Rubric Creator</a>.\n\n<strong>Features:</strong>\n• Create custom rubrics\n• Define criteria & point values\n• Save rubric templates\n• Apply to assignments\n• Consistent grading\n\n<strong>Benefit:</strong> Ensures fair & transparent evaluation!`
             },
             'students': {
                 keywords: ['students', 'my students', 'class students', 'student list', 'view students'],
-                answer: `👥 <strong>My Students</strong>\n\nView in <a href="/dashboard/teacher-students.html" class="nav-suggestion">👥 My Students</a>.\n\n<strong>Features:</strong>\n• Student list by class/section\n• Individual student profiles\n• Attendance & marks summary\n• Performance tracking\n• Contact information\n\n<strong>Tip:</strong> Identify struggling students early for intervention!`
+                answer: ` <strong>My Students</strong>\n\nView in <a href="/dashboard/teacher-students.html" class="nav-suggestion"> My Students</a>.\n\n<strong>Features:</strong>\n• Student list by class/section\n• Individual student profiles\n• Attendance & marks summary\n• Performance tracking\n• Contact information\n\n<strong>Tip:</strong> Identify struggling students early for intervention!`
             },
             'dashboard': {
                 keywords: ['dashboard', 'home', 'overview', 'teacher dashboard'],
-                answer: `🏠 <strong>Teacher Dashboard</strong>\n\nGo to <a href="/dashboard/teacher.html" class="nav-suggestion">🏠 Dashboard</a>.\n\n<strong>Quick Overview:</strong>\n• Today's classes\n• Pending submissions to grade\n• Class attendance stats\n• Recent announcements\n• Quick links to all features`
+                answer: ` <strong>Teacher Dashboard</strong>\n\nGo to <a href="/dashboard/teacher.html" class="nav-suggestion"> Dashboard</a>.\n\n<strong>Quick Overview:</strong>\n• Today's classes\n• Pending submissions to grade\n• Class attendance stats\n• Recent announcements\n• Quick links to all features`
             }
         };
     }
@@ -276,31 +276,31 @@ class Chatbot {
         return {
             'users': {
                 keywords: ['users', 'user management', 'add user', 'delete user', 'manage users', 'students', 'teachers'],
-                answer: `👥 <strong>User Management</strong>\n\nManage in <a href="/dashboard/admin-users.html" class="nav-suggestion">👥 User Management</a>.\n\n<strong>Features:</strong>\n• Add/Edit/Delete users\n• Bulk user import (Excel)\n• Role assignment (Student/Teacher/Admin)\n• Reset passwords\n• View user activity logs\n• Export user data\n\n<strong>Roles:</strong> Student, Teacher, Admin, HOD`
+                answer: ` <strong>User Management</strong>\n\nManage in <a href="/dashboard/admin-users.html" class="nav-suggestion"> User Management</a>.\n\n<strong>Features:</strong>\n• Add/Edit/Delete users\n• Bulk user import (Excel)\n• Role assignment (Student/Teacher/Admin)\n• Reset passwords\n• View user activity logs\n• Export user data\n\n<strong>Roles:</strong> Student, Teacher, Admin, HOD`
             },
             'approvals': {
                 keywords: ['approvals', 'pending', 'approve', 'reject', 'review', 'pending approvals'],
-                answer: `✅ <strong>Approvals</strong>\n\nReview in <a href="/dashboard/admin-approvals.html" class="nav-suggestion">✅ Approvals</a>.\n\n<strong>Pending Items:</strong>\n• New registrations\n• Leave applications\n• Notes/Material uploads\n• Event requests\n• Fee concessions\n\n<strong>Tip:</strong> Review approvals daily to avoid backlog!`
+                answer: ` <strong>Approvals</strong>\n\nReview in <a href="/dashboard/admin-approvals.html" class="nav-suggestion"> Approvals</a>.\n\n<strong>Pending Items:</strong>\n• New registrations\n• Leave applications\n• Notes/Material uploads\n• Event requests\n• Fee concessions\n\n<strong>Tip:</strong> Review approvals daily to avoid backlog!`
             },
             'analytics': {
                 keywords: ['analytics', 'reports', 'statistics', 'data', 'insights', 'metrics'],
-                answer: `📊 <strong>System Analytics</strong>\n\nView in <a href="/dashboard/admin-analytics.html" class="nav-suggestion">📊 Analytics</a>.\n\n<strong>Reports:</strong>\n• User statistics & growth\n• Attendance trends\n• Academic performance\n• System usage metrics\n• Department-wise data\n• Custom date ranges\n\n<strong>Export:</strong> PDF, Excel, CSV`
+                answer: ` <strong>System Analytics</strong>\n\nView in <a href="/dashboard/admin-analytics.html" class="nav-suggestion"> Analytics</a>.\n\n<strong>Reports:</strong>\n• User statistics & growth\n• Attendance trends\n• Academic performance\n• System usage metrics\n• Department-wise data\n• Custom date ranges\n\n<strong>Export:</strong> PDF, Excel, CSV`
             },
             'announcements': {
                 keywords: ['announcement', 'notice', 'broadcast', 'create announcement', 'notify'],
-                answer: `📢 <strong>Announcements</strong>\n\nManage in <a href="/dashboard/admin-announcements.html" class="nav-suggestion">📢 Announcements</a>.\n\n<strong>Features:</strong>\n• Create announcements\n• Target specific groups\n• Schedule announcements\n• Priority levels (Normal/Important/Urgent)\n• Email notifications\n• Track read status\n\n<strong>Tip:</strong> Use priority wisely - urgent notifications alert users!`
+                answer: ` <strong>Announcements</strong>\n\nManage in <a href="/dashboard/admin-announcements.html" class="nav-suggestion"> Announcements</a>.\n\n<strong>Features:</strong>\n• Create announcements\n• Target specific groups\n• Schedule announcements\n• Priority levels (Normal/Important/Urgent)\n• Email notifications\n• Track read status\n\n<strong>Tip:</strong> Use priority wisely - urgent notifications alert users!`
             },
             'departments': {
                 keywords: ['department', 'departments', 'add department', 'manage department', 'courses'],
-                answer: `🎓 <strong>Departments</strong>\n\nManage in <a href="/dashboard/admin-departments.html" class="nav-suggestion">🎓 Departments</a>.\n\n<strong>Features:</strong>\n• Add/Edit departments\n• Assign HODs\n• Manage courses & programs\n• Set department settings\n• View department statistics`
+                answer: ` <strong>Departments</strong>\n\nManage in <a href="/dashboard/admin-departments.html" class="nav-suggestion"> Departments</a>.\n\n<strong>Features:</strong>\n• Add/Edit departments\n• Assign HODs\n• Manage courses & programs\n• Set department settings\n• View department statistics`
             },
             'settings': {
                 keywords: ['settings', 'configuration', 'system settings', 'preferences', 'setup'],
-                answer: `⚙️ <strong>System Settings</strong>\n\nConfigure in <a href="/dashboard/admin-settings.html" class="nav-suggestion">⚙️ Settings</a>.\n\n<strong>Options:</strong>\n• Academic year setup\n• Grading system config\n• Attendance rules\n• Email templates\n• System preferences\n• Backup & restore`
+                answer: ` <strong>System Settings</strong>\n\nConfigure in <a href="/dashboard/admin-settings.html" class="nav-suggestion"> Settings</a>.\n\n<strong>Options:</strong>\n• Academic year setup\n• Grading system config\n• Attendance rules\n• Email templates\n• System preferences\n• Backup & restore`
             },
             'dashboard': {
                 keywords: ['dashboard', 'home', 'overview', 'admin dashboard'],
-                answer: `🏠 <strong>Admin Dashboard</strong>\n\nGo to <a href="/dashboard/admin.html" class="nav-suggestion">🏠 Dashboard</a>.\n\n<strong>Overview:</strong>\n• Total users & growth\n• Pending approvals count\n• System health status\n• Recent activities\n• Quick action buttons`
+                answer: ` <strong>Admin Dashboard</strong>\n\nGo to <a href="/dashboard/admin.html" class="nav-suggestion"> Dashboard</a>.\n\n<strong>Overview:</strong>\n• Total users & growth\n• Pending approvals count\n• System health status\n• Recent activities\n• Quick action buttons`
             }
         };
     }
@@ -312,31 +312,31 @@ class Chatbot {
         return {
             'about': {
                 keywords: ['about', 'iter', 'soa', 'university', 'college', 'institute', 'what is'],
-                answer: `🎓 <strong>About ITER, SOA University</strong>\n\nITER (Institute of Technical Education & Research) is a premier constituent college of SOA University, Bhubaneswar.\n\n<strong>Highlights:</strong>\n• 🏆 NAAC A++ Accredited\n• 📚 NBA Approved Programs\n• 💼 95%+ Placement Rate\n• 🌍 Global Collaborations\n\n<a href="/#about" class="nav-suggestion">📖 Learn More</a> | <a href="/creator.html" class="nav-suggestion">👨‍💻 About Creator</a>`
+                answer: ` <strong>About ITER, SOA University</strong>\n\nITER (Institute of Technical Education & Research) is a premier constituent college of SOA University, Bhubaneswar.\n\n<strong>Highlights:</strong>\n•  NAAC A++ Accredited\n•  NBA Approved Programs\n•  95%+ Placement Rate\n•  Global Collaborations\n\n<a href="/#about" class="nav-suggestion"> Learn More</a> | <a href="/creator.html" class="nav-suggestion">‍ About Creator</a>`
             },
             'features': {
                 keywords: ['features', 'what can', 'capabilities', 'services', 'offerings', 'iterasn hub', 'hub'],
-                answer: `✨ <strong>ITERasn hub Features</strong>\n\n<strong>For Students:</strong>\n• 📊 Real-time Attendance Tracking\n• 📈 Marks & Performance Analytics\n• 📚 Digital Notes & PYQs\n• 📅 Interactive Timetable\n• 🎫 Admit Card Download\n• 💬 Student Forum\n• 🎉 Events & Clubs\n\n<strong>For Teachers:</strong>\n• 📝 Assignment Management\n• 🎯 Question Bank\n• 📊 Grade Management\n\n<strong>For Admins:</strong>\n• 👥 User Management\n• 📊 Advanced Analytics\n• 📢 Announcements\n\n<a href="/#features" class="nav-suggestion">🔍 Explore All Features</a>`
+                answer: ` <strong>ITERasn hub Features</strong>\n\n<strong>For Students:</strong>\n•  Real-time Attendance Tracking\n•  Marks & Performance Analytics\n•  Digital Notes & PYQs\n•  Interactive Timetable\n•  Admit Card Download\n•  Student Forum\n•  Events & Clubs\n\n<strong>For Teachers:</strong>\n•  Assignment Management\n•  Question Bank\n•  Grade Management\n\n<strong>For Admins:</strong>\n•  User Management\n•  Advanced Analytics\n•  Announcements\n\n<a href="/#features" class="nav-suggestion"> Explore All Features</a>`
             },
             'register': {
                 keywords: ['register', 'sign up', 'create account', 'new account', 'join', 'registration'],
-                answer: `📝 <strong>Registration Guide</strong>\n\n<strong>Steps to Register:</strong>\n1. Go to <a href="/register.html" class="nav-suggestion">📝 Registration Page</a>\n2. Fill your details (Name, Email, Registration No.)\n3. Choose your role (Student/Teacher)\n4. Create a strong password\n5. Verify your email\n6. Wait for admin approval\n\n<strong>Need help?</strong> Contact: support@iter.ac.in`
+                answer: ` <strong>Registration Guide</strong>\n\n<strong>Steps to Register:</strong>\n1. Go to <a href="/register.html" class="nav-suggestion"> Registration Page</a>\n2. Fill your details (Name, Email, Registration No.)\n3. Choose your role (Student/Teacher)\n4. Create a strong password\n5. Verify your email\n6. Wait for admin approval\n\n<strong>Need help?</strong> Contact: support@iter.ac.in`
             },
             'login': {
                 keywords: ['login', 'sign in', 'access', 'portal', 'cant login', 'login problem'],
-                answer: `🔐 <strong>Login Guide</strong>\n\n<strong>To Login:</strong>\n1. Go to <a href="/login.html" class="nav-suggestion">🔐 Login Page</a>\n2. Enter your Registration Number\n3. Enter your Password\n4. Click Login\n\n<strong>Forgot Password?</strong>\n• Click "Forgot Password" on login page\n• Enter your registered email\n• Check inbox for reset link\n\n<strong>Issues?</strong> Contact IT Helpdesk: +91-674-2350171`
+                answer: ` <strong>Login Guide</strong>\n\n<strong>To Login:</strong>\n1. Go to <a href="/login.html" class="nav-suggestion"> Login Page</a>\n2. Enter your Registration Number\n3. Enter your Password\n4. Click Login\n\n<strong>Forgot Password?</strong>\n• Click "Forgot Password" on login page\n• Enter your registered email\n• Check inbox for reset link\n\n<strong>Issues?</strong> Contact IT Helpdesk: +91-674-2350171`
             },
             'placement': {
                 keywords: ['placement', 'job', 'career', 'recruitment', 'companies', 'package'],
-                answer: `💼 <strong>Placements at ITER</strong>\n\n<strong>Statistics:</strong>\n• 95%+ Placement Rate\n• Highest Package: 30+ LPA\n• Average Package: 8+ LPA\n• 200+ Recruiting Companies\n\n<strong>Top Recruiters:</strong>\nGoogle, Microsoft, Amazon, Adobe, TCS, Infosys, Wipro, and many more!\n\n<a href="/#academics" class="nav-suggestion">📊 View Details</a>`
+                answer: ` <strong>Placements at ITER</strong>\n\n<strong>Statistics:</strong>\n• 95%+ Placement Rate\n• Highest Package: 30+ LPA\n• Average Package: 8+ LPA\n• 200+ Recruiting Companies\n\n<strong>Top Recruiters:</strong>\nGoogle, Microsoft, Amazon, Adobe, TCS, Infosys, Wipro, and many more!\n\n<a href="/#academics" class="nav-suggestion"> View Details</a>`
             },
             'contact': {
                 keywords: ['contact', 'phone', 'email', 'address', 'reach', 'help', 'support'],
-                answer: `📞 <strong>Contact Information</strong>\n\n<strong>ITER, SOA University</strong>\n\n📍 <strong>Address:</strong>\nJagamohan Nagar, Khandagiri\nBhubaneswar, Odisha 751030\n\n📧 <strong>Email:</strong>\ninfo@iter.ac.in\nadmissions@iter.ac.in\n\n📞 <strong>Phone:</strong>\n+91-674-2350171\n+91-674-2351006\n\n<a href="/#contact" class="nav-suggestion">📍 View Location</a>`
+                answer: ` <strong>Contact Information</strong>\n\n<strong>ITER, SOA University</strong>\n\n <strong>Address:</strong>\nJagamohan Nagar, Khandagiri\nBhubaneswar, Odisha 751030\n\n <strong>Email:</strong>\ninfo@iter.ac.in\nadmissions@iter.ac.in\n\n <strong>Phone:</strong>\n+91-674-2350171\n+91-674-2351006\n\n<a href="/#contact" class="nav-suggestion"> View Location</a>`
             },
             'academics': {
                 keywords: ['academics', 'courses', 'programs', 'branches', 'departments', 'btech', 'mtech'],
-                answer: `📚 <strong>Academic Programs</strong>\n\n<strong>Undergraduate (B.Tech):</strong>\n• Computer Science & Engineering\n• Electronics & Communication\n• Mechanical Engineering\n• Civil Engineering\n• Electrical Engineering\n• Information Technology\n• And more...\n\n<strong>Postgraduate:</strong>\n• M.Tech (Various Specializations)\n• MBA\n• Ph.D.\n\n<a href="/#academics" class="nav-suggestion">📖 View All Programs</a>`
+                answer: ` <strong>Academic Programs</strong>\n\n<strong>Undergraduate (B.Tech):</strong>\n• Computer Science & Engineering\n• Electronics & Communication\n• Mechanical Engineering\n• Civil Engineering\n• Electrical Engineering\n• Information Technology\n• And more...\n\n<strong>Postgraduate:</strong>\n• M.Tech (Various Specializations)\n• MBA\n• Ph.D.\n\n<a href="/#academics" class="nav-suggestion"> View All Programs</a>`
             }
         };
     }
@@ -348,11 +348,11 @@ class Chatbot {
         return {
             'help': {
                 keywords: ['help', 'support', 'issue', 'problem', 'not working'],
-                answer: `🆘 <strong>Need Help?</strong>\n\n<strong>Contact Options:</strong>\n• 📧 Email: support@iter.ac.in\n• 📞 Helpdesk: +91-674-2350171\n• 🏢 Admin Office (Block A)\n• 💬 Use this chatbot!\n\n<strong>Common Issues:</strong>\n• Login problems → Try password reset\n• Page not loading → Clear cache & refresh\n• Data not showing → Check internet connection`
+                answer: `🆘 <strong>Need Help?</strong>\n\n<strong>Contact Options:</strong>\n•  Email: support@iter.ac.in\n•  Helpdesk: +91-674-2350171\n•  Admin Office (Block A)\n•  Use this chatbot!\n\n<strong>Common Issues:</strong>\n• Login problems → Try password reset\n• Page not loading → Clear cache & refresh\n• Data not showing → Check internet connection`
             },
             'password': {
                 keywords: ['password', 'forgot password', 'reset', 'login issue', 'change password'],
-                answer: `🔑 <strong>Password Help</strong>\n\n<strong>Forgot Password?</strong>\n1. Click "Forgot Password" on login page\n2. Enter registered email\n3. Check inbox for reset link\n4. Create new password\n\n<strong>Change Password:</strong>\n• Login → Profile → Change Password\n\n<strong>Still having issues?</strong>\nContact IT Helpdesk: +91-674-2350171`
+                answer: ` <strong>Password Help</strong>\n\n<strong>Forgot Password?</strong>\n1. Click "Forgot Password" on login page\n2. Enter registered email\n3. Check inbox for reset link\n4. Create new password\n\n<strong>Change Password:</strong>\n• Login → Profile → Change Password\n\n<strong>Still having issues?</strong>\nContact IT Helpdesk: +91-674-2350171`
             }
         };
     }
@@ -379,7 +379,7 @@ class Chatbot {
         // Create toggle button
         this.toggleBtn = document.createElement('button');
         this.toggleBtn.className = 'chatbot-toggle';
-        this.toggleBtn.innerHTML = '<span class="chatbot-toggle-icon">🤖</span>';
+        this.toggleBtn.innerHTML = '<span class="chatbot-toggle-icon"></span>';
         this.toggleBtn.title = 'Chat with ITER Assistant';
         document.body.appendChild(this.toggleBtn);
 
@@ -397,7 +397,7 @@ class Chatbot {
         this.container.innerHTML = `
             <div class="chatbot-header">
                 <div class="chatbot-header-info">
-                    <div class="chatbot-avatar">🤖</div>
+                    <div class="chatbot-avatar"></div>
                     <div>
                         <h4 class="chatbot-title">ITER Assistant</h4>
                         <div class="chatbot-status">
@@ -406,7 +406,7 @@ class Chatbot {
                         </div>
                     </div>
                 </div>
-                <button class="chatbot-close" title="Close chat">✕</button>
+                <button class="chatbot-close" title="Close chat"></button>
             </div>
             <div class="chatbot-messages" id="chatbotMessages"></div>
             <div class="chatbot-quick-actions" id="chatbotQuickActions"></div>
@@ -414,7 +414,7 @@ class Chatbot {
                 <input type="text" class="chatbot-input" id="chatbotInput" 
                     placeholder="${placeholders[this.userRole] || placeholders.guest}" 
                     autocomplete="off">
-                <button class="chatbot-send" id="chatbotSend" title="Send message">➤</button>
+                <button class="chatbot-send" id="chatbotSend" title="Send message"></button>
             </div>
         `;
         document.body.appendChild(this.container);
@@ -430,10 +430,10 @@ class Chatbot {
 
     getRoleLabel() {
         const labels = {
-            student: '🎓 Student',
-            teacher: '👨‍🏫 Teacher',
-            admin: '👨‍💼 Admin',
-            guest: '👋 Guest'
+            student: ' Student',
+            teacher: '‍ Teacher',
+            admin: '‍ Admin',
+            guest: ' Guest'
         };
         return labels[this.userRole] || labels.guest;
     }
@@ -540,13 +540,13 @@ class Chatbot {
 
     addWelcomeMessage() {
         const welcomeMessages = {
-            student: `Hello! 👋 I'm your ITER Assistant.\n\n<strong>As a Student, I can help you with:</strong>\n• 📊 Check attendance & marks\n• 📚 Find study materials & PYQs\n• 💡 Help solve questions\n• 📅 View timetable & schedules\n• 🎉 Explore events & clubs\n• 🏨 Hostel & mess info\n\nJust type your question or click a quick action below!`,
+            student: `Hello!  I'm your ITER Assistant.\n\n<strong>As a Student, I can help you with:</strong>\n•  Check attendance & marks\n•  Find study materials & PYQs\n•  Help solve questions\n•  View timetable & schedules\n•  Explore events & clubs\n•  Hostel & mess info\n\nJust type your question or click a quick action below!`,
             
-            teacher: `Hello! 👋 I'm your ITER Assistant.\n\n<strong>As a Teacher, I can help you with:</strong>\n• 📊 Mark student attendance\n• 📈 Upload & manage marks\n• 📝 Create assignments\n• 📚 Upload study materials\n• 🎯 Manage question bank\n• 👥 View student details\n\nHow can I assist you today?`,
+            teacher: `Hello!  I'm your ITER Assistant.\n\n<strong>As a Teacher, I can help you with:</strong>\n•  Mark student attendance\n•  Upload & manage marks\n•  Create assignments\n•  Upload study materials\n•  Manage question bank\n•  View student details\n\nHow can I assist you today?`,
             
-            admin: `Hello! 👋 I'm your ITER Assistant.\n\n<strong>As an Admin, I can help you with:</strong>\n• 👥 Manage users & roles\n• ✅ Review pending approvals\n• 📊 View system analytics\n• 📢 Create announcements\n• 🎓 Manage departments\n• ⚙️ System configuration\n\nWhat would you like to do?`,
+            admin: `Hello!  I'm your ITER Assistant.\n\n<strong>As an Admin, I can help you with:</strong>\n•  Manage users & roles\n•  Review pending approvals\n•  View system analytics\n•  Create announcements\n•  Manage departments\n•  System configuration\n\nWhat would you like to do?`,
             
-            guest: `Welcome to ITERasn hub! 👋\n\n<strong>I can help you learn about:</strong>\n• 🎓 About ITER & SOA University\n• ✨ ITERasn hub features & capabilities\n• 📝 How to register & login\n• 💼 Placements & career\n• 📚 Academic programs\n• 📞 Contact information\n\nAsk me anything about ITERasn hub!`
+            guest: `Welcome to ITERasn hub! \n\n<strong>I can help you learn about:</strong>\n•  About ITER & SOA University\n•  ITERasn hub features & capabilities\n•  How to register & login\n•  Placements & career\n•  Academic programs\n•  Contact information\n\nAsk me anything about ITERasn hub!`
         };
 
         this.addMessage(welcomeMessages[this.userRole] || welcomeMessages.guest, 'bot');
@@ -892,14 +892,14 @@ For math or study questions:
                 case '-': result = a - b; break;
                 case '*': result = a * b; break;
                 case '/': 
-                    if (b === 0) return '❌ Cannot divide by zero!';
+                    if (b === 0) return ' Cannot divide by zero!';
                     result = a / b; 
                     break;
                 case '^': result = Math.pow(a, b); break;
                 default: return null;
             }
             
-            return `✅ <strong>${a} ${operator} ${b} = ${result}</strong>`;
+            return ` <strong>${a} ${operator} ${b} = ${result}</strong>`;
         } catch (error) {
             return null;
         }
@@ -952,7 +952,7 @@ For math or study questions:
         const links = this.getRoleLinks();
         
         if (solution) {
-            return `${solution}\n\n💡 <strong>Need help with complex math?</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>\n• <a href="${links.notes}" class="nav-suggestion">📚 Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
+            return `${solution}\n\n <strong>Need help with complex math?</strong>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>\n• <a href="${links.notes}" class="nav-suggestion"> Check Study Materials</a>\n• Contact your faculty for detailed explanations`;
         }
         
         // Check if it's an advanced/academic math question
@@ -962,7 +962,7 @@ For math or study questions:
             return this.getAcademicMathResponse(message, links);
         }
         
-        return `🧮 <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="${links.forum}" class="nav-suggestion">💬 Post in Forum</a> for peer/faculty help\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
+        return ` <strong>Math Question Detected</strong>\n\nI can help with simple calculations like:\n• Basic arithmetic (2+2, 10*5)\n• Division and powers\n\nFor complex problems, I need the AI service to provide detailed solutions.\n\n<strong>What you can do:</strong>\n• <a href="${links.forum}" class="nav-suggestion"> Post in Forum</a> for peer/faculty help\n• <a href="${links.pyqs}" class="nav-suggestion"> Check PYQs</a> for similar problems\n• Specify the subject (Physics, Chemistry, etc.) for better help`;
     }
 
     /**
@@ -975,23 +975,23 @@ For math or study questions:
         if (/integra(te|tion|l)/i.test(message)) {
             // Check for common integration patterns
             if (/n\s*(square|²|squared|\^2)/i.test(message) || /n\^2/i.test(message)) {
-                return `📐 <strong>Integration of n²</strong>\n\n<strong>Formula:</strong>\n∫n² dn = <strong>n³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫n² dn = n²⁺¹/(2+1) = n³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+                return ` <strong>Integration of n²</strong>\n\n<strong>Formula:</strong>\n∫n² dn = <strong>n³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫n² dn = n²⁺¹/(2+1) = n³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>`;
             }
             if (/x\s*(square|²|squared|\^2)/i.test(message) || /x\^2/i.test(message)) {
-                return `📐 <strong>Integration of x²</strong>\n\n<strong>Formula:</strong>\n∫x² dx = <strong>x³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫x² dx = x²⁺¹/(2+1) = x³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+                return ` <strong>Integration of x²</strong>\n\n<strong>Formula:</strong>\n∫x² dx = <strong>x³/3 + C</strong>\n\n<strong>Using the power rule:</strong>\n∫xⁿ dx = xⁿ⁺¹/(n+1) + C\n\nSo: ∫x² dx = x²⁺¹/(2+1) = x³/3 + C\n\n<strong>Where C is the constant of integration.</strong>\n\n <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>`;
             }
-            return `📐 <strong>Integration Help</strong>\n\n<strong>Common Integration Formulas:</strong>\n• ∫xⁿ dx = xⁿ⁺¹/(n+1) + C (Power Rule)\n• ∫sin(x) dx = -cos(x) + C\n• ∫cos(x) dx = sin(x) + C\n• ∫eˣ dx = eˣ + C\n• ∫1/x dx = ln|x| + C\n\n<strong>Share your specific problem</strong> and I'll try to help you step by step!\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.pyqs}" class="nav-suggestion">📝 Previous Year Questions</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+            return ` <strong>Integration Help</strong>\n\n<strong>Common Integration Formulas:</strong>\n• ∫xⁿ dx = xⁿ⁺¹/(n+1) + C (Power Rule)\n• ∫sin(x) dx = -cos(x) + C\n• ∫cos(x) dx = sin(x) + C\n• ∫eˣ dx = eˣ + C\n• ∫1/x dx = ln|x| + C\n\n<strong>Share your specific problem</strong> and I'll try to help you step by step!\n\n <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a>\n• <a href="${links.pyqs}" class="nav-suggestion"> Previous Year Questions</a>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>`;
         }
         
         if (/derivat(ive|ion|e)|differenti(ate|ation|al)/i.test(message)) {
             if (/n\s*(square|²|squared|\^2)/i.test(message) || /n\^2/i.test(message)) {
-                return `📐 <strong>Derivative of n²</strong>\n\n<strong>Formula:</strong>\nd/dn(n²) = <strong>2n</strong>\n\n<strong>Using the power rule:</strong>\nd/dx(xⁿ) = n·xⁿ⁻¹\n\nSo: d/dn(n²) = 2·n²⁻¹ = 2n\n\n📚 <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+                return ` <strong>Derivative of n²</strong>\n\n<strong>Formula:</strong>\nd/dn(n²) = <strong>2n</strong>\n\n<strong>Using the power rule:</strong>\nd/dx(xⁿ) = n·xⁿ⁻¹\n\nSo: d/dn(n²) = 2·n²⁻¹ = 2n\n\n <strong>Need more help?</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>`;
             }
-            return `📐 <strong>Differentiation Help</strong>\n\n<strong>Common Derivative Formulas:</strong>\n• d/dx(xⁿ) = n·xⁿ⁻¹ (Power Rule)\n• d/dx(sin x) = cos x\n• d/dx(cos x) = -sin x\n• d/dx(eˣ) = eˣ\n• d/dx(ln x) = 1/x\n\n<strong>Share your specific problem</strong> and I'll help you solve it!\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion">💬 Ask in Forum</a>`;
+            return ` <strong>Differentiation Help</strong>\n\n<strong>Common Derivative Formulas:</strong>\n• d/dx(xⁿ) = n·xⁿ⁻¹ (Power Rule)\n• d/dx(sin x) = cos x\n• d/dx(cos x) = -sin x\n• d/dx(eˣ) = eˣ\n• d/dx(ln x) = 1/x\n\n<strong>Share your specific problem</strong> and I'll help you solve it!\n\n <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a>\n• <a href="${links.forum}" class="nav-suggestion"> Ask in Forum</a>`;
         }
         
         // Generic academic math response
-        return `📐 <strong>Academic Math Question</strong>\n\nI've detected a math-related question. While I can handle basic calculations directly, for advanced topics like calculus, algebra, and trigonometry, I can guide you to helpful resources.\n\n<strong>How to get help:</strong>\n• Type out your specific problem for step-by-step guidance\n• Include the formula or equation you're working with\n• Mention if it's from a specific chapter or topic\n\n📚 <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion">📚 Study Materials</a> - Reference notes\n• <a href="${links.pyqs}" class="nav-suggestion">📝 PYQs</a> - Similar solved problems\n• <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> - Ask peers & faculty\n\n💡 <strong>Tip:</strong> Try asking "integrate x squared" or "derivative of sin x" for specific formulas!`;
+        return ` <strong>Academic Math Question</strong>\n\nI've detected a math-related question. While I can handle basic calculations directly, for advanced topics like calculus, algebra, and trigonometry, I can guide you to helpful resources.\n\n<strong>How to get help:</strong>\n• Type out your specific problem for step-by-step guidance\n• Include the formula or equation you're working with\n• Mention if it's from a specific chapter or topic\n\n <strong>Resources:</strong>\n• <a href="${links.notes}" class="nav-suggestion"> Study Materials</a> - Reference notes\n• <a href="${links.pyqs}" class="nav-suggestion"> PYQs</a> - Similar solved problems\n• <a href="${links.forum}" class="nav-suggestion"> Forum</a> - Ask peers & faculty\n\n <strong>Tip:</strong> Try asking "integrate x squared" or "derivative of sin x" for specific formulas!`;
     }
 
     /**
@@ -999,36 +999,36 @@ For math or study questions:
      */
     getGeneralResponse(message) {
         const links = this.getRoleLinks();
-        return `I can answer ITERasn hub and portal questions directly.\n\nFor broader general questions, please try again when AI is available or use <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> for help.`;
+        return `I can answer ITERasn hub and portal questions directly.\n\nFor broader general questions, please try again when AI is available or use <a href="${links.forum}" class="nav-suggestion"> Forum</a> for help.`;
     }
 
     getAiUnavailableResponse(reason = 'The AI service is unavailable right now.') {
         const links = this.getRoleLinks();
         const safeReason = this.escapeHtml(reason);
 
-        return `⚠️ <strong>AI reply is unavailable right now.</strong>\n\n${safeReason}\n\n<strong>How to fix:</strong>\n• Configure <code>OPENROUTER_API_KEY</code> on the server\n• Or configure <code>GEMINI_API_KEY</code> as fallback\n• Check <code>/api/health/ai-service</code> for live status\n\nYou can still use <a href="${links.forum}" class="nav-suggestion">💬 Forum</a> or ask portal-specific questions here.`;
+        return ` <strong>AI reply is unavailable right now.</strong>\n\n${safeReason}\n\n<strong>How to fix:</strong>\n• Configure <code>OPENROUTER_API_KEY</code> on the server\n• Or configure <code>GEMINI_API_KEY</code> as fallback\n• Check <code>/api/health/ai-service</code> for live status\n\nYou can still use <a href="${links.forum}" class="nav-suggestion"> Forum</a> or ask portal-specific questions here.`;
     }
 
     getGreetingResponse() {
         const responses = {
             student: [
-                "Hello! 👋 How can I help you today? Ask about attendance, marks, notes, or let me help solve a question!",
-                "Hi there! 😊 Ready to assist with your studies. What do you need help with?",
-                "Hey! 🎓 What would you like to know about?"
+                "Hello!  How can I help you today? Ask about attendance, marks, notes, or let me help solve a question!",
+                "Hi there!  Ready to assist with your studies. What do you need help with?",
+                "Hey!  What would you like to know about?"
             ],
             teacher: [
-                "Hello! 👋 How can I assist you today? Ask about attendance, marks, assignments, or student management!",
-                "Hi there! 👨‍🏫 Ready to help with your teaching tasks. What do you need?",
+                "Hello!  How can I assist you today? Ask about attendance, marks, assignments, or student management!",
+                "Hi there! ‍ Ready to help with your teaching tasks. What do you need?",
                 "Hey! What would you like to do today?"
             ],
             admin: [
-                "Hello! 👋 How can I help with system administration? Ask about users, approvals, or analytics!",
-                "Hi there! 👨‍💼 Ready to assist with admin tasks. What do you need?",
+                "Hello!  How can I help with system administration? Ask about users, approvals, or analytics!",
+                "Hi there! ‍ Ready to assist with admin tasks. What do you need?",
                 "Hey! What system task can I help with?"
             ],
             guest: [
-                "Hello! 👋 Welcome to ITERasn hub. I can tell you about ITER, our features, or help you register!",
-                "Hi there! 😊 Looking to learn about ITER or need help with registration?",
+                "Hello!  Welcome to ITERasn hub. I can tell you about ITER, our features, or help you register!",
+                "Hi there!  Looking to learn about ITER or need help with registration?",
                 "Hey! How can I help you explore ITERasn hub today?"
             ]
         };
@@ -1040,13 +1040,13 @@ For math or study questions:
     getSmartFallback(message) {
         // Using data attributes for security instead of inline onclick
         const fallbacks = {
-            student: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="attendance">📊 Attendance & Marks</div>\n    <div class="faq-item" data-query="study notes">📚 Study Materials</div>\n    <div class="faq-item" data-query="help solve">💡 Solve Questions</div>\n    <div class="faq-item" data-query="forum">💬 Ask in Forum</div>\n</div>\n\nOr visit <a href="/dashboard/student-forum.html" class="nav-suggestion">💬 Forum</a> to ask your question!`,
+            student: `I understand you're asking about "${this.escapeHtml(message)}". \n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="attendance"> Attendance & Marks</div>\n    <div class="faq-item" data-query="study notes"> Study Materials</div>\n    <div class="faq-item" data-query="help solve"> Solve Questions</div>\n    <div class="faq-item" data-query="forum"> Ask in Forum</div>\n</div>\n\nOr visit <a href="/dashboard/student-forum.html" class="nav-suggestion"> Forum</a> to ask your question!`,
             
-            teacher: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="mark attendance">📊 Mark Attendance</div>\n    <div class="faq-item" data-query="upload marks">📈 Upload Marks</div>\n    <div class="faq-item" data-query="assignments">📝 Manage Assignments</div>\n    <div class="faq-item" data-query="my students">👥 View Students</div>\n</div>\n\nNeed more help? Contact admin office!`,
+            teacher: `I understand you're asking about "${this.escapeHtml(message)}". \n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="mark attendance"> Mark Attendance</div>\n    <div class="faq-item" data-query="upload marks"> Upload Marks</div>\n    <div class="faq-item" data-query="assignments"> Manage Assignments</div>\n    <div class="faq-item" data-query="my students"> View Students</div>\n</div>\n\nNeed more help? Contact admin office!`,
             
-            admin: `I understand you're asking about "${this.escapeHtml(message)}". 🤔\n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="manage users">👥 User Management</div>\n    <div class="faq-item" data-query="pending approvals">✅ Approvals</div>\n    <div class="faq-item" data-query="analytics">📊 View Analytics</div>\n    <div class="faq-item" data-query="settings">⚙️ System Settings</div>\n</div>\n\nFor technical issues, contact IT department!`,
+            admin: `I understand you're asking about "${this.escapeHtml(message)}". \n\n<strong>Here's what might help:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="manage users"> User Management</div>\n    <div class="faq-item" data-query="pending approvals"> Approvals</div>\n    <div class="faq-item" data-query="analytics"> View Analytics</div>\n    <div class="faq-item" data-query="settings"> System Settings</div>\n</div>\n\nFor technical issues, contact IT department!`,
             
-            guest: `Thanks for asking about "${this.escapeHtml(message)}"! 🤔\n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="about iter">🎓 About ITER</div>\n    <div class="faq-item" data-query="features">✨ ITERasn hub Features</div>\n    <div class="faq-item" data-query="register">📝 How to Register</div>\n    <div class="faq-item" data-query="contact">📞 Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion">🔐 Login</a> or <a href="/register.html" class="nav-suggestion">📝 Register</a> to access more features!`
+            guest: `Thanks for asking about "${this.escapeHtml(message)}"! \n\n<strong>Here's what I can help with:</strong>\n\n<div class="faq-category">\n    <div class="faq-item" data-query="about iter"> About ITER</div>\n    <div class="faq-item" data-query="features"> ITERasn hub Features</div>\n    <div class="faq-item" data-query="register"> How to Register</div>\n    <div class="faq-item" data-query="contact"> Contact Us</div>\n</div>\n\n<a href="/login.html" class="nav-suggestion"> Login</a> or <a href="/register.html" class="nav-suggestion"> Register</a> to access more features!`
         };
 
         return fallbacks[this.userRole] || fallbacks.guest;
