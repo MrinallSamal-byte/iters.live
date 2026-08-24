@@ -16,6 +16,16 @@ services:
         sync: false
       - key: JWT_REFRESH_SECRET
         generateValue: true
+      - key: JWT_EXPIRE
+        value: 1h
+      # Client origin used for links/emails and Socket.IO CORS fallback
+      - key: CLIENT_URL
+        value: https://iters.live
+      - key: SOCKET_CORS_ORIGIN
+        value: https://iters.live
+      # Optional external Redis (Render Key Value). Leave unset to use in-memory cache.
+      - key: REDIS_URL
+        sync: false
       - key: CORS_WHITELIST
         value: https://updated-iters-live.onrender.com,https://iters.live
       - key: MAX_FILE_SIZE

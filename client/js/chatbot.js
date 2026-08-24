@@ -675,7 +675,7 @@ class Chatbot {
                 const errorData = await response.json().catch(() => ({}));
                 console.log('503 error details:', errorData);
                 return this.getAiUnavailableResponse(
-                    errorData.message || 'The AI provider is not configured on the server.'
+                    'AI services are temporarily unavailable.'
                 );
             } else if (response.status === 401) {
                 console.log('AI API authentication issue (401), using FAQ fallback');
@@ -977,9 +977,10 @@ For math or study questions:
 
     getAiUnavailableResponse(reason = 'The AI service is unavailable right now.') {
         const links = this.getRoleLinks();
-        const safeReason = this.escapeHtml(reason);
+        // Never expose server config details (API keys, endpoints) to end users
+        void reason;
 
-        return ` <strong>AI reply is unavailable right now.</strong>\n\n${safeReason}\n\n<strong>How to fix:</strong>\n• Configure <code>OPENROUTER_API_KEY</code> on the server\n• Or configure <code>GEMINI_API_KEY</code> as fallback\n• Check <code>/api/health/ai-service</code> for live status\n\nYou can still use <a href="${links.forum}" class="nav-suggestion"> Forum</a> or ask portal-specific questions here.`;
+        return ` <strong>The AI assistant is taking a short break.</strong>\n\nAI services aren't available right now - please try again in a little while.\n\nIn the meantime, you can use <a href="${links.forum}" class="nav-suggestion"> Forum</a> or ask me portal-specific questions here.`;
     }
 
     getGreetingResponse() {

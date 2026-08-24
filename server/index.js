@@ -544,7 +544,7 @@ if (!IS_SERVERLESS) {
       // Initialize Redis connection (only in production)
       await initRedis();
 
-      server.listen(PORT, () => {
+      server.listen(PORT, '0.0.0.0', () => {
         const cacheType = isRedisConnected() ? 'Redis' : 'In-Memory';
         console.log(`
 ╔═══════════════════════════════════════════════════════╗

@@ -1044,6 +1044,44 @@ function getUserRole() {
     return user ? user.role : null;
 }
 
+// Role guard for dashboard subpages.
+// Returns true when the signed-in user's role matches requiredRole exactly
+// (strict per-role, matching the dashboard shells' model). Otherwise shows a
+// toast and redirects to the correct role dashboard (or login if signed out).
+function requirePageRole(requiredRole) {
+    const user = checkAuth();
+
+    if (!user) {
+        try { window.location.replace('/login.html'); } catch (_) { }
+        return false;
+    }
+
+    const role = getUserRole();
+    if (role !== requiredRole) {
+        showToast('Access denied', 'error');
+        const dashboards = {
+            student: '/dashboard/student.html',
+            teacher: '/dashboard/teacher.html',
+            admin: '/dashboard/admin.html'
+        };
+        const target = dashboards[requiredRole] || '/index.html';
+        setTimeout(() => {
+            try {
+                if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                    window.LinkEncoding.navigateTo(target);
+                } else {
+                    window.location.replace(target);
+                }
+            } catch (_) {
+                window.location.replace(target);
+            }
+        }, 600);
+        return false;
+    }
+
+    return true;
+}
+
 // Export for use in other scripts
 window.APP = {
     API,
@@ -1065,6 +1103,7 @@ window.APP = {
     logout,
     isAuthenticated,
     getUserRole,
+    requirePageRole,
     sanitize: function (str) {
         if (!str) return '';
         const div = document.createElement('div');

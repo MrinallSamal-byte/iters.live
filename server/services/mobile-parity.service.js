@@ -362,7 +362,7 @@ async function queryFirebaseData(sql, params = []) {
             : 0
         };
       })
-      .slice(0, 30);
+      .slice(0, 200);
   }
 
   if (normalizedSql.includes('from assignments')) {
@@ -1558,13 +1558,29 @@ async function getStudentSnapshot(user) {
 }
 
 async function getTeacherStudents(user) {
+  // Real aggregates from attendance + marks. Kept on a LEFT JOIN so students
+  // without any records still appear with zeros instead of being dropped.
   const rows = await safeQuery(
-    `SELECT id, name, registration_number, email, department, year, section,
-            78 as attendance_percent, 81 as avg_marks
-     FROM users
+    `SELECT u.id, u.name, u.registration_number, u.email, u.department, u.year, u.section,
+            COALESCE(att.attendance_percent, 0) as attendance_percent,
+            COALESCE(mk.avg_marks, 0) as avg_marks
+     FROM users u
+     LEFT JOIN (
+       SELECT CAST(student_id AS TEXT) AS sid,
+              ROUND(SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 2) AS attendance_percent
+       FROM attendance
+       GROUP BY CAST(student_id AS TEXT)
+     ) att ON att.sid = CAST(u.id AS TEXT)
+     LEFT JOIN (
+       SELECT CAST(student_id AS TEXT) AS sid,
+              ROUND(AVG(CASE WHEN NULLIF(total_marks, 0) IS NOT NULL
+                             THEN marks_obtained * 100.0 / total_marks END), 2) AS avg_marks
+       FROM marks
+       GROUP BY CAST(student_id AS TEXT)
+     ) mk ON mk.sid = CAST(u.id AS TEXT)
      WHERE role = 'student' AND department = $1
      ORDER BY year, section, name
-     LIMIT 30`,
+     LIMIT 200`,
     [user.department || 'CSE'],
     [
       { id: 1, name: 'Riya Das', registration_number: 'STU20250110', email: 'riya.das@iter.edu', department: user.department || 'CSE', year: 2, section: 'A', attendance_percent: 84, avg_marks: 86 },

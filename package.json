@@ -3,6 +3,9 @@
   "version": "3.2.0",
   "description": "Ultimate All-in-One College Management System for ITER/SOA with AI-Powered Student Tools, Bulk Operations, Advanced Analytics, Enterprise Security, and Real-time Features",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "setup": "node scripts/setup/setup.js",
     "init:db": "node -e \"require('./server/database/db'); console.log('DB initialized')\"",

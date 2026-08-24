@@ -1,3 +1,11 @@
+// Role guard (must run before any page logic or API calls)
+(function () {
+  if (typeof APP === 'undefined' || typeof APP.requirePageRole !== 'function' || !APP.requirePageRole('student')) {
+    // Stop all further execution on this page when the guard fails
+    throw new Error('Access denied: page requires student role');
+  }
+})();
+
 // ============================================
 // ENHANCED STUDENT NOTES PAGE
 // With Branch, Semester, Type, PYQ Features
