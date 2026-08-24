@@ -58,7 +58,7 @@ class TeacherStudentsPage {
     const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
 
     this.filtered = this.students.filter(s => {
-      if (dept && String(s.department || '') !== dept) return false;
+      if (dept && String(s.department || '').toUpperCase() !== String(dept).toUpperCase()) return false;
       if (year && String(s.year ?? '') !== year) return false;
       if (section && String(s.section || '') !== section) return false;
       if (q && !`${s.name || ''} ${s.registration_number || ''}`.toLowerCase().includes(q)) return false;

@@ -149,6 +149,37 @@ router.post('/:id/submit', authMiddleware, roleMiddleware('student'), async (req
   }
 });
 
+// List submissions for one assignment (teacher grading context)
+router.get('/:id/submissions', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
+  try {
+    const assignmentId = req.params.id;
+    const [assignment] = await listRecords('assignments', {
+      filters: [{ field: 'id', value: assignmentId }]
+    });
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Assignment not found' });
+    }
+
+    const submissions = await listRecords('assignment_submissions', {
+      filters: [{ field: 'assignment_id', value: assignmentId }]
+    });
+
+    res.json({
+      success: true,
+      data: submissions.map((submission) => ({
+        id: submission.id,
+        student_id: submission.student_id,
+        status: submission.status || 'submitted',
+        submitted_at: submission.submitted_at || null,
+        marks_obtained: submission.marks_obtained ?? null,
+        feedback: submission.feedback || null
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Grade submission
 router.post('/:id/grade', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {

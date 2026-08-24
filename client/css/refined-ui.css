@@ -978,3 +978,149 @@ body:not(.nothing-home) .modern-table {
 
 
 
+
+/* Skip link - visually hidden until keyboard focus */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 16px;
+  z-index: 10001;
+  padding: 10px 18px;
+  background: #000000;
+  color: #f6f3ee;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 12px;
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* === dashboard consistency pass === */
+/* Scope: /dashboard/*.html pages. Append-only block from the dashboard-wide
+   visual consistency + readability sweep. Do not reorder above rules. */
+
+/* 1) Header hierarchy parity - every dashboard h1/page-title area shares the
+      same spacing rhythm, even on pages that predate .page-hero markup. */
+body:not(.nothing-home) .dashboard-main h1.page-title,
+body:not(.nothing-home) .dashboard-main .page-title {
+    margin: 0;
+}
+body:not(.nothing-home) .dashboard-main .ai-header h1,
+body:not(.nothing-home) .dashboard-main .soa-title {
+    margin: 0;
+}
+
+/* 2) Contrast/readability floor.
+   Light theme: secondary text was hardcoded #757575 (~4.6:1, borderline at
+   small mono sizes). Raise to the token value used elsewhere. */
+body.light-theme:not(.nothing-home) .dashboard-main p,
+body.light-theme:not(.nothing-home) .dashboard-main li,
+body.light-theme:not(.nothing-home) .dashboard-main td,
+body.light-theme:not(.nothing-home) .dashboard-main th,
+body.light-theme:not(.nothing-home) .dashboard-main .modern-table th,
+body.light-theme:not(.nothing-home) .dashboard-main .data-table th,
+body.light-theme:not(.nothing-home) .dashboard-main small,
+body.light-theme:not(.nothing-home) .dashboard-main .text-muted,
+body.light-theme:not(.nothing-home) .dashboard-main .ai-status-label,
+body.light-theme:not(.nothing-home) .dashboard-main .ai-recommendation-item,
+body.light-theme:not(.nothing-home) .dashboard-main .quick-link-content p {
+    color: var(--r-text-2);
+}
+/* Dark theme: same elements must never fall below --r-text-2 on panels. */
+body:not(.nothing-home):not(.light-theme) .dashboard-main p,
+body:not(.nothing-home):not(.light-theme) .dashboard-main li,
+body:not(.nothing-home):not(.light-theme) .dashboard-main td {
+    color: var(--r-text-2);
+}
+/* Decorative micro-labels stay at --r-text-3 but keep a legible size. */
+body:not(.nothing-home) .dashboard-main .page-subtitle,
+body:not(.nothing-home) .dashboard-main .section-label,
+body:not(.nothing-home) .dashboard-main .micro-label {
+    font-size: 0.75rem;
+}
+
+/* 3) Invisible/broken element guards.
+   Charts and async regions never collapse to zero height while loading. */
+body:not(.nothing-home) .dashboard-main .chart-wrapper,
+body:not(.nothing-home) .dashboard-main canvas {
+    min-height: 220px;
+}
+body:not(.nothing-home) .dashboard-main .glass-card:empty,
+body:not(.nothing-home) .dashboard-main .stat-box:empty,
+body:not(.nothing-home) .dashboard-main .widget:empty {
+    min-height: 0;
+    display: none;
+}
+
+/* 4) Async region fallback label - shared mono style for LOADING / EMPTY /
+   ERROR states so no container ever renders fully blank. */
+body:not(.nothing-home) .dashboard-main [data-state]:empty::after {
+    content: attr(data-state);
+    display: block;
+    padding: 2rem 0;
+    font-family: var(--r-font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--r-text-3);
+}
+
+/* 5) Buttons: uniform height/radius; disabled state visibly off but readable. */
+body:not(.nothing-home) .dashboard-main .btn {
+    min-height: 40px;
+    border-radius: var(--r-radius);
+}
+body:not(.nothing-home) .dashboard-main .btn:disabled,
+body:not(.nothing-home) .dashboard-main button:disabled,
+body:not(.nothing-home) .dashboard-main .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+body:not(.nothing-home) .dashboard-main .btn:disabled:hover {
+    transform: none;
+}
+
+/* 6) Tables: horizontal scroll containment + consistent header/row styling
+   regardless of which wrapper class a page uses. */
+body:not(.nothing-home) .dashboard-main .table-wrap,
+body:not(.nothing-home) .dashboard-main .table-container,
+body:not(.nothing-home) .dashboard-main .table-responsive,
+body:not(.nothing-home) .dashboard-main .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+body:not(.nothing-home) .dashboard-main table th {
+    font-family: var(--r-font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+body:not(.nothing-home) .dashboard-main table tbody tr:nth-child(even) {
+    background: var(--r-panel-inset);
+}
+
+/* 7) Notification bell badge (injected by notification-center.js) keeps a
+   readable size/contrast in both themes inside dashboards. */
+body:not(.nothing-home) .notification-bell .notification-badge {
+    min-width: 16px;
+    height: 16px;
+    font-family: var(--r-font-mono);
+    font-size: 0.6rem;
+    line-height: 16px;
+    color: var(--r-text);
+}
+
+/* 8) Spacing rhythm: normalize section/card gap outliers to the shared scale
+   (multiples of the existing card gap). */
+body:not(.nothing-home) .dashboard-main .dashboard-section + .dashboard-section {
+    margin-top: 1.5rem;
+}

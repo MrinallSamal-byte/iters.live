@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approvals - Admin Dashboard</title>
+    <title>Approvals · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -51,7 +51,8 @@
 </head>
 
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Admin Approvals main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -89,7 +90,7 @@
         <!-- Filter Section -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Filter Approvals
                 </h3>
             </div>
@@ -116,7 +117,7 @@
         <!-- Approvals Table -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Approval Queue
                     <span id="approvalCount" class="result-count"></span>
                 </h3>
@@ -147,7 +148,7 @@
         <!-- Recently Approved -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Recently Approved
                 </h3>
             </div>
@@ -167,10 +168,10 @@
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/prototype-mode.js"></script>
-    <script src="/js/dummy-data.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/admin-approvals.js"></script>
     <script src="/js/chatbot.js"></script>

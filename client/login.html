@@ -173,17 +173,10 @@
                         APP.Storage.set('user', response.data.user);
 
                         // All users go directly to their respective dashboards
-                        let redirectUrl;
-                        if (response.data.user.role === 'student') {
-                            // Students go directly to dashboard
-                            redirectUrl = '/dashboard/student.html';
-                        } else if (response.data.user.role === 'teacher') {
-                            redirectUrl = '/dashboard/teacher.html';
-                        } else if (response.data.user.role === 'admin') {
-                            redirectUrl = '/dashboard/admin.html';
-                        } else {
-                            // Unknown role - clear storage and show error
-                            console.error('Unknown user role:', response.data.user.role);
+                        // (honoring any pending post-login redirect target)
+                        const userRole = response.data.user.role;
+                        if (!['student', 'teacher', 'admin'].includes(userRole)) {
+                            console.error('Unknown user role:', userRole);
                             if (typeof APP.Storage !== 'undefined') {
                                 APP.Storage.clear();
                             }
@@ -192,18 +185,12 @@
                             }
                             return;
                         }
-                        
-                        // Create page access token for the next page
-                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
-                            window.PageAccessToken.createPageAccessToken(redirectUrl);
+
+                        if (typeof APP.resetAuthExpiryHandled === 'function') {
+                            APP.resetAuthExpiryHandled();
                         }
-                        
-                        // Use encoded URL for navigation
-                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                            window.LinkEncoding.navigateTo(redirectUrl);
-                        } else {
-                            window.location.href = redirectUrl;
-                        }
+
+                        navigateAfterLogin(resolvePostLoginTarget(userRole));
                     } else {
                         if (typeof APP.showToast === 'function') {
                             APP.showToast('Login failed: ' + response.message, 'error');
@@ -220,6 +207,46 @@
     </script>
 
     <script>
+        /**
+         * Resolve where to go after a successful login. A pending
+         * sessionStorage 'loginRedirect' (set by page-access-token.js when a
+         * protected page bounced us here) wins, as long as it is a safe
+         * same-origin path. Falls back to the user's role dashboard.
+         */
+        function resolvePostLoginTarget(userRole) {
+            const dashboardUrls = {
+                student: '/dashboard/student.html',
+                teacher: '/dashboard/teacher.html',
+                admin: '/dashboard/admin.html'
+            };
+
+            let target = null;
+            try {
+                const stored = sessionStorage.getItem('loginRedirect');
+                if (stored && stored.startsWith('/') && !stored.startsWith('//')) {
+                    target = stored;
+                }
+                sessionStorage.removeItem('loginRedirect');
+            } catch (storageError) {
+                console.warn('Failed to read pending login redirect:', storageError);
+            }
+
+            return target || dashboardUrls[userRole] || '/dashboard/student.html';
+        }
+
+        function navigateAfterLogin(redirectUrl) {
+            // Create page access token for the next page
+            if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                window.PageAccessToken.createPageAccessToken(redirectUrl);
+            }
+            // Use encoded URL for navigation
+            if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
+                window.LinkEncoding.navigateTo(redirectUrl);
+            } else {
+                window.location.href = redirectUrl;
+            }
+        }
+
         // Wait for DOM and APP to be ready
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
@@ -351,29 +378,8 @@
                         const userRole = response.data.user.role;
 
                         // All users go directly to their respective dashboards
-                        if (userRole === 'student') {
-                            if (typeof APP.showToast === 'function') {
-                                APP.showToast('Login successful!', 'success');
-                            }
-                            showStatus('Login successful! Redirecting to dashboard...', 'success');
-
-                            // Redirect to student dashboard
-                            redirectUrl = '/dashboard/student.html';
-                        } else if (userRole === 'teacher') {
-                            if (typeof APP.showToast === 'function') {
-                                APP.showToast('Login successful!', 'success');
-                            }
-                            showStatus('Login successful! Redirecting...', 'success');
-
-                            redirectUrl = '/dashboard/teacher.html';
-                        } else if (userRole === 'admin') {
-                            if (typeof APP.showToast === 'function') {
-                                APP.showToast('Login successful!', 'success');
-                            }
-                            showStatus('Login successful! Redirecting...', 'success');
-
-                            redirectUrl = '/dashboard/admin.html';
-                        } else {
+                        // (honoring any pending post-login redirect target)
+                        if (!['student', 'teacher', 'admin'].includes(userRole)) {
                             // Unknown role - clear storage and show error
                             console.error('Unknown user role:', userRole);
                             if (typeof APP.Storage !== 'undefined') {
@@ -388,16 +394,17 @@
                             return;
                         }
 
-                        // Create page access token for the next page
-                        if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
-                            window.PageAccessToken.createPageAccessToken(redirectUrl);
+                        if (typeof APP.resetAuthExpiryHandled === 'function') {
+                            APP.resetAuthExpiryHandled();
                         }
-                        // Use encoded URL for navigation
-                        if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
-                            window.LinkEncoding.navigateTo(redirectUrl);
-                        } else {
-                            window.location.href = redirectUrl;
+                        if (typeof APP.showToast === 'function') {
+                            APP.showToast('Login successful!', 'success');
                         }
+                        showStatus('Login successful! Redirecting to dashboard...', 'success');
+
+                        redirectUrl = resolvePostLoginTarget(userRole);
+
+                        navigateAfterLogin(redirectUrl);
                     } else {
                         showError(response.message || 'Login failed');
                         loginBtn.textContent = originalText;
@@ -519,10 +526,8 @@
             return newAttempts;
         }
 
-        // Register service worker (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js').catch(() => { });
-        }
+        // NOTE: Service worker registration is owned by /js/main.js —
+        // do not register it again here (was previously duplicated).
     </script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/linkEncoding.js"></script>

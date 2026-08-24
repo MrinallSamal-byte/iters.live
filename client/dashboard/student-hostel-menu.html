@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hostel Menu - ITERasn hub</title>
+    <title>Hostel Menu · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -49,10 +49,11 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Student Hostel Menu main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -66,7 +67,7 @@
         <!-- Block Selection -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Select Hostel Block
                 </h3>
             </div>
@@ -81,13 +82,13 @@
         <!-- Date Selection -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Select Date
                 </h3>
             </div>
             <div class="date-selector">
                 <button class="date-nav-btn" id="prevDay">&laquo; Previous</button>
-                <input type="date" id="menuDate" class="date-input" />
+                <input type="date" id="menuDate" class="date-input" aria-label="Menu date" />
                 <button class="date-nav-btn" id="nextDay">Next &raquo;</button>
             </div>
         </section>
@@ -95,7 +96,7 @@
         <!-- Menu Display -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="menuSection">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Today's Menu
                 </h3>
                 <span class="section-badge" id="menuDateBadge">Loading...</span>
@@ -138,6 +139,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/student-hostel-menu.js"></script>
     <script src="/js/chatbot.js"></script>

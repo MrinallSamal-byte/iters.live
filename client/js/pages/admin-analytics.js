@@ -10,10 +10,11 @@ async function loadAnalytics() {
     try {
         res = await APP.API.get('/admin/stats');
     } catch (e) {
-        console.warn('Using dummy stats for admin analytics');
-        res = DummyData?.getAdminStats?.();
+        console.error('Error loading admin stats:', e);
+        renderStatsError(e);
+        return;
     }
-    if (!res?.data) return;
+    if (!res?.data) { renderStatsError(new Error('Empty response')); return; }
 
     const ids = ['totalFiles','totalAssignments','totalEvents','avgAttendance'];
     const map = {
@@ -52,17 +53,35 @@ async function loadAnalytics() {
     if (body) {
         let logRes;
         try { logRes = await APP.API.get('/admin/activity-log?limit=20'); }
-        catch { logRes = DummyData?.getAdminActivityLog?.(20); }
+        catch (e) {
+            console.error('Error loading activity log:', e);
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1.5rem; font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">ACTIVITY UNAVAILABLE</td></tr>';
+            return;
+        }
         const items = logRes?.data || [];
         body.innerHTML = items.map(l => `
             <tr>
-                <td>${new Date(l.timestamp).toLocaleString()}</td>
+                <td>${l.created_at || l.timestamp ? new Date(l.created_at || l.timestamp).toLocaleString() : '--'}</td>
                 <td>${escapeHtml(l.user_name)}</td>
                 <td><span class="badge primary">${escapeHtml(l.action)}</span></td>
                 <td>${escapeHtml(l.details || '--')}</td>
             </tr>
-        `).join('') || '<tr><td colspan="4">No activity</td></tr>';
+        `).join('') || '<tr><td colspan="4" style="text-align:center; padding: 1.5rem; font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">NO ACTIVITY RECORDED</td></tr>';
     }
+}
+
+function renderStatsError(error) {
+    ['totalFiles','totalAssignments','totalEvents'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '--';
+    });
+    const avg = document.getElementById('avgAttendance');
+    if (avg) avg.textContent = '--';
+
+    const userCtx = document.getElementById('userChart');
+    if (userCtx) userCtx.outerHTML = `<p style="text-align:center; padding: 2rem; font-family: 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">STATS UNAVAILABLE — ${escapeHtml(error.message || 'request failed')}</p>`;
+    const deptCtx = document.getElementById('deptChart');
+    if (deptCtx) deptCtx.outerHTML = `<p style="text-align:center; padding: 2rem; font-family: 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">DEPARTMENT DATA UNAVAILABLE</p>`;
 }
 
 function escapeHtml(value) { // ponytail: tiny local escaper

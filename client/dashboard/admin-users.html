@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management - Admin Dashboard</title>
+    <title>User Management · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -49,7 +49,8 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Admin Users main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -71,7 +72,7 @@
         <!-- Filter Section -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Filter Users
                 </h3>
             </div>
@@ -130,7 +131,7 @@
         <!-- Users Table -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # All Users
                     <span id="userCount" class="result-count"></span>
                 </h3>
@@ -235,10 +236,10 @@
     <script src="/js/universal-profile.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/prototype-mode.js"></script>
-    <script src="/js/dummy-data.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/admin-users.js"></script>
     <script src="/js/chatbot.js"></script>

@@ -255,9 +255,7 @@
         const archiveSet = getArchiveSet();
 
         let items = rubrics.filter(r => {
-            if (type && r.name && !String(r.description || '').toLowerCase().includes(type)) {
-                if (type !== 'all' && !(r.description || '').toLowerCase().includes(type)) { /* keep going - type filter is advisory */ }
-            }
+            if (type && !`${r.name} ${r.description}`.toLowerCase().includes(String(type).toLowerCase())) return false;
             if (search && !`${r.name} ${r.description}`.toLowerCase().includes(search)) return false;
             return true;
         });

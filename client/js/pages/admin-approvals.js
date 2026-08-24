@@ -28,12 +28,13 @@ async function loadApprovals() {
     }
 
     tbody.innerHTML = items.map(item => {
-        const typeClass = { notes: 'primary', assignment: 'warning', pyq: 'success', announcement: 'info' }[item.type] || 'primary';
+        const itemType = item.category || item.type || 'file';
+        const typeClass = { note: 'primary', notes: 'primary', assignment: 'warning', assignments: 'warning', pyq: 'success', event: 'info', events: 'info', announcement: 'info', announcements: 'info' }[itemType] || 'primary';
         const priority = item.priority ? String(item.priority) : '';
         const priorityClass = priority === 'High' ? 'danger' : (priority === 'Medium' ? 'warning' : 'success');
         return `
-        <tr data-id="${escapeHtml(String(item.id))}" data-type="${escapeHtml(String(item.type || 'file'))}">
-            <td><span class="badge ${typeClass}">${escapeHtml(String(item.type || 'file'))}</span></td>
+        <tr data-id="${escapeHtml(String(item.id))}" data-type="${escapeHtml(itemType)}">
+            <td><span class="badge ${typeClass}">${escapeHtml(itemType)}</span></td>
             <td>${escapeHtml(item.title || item.file_name || item.name || 'Untitled')}</td>
             <td>${escapeHtml(item.uploaded_by_name || item.uploaded_by || 'Unknown')}</td>
             <td>${escapeHtml(item.department || '--')}</td>
@@ -97,17 +98,24 @@ function updateApprovalCount(delta) {
     if (!isNaN(current)) badge.textContent = Math.max(0, current + delta);
 }
 
-const APPROVAL_TAB_TYPE_MAP = { all: '', notes: 'notes', assignments: 'assignment', events: 'event', announcements: 'announcement' };
+// File records carry `category` (note/assignment/pyq/...), so tabs map to category values
+const APPROVAL_TAB_CATEGORIES = {
+    all: null,
+    notes: ['note', 'notes'],
+    assignments: ['assignment', 'assignments'],
+    events: ['event', 'events'],
+    announcements: ['announcement', 'announcements']
+};
 
 function filterApprovals(filter) {
-    const type = APPROVAL_TAB_TYPE_MAP[filter] ?? '';
+    const categories = APPROVAL_TAB_CATEGORIES[filter];
     document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === String(filter));
     });
     const tbody = document.getElementById('approvalsTableBody');
     if (!tbody) return;
     tbody.querySelectorAll('tr[data-id]').forEach(row => {
-        row.style.display = !type || row.dataset.type === type ? '' : 'none';
+        row.style.display = !categories || categories.includes(row.dataset.type) ? '' : 'none';
     });
 }
 

@@ -96,6 +96,7 @@ router.get(
   [
     query('subject_id').optional().isInt({ min: 1 }),
     query('difficulty').optional().isIn(['easy', 'medium', 'hard']),
+    query('question_type').optional().isIn(['mcq', 'short_answer', 'essay']),
     query('topic').optional().isString(),
     query('q').optional().isString(),
     query('page').optional().isInt({ min: 1 }),
@@ -104,11 +105,12 @@ router.get(
   async (req, res) => {
     const err = handleValidation(req, res); if (err) return;
     try {
-      const { subject_id, difficulty, topic, q, page = 1, limit = 20 } = req.query;
+      const { subject_id, difficulty, question_type, topic, q, page = 1, limit = 20 } = req.query;
       const filters = [];
 
       if (subject_id) filters.push({ field: 'subject_id', value: Number(subject_id) });
       if (difficulty) filters.push({ field: 'difficulty', value: difficulty });
+      if (question_type) filters.push({ field: 'question_type', value: question_type });
       if (topic) filters.push({ field: 'topic', value: topic });
       if (req.user.role === 'teacher') filters.push({ field: 'teacher_id', value: req.user.id });
 

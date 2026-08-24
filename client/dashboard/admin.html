@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ITERasn hub</title>
+    <title>Admin Dashboard · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -50,8 +50,9 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Admin main content" id="main-content">
         <!-- Welcome Section -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -88,7 +89,7 @@
 
         <section class="dashboard-section glass-card scroll-reveal ai-debug-panel">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # AI Service Status
                 </h3>
                 <div class="ai-panel-actions">
@@ -129,7 +130,7 @@
             <!-- User Distribution Chart -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # User Distribution
                     </h3>
                     <span class="section-badge">System Overview</span>
@@ -142,7 +143,7 @@
             <!-- Department Chart -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Department-wise Students
                     </h3>
                     <span class="section-badge">Enrollment Data</span>
@@ -156,7 +157,7 @@
         <!-- Pending Approvals -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Pending Approvals
                 </h3>
                 <span class="notification-badge" id="approvalCount">0</span>
@@ -184,7 +185,7 @@
             <!-- System Analytics -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # System Analytics
                     </h3>
                 </div>
@@ -223,7 +224,7 @@
             <!-- Recent Activity -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Recent Activity
                     </h3>
                 </div>
@@ -236,7 +237,7 @@
         <!-- Quick Links -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Quick Actions
                 </h3>
             </div>
@@ -284,6 +285,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>

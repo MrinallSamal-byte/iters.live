@@ -379,7 +379,10 @@ class Chatbot {
         // Create toggle button
         this.toggleBtn = document.createElement('button');
         this.toggleBtn.className = 'chatbot-toggle';
-        this.toggleBtn.innerHTML = '<span class="chatbot-toggle-icon"></span>';
+        this.toggleBtn.innerHTML = '<span class="chatbot-toggle-icon">'
+            + '<svg class="cti-chat" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
+            + '<svg class="cti-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+            + '</span>';
         this.toggleBtn.title = 'Chat with ITER Assistant';
         document.body.appendChild(this.toggleBtn);
 
@@ -638,39 +641,9 @@ class Chatbot {
                 'Content-Type': 'application/json'
             };
             
-            // Only add authorization header if token exists AND is valid
-            if (token) {
-                // Simple expiration check (JWT tokens have exp claim)
-                try {
-                    // Validate JWT structure (3 parts separated by dots)
-                    const parts = token.split('.');
-                    if (parts.length !== 3) {
-                        throw new Error('Invalid JWT structure');
-                    }
-                    
-                    const payload = JSON.parse(atob(parts[1]));
-                    
-                    // Check if exp claim exists and token is not expired
-                    if (payload.exp && typeof payload.exp === 'number') {
-                        const isExpired = payload.exp * 1000 < Date.now();
-                        
-                        if (!isExpired) {
-                            headers['Authorization'] = `Bearer ${token}`;
-                        } else {
-                            // Remove expired token
-                            localStorage.removeItem('accessToken');
-                            console.log('Removed expired token');
-                        }
-                    } else {
-                        // Token missing exp claim - remove it
-                        localStorage.removeItem('accessToken');
-                        console.log('Removed token without expiration claim');
-                    }
-                } catch (e) {
-                    // Invalid token format - remove it
-                    localStorage.removeItem('accessToken');
-                    console.log('Removed invalid token');
-                }
+            // Only add authorization header if token exists (never delete auth state here)
+            if (typeof token === 'string' && token.trim().length > 0) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
             
             // Build context string safely
@@ -691,7 +664,7 @@ class Chatbot {
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.response) {
-                    return this.postProcessAiResponse(data.response, questionType);
+                    return this.postProcessAiResponse(esc(String(data.response)), questionType);
                 } else if (!data.success) {
                     console.warn('AI API returned success:false', { message: data.message, error: data.error });
                     return this.getAiUnavailableResponse(data.message);
@@ -1060,6 +1033,16 @@ For math or study questions:
         div.textContent = text;
         return div.innerHTML;
     }
+}
+
+// Escape HTML to prevent XSS (used for all dynamic/server/user content)
+function esc(text) {
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // Initialize chatbot when DOM is ready

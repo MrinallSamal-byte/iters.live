@@ -81,7 +81,7 @@ function renderAssignmentsList() {
     if (!container) return;
 
     if (!createdAssignments.length) {
-        container.innerHTML = '<div class="loading-text">No teacher assignment listing endpoint is available yet.<br>Assignments you create in this session will appear here.</div>';
+        container.innerHTML = '<div class="loading-text">Nothing here yet.<br>Assignments you create will appear here.</div>';
         return;
     }
 
@@ -102,7 +102,7 @@ function renderAssignmentsList() {
             <p style="font-size: 0.875rem; color: var(--text-secondary);">${assignmentsEscape(a.description)}</p>
             <div class="assignment-actions">
                 <button class="btn btn-sm btn-primary" onclick="viewAssignment('${assignmentsEscape(a.id)}')">View Details</button>
-                <button class="btn btn-sm btn-secondary" disabled title="Submissions cannot be listed - no teacher submissions endpoint exists">Grade</button>
+                <button class="btn btn-sm btn-secondary" onclick="openGradingModal('${assignmentsEscape(a.id)}')">Grade</button>
             </div>
         </div>
     `).join('');
@@ -111,7 +111,7 @@ function renderAssignmentsList() {
 function renderPendingSubmissions() {
     const tbody = document.getElementById('submissionsTableBody');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Submissions unavailable - no teacher submissions listing endpoint exists.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading-text">Nothing to grade yet.<br>Open an assignment above and click Grade to review submissions.</td></tr>';
     }
     setStat('pendingCount', '0');
 }
@@ -190,7 +190,7 @@ async function handleCreateAssignment(e) {
             deadline
         });
 
-        assignmentsToast('success', 'Assignment created. It broadcasts to Sections A-D of the selected class.', 'Created');
+        assignmentsToast('success', 'Assignment created successfully.', 'Created');
         renderAssignmentsList();
         form.reset();
     } catch (err) {
@@ -228,10 +228,55 @@ function viewAssignment(id) {
                 <span class="meta-item">📅 Due ${assignmentsEscape(formatDeadline(assignment.deadline))}</span>
             </div>
             <p style="color: var(--text-primary);">${assignmentsEscape(assignment.description)}</p>
-            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">Submissions for this assignment cannot be listed yet - no teacher submissions endpoint exists.</p>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">Click Grade on this assignment to review and score student submissions.</p>
         `;
     }
     openModal('assignmentModal');
+}
+
+async function openGradingModal(assignmentId) {
+    const assignment = createdAssignments.find((a) => String(a.id) === String(assignmentId));
+    if (!assignment) return;
+
+    gradingContext = { assignmentId, submissions: [] };
+
+    const studentSelect = document.getElementById('gradeStudent');
+    const marksInput = document.getElementById('marksObtained');
+    const feedbackInput = document.getElementById('feedback');
+    if (marksInput) {
+        marksInput.value = '';
+        marksInput.max = assignment.total_marks || undefined;
+        clearAssignmentFieldError(marksInput);
+    }
+    if (feedbackInput) feedbackInput.value = '';
+    if (studentSelect) {
+        studentSelect.innerHTML = '<option value="">Loading submissions...</option>';
+        studentSelect.disabled = true;
+    }
+
+    openModal('gradingModal');
+
+    try {
+        const resp = await fetch(`/api/assignments/${encodeURIComponent(assignmentId)}/submissions`, { headers: assignmentsAuthHeaders() });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok || !payload.success) throw new Error(payload.message || `Request failed (${resp.status})`);
+        gradingContext.submissions = payload.data || [];
+
+        if (studentSelect) {
+            if (!gradingContext.submissions.length) {
+                studentSelect.innerHTML = '<option value="">No submissions yet</option>';
+            } else {
+                studentSelect.innerHTML = gradingContext.submissions.map((s) => {
+                    const graded = s.status === 'graded' ? ` — graded (${Number(s.marks_obtained || 0)})` : '';
+                    return `<option value="${assignmentsEscape(s.student_id)}">${assignmentsEscape(s.student_id)}${graded}</option>`;
+                }).join('');
+                studentSelect.disabled = false;
+            }
+        }
+    } catch (err) {
+        if (studentSelect) studentSelect.innerHTML = '<option value="">Failed to load submissions</option>';
+        assignmentsToast('error', err.message || 'Failed to load submissions', 'Grading');
+    }
 }
 
 function openModal(id) {
@@ -257,11 +302,24 @@ async function handleGradeSubmit(e) {
         return;
     }
 
+    const studentSelect = document.getElementById('gradeStudent');
     const marksInput = document.getElementById('marksObtained');
     const feedbackInput = document.getElementById('feedback');
+
+    if (studentSelect && !studentSelect.value) {
+        assignmentsToast('warning', 'No submission selected for grading.', 'Nothing to grade');
+        return;
+    }
+    gradingContext.studentId = studentSelect.value;
+
     const marksObtained = Number(marksInput.value);
-    if (!Number.isFinite(marksObtained)) {
+    if (!Number.isFinite(marksObtained) || marksInput.value === '') {
         setAssignmentFieldError(marksInput, 'Enter a numeric score');
+        return;
+    }
+    const maxMarks = Number(marksInput.max);
+    if (Number.isFinite(maxMarks) && maxMarks > 0 && marksObtained > maxMarks) {
+        setAssignmentFieldError(marksInput, `Score cannot exceed ${maxMarks}`);
         return;
     }
 

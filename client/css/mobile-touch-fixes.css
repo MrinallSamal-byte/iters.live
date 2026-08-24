@@ -47,8 +47,8 @@
     a,
     .btn,
     .nav-link {
-        min-height: 38px;
-        padding: 10px 18px;
+        min-height: 44px;
+        padding: 12px 18px;
     }
 }
 
@@ -277,8 +277,8 @@ body {
 
     /* Buttons smaller in landscape */
     .btn {
-        min-height: 38px;
-        padding: 10px 18px;
+        min-height: 44px;
+        padding: 12px 18px;
     }
 }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timetable - ITERasn hub</title>
+    <title>Timetable · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -51,10 +51,11 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Student Timetable main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -94,7 +95,7 @@
         <!-- Weekly Timetable -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Weekly Schedule
                 </h3>
                 <div class="timetable-controls">
@@ -132,7 +133,7 @@
         <!-- Today's Schedule -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Today's Schedule
                 </h3>
                 <span class="section-badge" id="todayDate">Loading...</span>
@@ -154,6 +155,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/offline-cache.js"></script>
     <script src="/js/pages/student-timetable.js"></script>

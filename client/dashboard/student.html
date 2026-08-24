@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - ITERasn hub</title>
+    <title>Dashboard · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -54,8 +54,9 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Student main content" id="main-content">
         <!-- Welcome Section -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -120,7 +121,7 @@
             <!-- Attendance Chart -->
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Attendance Overview
                     </h3>
                     <span class="section-badge">Current Semester</span>
@@ -133,7 +134,7 @@
             <!-- Performance Chart -->
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Academic Performance
                     </h3>
                     <span class="section-badge">Progress Tracking</span>
@@ -147,7 +148,7 @@
         <!-- Today's Schedule -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Today's Schedule
                     </h3>
                 <span class="section-badge">Active Classes</span>
@@ -162,7 +163,7 @@
             <!-- Announcements -->
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Announcements
                     </h3>
                 </div>
@@ -177,7 +178,7 @@
             <!-- Upcoming Deadlines -->
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Upcoming Deadlines
                     </h3>
                 </div>
@@ -193,7 +194,7 @@
         <!-- Recent Activity -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Recent Activity
                     </h3>
             </div>
@@ -205,7 +206,7 @@
         <!-- Quick Links -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         Quick Links
                     </h3>
             </div>
@@ -309,6 +310,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>

@@ -341,9 +341,12 @@ router.get('/approvals', authMiddleware, roleMiddleware('admin'), async (req, re
       orderBy: [{ field: 'created_at', direction: 'desc' }]
     });
 
+    // Rejected files keep approved=false forever - exclude them from the queue
+    const pending = files.filter((file) => file.status !== 'rejected');
+
     res.json({
       success: true,
-      data: files.slice(0, 100).map((file) => ({
+      data: pending.slice(0, 100).map((file) => ({
         ...file,
         uploaded_by_name: userNameById.get(file.uploaded_by) || null
       }))
@@ -441,6 +444,55 @@ router.post('/announcements', authMiddleware, roleMiddleware('admin'), async (re
     }
 
     res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/announcements/:id', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const announcement = await getRecord('announcements', req.params.id);
+
+    if (!announcement) {
+      return res.status(404).json({ success: false, message: 'Announcement not found' });
+    }
+
+    const { title, content } = req.body;
+
+    if (!title || !String(title).trim()) {
+      return res.status(400).json({ success: false, message: 'title is required' });
+    }
+
+    if (!content || !String(content).trim()) {
+      return res.status(400).json({ success: false, message: 'content is required' });
+    }
+
+    const priority = req.body.priority || 'normal';
+    if (!['urgent', 'normal', 'info'].includes(priority)) {
+      return res.status(400).json({ success: false, message: 'Priority must be one of urgent, normal, info' });
+    }
+
+    const targetAudience = req.body.target_audience || 'all';
+    if (!['all', 'students', 'teachers', 'department'].includes(targetAudience)) {
+      return res.status(400).json({ success: false, message: 'Target audience must be one of all, students, teachers, department' });
+    }
+
+    const updates = {
+      title: String(title).trim(),
+      content: String(content).trim(),
+      priority,
+      target_audience: targetAudience,
+      target_department: req.body.department || null,
+      department: req.body.department || null,
+      is_pinned: Boolean(req.body.pinned),
+      pinned: Boolean(req.body.pinned),
+      status: req.body.status || announcement.status || 'active',
+      updated_at: new Date().toISOString()
+    };
+
+    await updateRecord('announcements', req.params.id, updates);
+
+    res.json({ success: true, data: { ...announcement, ...updates } });
   } catch (error) {
     next(error);
   }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubric Creator - Teacher Dashboard</title>
+    <title>Rubric Creator · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -49,7 +49,8 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Teacher Rubric Creator main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -87,7 +88,7 @@
         <!-- Create New Rubric -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Create New Rubric
                 </h3>
             </div>
@@ -164,7 +165,7 @@
         <!-- Rubric Builder -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Rubric Builder
                 </h3>
                 <button class="btn btn-secondary btn-sm" onclick="addCriterion()">
@@ -224,7 +225,7 @@
         <!-- My Rubrics -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # My Rubrics
                 </h3>
                 <div class="filter-tabs">
@@ -274,14 +275,13 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/teacher-rubric-creator.js"></script>
     <script src="/js/chatbot.js"></script>

@@ -37,13 +37,22 @@
     setEl('totalCourses', totalCourses);
   }
 
+  function renderError(){
+    if(!bodyEl) return;
+    bodyEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">DEPARTMENTS UNAVAILABLE — COULD NOT REACH THE SERVER</td></tr>';
+  }
+
   async function load(){
     try{
       let res;
       try{
         res = await fetch('/api/admin/departments', { headers: { Authorization: `Bearer ${APP.Storage.get('accessToken')||''}` }}).then(r=>r.ok?r.json():null);
       }catch(_){ res = null; }
-      if(!res || !res.success){ res = window.DummyData?.getDepartments?.(); }
+      if(!res || !res.success){
+        console.error('Departments endpoint failed');
+        renderError();
+        return;
+      }
       const items = res?.data || [];
       const q = searchEl?.value?.trim()?.toLowerCase();
       const filtered = q? items.filter(d=>`${d.code} ${d.name} ${d.hod}`.toLowerCase().includes(q)) : items;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Marks - Teacher Dashboard</title>
+    <title>Upload Marks · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -49,7 +49,8 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Teacher Marks main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -87,7 +88,7 @@
         <!-- Exam Selection Form -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Select Exam Details
                 </h3>
             </div>
@@ -192,7 +193,7 @@
         <!-- Students Marks Entry -->
         <section id="studentsList" class="dashboard-section glass-card scroll-reveal" style="display:none;">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Enter Marks
                     <span id="studentCount" class="result-count"></span>
                 </h3>
@@ -245,7 +246,7 @@
         <!-- Statistics Chart -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Marks Distribution
                 </h3>
             </div>
@@ -301,7 +302,7 @@
         <!-- Recent Submissions -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Recent Marks Submissions
                 </h3>
             </div>
@@ -338,14 +339,13 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/teacher-marks.js"></script>
     <script src="/js/chatbot.js"></script>

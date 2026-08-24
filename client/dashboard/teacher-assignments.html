@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment Management - Teacher Dashboard</title>
+    <title>Assignment Management · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -49,7 +49,8 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Teacher Assignments main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -87,7 +88,7 @@
         <!-- Create New Assignment -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Create New Assignment
                 </h3>
             </div>
@@ -212,7 +213,7 @@
         <!-- Active Assignments -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Active Assignments
                 </h3>
                 <div class="filter-tabs">
@@ -231,7 +232,7 @@
         <!-- Pending Submissions -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Pending Submissions to Grade
                 </h3>
                 <span class="notification-badge" id="pendingCount">0</span>
@@ -285,8 +286,10 @@
             <div class="modal-body">
                 <form id="gradingForm">
                     <div class="form-group">
-                        <label>Student Name</label>
-                        <input type="text" id="studentName" class="form-input" readonly>
+                        <label>Student Submission</label>
+                        <select id="gradeStudent" class="form-select" required>
+                            <option value="">Select a submission</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Marks Obtained</label>
@@ -310,14 +313,13 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/teacher-assignments.js"></script>
     <script src="/js/chatbot.js"></script>

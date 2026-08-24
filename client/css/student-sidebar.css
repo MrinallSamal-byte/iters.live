@@ -414,3 +414,11 @@ html {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
+
+/* Touch target: expand the 24px toggle's hit area to >=44px without
+   changing its visual footprint */
+.sidebar-toggle::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+}

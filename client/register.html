@@ -217,13 +217,23 @@
             });
         }
 
-        initPasswordToggles();
+        // Guarded initialization - one missing element must not kill all bindings
+        (function initRegisterPage() {
+            try {
+                initPasswordToggles();
 
-        const registerForm = document.getElementById('registerForm');
-        const errorMessage = document.getElementById('errorMessage');
-        const registerBtn = document.getElementById('registerBtn');
+                const registerForm = document.getElementById('registerForm');
+                const errorMessage = document.getElementById('errorMessage');
+                const registerBtn = document.getElementById('registerBtn');
 
-        registerForm.addEventListener('submit', async (e) => {
+                function showError(message) {
+                    if (!errorMessage) return;
+                    errorMessage.textContent = message;
+                    errorMessage.style.display = 'block';
+                }
+
+                if (registerForm && registerBtn) {
+                    registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = new FormData(e.target);
@@ -264,7 +274,7 @@
                         window.location.href = '/login.html';
                     }
                 } else {
-                    showError(response.message || 'Registration failed');
+                    showError(response.message || response.error || 'Registration failed');
                 }
             } catch (error) {
                 showError(error.message || 'Registration failed. Please try again.');
@@ -273,11 +283,13 @@
                 registerBtn.disabled = false;
             }
         });
-
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
+                } else {
+                    console.warn('Register page: missing form or button elements; submit handler not bound.');
+                }
+            } catch (initError) {
+                console.error('Register page init failed:', initError);
+            }
+        })();
 
         function clearPublicRedirectState() {
             try {
@@ -328,11 +340,10 @@
             });
         });
 
-        // Register service worker (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js').catch(() => { });
-        }
+        // NOTE: Service worker registration is owned by /js/main.js —
+        // do not register it again here (was previously duplicated).
     </script>
+    <script src="/js/page-access-token.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/chatbot.js"></script>
 </body>

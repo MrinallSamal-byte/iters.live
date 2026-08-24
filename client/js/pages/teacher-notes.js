@@ -115,17 +115,17 @@
             return;
         }
 
-        const composedDescription = [
-            `${title} — ${description}`,
-            [unit && `Unit: ${unit}`, department && `Dept: ${department}`, year && `Year ${year}`, semester && `Semester ${semester}`, tags && `Tags: ${tags}`]
-                .filter(Boolean).join(' | ')
-        ].join(' (');
+        const metadata = [unit && `Unit: ${unit}`, department && `Dept: ${department}`, year && `Year ${year}`, semester && `Semester ${semester}`, tags && `Tags: ${tags}`]
+            .filter(Boolean).join(' | ');
+        const composedDescription = metadata
+            ? `${title} — ${description} (${metadata})`
+            : `${title} — ${description}`;
 
         const formData = new FormData();
         formData.append('file', file);
         formData.append('category', category);
         formData.append('subject', subject);
-        formData.append('description', composedDescription + ')');
+        formData.append('description', composedDescription);
 
         const submitBtn = els.form.querySelector('[type="submit"]');
         submitBtn && (submitBtn.disabled = true);
@@ -161,6 +161,7 @@
 
         return materials.filter(m => {
             if (category && m.category !== category) return false;
+            if (department && String(deptFromDescription(m.description) || '').toUpperCase() !== String(department).toUpperCase()) return false;
             if (search && !`${m.original_name} ${m.subject} ${m.description}`.toLowerCase().includes(search)) return false;
             return true;
         }).filter(m => {

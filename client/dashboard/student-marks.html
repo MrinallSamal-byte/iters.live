@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marks - ITERasn hub</title>
+    <title>Marks · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -52,7 +52,8 @@
 </head>
 
 <body>
-    <main class="dashboard-main">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main class="dashboard-main" aria-label="Student Marks main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -87,7 +88,7 @@
         <!-- Performance Chart -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Performance Trend
                 </h3>
                 <span class="section-badge">Semester-wise Analysis</span>
@@ -100,7 +101,7 @@
         <!-- Current Semester Marks -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Current Semester Marks
                 </h3>
                 <span class="section-badge">Latest Results</span>
@@ -131,7 +132,7 @@
         <div class="dashboard-grid">
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Grade Distribution
                 </h3>
                 </div>
@@ -142,7 +143,7 @@
 
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Performance Insights
                 </h3>
             </div>
@@ -183,7 +184,7 @@
         <!-- Semester History -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Semester History
                 </h3>
                 <span class="section-badge">All Semesters</span>
@@ -216,14 +217,13 @@
     </button>
 
     <!-- Scripts - Load in specific order -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/pages/student-marks.js"></script>
     <script src="/js/chatbot.js"></script>

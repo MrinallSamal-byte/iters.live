@@ -5,6 +5,7 @@
   let announcements = [];
   let filteredAnnouncements = [];
   let currentView = 'grid';
+  let editingId = null;
 
   const elements = {
     list: document.getElementById('annList'),
@@ -205,12 +206,14 @@
   }
 
   function openNewAnnouncementModal() {
+    editingId = null;
     elements.modal.classList.add('active');
     document.getElementById('modalTitleText').textContent = 'Create New Announcement';
     elements.form.reset();
   }
 
   window.closeAnnouncementModal = function() {
+    editingId = null;
     elements.modal.classList.remove('active');
   };
 
@@ -245,13 +248,19 @@
     };
 
     try {
-      await APP.API.post('/admin/announcements', payload);
-      notify('Announcement published successfully!', 'success');
+      if (editingId) {
+        await APP.API.put(`/admin/announcements/${encodeURIComponent(editingId)}`, payload);
+        notify('Announcement updated successfully!', 'success');
+      } else {
+        await APP.API.post('/admin/announcements', payload);
+        notify('Announcement published successfully!', 'success');
+      }
+      editingId = null;
       window.closeAnnouncementModal();
       await loadAnnouncements();
     } catch (error) {
-      console.error('Error creating announcement:', error);
-      notify(`Failed to publish announcement: ${error.message || 'request failed'}`, 'error');
+      console.error('Error saving announcement:', error);
+      notify(`Failed to save announcement: ${error.message || 'request failed'}`, 'error');
     } finally {
       if (submitBtn) submitBtn.disabled = false;
     }
@@ -261,12 +270,17 @@
     const ann = announcements.find(a => String(a.id) === String(id));
     if (!ann) return;
 
+    editingId = String(id);
     elements.modal.classList.add('active');
     document.getElementById('modalTitleText').textContent = 'Edit Announcement';
-    document.getElementById('annTitle').value = ann.title;
-    document.getElementById('annContent').value = ann.content;
-    document.getElementById('annPriority').value = ann.priority;
-    document.getElementById('annAudience').value = ann.target_audience;
+    document.getElementById('annTitle').value = ann.title || '';
+    document.getElementById('annContent').value = ann.content || '';
+    document.getElementById('annPriority').value = ann.priority || 'normal';
+    document.getElementById('annAudience').value = ann.target_audience || 'all';
+    const deptSelect = document.getElementById('annDepartment');
+    if (deptSelect) deptSelect.value = ann.department || ann.target_department || '';
+    const pinnedInput = document.getElementById('annPinned');
+    if (pinnedInput) pinnedInput.checked = Boolean(ann.pinned);
     window.toggleDepartmentField();
   };
 

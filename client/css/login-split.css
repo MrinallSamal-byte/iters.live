@@ -381,8 +381,11 @@ body.nothing-home.public-auth-page .form-hint {
     color: var(--au-text-3);
 }
 
-/* password visibility toggle */
+/* password visibility toggle - >=44px touch target */
 body.nothing-home.public-auth-page .password-toggle-btn {
+    min-height: 44px;
+    min-width: 44px;
+
     font-size: 0.62rem;
     letter-spacing: 0.12em;
     color: var(--au-text-3);
@@ -1063,4 +1066,77 @@ body.nothing-home.public-auth-page .theme-toggle {
     body.nothing-home.public-auth-page .brand-subtitle {
         letter-spacing: 0.08em;
     }
+}
+
+/* ============================================================
+   APPENDED: auth consistency polish (login/register parity)
+   ============================================================ */
+
+/* 1. Contrast: placeholders + helper text >= 4.5:1 on input bg in
+      BOTH themes (--au-text-3 was ~4.2:1 dark / ~3.3:1 light) */
+body.nothing-home.public-auth-page .form-group input::placeholder,
+body.nothing-home.public-auth-page .form-group select::placeholder,
+body.nothing-home.public-auth-page .form-hint {
+    color: var(--au-text-2);
+    opacity: 1;
+}
+
+/* 2. Error banner: mono, bordered, accent-red left edge (matches
+    status-message structure; register page shares these classes) */
+body.nothing-home.public-auth-page .error-message {
+    border-left: 3px solid var(--au-accent);
+}
+
+/* 3. Focus visibility: restore a keyboard-only :focus-visible outline
+      (the base input/select :focus rule intentionally uses outline:none
+       for mouse clicks, but keyboard focus must stay visible) */
+body.nothing-home.public-auth-page .form-group input:focus-visible,
+body.nothing-home.public-auth-page .form-group select:focus-visible {
+    outline: 2px solid var(--au-accent);
+    outline-offset: 1px;
+}
+
+body.nothing-home.public-auth-page .password-toggle-btn:focus-visible,
+body.nothing-home.public-auth-page .forgot-link-btn:focus-visible,
+body.nothing-home.public-auth-page .role-btn:focus-visible,
+body.nothing-home.public-auth-page #googleLoginBtn:focus-visible {
+    outline: 2px solid var(--au-accent);
+    outline-offset: 2px;
+}
+
+body.nothing-home.public-auth-page .login-footer a:focus-visible,
+body.nothing-home.public-auth-page .back-link:focus-visible,
+body.nothing-home.public-auth-page .forgot-link:focus-visible {
+    outline: 2px solid var(--au-accent);
+    outline-offset: 3px;
+}
+
+/* 4. Role selector cards: equal size, clear selected state */
+body.nothing-home.public-auth-page .role-selection {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+body.nothing-home.public-auth-page .role-btn {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1rem;
+}
+
+/* selected role gets the red edge marker too, so state survives
+   grayscale/high-contrast viewing */
+body.nothing-home.public-auth-page .role-btn.active {
+    box-shadow: inset 0 -2px 0 0 var(--au-accent);
+}
+
+/* 5. Submit buttons: consistent full-width height + visible loading
+      state (JS sets disabled + text swap while awaiting the API) */
+body.nothing-home.public-auth-page button.btn-block:disabled {
+    opacity: 0.75;
+    cursor: wait;
 }

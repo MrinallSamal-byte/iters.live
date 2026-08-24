@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mark Attendance - Teacher Dashboard</title>
+    <title>Mark Attendance · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -32,7 +32,8 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+                document.write('<html><body><a class="skip-link" href="#main-content">Skip to content</a>
+    <p>Redirecting to login...</p></body></html>'); return;
             }
         })();
     </script>
@@ -46,7 +47,7 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Teacher Attendance main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -84,7 +85,7 @@
         <!-- Class Selection Form -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Select Class
                 </h3>
             </div>
@@ -165,7 +166,7 @@
         <!-- Students List -->
         <section id="studentsList" class="dashboard-section glass-card scroll-reveal" style="display:none;">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Student List
                     <span id="studentCount" class="result-count"></span>
                 </h3>
@@ -213,7 +214,7 @@
         <!-- Recent Attendance Records -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Recent Attendance Records
                 </h3>
             </div>
@@ -230,14 +231,13 @@
     </button>
 
     <!-- Scripts -->
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/teacher-attendance.js"></script>
     <script src="/js/chatbot.js"></script>

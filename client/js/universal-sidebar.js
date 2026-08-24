@@ -692,6 +692,9 @@
 
                 if (isActive) {
                     link.classList.add('active');
+                    link.setAttribute('aria-current', 'page');
+                } else if (link.getAttribute('aria-current')) {
+                    link.removeAttribute('aria-current');
                 }
             });
         },

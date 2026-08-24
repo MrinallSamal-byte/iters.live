@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Forum - ITERasn hub</title>
+    <title>Student Forum · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -53,8 +53,9 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Student Forum main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -95,7 +96,7 @@
         <!-- Category Navigation -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Categories
                 </h3>
             </div>
@@ -131,16 +132,16 @@
         <section class="forum-controls glass-card">
             <div class="search-filter-row">
                 <div class="search-box-forum">
-                    <input type="text" id="forumSearch" class="search-input" 
-                        placeholder="Search questions, topics, or keywords...">
+                    <input type="text" id="forumSearch" class="search-input" aria-label="Search questions, topics, or keywords"
+                                            placeholder="Search questions, topics, or keywords...">
                 </div>
-                <select id="filterStatus" class="filter-select">
+                <select id="filterStatus" class="filter-select" aria-label="Filter by question status">
                     <option value="">All Status</option>
                     <option value="open">Open Questions</option>
                     <option value="answered">Answered</option>
                     <option value="unanswered">Unanswered</option>
                 </select>
-                <select id="sortOrder" class="filter-select">
+                <select id="sortOrder" class="filter-select" aria-label="Sort questions">
                     <option value="newest">Newest First</option>
                     <option value="popular">Most Popular</option>
                     <option value="unanswered">Needs Answer</option>
@@ -174,7 +175,7 @@
         <!-- Top Contributors -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Top Contributors
                 </h3>
             </div>
@@ -198,14 +199,14 @@
                         <label class="form-label">
                             Question Title
                         </label>
-                        <input type="text" id="questionTitle" class="form-input" 
-                            placeholder="What's your question? Be specific and clear..." required>
+                        <input type="text" id="questionTitle" class="form-input" aria-label="Question title"
+                                                    placeholder="What's your question? Be specific and clear..." required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">
                             Category
                         </label>
-                        <select id="questionCategory" class="form-select" required>
+                        <select id="questionCategory" class="form-select" aria-label="Question category" required>
                             <option value="">Select a category</option>
                             <option value="academic">Academic</option>
                             <option value="technical">Technical</option>
@@ -218,7 +219,7 @@
                         <label class="form-label">
                             Description
                         </label>
-                        <textarea id="questionDescription" class="form-textarea" rows="6"
+                        <textarea id="questionDescription" class="form-textarea" rows="6" aria-label="Question description"
                             placeholder="Provide more details about your question. Include any relevant context, what you've tried, or specific issues you're facing..."
                             required></textarea>
                     </div>
@@ -226,8 +227,8 @@
                         <label class="form-label">
                             Tags (comma separated)
                         </label>
-                        <input type="text" id="questionTags" class="form-input" 
-                            placeholder="e.g., python, algorithms, exam">
+                        <input type="text" id="questionTags" class="form-input" aria-label="Tags, comma separated"
+                                                    placeholder="e.g., python, algorithms, exam">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeNewQuestionModal()">
@@ -265,9 +266,8 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
-    <script src="/js/dummy-data.js"></script>
-    <script src="/js/dummy-data-init.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>
     <script src="/js/chatbot.js"></script>

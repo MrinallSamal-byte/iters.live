@@ -276,7 +276,7 @@
 
 .notification-message {
   font-size: 0.85rem;
-  color: #666;
+  color: #8a8a8a;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -345,7 +345,7 @@
 .notification-loading {
   text-align: center;
   padding: 40px 20px;
-  color: #666;
+  color: #8a8a8a;
 }
 
 .notification-loading i {
@@ -478,4 +478,15 @@
 
 .notification-item {
   animation: slideIn 0.3s ease-out;
+}
+
+
+/* Reduced motion: enforce OS accessibility preference */
+@media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
+    }
 }

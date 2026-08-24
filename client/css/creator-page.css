@@ -2,15 +2,15 @@ body.creator-page {
     --creator-bg: #090705;
     --creator-surface: rgba(23, 17, 14, 0.82);
     --creator-surface-strong: rgba(30, 22, 17, 0.94);
-    --creator-surface-soft: rgba(255, 244, 233, 0.04);
-    --creator-border: rgba(221, 186, 150, 0.14);
-    --creator-border-strong: rgba(221, 186, 150, 0.24);
+    --creator-surface-soft: rgba(255, 255, 255, 0.04);
+    --creator-border: rgba(255, 255, 255, 0.07);
+    --creator-border-strong: rgba(255, 255, 255, 0.12);
     --creator-text: #f6eee4;
     --creator-muted: #b7a697;
     --creator-muted-strong: #d7c7b7;
     --creator-accent: #b97845;
     --creator-accent-strong: #d69760;
-    --creator-accent-soft: rgba(185, 120, 69, 0.18);
+    --creator-accent-soft: rgba(255, 255, 255, 0.04);
     --creator-accent-glow: rgba(214, 151, 96, 0.16);
     --creator-shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
     --creator-shell-padding: clamp(22px, 2.8vw, 38px);
@@ -23,16 +23,16 @@ body.creator-page {
 
 body.creator-page::before {
     background-image:
-        linear-gradient(rgba(255, 244, 233, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 244, 233, 0.035) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 88px 88px;
     opacity: 0.18;
 }
 
 body.creator-page::before {
     background-image:
-        linear-gradient(rgba(255, 244, 233, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 244, 233, 0.035) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 88px 88px;
     opacity: 0.18;
 }
@@ -47,7 +47,7 @@ body.creator-page.light-theme {
     --creator-text: #1f1711;
     --creator-muted: #6f5c4d;
     --creator-muted-strong: #4a392f;
-    --creator-accent-soft: rgba(185, 120, 69, 0.12);
+    --creator-accent-soft: rgba(255, 255, 255, 0.04);
     --creator-shadow: 0 24px 60px rgba(76, 50, 33, 0.12);
     background: #fcf7f0;
     color-scheme: light;
@@ -111,7 +111,8 @@ body.creator-page.light-theme::before {
     background: var(--creator-accent);
     border-color: transparent;
     color: #fff6ef;
-    box-shadow: 0 14px 30px rgba(185, 120, 69, 0.24);
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .creator-page .btn-primary:hover,
@@ -124,7 +125,7 @@ body.creator-page.light-theme::before {
 .creator-page .btn-outline,
 .creator-page .btn-secondary,
 .creator-page .project-link {
-    background: rgba(255, 244, 233, 0.04);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--creator-border);
     color: var(--creator-text);
 }
@@ -158,7 +159,7 @@ body.creator-page.light-theme::before {
     left: -10%;
     width: 360px;
     height: 360px;
-    background: radial-gradient(circle, rgba(185, 120, 69, 0.24) 0%, transparent 68%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 68%);
 }
 
 .creator-page .orb-2 {
@@ -174,14 +175,14 @@ body.creator-page.light-theme::before {
     left: 34%;
     width: 260px;
     height: 260px;
-    background: radial-gradient(circle, rgba(185, 120, 69, 0.18) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
 }
 
 .creator-page .creator-grid-glow {
     position: absolute;
     inset: 12% 6% auto;
     height: 420px;
-    border: 1px solid rgba(221, 186, 150, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 40px;
     background: none;
     box-shadow: none;
@@ -212,9 +213,8 @@ body.creator-page.light-theme::before {
     padding: clamp(24px, 3vw, 44px);
     border-radius: calc(var(--creator-shell-radius) + 8px);
     background: rgba(16, 11, 8, 0.44);
-    border: 1px solid rgba(221, 186, 150, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    }
 
 .creator-page .creator-hero-grid::before,
 .creator-page .creator-section-shell::after,
@@ -247,7 +247,7 @@ body.creator-page.light-theme::before {
     align-items: center;
     gap: 10px;
     color: var(--creator-muted-strong);
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.24em;
     text-transform: uppercase;
@@ -269,11 +269,11 @@ body.creator-page.light-theme::before {
 .creator-page .hero-badge.creator-badge {
     width: fit-content;
     padding: 12px 16px;
-    border-radius: 999px;
-    background: rgba(255, 244, 233, 0.05);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--creator-border);
     color: var(--creator-muted-strong);
-    font-size: 0.86rem;
+    font-size: 0.875rem;
     font-weight: 500;
     box-shadow: none;
 }
@@ -284,7 +284,7 @@ body.creator-page.light-theme::before {
     height: 7px;
     border-radius: 999px;
     background: var(--creator-accent);
-    box-shadow: 0 0 0 6px rgba(185, 120, 69, 0.14);
+    box-shadow: none;
 }
 
 .creator-page .hero-title,
@@ -306,7 +306,7 @@ body.creator-page.light-theme::before {
     max-width: 14.2ch;
     margin: 0;
     font-size: clamp(3.1rem, 6.5vw, 5.75rem);
-    line-height: 0.95;
+    line-height: 1.35;
     text-wrap: balance;
 }
 
@@ -358,9 +358,9 @@ body.creator-page.light-theme::before {
     position: relative;
     min-height: 100%;
     padding: 18px 20px;
-    border-radius: 24px;
-    background: rgba(255, 244, 233, 0.04);
-    border: 1px solid rgba(221, 186, 150, 0.09);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
 }
 
@@ -373,7 +373,7 @@ body.creator-page.light-theme::before {
     position: absolute;
     inset: 0 0 auto;
     height: 1px;
-    background: rgba(221, 186, 150, 0.32);
+    background: rgba(255, 255, 255, 0.16);
     pointer-events: none;
 }
 
@@ -382,7 +382,7 @@ body.creator-page.light-theme::before {
     display: inline-flex;
     margin-bottom: 10px;
     color: var(--creator-muted-strong);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -405,7 +405,7 @@ body.creator-page.light-theme::before {
     min-width: 0;
     width: 100%;
     justify-content: center;
-    border-radius: 999px;
+    border-radius: var(--r-radius, 4px);
 }
 
 .creator-page .creator-note-strip {
@@ -415,7 +415,7 @@ body.creator-page.light-theme::before {
     align-items: start;
     width: min(100%, 760px);
     padding: clamp(18px, 2.4vw, 24px);
-    border-radius: 28px;
+    border-radius: var(--r-radius, 4px);
     background: var(--creator-surface);
 }
 
@@ -425,10 +425,10 @@ body.creator-page.light-theme::before {
     justify-content: center;
     min-width: 148px;
     padding: 10px 14px;
-    border-radius: 999px;
+    border-radius: var(--r-radius, 4px);
     background: var(--creator-accent-soft);
     color: var(--creator-text);
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -473,11 +473,11 @@ body.creator-page.light-theme::before {
 
 .creator-page .creator-status {
     padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 244, 233, 0.05);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--creator-border);
     color: var(--creator-muted-strong);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -487,9 +487,9 @@ body.creator-page.light-theme::before {
     display: grid;
     place-items: center;
     min-height: clamp(220px, 26vw, 300px);
-    border-radius: 30px;
-    background: rgba(185, 120, 69, 0.18);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
 }
 
@@ -498,7 +498,7 @@ body.creator-page.light-theme::before {
     content: "";
     position: absolute;
     border-radius: 999px;
-    border: 1px solid rgba(221, 186, 150, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .creator-page .creator-portrait::before {
@@ -512,8 +512,8 @@ body.creator-page.light-theme::before {
 .creator-page .creator-portrait-ring {
     position: absolute;
     inset: 16px;
-    border-radius: 28px;
-    border: 1px solid rgba(221, 186, 150, 0.08);
+    border-radius: var(--r-radius, 4px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .creator-page .creator-monogram {
@@ -524,9 +524,9 @@ body.creator-page.light-theme::before {
     width: 156px;
     height: 156px;
     border-radius: 50%;
-    background: rgba(185, 120, 69, 0.18);
-    border: 1px solid rgba(221, 186, 150, 0.2);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 42px rgba(0, 0, 0, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
     color: var(--creator-text);
     font-family: "Instrument Serif", "Georgia", serif;
     font-size: 4.4rem;
@@ -548,9 +548,9 @@ body.creator-page.light-theme::before {
 .creator-page .creator-profile-item,
 .creator-page .project-proof-grid > div {
     padding: 16px 18px;
-    border-radius: 22px;
+    border-radius: var(--r-radius, 4px);
     background: var(--creator-surface-soft);
-    border: 1px solid rgba(221, 186, 150, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .creator-page .creator-profile-item span,
@@ -558,7 +558,7 @@ body.creator-page.light-theme::before {
     display: block;
     margin-bottom: 8px;
     color: var(--creator-muted);
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -579,9 +579,9 @@ body.creator-page.light-theme::before {
 
 .creator-page .creator-metric {
     padding: 18px;
-    border-radius: 22px;
-    background: rgba(185, 120, 69, 0.1);
-    border: 1px solid rgba(221, 186, 150, 0.12);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .creator-page .creator-metric strong {
@@ -652,7 +652,7 @@ body.creator-page.light-theme::before {
     font-family: "Instrument Serif", "Georgia", serif;
     font-size: clamp(2.1rem, 4.6vw, 3.2rem);
     font-weight: 400;
-    line-height: 0.98;
+    line-height: 1.35;
     letter-spacing: -0.045em;
     color: var(--creator-text);
     text-wrap: balance;
@@ -677,7 +677,7 @@ body.creator-page.light-theme::before {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
     padding-top: 8px;
-    border-top: 1px solid rgba(221, 186, 150, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .creator-page .creator-section-link {
@@ -687,11 +687,11 @@ body.creator-page.light-theme::before {
     min-height: 48px;
     width: 100%;
     padding: 12px 18px;
-    border-radius: 999px;
-    background: rgba(255, 244, 233, 0.04);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--creator-muted-strong);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -706,15 +706,15 @@ body.creator-page.light-theme::before {
 .creator-page .creator-section-link:hover,
 .creator-page .creator-section-link:focus-visible,
 .creator-page .creator-section-link.is-active {
-    background: rgba(185, 120, 69, 0.18);
-    border-color: rgba(221, 186, 150, 0.24);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
     color: var(--creator-text);
     transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: none;
 }
 
 .creator-page .creator-section-link:focus-visible {
-    outline: 2px solid rgba(214, 151, 96, 0.55);
+    outline: 2px solid rgba(255, 255, 255, 0.45);
     outline-offset: 2px;
 }
 
@@ -727,7 +727,7 @@ body.creator-page.light-theme::before {
 .creator-page .section-title {
     margin-bottom: 14px;
     font-size: clamp(2.25rem, 5vw, 3.6rem);
-    line-height: 0.98;
+    line-height: 1.35;
 }
 
 .creator-page .section-subtitle {
@@ -761,7 +761,7 @@ body.creator-page.light-theme::before {
 
 .creator-page .principle-item {
     padding: 22px 24px;
-    border-radius: 28px;
+    border-radius: var(--r-radius, 4px);
 }
 
 .creator-page .principle-index {
@@ -807,7 +807,7 @@ body.creator-page.light-theme::before {
     gap: clamp(16px, 2vw, 22px);
     margin-left: clamp(30px, 4vw, 54px);
     padding: clamp(22px, 2.5vw, 30px);
-    border-radius: 32px;
+    border-radius: var(--r-radius, 4px);
 }
 
 .creator-page .timeline-item::before {
@@ -818,7 +818,7 @@ body.creator-page.light-theme::before {
     height: 12px;
     border: 0;
     background: var(--creator-accent);
-    box-shadow: 0 0 0 8px rgba(185, 120, 69, 0.14);
+    box-shadow: none;
 }
 
 .creator-page .timeline-icon {
@@ -827,9 +827,9 @@ body.creator-page.light-theme::before {
     justify-content: center;
     width: 72px;
     height: 72px;
-    border-radius: 24px;
-    background: rgba(185, 120, 69, 0.16);
-    border: 1px solid rgba(221, 186, 150, 0.14);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     color: var(--creator-text);
     font-size: 1.02rem;
     font-weight: 700;
@@ -856,10 +856,10 @@ body.creator-page.light-theme::before {
 .creator-page .timeline-date {
     background: var(--creator-accent-soft);
     color: var(--creator-text);
-    border: 1px solid rgba(221, 186, 150, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 0.78rem;
+    border-radius: var(--r-radius, 4px);
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -893,10 +893,10 @@ body.creator-page.light-theme::before {
 
 .creator-page .edu-tag {
     padding: 8px 12px;
-    background: rgba(255, 244, 233, 0.05);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--creator-muted-strong);
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -947,7 +947,7 @@ body.creator-page.light-theme::before {
 
 .creator-page .skill-item {
     padding-top: 18px;
-    border-top: 1px solid rgba(221, 186, 150, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .creator-page .skill-item:first-child {
@@ -971,11 +971,11 @@ body.creator-page.light-theme::before {
 
 .creator-page .skill-level {
     padding: 7px 10px;
-    border-radius: 999px;
-    background: rgba(255, 244, 233, 0.05);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--creator-muted-strong);
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -1019,11 +1019,11 @@ body.creator-page.light-theme::before {
 .creator-page .project-badge {
     position: static;
     padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 244, 233, 0.05);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    border-radius: var(--r-radius, 4px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--creator-muted-strong);
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -1032,7 +1032,7 @@ body.creator-page.light-theme::before {
 .creator-page .project-card h3 {
     margin: 0;
     font-size: clamp(2rem, 4vw, 3.1rem);
-    line-height: 0.98;
+    line-height: 1.35;
 }
 
 .creator-page .project-card > p {
@@ -1054,10 +1054,10 @@ body.creator-page.light-theme::before {
 
 .creator-page .tech-tag-small {
     padding: 9px 12px;
-    background: rgba(255, 244, 233, 0.05);
-    border: 1px solid rgba(221, 186, 150, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--creator-muted-strong);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1070,8 +1070,8 @@ body.creator-page.light-theme::before {
 
 .creator-page .project-link {
     padding: 12px 18px;
-    border-radius: 999px;
-    font-size: 0.86rem;
+    border-radius: var(--r-radius, 4px);
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1111,29 +1111,29 @@ body.creator-page.light-theme::before {
 
 .creator-page .tech-tag-pill {
     padding: 12px 18px;
-    background: rgba(255, 244, 233, 0.04);
-    border: 1px solid rgba(221, 186, 150, 0.1);
-    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--r-radius, 4px);
     color: var(--creator-muted-strong);
-    font-size: 0.88rem;
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.03em;
 }
 
 .creator-page .tech-tag-pill:hover {
-    background: rgba(185, 120, 69, 0.16);
-    border-color: rgba(221, 186, 150, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
     color: var(--creator-text);
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    box-shadow: none;
 }
 
 .creator-page .tech-tag-pill[data-tooltip]:hover::after {
     padding: 10px 12px;
     background: var(--creator-surface-strong);
-    border: 1px solid rgba(221, 186, 150, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     color: var(--creator-text);
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     border-radius: 14px;
     box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
     white-space: normal;
@@ -1164,15 +1164,15 @@ body.creator-page.light-theme::before {
     width: 100%;
     min-width: 0;
     padding: 16px 18px;
-    background: rgba(255, 244, 233, 0.04);
-    border: 1px solid rgba(221, 186, 150, 0.1);
-    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--r-radius, 4px);
     box-shadow: none;
 }
 
 .creator-page .feature-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.12);
+    box-shadow: none;
 }
 
 .creator-page .feature-icon {
@@ -1183,7 +1183,7 @@ body.creator-page.light-theme::before {
     height: 40px;
     margin-right: 14px;
     border-radius: 14px;
-    background: rgba(185, 120, 69, 0.18);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--creator-text);
     font-size: 0.82rem;
     font-weight: 700;
@@ -1268,12 +1268,12 @@ body.creator-page.light-theme::before {
 }
 
 .creator-page .back-home-section .btn {
-    border-radius: 999px;
+    border-radius: var(--r-radius, 4px);
     min-width: 220px;
 }
 
 .creator-page .footer {
-    border-top: 1px solid rgba(221, 186, 150, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
     background: rgba(7, 5, 4, 0.5);
 }
 
@@ -1348,7 +1348,7 @@ body.creator-page .disclaimer-card:hover,
 body.creator-page .tech-stack-note:hover,
 body.creator-page .creator-proof-card:hover,
 body.creator-page .creator-glance-card:hover {
-    border-color: rgba(221, 186, 150, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
 }
 
@@ -1463,7 +1463,7 @@ body.creator-page .creator-glance-card:hover {
     .creator-page .hero-title {
         max-width: none;
         font-size: clamp(2.35rem, 10vw, 3.7rem);
-        line-height: 0.98;
+        line-height: 1.35;
     }
 
     .creator-page .creator-note-strip,
@@ -1476,7 +1476,7 @@ body.creator-page .creator-glance-card:hover {
     .creator-page .timeline-item,
     .creator-page .disclaimer-card {
         padding: 22px;
-        border-radius: 26px;
+        border-radius: var(--r-radius, 4px);
     }
 
     .creator-page .creator-note-strip {
@@ -1611,7 +1611,7 @@ body.creator-page .creator-glance-card:hover {
     .creator-page .creator-proof-card,
     .creator-page .creator-glance-card {
         padding: 16px 16px 18px;
-        border-radius: 20px;
+        border-radius: var(--r-radius, 4px);
     }
 
     .creator-page .creator-overview-shell {
@@ -1918,7 +1918,7 @@ body.nothing-home.creator-page .contact-card-label,
 body.nothing-home.creator-page .disclaimer-label,
 body.nothing-home.creator-page .skill-category-label,
 body.nothing-home.creator-page .project-eyebrow {
-    font-size: 0.66rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.18em;
     color: var(--creator-muted-strong);
@@ -1942,7 +1942,7 @@ body.nothing-home.creator-page .creator-profile-item span,
 body.nothing-home.creator-page .project-proof-grid span,
 body.nothing-home.creator-page .creator-note-label,
 body.nothing-home.creator-page .principle-index {
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.16em;
     color: var(--creator-muted-strong);
@@ -1972,7 +1972,7 @@ body.nothing-home.creator-page .hero-badge.creator-badge {
     background: transparent;
     border: 1px solid var(--creator-border-strong);
     box-shadow: none;
-    font-size: 0.64rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     padding: 10px 14px;
@@ -1991,7 +1991,7 @@ body.nothing-home.creator-page .creator-status {
     background: transparent;
     border: 1px solid var(--creator-border-strong);
     color: var(--creator-muted);
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -2004,7 +2004,7 @@ body.nothing-home.creator-page .creator-note-label {
     border: 1px solid var(--creator-border-strong);
     min-width: 148px;
     padding: 9px 12px;
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.16em;
 }
@@ -2023,7 +2023,7 @@ body.nothing-home.creator-page .project-badge {
     background: transparent;
     border: 1px solid var(--creator-border-strong);
     color: var(--creator-muted);
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.12em;
 }
@@ -2038,7 +2038,7 @@ body.nothing-home.creator-page .tech-tag-pill {
     background: var(--creator-surface-soft);
     border: 1px solid var(--creator-border);
     color: var(--creator-muted);
-    font-size: 0.68rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -2068,7 +2068,7 @@ body.nothing-home.creator-page .btn-primary {
     color: #ffffff;
     box-shadow: none;
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -2088,7 +2088,7 @@ body.nothing-home.creator-page .btn-secondary {
     border-radius: 0;
     color: var(--creator-text);
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -2112,7 +2112,7 @@ body.nothing-home.creator-page .project-link {
     border-radius: 0;
     color: var(--creator-text);
     font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.66rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.14em;
 }
@@ -2128,7 +2128,7 @@ body.nothing-home.creator-page .creator-section-link {
     background: transparent;
     border: 1px solid var(--creator-border);
     color: var(--creator-muted);
-    font-size: 0.64rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
@@ -2446,13 +2446,13 @@ body.nothing-home.creator-page.light-theme .theme-toggle {
 
     .creator-page .tech-tag-pill {
         padding: 10px 12px;
-        font-size: 0.62rem;
+        font-size: 0.6875rem;
     }
 
     .creator-page .edu-tag,
     .creator-page .tech-tag-small,
     .creator-page .skill-level {
-        font-size: 0.58rem;
+        font-size: 0.6875rem;
         letter-spacing: 0.1em;
     }
 
@@ -2522,5 +2522,19 @@ body.nothing-home.creator-page.light-theme .theme-toggle {
 
     .creator-page .contact-card h3 {
         overflow-wrap: anywhere;
+    }
+}
+
+/* ============================================================
+   REDUCED MOTION KILL-SWITCH
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .creator-page *,
+    .creator-page *::before,
+    .creator-page *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

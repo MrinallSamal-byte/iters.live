@@ -19,7 +19,7 @@
 
 .btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
 }
 
 .btn-primary {
@@ -47,5 +47,16 @@
     .btn {
         min-height: 48px;
         padding: 0.875rem 1.5rem;
+    }
+}
+
+
+/* Reduced motion: enforce OS accessibility preference */
+@media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+        transition-duration:.01ms !important;
     }
 }

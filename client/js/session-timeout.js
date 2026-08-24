@@ -93,7 +93,9 @@
      */
     function isSessionTimedOut() {
         const lastActivity = getLastActivity();
-        if (!lastActivity) return true;
+        // Missing timestamp means the session was never seeded yet - treat as
+        // not timed out (init() seeds it right after startup).
+        if (!lastActivity) return false;
         
         const elapsed = Date.now() - lastActivity;
         return elapsed >= SESSION_TIMEOUT_MS;
@@ -231,8 +233,13 @@
         hideTimeoutWarning();
         
         // Disconnect any active socket/bot connections
-        if (window.socket && typeof window.socket.disconnect === 'function') {
-            window.socket.disconnect();
+        const activeSocket = (window.APP && window.APP.socket) || null;
+        if (activeSocket && typeof activeSocket.disconnect === 'function') {
+            try {
+                activeSocket.disconnect();
+            } catch (e) {
+                // Ignore disconnect errors
+            }
         }
         
         window.location.replace('/index.html');

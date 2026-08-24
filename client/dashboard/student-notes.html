@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes & Resources - ITERasn hub</title>
+    <title>Notes & Resources · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -50,8 +50,9 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Student Notes main content" id="main-content">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -71,7 +72,7 @@
         <!-- Semester Quick Links Section -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Quick Access - Semester Folders
                 </h3>
             </div>
@@ -137,7 +138,7 @@
         <!-- Enhanced Filter Section -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Filter Notes
                 </h3>
             </div>
@@ -214,7 +215,7 @@
 
                 <!-- Search Bar -->
                 <div class="search-box-container">
-                    <input type="text" id="searchInput" placeholder="Search by subject name, title, or keywords..." class="search-input">
+                    <input type="text" id="searchInput" placeholder="Search by subject name, title, or keywords..." class="search-input" aria-label="Search notes by subject name, title, or keywords">
                 </div>
             </div>
         </section>
@@ -222,7 +223,7 @@
         <!-- Popular Subjects for PYQs (shown when PYQ type is selected) -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="popularSubjectsSection" style="display: none;">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Popular Subjects
                 </h3>
             </div>
@@ -257,7 +258,7 @@
         <!-- Resources Display -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Available Resources
                     <span id="resultCount" class="result-count"></span>
                 </h3>
@@ -283,7 +284,7 @@
         <!-- Recent Downloads -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Recent Downloads
                 </h3>
             </div>
@@ -295,16 +296,16 @@
         <!-- Request Paper Section (shown when PYQ type is selected) -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="requestPaperSection" style="display: none;">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     Can't Find a Paper?
                 </h3>
             </div>
             <div class="request-form">
                 <p class="request-text">Request a question paper and we'll try to add it to our collection.</p>
                 <div class="request-row">
-                    <input type="text" id="requestSubject" class="form-input" placeholder="Subject Name">
-                    <input type="text" id="requestYear" class="form-input" placeholder="Year (e.g., 2023)">
-                    <select id="requestExamType" class="form-select">
+                    <input type="text" id="requestSubject" class="form-input" placeholder="Subject Name" aria-label="Subject Name">
+                    <input type="text" id="requestYear" class="form-input" placeholder="Year (e.g., 2023)" aria-label="Year">
+                    <select id="requestExamType" class="form-select" aria-label="Exam Type">
                         <option value="">Exam Type</option>
                         <option value="midterm">Mid-Term</option>
                         <option value="endterm">End-Term</option>
@@ -329,6 +330,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/pages/student-notes-enhanced.js"></script>
     <script src="/js/chatbot.js"></script>

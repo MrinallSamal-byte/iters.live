@@ -305,6 +305,15 @@ function sanitizeExpiredPublicSession() {
     return true;
 }
 
+function isSameOriginReferrer() {
+    if (!document.referrer) return false;
+    try {
+        return new URL(document.referrer, window.location.origin).origin === window.location.origin;
+    } catch (error) {
+        return false;
+    }
+}
+
 function consumePostLogoutRedirect(currentPath = decodeVisiblePathname(window.location.pathname)) {
     const target = getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_KEY);
     const timestamp = parseInt(getRawStorageItem(localStorage, POST_LOGOUT_REDIRECT_AT_KEY) || '0', 10);
@@ -320,12 +329,45 @@ function consumePostLogoutRedirect(currentPath = decodeVisiblePathname(window.lo
         return false;
     }
 
+    // Only honor the redirect target when the navigation is internal
+    // (same-origin referrer, e.g. an in-app link click or back/forward).
+    // A direct external entry to /login must not bounce the user away.
+    if (!isSameOriginReferrer()) {
+        clearPostLogoutRedirect();
+        return false;
+    }
+
     clearPostLogoutRedirect();
     window.location.replace(target);
     return true;
 }
 
+function handleAuthExpiry() {
+    authExpiryHandled = true;
+
+    if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
+        window.SessionTimeout.logout(SESSION_INVALID_LOGOUT_REASON);
+    } else {
+        setPostLogoutRedirect('/index.html', SESSION_INVALID_LOGOUT_REASON);
+        clearClientState({
+            preserveTheme: true,
+            preserveLogoutReason: true,
+            preservePostLogoutRedirect: true
+        });
+        window.location.replace('/index.html');
+    }
+}
+
+function resetAuthExpiryHandled() {
+    authExpiryHandled = false;
+}
+
 // Local Storage Helper with multiple fallbacks
+// Auth tokens are persisted to localStorage only (shared across tabs is intended);
+// non-sensitive UI state goes to sessionStorage only. Reads check both stores
+// during the transition so pre-existing entries keep working.
+const AUTH_LOCAL_ONLY_KEYS = new Set(['accessToken', 'refreshToken', 'user', 'token', 'firebaseIdToken']);
+const UI_SESSION_ONLY_KEYS = new Set(['theme', 'prototypeMode', 'demoRole', 'rememberedUser']);
 const Storage = {
     get(key) {
         // Try localStorage first
@@ -353,11 +395,13 @@ const Storage = {
     },
 
     set(key, value) {
-        // Try to save to all available storage methods
+        // Scope the write to the appropriate store(s)
+        const localOnly = AUTH_LOCAL_ONLY_KEYS.has(key);
+        const sessionOnly = UI_SESSION_ONLY_KEYS.has(key);
         let saved = false;
 
-        // Try localStorage
-        if (storageAvailable) {
+        // Try localStorage (skipped for sessionStorage-scoped UI state)
+        if (storageAvailable && !sessionOnly) {
             try {
                 localStorage.setItem(key, JSON.stringify(value));
                 saved = true;
@@ -366,8 +410,8 @@ const Storage = {
             }
         }
 
-        // Try sessionStorage
-        if (sessionStorageAvailable) {
+        // Try sessionStorage (skipped for auth tokens)
+        if (sessionStorageAvailable && !localOnly) {
             try {
                 sessionStorage.setItem(key, JSON.stringify(value));
                 saved = true;
@@ -444,27 +488,37 @@ const API = {
 
         try {
             const response = await fetch(`${API_URL}${endpoint}`, config);
-            const data = await response.json();
+
+            const contentType = response.headers ? (response.headers.get('content-type') || '') : '';
+            let data = null;
+            if (contentType.includes('application/json')) {
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    data = null;
+                }
+            }
+
+            if (!data) {
+                const error = new Error(`Server error (HTTP ${response.status})`);
+                error.status = response.status;
+                error.data = null;
+
+                if (response.status === 401 && !authExpiryHandled) {
+                    handleAuthExpiry();
+                }
+
+                throw error;
+            }
 
             if (!response.ok) {
-                const error = new Error(data.message || 'Request failed');
+                const message = data.message || data.error || 'Request failed';
+                const error = new Error(message);
                 error.status = response.status;
                 error.data = data;
 
                 if (response.status === 401 && !authExpiryHandled) {
-                    authExpiryHandled = true;
-
-                    if (window.SessionTimeout && typeof window.SessionTimeout.logout === 'function') {
-                        window.SessionTimeout.logout(SESSION_INVALID_LOGOUT_REASON);
-                    } else {
-                        setPostLogoutRedirect('/index.html', SESSION_INVALID_LOGOUT_REASON);
-                        clearClientState({
-                            preserveTheme: true,
-                            preserveLogoutReason: true,
-                            preservePostLogoutRedirect: true
-                        });
-                        window.location.replace('/index.html');
-                    }
+                    handleAuthExpiry();
                 }
 
                 throw error;
@@ -567,6 +621,9 @@ const Socket = {
             auth: { token }
         });
 
+        // Expose the live socket for session-timeout / other consumers
+        (window.APP = window.APP || {}).socket = socket;
+
         socket.on('connect', () => {
             console.log('Socket connected');
             const user = Storage.get('user');
@@ -580,8 +637,16 @@ const Socket = {
             flushPendingSocketListeners(socket);
         });
 
-        socket.on('disconnect', () => {
-            console.log('Socket disconnected');
+        socket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
+            // Refresh the auth payload so an automatic reconnect uses the
+            // current token instead of the stale one captured at connect time.
+            if (socket && reason !== 'io client disconnect') {
+                const currentToken = Storage.get('accessToken');
+                if (currentToken) {
+                    socket.auth = { token: currentToken };
+                }
+            }
         });
 
         return socket;
@@ -990,6 +1055,7 @@ window.APP = {
     formatTime,
     clearClientState,
     clearAppCaches,
+    resetAuthExpiryHandled,
     setPostLogoutRedirect,
     clearPostLogoutRedirect,
     hasExpiredSessionByInactivity,

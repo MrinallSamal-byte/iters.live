@@ -52,20 +52,38 @@
         const key = String(name || '').trim();
         if (!key) return 0;
         if (registry[key]) return Number(registry[key]);
-        const nextId = Math.max(100, ...Object.values(registry).map(Number)) + 1;
-        registry[key] = nextId;
+        // No server-side subjects table exists to mint real IDs, so derive a
+        // deterministic ID from the subject name (same name -> same ID on every
+        // device) instead of inventing per-browser sequence numbers.
+        let hash = 2166136261;
+        for (let i = 0; i < key.length; i++) {
+            hash ^= key.charCodeAt(i);
+            hash = Math.imul(hash, 16777619);
+        }
+        const id = Math.abs(hash % 1000000000) + 1;
+        registry[key] = id;
         saveSubjectRegistry(registry);
         if (!warnedSubjectRegistry) {
             warnedSubjectRegistry = true;
-            console.warn('No /api/subjects endpoint exists server-side; subject IDs are assigned from a local registry.');
+            console.warn('No /api/subjects endpoint exists server-side; subject IDs are derived deterministically from subject names.');
         }
-        return nextId;
+        return id;
+    }
+
+    function teacherProfileSubjects() {
+        const user = window.APP?.Storage?.get?.('user') || {};
+        if (Array.isArray(user.subjects)) return user.subjects.filter(Boolean);
+        if (typeof user.subjects_taught === 'string' && user.subjects_taught.trim()) {
+            return user.subjects_taught.split(',').map((s) => s.trim()).filter(Boolean);
+        }
+        return [];
     }
 
     function refreshSubjectOptions() {
         const registry = loadSubjectRegistry();
+        const names = [...new Set(teacherProfileSubjects().concat(Object.keys(registry)))].sort();
         const options = ['<option value="">All Subjects</option>']
-            .concat(Object.keys(registry).sort().map(name => `<option value="${esc(name)}">${esc(name)}</option>`));
+            .concat(names.map(name => `<option value="${esc(name)}">${esc(name)}</option>`));
         if (els.subjectFilter) els.subjectFilter.innerHTML = options.join('');
     }
 
@@ -91,7 +109,7 @@
                 document.querySelectorAll('.filter-tabs .tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 typeFilter = btn.dataset.filter || 'all';
-                renderGrid(filterQuestionsByType());
+                loadQuestions(1);
             });
         });
 
@@ -111,6 +129,7 @@
             if (search) q.set('q', search);
             if (diff) q.set('difficulty', diff);
             if (subjectName) q.set('subject_id', String(resolveSubjectId(subjectName)));
+            if (typeFilter !== 'all') q.set('question_type', typeFilter);
             q.set('page', String(page));
             q.set('limit', String(limit));
 
@@ -119,7 +138,7 @@
             const payload = await resp.json();
             questions = payload?.data?.items ?? [];
             total = Number(payload?.data?.total ?? questions.length);
-            renderGrid(filterQuestionsByType());
+            renderGrid(questions);
             renderPagination();
             updateStats();
         } catch (err) {
@@ -130,16 +149,19 @@
     }
 
     function filterQuestionsByType() {
-        if (typeFilter === 'all') return questions;
-        return questions.filter(q => q.question_type === typeFilter);
+        // Type filtering happens server-side (question_type query param), so the
+        // loaded page already matches the active tab and pager counts stay in sync.
+        return questions;
     }
 
     function updateStats() {
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
         setEl('totalQuestions', total);
         setEl('subjectCovered', new Set(questions.map(q => q.subject_id)).size);
-        const diffs = questions.map(q => q.difficulty);
-        setEl('avgDifficulty', diffs.length ? diffs[0] ? diffs[0].charAt(0).toUpperCase() + diffs[0].slice(1) : '--' : '--');
+        const counts = {};
+        questions.forEach(q => { if (q.difficulty) counts[q.difficulty] = (counts[q.difficulty] || 0) + 1; });
+        const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+        setEl('avgDifficulty', top ? top[0].charAt(0).toUpperCase() + top[0].slice(1) : '--');
         setEl('questionPapers', localStorage.getItem('qbPaperCount') || 0);
     }
 

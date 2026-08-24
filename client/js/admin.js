@@ -67,14 +67,14 @@
     ]);
     
     // Update stats as soon as data is available
-    setText('totalUsers', stats.totalUsers || 1435);
-    setText('totalStudents', stats.totalStudents || 1250);
-    setText('totalTeachers', stats.totalTeachers || 95);
-    setText('pendingApprovals', stats.pendingApprovals || 12);
-    setText('totalFiles', stats.totalFiles || 420);
-    setText('totalAssignments', stats.totalAssignments || 180);
-    setText('totalEvents', stats.totalEvents || 25);
-    setText('avgAttendance', (stats.avgAttendance || 88) + '%');
+    setText('totalUsers', stats.totalUsers != null ? stats.totalUsers : '--');
+    setText('totalStudents', stats.totalStudents ?? '--');
+    setText('totalTeachers', stats.totalTeachers ?? '--');
+    setText('pendingApprovals', stats.pendingApprovals ?? '--');
+    setText('totalFiles', stats.totalFiles ?? '--');
+    setText('totalAssignments', stats.totalAssignments ?? '--');
+    setText('totalEvents', stats.totalEvents ?? '--');
+    setText('avgAttendance', stats.avgAttendance != null ? stats.avgAttendance + '%' : '--');
 
     // Load charts
     renderUserChart(stats);
@@ -270,38 +270,14 @@
     const cached = dataCache.get('stats');
     if (cached) return cached;
     
-    try { 
+    try {
       const r = await APP.API.get('/admin/stats');
       const stats = r.data || {};
       dataCache.set('stats', stats);
       return stats;
-    } catch(_) { 
-      if (typeof DummyData !== 'undefined') {
-        const r = DummyData.getAdminStats();
-        const stats = r.data || {};
-        dataCache.set('stats', stats);
-        return stats;
-      }
-      return {
-        totalUsers: 1435,
-        totalStudents: 1250,
-        totalTeachers: 95,
-        totalAdmins: 3,
-        pendingApprovals: 12,
-        totalFiles: 420,
-        totalAssignments: 180,
-        totalEvents: 25,
-        avgAttendance: 88,
-        activeClubs: 10,
-        departments: [
-          { name: 'CSE', count: 420 },
-          { name: 'ECE', count: 350 },
-          { name: 'MECH', count: 280 },
-          { name: 'CIVIL', count: 200 },
-          { name: 'IT', count: 180 },
-          { name: 'EEE', count: 170 }
-        ]
-      };
+    } catch(err) {
+      console.error('Error loading admin stats:', err);
+      return {};
     }
   }
 
@@ -347,14 +323,7 @@
     const el = document.getElementById('deptChart');
     if (!el || typeof Chart === 'undefined') return;
 
-    const departments = stats.departments || [
-      { name: 'CSE', count: 420 },
-      { name: 'ECE', count: 350 },
-      { name: 'MECH', count: 280 },
-      { name: 'CIVIL', count: 200 },
-      { name: 'IT', count: 180 },
-      { name: 'EEE', count: 170 }
-    ];
+    const departments = stats.departments || [];
 
     try {
       new Chart(el, {
@@ -422,16 +391,22 @@
         const date = new Date(a.created_at);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const typeColors = {
+          note: 'primary',
           notes: 'primary',
           assignment: 'warning',
+          assignments: 'warning',
           pyq: 'success',
-          announcement: 'info'
+          event: 'info',
+          events: 'info',
+          announcement: 'info',
+          announcements: 'info'
         };
-        const typeColor = typeColors[a.type] || 'primary';
+        const itemType = a.category || a.type || 'file';
+        const typeColor = typeColors[itemType] || 'primary';
 
         return `
           <tr>
-            <td><span class="badge badge-${typeColor}">${escapeHtml(String(a.type || 'file').toUpperCase())}</span></td>
+            <td><span class="badge badge-${typeColor}">${escapeHtml(itemType.toUpperCase())}</span></td>
             <td>${escapeHtml(a.uploaded_by_name || a.uploaded_by || 'Unknown')}</td>
             <td><strong>${escapeHtml(a.title || a.file_name || 'Untitled')}</strong></td>
             <td>${escapeHtml(dateStr)}</td>
@@ -450,29 +425,41 @@
       }).join('');
   }
 
-  function loadRecentActivity(){
+  async function loadRecentActivity(){
     const container = document.getElementById('recentActivity');
     if (!container) return;
 
-    const activities = [
-      { user: 'Dr. Priya Sharma', action: 'uploaded new notes for Data Structures', time: '5 mins ago' },
-      { user: 'Aarav Kumar', action: 'submitted assignment for Algorithms', time: '15 mins ago' },
-      { user: 'Admin User', action: 'approved 3 pending submissions', time: '30 mins ago' },
-      { user: 'Dr. Raj Patel', action: 'created new assignment', time: '1 hour ago' },
-      { user: 'System', action: 'generated attendance reports', time: '2 hours ago' },
-      { user: 'Diya Singh', action: 'registered for TechFest 2025', time: '3 hours ago' },
-      { user: 'Dr. Anita Verma', action: 'updated student marks', time: '4 hours ago' }
-    ];
+    container.innerHTML = '<div class="activity-item"><div class="activity-description" style="font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">LOADING ACTIVITY…</div></div>';
 
-    container.innerHTML = activities.map(a => `
+    let logs;
+    try {
+      const response = await APP.API.get('/admin/activity-log?limit=7');
+      logs = response.data || [];
+    } catch (err) {
+      console.error('Error loading activity log:', err);
+      container.innerHTML = '<div class="activity-item"><div class="activity-description" style="font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">ACTIVITY UNAVAILABLE — COULD NOT REACH THE SERVER</div></div>';
+      return;
+    }
+
+    if (!logs.length) {
+      container.innerHTML = '<div class="activity-item"><div class="activity-description" style="font-family: \'IBM Plex Mono\', ui-monospace, monospace; letter-spacing: 0.08em; color: var(--text-secondary);">NO RECENT ACTIVITY</div></div>';
+      return;
+    }
+
+    container.innerHTML = logs.map(a => {
+      const who = a.user_name || a.user_id || 'System';
+      const what = a.action || a.details || 'activity';
+      const when = a.created_at || a.timestamp;
+      const timeStr = when ? new Date(when).toLocaleString() : '';
+      return `
       <div class="activity-item">
         <div class="activity-header">
-          <span class="activity-user">${a.user}</span>
-          <span class="activity-time">${a.time}</span>
+          <span class="activity-user">${escapeHtml(String(who))}</span>
+          <span class="activity-time">${escapeHtml(timeStr)}</span>
         </div>
-        <div class="activity-description">${a.action}</div>
+        <div class="activity-description">${escapeHtml(String(what))}</div>
       </div>
-    `).join('');
+    `;}).join('');
   }
 
   // Make functions global for onclick handlers
@@ -480,30 +467,22 @@
   window.approveItem = async function(id) {
     try {
       await APP.API.post(`/files/approve/${encodeURIComponent(id)}`, {});
-      if (typeof Toast !== 'undefined') {
-        Toast.success('Item approved successfully', 'Success');
-      } else {
-        showToast('Item approved successfully', 'success');
-      }
+      Toast.success('Item approved successfully', 'Success');
       setTimeout(loadPendingApprovals, 800);
     } catch (err) {
       console.error('Approve failed:', err);
-      showToast(`Approve failed: ${err.message || 'request failed'}`, 'error');
+      Toast.error(`Approve failed: ${err.message || 'request failed'}`);
     }
   };
 
   window.rejectItem = async function(id) {
     try {
       await APP.API.post(`/admin/approvals/${encodeURIComponent(id)}/reject`, {});
-      if (typeof Toast !== 'undefined') {
-        Toast.warning('Item rejected', 'Rejected');
-      } else {
-        showToast('Item rejected', 'success');
-      }
+      Toast.warning('Item rejected', 'Rejected');
       setTimeout(loadPendingApprovals, 800);
     } catch (err) {
       console.error('Reject failed:', err);
-      showToast(`Reject failed: ${err.message || 'request failed'}`, 'error');
+      Toast.error(`Reject failed: ${err.message || 'request failed'}`);
     }
   };
 

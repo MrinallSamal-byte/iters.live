@@ -258,7 +258,8 @@
             } catch (error) {
                 console.error('Error loading notes:', error);
                 console.log('Loading dummy data as fallback...');
-                // Load dummy data for demo - don't show error if dummy data loads successfully
+                // Load dummy data for offline resilience, but tell the user this is cached sample data
+                Toast.warning('Showing cached sample data - could not reach server');
                 this.loadDummyData();
             }
         },
@@ -1681,7 +1682,13 @@
         },
 
         addToRecentDownloads(note) {
-            let recent = JSON.parse(localStorage.getItem('recentDownloads') || '[]');
+            let recent;
+            try {
+                recent = JSON.parse(localStorage.getItem('recentDownloads') || '[]');
+            } catch (e) {
+                console.warn('Corrupt recentDownloads data, resetting:', e);
+                recent = [];
+            }
             
             // Add to beginning, remove if already exists
             recent = recent.filter(r => r.id !== note.id);
@@ -1736,7 +1743,8 @@
                     const stats = await response.json();
                     this.updateStats(stats);
                 } else {
-                    // Use dummy stats
+                    // Offline fallback stats - flag it visibly so sample numbers aren't mistaken for live data
+                    Toast.warning('Showing cached sample data - could not reach server');
                     this.updateStats({
                         totalNotes: this.allNotes.length,
                         downloadedNotes: 12,
@@ -1746,6 +1754,7 @@
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
+                Toast.warning('Showing cached sample data - could not reach server');
             }
         },
 

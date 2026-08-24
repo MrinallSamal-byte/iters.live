@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant - ITERasn hub</title>
+    <title>AI Assistant · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -666,16 +666,17 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="dashboard-container">
         <!-- Navigation will be injected here -->
         <div id="nav-placeholder"></div>
 
-        <main class="main-content">
+        <main class="dashboard-main" aria-label="Student Ai Assistant main content" id="main-content">
             <div class="ai-container">
                 <!-- Header -->
                 <div class="ai-header">
-                    <h1>AI Assistant</h1>
-                    <p>Exam performance prediction, study recommendations, schedules, and chat support</p>
+                    <h1 class="page-title">AI ASSISTANT</h1>
+                    <p class="page-subtitle">Exam performance prediction, study recommendations, schedules, and chat support</p>
                 </div>
 
                 <!-- Feature Cards -->
@@ -775,14 +776,13 @@
         </div>
     </div>
 
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/chatbot.js"></script>
+    <script src="/js/universal-sidebar.js"></script>
     <script>
-        // Load navigation
-        if (typeof loadDashboardNav === 'function') {
-            loadDashboardNav('student');
-        }
-
         let currentUser = null;
 
         // Initialize
@@ -1082,7 +1082,7 @@
             if (window.chatbot) {
                 window.chatbot.toggle();
             } else {
-                alert('Chatbot is loading... Please wait a moment and try again.');
+                Toast.info('Chatbot is loading... Please wait a moment and try again.');
             }
         }
     </script>

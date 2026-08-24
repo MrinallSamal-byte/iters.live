@@ -15,11 +15,11 @@
     <meta property="og:title" content="ITERasn hub | Attendance. Marks. Timetable. One quiet place.">
     <meta property="og:description"
         content="Import your official SOA portal data once - ITERasn hub keeps attendance, marks, timetable, notes and deadlines in a fast, distraction-free dashboard built for daily use.">
-    <title>ITERasn hub | Simplified Campus Portal</title>
+    <title>ITERasn hub | Simplified Campus Portal · ITERasn hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/responsive.css">
@@ -31,6 +31,9 @@
     <link rel="stylesheet" href="/css/navbar-scroll-behavior.css">
     <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="stylesheet" href="/css/home-minimal.css">
+    <!-- Nothing-edition theme cascade: order is load-bearing (refined-ui must stay before home-nothing, both last) -->
+    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="stylesheet" href="/css/home-nothing.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -183,11 +186,10 @@
             checkAuthAndRedirect();
         })();
     </script>
-    <link rel="stylesheet" href="/css/refined-ui.css">
-    <link rel="stylesheet" href="/css/home-nothing.css">
 </head>
 
-<body class="landing-page nothing-home public-home-page">
+<body class="landing-page nothing-home">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div id="logoutNotification" class="logout-notification" style="display: none;">
         <span id="logoutMessage"></span>
     </div>
@@ -215,8 +217,10 @@
                 <a href="#academics" class="nav-link">Programs</a>
                 <a href="/creator.html" class="nav-link">Creator</a>
                 <a href="#contact" class="nav-link">Contact</a>
-                <a href="/register.html" class="btn btn-outline">Register</a>
-                <a href="/login.html" class="btn btn-primary">Portal Login</a>
+                <div class="nav-cta">
+                    <a href="/register.html" class="btn btn-outline">Register</a>
+                    <a href="/login.html" class="btn btn-primary">Portal Login</a>
+                </div>
             </div>
 
             <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" aria-expanded="false">
@@ -227,7 +231,7 @@
         </div>
     </nav>
 
-    <main class="home-main">
+    <main class="home-main" aria-label="Home main content" id="main-content">
         <div class="r-ticker" aria-hidden="true">
             <div class="r-ticker-track">
                 <span>Attendance <b>+</b></span>
@@ -496,6 +500,7 @@
     <script src="/js/scroll-fix.js"></script>
     <script src="/js/page-access-token.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/mobile-nav.js"></script>
     <script src="/js/toast.js"></script>

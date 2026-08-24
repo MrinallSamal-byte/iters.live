@@ -96,10 +96,18 @@ class MobileNavigation {
 
   getCurrentUserRole() {
     try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.role) return user.role;
+      const user = this.safeParseUser();
+      return (user && user.role) ? user.role : 'student';
     } catch (e) { }
-    return localStorage.getItem('userRole') || 'student';
+    return 'student';
+  }
+
+  safeParseUser() {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {
+      return {};
+    }
   }
 
   /**

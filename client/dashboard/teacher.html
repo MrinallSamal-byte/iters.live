@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard - ITERasn hub</title>
+    <title>Teacher Dashboard · ITERasn hub</title>
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
@@ -50,8 +50,9 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Main Content -->
-    <main class="dashboard-main">
+    <main class="dashboard-main" aria-label="Teacher main content" id="main-content">
         <!-- Welcome Section -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
@@ -91,7 +92,7 @@
             <!-- Attendance Overview -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Attendance Overview
                     </h3>
                     <span class="section-badge">Last 7 Days</span>
@@ -104,7 +105,7 @@
             <!-- Performance Distribution -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Performance Distribution
                     </h3>
                     <span class="section-badge">Current Semester</span>
@@ -118,7 +119,7 @@
         <!-- Pending Submissions -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Pending Submissions
                 </h3>
                 <span class="notification-badge" id="submissionCount">0</span>
@@ -146,7 +147,7 @@
             <!-- Upcoming Classes -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Today's Classes
                     </h3>
                 </div>
@@ -160,7 +161,7 @@
             <!-- Recent Announcements -->
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
+                    <h2 class="section-title-formal">
                         # Recent Announcements
                     </h3>
                 </div>
@@ -175,7 +176,7 @@
         <!-- Quick Links -->
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
-                <h3 class="section-title-formal">
+                <h2 class="section-title-formal">
                     # Quick Actions
                 </h3>
             </div>
@@ -237,6 +238,7 @@
     <script src="/js/page-access-token.js"></script>
     <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/live-updates.js" defer></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/universal-sidebar.js"></script>
     <script src="/js/universal-profile.js"></script>

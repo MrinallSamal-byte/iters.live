@@ -246,7 +246,7 @@ body.light-theme .profile-dropdown {
     object-fit: contain;
     background: white;
     padding: 3px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    box-shadow: none;
     transition: box-shadow var(--transition-base), transform var(--transition-base);
 }
 
@@ -1023,7 +1023,7 @@ body.light-theme select optgroup {
     cursor: pointer;
     transition: all var(--transition-base);
     z-index: 9999;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
     padding: 0;
     margin: 0;
 }
@@ -1057,7 +1057,7 @@ body.light-theme select optgroup {
 body.light-theme .theme-toggle {
     background: rgba(255, 255, 255, 0.9);
     border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 body.light-theme .theme-toggle:hover {

@@ -17,14 +17,6 @@
             await NavLoader.load('student', 'marks');
         }
 
-        if (typeof ParticleSystem !== 'undefined' && document.getElementById('particleCanvas')) {
-            new ParticleSystem('particleCanvas', {
-                particleCount: 50,
-                particleColor: 'rgba(99, 102, 241, 0.5)',
-                speed: 0.3
-            });
-        }
-
         initCgpaPlanner();
         await loadMarksData();
     });
