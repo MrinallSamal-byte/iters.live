@@ -63,8 +63,13 @@
         summaryTotal.textContent = `₹ ${total.toFixed(2)}`;
     }
 
+    let paymentInFlight = false;
+
     async function handleSubmit(e) {
         e.preventDefault();
+
+        if (paymentInFlight) return;
+        paymentInFlight = true;
 
         const form = e.target;
         const submitBtn = document.getElementById('submitPayment');
@@ -123,6 +128,7 @@
             notify(error.message || 'Failed to process payment. Please try again.', 'error');
         } finally {
             // Hide loading state
+            paymentInFlight = false;
             submitBtn.disabled = false;
             btnText.style.display = 'inline';
             btnLoading.style.display = 'none';

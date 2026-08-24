@@ -16,6 +16,16 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const portalController = require('../controllers/portal.controller');
+const rateLimit = require('express-rate-limit');
+
+// Strict limiter for credential endpoints (brute-force protection)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many portal login attempts. Please try again later.' }
+});
 
 /**
  * POST /api/portal/login
@@ -36,7 +46,7 @@ const portalController = require('../controllers/portal.controller');
  * Response (Success):
  * { success: true, status: "SUCCESS", data: {...} }
  */
-router.post('/login', optionalAuth, portalController.portalLogin);
+router.post('/login', loginLimiter, optionalAuth, portalController.portalLogin);
 
 /**
  * GET /api/portal/demo

@@ -19,6 +19,15 @@ const loginLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts. Please try again later.' }
 });
 
+// Dedicated limiter for account creation (prevents mass registration abuse)
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many registration attempts. Please try again later.' }
+});
+
 function buildLocalDemoLoginResponse(user) {
   const localAccessToken = `demo-local-${user.registration_number || user.id || user.role}-${Date.now()}`;
   return {
@@ -230,7 +239,7 @@ router.post('/login', loginLimiter, [
  * POST /api/auth/register-student
  * Register a new student
  */
-router.post('/register-student', [
+router.post('/register-student', registerLimiter, [
   body('name').trim().notEmpty(),
   body('registration_number').trim().notEmpty(),
   body('email').isEmail(),

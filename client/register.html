@@ -170,11 +170,11 @@
         <span class="theme-icon">🌙</span>
     </button>
 
-    <script src="/js/mobile-fixes.js"></script>
-    <script src="/js/prevent-empty-hash.js"></script>
-    <script src="/js/scroll-fix.js"></script>
-    <script src="/js/main.js"></script>
-    <script src="/js/mobile-nav.js"></script>
+    <script defer src="/js/mobile-fixes.js"></script>
+    <script defer src="/js/prevent-empty-hash.js"></script>
+    <script defer src="/js/scroll-fix.js"></script>
+    <script defer src="/js/main.js"></script>
+    <script defer src="/js/mobile-nav.js"></script>
     <script>
         function selectRole(role) {
             document.getElementById('selectedRole').value = role;
@@ -343,8 +343,7 @@
         // NOTE: Service worker registration is owned by /js/main.js —
         // do not register it again here (was previously duplicated).
     </script>
-    <script src="/js/page-access-token.js"></script>
-    <script src="/js/linkEncoding.js"></script>
-    <script src="/js/chatbot.js"></script>
+    <script defer src="/js/page-access-token.js"></script>
+    <script defer src="/js/linkEncoding.js"></script>
 </body>
 </html>

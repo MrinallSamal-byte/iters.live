@@ -3,6 +3,7 @@
  * Handles student payment operations: create, view, history, receipt generation
  */
 
+const crypto = require('crypto');
 const { db, admin } = require('../database/firebase');
 const PDFDocument = require('pdfkit');
 
@@ -24,15 +25,22 @@ const createPayment = async (req, res) => {
         }
 
         // Validate amount
-        if (isNaN(amount) || parseFloat(amount) <= 0) {
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
             return res.status(400).json({
                 success: false,
-                error: 'Invalid amount'
+                error: 'Invalid amount: amount must be a positive number'
+            });
+        }
+        if (parsedAmount > 1e7) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid amount: amount cannot exceed 1,00,00,000'
             });
         }
 
-        // Generate payment ID
-        const paymentId = `PAY${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        // Generate collision-proof payment ID
+        const paymentId = `PAY${crypto.randomUUID().replace(/-/g, '')}`;
 
         // Create payment record
         const payment = {
@@ -41,14 +49,14 @@ const createPayment = async (req, res) => {
             studentName: req.user.name,
             studentEmail: req.user.email,
             studentRegNo: req.user.registration_number || req.user.reg_no || req.user.student_id || 'N/A',
-            amount: parseFloat(amount),
+            amount: parsedAmount,
             semester,
             category,
             paymentMethod,
             description: description || '',
             // ponytail: no gateway verification -> verify via gateway webhook before marking completed
             status: req.user.role === 'admin' ? 'completed' : 'pending',
-            transactionId: `TXN${Date.now()}`,
+            transactionId: `TXN${crypto.randomUUID().replace(/-/g, '')}`,
             paymentDate: admin.firestore.FieldValue.serverTimestamp(),
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             // Admin reconciliation fields
@@ -112,7 +120,20 @@ const getPaymentHistory = async (req, res) => {
         const pageNum = parseInt(page);
         const limitNum = parseInt(limit);
         const offset = (pageNum - 1) * limitNum;
-        
+
+        if (offset >= total) {
+            return res.json({
+                success: true,
+                data: [],
+                pagination: {
+                    total: total,
+                    page: pageNum,
+                    limit: limitNum,
+                    totalPages: Math.ceil(total / limitNum)
+                }
+            });
+        }
+
         if (offset > 0) {
             // Get documents for pagination offset
             const offsetSnapshot = await query.limit(offset).get();

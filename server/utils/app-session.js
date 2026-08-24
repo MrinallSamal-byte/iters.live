@@ -1,14 +1,20 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// ponytail: ephemeral random secret keeps the site up when JWT_SECRET is unset,
-// but sessions die on every cold start -> set JWT_SECRET in the host dashboard
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+// Security policy for the JWT signing secret:
+// - production: JWT_SECRET MUST be set -> fail fast at boot, never fall back
+//   to a guessable value (a known fallback would allow session forgery).
+// - development: generate a random ephemeral secret once per boot so local
+//   runs keep working without extra env setup.
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET is not set. Refusing to start in production without an explicit JWT_SECRET.');
+  }
   process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
-  console.warn('⚠️  JWT_SECRET is NOT set in production. Using a random ephemeral secret — login sessions will not survive instance restarts. Set JWT_SECRET in your hosting dashboard.');
+  console.warn('⚠️  JWT_SECRET is NOT set. Using a random ephemeral secret for this boot (dev only) — all sessions invalidate on restart. Set JWT_SECRET to persist sessions.');
 }
 
-const APP_SESSION_SECRET = process.env.JWT_SECRET || 'iterasn-hub-dev-secret';
+const APP_SESSION_SECRET = process.env.JWT_SECRET;
 const APP_SESSION_EXPIRE = process.env.JWT_EXPIRE || '7d';
 
 function sanitizeUser(user = {}) {

@@ -31,8 +31,7 @@
 
     async function init() {
         setupEventListeners();
-        await loadPaymentStats();
-        await loadPaymentHistory();
+        await Promise.all([loadPaymentStats(), loadPaymentHistory()]);
     }
 
     function setupEventListeners() {

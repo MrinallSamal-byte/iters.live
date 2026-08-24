@@ -8,6 +8,7 @@ const {
   buildMarksRouteData
 } = require('../services/soa-data.service');
 const {
+  findOne,
   getRecord,
   createRecord,
   listRecords
@@ -231,14 +232,80 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
       semester
     } = req.body;
 
+    // --- Validation ---
+    if (!student_id || !subject || !exam_type) {
+      return res.status(400).json({
+        success: false,
+        message: 'student_id, subject, and exam_type are required'
+      });
+    }
+
+    const parsedMarks = toNumber(marks_obtained, NaN);
+    const parsedTotal = toNumber(total_marks, NaN);
+
+    if (!Number.isFinite(parsedTotal) || !Number.isInteger(parsedTotal) || parsedTotal < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'total_marks must be an integer greater than or equal to 1'
+      });
+    }
+
+    const marksIsValid = Number.isFinite(parsedMarks)
+      && parsedMarks >= 0
+      && parsedMarks <= parsedTotal
+      && (Number.isInteger(parsedMarks) || Number.isInteger(parsedMarks * 10));
+    if (!marksIsValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'marks_obtained must be a number between 0 and total_marks, with at most one decimal place'
+      });
+    }
+
+    const parsedExamDate = new Date(exam_date);
+    if (!exam_date || Number.isNaN(parsedExamDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'exam_date must be a valid date'
+      });
+    }
+    if (parsedExamDate > new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'exam_date cannot be in the future'
+      });
+    }
+
     const student = await getRecord('users', student_id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+
+    const normalizedDate = String(exam_date).slice(0, 10);
+    const duplicate = await findOne('marks', {
+      filters: [
+        { field: 'student_id', value: student_id },
+        { field: 'subject', value: subject },
+        { field: 'exam_type', value: exam_type },
+        { field: 'exam_date', value: normalizedDate }
+      ]
+    });
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        message: `A record for this student already exists for ${subject} (${exam_type}) on ${normalizedDate}`
+      });
+    }
+
     const record = await createRecord('marks', {
       student_id,
       subject,
       exam_type,
-      marks_obtained: toNumber(marks_obtained, 0),
-      total_marks: toNumber(total_marks, 0),
-      exam_date,
+      marks_obtained: parsedMarks,
+      total_marks: parsedTotal,
+      exam_date: normalizedDate,
       semester: semester ?? student?.semester ?? null,
       uploaded_by: req.user.id,
       remarks: remarks || null,

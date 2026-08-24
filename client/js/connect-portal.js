@@ -18,6 +18,7 @@
     let currentConnection = null;
     let currentRuntime = null;
     let importProgressListenerAttached = false;
+    let importInFlight = false;
     let importProgressAwaiting = false;
     let importProgressActiveIndex = -1;
 
@@ -351,6 +352,8 @@
     async function importPortalData(event) {
         event.preventDefault();
 
+        if (importInFlight) return;
+
         const regNo = regNumberInput?.value.trim();
         const password = portalPasswordInput?.value || '';
         const captcha = captchaInput?.value.trim();
@@ -366,6 +369,7 @@
         }
 
         rememberRegistrationNumber(regNo);
+        importInFlight = true;
         setButtonLoading(importBtn, 'Importing SOA data');
         setStatus('info', 'Importing your SOA data.', 'This can take a short while while we log in, collect the available sections, and save them to your account.');
         beginImportProgressTracking();
@@ -425,6 +429,7 @@
                 setStatus('error', 'SOA import failed.', payload.message || error.message || 'Fetch a fresh CAPTCHA and try again.');
             }
         } finally {
+            importInFlight = false;
             importProgressAwaiting = false;
             resetButton(importBtn);
         }
@@ -446,7 +451,8 @@
             case 'fetching-attendance': return 2;
             case 'fetching-marks': return 3;
             case 'fetching-timetable': return 4;
-            case 'saving': return 5;
+            case 'saving': return 6;
+            case 'done': return IMPORT_PROGRESS_STAGES.length;
             default: return -1;
         }
     }

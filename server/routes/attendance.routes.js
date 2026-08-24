@@ -89,13 +89,50 @@ async function loadAttendanceData(studentId, useCache = true) {
 router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
     const { student_id, subject, date, status, remarks } = req.body;
+
+    const VALID_STATUSES = ['present', 'absent', 'late'];
+    const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : '';
+    if (!VALID_STATUSES.includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid attendance status. Valid values are: ${VALID_STATUSES.join(', ')}`
+      });
+    }
+
+    const parsedDate = new Date(date);
+    if (!date || Number.isNaN(parsedDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'date must be a valid date'
+      });
+    }
+    if (parsedDate > new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: 'date cannot be in the future'
+      });
+    }
+
+    if (!student_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'student_id is required'
+      });
+    }
+
     const student = await getRecord('users', student_id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
 
     const payload = {
       student_id,
       subject,
       date,
-      status,
+      status: normalizedStatus,
       remarks: remarks || null,
       marked_by: req.user.id,
       department: student?.department || null,

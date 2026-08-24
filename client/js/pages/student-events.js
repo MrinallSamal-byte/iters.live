@@ -152,8 +152,7 @@
     ];
 
     async function init() {
-        await loadUserData();
-        await loadEvents();
+        await Promise.all([loadUserData(), loadEvents()]);
         setupEventListeners();
         updateStats();
     }

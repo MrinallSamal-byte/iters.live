@@ -140,6 +140,9 @@ if (!IS_SERVERLESS) {
 app.set('io', io);
 
 // Security middleware
+// TODO(security): enable a strict Content-Security-Policy (helmet CSP) once all
+// inline scripts/styles in client/ are audited. Left disabled deliberately —
+// turning it on blind would break pages; needs a full client-side audit first.
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
@@ -254,10 +257,14 @@ app.use((req, res, next) => {
 // On Vercel, runtime uploads land in /tmp; fall through to the bundled
 // repo uploads directory (demo/seed files) for anything not found there.
 const { getUploadsBaseDir } = require('./utils/uploads-dir.util');
-// ponytail: uploads dir still world-readable via /static/uploads -> serve sensitive subdirs through auth-checked routes
-app.use('/static/uploads', express.static(getUploadsBaseDir()));
+// Security: only the avatars subdir is public (profile pictures shown to
+// logged-in users). admitcards/ contain PII and notes/ are gated content, so
+// they are NOT served statically anymore — clients must use the auth-checked
+// download routes (/api/admitcard/:studentId/download, /api/notes/:id/download).
+const uploadsBaseDir = getUploadsBaseDir();
+app.use('/static/uploads/avatars', express.static(path.join(uploadsBaseDir, 'avatars')));
 if (IS_SERVERLESS) {
-  app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
+  app.use('/static/uploads/avatars', express.static(path.join(__dirname, '../uploads/avatars')));
 }
 
 // Serve client static assets (CSS, JS, images) - needed for pages served from /web/:sessionId

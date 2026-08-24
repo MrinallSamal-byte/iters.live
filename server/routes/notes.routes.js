@@ -13,6 +13,23 @@ const {
 } = require('../services/firebase-data.service');
 const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 
+// Extension whitelist keyed by validated MIME type — the stored extension is
+// always derived from the accepted MIME, never from user input.
+const NOTE_MIME_EXT = {
+  'application/pdf': '.pdf',
+  'application/msword': '.doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'application/vnd.ms-powerpoint': '.ppt',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+  'text/plain': '.txt'
+};
+
+function sanitizeNoteFilename(originalname = '') {
+  const base = path.basename(String(originalname));
+  const cleaned = base.toLowerCase().replace(/[^a-z0-9._-]/g, '_').replace(/\.{2,}/g, '.');
+  return cleaned.replace(/^[._-]+/, '') || 'note';
+}
+
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = path.join(getUploadsBaseDir(), 'notes');
@@ -21,19 +38,17 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
+    const base = sanitizeNoteFilename(file.originalname).replace(/\.[a-z0-9]+$/, '');
+    // Extension always comes from the validated MIME type, not user input
+    cb(null, `${uniqueSuffix}-${base}${NOTE_MIME_EXT[file.mimetype] || '.bin'}`);
   }
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /pdf|doc|docx|ppt|pptx|txt/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (extname && mimetype) {
+    if (Object.prototype.hasOwnProperty.call(NOTE_MIME_EXT, file.mimetype)) {
       return cb(null, true);
     }
     cb(new Error('Only PDF, DOC, DOCX, PPT, PPTX, and TXT files are allowed!'));

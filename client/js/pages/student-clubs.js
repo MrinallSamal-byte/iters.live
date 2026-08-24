@@ -145,8 +145,7 @@
     ];
 
     async function init() {
-        await loadUserData();
-        await loadClubs();
+        await Promise.all([loadUserData(), loadClubs()]);
         updateStats();
     }
 
