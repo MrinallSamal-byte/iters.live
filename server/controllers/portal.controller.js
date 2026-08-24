@@ -555,17 +555,24 @@ const getDemoData = async (req, res) => {
  */
 const syncPortalData = async (req, res) => {
   try {
-    const { reg_number, password, useDemoData } = req.body;
-    const userId = req.user ? (req.user.id || req.user.uid) : null;
+    const { password, useDemoData } = req.body;
+    const userId = req.user.id;
+
+    // IDOR fix: ignore caller-supplied reg_number; students are pinned to their own account
+    const regNumber = (req.user.role !== 'student' && req.query.reg_number)
+      ? String(req.query.reg_number)
+      : (req.user.registration_number || null);
 
     // If explicitly requesting demo data OR portal is disabled, return demo data
     if (useDemoData === true || !isPortalEnabled()) {
       if (!isPortalEnabled()) {
         console.log('Portal sync attempted but feature is disabled - redirecting to demo data');
       }
-      return await saveDemoData(userId, reg_number, res);
+      return await saveDemoData(userId, regNumber, res);
     }
 
+    // ponytail: mutating req.body to keep delegated portalLogin pinned -> pass resolved identity explicitly instead
+    req.body.reg_number = regNumber;
     // Use the new login function with 3-attempt logic for live portal sync
     return await portalLogin(req, res);
   } catch (error) {
@@ -1002,17 +1009,21 @@ const loadBackupData = async (req, res) => {
   }
 
   try {
-    const { reg_number } = req.body;
-    const userId = req.user ? (req.user.id || req.user.uid) : null;
+    const userId = req.user.id;
 
-    if (!reg_number && !userId) {
+    // IDOR fix: ignore caller-supplied reg_number; staff may target another student via explicit ?reg_number=
+    const regNumber = (req.user.role !== 'student' && req.query.reg_number)
+      ? String(req.query.reg_number)
+      : (req.user.registration_number || null);
+
+    if (!regNumber) {
       return res.status(400).json({
         success: false,
         message: 'Registration number is required'
       });
     }
 
-    const backupData = await tryLoadBackupData(reg_number, userId);
+    const backupData = await tryLoadBackupData(regNumber, userId);
     
     if (backupData) {
       return res.json({
@@ -1071,11 +1082,14 @@ const recoverPortalData = async (req, res) => {
   }
 
   try {
-    const { reg_number } = req.query;
-    const userId = req.user ? (req.user.id || req.user.uid) : null;
-    const regNumber = reg_number || (req.user ? req.user.registration_number : null);
+    const userId = req.user.id;
 
-    if (!regNumber && !userId) {
+    // IDOR fix: ignore caller-supplied reg_number; staff may target another student via explicit ?reg_number=
+    const regNumber = (req.user.role !== 'student' && req.query.reg_number)
+      ? String(req.query.reg_number)
+      : (req.user.registration_number || null);
+
+    if (!regNumber) {
       return res.status(400).json({
         success: false,
         message: 'Registration number or authentication is required'
@@ -1162,10 +1176,15 @@ const fetchPortalData = async (req, res) => {
   }
 
   try {
-    const { reg_number, password } = req.body;
-    const userId = req.user ? (req.user.id || req.user.uid) : null;
+    const { password } = req.body;
+    const userId = req.user.id;
 
-    if (!reg_number || !password) {
+    // IDOR fix: ignore caller-supplied reg_number; staff may target another student via explicit ?reg_number=
+    const regNumber = (req.user.role !== 'student' && req.query.reg_number)
+      ? String(req.query.reg_number)
+      : (req.user.registration_number || null);
+
+    if (!regNumber || !password) {
       return res.status(400).json({
         success: false,
         message: 'Registration number and password are required'
@@ -1181,19 +1200,19 @@ const fetchPortalData = async (req, res) => {
     
     try {
       // Scrape portal data using Node.js scraper
-      const scraperResponse = await scraper.scrape(reg_number, password);
+      const scraperResponse = await scraper.scrape(regNumber, password);
       
       const { status, data, message, failureReasons } = scraperResponse;
 
       if (status === STATUS_SUCCESS) {
         // Save to Firestore
-        await savePortalDataToFirestore(userId, reg_number, data, true);
+        await savePortalDataToFirestore(userId, regNumber, data, true);
 
         // Save to Google Drive backup
-        await saveToGoogleDriveBackup(reg_number, data);
+        await saveToGoogleDriveBackup(regNumber, data);
 
         // Save to Google Sheets backup
-        await saveToGoogleSheetsBackup(reg_number, data);
+        await saveToGoogleSheetsBackup(regNumber, data);
 
         return res.json({
           success: true,
@@ -1251,9 +1270,14 @@ const saveBackup = async (req, res) => {
   }
 
   try {
-    const { reg_number, data } = req.body;
-    const userId = req.user ? (req.user.id || req.user.uid) : null;
-    const regNumber = reg_number || (req.user ? req.user.registration_number : null);
+    const { data } = req.body;
+    const userId = req.user.id;
+
+    // IDOR fix: ignore caller-supplied reg_number; staff may target another student via explicit ?reg_number=
+    // ponytail: staff override also allows writing another student's Drive backup -> restrict override to read-only endpoints
+    const regNumber = (req.user.role !== 'student' && req.query.reg_number)
+      ? String(req.query.reg_number)
+      : (req.user.registration_number || null);
 
     if (!regNumber) {
       return res.status(400).json({

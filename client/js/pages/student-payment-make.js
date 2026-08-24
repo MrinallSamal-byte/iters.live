@@ -141,18 +141,18 @@
         overlay.innerHTML = `
             <div style="
                 background: var(--bg-primary);
-                border-radius: 16px;
+                border: 1px solid #333;
+                border-radius: 2px;
                 padding: 3rem;
                 max-width: 500px;
                 text-align: center;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
                 animation: slideUp 0.3s ease;
             ">
                 <div style="
                     width: 80px;
                     height: 80px;
                     background: rgba(34, 197, 94, 0.1);
-                    border-radius: 50%;
+                    border-radius: 2px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -164,7 +164,7 @@
                 <div style="
                     background: var(--bg-secondary);
                     padding: 1.5rem;
-                    border-radius: 12px;
+                    border-radius: 2px;
                     text-align: left;
                     margin-bottom: 2rem;
                 ">
@@ -178,7 +178,7 @@
                     </div>
                     <div>
                         <small style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Amount</small>
-                        <strong style="color: var(--primary-color); font-size: 1.5rem;">₹ ${paymentData.amount.toFixed(2)}</strong>
+                        <strong style="color: var(--primary); font-size: 1.5rem;">₹ ${paymentData.amount.toFixed(2)}</strong>
                     </div>
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.875rem;">

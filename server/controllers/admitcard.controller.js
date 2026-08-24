@@ -48,7 +48,7 @@ async function findAdmitCardFile(studentId, registrationNumber, metadata = null)
       return false;
     }
     return file.includes(String(studentId)) || (registrationNumber && file.includes(String(registrationNumber)));
-  }) || files[0];
+  });
 
   if (candidate) {
     candidates.push({
@@ -113,7 +113,7 @@ async function getAdmitCard(req, res) {
       mime,
       size: stats?.size || admitCard?.size || 0,
       download_count: admitCard?.download_count || 0,
-      public_url: fileInfo?.fileName ? `/uploads/admitcards/${encodeURIComponent(fileInfo.fileName)}` : null,
+      public_url: fileInfo?.fileName ? `/static/uploads/admitcards/${encodeURIComponent(fileInfo.fileName)}` : null,
       download_url: `/api/admitcard/${encodeURIComponent(studentId)}/download`,
       created_at: admitCard?.created_at || null
     };

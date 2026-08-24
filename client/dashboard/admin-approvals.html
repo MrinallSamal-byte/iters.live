@@ -48,19 +48,12 @@
 </head>
 
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">✅</span> Pending Approvals </h1>
+                    <h1 class="page-title"> Pending Approvals </h1>
                     <p class="page-subtitle">Review and approve submitted content from teachers and students</p>
                 </div>
             </div>
@@ -68,26 +61,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">📄</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="pendingNotes">--</div>
                 <div class="stat-text">Pending Notes</div>
                 <div class="stat-subtext">Awaiting review</div>
             </div>
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📝</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="pendingAssignments">--</div>
                 <div class="stat-text">Assignments</div>
                 <div class="stat-subtext">Need approval</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✓</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="approvedToday">--</div>
                 <div class="stat-text">Approved Today</div>
                 <div class="stat-subtext">Successfully processed</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏱️</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="avgResponseTime">--</div>
                 <div class="stat-text">Avg Response</div>
                 <div class="stat-subtext">Processing time</div>
@@ -95,39 +84,37 @@
         </section>
 
         <!-- Filter Section -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔍</span>
-                    Filter Approvals
+                    # Filter Approvals
                 </h3>
             </div>
 
             <div class="filter-buttons-container">
                 <button class="filter-btn active" data-filter="all" onclick="filterApprovals('all')">
-                    <span>📋</span> All Items
+                    All Items
                 </button>
                 <button class="filter-btn" data-filter="notes" onclick="filterApprovals('notes')">
-                    <span>📚</span> Notes
+                    Notes
                 </button>
                 <button class="filter-btn" data-filter="assignments" onclick="filterApprovals('assignments')">
-                    <span>📝</span> Assignments
+                    Assignments
                 </button>
                 <button class="filter-btn" data-filter="events" onclick="filterApprovals('events')">
-                    <span>🎉</span> Events
+                    Events
                 </button>
                 <button class="filter-btn" data-filter="announcements" onclick="filterApprovals('announcements')">
-                    <span>📢</span> Announcements
+                    Announcements
                 </button>
             </div>
         </section>
 
         <!-- Approvals Table -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    Approval Queue
+                    # Approval Queue
                     <span id="approvalCount" class="result-count"></span>
                 </h3>
             </div>
@@ -155,11 +142,10 @@
         </section>
 
         <!-- Recently Approved -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">✅</span>
-                    Recently Approved
+                    # Recently Approved
                 </h3>
             </div>
 
@@ -171,7 +157,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Scripts -->
@@ -449,40 +435,6 @@
             --error: #d71921;
             --success: #e8e8e8;
             --warning: #d71921;
-        }
-
-        /* Dark theme improvements */
-        [data-theme="dark"] .page-title,
-        [data-theme="dark"] .modern-table td,
-        [data-theme="dark"] .approved-title {
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .stat-subtext,
-        [data-theme="dark"] .result-count,
-        [data-theme="dark"] .approved-meta,
-        [data-theme="dark"] .filter-btn,
-        [data-theme="dark"] .loading-text {
-            color: #b0b0b0;
-        }
-
-        [data-theme="dark"] .modern-table th,
-        [data-theme="dark"] .badge.primary,
-        [data-theme="dark"] .badge.success,
-        [data-theme="dark"] .badge.info,
-        [data-theme="dark"] .approved-badge {
-            color: #757575;
-        }
-
-        [data-theme="dark"] .filter-btn.active {
-            color: #d71921;
-        }
-
-        [data-theme="dark"] .filter-btn.active,
-        [data-theme="dark"] .badge.warning,
-        [data-theme="dark"] .badge.danger {
-            color: #d71921;
         }
 
         /* Light theme normalization */

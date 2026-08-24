@@ -46,13 +46,6 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
@@ -61,7 +54,7 @@
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">👥</span> Student Clubs </h1>
+                    <h1 class="page-title">Student Clubs</h1>
                     <p class="page-subtitle">Join clubs and connect with like-minded peers</p>
                 </div>
             </div>
@@ -70,22 +63,18 @@
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎪</div>
                 <div class="stat-number" id="totalClubs">--</div>
                 <div class="stat-text">Total Clubs</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
                 <div class="stat-number" id="myClubsCount">--</div>
                 <div class="stat-text">My Clubs</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">👤</div>
                 <div class="stat-number" id="totalMembers">--</div>
                 <div class="stat-text">Total Members</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
                 <div class="stat-number" id="activeClubs">--</div>
                 <div class="stat-text">Active Clubs</div>
             </div>
@@ -95,7 +84,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="myClubsSection" style="display: none;">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⭐</span>
                     My Clubs
                 </h3>
             </div>
@@ -108,15 +96,14 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🎭</span>
                     All Clubs
                 </h3>
-                <span class="section-badge">Explore & Join</span>
+                <span class="section-badge">Explore &amp; Join</span>
             </div>
             <div class="clubs-grid" id="clubsGrid">
+                <!-- CUT CORNER: student-clubs.js re-injects .empty-state-icon and club emoji icons (file not in ownership scope) -->
                 <div class="empty-state">
-                    <div class="empty-state-icon">👥</div>
-                    <p>Loading clubs...</p>
+                    <div class="loading-text">Loading clubs...</div>
                 </div>
             </div>
         </section>
@@ -147,13 +134,6 @@
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
             color: var(--r-text);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .title-icon {
-            font-size: 2.5rem;
         }
 
         .page-subtitle {
@@ -359,12 +339,6 @@
             text-align: center;
             padding: 3rem 1rem;
             color: var(--r-text-3);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
         }
 
         @media (max-width: 768px) {

@@ -46,19 +46,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📋</span> Rubric Creator </h1>
+                    <h1 class="page-title"> Rubric Creator </h1>
                     <p class="page-subtitle">Create grading rubrics for assignments and assessments</p>
                 </div>
             </div>
@@ -66,26 +59,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📋</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="totalRubrics">--</div>
                 <div class="stat-text">Total Rubrics</div>
                 <div class="stat-subtext">Created</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="activeRubrics">--</div>
                 <div class="stat-text">Active</div>
                 <div class="stat-subtext">In use</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="avgCriteria">--</div>
                 <div class="stat-text">Avg Criteria</div>
                 <div class="stat-subtext">Per rubric</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎯</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="templatesUsed">--</div>
                 <div class="stat-text">Templates</div>
                 <div class="stat-subtext">Available</div>
@@ -93,11 +82,10 @@
         </section>
 
         <!-- Create New Rubric -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">➕</span>
-                    Create New Rubric
+                    # Create New Rubric
                 </h3>
             </div>
             
@@ -105,7 +93,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="rubricTitle" class="form-label">
-                            <span class="label-icon">📌</span>
                             Rubric Title
                         </label>
                         <input type="text" id="rubricTitle" name="title" class="form-input" placeholder="e.g., Project Assessment Rubric" required>
@@ -113,7 +100,6 @@
                     
                     <div class="form-group">
                         <label for="assessmentType" class="form-label">
-                            <span class="label-icon">📝</span>
                             Assessment Type
                         </label>
                         <select id="assessmentType" name="assessmentType" class="form-select" required>
@@ -129,7 +115,6 @@
 
                     <div class="form-group">
                         <label for="totalPoints" class="form-label">
-                            <span class="label-icon">💯</span>
                             Total Points
                         </label>
                         <input type="number" id="totalPoints" name="totalPoints" class="form-input" placeholder="100" min="1" required>
@@ -138,7 +123,6 @@
 
                 <div class="form-group">
                     <label for="description" class="form-label">
-                        <span class="label-icon">📄</span>
                         Description
                     </label>
                     <textarea id="description" name="description" class="form-textarea" rows="3" placeholder="Brief description of the rubric..."></textarea>
@@ -146,27 +130,26 @@
 
                 <div class="template-selector">
                     <label class="form-label">
-                        <span class="label-icon">📑</span>
                         Start from Template (Optional)
                     </label>
                     <div class="template-grid">
                         <button type="button" class="template-card" onclick="loadTemplate('basic')">
-                            <span class="template-icon">📝</span>
+                            <span class="template-icon">01</span>
                             <div class="template-name">Basic 4-Level</div>
                             <small>4 criteria, 4 levels</small>
                         </button>
                         <button type="button" class="template-card" onclick="loadTemplate('detailed')">
-                            <span class="template-icon">📊</span>
+                            <span class="template-icon">02</span>
                             <div class="template-name">Detailed</div>
                             <small>6 criteria, 5 levels</small>
                         </button>
                         <button type="button" class="template-card" onclick="loadTemplate('presentation')">
-                            <span class="template-icon">🎤</span>
+                            <span class="template-icon">03</span>
                             <div class="template-name">Presentation</div>
                             <small>Pre-configured</small>
                         </button>
                         <button type="button" class="template-card" onclick="loadTemplate('project')">
-                            <span class="template-icon">🚀</span>
+                            <span class="template-icon">04</span>
                             <div class="template-name">Project</div>
                             <small>Project-specific</small>
                         </button>
@@ -176,14 +159,13 @@
         </section>
 
         <!-- Rubric Builder -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔨</span>
-                    Rubric Builder
+                    # Rubric Builder
                 </h3>
                 <button class="btn btn-secondary btn-sm" onclick="addCriterion()">
-                    <span>➕</span> Add Criterion
+                    + Add Criterion
                 </button>
             </div>
 
@@ -210,7 +192,7 @@
                         </div>
                     </div>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="addLevel()">
-                        <span>➕</span> Add Level
+                        + Add Level
                     </button>
                 </div>
 
@@ -225,10 +207,10 @@
                     <span>✓</span> Save Rubric
                 </button>
                 <button class="btn btn-secondary" onclick="previewRubric()">
-                    <span>👁️</span> Preview
+                    Preview
                 </button>
                 <button class="btn btn-secondary" onclick="exportRubric()">
-                    <span>📥</span> Export PDF
+                    Export PDF
                 </button>
                 <button class="btn btn-secondary" onclick="resetRubric()">
                     <span>↺</span> Reset
@@ -237,11 +219,10 @@
         </section>
 
         <!-- My Rubrics -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📚</span>
-                    My Rubrics
+                    # My Rubrics
                 </h3>
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
@@ -252,7 +233,7 @@
 
             <div class="search-filter-bar">
                 <div class="search-box">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon" aria-hidden="true">#</span>
                     <input type="text" id="rubricSearch" placeholder="Search rubrics..." class="search-input">
                 </div>
                 <select id="typeFilter" class="filter-select-small">
@@ -273,7 +254,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Rubric Preview Modal -->
@@ -307,6 +288,14 @@
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
            ============================================================ */
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+            --success: var(--r-text-2);
+            --warning: var(--r-accent);
+            --danger: var(--r-accent);
+        }
+
         :root {
             --np-panel: #0a0a0a;
             --np-inset: rgba(255, 255, 255, 0.04);
@@ -491,9 +480,13 @@
         }
 
         .template-icon {
-            font-size: 1.7rem;
+            font-family: var(--r-font-mono);
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
             margin-bottom: 0.5rem;
             display: block;
+            color: var(--np-text-3);
         }
 
         .template-name {
@@ -869,7 +862,6 @@
         }
 
         .rubric-card:hover {
-            transform: translateY(-2px);
             border-color: var(--np-line-strong);
             box-shadow: none;
         }

@@ -12,7 +12,7 @@ class SearchService {
     } = options;
 
     const cacheKey = `search:${query}:${JSON.stringify(options)}`;
-    const cached = cacheService.getApi(cacheKey);
+    const cached = await cacheService.getApi(cacheKey);
     if (cached) return cached;
 
     const q = String(query || '').toLowerCase();
@@ -38,6 +38,8 @@ class SearchService {
       ]);
 
       if (types.includes('all') || types.includes('users')) {
+        // ponytail: PII gate keyed on caller role -> field-level ACL if more roles need partial access
+        const canViewContactInfo = ['teacher', 'admin'].includes(userRole);
         results.users = users
           .filter((user) => user.is_active !== false)
           .filter((user) =>
@@ -50,11 +52,11 @@ class SearchService {
             id: user.id,
             name: user.name,
             registration_number: user.registration_number,
-            email: user.email,
+            email: canViewContactInfo ? user.email : null,
             department: user.department,
             role: user.role,
-            phone: user.phone_number || null,
-            profile_pic: user.profile_picture || null,
+            phone: canViewContactInfo ? (user.phone_number || null) : null,
+            profile_pic: canViewContactInfo ? (user.profile_picture || null) : null,
             type: 'user'
           }));
       }
@@ -341,64 +343,6 @@ class SearchService {
       console.error('Search files error:', error);
       return { success: false, error: error.message };
     }
-  }
-
-  async getSuggestions(query, type = 'all') {
-    const cacheKey = `suggestions:${type}:${query}`;
-    const cached = cacheService.getApi(cacheKey);
-    if (cached) return cached;
-
-    const q = String(query || '').toLowerCase();
-    const suggestions = [];
-
-    try {
-      if (type === 'all' || type === 'users') {
-        const users = await listRecords('users');
-        suggestions.push(...users
-          .filter((user) => user.is_active !== false && String(user.name || '').toLowerCase().startsWith(q))
-          .slice(0, 5)
-          .map((user) => ({ name: user.name, type: 'user' })));
-      }
-
-      if (type === 'all' || type === 'subjects') {
-        const files = await listRecords('files');
-        const subjects = Array.from(new Set(files
-          .map((file) => file.subject)
-          .filter((subject) => subject && String(subject).toLowerCase().startsWith(q))))
-          .slice(0, 5)
-          .map((name) => ({ name, type: 'subject' }));
-        suggestions.push(...subjects);
-      }
-
-      if (type === 'all' || type === 'files') {
-        const files = await listRecords('files');
-        suggestions.push(...files
-          .filter((file) => file.approved === true && String(file.original_name || '').toLowerCase().startsWith(q))
-          .slice(0, 5)
-          .map((file) => ({ name: file.original_name, type: 'file' })));
-      }
-
-      const response = {
-        success: true,
-        suggestions: suggestions.slice(0, 10)
-      };
-      cacheService.setApi(cacheKey, response, 300);
-      return response;
-    } catch (error) {
-      console.error('Get suggestions error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getTrendingSearches(limit = 10) {
-    return {
-      success: true,
-      trending: [
-        { query: 'Data Structures', count: 45 },
-        { query: 'Python Notes', count: 38 },
-        { query: 'Assignment 3', count: 32 }
-      ].slice(0, limit)
-    };
   }
 }
 

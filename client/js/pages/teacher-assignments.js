@@ -120,6 +120,7 @@ async function handleCreateAssignment(e) {
     e.preventDefault();
     if (assignmentCreating) return;
 
+    const form = document.getElementById('createAssignmentForm');
     const titleInput = document.getElementById('assignmentTitle');
     const subjectInput = document.getElementById('subject');
     const descInput = document.getElementById('description');

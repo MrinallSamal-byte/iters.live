@@ -46,19 +46,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">❓</span> Question Bank </h1>
+                    <h1 class="page-title"> Question Bank </h1>
                     <p class="page-subtitle">Create and manage exam questions and question papers</p>
                 </div>
             </div>
@@ -66,26 +59,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📝</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="totalQuestions">--</div>
                 <div class="stat-text">Total Questions</div>
                 <div class="stat-subtext">In database</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">📄</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="questionPapers">--</div>
                 <div class="stat-text">Question Papers</div>
                 <div class="stat-subtext">Generated</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎯</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="subjectCovered">--</div>
                 <div class="stat-text">Subjects</div>
                 <div class="stat-subtext">Coverage</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">⭐</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="avgDifficulty">--</div>
                 <div class="stat-text">Avg Difficulty</div>
                 <div class="stat-subtext">Question level</div>
@@ -93,11 +82,10 @@
         </section>
 
         <!-- Create Question -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">➕</span>
-                    Add New Question
+                    # Add New Question
                 </h3>
             </div>
             
@@ -105,7 +93,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="subject" class="form-label">
-                            <span class="label-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="subject" name="subject" class="form-input" placeholder="e.g., Data Structures" required>
@@ -113,7 +100,6 @@
                     
                     <div class="form-group">
                         <label for="unit" class="form-label">
-                            <span class="label-icon">📑</span>
                             Unit/Chapter
                         </label>
                         <input type="text" id="unit" name="unit" class="form-input" placeholder="e.g., Unit 1" required>
@@ -121,7 +107,6 @@
 
                     <div class="form-group">
                         <label for="topic" class="form-label">
-                            <span class="label-icon">🏷️</span>
                             Topic
                         </label>
                         <input type="text" id="topic" name="topic" class="form-input" placeholder="e.g., Arrays" required>
@@ -131,7 +116,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="questionType" class="form-label">
-                            <span class="label-icon">📋</span>
                             Question Type
                         </label>
                         <select id="questionType" name="questionType" class="form-select" required onchange="toggleMCQOptions()">
@@ -144,7 +128,6 @@
 
                     <div class="form-group">
                         <label for="difficulty" class="form-label">
-                            <span class="label-icon">🎯</span>
                             Difficulty Level
                         </label>
                         <select id="difficulty" name="difficulty" class="form-select" required>
@@ -157,7 +140,6 @@
 
                     <div class="form-group">
                         <label for="marks" class="form-label">
-                            <span class="label-icon">💯</span>
                             Marks
                         </label>
                         <input type="number" id="marks" name="marks" class="form-input" placeholder="e.g., 5" min="1" required>
@@ -165,7 +147,6 @@
 
                     <div class="form-group">
                         <label for="bloomLevel" class="form-label">
-                            <span class="label-icon">🧠</span>
                             Bloom's Level
                         </label>
                         <select id="bloomLevel" name="bloomLevel" class="form-select">
@@ -182,7 +163,6 @@
 
                 <div class="form-group">
                     <label for="question" class="form-label">
-                        <span class="label-icon">❓</span>
                         Question Text
                     </label>
                     <textarea id="question" name="question" class="form-textarea" rows="4" placeholder="Enter the question text..." required></textarea>
@@ -225,7 +205,6 @@
 
                 <div class="form-group">
                     <label for="answer" class="form-label">
-                        <span class="label-icon">✅</span>
                         Answer/Solution (Optional)
                     </label>
                     <textarea id="answer" name="answer" class="form-textarea" rows="3" placeholder="Enter the answer or solution..."></textarea>
@@ -233,7 +212,6 @@
 
                 <div class="form-group">
                     <label for="tags" class="form-label">
-                        <span class="label-icon">🏷️</span>
                         Tags (comma separated)
                     </label>
                     <input type="text" id="tags" name="tags" class="form-input" placeholder="e.g., sorting, algorithms, complexity">
@@ -247,18 +225,17 @@
                         <span>↺</span> Reset
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="importQuestions()">
-                        <span>📥</span> Import CSV
+                        Import CSV
                     </button>
                 </div>
             </form>
         </section>
 
         <!-- Generate Question Paper -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📄</span>
-                    Generate Question Paper
+                    # Generate Question Paper
                 </h3>
             </div>
 
@@ -266,7 +243,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="paperSubject" class="form-label">
-                            <span class="label-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="paperSubject" class="form-input" placeholder="Subject name" required>
@@ -274,7 +250,6 @@
 
                     <div class="form-group">
                         <label for="examType" class="form-label">
-                            <span class="label-icon">📝</span>
                             Exam Type
                         </label>
                         <select id="examType" class="form-select" required>
@@ -288,7 +263,6 @@
 
                     <div class="form-group">
                         <label for="totalMarks" class="form-label">
-                            <span class="label-icon">💯</span>
                             Total Marks
                         </label>
                         <input type="number" id="totalMarks" class="form-input" placeholder="100" min="1" required>
@@ -296,7 +270,6 @@
 
                     <div class="form-group">
                         <label for="duration" class="form-label">
-                            <span class="label-icon">⏰</span>
                             Duration (mins)
                         </label>
                         <input type="number" id="duration" class="form-input" placeholder="180" min="1" required>
@@ -323,21 +296,20 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary btn-lg">
-                        <span>📄</span> Generate Paper
+                        Generate Paper
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="previewPaper()">
-                        <span>👁️</span> Preview
+                        Preview
                     </button>
                 </div>
             </form>
         </section>
 
         <!-- Question Bank -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📚</span>
-                    Question Bank
+                    # Question Bank
                 </h3>
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
@@ -349,7 +321,7 @@
 
             <div class="search-filter-bar">
                 <div class="search-box">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon" aria-hidden="true">#</span>
                     <input type="text" id="questionSearch" placeholder="Search questions..." class="search-input">
                 </div>
                 <select id="subjectFilter" class="filter-select-small">
@@ -362,7 +334,7 @@
                     <option value="hard">Hard</option>
                 </select>
                 <button class="btn btn-secondary" onclick="exportQuestions()">
-                    <span>📥</span> Export
+                    Export
                 </button>
             </div>
 
@@ -374,7 +346,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Question Preview Modal -->
@@ -417,6 +389,14 @@
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
            ============================================================ */
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+            --success: var(--r-text-2);
+            --warning: var(--r-accent);
+            --danger: var(--r-accent);
+        }
+
         :root {
             --np-panel: #0a0a0a;
             --np-inset: rgba(255, 255, 255, 0.04);

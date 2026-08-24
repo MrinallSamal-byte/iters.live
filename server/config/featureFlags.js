@@ -28,9 +28,9 @@ const isMemoryConstrained = () => {
   return isRenderFreeTier;
 };
 
-// Portal features - enabled by default, can be disabled via environment variable
-// Set PORTAL_FEATURES_ENABLED=false to disable portal scraping
-const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED !== 'false';
+// Portal features - disabled by default (opt-in via env)
+// Set PORTAL_FEATURES_ENABLED=true to enable portal scraping
+const PORTAL_FEATURES_ENABLED = process.env.PORTAL_FEATURES_ENABLED === 'true';
 
 // Message to show users when portal features are disabled
 const PORTAL_DISABLED_MESSAGE = 'Portal data syncing is temporarily unavailable. Please use demo data to explore all features.';
@@ -41,15 +41,6 @@ const featureFlags = {
   portal: {
     enabled: PORTAL_FEATURES_ENABLED,
     disabledMessage: PORTAL_DISABLED_MESSAGE,
-    
-    // Sub-features (all disabled when main portal is disabled)
-    login: PORTAL_FEATURES_ENABLED,
-    sync: PORTAL_FEATURES_ENABLED,
-    fetch: PORTAL_FEATURES_ENABLED,
-    backup: PORTAL_FEATURES_ENABLED,
-    recover: PORTAL_FEATURES_ENABLED,
-    googleDriveBackup: PORTAL_FEATURES_ENABLED,
-    googleSheetsSync: PORTAL_FEATURES_ENABLED,
   },
   
   // Demo data is always available as fallback
@@ -70,14 +61,6 @@ function isPortalEnabled() {
 }
 
 /**
- * Get the disabled message for portal features
- * @returns {string} - The disabled message
- */
-function getPortalDisabledMessage() {
-  return featureFlags.portal.disabledMessage;
-}
-
-/**
  * Get the disabled response object for API endpoints
  * @returns {Object} - Standard response object for disabled portal
  */
@@ -93,7 +76,6 @@ function getPortalDisabledResponse() {
 module.exports = {
   featureFlags,
   isPortalEnabled,
-  getPortalDisabledMessage,
   getPortalDisabledResponse,
   PORTAL_FEATURES_ENABLED,
   PORTAL_DISABLED_MESSAGE

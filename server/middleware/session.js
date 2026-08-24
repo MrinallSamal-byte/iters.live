@@ -122,85 +122,11 @@ function invalidateSession(userId, sessionId) {
     }
 }
 
-/**
- * Invalidate all sessions for a user
- * @param {string} userId - User ID
- */
-function invalidateAllUserSessions(userId) {
-    // Get all keys and filter for this user's sessions
-    const allKeys = sessionCache.keys();
-    const userSessionKeys = allKeys.filter(key => key.startsWith(`session:${userId}:`));
-    
-    userSessionKeys.forEach(key => sessionCache.del(key));
-    sessionCache.del(`user:${userId}:activeSession`);
-}
-
-/**
- * Session validation middleware
- * Validates session on protected API routes
- */
-const sessionValidationMiddleware = (req, res, next) => {
-    // Skip for non-authenticated requests
-    if (!req.user) {
-        return next();
-    }
-    
-    const userId = req.user.id;
-    const sessionId = req.headers['x-session-id'];
-    const clientLastActivity = parseInt(req.headers['x-last-activity'] || '0', 10);
-    
-    // If no session ID, allow but don't track (backwards compatibility)
-    if (!sessionId) {
-        return next();
-    }
-    
-    const validation = validateSession(userId, sessionId, clientLastActivity);
-    
-    if (!validation.valid) {
-        return res.status(401).json({
-            success: false,
-            message: 'Session expired. Please log in again.',
-            code: 'SESSION_EXPIRED',
-            reason: validation.reason
-        });
-    }
-    
-    // Attach session info to request
-    req.sessionInfo = {
-        sessionId,
-        lastActivity: validation.serverLastActivity,
-        remainingTime: validation.remainingTime
-    };
-    
-    // Add session info to response headers
-    res.setHeader('X-Session-Remaining', validation.remainingTime);
-    
-    next();
-};
-
-/**
- * Update session activity middleware
- * Call this after successful authenticated requests
- */
-const updateSessionMiddleware = (req, res, next) => {
-    if (req.user && req.sessionInfo) {
-        updateSessionActivity(
-            req.user.id, 
-            req.sessionInfo.sessionId, 
-            Date.now()
-        );
-    }
-    next();
-};
-
 module.exports = {
     SESSION_TIMEOUT_MS,
     updateSessionActivity,
     getSessionData,
     validateSession,
     invalidateSession,
-    invalidateAllUserSessions,
-    sessionValidationMiddleware,
-    updateSessionMiddleware,
     sessionCache
 };

@@ -644,13 +644,8 @@
 
         logout() {
             if (confirm('Are you sure you want to logout?')) {
-                // Clear all localStorage
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                localStorage.removeItem('profilePicture');
-                
-                // Redirect to login
-                window.location.href = '../login.html';
+                // ponytail: optional chaining assumes ES2020+ -> transpile if legacy browser support is required
+                window.APP?.logout ? APP.logout('user_initiated') : window.SessionTimeout?.logout?.('user_initiated');
             }
         },
 

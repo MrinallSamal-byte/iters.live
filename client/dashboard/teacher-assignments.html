@@ -46,19 +46,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📝</span> Assignment Management </h1>
+                    <h1 class="page-title"> Assignment Management </h1>
                     <p class="page-subtitle">Create, manage and grade student assignments</p>
                 </div>
             </div>
@@ -66,26 +59,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📋</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="totalAssignments">--</div>
                 <div class="stat-text">Total Assignments</div>
                 <div class="stat-subtext">All time</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="activeAssignments">--</div>
                 <div class="stat-text">Active</div>
                 <div class="stat-subtext">Currently open</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏳</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="pendingSubmissions">--</div>
                 <div class="stat-text">Pending Review</div>
                 <div class="stat-subtext">To be graded</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="avgSubmissionRate">--%</div>
                 <div class="stat-text">Submission Rate</div>
                 <div class="stat-subtext">Overall average</div>
@@ -93,11 +82,10 @@
         </section>
 
         <!-- Create New Assignment -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">➕</span>
-                    Create New Assignment
+                    # Create New Assignment
                 </h3>
             </div>
             
@@ -105,7 +93,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="assignmentTitle" class="form-label">
-                            <span class="label-icon">📌</span>
                             Assignment Title
                         </label>
                         <input type="text" id="assignmentTitle" name="title" class="form-input" placeholder="e.g., Data Structures Lab Assignment 1" required>
@@ -113,7 +100,6 @@
                     
                     <div class="form-group">
                         <label for="subject" class="form-label">
-                            <span class="label-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="subject" name="subject" class="form-input" placeholder="e.g., Data Structures" required>
@@ -122,7 +108,6 @@
 
                 <div class="form-group">
                     <label for="description" class="form-label">
-                        <span class="label-icon">📝</span>
                         Description
                     </label>
                     <textarea id="description" name="description" class="form-textarea" rows="4" placeholder="Detailed instructions for the assignment..." required></textarea>
@@ -131,7 +116,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="department" class="form-label">
-                            <span class="label-icon">🎓</span>
                             Department
                         </label>
                         <select id="department" name="department" class="form-select" required>
@@ -147,7 +131,6 @@
 
                     <div class="form-group">
                         <label for="year" class="form-label">
-                            <span class="label-icon">📚</span>
                             Year
                         </label>
                         <select id="year" name="year" class="form-select" required>
@@ -161,7 +144,6 @@
 
                     <div class="form-group">
                         <label for="section" class="form-label">
-                            <span class="label-icon">📋</span>
                             Section
                         </label>
                         <select id="section" name="section" class="form-select" required>
@@ -178,7 +160,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="dueDate" class="form-label">
-                            <span class="label-icon">📅</span>
                             Due Date
                         </label>
                         <input type="date" id="dueDate" name="dueDate" class="form-input" required>
@@ -186,7 +167,6 @@
 
                     <div class="form-group">
                         <label for="dueTime" class="form-label">
-                            <span class="label-icon">⏰</span>
                             Due Time
                         </label>
                         <input type="time" id="dueTime" name="dueTime" class="form-input" required>
@@ -194,7 +174,6 @@
 
                     <div class="form-group">
                         <label for="maxMarks" class="form-label">
-                            <span class="label-icon">💯</span>
                             Max Marks
                         </label>
                         <input type="number" id="maxMarks" name="maxMarks" class="form-input" placeholder="100" min="1" required>
@@ -203,13 +182,12 @@
 
                 <div class="form-group">
                     <label for="attachments" class="form-label">
-                        <span class="label-icon">📎</span>
                         Attachments (Optional)
                     </label>
                     <div class="file-upload-area">
                         <input type="file" id="attachments" name="attachments" multiple class="file-input">
                         <div class="file-upload-text">
-                            <span class="upload-icon">📁</span>
+                            <span class="upload-icon">+</span>
                             <p>Click to upload or drag and drop</p>
                             <small>PDF, DOC, DOCX, PPT, ZIP (Max 50MB)</small>
                         </div>
@@ -229,11 +207,10 @@
         </section>
 
         <!-- Active Assignments -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    Active Assignments
+                    # Active Assignments
                 </h3>
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
@@ -249,11 +226,10 @@
         </section>
 
         <!-- Pending Submissions -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⏳</span>
-                    Pending Submissions to Grade
+                    # Pending Submissions to Grade
                 </h3>
                 <span class="notification-badge" id="pendingCount">0</span>
             </div>
@@ -280,7 +256,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Assignment Details Modal -->
@@ -348,6 +324,14 @@
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
            ============================================================ */
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+            --success: var(--r-text-2);
+            --warning: var(--r-accent);
+            --danger: var(--r-accent);
+        }
+
         :root {
             --np-panel: #0a0a0a;
             --np-inset: rgba(255, 255, 255, 0.04);
@@ -634,7 +618,6 @@
         }
 
         .assignment-card:hover {
-            transform: translateY(-2px);
             border-color: var(--np-line-strong);
         }
 

@@ -1,3 +1,4 @@
+// ponytail: hardcoded prototype data -> wire to /api/forum when the forum backend is live
 /**
  * Student Forum Page
  * Q&A platform for students to ask questions and get answers

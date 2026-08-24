@@ -60,7 +60,6 @@
                     <p class="page-subtitle">Your weekly schedule at a glance</p>
                 </div>
                 <div class="current-class-badge" id="currentClassBadge">
-                    <div class="badge-icon">⏰</div>
                     <div class="badge-content">
                         <span class="badge-label">Current Class</span>
                         <span class="badge-value" id="currentClassName">No class now</span>
@@ -72,22 +71,18 @@
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📚</div>
                 <div class="stat-number" id="todayClasses">--</div>
                 <div class="stat-text">Classes Today</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏰</div>
                 <div class="stat-number" id="nextClassTime">--</div>
                 <div class="stat-text">Next Class At</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">📖</div>
                 <div class="stat-number" id="weeklyClasses">--</div>
                 <div class="stat-text">Classes This Week</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🏫</div>
                 <div class="stat-number" id="totalSubjects">--</div>
                 <div class="stat-text">Total Subjects</div>
             </div>
@@ -102,12 +97,12 @@
                 </h3>
                 <div class="timetable-controls">
                     <button class="btn btn-sm btn-primary" onclick="downloadTimetable()">
-                        📥 Download PDF
+                        Download PDF
                     </button>
                     <button class="btn btn-sm btn-secondary" onclick="syncToCalendar()">
-                        🔄 Sync to Calendar
+                        Sync to Calendar
                     </button>
-                    <a class="btn btn-sm btn-primary calendar-cta" href="/api/calendar.ics" download="iterasn-timetable.ics">ADD TO CALENDAR</a>
+                    <!-- ponytail: duplicate third export control (.ics ADD TO CALENDAR link) collapsed -->
                 </div>
             </div>
             <div class="timetable-wrapper">
@@ -199,14 +194,10 @@
             gap: 1rem;
             padding: 1rem 1.5rem;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid #333;
+            border: 1px solid var(--r-line-strong);
             border-radius: 0;
         }
-        
-        .badge-icon {
-            font-size: 2rem;
-        }
-        
+
         .badge-content {
             display: flex;
             flex-direction: column;
@@ -216,7 +207,7 @@
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.62rem;
             letter-spacing: 0.16em;
-            color: #757575;
+            color: var(--r-text-3);
             text-transform: uppercase;
         }
 
@@ -230,16 +221,6 @@
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
-        }
-
-        .calendar-cta {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
         }
         
         .timetable-wrapper {
@@ -265,7 +246,7 @@
             font-weight: 600;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #757575;
+            color: var(--r-text-3);
             text-align: center;
             border: 1px solid var(--glass-border);
         }
@@ -289,10 +270,14 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
+        <!-- ponytail: red edge scoped to current-day-cell, the class student-timetable.js adds to today's column -->
         .class-cell {
             background: var(--glass-bg);
-            border-left: 2px solid var(--primary);
             cursor: pointer;
+        }
+
+        .class-cell.current-day-cell {
+            border-left: 2px solid var(--primary);
         }
 
         .class-cell:hover {

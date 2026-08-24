@@ -40,14 +40,21 @@ async function fetchAgendaItems(req) {
   const graceWindow = 12 * 60 * 60 * 1000;
   const items = [];
 
+  // Students scope to their department+year; teachers scope to their department.
+  let assignmentFilters = [];
+  if (req.user.role === 'student') {
+    assignmentFilters = [
+      { field: 'department', value: req.user.department },
+      { field: 'year', value: req.user.year }
+    ];
+  } else if (req.user.role === 'teacher' && req.user.department) {
+    assignmentFilters = [
+      { field: 'department', value: req.user.department }
+    ];
+  }
+
   try {
-    const filters = req.user.role === 'student'
-      ? [
-        { field: 'department', value: req.user.department },
-        { field: 'year', value: req.user.year }
-      ]
-      : [];
-    const assignments = await listRecords('assignments', { filters });
+    const assignments = await listRecords('assignments', { filters: assignmentFilters });
 
     for (const assignment of assignments) {
       if (assignment.is_active === false) continue;
@@ -60,8 +67,9 @@ async function fetchAgendaItems(req) {
         dueAt: new Date(dueAt).toISOString()
       });
     }
-  } catch (_) {
-    void 0;
+  } catch (error) {
+    console.error('Agenda: failed to load assignments:', error.message);
+    throw error;
   }
 
   try {
@@ -77,8 +85,9 @@ async function fetchAgendaItems(req) {
         dueAt: new Date(dueAt).toISOString()
       });
     }
-  } catch (_) {
-    void 0;
+  } catch (error) {
+    console.error('Agenda: failed to load events:', error.message);
+    throw error;
   }
 
   items.sort((left, right) => left.dueAt.localeCompare(right.dueAt));
@@ -99,7 +108,7 @@ async function getAgenda(req, res, next) {
   }
 }
 
+// ponytail: GET /upcoming duplicate alias deleted — zero callers anywhere
 router.get('/', authMiddleware, getAgenda);
-router.get('/upcoming', authMiddleware, getAgenda);
 
 module.exports = router;

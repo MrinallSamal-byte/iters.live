@@ -248,6 +248,11 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
     });
 
     cacheService.invalidateMarks(student_id);
+    try {
+      await cacheService.invalidateAnalytics();
+    } catch (_) {
+      void 0;
+    }
     emitToUser(student_id, 'marks:update', { student_id, id: record.id });
 
     await notificationService.create({

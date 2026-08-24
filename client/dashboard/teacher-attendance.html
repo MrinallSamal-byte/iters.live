@@ -43,19 +43,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📊</span> Mark Attendance </h1>
+                    <h1 class="page-title"> Mark Attendance </h1>
                     <p class="page-subtitle">Record student attendance for your classes</p>
                 </div>
             </div>
@@ -63,26 +56,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="todayPresent">--</div>
                 <div class="stat-text">Present Today</div>
                 <div class="stat-subtext">Students attended</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">❌</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="todayAbsent">--</div>
                 <div class="stat-text">Absent Today</div>
                 <div class="stat-subtext">Students missed</div>
             </div>
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="avgAttendance">--%</div>
                 <div class="stat-text">Average</div>
                 <div class="stat-subtext">Overall attendance</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">📅</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="classesToday">--</div>
                 <div class="stat-text">Classes Today</div>
                 <div class="stat-subtext">Total sessions</div>
@@ -90,11 +79,10 @@
         </section>
 
         <!-- Class Selection Form -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🎯</span>
-                    Select Class
+                    # Select Class
                 </h3>
             </div>
             
@@ -102,7 +90,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="dept" class="filter-label">
-                            <span class="filter-icon">🎓</span>
                             Department
                         </label>
                         <select id="dept" name="department" class="filter-select" required>
@@ -118,7 +105,6 @@
                     
                     <div class="filter-group">
                         <label for="year" class="filter-label">
-                            <span class="filter-icon">📚</span>
                             Year
                         </label>
                         <select id="year" name="year" class="filter-select" required>
@@ -132,7 +118,6 @@
                     
                     <div class="filter-group">
                         <label for="section" class="filter-label">
-                            <span class="filter-icon">📋</span>
                             Section
                         </label>
                         <select id="section" name="section" class="filter-select" required>
@@ -146,7 +131,6 @@
                     
                     <div class="filter-group">
                         <label for="subject" class="filter-label">
-                            <span class="filter-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="subject" name="subject" class="filter-input" list="subjectOptions" placeholder="e.g., Data Structures" required>
@@ -155,7 +139,6 @@
                     
                     <div class="filter-group">
                         <label for="attDate" class="filter-label">
-                            <span class="filter-icon">📅</span>
                             Date
                         </label>
                         <input type="date" id="attDate" name="attendance_date" class="filter-input" required>
@@ -164,7 +147,7 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" onclick="loadStudentsForAttendance()">
-                        <span>🔍</span> Load Students
+                        Load Students
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="markAllPresent()">
                         <span>✓</span> Mark All Present
@@ -177,11 +160,10 @@
         </section>
 
         <!-- Students List -->
-        <section id="studentsList" class="dashboard-section glass-card hover-lift scroll-reveal" style="display:none;">
+        <section id="studentsList" class="dashboard-section glass-card scroll-reveal" style="display:none;">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">👥</span>
-                    Student List
+                    # Student List
                     <span id="studentCount" class="result-count"></span>
                 </h3>
                 <div class="attendance-summary">
@@ -226,11 +208,10 @@
         </section>
 
         <!-- Recent Attendance Records -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    Recent Attendance Records
+                    # Recent Attendance Records
                 </h3>
             </div>
             
@@ -242,7 +223,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Scripts -->

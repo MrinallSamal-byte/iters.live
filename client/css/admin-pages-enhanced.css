@@ -946,3 +946,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ================================================
+   NOTHING EDITION - FINAL OVERRIDES
+   Neutralizes generic-AI remnants above. Loads before
+   each page's inline <style>, so !important is used
+   where the legacy rule would otherwise tie.
+   ================================================ */
+
+/* focus glow -> red hairline only */
+.filter-input:focus,
+.filter-select:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary, #d71921);
+  box-shadow: none !important;
+}
+
+/* glass radii -> squared */
+.announcement-card,
+.department-card {
+  border-radius: 2px;
+}
+
+/* card hover lift/shadow -> border-color change only */
+.announcement-card:hover,
+.department-card:hover,
+.action-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.announcement-card[data-priority="urgent"]::before {
+  background: #d71921;
+}
+
+.announcement-card[data-priority="normal"]::before {
+  background: #333333;
+}
+
+.announcement-card[data-priority="info"]::before {
+  background: #333333;
+}
+
+/* amber pinned pill -> red-tinted squared chip */
+.pinned-badge {
+  background: rgba(215, 25, 33, 0.1);
+  color: var(--primary, #d71921);
+  border: 1px solid rgba(215, 25, 33, 0.4);
+  border-radius: 0;
+}
+
+/* toggle pill -> squared rectangular switch */
+.toggle-switch {
+  width: 40px;
+  height: 20px;
+  border: 1px solid var(--glass-border);
+  border-radius: 0;
+}
+
+.toggle-switch::before {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+}
+
+.toggle-input:checked + .toggle-switch::before {
+  left: 22px;
+}
+
+/* drop zone: dashed -> dotted hairline */
+.file-upload-area {
+  border: 1px dotted rgba(255, 255, 255, 0.25);
+}
+
+.file-upload-area:hover {
+  background: rgba(215, 25, 33, 0.05);
+}
+
+/* modal close spin -> none */
+.modal-close:hover {
+  transform: none;
+}
+
+.modal-overlay {
+  backdrop-filter: none !important;
+}

@@ -50,24 +50,17 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">💬</span> Student Forum </h1>
-                    <p class="page-subtitle">Ask questions, share knowledge, and connect with peers & faculty</p>
+                    <h1 class="page-title">Student Forum</h1>
+                    <p class="page-subtitle">Ask questions, share knowledge, and connect with peers &amp; faculty</p>
                 </div>
                 <button class="btn btn-primary btn-lg" onclick="openNewQuestionModal()">
-                    <span>➕</span> Ask Question
+                    Ask Question
                 </button>
             </div>
         </section>
@@ -75,25 +68,21 @@
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">💬</div>
                 <div class="stat-number" id="totalQuestions">--</div>
                 <div class="stat-text">Questions</div>
                 <div class="stat-subtext">Total asked</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
                 <div class="stat-number" id="answeredQuestions">--</div>
                 <div class="stat-text">Answered</div>
                 <div class="stat-subtext">Resolved</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">👥</div>
                 <div class="stat-number" id="activeUsers">--</div>
                 <div class="stat-text">Active Users</div>
                 <div class="stat-subtext">This week</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">⭐</div>
                 <div class="stat-number" id="topContributors">--</div>
                 <div class="stat-text">Top Contributors</div>
                 <div class="stat-subtext">Best answers</div>
@@ -104,38 +93,31 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📂</span>
                     Categories
                 </h3>
             </div>
             <div class="category-grid">
                 <button class="category-btn active" data-category="all">
-                    <span class="category-icon">📚</span>
                     <span class="category-name">All Topics</span>
                     <span class="category-count" id="countAll">--</span>
                 </button>
                 <button class="category-btn" data-category="academic">
-                    <span class="category-icon">📖</span>
                     <span class="category-name">Academic</span>
                     <span class="category-count" id="countAcademic">--</span>
                 </button>
                 <button class="category-btn" data-category="technical">
-                    <span class="category-icon">💻</span>
                     <span class="category-name">Technical</span>
                     <span class="category-count" id="countTechnical">--</span>
                 </button>
                 <button class="category-btn" data-category="placement">
-                    <span class="category-icon">💼</span>
                     <span class="category-name">Placement</span>
                     <span class="category-count" id="countPlacement">--</span>
                 </button>
                 <button class="category-btn" data-category="campus">
-                    <span class="category-icon">🏛️</span>
                     <span class="category-name">Campus Life</span>
                     <span class="category-count" id="countCampus">--</span>
                 </button>
                 <button class="category-btn" data-category="general">
-                    <span class="category-icon">💡</span>
                     <span class="category-name">General</span>
                     <span class="category-count" id="countGeneral">--</span>
                 </button>
@@ -146,7 +128,6 @@
         <section class="forum-controls glass-card">
             <div class="search-filter-row">
                 <div class="search-box-forum">
-                    <span class="search-icon">🔍</span>
                     <input type="text" id="forumSearch" class="search-input" 
                         placeholder="Search questions, topics, or keywords...">
                 </div>
@@ -191,10 +172,10 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🏆</span>
                     Top Contributors
                 </h3>
             </div>
+            <!-- CUT CORNER: student-forum.js injects contributor medal emojis (badge field, file not in ownership scope) -->
             <div id="contributorsList" class="contributors-grid">
                 <!-- Contributors will be loaded here -->
             </div>
@@ -212,7 +193,6 @@
                 <form id="newQuestionForm">
                     <div class="form-group">
                         <label class="form-label">
-                            <span class="label-icon">📝</span>
                             Question Title
                         </label>
                         <input type="text" id="questionTitle" class="form-input" 
@@ -220,7 +200,6 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">
-                            <span class="label-icon">📂</span>
                             Category
                         </label>
                         <select id="questionCategory" class="form-select" required>
@@ -234,7 +213,6 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">
-                            <span class="label-icon">📄</span>
                             Description
                         </label>
                         <textarea id="questionDescription" class="form-textarea" rows="6"
@@ -243,7 +221,6 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">
-                            <span class="label-icon">🏷️</span>
                             Tags (comma separated)
                         </label>
                         <input type="text" id="questionTags" class="form-input" 
@@ -254,7 +231,7 @@
                             Cancel
                         </button>
                         <button type="submit" class="btn btn-primary">
-                            <span>📤</span> Post Question
+                            Post Question
                         </button>
                     </div>
                 </form>
@@ -311,13 +288,6 @@
             font-size: 2rem;
             margin-bottom: 0.5rem;
             color: var(--r-text);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .title-icon {
-            font-size: 2rem;
         }
 
         .page-subtitle {
@@ -367,10 +337,6 @@
             border-color: var(--r-accent);
         }
 
-        .category-icon {
-            font-size: 1.5rem;
-        }
-
         .category-name {
             font-weight: 600;
             font-size: 0.85rem;
@@ -407,17 +373,9 @@
             position: relative;
         }
 
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.125rem;
-        }
-
         .search-input {
             width: 100%;
-            padding: 0.75rem 1rem 0.75rem 3rem;
+            padding: 0.75rem 1rem;
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -799,10 +757,6 @@
             letter-spacing: 0.14em;
             margin-bottom: 0.5rem;
             color: var(--r-text-2);
-        }
-
-        .label-icon {
-            font-size: 1rem;
         }
 
         .form-input,

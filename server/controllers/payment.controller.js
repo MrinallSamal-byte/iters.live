@@ -46,7 +46,8 @@ const createPayment = async (req, res) => {
             category,
             paymentMethod,
             description: description || '',
-            status: 'completed', // For now, all payments are completed immediately
+            // ponytail: no gateway verification -> verify via gateway webhook before marking completed
+            status: req.user.role === 'admin' ? 'completed' : 'pending',
             transactionId: `TXN${Date.now()}`,
             paymentDate: admin.firestore.FieldValue.serverTimestamp(),
             createdAt: admin.firestore.FieldValue.serverTimestamp(),

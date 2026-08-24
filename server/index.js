@@ -246,14 +246,10 @@ app.use((req, res, next) => {
 // On Vercel, runtime uploads land in /tmp; fall through to the bundled
 // repo uploads directory (demo/seed files) for anything not found there.
 const { getUploadsBaseDir } = require('./utils/uploads-dir.util');
+// ponytail: uploads dir still world-readable via /static/uploads -> serve sensitive subdirs through auth-checked routes
 app.use('/static/uploads', express.static(getUploadsBaseDir()));
 if (IS_SERVERLESS) {
   app.use('/static/uploads', express.static(path.join(__dirname, '../uploads')));
-}
-// Alias used by controllers when building public file URLs
-app.use('/uploads', express.static(getUploadsBaseDir()));
-if (IS_SERVERLESS) {
-  app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 }
 
 // Serve client static assets (CSS, JS, images) - needed for pages served from /web/:sessionId
@@ -510,9 +506,18 @@ app.use(errorHandler);
 app.use((err, req, res, next) => {
   if (!res.headersSent) {
     res.setHeader('Content-Type', 'application/json');
-    res.status(err.statusCode || 500).json({
+    const status = err.statusCode || 500;
+    const isProd = process.env.NODE_ENV === 'production';
+    if (!isProd) {
+      console.error(err);
+    }
+    // Hide internal error details from clients in production (5xx only; 4xx messages stay client-facing)
+    const message = isProd && status >= 500
+      ? 'Internal Server Error'
+      : err.message || 'Internal Server Error';
+    res.status(status).json({
       success: false,
-      message: err.message || 'Internal Server Error'
+      message
     });
   }
 });
@@ -559,6 +564,7 @@ if (!IS_SERVERLESS) {
     console.log('SIGTERM received, closing server gracefully...');
     stopRenderKeepAlive();
     await closeRedis();
+    io.close();
     server.close(() => {
       console.log('Server closed');
       process.exit(0);
@@ -569,6 +575,7 @@ if (!IS_SERVERLESS) {
     console.log('SIGINT received, closing server gracefully...');
     stopRenderKeepAlive();
     await closeRedis();
+    io.close();
     server.close(() => {
       console.log('Server closed');
       process.exit(0);

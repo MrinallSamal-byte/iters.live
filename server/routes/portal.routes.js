@@ -57,14 +57,14 @@ router.get('/demo', portalController.getDemoData);
  *   "useDemoData": boolean (optional)
  * }
  */
-router.post('/sync', optionalAuth, portalController.syncPortalData);
+router.post('/sync', authMiddleware, portalController.syncPortalData);
 
 /**
  * POST /api/portal/fetch
  * Fetch all portal data (bypasses attempt tracking)
  * Use this when you want to force a fresh data fetch
  */
-router.post('/fetch', optionalAuth, portalController.fetchPortalData);
+router.post('/fetch', authMiddleware, portalController.fetchPortalData);
 
 /**
  * POST /api/portal/backup
@@ -76,7 +76,7 @@ router.post('/fetch', optionalAuth, portalController.fetchPortalData);
  *   "data": {...} (optional - if not provided, loads from Firestore)
  * }
  */
-router.post('/backup', optionalAuth, portalController.saveBackup);
+router.post('/backup', authMiddleware, portalController.saveBackup);
 
 /**
  * GET /api/portal/recover
@@ -85,7 +85,7 @@ router.post('/backup', optionalAuth, portalController.saveBackup);
  * Query params:
  * - reg_number: string (optional if authenticated)
  */
-router.get('/recover', optionalAuth, portalController.recoverPortalData);
+router.get('/recover', authMiddleware, portalController.recoverPortalData);
 
 /**
  * POST /api/portal/load-backup
@@ -96,14 +96,14 @@ router.get('/recover', optionalAuth, portalController.recoverPortalData);
  *   "reg_number": "string"
  * }
  */
-router.post('/load-backup', optionalAuth, portalController.loadBackupData);
+router.post('/load-backup', authMiddleware, portalController.loadBackupData);
 
 /**
  * GET /api/portal/status
  * Get portal connection status
- * Uses optionalAuth to allow checking portal availability without authentication
+ * Requires authentication; status is always scoped to req.user
  */
-router.get('/status', optionalAuth, portalController.getPortalStatus);
+router.get('/status', authMiddleware, portalController.getPortalStatus);
 
 /**
  * GET /api/portal/data

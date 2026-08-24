@@ -582,17 +582,23 @@ class Chatbot {
         const message = this.input.value.trim();
         if (!message || this.isLoading) return;
 
-        this.addMessage(message, 'user');
+        this.addMessage(this.escapeHtml(message), 'user');
         this.input.value = '';
         this.isLoading = true;
 
         this.showTypingIndicator();
 
         setTimeout(async () => {
-            const response = await this.getResponse(message);
-            this.hideTypingIndicator();
-            this.addMessage(response, 'bot');
-            this.isLoading = false;
+            try {
+                const response = await this.getResponse(message);
+                this.addMessage(response, 'bot');
+            } catch (err) {
+                console.error('Chatbot response failed:', err);
+                this.addMessage('Sorry, something went wrong. Please try again.', 'bot');
+            } finally {
+                this.hideTypingIndicator();
+                this.isLoading = false;
+            }
         }, 500 + Math.random() * 500);
     }
 

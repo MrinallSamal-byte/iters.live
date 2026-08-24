@@ -7,6 +7,7 @@ const csv = require('csv-parse');
 const { stringify } = require('csv-stringify/sync');
 const ExcelJS = require('exceljs');
 const fs = require('fs').promises;
+const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const {
   createRecord,
@@ -24,13 +25,20 @@ class BulkOperationsService {
     const results = {
       success: 0,
       failed: 0,
-      errors: []
+      errors: [],
+      credentials: []
     };
 
     for (const user of users) {
       try {
         if (!user.username || !user.email || !user.role) {
           throw new Error('Missing required fields (username, email, role)');
+        }
+
+        // ponytail: per-row role gate -> shared validator if more import types need it
+        const role = String(user.role).trim().toLowerCase();
+        if (!['student', 'teacher', 'admin'].includes(role)) {
+          throw new Error('Invalid role. Must be student, teacher, or admin');
         }
 
         const registrationNumber = String(user.registration_number || user.username).trim();
@@ -51,7 +59,7 @@ class BulkOperationsService {
           email: user.email,
           password: hashedPassword,
           full_name: user.full_name || user.name || user.username,
-          role: user.role,
+          role,
           department: user.department || null,
           year: user.year ? Number(user.year) : null,
           section: user.section || null,
@@ -62,6 +70,14 @@ class BulkOperationsService {
           is_active: true,
           last_login: null
         }, { id: registrationNumber });
+
+        if (!user.password) {
+          results.credentials.push({
+            username: user.username,
+            email: user.email,
+            temporary_password: password
+          });
+        }
 
         results.success += 1;
       } catch (error) {
@@ -77,8 +93,11 @@ class BulkOperationsService {
     return results;
   }
 
-  async bulkMarkAttendance(filePath, teacherId) {
-    const records = await this.parseCSV(filePath);
+  async bulkMarkAttendance(filePath, teacherId, fileType = 'csv') {
+    // ponytail: extension sniffing duplicated per import -> shared parse dispatch if a 4th import lands
+    const records = fileType === 'csv'
+      ? await this.parseCSV(filePath)
+      : await this.parseExcel(filePath);
     const results = {
       success: 0,
       failed: 0,
@@ -133,8 +152,10 @@ class BulkOperationsService {
     return results;
   }
 
-  async bulkUploadMarks(filePath, teacherId) {
-    const records = await this.parseExcel(filePath);
+  async bulkUploadMarks(filePath, teacherId, fileType = 'csv') {
+    const records = fileType === 'csv'
+      ? await this.parseCSV(filePath)
+      : await this.parseExcel(filePath);
     const results = {
       success: 0,
       failed: 0,
@@ -408,9 +429,11 @@ class BulkOperationsService {
   generatePassword() {
     const length = 12;
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    // ponytail: modulo bias negligible for one-time temp passwords -> rejection sampling if audited
+    const bytes = crypto.randomBytes(length);
     let password = '';
     for (let i = 0; i < length; i += 1) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
+      password += charset.charAt(bytes[i] % charset.length);
     }
     return password;
   }

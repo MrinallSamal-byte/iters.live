@@ -85,12 +85,25 @@ async function getDatabaseHealth() {
 router.get('/', async (req, res) => {
   try {
     const healthCheck = await getDatabaseHealth();
-    
+
+    // ponytail: raw Firestore/Realtime error messages are internal detail —
+    // only expose them outside production; the public root stays leak-free in prod
+    const includeErrorDetails = process.env.NODE_ENV !== 'production';
+    const database = includeErrorDetails ? healthCheck : {
+      status: healthCheck.status,
+      provider: healthCheck.provider,
+      firestore: { ready: healthCheck.firestore.ready },
+      realtime: {
+        ready: healthCheck.realtime.ready,
+        enabled: healthCheck.realtime.enabled
+      }
+    };
+
     res.json({
       status: healthCheck.status,
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      database: healthCheck
+      database
     });
   } catch (error) {
     res.status(503).json({
@@ -218,30 +231,7 @@ router.post('/refresh-views', auth, async (req, res) => {
   }
 });
 
-/**
- * @route   GET /api/health/slow-queries
- * @desc    Get slow query log (last 100 entries)
- * @access  Admin only
- */
-router.get('/slow-queries', auth, async (req, res) => {
-  try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    res.json({
-      total: 0,
-      queries: [],
-      message: 'Slow query logs are not available in Firebase-backed mode'
-    });
-  } catch (error) {
-    console.error('Slow query fetch error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch slow queries',
-      details: error.message
-    });
-  }
-});
+// ponytail: GET /slow-queries deleted — hardcoded empty stub with zero callers
 
 /**
  * @route   GET /api/health/cache-stats
@@ -273,9 +263,9 @@ router.get('/cache-stats', auth, async (req, res) => {
 /**
  * @route   GET /api/health/ai-service
  * @desc    Check AI service configuration and availability
- * @access  Public (with rate limiting for security)
+ * @access  Private (authMiddleware; reveals provider configuration state)
  */
-router.get('/ai-service', async (req, res) => {
+router.get('/ai-service', auth, async (req, res) => {
   try {
     // Lazy load service to avoid startup issues
     const openRouterService = require('../services/openrouter.service');

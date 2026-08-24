@@ -162,7 +162,6 @@
     }
 
     function addLevelRow(name = '', weight = '') {
-        const row = els.modal?.ownerDocument ? null : null;
         const container = document.querySelector('.levels-row');
         if (!container) return;
         const div = document.createElement('div');
@@ -355,9 +354,9 @@
             <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
                 <thead>
                     <tr>
-                        <th style="text-align:left; padding:0.5rem; border-bottom:2px solid var(--glass-border);">Criterion</th>
-                        <th style="text-align:left; padding:0.5rem; border-bottom:2px solid var(--glass-border);">Description</th>
-                        <th style="text-align:right; padding:0.5rem; border-bottom:2px solid var(--glass-border);">Points</th>
+                        <th style="text-align:left; padding:0.5rem; border-bottom:1px dotted var(--r-line-strong);">Criterion</th>
+                        <th style="text-align:left; padding:0.5rem; border-bottom:1px dotted var(--r-line-strong);">Description</th>
+                        <th style="text-align:right; padding:0.5rem; border-bottom:1px dotted var(--r-line-strong);">Points</th>
                     </tr>
                 </thead>
                 <tbody>

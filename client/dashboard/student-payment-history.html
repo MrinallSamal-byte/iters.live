@@ -44,24 +44,17 @@
 </head>
 
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📋</span> Payment History </h1>
+                    <h1 class="page-title">Payment History</h1>
                     <p class="page-subtitle">View all your payment transactions and download receipts</p>
                 </div>
                 <a href="/dashboard/student-payment-make.html" class="btn btn-primary">
-                    <span>💳</span> Make Payment
+                    Make Payment
                 </a>
             </div>
         </section>
@@ -69,19 +62,16 @@
         <!-- Payment Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">💰</div>
                 <div class="stat-number" id="totalPaid">₹ --</div>
                 <div class="stat-text">Total Paid</div>
                 <div class="stat-subtext">All time</div>
             </div>
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📝</div>
                 <div class="stat-number" id="totalPayments">--</div>
                 <div class="stat-text">Total Payments</div>
                 <div class="stat-subtext">Number of transactions</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏳</div>
                 <div class="stat-number" id="pendingPayments">--</div>
                 <div class="stat-text">Pending</div>
                 <div class="stat-subtext">Awaiting confirmation</div>
@@ -123,21 +113,18 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📊</span>
                     All Transactions
                 </h3>
             </div>
 
             <div class="table-container">
                 <div id="loadingState" class="loading-state">
-                    <div class="spinner-large"></div>
-                    <p>Loading payment history...</p>
+                    <div class="loading-text">Loading payment history...</div>
                 </div>
 
                 <div id="emptyState" class="empty-state" style="display: none;">
-                    <div class="empty-icon">💳</div>
-                    <h3>No Payments Found</h3>
-                    <p>You haven't made any payments yet.</p>
+                    <div class="empty-state-label">No Payments Recorded</div>
+                    <p class="empty-state-hint">You haven't made any payments yet.</p>
                     <a href="/dashboard/student-payment-make.html" class="btn btn-primary">Make Your First Payment</a>
                 </div>
 
@@ -404,23 +391,13 @@
             padding: 3rem;
         }
 
-        .spinner-large {
-            width: 44px;
-            height: 44px;
-            border: 2px solid var(--r-line-strong);
-            border-top-color: var(--r-accent);
-            border-radius: var(--r-radius);
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 1rem;
+        .empty-state-label {
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
-        .empty-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .empty-state-hint {
+            margin: 0 auto 1.25rem;
         }
 
         @media (max-width: 768px) {

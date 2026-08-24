@@ -439,7 +439,7 @@
 
         const paperMarks = picked.reduce((sum, q) => sum + Number(q.marks || 0), 0);
         const sectionsHtml = picked.map((q, idx) => `
-            <div style="margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--glass-border);">
+            <div style="margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px dotted var(--r-line-strong);">
                 <strong>Q${idx + 1}.</strong> ${esc(q.question_text)}
                 <div style="color:var(--text-secondary); font-size:0.85rem; margin-top:0.25rem;">
                     [${TYPE_LABELS[q.question_type] || esc(q.question_type)} • ${esc(q.difficulty)} • ${Number(q.marks || 0)} marks]
@@ -454,7 +454,7 @@
                     <p>${esc(examType || '')} • Total Marks: ${paperMarks}${totalMarks ? ` / ${totalMarks}` : ''} • Duration: ${duration} mins</p>
                 </div>
                 ${sectionsHtml}
-                ${paperMarks !== totalMarks ? `<p style="color:var(--warning, orange);">⚠️ Paper totals ${paperMarks} marks vs a target of ${totalMarks}. Adjust counts or question marks.</p>` : ''}
+                ${paperMarks !== totalMarks ? `<p style="color:var(--warning,#d71921);">⚠️ Paper totals ${paperMarks} marks vs a target of ${totalMarks}. Adjust counts or question marks.</p>` : ''}
             `;
         }
         if (els.modal) els.modal.style.display = 'flex';

@@ -475,12 +475,12 @@
         const stageMarkup = IMPORT_PROGRESS_STAGES.map(([, label], index) => {
             const state = index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'pending';
             const style = state === 'active'
-                ? 'color:var(--stage-active,#d71921);font-weight:700'
+                ? 'color:#d71921;font-weight:700'
                 : state === 'done'
-                    ? 'color:var(--stage-done,rgba(255,255,255,0.45))'
+                    ? 'color:#8a8a8a'
                     : '';
             return `<span style="${style}">${escapeHtml(label)}</span>`;
-        }).join('<span style="color:var(--stage-sep,rgba(255,255,255,0.35))"> &#8250; </span>');
+        }).join('<span style="color:#333"> &#8250; </span>');
 
         statusBanner.className = 'status-banner info visible';
         statusBanner.innerHTML = `

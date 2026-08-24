@@ -6,7 +6,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { generateUniqueFilename, sanitizeFilename, ensureDir } = require('../utils/file.util');
+const { generateUniqueFilename, sanitizeFilename, ensureDir, getExtensionFromMime } = require('../utils/file.util');
 const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 
 // Storage configuration
@@ -38,7 +38,10 @@ const storage = multer.diskStorage({
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        const uniqueName = generateUniqueFilename(file.originalname);
+        // Stored-XSS fix: derive extension from the validated MIME type instead of
+        // trusting the client-supplied filename (blocks .html/.svg double extensions)
+        const ext = getExtensionFromMime(file.mimetype) || '.bin';
+        const uniqueName = generateUniqueFilename(`${Date.now()}${ext}`);
         cb(null, uniqueName);
     }
 });

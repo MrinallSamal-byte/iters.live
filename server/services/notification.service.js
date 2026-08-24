@@ -136,6 +136,7 @@ class NotificationService {
         ]
       });
 
+      // ponytail: N+1 updates -> writeBatch chunks if notification volume grows
       await Promise.all(notifications.map((notification) => updateRecord('notifications', notification.id, {
         is_read: true,
         read_at: new Date().toISOString()
@@ -181,6 +182,7 @@ class NotificationService {
         ]
       });
 
+      // ponytail: N+1 updates -> writeBatch chunks if notification volume grows
       await Promise.all(notifications.map((notification) => deleteRecord('notifications', notification.id)));
       return {
         success: true,

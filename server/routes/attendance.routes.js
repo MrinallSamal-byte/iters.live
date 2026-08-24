@@ -118,6 +118,11 @@ router.post('/mark', authMiddleware, roleMiddleware('teacher', 'admin'), async (
     }
 
     cacheService.invalidateAttendance(student_id);
+    try {
+      await cacheService.invalidateAnalytics();
+    } catch (_) {
+      void 0;
+    }
 
     if (student?.department && student?.year && student?.section) {
       emitToClass(student.department, student.year, student.section, 'attendance:update', {

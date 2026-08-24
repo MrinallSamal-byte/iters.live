@@ -510,28 +510,9 @@
     }
 
     /**
-     * Setup secure link handlers for all dashboard navigation links
-     */
-    function setupSecureLinks() {
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a[href]');
-            if (!link) return;
-            
-            const href = link.getAttribute('href');
-            if (!href) return;
-            
-            // Check if it's a dashboard link
-            if (href.startsWith('/dashboard/') || href.includes('/dashboard/')) {
-                e.preventDefault();
-                navigateSecurely(href);
-            }
-        }, true);
-    }
-
-    /**
      * Initialize page access token validation on page load
      * This is the main entry point for dashboard pages
-     * 
+     *
      * SECURITY: This function immediately hides page content while
      * verifying authentication to prevent any flash of protected content.
      */
@@ -580,13 +561,6 @@
         
         // Token is valid - regenerate for this page load
         regenerateToken(currentPath);
-        
-        // Setup secure navigation for internal links
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupSecureLinks);
-        } else {
-            setupSecureLinks();
-        }
     }
 
     // Export functions to global scope

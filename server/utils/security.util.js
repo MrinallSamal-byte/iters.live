@@ -36,6 +36,7 @@ function isValidOpenRouterKey(key) {
     return key.startsWith('sk-or-v1-') && key.length >= 30;
 }
 
+// ponytail: kept — audit flagged zero callers, but scripts/ops/check-ai-service.js:71 calls it; re-audit that script before deleting
 /**
  * Validate Google Gemini API key format
  * @param {string} key - The API key to validate

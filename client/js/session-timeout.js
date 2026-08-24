@@ -28,6 +28,8 @@
 
     // State
     let sessionCheckInterval = null;
+    let backendValidationInterval = null;
+    let warningCountdownInterval = null;
     let warningShown = false;
     let warningModal = null;
 
@@ -218,6 +220,15 @@
             clearInterval(sessionCheckInterval);
             sessionCheckInterval = null;
         }
+
+        // Stop the backend validation interval
+        if (backendValidationInterval) {
+            clearInterval(backendValidationInterval);
+            backendValidationInterval = null;
+        }
+
+        // Stop any running warning countdown
+        hideTimeoutWarning();
         
         // Disconnect any active socket/bot connections
         if (window.socket && typeof window.socket.disconnect === 'function') {
@@ -373,6 +384,10 @@
         
         // Start countdown
         updateWarningCountdown();
+        if (warningCountdownInterval) {
+            clearInterval(warningCountdownInterval);
+        }
+        warningCountdownInterval = setInterval(updateWarningCountdown, 1000);
     }
 
     /**
@@ -397,6 +412,10 @@
      */
     function hideTimeoutWarning() {
         warningShown = false;
+        if (warningCountdownInterval) {
+            clearInterval(warningCountdownInterval);
+            warningCountdownInterval = null;
+        }
         if (warningModal) {
             warningModal.style.display = 'none';
         }
@@ -412,9 +431,9 @@
             return;
         }
         
-        // Check if user is authenticated
-        const accessToken = localStorage.getItem('accessToken');
-        const user = localStorage.getItem('user');
+        // Check if user is authenticated (localStorage or sessionStorage)
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
         
         if (!accessToken || !user) {
             logout('not_authenticated');
@@ -564,7 +583,7 @@
         }, SESSION_CHECK_INTERVAL_MS);
         
         // Validate with backend periodically (every 5 minutes)
-        setInterval(async () => {
+        backendValidationInterval = setInterval(async () => {
             if (currentPath.startsWith('/dashboard/')) {
                 const isValid = await validateSessionWithBackend();
                 if (!isValid) {

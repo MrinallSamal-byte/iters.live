@@ -35,7 +35,7 @@ function sortPapers(items = [], sortBy = 'newest') {
   }
 }
 
-router.get('/papers', async (req, res) => {
+router.get('/papers', verifyToken, async (req, res) => {
   try {
     const {
       page = 1,
@@ -89,7 +89,7 @@ router.get('/papers', async (req, res) => {
   }
 });
 
-router.get('/papers/:id', async (req, res) => {
+router.get('/papers/:id', verifyToken, async (req, res) => {
   try {
     const paper = await getRecord('pyq_papers', req.params.id);
     if (!paper) {
@@ -110,13 +110,16 @@ router.get('/papers/:id', async (req, res) => {
   }
 });
 
-router.post('/papers/:id/download', async (req, res) => {
+router.post('/papers/:id/download', verifyToken, async (req, res) => {
   try {
     const paper = await getRecord('pyq_papers', req.params.id);
     if (!paper) {
       return res.status(404).json({ success: false, message: 'Paper not found' });
     }
 
+    // ponytail: FieldValue.increment(1) not viable — firebase-data.service updateRecord()
+    // merges + normalizeStoredValue() (mangles sentinels) and mirrors to Realtime DB;
+    // read-modify-write kept, accepting rare lost updates on concurrent downloads
     const downloads = toNumber(paper.downloads, 0) + 1;
     await updateRecord('pyq_papers', req.params.id, { downloads });
 
@@ -205,7 +208,7 @@ router.post('/requests', verifyToken, async (req, res) => {
   }
 });
 
-router.get('/stats', async (req, res) => {
+router.get('/stats', verifyToken, async (req, res) => {
   try {
     const papers = await listRecords('pyq_papers');
     const years = papers.map((paper) => toNumber(paper.year, null)).filter((value) => value != null);
@@ -225,7 +228,7 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-router.get('/subjects', async (req, res) => {
+router.get('/subjects', verifyToken, async (req, res) => {
   try {
     const papers = await listRecords('pyq_papers');
     const grouped = new Map();

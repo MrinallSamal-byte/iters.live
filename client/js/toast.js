@@ -363,7 +363,7 @@ class ToastNotification {
 
     // Clear all toasts
     clearAll() {
-        this.toasts.forEach(toast => this.remove(toast));
+        [...this.toasts].forEach(toast => this.remove(toast));
     }
 }
 

@@ -46,24 +46,17 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">⚙️</span> System Settings </h1>
+                    <h1 class="page-title"> System Settings </h1>
                     <p class="page-subtitle">Configure system preferences and manage platform settings</p>
                 </div>
                 <div class="hero-actions">
                     <button id="saveAllBtn" class="btn btn-success">
-                        <span>💾</span> Save All Changes
+                        Save All Changes
                     </button>
                 </div>
             </div>
@@ -71,26 +64,22 @@
 
         <!-- System Overview Cards -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">💻</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="systemStatus">Active</div>
                 <div class="stat-text">System Status</div>
                 <div class="stat-subtext">All services running</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">💾</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="lastBackup">2 days ago</div>
                 <div class="stat-text">Last Backup</div>
                 <div class="stat-subtext">Database backup</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">📦</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="storageUsed">45%</div>
                 <div class="stat-text">Storage Used</div>
                 <div class="stat-subtext">500 GB available</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🔄</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="systemUptime">99.9%</div>
                 <div class="stat-text">Uptime</div>
                 <div class="stat-subtext">Last 30 days</div>
@@ -98,30 +87,24 @@
         </section>
 
         <!-- Tabbed Settings Interface -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="settings-tabs">
                 <button class="settings-tab active" data-tab="general">
-                    <span class="tab-icon">⚙️</span>
                     <span class="tab-label">General</span>
                 </button>
                 <button class="settings-tab" data-tab="academic">
-                    <span class="tab-icon">📚</span>
                     <span class="tab-label">Academic</span>
                 </button>
                 <button class="settings-tab" data-tab="notifications">
-                    <span class="tab-icon">📢</span>
                     <span class="tab-label">Notifications</span>
                 </button>
                 <button class="settings-tab" data-tab="database">
-                    <span class="tab-icon">💾</span>
                     <span class="tab-label">Database</span>
                 </button>
                 <button class="settings-tab" data-tab="security">
-                    <span class="tab-icon">🔒</span>
                     <span class="tab-label">Security</span>
                 </button>
                 <button class="settings-tab" data-tab="appearance">
-                    <span class="tab-icon">🎨</span>
                     <span class="tab-label">Appearance</span>
                 </button>
             </div>
@@ -132,7 +115,6 @@
             <div class="tab-content active" id="general-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">🏫</span>
                         Institution Information
                     </h3>
                     <form id="generalForm" class="settings-form">
@@ -177,7 +159,6 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">⚙️</span>
                         System Preferences
                     </h3>
                     <form id="systemPrefsForm" class="settings-form">
@@ -232,7 +213,6 @@
             <div class="tab-content" id="academic-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">📚</span>
                         Academic Year Configuration
                     </h3>
                     <form id="academicForm" class="settings-form">
@@ -265,7 +245,6 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">📊</span>
                         Grading Configuration
                     </h3>
                     <form id="gradingForm" class="settings-form">
@@ -298,7 +277,6 @@
             <div class="tab-content" id="notifications-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">📧</span>
                         Email Notifications
                     </h3>
                     <form id="emailNotifForm" class="settings-form">
@@ -341,7 +319,6 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">🔔</span>
                         Push Notifications
                     </h3>
                     <form id="pushNotifForm" class="settings-form">
@@ -379,40 +356,39 @@
             <div class="tab-content" id="database-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">💾</span>
                         Database Management
                     </h3>
                     <div class="action-cards">
                         <div class="action-card">
-                            <div class="action-icon">💾</div>
+                            <div class="action-icon">+</div>
                             <h4>Backup Database</h4>
                             <p>Create a complete backup of all system data</p>
                             <button class="btn btn-primary" onclick="backupDatabase()" disabled title="Database backup is not available on the server yet (no /api/admin/database endpoints)">
-                                <span>⬇️</span> Create Backup
+                                Create Backup
                             </button>
                         </div>
                         <div class="action-card">
-                            <div class="action-icon">🔄</div>
+                            <div class="action-icon">&gt;</div>
                             <h4>Restore Database</h4>
                             <p>Restore from a previous backup file</p>
                             <button class="btn btn-warning" onclick="restoreDatabase()" disabled title="Database restore is not available on the server yet (no /api/admin/database endpoints)">
-                                <span>⬆️</span> Restore Backup
+                                Restore Backup
                             </button>
                         </div>
                         <div class="action-card">
-                            <div class="action-icon">🗑️</div>
+                            <div class="action-icon">#</div>
                             <h4>Clear Cache</h4>
                             <p>Clear all cached data to improve performance</p>
                             <button class="btn btn-secondary" onclick="clearCache()" disabled title="Server cache clearing is not available on the server yet">
-                                <span>🗑️</span> Clear Cache
+                                Clear Cache
                             </button>
                         </div>
                         <div class="action-card">
-                            <div class="action-icon">🔧</div>
+                            <div class="action-icon">%</div>
                             <h4>Optimize Database</h4>
                             <p>Run optimization and cleanup tasks</p>
                             <button class="btn btn-info" onclick="optimizeDatabase()" disabled title="Database optimization is not available on the server yet">
-                                <span>⚡</span> Optimize Now
+                                Optimize Now
                             </button>
                         </div>
                     </div>
@@ -420,7 +396,6 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">📊</span>
                         Database Information
                     </h3>
                     <div class="info-grid">
@@ -448,7 +423,6 @@
             <div class="tab-content" id="security-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">🔒</span>
                         Security Settings
                     </h3>
                     <form id="securityForm" class="settings-form">
@@ -494,12 +468,11 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">📜</span>
                         Activity Log
                     </h3>
                     <div class="activity-log">
                         <div class="activity-item">
-                            <span class="activity-icon">👤</span>
+                            <span class="activity-icon">&gt;</span>
                             <div class="activity-details">
                                 <strong>Admin Login</strong>
                                 <small>admin@iter.edu logged in from 192.168.1.100</small>
@@ -507,7 +480,7 @@
                             <span class="activity-time">2 hours ago</span>
                         </div>
                         <div class="activity-item">
-                            <span class="activity-icon">⚙️</span>
+                            <span class="activity-icon">+</span>
                             <div class="activity-details">
                                 <strong>Settings Changed</strong>
                                 <small>Academic year updated to 2024-2025</small>
@@ -515,7 +488,7 @@
                             <span class="activity-time">5 hours ago</span>
                         </div>
                         <div class="activity-item">
-                            <span class="activity-icon">💾</span>
+                            <span class="activity-icon">#</span>
                             <div class="activity-details">
                                 <strong>Database Backup</strong>
                                 <small>Automatic backup completed successfully</small>
@@ -530,7 +503,6 @@
             <div class="tab-content" id="appearance-tab">
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">🎨</span>
                         Theme & Appearance
                     </h3>
                     <form id="appearanceForm" class="settings-form">
@@ -566,7 +538,6 @@
 
                 <div class="settings-section">
                     <h3 class="settings-section-title">
-                        <span class="title-icon">🖼️</span>
                         Branding
                     </h3>
                     <form id="brandingForm" class="settings-form">
@@ -575,7 +546,7 @@
                             <div class="file-upload-area">
                                 <input type="file" id="logoUpload" accept="image/*" hidden>
                                 <label for="logoUpload" class="file-upload-label">
-                                    <span class="upload-icon">📤</span>
+                                    <span class="upload-icon">+</span>
                                     <span>Click to upload logo</span>
                                     <small>PNG, JPG or SVG (Max 2MB)</small>
                                 </label>
@@ -586,7 +557,7 @@
                             <div class="file-upload-area">
                                 <input type="file" id="faviconUpload" accept="image/x-icon,image/png" hidden>
                                 <label for="faviconUpload" class="file-upload-label">
-                                    <span class="upload-icon">🔖</span>
+                                    <span class="upload-icon">+</span>
                                     <span>Click to upload favicon</span>
                                     <small>ICO or PNG (32x32px)</small>
                                 </label>
@@ -600,7 +571,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Scripts -->
@@ -948,37 +919,6 @@
             --error: #d71921;
             --success: #e8e8e8;
             --warning: #d71921;
-        }
-
-        /* Dark theme improvements */
-        [data-theme="dark"] .page-title,
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .settings-section-title,
-        [data-theme="dark"] .toggle-text strong,
-        [data-theme="dark"] .activity-details strong,
-        [data-theme="dark"] .info-value,
-        [data-theme="dark"] .action-card h4 {
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .settings-tab,
-        [data-theme="dark"] .form-label,
-        [data-theme="dark"] .form-hint,
-        [data-theme="dark"] .stat-subtext,
-        [data-theme="dark"] .toggle-text small,
-        [data-theme="dark"] .activity-details small,
-        [data-theme="dark"] .activity-time,
-        [data-theme="dark"] .info-label,
-        [data-theme="dark"] .action-card p {
-            color: #b0b0b0;
-        }
-
-        [data-theme="dark"] .form-input,
-        [data-theme="dark"] .form-select,
-        [data-theme="dark"] .form-textarea {
-            background: #0a0a0a !important;
-            border-color: #1f1f1f;
-            color: #f4f4f4;
         }
 
         /* Light theme normalization */

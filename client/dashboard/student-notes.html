@@ -47,26 +47,19 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📚</span> Notes & Resources </h1>
+                    <h1 class="page-title">Notes &amp; Resources</h1>
                     <p class="page-subtitle">Access study materials, notes, and previous year questions from Google Drive</p>
                 </div>
                 <div class="hero-actions">
                     <button onclick="NotesManager.openDriveFolder()" 
-                       class="btn btn-primary btn-with-icon">
-                        <span>📁</span> Open Google Drive
+                       class="btn btn-primary">
+                        Open Google Drive
                     </button>
                 </div>
             </div>
@@ -76,7 +69,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📂</span>
                     Quick Access - Semester Folders
                 </h3>
             </div>
@@ -122,22 +114,18 @@
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📄</div>
                 <div class="stat-number" id="totalNotes">--</div>
                 <div class="stat-text">Total Notes</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">📥</div>
                 <div class="stat-number" id="downloadedNotes">--</div>
                 <div class="stat-text">Downloaded</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⭐</div>
                 <div class="stat-number" id="savedNotes">--</div>
                 <div class="stat-text">Saved</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">📁</div>
                 <div class="stat-number" id="totalSubjects">--</div>
                 <div class="stat-text">Subjects</div>
             </div>
@@ -147,7 +135,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔍</span>
                     Filter Notes
                 </h3>
             </div>
@@ -156,7 +143,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="branchFilter" class="filter-label">
-                            <span class="filter-icon">🎓</span>
                             Branch
                         </label>
                         <select id="branchFilter" class="filter-select">
@@ -172,7 +158,6 @@
 
                     <div class="filter-group">
                         <label for="semesterFilter" class="filter-label">
-                            <span class="filter-icon">📚</span>
                             Semester
                         </label>
                         <select id="semesterFilter" class="filter-select">
@@ -190,7 +175,6 @@
 
                     <div class="filter-group">
                         <label for="typeFilter" class="filter-label">
-                            <span class="filter-icon">📋</span>
                             Type
                         </label>
                         <select id="typeFilter" class="filter-select">
@@ -204,7 +188,6 @@
 
                     <div class="filter-group" id="examTypeFilterGroup" style="display: none;">
                         <label for="examTypeFilter" class="filter-label">
-                            <span class="filter-icon">📝</span>
                             Exam Type
                         </label>
                         <select id="examTypeFilter" class="filter-select">
@@ -218,11 +201,9 @@
 
                     <div class="filter-group">
                         <button id="applyFilterBtn" class="btn btn-primary filter-apply-btn">
-                            <span>🔎</span>
                             Apply Filter
                         </button>
                         <button id="resetFilterBtn" class="btn btn-secondary filter-reset-btn">
-                            <span>🔄</span>
                             Reset
                         </button>
                     </div>
@@ -230,7 +211,7 @@
 
                 <!-- Search Bar -->
                 <div class="search-box-container">
-                    <input type="text" id="searchInput" placeholder="🔍 Search by subject name, title, or keywords..." class="search-input">
+                    <input type="text" id="searchInput" placeholder="Search by subject name, title, or keywords..." class="search-input">
                 </div>
             </div>
         </section>
@@ -239,34 +220,33 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="popularSubjectsSection" style="display: none;">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⭐</span>
                     Popular Subjects
                 </h3>
             </div>
             <div class="subject-tags" id="popularSubjectTags">
                 <button class="subject-tag" data-subject="data-structures">
-                    <span class="tag-icon">📊</span> Data Structures
+                    Data Structures
                 </button>
                 <button class="subject-tag" data-subject="algorithms">
-                    <span class="tag-icon">🧮</span> Algorithms
+                    Algorithms
                 </button>
                 <button class="subject-tag" data-subject="dbms">
-                    <span class="tag-icon">🗄️</span> DBMS
+                    DBMS
                 </button>
                 <button class="subject-tag" data-subject="os">
-                    <span class="tag-icon">💻</span> Operating Systems
+                    Operating Systems
                 </button>
                 <button class="subject-tag" data-subject="cn">
-                    <span class="tag-icon">🌐</span> Computer Networks
+                    Computer Networks
                 </button>
                 <button class="subject-tag" data-subject="ml">
-                    <span class="tag-icon">🤖</span> Machine Learning
+                    Machine Learning
                 </button>
                 <button class="subject-tag" data-subject="oops">
-                    <span class="tag-icon">📦</span> OOPS
+                    OOPS
                 </button>
                 <button class="subject-tag" data-subject="se">
-                    <span class="tag-icon">⚙️</span> Software Engineering
+                    Software Engineering
                 </button>
             </div>
         </section>
@@ -275,7 +255,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📖</span>
                     Available Resources
                     <span id="resultCount" class="result-count"></span>
                 </h3>
@@ -283,14 +262,12 @@
             
             <!-- Loading State -->
             <div id="loadingState" class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Loading resources...</p>
+                <div class="loading-text">Loading resources...</div>
             </div>
 
             <!-- No Results State -->
             <div id="noResultsState" class="no-results-container" style="display: none;">
-                <div class="no-results-icon">📭</div>
-                <h3>No notes found</h3>
+                <div class="empty-state-label">No Results Found</div>
                 <p>Try adjusting your filters or search criteria</p>
             </div>
 
@@ -304,7 +281,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⏱️</span>
                     Recent Downloads
                 </h3>
             </div>
@@ -317,7 +293,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="requestPaperSection" style="display: none;">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📨</span>
                     Can't Find a Paper?
                 </h3>
             </div>
@@ -333,7 +308,7 @@
                         <option value="internal">Internal</option>
                     </select>
                     <button class="btn btn-primary" onclick="NotesManager.requestPaper()">
-                        <span>📨</span> Submit Request
+                        Submit Request
                     </button>
                 </div>
             </div>
@@ -360,27 +335,7 @@
             margin-bottom: 2rem;
         }
 
-        .title-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 3.15rem;
-            height: 3.15rem;
-            border-radius: 0;
-            background: var(--r-accent-wash);
-            border: 1px solid var(--r-accent);
-            font-size: 1.45rem;
-            flex-shrink: 0;
-        }
-
         /* Semester Quick Links Grid */
-        /* Button with icon */
-        .btn-with-icon {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         .semester-links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -525,10 +480,6 @@
             gap: 0.5rem;
         }
 
-        .filter-icon {
-            font-size: 1rem;
-        }
-
         .filter-select {
             padding: 0.875rem 1rem;
             min-height: 52px;
@@ -603,39 +554,19 @@
             padding: 4rem 2rem;
         }
 
-        .loading-spinner {
-            width: 44px;
-            height: 44px;
-            border: 3px solid var(--r-line);
-            border-top-color: var(--r-accent);
-            border-radius: 0;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         .no-results-container {
             text-align: center;
             padding: 4rem 2rem;
         }
 
-        .no-results-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .no-results-container h3 {
-            color: var(--r-text);
+        .no-results-container .empty-state-label {
+            display: block;
             margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
         }
 
         .no-results-container p {
             color: var(--r-text-3);
+            margin-top: 0.75rem;
         }
 
         .resources-grid {
@@ -797,11 +728,7 @@
         }
 
         .recent-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        body.light-theme .recent-item:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: var(--r-panel-inset);
         }
 
         .recent-icon {
@@ -857,10 +784,6 @@
             background: var(--r-accent-wash);
             color: var(--r-text);
             border-color: var(--r-accent);
-        }
-
-        .tag-icon {
-            font-size: 1.125rem;
         }
 
         /* Request Paper Form */
@@ -1006,12 +929,6 @@
             .page-title {
                 font-size: clamp(1.9rem, 8vw, 2.6rem);
                 line-height: 1.04;
-            }
-
-            .title-icon {
-                width: 2.9rem;
-                height: 2.9rem;
-                font-size: 1.25rem;
             }
 
             .resources-grid {

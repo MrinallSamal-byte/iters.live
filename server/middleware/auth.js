@@ -27,6 +27,7 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader.substring(7);
 
     try {
+      // ponytail: full user in 7d token, no revocation -> store uid only + per-request Firestore lookup if session revocation is ever needed
       const decodedSession = verifyAppSessionToken(token);
       const sessionUser = decodedSession?.user;
       if (sessionUser) {
@@ -37,10 +38,16 @@ const authMiddleware = async (req, res, next) => {
       // Continue to demo/Firebase verification.
     }
 
-    const localDemoUser = getLocalDemoUserFromToken(token);
-    if (localDemoUser) {
-      attachSessionUser(req, localDemoUser);
-      return next();
+    // ponytail: per-token HMAC signing skipped -> sign demo tokens if demo mode is ever needed in prod
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.ALLOW_LOCAL_DEMO_AUTH === 'true'
+    ) {
+      const localDemoUser = getLocalDemoUserFromToken(token);
+      if (localDemoUser) {
+        attachSessionUser(req, localDemoUser);
+        return next();
+      }
     }
 
     // Verify Firebase ID Token
@@ -60,7 +67,14 @@ const authMiddleware = async (req, res, next) => {
       if (decodedToken.email) {
         const snapshot = await db.collection('users').where('email', '==', decodedToken.email).limit(1).get();
         if (!snapshot.empty) {
-          req.user = snapshot.docs[0].data();
+          const fallbackUser = snapshot.docs[0].data();
+          if (fallbackUser.is_active === false) {
+            return res.status(403).json({
+              success: false,
+              message: 'Account is inactive'
+            });
+          }
+          req.user = fallbackUser;
           req.user.id = snapshot.docs[0].id;
           return next();
         }
@@ -147,10 +161,16 @@ const optionalAuth = async (req, res, next) => {
         // Continue to legacy token handling.
       }
 
-      const localDemoUser = getLocalDemoUserFromToken(token);
-      if (localDemoUser) {
-        attachSessionUser(req, localDemoUser);
-        return next();
+      // ponytail: per-token HMAC signing skipped -> sign demo tokens if demo mode is ever needed in prod
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        process.env.ALLOW_LOCAL_DEMO_AUTH === 'true'
+      ) {
+        const localDemoUser = getLocalDemoUserFromToken(token);
+        if (localDemoUser) {
+          attachSessionUser(req, localDemoUser);
+          return next();
+        }
       }
 
       try {

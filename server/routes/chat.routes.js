@@ -24,10 +24,13 @@ const chatService = new ChatService(null);
 router.get('/groups/:groupId/messages', authMiddleware, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-    const messages = await chatService.getRecentMessages(req.params.groupId, limit);
+    const messages = await chatService.getRecentMessages(req.params.groupId, limit, req.user.id);
     res.json({ success: true, messages });
   } catch (error) {
     console.error('Error fetching chat messages:', error);
+    if (error.message === 'Not a member') {
+      return res.status(403).json({ success: false, message: 'Not a member' });
+    }
     res.status(500).json({ success: false, message: 'Failed to fetch messages' });
   }
 });
@@ -55,6 +58,9 @@ router.post('/groups/:groupId/messages', authMiddleware, async (req, res) => {
     res.status(201).json({ success: true, message: messageData });
   } catch (error) {
     console.error('Error sending chat message:', error);
+    if (error.message === 'Not a member') {
+      return res.status(403).json({ success: false, message: 'Not a member' });
+    }
     const status = error.message === 'User not found' ? 404 : 500;
     res.status(status).json({ success: false, message: error.message || 'Failed to send message' });
   }

@@ -46,19 +46,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📈</span> Upload Marks </h1>
+                    <h1 class="page-title"> Upload Marks </h1>
                     <p class="page-subtitle">Enter and manage student examination scores</p>
                 </div>
             </div>
@@ -66,26 +59,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="marksEntered">--</div>
                 <div class="stat-text">Marks Entered</div>
                 <div class="stat-subtext">This semester</div>
             </div>
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="classAvg">--</div>
                 <div class="stat-text">Class Average</div>
                 <div class="stat-subtext">Overall score</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏳</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="pending">--</div>
                 <div class="stat-text">Pending</div>
                 <div class="stat-subtext">To be graded</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎯</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="passPercentage">--%</div>
                 <div class="stat-text">Pass Rate</div>
                 <div class="stat-subtext">Above passing</div>
@@ -93,11 +82,10 @@
         </section>
 
         <!-- Exam Selection Form -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🎯</span>
-                    Select Exam Details
+                    # Select Exam Details
                 </h3>
             </div>
             
@@ -105,7 +93,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="examType" class="filter-label">
-                            <span class="filter-icon">📝</span>
                             Exam Type
                         </label>
                         <select id="examType" name="examType" class="filter-select" required>
@@ -122,7 +109,6 @@
                     
                     <div class="filter-group">
                         <label for="subject" class="filter-label">
-                            <span class="filter-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="subject" name="subject" class="filter-input" placeholder="e.g., Data Structures" required>
@@ -130,7 +116,6 @@
                     
                     <div class="filter-group">
                         <label for="maxMarks" class="filter-label">
-                            <span class="filter-icon">💯</span>
                             Max Marks
                         </label>
                         <input type="number" id="maxMarks" name="maxMarks" class="filter-input" placeholder="100" min="1" max="100" required>
@@ -138,7 +123,6 @@
                     
                     <div class="filter-group">
                         <label for="passingMarks" class="filter-label">
-                            <span class="filter-icon">✔️</span>
                             Passing Marks
                         </label>
                         <input type="number" id="passingMarks" name="passingMarks" class="filter-input" placeholder="40" min="1" max="100" required>
@@ -148,7 +132,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="dept" class="filter-label">
-                            <span class="filter-icon">🎓</span>
                             Department
                         </label>
                         <select id="dept" name="department" class="filter-select" required>
@@ -164,7 +147,6 @@
                     
                     <div class="filter-group">
                         <label for="year" class="filter-label">
-                            <span class="filter-icon">📚</span>
                             Year
                         </label>
                         <select id="year" name="year" class="filter-select" required>
@@ -178,7 +160,6 @@
                     
                     <div class="filter-group">
                         <label for="section" class="filter-label">
-                            <span class="filter-icon">📋</span>
                             Section
                         </label>
                         <select id="section" name="section" class="filter-select" required>
@@ -193,24 +174,23 @@
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" onclick="loadStudentsForMarks()">
-                        <span>🔍</span> Load Students
+                        Load Students
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="importCSV()">
-                        <span>📄</span> Import CSV
+                        Import CSV
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="downloadTemplate()">
-                        <span>⬇️</span> Download Template
+                        Download Template
                     </button>
                 </div>
             </form>
         </section>
 
         <!-- Students Marks Entry -->
-        <section id="studentsList" class="dashboard-section glass-card hover-lift scroll-reveal" style="display:none;">
+        <section id="studentsList" class="dashboard-section glass-card scroll-reveal" style="display:none;">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">👥</span>
-                    Enter Marks
+                    # Enter Marks
                     <span id="studentCount" class="result-count"></span>
                 </h3>
                 <div class="marks-summary">
@@ -223,7 +203,7 @@
                         Failed: <strong id="failedCount">0</strong>
                     </span>
                     <span class="summary-item info">
-                        <span class="summary-icon">📊</span>
+                        <span class="summary-icon">%</span>
                         Average: <strong id="avgMarks">0</strong>
                     </span>
                 </div>
@@ -254,17 +234,16 @@
                     <span>↺</span> Reset
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="autoCalculateGrade()">
-                    <span>🎯</span> Auto Calculate Grades
+                    Auto Calculate Grades
                 </button>
             </div>
         </section>
 
         <!-- Statistics Chart -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📊</span>
-                    Marks Distribution
+                    # Marks Distribution
                 </h3>
             </div>
             
@@ -317,11 +296,10 @@
         </section>
 
         <!-- Recent Submissions -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    Recent Marks Submissions
+                    # Recent Marks Submissions
                 </h3>
             </div>
             
@@ -333,7 +311,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- File Upload Modal -->
@@ -345,7 +323,7 @@
             </div>
             <div class="modal-body">
                 <div class="upload-area" id="csvUploadArea">
-                    <div class="upload-icon">📄</div>
+                    <div class="upload-icon">+</div>
                     <p>Drag & drop CSV file here or click to browse</p>
                     <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
                     <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">

@@ -63,26 +63,19 @@
         <!-- Performance Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎯</div>
+                <!-- ponytail: canned ".stat-trend Excellent Performance" row removed -->
                 <div class="stat-number" id="currentCGPA">--</div>
                 <div class="stat-text">Current CGPA</div>
-                <div class="stat-trend positive">
-                    <span class="trend-icon">↑</span>
-                    <span>Excellent Performance</span>
-                </div>
             </div>
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
                 <div class="stat-number" id="currentSGPA">--</div>
                 <div class="stat-text">Current SGPA</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">📚</div>
                 <div class="stat-number" id="totalSubjects">--</div>
                 <div class="stat-text">Total Subjects</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🏆</div>
                 <div class="stat-number" id="classRank">--</div>
                 <div class="stat-text">Class Rank</div>
             </div>
@@ -92,7 +85,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📊</span>
                     Performance Trend
                 </h3>
                 <span class="section-badge">Semester-wise Analysis</span>
@@ -106,7 +98,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📝</span>
                     Current Semester Marks
                 </h3>
                 <span class="section-badge">Latest Results</span>
@@ -137,10 +128,9 @@
         <div class="dashboard-grid">
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
-                        <span class="title-icon">📊</span>
-                        Grade Distribution
-                    </h3>
+                <h3 class="section-title-formal">
+                    Grade Distribution
+                </h3>
                 </div>
                 <div class="chart-wrapper" style="max-width: 400px; margin: 0 auto;">
                     <canvas id="gradeDistChart" height="250"></canvas>
@@ -149,41 +139,41 @@
 
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
-                    <h3 class="section-title-formal">
-                        <span class="title-icon">💡</span>
-                        Performance Insights
-                    </h3>
-                </div>
-                <div class="insights-list">
-                    <div class="insight-item">
-                        <div class="insight-icon-small">🌟</div>
-                        <div>
-                            <h4>Top Performing Subject</h4>
-                            <p id="topSubject">Loading...</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon-small">📈</div>
-                        <div>
-                            <h4>Average Score</h4>
-                            <p id="averageScore">Loading...</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon-small">⚠️</div>
-                        <div>
-                            <h4>Needs Improvement</h4>
-                            <p id="weakSubject">Loading...</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon-small">🎯</div>
-                        <div>
-                            <h4>Target CGPA</h4>
-                            <p>Maintain current performance to achieve 9.0+ CGPA</p>
-                        </div>
+                <h3 class="section-title-formal">
+                    Performance Insights
+                </h3>
+            </div>
+            <div class="insights-list">
+                <div class="insight-item">
+                    <div class="insight-icon-small">01</div>
+                    <div>
+                        <h4>Top Performing Subject</h4>
+                        <p id="topSubject">Loading...</p>
                     </div>
                 </div>
+                <div class="insight-item">
+                    <div class="insight-icon-small">02</div>
+                    <div>
+                        <h4>Average Score</h4>
+                        <p id="averageScore">Loading...</p>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-icon-small">03</div>
+                    <div>
+                        <h4>Needs Improvement</h4>
+                        <p id="weakSubject">Loading...</p>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-icon-small">04</div>
+                    <div>
+                        <h4>Target CGPA</h4>
+                        <!-- ponytail: canned advice line removed; structure left empty -->
+                        <p></p>
+                    </div>
+                </div>
+            </div>
             </section>
         </div>
 
@@ -191,7 +181,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📚</span>
                     Semester History
                 </h3>
                 <span class="section-badge">All Semesters</span>
@@ -241,16 +230,6 @@
             margin-bottom: 2rem;
         }
 
-        .title-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0;
-            background: transparent;
-            border: none;
-            font-size: 1.25rem;
-        }
-
         .stat-number {
             font-family: 'Doto', 'IBM Plex Mono', monospace;
             font-weight: 800;
@@ -276,14 +255,14 @@
             gap: 1rem;
             padding: 1rem 1.05rem;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid #1f1f1f;
+            border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .insight-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            border-color: #333;
+            border-color: var(--r-line-strong);
         }
 
         .insight-icon-small {
@@ -293,10 +272,13 @@
             width: 3rem;
             height: 3rem;
             border-radius: 0;
-            font-size: 1.25rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
             flex-shrink: 0;
             background: transparent;
-            border: 1px solid #1f1f1f;
+            border: 1px solid var(--r-line);
         }
 
         .insight-item h4 {
@@ -321,14 +303,14 @@
         .semester-card {
             padding: 1.5rem;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid #1f1f1f;
+            border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .semester-card:hover {
             background: rgba(255, 255, 255, 0.05);
-            border-color: #333;
+            border-color: var(--r-line-strong);
         }
 
         .semester-card h4 {
@@ -356,19 +338,6 @@
         .chart-wrapper {
             padding: 1rem;
             min-height: 320px;
-        }
-
-        .stat-trend {
-            margin-top: 0.75rem;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-        }
-
-        .stat-trend.positive {
-            color: var(--success);
         }
 
         .loading-text {

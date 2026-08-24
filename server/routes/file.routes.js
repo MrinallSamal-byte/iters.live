@@ -8,6 +8,7 @@ const { db } = require('../database/firebase');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const { emitToClass, emitToDepartment, emitToRole } = require('../socket/socket');
 const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
+const { getExtensionFromMime } = require('../utils/file.util');
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -22,8 +23,9 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
-    const ext = path.extname(file.originalname);
-    const safeName = file.originalname.replace(ext, '').replace(/[^a-z0-9]/gi, '_');
+    // Stored-XSS fix: derive extension from validated MIME, never the client filename
+    const ext = getExtensionFromMime(file.mimetype) || '.bin';
+    const safeName = path.basename(file.originalname, path.extname(file.originalname)).replace(/[^a-z0-9]/gi, '_');
     cb(null, `${safeName}-${uniqueSuffix}${ext}`);
   }
 });

@@ -190,10 +190,12 @@
     }
 
     try {
+      const token = APP.Storage.get('accessToken');
       const response = await fetch('/api/health/ai-service', {
         method: 'GET',
         cache: 'no-store',
-        credentials: 'same-origin'
+        credentials: 'same-origin',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       if (!response.ok) {
@@ -363,7 +365,7 @@
             label: 'Students',
             data: departments.map(d => d.count),
             backgroundColor: '#6366f1',
-            borderRadius: 8
+            borderRadius: 2
           }]
         },
         options: {
@@ -402,7 +404,7 @@
       console.error('Error loading approvals:', err);
       if (countBadge) countBadge.textContent = '';
       tbody.innerHTML = `
-        <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--error);">
+        <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--danger, #d71921);">
           Error loading approvals
           <button class="btn-small btn-secondary" onclick="loadPendingApprovals()" style="margin-left: 0.75rem;">Retry</button>
         </td></tr>`;
@@ -474,6 +476,7 @@
   }
 
   // Make functions global for onclick handlers
+  window.loadPendingApprovals = loadPendingApprovals;
   window.approveItem = async function(id) {
     try {
       await APP.API.post(`/files/approve/${encodeURIComponent(id)}`, {});

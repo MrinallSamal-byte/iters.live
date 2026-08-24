@@ -28,7 +28,14 @@ class ChatService {
   initializeChatSockets(socket) {
     socket.on('join_chat', async (data) => {
       try {
-        const { userId, groupId, userName } = data;
+        const { groupId } = data;
+        // Identity fix: trust handshake identity only; ignore client-sent userId/userName
+        const userId = socket.userId;
+        const userName = socket.userName || 'User';
+
+        // Membership gate runs BEFORE joining the room so non-members cannot eavesdrop
+        const messages = await this.getRecentMessages(groupId, 50, userId);
+
         socket.join(`group_${groupId}`);
         this.activeUsers.set(socket.id, { userId, groupId, userName });
 
@@ -40,31 +47,34 @@ class ChatService {
           timestamp: new Date()
         });
 
-        const messages = await this.getRecentMessages(groupId);
         socket.emit('message_history', messages);
       } catch (error) {
         console.error('Error in join_chat:', error);
-        socket.emit('error', { message: 'Failed to join chat' });
+        socket.emit('error', { message: error.message === 'Not a member' ? 'Not a member' : 'Failed to join chat' });
       }
     });
 
     socket.on('send_message', async (data) => {
       try {
-        const { groupId, userId, message, attachments } = data;
+        const { groupId, message, attachments } = data;
         if (!message || message.trim() === '') {
           return socket.emit('error', { message: 'Message cannot be empty' });
         }
 
-        await this.sendMessage({ groupId, userId, message, attachments });
+        // Identity fix: ignore client-sent userId
+        await this.sendMessage({ groupId, userId: socket.userId, message, attachments });
       } catch (error) {
         console.error('Error in send_message:', error);
-        socket.emit('error', { message: 'Failed to send message' });
+        socket.emit('error', { message: error.message === 'Not a member' ? 'Not a member' : 'Failed to send message' });
       }
     });
 
     socket.on('typing_start', (data) => {
       try {
-        const { groupId, userId, userName } = data;
+        const { groupId } = data;
+        // Identity fix: ignore client-sent userId/userName
+        const userId = socket.userId;
+        const userName = socket.userName || 'User';
         if (!this.typingUsers.has(groupId)) {
           this.typingUsers.set(groupId, new Set());
         }
@@ -82,7 +92,9 @@ class ChatService {
 
     socket.on('typing_stop', (data) => {
       try {
-        const { groupId, userId } = data;
+        const { groupId } = data;
+        // Identity fix: ignore client-sent userId
+        const userId = socket.userId;
         this.removeTypingUser(groupId, userId);
         socket.to(`group_${groupId}`).emit('user_stopped_typing', {
           userId,
@@ -97,8 +109,9 @@ class ChatService {
 
     socket.on('delete_message', async (data) => {
       try {
-        const { messageId, userId } = data;
-        await this.deleteMessage({ messageId, userId });
+        const { messageId } = data;
+        // Identity fix: ignore client-sent userId
+        await this.deleteMessage({ messageId, userId: socket.userId });
       } catch (error) {
         console.error('Error in delete_message:', error);
         socket.emit('error', { message: 'Failed to delete message' });
@@ -107,11 +120,12 @@ class ChatService {
 
     socket.on('edit_message', async (data) => {
       try {
-        const { messageId, userId, newMessage } = data;
+        const { messageId, newMessage } = data;
         if (!newMessage || newMessage.trim() === '') {
           return socket.emit('error', { message: 'Message cannot be empty' });
         }
-        await this.editMessage({ messageId, userId, newMessage });
+        // Identity fix: ignore client-sent userId
+        await this.editMessage({ messageId, userId: socket.userId, newMessage });
       } catch (error) {
         console.error('Error in edit_message:', error);
         socket.emit('error', { message: 'Failed to edit message' });
@@ -120,8 +134,9 @@ class ChatService {
 
     socket.on('add_reaction', async (data) => {
       try {
-        const { messageId, userId, emoji } = data;
-        await this.addReaction({ messageId, userId, emoji });
+        const { messageId, emoji } = data;
+        // Identity fix: ignore client-sent userId
+        await this.addReaction({ messageId, userId: socket.userId, emoji });
       } catch (error) {
         console.error('Error in add_reaction:', error);
       }
@@ -137,11 +152,30 @@ class ChatService {
   }
 
   /**
+   * Throws 'Not a member' unless a study_group_members record exists
+   * for {group_id, user_id}.
+   */
+  async assertGroupMember(groupId, userId) {
+    const members = await listRecords('study_group_members', {
+      filters: [
+        { field: 'group_id', value: String(groupId) },
+        { field: 'user_id', value: String(userId) }
+      ]
+    });
+
+    if (!members || members.length === 0) {
+      throw new Error('Not a member');
+    }
+  }
+
+  /**
    * Persist and broadcast a chat message. Shared by the Socket.IO handler
    * and the REST fallback endpoints (used where WebSockets are unavailable,
    * e.g. Vercel serverless).
    */
   async sendMessage({ groupId, userId, message, attachments }) {
+    await this.assertGroupMember(groupId, userId);
+
     const user = await getRecord('users', String(userId));
     if (!user) {
       throw new Error('User not found');
@@ -261,7 +295,10 @@ class ChatService {
     return count;
   }
 
-  async getRecentMessages(groupId, limit = 50) {
+  async getRecentMessages(groupId, limit = 50, userId) {
+    // Membership gate; throws 'Not a member' for non-members
+    await this.assertGroupMember(groupId, userId);
+
     try {
       const messages = await listRecords('chat_messages', {
         filters: [

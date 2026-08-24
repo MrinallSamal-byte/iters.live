@@ -46,13 +46,6 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
@@ -61,7 +54,7 @@
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">🎉</span> Campus Events </h1>
+                    <h1 class="page-title">Campus Events</h1>
                     <p class="page-subtitle">Discover and register for exciting college events</p>
                 </div>
             </div>
@@ -70,22 +63,18 @@
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">🎭</div>
                 <div class="stat-number" id="totalEvents">--</div>
                 <div class="stat-text">Total Events</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
                 <div class="stat-number" id="registeredEvents">--</div>
                 <div class="stat-text">Registered</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">📅</div>
                 <div class="stat-number" id="upcomingEvents">--</div>
                 <div class="stat-text">Upcoming</div>
             </div>
             <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏰</div>
                 <div class="stat-number" id="todayEvents">--</div>
                 <div class="stat-text">Today</div>
             </div>
@@ -95,18 +84,17 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔍</span>
                     Filter Events
                 </h3>
             </div>
             <div class="event-filters">
                 <button class="filter-chip active" data-category="all">All Events</button>
-                <button class="filter-chip" data-category="technical">💻 Technical</button>
-                <button class="filter-chip" data-category="cultural">🎨 Cultural</button>
-                <button class="filter-chip" data-category="sports">⚽ Sports</button>
-                <button class="filter-chip" data-category="workshop">🛠️ Workshop</button>
-                <button class="filter-chip" data-category="seminar">📢 Seminar</button>
-                <button class="filter-chip" data-category="competition">🏆 Competition</button>
+                <button class="filter-chip" data-category="technical">Technical</button>
+                <button class="filter-chip" data-category="cultural">Cultural</button>
+                <button class="filter-chip" data-category="sports">Sports</button>
+                <button class="filter-chip" data-category="workshop">Workshop</button>
+                <button class="filter-chip" data-category="seminar">Seminar</button>
+                <button class="filter-chip" data-category="competition">Competition</button>
             </div>
         </section>
 
@@ -114,15 +102,14 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🎪</span>
                     Available Events
                 </h3>
-                <span class="section-badge">Browse & Register</span>
+                <span class="section-badge">Browse &amp; Register</span>
             </div>
             <div class="events-grid" id="eventsGrid">
+                <!-- CUT CORNER: student-events.js re-injects .empty-state-icon with an emoji on empty results (file not in ownership scope) -->
                 <div class="empty-state">
-                    <div class="empty-state-icon">🎪</div>
-                    <p>Loading events...</p>
+                    <div class="loading-text">Loading events...</div>
                 </div>
             </div>
         </section>
@@ -161,13 +148,6 @@
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
             color: var(--r-text);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .title-icon {
-            font-size: 2.5rem;
         }
 
         .page-subtitle {
@@ -349,12 +329,6 @@
             text-align: center;
             padding: 3rem 1rem;
             color: var(--r-text-3);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
         }
 
         @media (max-width: 768px) {

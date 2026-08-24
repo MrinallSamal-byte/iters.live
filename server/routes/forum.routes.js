@@ -75,6 +75,9 @@ router.get('/questions', optionalAuth, async (req, res) => {
             sortBy = 'newest',
             tag 
         } = req.query;
+
+        const pageNum = Math.max(1, parseInt(page) || 1);
+        const limitNum = Math.min(50, Math.max(1, parseInt(limit) || 10));
         
         // Try Firestore first
         try {
@@ -89,6 +92,10 @@ router.get('/questions', optionalAuth, async (req, res) => {
             } else if (status === 'open') {
                 questionsRef = questionsRef.where('status', '==', 'open');
             }
+
+            // Count must share the filters but not ordering/offset/limit
+            const countSnapshot = await questionsRef.count().get();
+            const total = countSnapshot.data().count || 0;
             
             // Sorting
             if (sortBy === 'popular') {
@@ -99,7 +106,9 @@ router.get('/questions', optionalAuth, async (req, res) => {
                 questionsRef = questionsRef.orderBy('created_at', 'desc');
             }
             
-            questionsRef = questionsRef.limit(parseInt(limit));
+            questionsRef = questionsRef
+                .offset((pageNum - 1) * limitNum)
+                .limit(limitNum);
             
             const snapshot = await questionsRef.get();
             const questions = snapshot.docs.map(doc => ({
@@ -111,10 +120,10 @@ router.get('/questions', optionalAuth, async (req, res) => {
                 success: true,
                 questions: questions.length > 0 ? questions : getDummyQuestions(),
                 pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    total: questions.length || getDummyQuestions().length,
-                    totalPages: 1
+                    page: pageNum,
+                    limit: limitNum,
+                    total,
+                    totalPages: Math.ceil(total / limitNum)
                 }
             });
         } catch (firestoreError) {
@@ -123,8 +132,8 @@ router.get('/questions', optionalAuth, async (req, res) => {
                 success: true,
                 questions: getDummyQuestions(),
                 pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
+                    page: pageNum,
+                    limit: limitNum,
                     total: getDummyQuestions().length,
                     totalPages: 1
                 }
@@ -262,7 +271,14 @@ router.post('/questions', verifyToken, async (req, res) => {
                 message: 'Question posted successfully'
             });
         } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
+            console.error('Firestore write failed for forum question:', firestoreError.message);
+            // Never fake a 201 with a temp id outside development — the write did not persist
+            if (process.env.NODE_ENV === 'production') {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Question could not be saved. Please try again shortly.'
+                });
+            }
             res.status(201).json({
                 success: true,
                 question: { id: 'temp-' + Date.now(), ...questionData },
@@ -319,7 +335,14 @@ router.post('/questions/:id/answers', verifyToken, async (req, res) => {
                 message: 'Answer posted successfully'
             });
         } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
+            console.error('Firestore write failed for forum answer:', firestoreError.message);
+            // Never fake a 201 with a temp id outside development — the write did not persist
+            if (process.env.NODE_ENV === 'production') {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Answer could not be saved. Please try again shortly.'
+                });
+            }
             res.status(201).json({
                 success: true,
                 answer: { id: 'temp-' + Date.now(), ...answerData },

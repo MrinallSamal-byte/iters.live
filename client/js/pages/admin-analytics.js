@@ -57,10 +57,14 @@ async function loadAnalytics() {
         body.innerHTML = items.map(l => `
             <tr>
                 <td>${new Date(l.timestamp).toLocaleString()}</td>
-                <td>${l.user_name}</td>
-                <td><span class="badge primary">${l.action}</span></td>
-                <td>${l.details || '--'}</td>
+                <td>${escapeHtml(l.user_name)}</td>
+                <td><span class="badge primary">${escapeHtml(l.action)}</span></td>
+                <td>${escapeHtml(l.details || '--')}</td>
             </tr>
         `).join('') || '<tr><td colspan="4">No activity</td></tr>';
     }
+}
+
+function escapeHtml(value) { // ponytail: tiny local escaper
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }

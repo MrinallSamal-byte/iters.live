@@ -46,38 +46,30 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">👥</span> User Management </h1>
+                    <h1 class="page-title"> User Management </h1>
                     <p class="page-subtitle">Manage students, teachers, and administrators</p>
                 </div>
                 <div class="hero-actions">
                     <button class="btn btn-primary" onclick="showAddUserModal()">
-                        <span>➕</span> Add User
+                        + Add User
                     </button>
                     <button class="btn btn-secondary" onclick="exportUsers()">
-                        <span>📥</span> Export CSV
+                        Export CSV
                     </button>
                 </div>
             </div>
         </section>
 
         <!-- Filter Section -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔍</span>
-                    Filter Users
+                    # Filter Users
                 </h3>
             </div>
             
@@ -85,7 +77,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="searchUsers" class="filter-label">
-                            <span class="filter-icon">🔎</span>
                             Search
                         </label>
                         <input type="text" id="searchUsers" class="filter-input" placeholder="Search by name or reg number...">
@@ -93,7 +84,6 @@
                     
                     <div class="filter-group">
                         <label for="filterRole" class="filter-label">
-                            <span class="filter-icon">👤</span>
                             Role
                         </label>
                         <select id="filterRole" class="filter-select" onchange="loadUsers()">
@@ -106,7 +96,6 @@
 
                     <div class="filter-group">
                         <label for="filterDept" class="filter-label">
-                            <span class="filter-icon">🎓</span>
                             Department
                         </label>
                         <select id="filterDept" class="filter-select" onchange="loadUsers()">
@@ -122,7 +111,6 @@
 
                     <div class="filter-group">
                         <label for="filterStatus" class="filter-label">
-                            <span class="filter-icon">✓</span>
                             Status
                         </label>
                         <select id="filterStatus" class="filter-select" onchange="loadUsers()">
@@ -137,11 +125,10 @@
         </section>
 
         <!-- Users Table -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    All Users
+                    # All Users
                     <span id="userCount" class="result-count"></span>
                 </h3>
             </div>
@@ -173,7 +160,6 @@
         <div class="modal-content glass-card">
             <div class="modal-header">
                 <h3 class="modal-title">
-                    <span class="title-icon">➕</span>
                     Add New User
                 </h3>
                 <button class="modal-close" onclick="closeAddUserModal()">×</button>
@@ -238,7 +224,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Scripts -->
@@ -630,51 +616,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        /* Dark theme improvements */
-        [data-theme="dark"] .page-title,
-        [data-theme="dark"] .modern-table td {
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .result-count,
-        [data-theme="dark"] .filter-label,
-        [data-theme="dark"] .modal-title,
-        [data-theme="dark"] .form-label,
-        [data-theme="dark"] .loading-text,
-        [data-theme="dark"] .modal-close {
-            color: #b0b0b0;
-        }
-
-        [data-theme="dark"] .modern-table th {
-            color: #757575;
-        }
-
-        [data-theme="dark"] .filter-input,
-        [data-theme="dark"] .filter-select,
-        [data-theme="dark"] .form-input,
-        [data-theme="dark"] .form-select {
-            background: #0a0a0a;
-            border-color: #1f1f1f;
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .filter-select option,
-        [data-theme="dark"] .form-select option {
-            background: #0a0a0a;
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .filter-input::placeholder,
-        [data-theme="dark"] .form-input::placeholder {
-            color: #757575;
-        }
-
-        [data-theme="dark"] .modal-content {
-            background: #0a0a0a !important;
-            border-color: #333;
         }
 
         /* Light theme normalization */

@@ -190,34 +190,6 @@
     }
 
     // ===================================
-    // Active Navigation Link Highlighting
-    // ===================================
-    function updateActiveNavLink() {
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link');
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const id = entry.target.getAttribute('id');
-                    
-                    navLinks.forEach(link => {
-                        link.classList.remove('active');
-                        if (link.getAttribute('href') === `#${id}`) {
-                            link.classList.add('active');
-                        }
-                    });
-                }
-            });
-        }, {
-            threshold: 0.3,
-            rootMargin: '-100px 0px -50% 0px'
-        });
-
-        sections.forEach(section => observer.observe(section));
-    }
-
-    // ===================================
     // Debounce function for performance
     // ===================================
     function debounce(func, wait) {
@@ -271,7 +243,6 @@
             initBackToTop();
             initNavbarScroll();
             enhanceMobileMenu();
-            updateActiveNavLink();
             setViewportHeight();
 
             // Event listeners

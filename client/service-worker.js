@@ -12,8 +12,17 @@ const PRECACHE_URLS = [
   '/assets/icon.png',
   '/assets/soa-logo.png',
   '/css/style.css',
-  '/css/home-minimal.css',
+  '/css/responsive.css',
+  '/css/responsive-enhanced.css',
   '/css/mobile.css',
+  '/css/responsive-universal.css',
+  '/css/button-fixes.css',
+  '/css/mobile-touch-fixes.css',
+  '/css/navbar-scroll-behavior.css',
+  '/css/chatbot.css',
+  '/css/home-minimal.css',
+  '/css/refined-ui.css',
+  '/css/home-nothing.css',
   '/js/main.js',
   '/js/landing.js',
   '/js/mobile-fixes.js',
@@ -92,7 +101,8 @@ async function pruneCache(name, max) {
 async function handleNavigation(request) {
   try {
     const response = await fetch(request);
-    if (response && response.ok) {
+    // Dashboard pages are user-specific; never put them in a shared cache.
+    if (response && response.ok && !new URL(request.url).pathname.startsWith('/dashboard/')) {
       const cache = await caches.open(RUNTIME_CACHE);
       cache.put(request, response.clone())
         .then(() => pruneCache(RUNTIME_CACHE, RUNTIME_MAX_ENTRIES))
@@ -121,7 +131,9 @@ async function handleApiGet(request) {
 }
 
 async function staleWhileRevalidate(request) {
-  const cached = await caches.match(request);
+  // Match against the runtime cache only; caches.match() would resolve the
+  // oldest matching cache first and serve frozen iter-core copies forever.
+  const cached = await caches.open(RUNTIME_CACHE).then((cache) => cache.match(request));
 
   const network = fetch(request).then(async (response) => {
     if (response && response.ok) {
@@ -173,7 +185,14 @@ self.addEventListener('fetch', (event) => {
 
 // Push notifications (only existing icon assets referenced).
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (err) {
+      data = {};
+    }
+  }
   const title = data.title || 'ITERasn hub';
   const options = {
     body: data.body || 'You have a new notification',

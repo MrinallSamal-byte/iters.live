@@ -153,6 +153,20 @@ router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, 
       role
     } = req.body;
 
+    if (!name || !registration_number || !password || !role) {
+      return res.status(400).json({ success: false, message: 'name, registration_number, password and role are required' });
+    }
+
+    if (!['student', 'teacher', 'admin'].includes(role)) {
+      return res.status(400).json({ success: false, message: 'Role must be one of student, teacher, admin' });
+    }
+
+    // ponytail: check-then-write race -> Firestore transaction if duplicate collisions matter
+    const existingDoc = await db.collection('users').doc(String(registration_number)).get();
+    if (existingDoc.exists) {
+      return res.status(409).json({ success: false, message: 'User already exists' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
     const payload = {
       name,
@@ -170,7 +184,6 @@ router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, 
     };
 
     await createRecord('users', payload, { id: registration_number });
-    await db.collection('users').doc(registration_number).set(payload, { merge: true });
 
     try {
       await auth.createUser({
@@ -319,27 +332,6 @@ router.patch('/users/:id', authMiddleware, roleMiddleware('admin'), async (req, 
 });
 
 // Approvals queue
-router.get('/approvals/files', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
-  try {
-    const users = await listRecords('users');
-    const userNameById = new Map(users.map((user) => [user.id, user.name]));
-    const files = await listRecords('files', {
-      filters: [{ field: 'approved', value: false }],
-      orderBy: [{ field: 'created_at', direction: 'desc' }]
-    });
-
-    res.json({
-      success: true,
-      data: files.slice(0, 100).map((file) => ({
-        ...file,
-        uploaded_by_name: userNameById.get(file.uploaded_by) || null
-      }))
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.get('/approvals', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
     const users = await listRecords('users');
@@ -399,28 +391,6 @@ router.post('/approvals/:id/reject', authMiddleware, roleMiddleware('admin'), as
 });
 
 // Activity logs
-router.get('/logs', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
-  try {
-    const { limit = 100 } = req.query;
-    const users = await listRecords('users');
-    const userNameById = new Map(users.map((user) => [user.id, user.name]));
-    const logs = await listRecords('activity_log', {
-      orderBy: [{ field: 'created_at', direction: 'desc' }],
-      limit: toNumber(limit, 100)
-    });
-
-    res.json({
-      success: true,
-      data: logs.map((log) => ({
-        ...log,
-        user_name: userNameById.get(log.user_id) || null
-      }))
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.get('/activity-log', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
     const { limit = 100 } = req.query;

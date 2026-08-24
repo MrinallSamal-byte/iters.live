@@ -46,27 +46,20 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-  <!-- Background -->
-  <div class="bg-animation">
-    <div class="gradient-orb orb-1"></div>
-    <div class="gradient-orb orb-2"></div>
-    <div class="gradient-orb orb-3"></div>
-  </div>
-
   <main class="dashboard-main">
     <!-- Page Hero -->
     <section class="page-hero glass-card scroll-reveal">
       <div class="hero-content-inline">
         <div>
-          <h1 class="page-title"> <span class="title-icon">📢</span> Announcements </h1>
+          <h1 class="page-title"> Announcements </h1>
           <p class="page-subtitle">Create and manage institute-wide announcements</p>
         </div>
         <div class="hero-actions">
           <button id="newAnnBtn" class="btn btn-primary">
-            <span>➕</span> Create New
+            + Create New
           </button>
           <button class="btn btn-secondary" onclick="exportAnnouncements()">
-            <span>📥</span> Export
+            Export
           </button>
         </div>
       </div>
@@ -74,26 +67,22 @@
 
     <!-- Statistics Cards -->
     <section class="quick-stats stagger-animation">
-      <div class="stat-box success hover-lift scroll-reveal">
-        <div class="stat-icon-large">📊</div>
+      <div class="stat-box success scroll-reveal">
         <div class="stat-number" id="totalAnnouncements">--</div>
         <div class="stat-text">Total</div>
         <div class="stat-subtext">All announcements</div>
       </div>
-      <div class="stat-box info hover-lift scroll-reveal">
-        <div class="stat-icon-large">✅</div>
+      <div class="stat-box info scroll-reveal">
         <div class="stat-number" id="activeAnnouncements">--</div>
         <div class="stat-text">Active</div>
         <div class="stat-subtext">Currently visible</div>
       </div>
-      <div class="stat-box warning hover-lift scroll-reveal">
-        <div class="stat-icon-large">🔔</div>
+      <div class="stat-box warning scroll-reveal">
         <div class="stat-number" id="urgentAnnouncements">--</div>
         <div class="stat-text">Urgent</div>
         <div class="stat-subtext">High priority</div>
       </div>
-      <div class="stat-box hover-lift scroll-reveal">
-        <div class="stat-icon-large">📅</div>
+      <div class="stat-box scroll-reveal">
         <div class="stat-number" id="thisMonthAnnouncements">--</div>
         <div class="stat-text">This Month</div>
         <div class="stat-subtext">Recent posts</div>
@@ -101,11 +90,10 @@
     </section>
 
     <!-- Filters and Search -->
-    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+    <section class="dashboard-section glass-card scroll-reveal">
       <div class="section-header-formal">
         <h3 class="section-title-formal">
-          <span class="title-icon">🔍</span>
-          Filter & Search
+          # Filter & Search
         </h3>
       </div>
       
@@ -113,7 +101,6 @@
         <div class="filter-row">
           <div class="filter-group">
             <label for="annSearch" class="filter-label">
-              <span class="filter-icon">🔎</span>
               Search
             </label>
             <input id="annSearch" class="filter-input" placeholder="Search by title, content..." />
@@ -121,20 +108,18 @@
           
           <div class="filter-group">
             <label for="filterPriority" class="filter-label">
-              <span class="filter-icon">🎯</span>
               Priority
             </label>
             <select id="filterPriority" class="filter-select">
               <option value="">All Priorities</option>
-              <option value="urgent">🔴 Urgent</option>
-              <option value="normal">🟢 Normal</option>
-              <option value="info">🔵 Information</option>
+              <option value="urgent">Urgent</option>
+              <option value="normal">Normal</option>
+              <option value="info">Information</option>
             </select>
           </div>
           
           <div class="filter-group">
             <label for="filterAudience" class="filter-label">
-              <span class="filter-icon">👥</span>
               Audience
             </label>
             <select id="filterAudience" class="filter-select">
@@ -148,7 +133,6 @@
 
           <div class="filter-group">
             <label for="filterStatus" class="filter-label">
-              <span class="filter-icon">📊</span>
               Status
             </label>
             <select id="filterStatus" class="filter-select">
@@ -169,11 +153,10 @@
     </section>
 
     <!-- Announcements Grid -->
-    <section class="dashboard-section glass-card hover-lift scroll-reveal">
+    <section class="dashboard-section glass-card scroll-reveal">
       <div class="section-header-formal">
         <h3 class="section-title-formal">
-          <span class="title-icon">📰</span>
-          All Announcements
+          # All Announcements
           <span id="annCount" class="result-count"></span>
         </h3>
         <div class="view-toggle">
@@ -188,9 +171,8 @@
       
       <div id="annList" class="announcements-grid"></div>
       <div id="annEmpty" class="empty-state" style="display: none;">
-        <div class="empty-icon">📢</div>
-        <h3>No Announcements Found</h3>
-        <p>Create your first announcement to get started</p>
+        <div class="empty-state-label"># NO ANNOUNCEMENTS FOUND</div>
+        <p class="empty-state-hint">Create your first announcement to get started</p>
         <button class="btn btn-primary" onclick="document.getElementById('newAnnBtn').click()">
           Create Announcement
         </button>
@@ -204,7 +186,6 @@
     <div class="modal-content glass-card">
       <div class="modal-header">
         <h3 class="modal-title">
-          <span class="title-icon">📢</span>
           <span id="modalTitleText">Create New Announcement</span>
         </h3>
         <button class="modal-close" onclick="closeAnnouncementModal()">&times;</button>
@@ -213,7 +194,7 @@
       <form id="announcementForm" class="modal-body">
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">📝</span> Title
+            Title
             <span class="required">*</span>
           </label>
           <input type="text" id="annTitle" name="title" class="form-input" placeholder="Enter announcement title..." required>
@@ -221,7 +202,7 @@
 
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">📄</span> Content
+            Content
             <span class="required">*</span>
           </label>
           <textarea id="annContent" name="content" class="form-textarea" rows="6" placeholder="Enter announcement details..." required></textarea>
@@ -231,19 +212,19 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">
-              <span class="label-icon">🎯</span> Priority
+              Priority
               <span class="required">*</span>
             </label>
             <select id="annPriority" name="priority" class="form-select" required>
-              <option value="normal">🟢 Normal</option>
-              <option value="urgent">🔴 Urgent</option>
-              <option value="info">🔵 Information</option>
+              <option value="normal">Normal</option>
+              <option value="urgent">Urgent</option>
+              <option value="info">Information</option>
             </select>
           </div>
 
           <div class="form-group">
             <label class="form-label">
-              <span class="label-icon">👥</span> Target Audience
+              Target Audience
               <span class="required">*</span>
             </label>
             <select id="annAudience" name="audience" class="form-select" required onchange="toggleDepartmentField()">
@@ -258,7 +239,7 @@
         <div class="form-row" id="departmentRow" style="display: none;">
           <div class="form-group">
             <label class="form-label">
-              <span class="label-icon">🎓</span> Department
+              Department
             </label>
             <select id="annDepartment" name="department" class="form-select">
               <option value="">Select Department</option>
@@ -275,7 +256,7 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">
-              <span class="label-icon">📅</span> Start Date
+              Start Date
             </label>
             <input type="date" id="annStartDate" name="start_date" class="form-input">
             <small class="form-hint">Leave empty for immediate posting</small>
@@ -283,7 +264,7 @@
 
           <div class="form-group">
             <label class="form-label">
-              <span class="label-icon">📅</span> End Date
+              End Date
             </label>
             <input type="date" id="annEndDate" name="end_date" class="form-input">
             <small class="form-hint">Leave empty for no expiration</small>
@@ -293,7 +274,7 @@
         <div class="form-group">
           <label class="form-checkbox">
             <input type="checkbox" id="annPinned" name="pinned">
-            <span>📌 Pin this announcement to the top</span>
+            <span>Pin this announcement to the top</span>
           </label>
         </div>
 
@@ -313,7 +294,7 @@
 
   <!-- Theme Toggle -->
   <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-    <span class="theme-icon">🌙</span>
+    <span aria-hidden="true">&gt;</span>
   </button>
 
   <!-- Scripts -->
@@ -560,12 +541,19 @@
       border-color: var(--r-accent-deep, #a31016);
     }
 
-    /* empty state */
-    .empty-state h3 {
-      font-family: var(--r-font-display, "Doto", sans-serif);
-      font-weight: 800;
+    /* empty state - mono label + hint */
+    .empty-state-label {
+      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-size: 0.72rem;
+      font-weight: 500;
       text-transform: uppercase;
+      letter-spacing: 0.16em;
       color: var(--r-text, #f4f4f4);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-hint {
+      color: var(--r-text-3, #757575);
     }
 
     .empty-state p {
@@ -659,48 +647,9 @@
       --warning: #d71921;
     }
 
-    /* Dark theme improvements */
-    [data-theme="dark"] .page-title,
-    [data-theme="dark"] .page-subtitle,
-    [data-theme="dark"] .announcement-title,
-    [data-theme="dark"] .empty-state h3 {
-      color: #f4f4f4;
-    }
-
-    [data-theme="dark"] .filter-label,
-    [data-theme="dark"] .form-label,
-    [data-theme="dark"] .result-count,
-    [data-theme="dark"] .stat-subtext,
-    [data-theme="dark"] .empty-state p,
-    [data-theme="dark"] .modal-close,
-    [data-theme="dark"] .form-hint {
-      color: #b0b0b0;
-    }
-
-    [data-theme="dark"] .announcement-meta {
-      color: #757575;
-    }
-
-    [data-theme="dark"] .filter-input,
-    [data-theme="dark"] .filter-select,
-    [data-theme="dark"] .form-input,
-    [data-theme="dark"] .form-select,
-    [data-theme="dark"] .form-textarea,
-    [data-theme="dark"] .modal-content {
-      background: #0a0a0a !important;
-      border-color: #1f1f1f;
-      color: #f4f4f4;
-    }
-
-    [data-theme="dark"] .announcement-card {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: #1f1f1f;
-    }
-
     /* Light theme normalization */
     body.light-theme .page-title,
     body.light-theme .announcement-title,
-    body.light-theme .empty-state h3,
     body.light-theme .modal-title {
       color: #0d0d0d;
     }

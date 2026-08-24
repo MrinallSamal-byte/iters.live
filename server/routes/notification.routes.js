@@ -202,31 +202,4 @@ router.delete('/read/all', auth, async (req, res) => {
   }
 });
 
-/**
- * @route   POST /api/notifications/test
- * @desc    Send test notification (for testing)
- * @access  Private
- */
-router.post('/test', auth, async (req, res) => {
-  try {
-    const result = await notificationService.create({
-      userId: req.user.id,
-      title: 'Test Notification',
-      message: 'This is a test notification from the system',
-      type: 'info',
-      link: null,
-      metadata: { test: true }
-    });
-
-    res.json(result);
-  } catch (error) {
-    console.error('Send test notification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send test notification',
-      error: error.message
-    });
-  }
-});
-
 module.exports = router;

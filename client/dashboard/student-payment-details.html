@@ -43,20 +43,13 @@
 </head>
 
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">🔍</span> Payment Details </h1>
+                    <h1 class="page-title">Payment Details</h1>
                     <p class="page-subtitle">Complete information about your transaction</p>
                 </div>
                 <a href="/dashboard/student-payment-history.html" class="btn btn-secondary">
@@ -67,13 +60,12 @@
 
         <!-- Loading State -->
         <div id="loadingState" class="loading-state">
-            <div class="spinner-large"></div>
-            <p>Loading payment details...</p>
+            <div class="loading-text">Loading payment details...</div>
         </div>
 
         <!-- Error State -->
         <div id="errorState" class="error-state" style="display: none;">
-            <div class="error-icon">⚠️</div>
+            <div class="empty-state-label">Error</div>
             <h3>Payment Not Found</h3>
             <p id="errorMessage">Unable to load payment details.</p>
             <a href="/dashboard/student-payment-history.html" class="btn btn-primary">Go to Payment History</a>
@@ -96,7 +88,6 @@
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">📋</span>
                         Payment Information
                     </h3>
                 </div>
@@ -124,7 +115,6 @@
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">👤</span>
                         Student Information
                     </h3>
                 </div>
@@ -148,7 +138,6 @@
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">💳</span>
                         Payment Details
                     </h3>
                 </div>
@@ -180,10 +169,10 @@
             <section class="dashboard-section glass-card hover-lift scroll-reveal">
                 <div class="actions-container">
                     <button class="btn btn-primary" id="downloadReceipt">
-                        <span>📄</span> Download Receipt
+                        Download Receipt
                     </button>
                     <button class="btn btn-secondary" id="printReceipt">
-                        <span>🖨️</span> Print Receipt
+                        Print Receipt
                     </button>
                 </div>
             </section>
@@ -254,19 +243,9 @@
             padding: 4rem 2rem;
         }
 
-        .spinner-large {
-            width: 44px;
-            height: 44px;
-            border: 2px solid var(--r-line-strong);
-            border-top-color: var(--r-accent);
-            border-radius: var(--r-radius);
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        .error-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .error-state .empty-state-label {
+            display: block;
+            margin-bottom: 0.75rem;
         }
 
         .payment-status-header {
@@ -453,10 +432,6 @@
         .btn-secondary:hover {
             background: transparent;
             border-color: var(--r-text);
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {

@@ -95,6 +95,10 @@ router.post('/:id/register', authMiddleware, async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
+    if (event.registration_deadline && new Date(event.registration_deadline).getTime() < Date.now()) {
+      return res.status(400).json({ success: false, message: 'Registration deadline has passed' });
+    }
+
     const existing = await findOne('event_registrations', {
       filters: [
         { field: 'event_id', value: eventId },
@@ -102,13 +106,25 @@ router.post('/:id/register', authMiddleware, async (req, res, next) => {
       ]
     });
 
-    if (!existing) {
-      await createRecord('event_registrations', {
-        event_id: eventId,
-        user_id: req.user.id,
-        registered_at: new Date().toISOString()
-      });
+    if (existing) {
+      return res.json({ success: true, message: 'Already registered' });
     }
+
+    if (event.max_participants != null) {
+      const registrations = await listRecords('event_registrations', {
+        filters: [{ field: 'event_id', value: eventId }]
+      });
+      if (registrations.length >= Number(event.max_participants)) {
+        return res.status(409).json({ success: false, message: 'Event is full' });
+      }
+    }
+
+    // ponytail: check-then-create race -> Firestore transaction if double-registration ever matters
+    await createRecord('event_registrations', {
+      event_id: eventId,
+      user_id: req.user.id,
+      registered_at: new Date().toISOString()
+    });
 
     if (event.max_participants != null) {
       const registrations = await listRecords('event_registrations', {

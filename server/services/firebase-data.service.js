@@ -133,9 +133,7 @@ async function listFromFirestore(collectionName) {
     ...normalizeStoredValue(doc.data())
   }));
 
-  if (isRealtimeDbReady && records.length > 0) {
-    await Promise.all(records.map((record) => mirrorToRealtime(collectionName, record.id, record).catch(() => {})));
-  }
+  // ponytail: RTDB mirror now write-time only -> remove preferRealtime reads if mirror drift matters
 
   return records;
 }

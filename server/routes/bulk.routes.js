@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fsp = require('fs').promises;
 const { body, query, validationResult } = require('express-validator');
 const { authMiddleware: authenticate, roleMiddleware: authorize } = require('../middleware/auth');
 const bulkOperationsService = require('../services/bulk-operations.service');
@@ -70,6 +71,10 @@ router.post('/users/import',
         message: 'Failed to import users',
         error: error.message
       });
+    } finally {
+      if (req.file) {
+        fsp.unlink(req.file.path).catch(() => {});
+      }
     }
   }
 );
@@ -91,7 +96,8 @@ router.post('/attendance/import',
         });
       }
 
-      const results = await bulkOperationsService.bulkMarkAttendance(req.file.path, req.user.id);
+      const fileType = path.extname(req.file.originalname).toLowerCase() === '.csv' ? 'csv' : 'xlsx';
+      const results = await bulkOperationsService.bulkMarkAttendance(req.file.path, req.user.id, fileType);
 
       // Emit socket event for bulk attendance update
       const io = req.app.get('io');
@@ -136,7 +142,8 @@ router.post('/marks/import',
         });
       }
 
-      const results = await bulkOperationsService.bulkUploadMarks(req.file.path, req.user.id);
+      const fileType = path.extname(req.file.originalname).toLowerCase() === '.csv' ? 'csv' : 'xlsx';
+      const results = await bulkOperationsService.bulkUploadMarks(req.file.path, req.user.id, fileType);
 
       // Emit socket event for bulk marks update
       const io = req.app.get('io');

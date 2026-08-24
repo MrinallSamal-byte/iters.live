@@ -44,36 +44,26 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <section class="page-hero glass-card">
-            <h1 class="page-title"> <span class="title-icon">📊</span> System Analytics </h1>
-            <p class="page-subtitle">Comprehensive system insights and statistics</p>
+            <h1 class="page-title"> System Analytics </h1>
+            <p class="page-subtitle">PLATFORM TOTALS &mdash; FILES / ASSIGNMENTS / EVENTS</p>
         </section>
 
         <section class="quick-stats stagger-animation">
-            <div class="stat-box hover-lift">
-                <div class="stat-icon-large">📄</div>
+            <div class="stat-box">
                 <div class="stat-number" id="totalFiles">--</div>
                 <div class="stat-text">Total Files</div>
             </div>
-            <div class="stat-box hover-lift">
-                <div class="stat-icon-large">📝</div>
+            <div class="stat-box">
                 <div class="stat-number" id="totalAssignments">--</div>
                 <div class="stat-text">Assignments</div>
             </div>
-            <div class="stat-box hover-lift">
-                <div class="stat-icon-large">🎉</div>
+            <div class="stat-box">
                 <div class="stat-number" id="totalEvents">--</div>
                 <div class="stat-text">Events</div>
             </div>
-            <div class="stat-box hover-lift">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box">
                 <div class="stat-number" id="avgAttendance">--%</div>
                 <div class="stat-text">Avg Attendance</div>
             </div>
@@ -107,14 +97,14 @@
                     </tr>
                 </thead>
                 <tbody id="activityLogBody">
-                    <tr><td colspan="4">Loading...</td></tr>
+                    <tr><td colspan="4" class="loading-text">Loading...</td></tr>
                 </tbody>
             </table>
         </section>
     </main>
 
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -274,21 +264,14 @@
             --warning: #d71921;
         }
 
-        /* Dark theme improvements */
-        [data-theme="dark"] .page-title,
-        [data-theme="dark"] .dashboard-section > h3,
-        [data-theme="dark"] .stat-number,
-        [data-theme="dark"] .data-table td {
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .stat-text {
-            color: #b0b0b0;
-        }
-
-        [data-theme="dark"] .data-table th {
-            color: #757575;
+        .loading-text {
+            text-align: center;
+            padding: 1rem;
+            color: var(--r-text-3, #757575);
+            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
 
         /* Light theme normalization */

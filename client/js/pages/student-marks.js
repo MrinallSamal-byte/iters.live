@@ -350,8 +350,8 @@
                 datasets: [{
                     label: 'SGPA',
                     data: points.map((item) => item.value),
-                    borderColor: '#ff6b5e',
-                    backgroundColor: 'rgba(255, 107, 94, 0.16)',
+                    borderColor: '#d71921',
+                    backgroundColor: 'rgba(215, 25, 33, 0.16)',
                     tension: 0.35,
                     fill: true,
                     borderWidth: 3,
@@ -405,7 +405,7 @@
                 labels: Object.keys(grades),
                 datasets: [{
                     data: Object.values(grades),
-                    backgroundColor: ['#ff6b5e', '#ff8d71', '#f7b267', '#38b26d', '#7b7b7b'],
+                    backgroundColor: ['#d71921', '#ffffff', '#8a8a8a', '#4a4a4a', '#7b7b7b'],
                     borderWidth: 0
                 }]
             },

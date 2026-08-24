@@ -47,13 +47,6 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Main Content -->
     <main class="dashboard-main">
         <!-- Welcome Section -->
@@ -68,37 +61,32 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">👥</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="totalUsers">--</div>
                 <div class="stat-text">Total Users</div>
                 <div class="stat-subtext">Active accounts</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">👨‍🎓</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="totalStudents">--</div>
                 <div class="stat-text">Students</div>
                 <div class="stat-subtext">Enrolled students</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">👨‍🏫</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="totalTeachers">--</div>
                 <div class="stat-text">Teachers</div>
                 <div class="stat-subtext">Faculty members</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏳</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="pendingApprovals">--</div>
                 <div class="stat-text">Pending</div>
                 <div class="stat-subtext">Awaiting approval</div>
             </div>
         </section>
 
-        <section class="dashboard-section glass-card hover-lift scroll-reveal ai-debug-panel">
+        <section class="dashboard-section glass-card scroll-reveal ai-debug-panel">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🤖</span>
-                    AI Service Status
+                    # AI Service Status
                 </h3>
                 <div class="ai-panel-actions">
                     <span id="aiServiceCheckedAt" class="section-badge">Checking...</span>
@@ -136,11 +124,10 @@
         <!-- Charts Row -->
         <div class="dashboard-grid">
             <!-- User Distribution Chart -->
-            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">📊</span>
-                        User Distribution
+                        # User Distribution
                     </h3>
                     <span class="section-badge">System Overview</span>
                 </div>
@@ -150,11 +137,10 @@
             </section>
 
             <!-- Department Chart -->
-            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">🎓</span>
-                        Department-wise Students
+                        # Department-wise Students
                     </h3>
                     <span class="section-badge">Enrollment Data</span>
                 </div>
@@ -165,11 +151,10 @@
         </div>
 
         <!-- Pending Approvals -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">✅</span>
-                    Pending Approvals
+                    # Pending Approvals
                 </h3>
                 <span class="notification-badge" id="approvalCount">0</span>
             </div>
@@ -194,37 +179,36 @@
         <!-- Grid Layout: System Analytics & Recent Activity -->
         <div class="dashboard-grid">
             <!-- System Analytics -->
-            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">📈</span>
-                        System Analytics
+                        # System Analytics
                     </h3>
                 </div>
                 <div class="analytics-grid">
                     <div class="analytics-item">
-                        <div class="analytics-icon">📁</div>
+                        <div class="analytics-icon">+</div>
                         <div class="analytics-content">
                             <div class="analytics-value" id="totalFiles">--</div>
                             <div class="analytics-label">Total Files</div>
                         </div>
                     </div>
                     <div class="analytics-item">
-                        <div class="analytics-icon">📝</div>
+                        <div class="analytics-icon">></div>
                         <div class="analytics-content">
                             <div class="analytics-value" id="totalAssignments">--</div>
                             <div class="analytics-label">Assignments</div>
                         </div>
                     </div>
                     <div class="analytics-item">
-                        <div class="analytics-icon">🎉</div>
+                        <div class="analytics-icon">#</div>
                         <div class="analytics-content">
                             <div class="analytics-value" id="totalEvents">--</div>
                             <div class="analytics-label">Events</div>
                         </div>
                     </div>
                     <div class="analytics-item">
-                        <div class="analytics-icon">📊</div>
+                        <div class="analytics-icon">%</div>
                         <div class="analytics-content">
                             <div class="analytics-value" id="avgAttendance">--%</div>
                             <div class="analytics-label">Avg Attendance</div>
@@ -234,11 +218,10 @@
             </section>
 
             <!-- Recent Activity -->
-            <section class="dashboard-section glass-card hover-lift scroll-reveal">
+            <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h3 class="section-title-formal">
-                        <span class="title-icon">🕒</span>
-                        Recent Activity
+                        # Recent Activity
                     </h3>
                 </div>
                 <div id="recentActivity" class="activity-list">
@@ -248,37 +231,36 @@
         </div>
 
         <!-- Quick Links -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔗</span>
-                    Quick Actions
+                    # Quick Actions
                 </h3>
             </div>
             <div class="quick-links-grid">
                 <a href="/dashboard/admin-users.html" class="quick-link-card">
-                    <div class="quick-link-icon">👥</div>
+                    <div class="quick-link-icon">></div>
                     <div class="quick-link-content">
                         <h4>User Management</h4>
                         <p>Manage students, teachers & admins</p>
                     </div>
                 </a>
                 <a href="/dashboard/admin-approvals.html" class="quick-link-card">
-                    <div class="quick-link-icon">✅</div>
+                    <div class="quick-link-icon">#</div>
                     <div class="quick-link-content">
                         <h4>Approvals</h4>
                         <p>Review pending submissions</p>
                     </div>
                 </a>
                 <a href="/dashboard/admin-analytics.html" class="quick-link-card">
-                    <div class="quick-link-icon">📊</div>
+                    <div class="quick-link-icon">%</div>
                     <div class="quick-link-content">
                         <h4>Analytics</h4>
                         <p>View detailed reports</p>
                     </div>
                 </a>
                 <a href="/dashboard/admin-settings.html" class="quick-link-card">
-                    <div class="quick-link-icon">⚙️</div>
+                    <div class="quick-link-icon">+</div>
                     <div class="quick-link-content">
                         <h4>Settings</h4>
                         <p>System configuration</p>
@@ -290,7 +272,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Scripts - Load in specific order -->
@@ -741,29 +723,6 @@
             --error: #d71921;
             --success: #e8e8e8;
             --warning: #d71921;
-        }
-
-        /* Dark theme improvements */
-        [data-theme="dark"] .modern-table th {
-            color: #757575;
-        }
-
-        [data-theme="dark"] .modern-table td,
-        [data-theme="dark"] .quick-link-content h4,
-        [data-theme="dark"] .activity-user,
-        [data-theme="dark"] .ai-status-tile strong {
-            color: #f4f4f4;
-        }
-
-        [data-theme="dark"] .page-subtitle,
-        [data-theme="dark"] .quick-link-content p,
-        [data-theme="dark"] .stat-subtext,
-        [data-theme="dark"] .analytics-label,
-        [data-theme="dark"] .activity-description,
-        [data-theme="dark"] .activity-time,
-        [data-theme="dark"] .ai-status-label,
-        [data-theme="dark"] .ai-recommendation-item {
-            color: #b0b0b0;
         }
 
         /* Light theme normalization */

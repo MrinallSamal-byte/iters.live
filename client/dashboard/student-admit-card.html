@@ -62,7 +62,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">👤</span>
                     Student Information
                 </h3>
             </div>
@@ -98,7 +97,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
                     Select Examination
                 </h3>
             </div>
@@ -131,7 +129,7 @@
                 </div>
                 
                 <button class="btn btn-primary btn-large" id="downloadBtn">
-                    📥 Download Admit Card
+                    Download Admit Card
                 </button>
             </div>
         </section>
@@ -140,27 +138,26 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⚠️</span>
                     Important Instructions
                 </h3>
             </div>
             <div class="notes-container">
                 <div class="note-card">
-                    <div class="note-icon">ℹ️</div>
+                    <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 1</h4>
                         <p>Please contact the University Office in case of any dispute or mismatch in data.</p>
                     </div>
                 </div>
                 <div class="note-card">
-                    <div class="note-icon">📄</div>
+                    <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 2</h4>
                         <p>This is a computer-generated report. No signature is required.</p>
                     </div>
                 </div>
                 <div class="note-card">
-                    <div class="note-icon">✅</div>
+                    <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 3</h4>
                         <p>Carry a printed copy of the admit card along with a valid photo ID to the examination hall.</p>
@@ -218,8 +215,8 @@
             flex-direction: column;
             gap: 0.5rem;
             padding: 1.5rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease;
         }
@@ -266,8 +263,8 @@
         .form-select {
             padding: 0.85rem 1rem;
             border-radius: 0;
-            border: 1px solid var(--glass-border);
-            background: var(--glass-bg);
+            border: 1px solid var(--r-line);
+            background: var(--r-panel-inset);
             color: var(--text-primary);
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.8rem;
@@ -319,7 +316,10 @@
         }
         
         .note-icon {
-            font-size: 2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.25rem;
+            line-height: 1;
+            color: var(--r-accent);
             flex-shrink: 0;
         }
         

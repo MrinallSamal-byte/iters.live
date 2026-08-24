@@ -46,19 +46,12 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">📚</span> Study Materials </h1>
+                    <h1 class="page-title"> Study Materials </h1>
                     <p class="page-subtitle">Upload and manage learning resources for your students</p>
                 </div>
             </div>
@@ -66,26 +59,22 @@
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📄</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="totalNotes">--</div>
                 <div class="stat-text">Total Materials</div>
                 <div class="stat-subtext">All uploads</div>
             </div>
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="approvedNotes">--</div>
                 <div class="stat-text">Approved</div>
                 <div class="stat-subtext">Live content</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⏳</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="pendingNotes">--</div>
                 <div class="stat-text">Pending</div>
                 <div class="stat-subtext">Awaiting approval</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">👁️</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="totalDownloads">--</div>
                 <div class="stat-text">Downloads</div>
                 <div class="stat-subtext">Student access</div>
@@ -93,11 +82,10 @@
         </section>
 
         <!-- Upload New Material -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">➕</span>
-                    Upload New Study Material
+                    # Upload New Study Material
                 </h3>
             </div>
             
@@ -105,7 +93,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="noteTitle" class="form-label">
-                            <span class="label-icon">📌</span>
                             Title
                         </label>
                         <input type="text" id="noteTitle" name="title" class="form-input" placeholder="e.g., Chapter 1 - Introduction to Data Structures" required>
@@ -113,7 +100,6 @@
                     
                     <div class="form-group">
                         <label for="subject" class="form-label">
-                            <span class="label-icon">📖</span>
                             Subject
                         </label>
                         <input type="text" id="subject" name="subject" class="form-input" placeholder="e.g., Data Structures" required>
@@ -122,7 +108,6 @@
 
                 <div class="form-group">
                     <label for="description" class="form-label">
-                        <span class="label-icon">📝</span>
                         Description
                     </label>
                     <textarea id="description" name="description" class="form-textarea" rows="3" placeholder="Brief description of the material..." required></textarea>
@@ -131,7 +116,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="category" class="form-label">
-                            <span class="label-icon">🏷️</span>
                             Category
                         </label>
                         <select id="category" name="category" class="form-select" required>
@@ -149,7 +133,6 @@
 
                     <div class="form-group">
                         <label for="unit" class="form-label">
-                            <span class="label-icon">📑</span>
                             Unit/Chapter
                         </label>
                         <input type="text" id="unit" name="unit" class="form-input" placeholder="e.g., Unit 1" required>
@@ -159,7 +142,6 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="department" class="form-label">
-                            <span class="label-icon">🎓</span>
                             Department
                         </label>
                         <select id="department" name="department" class="form-select" required>
@@ -175,7 +157,6 @@
 
                     <div class="form-group">
                         <label for="year" class="form-label">
-                            <span class="label-icon">📚</span>
                             Year
                         </label>
                         <select id="year" name="year" class="form-select" required>
@@ -189,7 +170,6 @@
 
                     <div class="form-group">
                         <label for="semester" class="form-label">
-                            <span class="label-icon">📅</span>
                             Semester
                         </label>
                         <select id="semester" name="semester" class="form-select" required>
@@ -202,7 +182,6 @@
 
                 <div class="form-group">
                     <label for="tags" class="form-label">
-                        <span class="label-icon">🏷️</span>
                         Tags (comma separated)
                     </label>
                     <input type="text" id="tags" name="tags" class="form-input" placeholder="e.g., arrays, sorting, algorithms">
@@ -210,13 +189,12 @@
 
                 <div class="form-group">
                     <label for="file" class="form-label">
-                        <span class="label-icon">📎</span>
                         Upload File
                     </label>
                     <div class="file-upload-area">
                         <input type="file" id="file" name="file" class="file-input" required>
                         <div class="file-upload-text">
-                            <span class="upload-icon">📁</span>
+                            <span class="upload-icon">+</span>
                             <p>Click to upload or drag and drop</p>
                             <small>PDF, DOC, DOCX, PPT, PPTX, ZIP (Max 50MB)</small>
                         </div>
@@ -236,11 +214,10 @@
         </section>
 
         <!-- My Uploads -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    My Uploads
+                    # My Uploads
                 </h3>
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
@@ -252,7 +229,7 @@
 
             <div class="search-filter-bar">
                 <div class="search-box">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon" aria-hidden="true">#</span>
                     <input type="text" id="searchInput" placeholder="Search by title, subject, or tags..." class="search-input">
                 </div>
                 <select id="categoryFilter" class="filter-select-small">
@@ -299,11 +276,10 @@
         </section>
 
         <!-- Popular Materials -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔥</span>
-                    Most Downloaded Materials
+                    # Most Downloaded Materials
                 </h3>
             </div>
 
@@ -315,7 +291,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- View Details Modal -->
@@ -349,6 +325,14 @@
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
            ============================================================ */
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+            --success: var(--r-text-2);
+            --warning: var(--r-accent);
+            --danger: var(--r-accent);
+        }
+
         :root {
             --np-panel: #0a0a0a;
             --np-inset: rgba(255, 255, 255, 0.04);
@@ -508,8 +492,10 @@
         }
 
         .upload-icon {
-            font-size: 2.4rem;
+            font-family: var(--r-font-mono);
+            font-size: 1.6rem;
             margin-bottom: 0.5rem;
+            color: var(--np-text-3);
         }
 
         .file-upload-text p {
@@ -776,7 +762,6 @@
         }
 
         .material-card:hover {
-            transform: translateY(-2px);
             border-color: var(--np-line-strong);
         }
 

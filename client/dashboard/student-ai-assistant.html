@@ -75,7 +75,11 @@
         }
 
         .feature-icon {
-            font-size: 2.4rem;
+            font-family: var(--r-font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            color: var(--r-text-3);
             margin-bottom: 1rem;
         }
 
@@ -429,6 +433,24 @@
             color: var(--r-text);
         }
 
+        /* Shared inline error line for failed API calls */
+        .error-line {
+            color: var(--r-accent);
+            font-family: var(--r-font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            border: 1px solid var(--r-accent);
+            padding: 0.75rem 1rem;
+        }
+
+        .strategy-block {
+            background: var(--r-panel-inset);
+            border: 1px solid var(--r-line);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
         @media (max-width: 1024px) {
             .ai-container {
                 padding: 1.25rem;
@@ -509,40 +531,40 @@
             <div class="ai-container">
                 <!-- Header -->
                 <div class="ai-header">
-                    <h1>🤖 AI Assistant</h1>
-                    <p>Your personal AI-powered study companion with smart recommendations</p>
+                    <h1>AI Assistant</h1>
+                    <p>Exam performance prediction, study recommendations, schedules, and chat support</p>
                 </div>
 
                 <!-- Feature Cards -->
                 <div class="feature-grid">
                     <div class="feature-card" onclick="showPrediction()">
-                        <div class="feature-icon">📊</div>
+                        <div class="feature-icon">01</div>
                         <h3>Performance Predictor</h3>
-                        <p>ML-powered prediction of your exam results based on multiple factors</p>
+                        <p>Estimates your exam results from study hours, marks, and attendance data</p>
                     </div>
 
                     <div class="feature-card" onclick="showTutorRecommendations()">
-                        <div class="feature-icon">📚</div>
-                        <h3>AI Tutor</h3>
-                        <p>Personalized study recommendations based on your marks and attendance</p>
+                        <div class="feature-icon">02</div>
+                        <h3>Study Recommendations</h3>
+                        <p>Study suggestions generated from your marks and attendance records</p>
                     </div>
 
                     <div class="feature-card" onclick="generateStudyPlan()">
-                        <div class="feature-icon">🎯</div>
+                        <div class="feature-icon">03</div>
                         <h3>Smart Study Plan</h3>
                         <p>Auto-generated study schedules focused on your weak subjects</p>
                     </div>
 
                     <div class="feature-card" onclick="openChatbot()">
-                        <div class="feature-icon">🤖</div>
-                        <h3>24/7 Chatbot</h3>
-                        <p>Get instant answers to your doubts with Gemini AI integration</p>
+                        <div class="feature-icon">04</div>
+                        <h3>Chat Assistant</h3>
+                        <p>Ask questions and get answers in the built-in chat</p>
                     </div>
                 </div>
 
                 <!-- Prediction Results -->
                 <div id="predictionResults" class="prediction-card" style="display: none;">
-                    <h2>📊 Performance Prediction</h2>
+                    <h2>Performance Prediction</h2>
                     <div class="prediction-header">
                         <div>
                             <div class="prediction-score" id="predictedScore">--</div>
@@ -579,13 +601,13 @@
 
                 <!-- Tutor Recommendations -->
                 <div id="tutorResults" class="recommendations-card" style="display: none;">
-                    <h2>📚 AI Tutor Recommendations</h2>
+                    <h2>Study Recommendations</h2>
                     <div id="tutorContent"></div>
                 </div>
 
                 <!-- Study Plan -->
                 <div id="studyPlanResults" class="study-plan-section" style="display: none;">
-                    <h2>🎯 Smart Study Plan</h2>
+                    <h2>Smart Study Plan</h2>
                     <div id="studyPlanContent"></div>
                 </div>
             </div>
@@ -596,15 +618,12 @@
     <div class="modal-overlay" id="studyHoursModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📊 Performance Prediction</h3>
+                <h3>Performance Prediction</h3>
                 <p>Help us predict your performance by providing some information</p>
             </div>
             <div class="modal-body">
                 <label for="studyHoursInput">How many hours do you study per day on average?</label>
                 <input type="number" id="studyHoursInput" min="0" max="24" step="0.5" value="4" placeholder="Enter hours (e.g., 4)">
-                <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--r-text-3, #757575); margin-top: 0.5rem;">
-                    💡 Be honest - this helps us give you accurate predictions!
-                </p>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeStudyHoursModal()">Cancel</button>
@@ -673,7 +692,7 @@
                 }
             } catch (error) {
                 console.error('Prediction error:', error);
-                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p class="error-line">Error: ${error.message}</p>`;
             }
         }
 
@@ -754,7 +773,7 @@
                 }
             } catch (error) {
                 console.error('Tutor recommendations error:', error);
-                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p class="error-line">Error: ${error.message}</p>`;
             }
         }
 
@@ -764,7 +783,7 @@
 
             // Action Plan
             if (recommendations.actionPlan) {
-                html += '<h3>📅 Two-Week Action Plan</h3>';
+                html += '<h3>Two-Week Action Plan</h3>';
                 html += '<div class="week-container">';
                 html += '<h4>Week 1</h4><ul>';
                 recommendations.actionPlan.week1.forEach(item => {
@@ -779,7 +798,7 @@
 
             // Time Allocation
             if (recommendations.timeAllocation && recommendations.timeAllocation.length > 0) {
-                html += '<h3>⏰ Time Allocation</h3>';
+                html += '<h3>Time Allocation</h3>';
                 html += '<div class="factor-grid">';
                 recommendations.timeAllocation.forEach(alloc => {
                     html += `
@@ -795,7 +814,7 @@
 
             // Motivation
             if (recommendations.motivation) {
-                html += '<h3>💪 Motivation Tips</h3><ul class="recommendations-list">';
+                html += '<h3>Motivation Tips</h3><ul class="recommendations-list">';
                 recommendations.motivation.forEach(tip => {
                     html += `<li>${tip}</li>`;
                 });
@@ -804,7 +823,7 @@
 
             // Resources
             if (recommendations.resources && recommendations.resources.length > 0) {
-                html += '<h3>📖 Recommended Resources</h3>';
+                html += '<h3>Recommended Resources</h3>';
                 recommendations.resources.forEach(resource => {
                     html += `<h4>${resource.subject}</h4><ul>`;
                     resource.resources.forEach(res => {
@@ -848,7 +867,7 @@
                 }
             } catch (error) {
                 console.error('Study plan error:', error);
-                resultsDiv.innerHTML = `<p style="color: #d71921; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; border: 1px solid #d71921; padding: 0.75rem 1rem;">Error: ${error.message}</p>`;
+                resultsDiv.innerHTML = `<p class="error-line">Error: ${error.message}</p>`;
             }
         }
 
@@ -858,15 +877,15 @@
 
             // Overall Strategy
             if (plan.overallStrategy) {
-                html += `<div style="background: var(--r-panel-inset, rgba(255,255,255,0.04)); border: 1px solid var(--r-line, #1f1f1f); padding: 1rem; margin-bottom: 1rem;">
-                    <h4>🎯 Overall Strategy</h4>
+                html += `<div class="strategy-block">
+                    <h4>Overall Strategy</h4>
                     <p>${plan.overallStrategy}</p>
                 </div>`;
             }
 
             // Weekly Goals
             if (plan.weeklyGoals) {
-                html += '<h3>🎯 Weekly Goals</h3><ul class="recommendations-list">';
+                html += '<h3>Weekly Goals</h3><ul class="recommendations-list">';
                 plan.weeklyGoals.forEach(goal => {
                     html += `<li>${goal}</li>`;
                 });

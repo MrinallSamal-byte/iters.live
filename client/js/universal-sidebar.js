@@ -333,7 +333,12 @@
         },
 
         createProfileIcon() {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            let user = {};
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch (e) {
+                user = {};
+            }
             const userName = user.name || 'User';
             const userInitial = userName.charAt(0).toUpperCase();
             const roleText = this.currentRole.charAt(0).toUpperCase() + this.currentRole.slice(1);
@@ -365,12 +370,14 @@
                                         <span>Show ID Card</span>
                                     </a>
                                 </li>
+                                ${this.currentRole === 'admin' ? `
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link" onclick="UniversalSidebar.openSettings(); return false;">
                                         <span class="profile-dropdown-icon">⚙️</span>
                                         <span>Settings</span>
                                     </a>
                                 </li>
+                                ` : ''}
                                 <div class="profile-dropdown-divider"></div>
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link danger" onclick="UniversalSidebar.logout(); return false;">
@@ -977,15 +984,13 @@
             const dropdown = document.getElementById('profileDropdown');
             if (dropdown) dropdown.classList.remove('show');
 
-            // Prefer a common settings page if available
-            const byRole = {
-                student: '/settings.html',
-                teacher: '/settings.html',
-                admin: '/settings.html'
-            };
+            // Only /dashboard/admin-settings.html exists; students/teachers have
+            // no settings page yet, so omit the entry entirely for them.
+            // ponytail: role-specific settings pages -> link them here once built
+            if (this.currentRole !== 'admin') return;
 
-            const target = byRole[this.currentRole] || '/settings.html';
-            
+            const target = '/dashboard/admin-settings.html';
+
             // Use encoded URL for navigation
             if (window.LinkEncoding && typeof window.LinkEncoding.navigateTo === 'function') {
                 window.LinkEncoding.navigateTo(target);

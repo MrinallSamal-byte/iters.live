@@ -163,7 +163,7 @@
               '#22c55e', '#3b82f6', '#f59e0b', 
               '#ef4444', '#6b7280', '#94a3b8', '#64748b'
             ],
-            borderRadius: 8
+            borderRadius: 2
           }]
         },
         options: {
@@ -217,7 +217,7 @@
               <div>${escapeHtml(s.student_name)}</div>
               <div style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(s.student_reg)}</div>
             </td>
-            <td>Data Structures</td>
+            <td>${escapeHtml(s.subject || '—')}</td>
             <td>${dateStr}</td>
             <td>
               <button class="btn-small btn-primary" disabled title="Grading is not available yet">

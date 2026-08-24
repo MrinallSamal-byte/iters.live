@@ -48,46 +48,35 @@
 </head>
 
 <body>
-    <!-- Background -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <main class="dashboard-main">
         <!-- Page Hero -->
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">👥</span> My Students </h1>
-                    <p class="page-subtitle">View and manage your student roster</p>
+                    <h1 class="page-title"> My Students </h1>
+                    <p class="page-subtitle">ROSTER // FILTER BY DEPT / YEAR / SECTION</p>
                 </div>
             </div>
         </section>
 
         <!-- Quick Stats -->
         <section class="quick-stats stagger-animation">
-            <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">👨‍🎓</div>
+            <div class="stat-box success scroll-reveal">
                 <div class="stat-number" id="totalStudents">--</div>
                 <div class="stat-text">Total Students</div>
                 <div class="stat-subtext">Under your guidance</div>
             </div>
-            <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📊</div>
+            <div class="stat-box info scroll-reveal">
                 <div class="stat-number" id="avgPerformance">--%</div>
                 <div class="stat-text">Avg Performance</div>
                 <div class="stat-subtext">Overall class average</div>
             </div>
-            <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">⚠️</div>
+            <div class="stat-box warning scroll-reveal">
                 <div class="stat-number" id="lowPerformers">--</div>
                 <div class="stat-text">Need Attention</div>
                 <div class="stat-subtext">Below 50%</div>
             </div>
-            <div class="stat-box hover-lift scroll-reveal">
-                <div class="stat-icon-large">🌟</div>
+            <div class="stat-box scroll-reveal">
                 <div class="stat-number" id="topPerformers">--</div>
                 <div class="stat-text">Top Performers</div>
                 <div class="stat-subtext">Above 85%</div>
@@ -95,11 +84,10 @@
         </section>
 
         <!-- Filter Section -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🔍</span>
-                    Filter Students
+                    # Filter Students
                 </h3>
             </div>
 
@@ -107,7 +95,6 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="deptFilter" class="filter-label">
-                            <span class="filter-icon">🎓</span>
                             Department
                         </label>
                         <select id="deptFilter" class="filter-select">
@@ -123,7 +110,6 @@
 
                     <div class="filter-group">
                         <label for="yearFilter" class="filter-label">
-                            <span class="filter-icon">📚</span>
                             Year
                         </label>
                         <select id="yearFilter" class="filter-select">
@@ -137,7 +123,6 @@
 
                     <div class="filter-group">
                         <label for="sectionFilter" class="filter-label">
-                            <span class="filter-icon">📋</span>
                             Section
                         </label>
                         <select id="sectionFilter" class="filter-select">
@@ -151,7 +136,6 @@
 
                     <div class="filter-group">
                         <label for="searchInput" class="filter-label">
-                            <span class="filter-icon">🔍</span>
                             Search
                         </label>
                         <input type="text" id="searchInput" class="filter-input"
@@ -161,32 +145,31 @@
 
                 <div class="form-actions">
                     <button class="btn btn-primary" onclick="applyFilters()">
-                        <span>🔍</span> Apply Filters
+                        Apply Filters
                     </button>
                     <button class="btn btn-secondary" onclick="resetFilters()">
                         <span>↺</span> Reset
                     </button>
                     <button class="btn btn-secondary" onclick="exportToExcel()">
-                        <span>📥</span> Export Excel
+                        Export Excel
                     </button>
                 </div>
             </div>
         </section>
 
         <!-- Students List -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
-                    Student List
+                    # Student List
                     <span id="studentCount" class="result-count"></span>
                 </h3>
                 <div class="view-toggle">
                     <button class="view-btn active" data-view="table" onclick="switchView('table')">
-                        <span>📊</span> Table
+                        Table
                     </button>
                     <button class="view-btn" data-view="cards" onclick="switchView('cards')">
-                        <span>🎴</span> Cards
+                        Cards
                     </button>
                 </div>
             </div>
@@ -223,11 +206,10 @@
         </section>
 
         <!-- Performance Chart -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📊</span>
-                    Class Performance Distribution
+                    # Class Performance Distribution
                 </h3>
             </div>
 
@@ -237,11 +219,10 @@
         </section>
 
         <!-- Students Needing Attention -->
-        <section class="dashboard-section glass-card hover-lift scroll-reveal">
+        <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">⚠️</span>
-                    Students Needing Attention
+                    # Students Needing Attention
                 </h3>
             </div>
 
@@ -253,7 +234,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span aria-hidden="true">&gt;</span>
     </button>
 
     <!-- Student Details Modal -->
@@ -288,6 +269,14 @@
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
            ============================================================ */
+        body {
+            --text-primary: var(--r-text);
+            --text-secondary: var(--r-text-2);
+            --success: var(--r-text-2);
+            --warning: var(--r-accent);
+            --danger: var(--r-accent);
+        }
+
         :root {
             --np-panel: #0a0a0a;
             --np-inset: rgba(255, 255, 255, 0.04);
@@ -573,7 +562,6 @@
         }
 
         .student-card:hover {
-            transform: translateY(-2px);
             border-color: var(--np-line-strong);
             box-shadow: none;
         }

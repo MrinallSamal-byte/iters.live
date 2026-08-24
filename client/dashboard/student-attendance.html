@@ -63,22 +63,18 @@
         <!-- Overall Attendance Stats -->
         <section class="quick-stats stagger-animation">
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✓</div>
                 <div class="stat-number" id="overallAttendance">--</div>
                 <div class="stat-text">Overall Attendance</div>
             </div>
             <div class="stat-box info hover-lift scroll-reveal">
-                <div class="stat-icon-large">📅</div>
                 <div class="stat-number" id="totalClasses">--</div>
                 <div class="stat-text">Total Classes</div>
             </div>
             <div class="stat-box success hover-lift scroll-reveal">
-                <div class="stat-icon-large">✅</div>
                 <div class="stat-number" id="presentClasses">--</div>
                 <div class="stat-text">Present</div>
             </div>
             <div class="stat-box warning hover-lift scroll-reveal">
-                <div class="stat-icon-large">❌</div>
                 <div class="stat-number" id="absentClasses">--</div>
                 <div class="stat-text">Absent</div>
             </div>
@@ -88,7 +84,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📈</span>
                     Attendance Distribution
                 </h3>
                 <span class="section-badge">Visual Overview</span>
@@ -126,10 +121,8 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📚</span>
                     Subject-wise Attendance
                 </h3>
-                <span class="section-badge">Detailed Breakdown</span>
             </div>
             <div class="table-responsive">
                 <table class="data-table modern-table">
@@ -154,25 +147,25 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">💡</span>
                     Attendance Insights
                 </h3>
             </div>
             <div class="insights-grid">
                 <div class="insight-card glass-card">
-                    <div class="insight-icon">⚠️</div>
+                    <div class="insight-icon">01</div>
                     <h4>Action Required</h4>
-                    <p id="lowAttendanceWarning">All subjects have healthy attendance</p>
+                    <!-- ponytail: copy made factual; id kept for student-attendance.js -->
+                    <p id="lowAttendanceWarning">Listed here when any subject falls below your selected target.</p>
                 </div>
                 <div class="insight-card glass-card">
-                    <div class="insight-icon">📅</div>
+                    <div class="insight-icon">02</div>
                     <h4>This Week</h4>
-                    <p id="weeklyAttendance">Check your weekly attendance progress</p>
+                    <p id="weeklyAttendance">Totals reflect the latest SOA portal import.</p>
                 </div>
                 <div class="insight-card glass-card">
-                    <div class="insight-icon">🎯</div>
+                    <div class="insight-icon">03</div>
                     <h4>Attendance Goal</h4>
-                    <p>Maintain at least 75% attendance to avoid issues</p>
+                    <p>University minimum is 75% overall attendance.</p>
                 </div>
             </div>
         </section>
@@ -234,14 +227,14 @@
             font-weight: 600;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #757575;
+            color: var(--r-text-3);
             text-align: left;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--r-line-strong);
         }
 
         .modern-table td {
             padding: 1rem;
-            border-bottom: 1px dotted #1f1f1f;
+            border-bottom: 1px dotted var(--r-line);
         }
 
         .modern-table tbody tr {
@@ -288,11 +281,14 @@
         }
 
         .insight-card:hover {
-            border-color: #333;
+            border-color: var(--r-line-strong);
         }
-        
+
         .insight-icon {
-            font-size: 2.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
             margin-bottom: 1rem;
         }
         
@@ -406,12 +402,12 @@
             font-size: 0.62rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #757575;
-            border-bottom: 1px solid #333;
+            color: var(--r-text-3);
+            border-bottom: 1px solid var(--r-line-strong);
         }
 
         .bunk-table td {
-            border-bottom: 1px dotted #1f1f1f;
+            border-bottom: 1px dotted var(--r-line);
         }
 
         .bunk-needs {

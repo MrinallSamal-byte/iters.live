@@ -184,6 +184,8 @@ class OpenRouterService {
         return preferredModels;
     }
 
+    // ponytail: getResolvedModels kept — audit flagged zero callers, but
+    // server/__tests__/openrouter.service.test.js:47,59 calls it; delete together with that test
     async getResolvedModels(useCase) {
         return this.getModelsForUseCase(useCase);
     }
@@ -277,51 +279,6 @@ class OpenRouterService {
         }
 
         throw lastError || new Error('All OpenRouter models failed');
-    }
-
-    /**
-     * Solve CAPTCHA using vision models
-     * @param {string} imageBase64 - Base64 encoded image
-     * @returns {Promise<string>} Extracted CAPTCHA text
-     */
-    async solveCaptcha(imageBase64) {
-        const messages = [
-            {
-                role: 'user',
-                content: [
-                    {
-                        type: 'text',
-                        text: 'Extract the text from this CAPTCHA image. Return ONLY the text you see, nothing else. The text is typically 5-6 alphanumeric characters.'
-                    },
-                    {
-                        type: 'image_url',
-                        image_url: {
-                            url: `data:image/png;base64,${imageBase64}`
-                        }
-                    }
-                ]
-            }
-        ];
-
-        try {
-            const models = await this.getModelsForUseCase('captcha');
-            const response = await this.makeRequestWithFallback(
-                models,
-                messages,
-                { temperature: 0.1, maxTokens: 50 }
-            );
-            
-            // Clean up the response to extract just the CAPTCHA text
-            const cleaned = response.trim()
-                .replace(/[^a-zA-Z0-9]/g, '')
-                .toUpperCase()
-                .substring(0, 6);
-            
-            return cleaned;
-        } catch (error) {
-            console.error('OpenRouter CAPTCHA solving error:', error.message);
-            throw error;
-        }
     }
 
     /**

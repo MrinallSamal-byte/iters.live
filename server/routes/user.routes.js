@@ -1,44 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
-const { getRecord, updateRecord } = require('../services/firebase-data.service');
-
-router.get('/me', authMiddleware, async (req, res, next) => {
-  try {
-    const user = await getRecord('users', req.user.id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    res.json({
-      success: true,
-      data: {
-        id: user.id,
-        name: user.name,
-        registration_number: user.registration_number,
-        email: user.email,
-        phone: user.phone_number || null,
-        role: user.role,
-        department: user.department || null,
-        year: user.year ?? null,
-        section: user.section || null,
-        subjects_taught: user.subjects_taught || null,
-        profile_pic: user.profile_picture || null
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+const { updateRecord } = require('../services/firebase-data.service');
 
 router.put('/profile', authMiddleware, async (req, res, next) => {
   try {
     const { name, phone_number, profile_picture } = req.body;
-    await updateRecord('users', req.user.id, {
-      name,
-      phone_number: phone_number || null,
-      profile_picture: profile_picture || null
-    });
+
+    if (profile_picture !== undefined && profile_picture !== '' &&
+        !/^https?:\/\//i.test(profile_picture) &&
+        !profile_picture.startsWith('/')) {
+      return res.status(400).json({ success: false, message: 'profile_picture must be an http(s) URL or a /path' });
+    }
+
+    // Only touch fields the client actually sent (partial updates stay partial)
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (phone_number !== undefined) updates.phone_number = phone_number || null;
+    if (profile_picture !== undefined) updates.profile_picture = profile_picture || null;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields to update' });
+    }
+
+    await updateRecord('users', req.user.id, updates);
     res.json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
     next(error);

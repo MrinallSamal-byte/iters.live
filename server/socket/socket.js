@@ -25,27 +25,39 @@ const initializeSocket = (socketIo) => {
       if (decodedSession?.user) {
         socket.userId = decodedSession.user.id || decodedSession.user.uid || decodedSession.user.registration_number;
         socket.userRole = decodedSession.user.role;
+        socket.userName = decodedSession.user.name || 'User';
+        socket.userDepartment = decodedSession.user.department || null;
         return next();
       }
     } catch (_) {
       // Fall through to demo/Firebase token handling.
     }
 
-    try {
-      const localDemoUser = getLocalDemoUserFromToken(token);
-      if (localDemoUser) {
-        socket.userId = localDemoUser.id || localDemoUser.registration_number;
-        socket.userRole = localDemoUser.role;
-        return next();
+    // Same demo-token gate as auth middleware
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.ALLOW_LOCAL_DEMO_AUTH === 'true'
+    ) {
+      try {
+        const localDemoUser = getLocalDemoUserFromToken(token);
+        if (localDemoUser) {
+          socket.userId = localDemoUser.id || localDemoUser.registration_number;
+          socket.userRole = localDemoUser.role;
+          socket.userName = localDemoUser.name || 'User';
+          socket.userDepartment = localDemoUser.department || null;
+          return next();
+        }
+      } catch (_) {
+        // Continue to Firebase token verification.
       }
-    } catch (_) {
-      // Continue to Firebase token verification.
     }
 
     try {
       const decoded = await auth.verifyIdToken(token);
       socket.userId = decoded.uid;
       socket.userRole = decoded.role || decoded.claims?.role || 'student';
+      socket.userName = decoded.name || decoded.displayName || 'User';
+      socket.userDepartment = null;
       return next();
     } catch (error) {
       return next(new Error('Invalid token'));
@@ -64,24 +76,25 @@ const initializeSocket = (socketIo) => {
 
     // Join department/class rooms (if data provided)
     socket.on('join:department', (data) => {
-      if (data.department) {
-        socket.join(`dept:${data.department}`);
-        socket.join(`dept-${data.department}`);
-        
-        if (data.year && data.section) {
-          socket.join(`class:${data.department}-${data.year}${data.section}`);
-          socket.join(`dept-${data.department}-year-${data.year}`);
-        }
+      const requested = data && data.department;
+      if (!requested) {
+        return;
       }
-    });
 
-    // Profile-related events
-    socket.on('profile:view', (data) => {
-      console.log(`User ${socket.userId} viewed profile`);
-    });
+      // Validate the requested department against the authenticated user's own
+      // department; admins may join any department room.
+      if (socket.userRole !== 'admin' && socket.userDepartment && requested !== socket.userDepartment) {
+        return;
+      }
+      // ponytail: dept claim not in token -> embed dept in token to validate room joins
 
-    socket.on('profile:photo:upload:progress', () => {
-      socket.emit('profile:photo:upload:progress', { percent: 0 });
+      socket.join(`dept:${requested}`);
+      socket.join(`dept-${requested}`);
+      
+      if (data.year && data.section) {
+        socket.join(`class:${requested}-${data.year}${data.section}`);
+        socket.join(`dept-${requested}-year-${data.year}`);
+      }
     });
 
     // Initialize chat service events

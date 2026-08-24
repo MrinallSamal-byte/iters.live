@@ -3,14 +3,21 @@ const router = express.Router();
 const { db, auth, isFirebaseAdminReady } = require('../database/firebase');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
-const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 const sessionModule = require('../middleware/session');
 const { createAppSessionToken } = require('../utils/app-session');
 const { getLocalDemoUser, registerLocalDemoStudent } = require('../services/demo-auth.service');
 
-// Flask Scraper Service URL
-const FLASK_SERVICE_URL = process.env.FLASK_SCRAPER_URL || 'http://localhost:5001';
 const allowLocalDemoAuth = process.env.ALLOW_LOCAL_DEMO_AUTH === 'true' || process.env.NODE_ENV !== 'production';
+
+// Strict limiter for credential endpoints (brute-force protection)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts. Please try again later.' }
+});
 
 function buildLocalDemoLoginResponse(user) {
   const localAccessToken = `demo-local-${user.registration_number || user.id || user.role}-${Date.now()}`;
@@ -38,7 +45,7 @@ function buildLocalDemoLoginResponse(user) {
  * Case A - Existing user with portal connected → Redirect to Dashboard
  * Case B - New user (never connected portal) → Redirect to /connect-portal
  */
-router.post('/google-login', async (req, res, next) => {
+router.post('/google-login', loginLimiter, async (req, res, next) => {
   try {
     if (!isFirebaseAdminReady) {
       return res.status(503).json({
@@ -106,6 +113,8 @@ router.post('/google-login', async (req, res, next) => {
       await userDoc.ref.update({ last_login: new Date() });
     }
 
+    delete user.password;
+
     res.json({
       success: true,
       message: 'Login successful',
@@ -134,7 +143,7 @@ router.post('/google-login', async (req, res, next) => {
  * Case C - Direct login with reg+pass automatically triggers portal sync
  * User never sees /connect-portal unless using Google OAuth first time
  */
-router.post('/login', [
+router.post('/login', loginLimiter, [
   body('registration_number').trim().notEmpty().withMessage('Registration number is required'),
   body('password').notEmpty().withMessage('Password is required')
 ], async (req, res, next) => {
@@ -144,7 +153,7 @@ router.post('/login', [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { registration_number, password, skipPortalSync } = req.body;
+    const { registration_number, password } = req.body;
 
     if (!isFirebaseAdminReady) {
       if (allowLocalDemoAuth) {
@@ -197,65 +206,6 @@ router.post('/login', [
     // Users will go directly to dashboard after login
     // The portal fetching feature has been temporarily suspended
     let portalSyncResult = null;
-    
-    /* COMMENTED OUT - Portal auto-sync suspended
-    let shouldAutoSync = !user.portalConnected && !skipPortalSync && user.role === 'student';
-
-    if (shouldAutoSync) {
-      try {
-        // Attempt to sync with portal using the same credentials
-        // NOTE: We do NOT log the password
-        console.log(`Auto-sync triggered for: ${registration_number}, userId: ${user.id}`);
-        
-        const scraperResponse = await axios.post(
-          `${FLASK_SERVICE_URL}/api/scrape`,
-          { reg_number: registration_number, password },
-          {
-            timeout: 90000, // 90 second timeout for slow CAPTCHA solving
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-
-        const { status, data, message } = scraperResponse.data;
-
-        if (status === 'SUCCESS') {
-          // Update user with portal data
-          await userDoc.ref.update({
-            profile: data.profile || {},
-            marks_data: data.marks || [],
-            attendance_data: data.attendance || [],
-            isVerified: true,
-            portalConnected: true,
-            portal_last_synced: new Date()
-          });
-
-          portalSyncResult = {
-            status: 'SUCCESS',
-            isVerified: true,
-            portalConnected: true
-          };
-        } else {
-          portalSyncResult = {
-            status: status,
-            message: message,
-            isVerified: false,
-            portalConnected: false
-          };
-        }
-      } catch (syncError) {
-        console.error('Auto-sync error:', syncError.message);
-        // Don't fail login, just report sync status
-        const errorStatus = syncError.response?.data?.status || 
-          (syncError.response?.status === 401 ? 'AUTH_FAILED' : 'SCRAPE_ERROR');
-        portalSyncResult = {
-          status: errorStatus,
-          message: syncError.response?.data?.message || 'Portal sync failed',
-          isVerified: false,
-          portalConnected: false
-        };
-      }
-    }
-    */ // END COMMENTED OUT - Portal auto-sync suspended
 
     res.json({
       success: true,
@@ -325,13 +275,6 @@ router.post('/register-student', [
 
     const { name, registration_number, email, password, department, year, section } = req.body;
 
-    const userRef = db.collection('users').doc(registration_number);
-    const doc = await userRef.get();
-
-    if (doc.exists) {
-      return res.status(409).json({ success: false, message: 'User already exists' });
-    }
-
     const bcrypt = require('bcrypt');
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -349,7 +292,15 @@ router.post('/register-student', [
       last_login: null
     };
 
-    await userRef.set(newUser);
+    const userRef = db.collection('users').doc(registration_number);
+    try {
+      await userRef.create(newUser);
+    } catch (createError) {
+      if (createError?.code === 6 || /ALREADY_EXISTS/i.test(createError?.message || '')) {
+        return res.status(409).json({ success: false, message: 'User already exists' });
+      }
+      throw createError;
+    }
 
     // Create Firebase Auth user too?
     // Ideally yes, but for now we are just storing in Firestore to match existing logic.

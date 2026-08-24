@@ -156,6 +156,17 @@
 
                             const dashboardUrl = dashboards[userData.role];
                             if (dashboardUrl) {
+                                // ponytail: duplicates page-access-token.js generateToken() -> extract a shared mint helper later
+                                try {
+                                    const tokenBytes = new Uint8Array(32);
+                                    crypto.getRandomValues(tokenBytes);
+                                    sessionStorage.setItem('pageAccessToken', Array.from(tokenBytes, (b) => b.toString(16).padStart(2, '0')).join(''));
+                                    sessionStorage.setItem('pageAccessTokenTimestamp', String(Date.now()));
+                                    sessionStorage.setItem('pageAccessTokenPath', dashboardUrl.replace(/\.html$/, ''));
+                                } catch (tokenError) {
+                                    // Token minting must never block an authenticated redirect
+                                }
+
                                 window.location.replace(dashboardUrl);
                                 return true;
                             }
@@ -487,7 +498,6 @@
     <script src="/js/main.js"></script>
     <script src="/js/linkEncoding.js"></script>
     <script src="/js/mobile-nav.js"></script>
-    <script src="/js/loading-states.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/navbar-scroll-behavior.js"></script>
     <script src="/js/navbar-active-links.js"></script>

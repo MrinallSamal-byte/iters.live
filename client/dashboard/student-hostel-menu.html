@@ -46,13 +46,6 @@
     <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body>
-    <!-- Background Animation -->
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
-
     <!-- Sidebar will be injected by student-sidebar.js -->
     
     <!-- Main Content -->
@@ -61,7 +54,7 @@
         <section class="page-hero glass-card scroll-reveal">
             <div class="hero-content-inline">
                 <div>
-                    <h1 class="page-title"> <span class="title-icon">🍽️</span> Hostel Menu </h1>
+                    <h1 class="page-title">Hostel Menu</h1>
                     <p class="page-subtitle">View daily meal schedules for your hostel block</p>
                 </div>
             </div>
@@ -71,7 +64,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">🏢</span>
                     Select Hostel Block
                 </h3>
             </div>
@@ -87,14 +79,13 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📅</span>
                     Select Date
                 </h3>
             </div>
             <div class="date-selector">
-                <button class="date-nav-btn" id="prevDay">◀ Previous</button>
+                <button class="date-nav-btn" id="prevDay">&laquo; Previous</button>
                 <input type="date" id="menuDate" class="date-input" />
-                <button class="date-nav-btn" id="nextDay">Next ▶</button>
+                <button class="date-nav-btn" id="nextDay">Next &raquo;</button>
             </div>
         </section>
 
@@ -102,7 +93,6 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="menuSection">
             <div class="section-header-formal">
                 <h3 class="section-title-formal">
-                    <span class="title-icon">📋</span>
                     Today's Menu
                 </h3>
                 <span class="section-badge" id="menuDateBadge">Loading...</span>
@@ -110,13 +100,11 @@
             <div class="menu-container" id="menuContainer">
                 <!-- Menu will be loaded here -->
                 <div class="empty-state">
-                    <div class="empty-state-icon">🍽️</div>
-                    <p>Loading menu...</p>
+                    <div class="loading-text">Loading menu...</div>
                 </div>
             </div>
             <div class="empty-state" id="noMenuMessage" style="display: none;">
-                <div class="empty-state-icon">📭</div>
-                <h3>No menu published</h3>
+                <div class="empty-state-label">No Menu Published</div>
                 <p>No hostel menu has been published for <span id="selectedBlock">Block A</span> on <span id="selectedDate"></span> yet. Please check back later.</p>
             </div>
         </section>
@@ -124,7 +112,6 @@
         <!-- Info Section -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="info-card">
-                <div class="info-icon">ℹ️</div>
                 <div class="info-content">
                     <h4>Important Information</h4>
                     <ul>
@@ -162,13 +149,6 @@
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
             color: var(--r-text);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .title-icon {
-            font-size: 2.5rem;
         }
 
         .page-subtitle {
@@ -312,18 +292,11 @@
         }
 
         .info-card {
-            display: flex;
-            gap: 1.5rem;
             padding: 1.5rem;
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-left: 2px solid var(--r-accent);
             border-radius: 0;
-        }
-
-        .info-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
         }
 
         .info-content h4 {
@@ -367,10 +340,13 @@
             color: var(--r-text-3);
         }
 
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
+        .empty-state-label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            margin-top: 0.75rem;
         }
 
         @media (max-width: 768px) {

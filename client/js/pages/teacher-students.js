@@ -129,8 +129,8 @@ class TeacherStudentsPage {
         <td>${this.escape(s.section || '-')}</td>
         <td>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; width: 60px;">
-              <div style="width: ${att}%; height: 100%; background: ${attColor}; border-radius: 3px;"></div>
+            <div style="flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 0; width: 60px;">
+              <div style="width: ${att}%; height: 100%; background: ${attColor}; border-radius: 0;"></div>
             </div>
             <span style="font-size: 0.85rem; font-weight: 600;">${att}%</span>
           </div>
@@ -244,7 +244,7 @@ class TeacherStudentsPage {
       type: 'bar',
       data: {
         labels: Object.keys(buckets),
-        datasets: [{ label: 'Students', data: Object.values(buckets), backgroundColor: ['#22c55e', '#6366f1', '#f59e0b', '#ef4444'] }]
+        datasets: [{ label: 'Students', data: Object.values(buckets), backgroundColor: ['#f4f4f4', '#8a8a8a', '#4a4a4a', '#d71921'] }]
       },
       options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
     });

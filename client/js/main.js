@@ -843,29 +843,6 @@ function debounce(func, wait) {
     };
 }
 
-// Intersection Observer for Animations
-function initScrollAnimations() {
-    const animatedElements = document.querySelectorAll('[data-aos]');
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const element = entry.target;
-                const animation = element.dataset.aos;
-                const delay = element.dataset.aosDelay || 0;
-
-                setTimeout(() => {
-                    element.classList.add(animation);
-                }, delay);
-
-                observer.unobserve(element);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    animatedElements.forEach(el => observer.observe(el));
-}
-
 // Mobile Menu Toggle
 function initMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -944,7 +921,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ensureThemeToggle();
     initThemeToggle();
-    initScrollAnimations();
     initMobileMenu();
 
     // Check if user is logged in and redirect if needed

@@ -183,71 +183,7 @@ router.get(
   }
 );
 
-/**
- * @route   GET /api/search/suggestions
- * @desc    Get search suggestions (autocomplete)
- * @access  Private
- */
-router.get(
-  '/suggestions',
-  auth,
-  [
-    query('q')
-      .trim()
-      .notEmpty().withMessage('Query is required')
-      .isLength({ min: 2, max: 50 }),
-    query('type')
-      .optional()
-      .isIn(['all', 'users', 'subjects', 'files'])
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          errors: errors.array()
-        });
-      }
-
-      const { q, type } = req.query;
-
-      const result = await searchService.getSuggestions(q, type || 'all');
-
-      res.json(result);
-    } catch (error) {
-      console.error('Get suggestions error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get suggestions',
-        error: error.message
-      });
-    }
-  }
-);
-
-/**
- * @route   GET /api/search/trending
- * @desc    Get trending searches
- * @access  Private
- */
-router.get('/trending', auth, async (req, res) => {
-  try {
-    const { limit } = req.query;
-
-    const result = await searchService.getTrendingSearches(
-      parseInt(limit) || 10
-    );
-
-    res.json(result);
-  } catch (error) {
-    console.error('Get trending searches error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get trending searches',
-      error: error.message
-    });
-  }
-});
+// ponytail: GET /suggestions and GET /trending deleted — zero callers in server/, client/,
+// android-app (Android only calls api/search); /trending served hardcoded fake data.
 
 module.exports = router;

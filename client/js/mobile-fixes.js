@@ -566,8 +566,15 @@
             preventScrollFreeze();
 
             // Re-enhance touch on dynamic content
+            // ponytail: fixed 300ms debounce -> tune per measured mutation churn later
+            let observerDebounce = null;
             const bodyObserver = new MutationObserver(function() {
-                enhanceTouchSupport();
+                if (observerDebounce) {
+                    clearTimeout(observerDebounce);
+                }
+                observerDebounce = setTimeout(function() {
+                    enhanceTouchSupport();
+                }, 300);
             });
             
             bodyObserver.observe(document.body, {
