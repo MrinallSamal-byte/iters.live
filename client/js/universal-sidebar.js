@@ -25,6 +25,7 @@
             'personal-info': svg('<path d="M20 11a8 8 0 0 0-14.6-3.2"/><path d="M4 13a8 8 0 0 0 14.6 3.2"/><path d="M5.5 3.5v4.3h4.3"/><path d="M18.5 20.5v-4.3h-4.3"/>'),
             'connect-portal': svg('<path d="M9.5 14.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.6l-1.2 1.2"/><path d="M14.5 9.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.6l1.2-1.2"/>'),
             'assignments': svg('<path d="M7 3.5h6.5L18 8v12.5H7z"/><path d="M13.5 3.5V8H18"/><path d="M9.75 12.25h4.5"/><path d="M9.75 15.75h4.5"/>'),
+            'ai': svg('<path d="M12 3.5l1.9 4.9 4.9 1.9-4.9 1.9L12 17.1l-1.9-4.9-4.9-1.9 4.9-1.9z"/><path d="M18.75 15.75l.85 2.15 2.15.85-2.15.85-.85 2.15-.85-2.15-2.15-.85 2.15-.85z"/>'),
             'question-bank': svg('<circle cx="12" cy="12" r="8.75"/><path d="M9.4 9.3a2.6 2.6 0 0 1 5.05.87c0 1.73-2.45 2.13-2.45 3.53"/><path d="M12 17.1h.01"/>'),
             'rubric': svg('<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7.5 9l1.4 1.4 2.4-2.6"/><path d="M14 10h3"/><path d="M7.5 14.5l1.4 1.4 2.4-2.6"/><path d="M14 15.5h3"/>'),
             'students': svg('<circle cx="9" cy="8.5" r="3.25"/><path d="M3 19.5c.65-3.2 3-4.9 6-4.9s5.35 1.7 6 4.9"/><path d="M15.5 5.6a3.25 3.25 0 0 1 0 5.8"/><path d="M17.5 14.9c1.9.7 3.1 2.3 3.5 4.6"/>'),
@@ -55,7 +56,9 @@
                         { text: 'Attendance', href: '/dashboard/student-attendance.html', page: 'attendance' },
                         { text: 'Marks', href: '/dashboard/student-marks.html', page: 'marks' },
                         { text: 'Timetable', href: '/dashboard/student-timetable.html', page: 'timetable' },
-                        { text: 'Admit Card', href: '/dashboard/student-admit-card.html', page: 'admit-card' }
+                        { text: 'Assignments', href: '/dashboard/student-assignments.html', page: 'assignments' },
+                        { text: 'Admit Card', href: '/dashboard/student-admit-card.html', page: 'admit-card' },
+                        { text: 'AI Assistant', href: '/dashboard/student-ai-assistant.html', page: 'ai' }
                     ]
                 },
                 {
@@ -129,6 +132,7 @@
             this.detectRole();
             // Ensure the universal (student-style) profile control is present everywhere
             this.ensureUniversalProfile();
+            this.ensureNotificationCenter();
 
             this.createSidebar();
             // Avoid duplicate top-right profile if global profile control exists
@@ -245,6 +249,30 @@
             } catch (e) {
                 // Non-fatal: page will fall back to local icon created below
                 console.warn('Failed to auto-load universal profile script:', e);
+            }
+        },
+
+        /**
+         * Ensure notification center is loaded.
+         * Loads ../js/notification-center.js once per page if not already present.
+         */
+        ensureNotificationCenter() {
+            // If already initialized or bell exists, do nothing
+            if (window.notificationCenter || document.getElementById('notificationBell')) return;
+
+            // Avoid double-inserting the script
+            const existing = Array.from(document.scripts).some(s => (s.getAttribute('src') || '').includes('notification-center.js'));
+            if (existing) return;
+
+            try {
+                const script = document.createElement('script');
+                // Use absolute path so it works from any page location
+                script.src = '/js/notification-center.js';
+                script.defer = true;
+                document.head.appendChild(script);
+            } catch (e) {
+                // Non-fatal: page simply has no notification bell
+                console.warn('Failed to auto-load notification center script:', e);
             }
         },
 

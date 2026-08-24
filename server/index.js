@@ -203,6 +203,14 @@ app.use('/api', (req, res, next) => {
 // Compression middleware
 app.use(compression());
 
+// Short-lived public cache headers for read-mostly public GET endpoints
+app.use('/api/', (req, res, next) => {
+  if (req.method === 'GET' && ['/api/events', '/api/clubs', '/api/hostel', '/api/agenda'].some(p => req.path.startsWith(p))) {
+    res.set('Cache-Control', 'public, max-age=60');
+  }
+  next();
+});
+
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));

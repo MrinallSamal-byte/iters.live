@@ -49,24 +49,24 @@
     const nameEl = document.getElementById('teacherName');
     if (nameEl) nameEl.textContent = user.name || 'Teacher';
 
-    // Render charts immediately (they use static data)
-    renderAttendanceChart();
-    renderPerformanceChart();
-
     // Load all data in parallel for faster loading
-    const [result] = await Promise.all([
+    const [statsResult] = await Promise.all([
       getTeacherStats(),
       loadPendingSubmissions()
     ]);
 
     // Update stats as soon as data is available
-    const stats = result.stats || {};
-    setText('totalStudents', stats.totalStudents ?? '--');
-    setText('avgAttendance', stats.avgAttendance != null ? stats.avgAttendance + '%' : '--');
-    setText('pendingSubmissions', stats.pendingSubmissions ?? '--');
-    setText('classAverage', stats.classAverage != null ? stats.classAverage + '%' : '--');
+    const stats = statsResult.stats || {};
+    setText('totalStudents', stats.totalStudents ?? '\u2014');
+    setText('avgAttendance', stats.avgAttendance != null ? stats.avgAttendance + '%' : '\u2014');
+    setText('pendingSubmissions', stats.pendingSubmissions ?? '\u2014');
+    setText('classAverage', stats.classAverage != null ? stats.classAverage + '%' : '\u2014');
 
-    if (!result.ok) {
+    // Render charts with real data (empty arrays -> empty state)
+    renderAttendanceChart(stats.attendanceTrend);
+    renderPerformanceChart(stats.gradeDistribution);
+
+    if (!statsResult.ok) {
       showConnectHint('totalStudents', '/dashboard/teacher-students.html', 'Connect: Students \u2192');
       showConnectHint('avgAttendance', '/dashboard/teacher-attendance.html', 'Connect: Attendance \u2192');
     }
@@ -96,7 +96,7 @@
 
     try {
       const r = await APP.API.get('/teacher/stats');
-      const stats = r.data || {};
+      const stats = r.stats || {};
       dataCache.set('stats', stats);
       return { stats, ok: true };
     } catch(_) {
@@ -104,18 +104,38 @@
     }
   }
 
-  function renderAttendanceChart(){
+  function showChartEmptyState(canvas){
+    const wrapper = canvas.parentElement;
+    if (!wrapper || wrapper.querySelector('.chart-empty-state')) return;
+    canvas.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.className = 'chart-empty-state';
+    msg.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.85rem;';
+    msg.textContent = '// No data yet';
+    wrapper.appendChild(msg);
+  }
+
+  function renderAttendanceChart(trend){
     const el = document.getElementById('attendanceChart');
     if (!el || typeof Chart === 'undefined') return;
+
+    const rows = Array.isArray(trend) ? trend : [];
+    if (rows.length === 0) {
+      showChartEmptyState(el);
+      return;
+    }
 
     try {
       new Chart(el, {
         type: 'line',
         data: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          labels: rows.map((row) => {
+            const d = new Date(row.date);
+            return Number.isNaN(d.getTime()) ? row.date : d.toLocaleDateString('en-US', { weekday: 'short' });
+          }),
           datasets: [{
             label: 'Attendance %',
-            data: [85, 88, 90, 87, 89, 86, 0],
+            data: rows.map((row) => row.percent ?? 0),
             borderColor: '#6366f1',
             backgroundColor: 'rgba(99, 102, 241, 0.1)',
             tension: 0.4,
@@ -147,18 +167,24 @@
     }
   }
 
-  function renderPerformanceChart(){
+  function renderPerformanceChart(distribution){
     const el = document.getElementById('performanceChart');
     if (!el || typeof Chart === 'undefined') return;
+
+    const rows = Array.isArray(distribution) ? distribution : [];
+    if (rows.length === 0 || rows.every((row) => !(row.count > 0))) {
+      showChartEmptyState(el);
+      return;
+    }
 
     try {
       new Chart(el, {
         type: 'bar',
         data: {
-          labels: ['A+', 'A', 'B+', 'B', 'C', 'D', 'F'],
+          labels: rows.map((row) => row.grade),
           datasets: [{
             label: 'Students',
-            data: [15, 25, 30, 28, 15, 5, 2],
+            data: rows.map((row) => row.count),
             backgroundColor: [
               '#22c55e', '#3b82f6', '#f59e0b', 
               '#ef4444', '#6b7280', '#94a3b8', '#64748b'
@@ -231,7 +257,7 @@
     } catch(err) {
       console.error('Error loading submissions:', err);
       if (countBadge) countBadge.textContent = '--';
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Submissions unavailable - no teacher submissions endpoint exists.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Submissions unavailable - please try again later.</td></tr>';
     }
   }
 

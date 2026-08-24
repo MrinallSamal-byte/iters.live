@@ -105,18 +105,6 @@
                         style="display: none;"></div>
                 </form>
 
-                <div class="demo-hint-compact">
-                    <p><strong>Quick Demo Access</strong></p>
-                    <div class="demo-chips">
-                        <button type="button" class="demo-chip" data-demo-user="STU20250001"
-                            data-demo-pass="Student@123">[ DEMO · STUDENT ]</button>
-                        <button type="button" class="demo-chip" data-demo-user="TCH2025001"
-                            data-demo-pass="Teacher@123">[ DEMO · TEACHER ]</button>
-                        <button type="button" class="demo-chip" data-demo-user="ADM2025001"
-                            data-demo-pass="Admin@123456">[ DEMO · ADMIN ]</button>
-                    </div>
-                </div>
-
                 <div class="login-footer">
                     <p>Don't have an account? <a href="/register.html" data-public-nav="register">Register here</a></p>
                     <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">← Back to Home</a>
@@ -274,12 +262,6 @@
                     forgotPasswordHint.hidden = !forgotPasswordHint.hidden;
                 });
             }
-
-            document.querySelectorAll('.demo-chip[data-demo-user]').forEach((chip) => {
-                chip.addEventListener('click', () => {
-                    fillDemo(chip.dataset.demoUser, chip.dataset.demoPass);
-                });
-            });
 
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -536,15 +518,6 @@
             localStorage.setItem(RETRY_KEY, newAttempts.toString());
             return newAttempts;
         }
-
-        function fillDemo(regNum, pass) {
-            document.getElementById('registration_number').value = regNum;
-            document.getElementById('password').value = pass;
-            APP.showToast('Demo credentials filled. Click Login!', 'info');
-        }
-
-        // Make fillDemo global
-        window.fillDemo = fillDemo;
 
         // Register service worker (optional)
         if ('serviceWorker' in navigator) {

@@ -471,10 +471,4 @@
         anchor.click();
         URL.revokeObjectURL(url);
     };
-
-    window.syncToCalendar = function syncToCalendar() {
-        if (typeof Toast !== 'undefined') {
-            Toast.info('Calendar sync is not available yet. Use the saved timetable download for now.', 'Not Implemented');
-        }
-    };
 })();

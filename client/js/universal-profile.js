@@ -609,6 +609,21 @@
                     localStorage.setItem('emailNotifications', emailNotifications);
                     localStorage.setItem('pushNotifications', pushNotifications);
 
+                    // Change password (optional)
+                    if (newPassword) {
+                        try {
+                            await APP.API.put('/users/password', { currentPassword, newPassword });
+                            if (typeof Toast !== 'undefined') {
+                                Toast.success('Password updated');
+                            } else {
+                                alert('Password updated');
+                            }
+                        } catch (err) {
+                            APP.showToast(err.message, 'error');
+                            return;
+                        }
+                    }
+
                     this.closeModal('settingsModal');
                     
                     if (typeof Toast !== 'undefined') {

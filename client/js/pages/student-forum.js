@@ -1,4 +1,4 @@
-// ponytail: hardcoded prototype data -> wire to /api/forum when the forum backend is live
+// ponytail: wired to /api/forum (previously hardcoded prototype data)
 /**
  * Student Forum Page
  * Q&A platform for students to ask questions and get answers
@@ -7,188 +7,108 @@
 (function() {
     'use strict';
 
-    // Sample forum data
+    // Live data populated from /api/forum
     const forumData = {
-        questions: [
-            {
-                id: 1,
-                title: 'How to implement Binary Search Tree in Java?',
-                description: 'I\'m trying to implement a BST in Java for my Data Structures assignment. Can someone explain the insert and delete operations with code examples?',
-                category: 'technical',
-                author: { name: 'Rahul Kumar', avatar: 'RK', role: 'student' },
-                tags: ['java', 'dsa', 'trees'],
-                status: 'answered',
-                views: 234,
-                upvotes: 15,
-                answers: 3,
-                createdAt: '2024-11-25T10:30:00',
-                lastActivity: '2024-11-26T14:20:00'
-            },
-            {
-                id: 2,
-                title: 'Best resources for Machine Learning preparation?',
-                description: 'I want to start learning ML for placements. What are the best courses, books, and projects I should focus on? Any roadmap suggestions?',
-                category: 'placement',
-                author: { name: 'Priya Singh', avatar: 'PS', role: 'student' },
-                tags: ['ml', 'placement', 'career'],
-                status: 'answered',
-                views: 456,
-                upvotes: 32,
-                answers: 7,
-                createdAt: '2024-11-24T15:45:00',
-                lastActivity: '2024-11-26T16:10:00'
-            },
-            {
-                id: 3,
-                title: 'DBMS Normalization - Need help with 3NF',
-                description: 'Can someone explain the difference between 2NF and 3NF with a practical example? I\'m confused about transitive dependencies.',
-                category: 'academic',
-                author: { name: 'Amit Patel', avatar: 'AP', role: 'student' },
-                tags: ['dbms', 'normalization', 'exam'],
-                status: 'open',
-                views: 123,
-                upvotes: 8,
-                answers: 2,
-                createdAt: '2024-11-26T09:15:00',
-                lastActivity: '2024-11-26T12:30:00'
-            },
-            {
-                id: 4,
-                title: 'When is the deadline for hostel fee payment?',
-                description: 'I missed the notice about hostel fee. Can someone tell me the last date and if there\'s any late fee?',
-                category: 'campus',
-                author: { name: 'Sneha Reddy', avatar: 'SR', role: 'student' },
-                tags: ['hostel', 'fee', 'deadline'],
-                status: 'answered',
-                views: 89,
-                upvotes: 5,
-                answers: 2,
-                createdAt: '2024-11-25T18:00:00',
-                lastActivity: '2024-11-26T10:45:00'
-            },
-            {
-                id: 5,
-                title: 'Tips for TCS NQT preparation?',
-                description: 'TCS NQT exam is coming up next month. What topics should I focus on? Any previous year patterns or important areas?',
-                category: 'placement',
-                author: { name: 'Vikram Sharma', avatar: 'VS', role: 'student' },
-                tags: ['tcs', 'placement', 'aptitude'],
-                status: 'answered',
-                views: 678,
-                upvotes: 45,
-                answers: 12,
-                createdAt: '2024-11-20T14:30:00',
-                lastActivity: '2024-11-26T15:00:00'
-            },
-            {
-                id: 6,
-                title: 'How to solve time complexity questions in interviews?',
-                description: 'I struggle with calculating time complexity of recursive algorithms. Any tips or standard approaches to follow?',
-                category: 'technical',
-                author: { name: 'Neha Gupta', avatar: 'NG', role: 'student' },
-                tags: ['dsa', 'interview', 'algorithms'],
-                status: 'open',
-                views: 198,
-                upvotes: 22,
-                answers: 4,
-                createdAt: '2024-11-24T11:20:00',
-                lastActivity: '2024-11-26T08:15:00'
-            },
-            {
-                id: 7,
-                title: 'Operating System - Process vs Thread difference',
-                description: 'I\'m preparing for my OS exam. Can someone explain the key differences between process and thread with examples?',
-                category: 'academic',
-                author: { name: 'Arjun Nair', avatar: 'AN', role: 'student' },
-                tags: ['os', 'exam', 'theory'],
-                status: 'answered',
-                views: 312,
-                upvotes: 18,
-                answers: 5,
-                createdAt: '2024-11-23T16:45:00',
-                lastActivity: '2024-11-25T20:30:00'
-            },
-            {
-                id: 8,
-                title: 'Best club to join for coding skills?',
-                description: 'I\'m a first year student interested in competitive programming. Which technical club should I join?',
-                category: 'general',
-                author: { name: 'Kavya Iyer', avatar: 'KI', role: 'student' },
-                tags: ['clubs', 'coding', 'freshers'],
-                status: 'answered',
-                views: 145,
-                upvotes: 10,
-                answers: 6,
-                createdAt: '2024-11-22T10:00:00',
-                lastActivity: '2024-11-24T14:20:00'
-            },
-            {
-                id: 9,
-                title: 'Python vs Java - Which is better for placements?',
-                description: 'I\'m comfortable with both languages. Which one should I focus more on for placement preparation?',
-                category: 'placement',
-                author: { name: 'Ravi Teja', avatar: 'RT', role: 'student' },
-                tags: ['python', 'java', 'placement'],
-                status: 'open',
-                views: 423,
-                upvotes: 28,
-                answers: 9,
-                createdAt: '2024-11-21T13:30:00',
-                lastActivity: '2024-11-26T11:00:00'
-            },
-            {
-                id: 10,
-                title: 'How to apply for internships through college?',
-                description: 'What is the process to apply for internships through the Training & Placement cell? Are there any eligibility criteria?',
-                category: 'placement',
-                author: { name: 'Simran Kaur', avatar: 'SK', role: 'student' },
-                tags: ['internship', 'placement', 'process'],
-                status: 'answered',
-                views: 267,
-                upvotes: 15,
-                answers: 4,
-                createdAt: '2024-11-19T09:00:00',
-                lastActivity: '2024-11-23T16:45:00'
-            }
-        ],
-        contributors: [
-            { name: 'Dr. Ramesh Kumar', role: 'Professor', answers: 156, badge: '🏆' },
-            { name: 'Ankit Verma', role: 'Student - 4th Year', answers: 89, badge: '🥇' },
-            { name: 'Prof. Sunita Patel', role: 'Assistant Professor', answers: 78, badge: '🥈' },
-            { name: 'Deepak Sharma', role: 'Student - 3rd Year', answers: 67, badge: '🥉' },
-            { name: 'Meera Krishnan', role: 'Student - Final Year', answers: 54, badge: '⭐' }
-        ]
+        questions: [],
+        contributors: []
     };
 
     let currentPage = 1;
     const itemsPerPage = 6;
-    let filteredQuestions = [...forumData.questions];
+    let filteredQuestions = [];
     let currentCategory = 'all';
 
     function esc(str) {
         return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // ---- API -> renderer mapping ----
+    // Server rows are flat (author_name, tags string, answer_count); renderers
+    // expect an author object, tag arrays and camelCase dates, so map instead of rewrite.
+    function initialsOf(name) {
+        return String(name || '?').trim().split(/\s+/).slice(0, 2).map(n => n.charAt(0).toUpperCase()).join('') || '?';
+    }
+
+    function parseTags(raw) {
+        return Array.isArray(raw) ? raw : String(raw || '').split(',').map(t => t.trim()).filter(Boolean);
+    }
+
+    function mapQuestion(raw) {
+        const answerCount = typeof raw.answer_count === 'number'
+            ? raw.answer_count
+            : (Array.isArray(raw.answers) ? raw.answers.length : 0);
+        const tags = parseTags(raw.tags);
+        return {
+            id: raw.id,
+            title: raw.title,
+            description: raw.description,
+            category: raw.category,
+            status: raw.status || (answerCount > 0 ? 'answered' : 'open'),
+            views: raw.views || 0,
+            upvotes: raw.upvotes || 0,
+            tags: tags.length > 0 ? tags : [String(raw.category || 'general').toLowerCase()],
+            author: {
+                name: raw.author_name || 'Unknown User',
+                avatar: initialsOf(raw.author_name),
+                role: raw.author_role || 'student'
+            },
+            answers: answerCount,
+            createdAt: raw.created_at,
+            lastActivity: raw.updated_at || raw.created_at,
+            userId: raw.user_id || null
+        };
+    }
+
+    function mapAnswer(raw) {
+        return {
+            id: raw.id,
+            content: raw.content,
+            author: raw.author_name || 'Unknown User',
+            role: raw.author_role || 'student',
+            avatar: initialsOf(raw.author_name),
+            upvotes: raw.upvotes || 0,
+            accepted: Boolean(raw.is_accepted),
+            createdAt: raw.created_at
+        };
+    }
+
+    function toast(message, type) {
+        if (window.APP && typeof window.APP.showToast === 'function') {
+            window.APP.showToast(message, type);
+        } else if (typeof window.showToast === 'function') {
+            window.showToast(message, type);
+        }
+    }
+
+    function getCurrentUserId() {
+        try {
+            const user = window.APP && window.APP.Storage.get('user');
+            return user ? (user.id || user.uid || null) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // Initialize page
     function init() {
+        setupEventListeners();
         loadStats();
         loadCategoryCounts();
         loadQuestions();
         loadContributors();
-        setupEventListeners();
     }
 
     // Load statistics
-    function loadStats() {
-        const totalQuestions = forumData.questions.length;
-        const answeredQuestions = forumData.questions.filter(q => q.status === 'answered').length;
-        const uniqueAuthors = new Set(forumData.questions.map(q => q.author.name)).size;
-        const topContributors = forumData.contributors.length;
-
-        document.getElementById('totalQuestions').textContent = totalQuestions;
-        document.getElementById('answeredQuestions').textContent = answeredQuestions;
-        document.getElementById('activeUsers').textContent = uniqueAuthors;
-        document.getElementById('topContributors').textContent = topContributors;
+    async function loadStats() {
+        try {
+            const res = await APP.API.get('/forum/stats');
+            const stats = res.stats || {};
+            document.getElementById('totalQuestions').textContent = stats.total_questions ?? 0;
+            document.getElementById('answeredQuestions').textContent = stats.answered_questions ?? 0;
+            document.getElementById('activeUsers').textContent = stats.active_users ?? 0;
+        } catch (err) {
+            console.error('Forum stats error:', err);
+        }
     }
 
     // Load category counts
@@ -211,51 +131,41 @@
     }
 
     // Load questions
-    function loadQuestions() {
+    async function loadQuestions() {
         const container = document.getElementById('questionsList');
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const questions = filteredQuestions.slice(start, end);
+        container.innerHTML = '<div class="loading-text">LOADING...</div>';
+        document.getElementById('pagination').innerHTML = '';
 
-        if (questions.length === 0) {
+        try {
+            const res = await APP.API.get('/forum/questions?page=1&limit=50');
+            forumData.questions = (res.questions || []).map(mapQuestion);
+        } catch (err) {
+            console.error('Load questions error:', err);
+            container.innerHTML = `
+                <div class="loading-text">
+                    <h3>Failed to load questions</h3>
+                    <p>Please try refreshing the page.</p>
+                </div>
+            `;
+            toast(err.message || 'Failed to load questions', 'error');
+            return;
+        }
+
+        loadCategoryCounts();
+
+        if (forumData.questions.length === 0) {
             container.innerHTML = `
                 <div class="loading-text">
                     <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                    <h3>No questions found</h3>
-                    <p>Try adjusting your filters or be the first to ask!</p>
+                    <h3>NO QUESTIONS YET</h3>
+                    <p>Be the first to ask!</p>
                 </div>
             `;
             document.getElementById('pagination').innerHTML = '';
             return;
         }
 
-        container.innerHTML = questions.map(q => `
-            <div class="question-card" onclick="openQuestionDetail(${q.id})">
-                <div class="question-header">
-                    <h3 class="question-title">${esc(q.title)}</h3>
-                    <span class="question-status ${q.status === 'answered' ? 'status-answered' : 'status-open'}">
-                        ${q.status === 'answered' ? '✅ Answered' : '❓ Open'}
-                    </span>
-                </div>
-                <p class="question-excerpt">${esc(q.description)}</p>
-                <div class="question-meta">
-                    <div class="question-author">
-                        <span class="author-avatar">${esc(q.author.avatar)}</span>
-                        <span>${esc(q.author.name)}</span>
-                    </div>
-                    <div class="question-stats">
-                        <span class="stat-item">💬 ${q.answers} answers</span>
-                        <span class="stat-item">👁️ ${q.views} views</span>
-                        <span class="stat-item">👍 ${q.upvotes}</span>
-                    </div>
-                    <div class="question-tags">
-                        ${q.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        renderPagination();
+        filterQuestions();
     }
 
     // Render pagination
@@ -295,23 +205,90 @@
         const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
         if (page < 1 || page > totalPages) return;
         currentPage = page;
-        loadQuestions();
+        loadQuestionsPage();
         document.querySelector('.questions-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
-    // Load contributors
-    function loadContributors() {
-        const container = document.getElementById('contributorsList');
-        container.innerHTML = forumData.contributors.map(c => `
-            <div class="contributor-card">
-                <div class="contributor-avatar">${c.name.split(' ').map(n => n[0]).join('')}</div>
-                <div class="contributor-info">
-                    <div class="contributor-name">${c.name}</div>
-                    <div class="contributor-stats">${c.role} • ${c.answers} answers</div>
+    // Render current page of already-loaded questions
+    function loadQuestionsPage() {
+        const container = document.getElementById('questionsList');
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const questions = filteredQuestions.slice(start, end);
+
+        if (questions.length === 0) {
+            container.innerHTML = `
+                <div class="loading-text">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3>No questions found</h3>
+                    <p>Try adjusting your filters or be the first to ask!</p>
                 </div>
-                <span class="contributor-badge">${c.badge}</span>
+            `;
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = questions.map(q => `
+            <div class="question-card" onclick="openQuestionDetail('${esc(q.id)}')">
+                <div class="question-header">
+                    <h3 class="question-title">${esc(q.title)}</h3>
+                    <span class="question-status ${q.status === 'answered' ? 'status-answered' : 'status-open'}">
+                        ${q.status === 'answered' ? '✅ Answered' : '❓ Open'}
+                    </span>
+                </div>
+                <p class="question-excerpt">${esc(q.description)}</p>
+                <div class="question-meta">
+                    <div class="question-author">
+                        <span class="author-avatar">${esc(q.author.avatar)}</span>
+                        <span>${esc(q.author.name)}</span>
+                    </div>
+                    <div class="question-stats">
+                        <span class="stat-item">💬 ${q.answers} answers</span>
+                        <span class="stat-item">👁️ ${q.views} views</span>
+                        <span class="stat-item">👍 ${q.upvotes}</span>
+                    </div>
+                    <div class="question-tags">
+                        ${q.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
+                    </div>
+                </div>
             </div>
         `).join('');
+
+        renderPagination();
+    }
+
+    // Load contributors
+    async function loadContributors() {
+        const container = document.getElementById('contributorsList');
+        container.innerHTML = '<div class="loading-text">LOADING...</div>';
+
+        try {
+            const res = await APP.API.get('/forum/contributors');
+            const badges = ['🏆', '🥇', '🥈', '🥉'];
+            forumData.contributors = (res.contributors || []).map((c, i) => ({
+                name: c.name || 'Anonymous',
+                role: String(c.role || 'member').charAt(0).toUpperCase() + String(c.role || '').slice(1),
+                answers: c.answer_count ?? c.answers ?? 0,
+                badge: badges[i] || '⭐'
+            }));
+
+            const topEl = document.getElementById('topContributors');
+            if (topEl) topEl.textContent = forumData.contributors.length;
+
+            container.innerHTML = forumData.contributors.map(c => `
+                <div class="contributor-card">
+                    <div class="contributor-avatar">${esc(c.name.split(' ').map(n => n[0]).join(''))}</div>
+                    <div class="contributor-info">
+                        <div class="contributor-name">${esc(c.name)}</div>
+                        <div class="contributor-stats">${esc(c.role)} • ${c.answers} answers</div>
+                    </div>
+                    <span class="contributor-badge">${c.badge}</span>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error('Load contributors error:', err);
+            container.innerHTML = '<div class="loading-text">Failed to load contributors.</div>';
+        }
     }
 
     // Setup event listeners
@@ -394,7 +371,7 @@
         }
 
         currentPage = 1;
-        loadQuestions();
+        loadQuestionsPage();
     }
 
     // Open new question modal
@@ -409,7 +386,7 @@
     };
 
     // Handle new question submission
-    function handleNewQuestion(e) {
+    async function handleNewQuestion(e) {
         e.preventDefault();
 
         const title = document.getElementById('questionTitle').value.trim();
@@ -418,49 +395,58 @@
         const tags = document.getElementById('questionTags').value.split(',').map(t => t.trim()).filter(Boolean);
 
         if (!title || !category || !description) {
-            if (window.showToast) {
-                window.showToast('Please fill in all required fields', 'error');
-            }
+            toast('Please fill in all required fields', 'error');
             return;
         }
 
-        // Create new question (in production, this would be an API call)
-        const newQuestion = {
-            id: forumData.questions.length + 1,
-            title,
-            description,
-            category,
-            author: { name: 'Current User', avatar: 'CU', role: 'student' },
-            tags: tags.length > 0 ? tags : [category],
-            status: 'open',
-            views: 0,
-            upvotes: 0,
-            answers: 0,
-            createdAt: new Date().toISOString(),
-            lastActivity: new Date().toISOString()
-        };
+        try {
+            const res = await APP.API.post('/forum/questions', { title, description, category, tags });
+            const newQuestion = mapQuestion(res.question || {});
+            // Server does not echo author profile fields
+            newQuestion.author = { name: 'You', avatar: initialsOf('You'), role: 'student' };
+            newQuestion.createdAt = newQuestion.createdAt || new Date().toISOString();
+            newQuestion.lastActivity = newQuestion.lastActivity || newQuestion.createdAt;
 
-        forumData.questions.unshift(newQuestion);
-        filteredQuestions = [...forumData.questions];
+            forumData.questions.unshift(newQuestion);
 
-        closeNewQuestionModal();
-        loadStats();
-        loadCategoryCounts();
-        loadQuestions();
+            closeNewQuestionModal();
+            loadStats();
+            loadCategoryCounts();
+            filterQuestions();
 
-        if (window.showToast) {
-            window.showToast('Question posted successfully!', 'success');
+            toast(res.message || 'Question posted successfully!', 'success');
+        } catch (err) {
+            console.error('Create question error:', err);
+            toast(err.message || 'Failed to post question', 'error');
         }
     }
 
     // Open question detail modal
-    window.openQuestionDetail = function(questionId) {
-        const question = forumData.questions.find(q => q.id === questionId);
-        if (!question) return;
+    window.openQuestionDetail = async function(questionId) {
+        const body = document.getElementById('questionDetailBody');
+
+        document.getElementById('modalQuestionTitle').textContent = 'Loading...';
+        body.innerHTML = '<div class="loading-text">LOADING...</div>';
+        document.getElementById('questionDetailModal').style.display = 'flex';
+
+        let question;
+        let answers = [];
+        try {
+            const res = await APP.API.get(`/forum/questions/${encodeURIComponent(questionId)}`);
+            question = mapQuestion((res && res.question) || {});
+            answers = (Array.isArray(res.question && res.question.answers) ? res.question.answers : []).map(mapAnswer);
+        } catch (err) {
+            console.error('Get question error:', err);
+            body.innerHTML = '<div class="loading-text">Failed to load question.</div>';
+            toast(err.message || 'Failed to load question', 'error');
+            return;
+        }
 
         document.getElementById('modalQuestionTitle').textContent = question.title;
-        
-        const body = document.getElementById('questionDetailBody');
+
+        const uid = getCurrentUserId();
+        const isAuthor = Boolean(uid && question.userId && String(uid) === String(question.userId));
+
         body.innerHTML = `
             <div class="question-detail">
                 <div class="question-meta" style="margin-bottom: 1rem;">
@@ -485,16 +471,16 @@
                 
                 <div class="answer-section">
                     <h4 style="color: var(--text-primary); margin-bottom: 1rem;">
-                        💬 ${question.answers} Answers
+                        💬 ${answers.length} Answers
                     </h4>
-                    ${generateSampleAnswers(question)}
+                    ${renderAnswers(answers, question, isAuthor)}
                     
                     <div style="margin-top: 1.5rem;">
                         <h4 style="color: var(--text-primary); margin-bottom: 0.75rem;">✍️ Your Answer</h4>
-                        <textarea class="form-textarea" rows="4" 
+                        <textarea id="answerContent" class="form-textarea" rows="4" 
                             placeholder="Share your knowledge or insights..."></textarea>
                         <div style="margin-top: 0.75rem;">
-                            <button class="btn btn-primary" onclick="submitAnswer(${question.id})">
+                            <button class="btn btn-primary" onclick="submitAnswer('${esc(question.id)}')">
                                 📤 Post Answer
                             </button>
                         </div>
@@ -502,50 +488,30 @@
                 </div>
             </div>
         `;
-
-        document.getElementById('questionDetailModal').style.display = 'flex';
     };
 
-    // Generate sample answers for demo
-    function generateSampleAnswers(question) {
-        if (question.answers === 0) {
+    // Render answers for a question
+    function renderAnswers(answers, question, isAuthor) {
+        if (!answers || answers.length === 0) {
             return '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No answers yet. Be the first to answer!</p>';
         }
 
-        const sampleAnswers = [
-            {
-                author: 'Dr. Ramesh Kumar',
-                role: 'Professor',
-                avatar: 'RK',
-                content: 'Great question! Here\'s a comprehensive explanation that should help you understand the concept better. The key points to remember are...',
-                upvotes: 12,
-                accepted: question.status === 'answered'
-            },
-            {
-                author: 'Ankit Verma',
-                role: 'Student',
-                avatar: 'AV',
-                content: 'I had the same doubt! I found this approach works well. You can also check out the additional resources on our notes section.',
-                upvotes: 8,
-                accepted: false
-            }
-        ];
-
-        return sampleAnswers.slice(0, Math.min(question.answers, 2)).map(a => `
+        return answers.map(a => `
             <div class="answer-card ${a.accepted ? 'accepted' : ''}">
                 <div class="answer-header">
                     <div class="answer-author">
-                        <span class="author-avatar">${a.avatar}</span>
-                        <span style="font-weight: 600; color: var(--text-primary);">${a.author}</span>
-                        <span style="color: var(--text-secondary); font-size: 0.85rem;">${a.role}</span>
+                        <span class="author-avatar">${esc(a.avatar)}</span>
+                        <span style="font-weight: 600; color: var(--text-primary);">${esc(a.author)}</span>
+                        <span style="color: var(--text-secondary); font-size: 0.85rem;">${esc(a.role)}</span>
                         ${a.accepted ? '<span style="color: #22c55e; font-weight: 600; margin-left: 0.5rem;">✅ Accepted</span>' : ''}
                     </div>
                 </div>
-                <p class="answer-content">${a.content}</p>
+                <p class="answer-content">${esc(a.content)}</p>
                 <div class="answer-actions">
-                    <button class="vote-btn">👍 ${a.upvotes}</button>
+                    <button class="vote-btn" onclick="upvoteAnswer('${esc(a.id)}', this)">👍 ${a.upvotes}</button>
                     <button class="vote-btn">👎</button>
                     <button class="vote-btn">💬 Reply</button>
+                    ${isAuthor && !a.accepted ? `<button class="vote-btn" onclick="acceptAnswer('${esc(question.id)}', '${esc(a.id)}')">✅ Accept</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -556,18 +522,57 @@
         document.getElementById('questionDetailModal').style.display = 'none';
     };
 
-    // Submit answer
-    window.submitAnswer = function(questionId) {
-        if (window.showToast) {
-            window.showToast('Answer submitted successfully!', 'success');
+    // Upvote an answer
+    window.upvoteAnswer = async function(answerId, btn) {
+        try {
+            const res = await APP.API.post(`/forum/answers/${encodeURIComponent(answerId)}/upvote`, {});
+            if (btn && typeof res.upvotes === 'number') {
+                btn.textContent = `👍 ${res.upvotes}`;
+            }
+        } catch (err) {
+            console.error('Upvote error:', err);
+            toast(err.message || 'Failed to upvote', 'error');
         }
-        closeQuestionDetailModal();
-        
-        // Update answer count
-        const question = forumData.questions.find(q => q.id === questionId);
-        if (question) {
-            question.answers++;
-            loadQuestions();
+    };
+
+    // Accept an answer (question author only, enforced server-side)
+    window.acceptAnswer = async function(questionId, answerId) {
+        try {
+            const res = await APP.API.post(`/forum/answers/${encodeURIComponent(answerId)}/accept`, {});
+            toast((res && res.message) || 'Answer accepted', 'success');
+            openQuestionDetail(questionId);
+        } catch (err) {
+            console.error('Accept answer error:', err);
+            toast(err.message || 'Failed to accept answer', 'error');
+        }
+    };
+
+    // Submit answer
+    window.submitAnswer = async function(questionId) {
+        const textarea = document.getElementById('answerContent');
+        const content = textarea ? textarea.value.trim() : '';
+
+        if (!content) {
+            toast('Please write your answer first', 'error');
+            return;
+        }
+
+        try {
+            const res = await APP.API.post(`/forum/questions/${encodeURIComponent(questionId)}/answers`, { content });
+
+            // Server list rows keep a denormalized answer_count; bump locally until next reload
+            const local = forumData.questions.find(q => String(q.id) === String(questionId));
+            if (local) {
+                local.answers++;
+                local.lastActivity = (res.answer && res.answer.created_at) || new Date().toISOString();
+                filterQuestions();
+            }
+
+            toast(res.message || 'Answer submitted successfully!', 'success');
+            openQuestionDetail(questionId);
+        } catch (err) {
+            console.error('Post answer error:', err);
+            toast(err.message || 'Failed to post answer', 'error');
         }
     };
 

@@ -11,7 +11,6 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const {
   createRecord,
-  findOne,
   listRecords,
   updateRecord
 } = require('./firebase-data.service');
@@ -29,6 +28,9 @@ class BulkOperationsService {
       credentials: []
     };
 
+    const existingUsers = await listRecords('users');
+    const existingUserIds = new Map(existingUsers.map((user) => [String(user.id), user]));
+
     for (const user of users) {
       try {
         if (!user.username || !user.email || !user.role) {
@@ -42,11 +44,7 @@ class BulkOperationsService {
         }
 
         const registrationNumber = String(user.registration_number || user.username).trim();
-        const existing = await findOne('users', {
-          filters: [{ field: 'id', value: registrationNumber }]
-        });
-
-        if (existing) {
+        if (existingUserIds.has(registrationNumber)) {
           throw new Error('User already exists');
         }
 
@@ -104,6 +102,9 @@ class BulkOperationsService {
       errors: []
     };
 
+    const existingAttendance = await listRecords('attendance');
+    const attendanceByKey = new Map(existingAttendance.map((row) => [`${row.student_id}_${row.subject}_${row.date}`, row]));
+
     for (const record of records) {
       try {
         if (!record.student_id || !record.subject || !record.date || !record.status) {
@@ -115,13 +116,7 @@ class BulkOperationsService {
           throw new Error('Invalid status. Must be present, absent, or late');
         }
 
-        const existing = await findOne('attendance', {
-          filters: [
-            { field: 'student_id', value: String(record.student_id) },
-            { field: 'subject', value: record.subject },
-            { field: 'date', value: record.date }
-          ]
-        });
+        const existing = attendanceByKey.get(`${record.student_id}_${record.subject}_${record.date}`);
 
         const payload = {
           student_id: String(record.student_id),
@@ -162,6 +157,9 @@ class BulkOperationsService {
       errors: []
     };
 
+    const existingMarks = await listRecords('marks');
+    const marksByKey = new Map(existingMarks.map((row) => [`${row.student_id}_${row.subject}_${row.exam_type}`, row]));
+
     for (const record of records) {
       try {
         if (!record.student_id || !record.subject || !record.exam_type ||
@@ -175,13 +173,7 @@ class BulkOperationsService {
           throw new Error('Invalid marks value');
         }
 
-        const existing = await findOne('marks', {
-          filters: [
-            { field: 'student_id', value: String(record.student_id) },
-            { field: 'subject', value: record.subject },
-            { field: 'exam_type', value: record.exam_type }
-          ]
-        });
+        const existing = marksByKey.get(`${record.student_id}_${record.subject}_${record.exam_type}`);
 
         const payload = {
           student_id: String(record.student_id),

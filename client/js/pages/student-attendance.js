@@ -385,6 +385,31 @@
                 </tr>
             `;
         }).join('');
+
+        attachAttendanceCsvExport(summary);
+    }
+
+    function attachAttendanceCsvExport(summary) {
+        const headerEl = document.querySelector('#attendanceTableBody')?.closest('.table-responsive')?.previousElementSibling;
+        if (!summary.length || !headerEl || !headerEl.classList.contains('section-header-formal') || document.getElementById('exportAttendanceCsv')) return;
+
+        const btn = document.createElement('button');
+        btn.id = 'exportAttendanceCsv';
+        btn.type = 'button';
+        btn.textContent = 'EXPORT CSV';
+        btn.style.cssText = 'background:transparent;border:1px solid var(--border-color,rgba(128,128,128,0.35));color:inherit;font-family:\'IBM Plex Mono\',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.4rem 0.7rem;border-radius:0;cursor:pointer;';
+        btn.addEventListener('click', () => {
+            const rows = [['Subject Code', 'Subject Name', 'Present', 'Total Classes', 'Percentage']];
+            summary.forEach((s) => rows.push([s.subject_code || '', s.subject || '', Number(s.present_count || 0), Number(s.total_classes || 0), (Number(s.present_count || 0) / Math.max(Number(s.total_classes || 0), 1) * 100).toFixed(2)]));
+            const csv = rows.map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'attendance.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+        headerEl.appendChild(btn);
     }
 
     function setText(id, value) {

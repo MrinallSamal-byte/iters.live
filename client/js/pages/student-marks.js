@@ -146,6 +146,10 @@
         }
     }
 
+    function reconnectCtaHtml() {
+        return '<a class="reconnect-cta" href="/connect-portal.html" style="display:inline-block;margin-top:0.6rem;padding:0.5rem 0.9rem;border:1px solid var(--primary);font-family:\'IBM Plex Mono\',monospace;font-size:0.68rem;letter-spacing:0.12em;color:var(--primary);text-decoration:none;background:transparent;">CONNECT SOA PORTAL</a>';
+    }
+
     function showEmptyMarks(message) {
         setText('currentCGPA', '--');
         setText('currentSGPA', '--');
@@ -157,7 +161,7 @@
 
         const tbody = document.getElementById('marksTableBody');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${escapeHtml(message)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${escapeHtml(message)}<div>${reconnectCtaHtml()}</div></td></tr>`;
         }
 
         const historyEl = document.getElementById('semesterHistory');
@@ -211,6 +215,24 @@
         renderPerformanceChart(semesterResults, resolvedSgpa);
         renderGradeChart(summary);
         setCgpaPlannerDefault(resolvedCgpa);
+        loadSubjectComparison();
+    }
+
+    async function loadSubjectComparison() {
+        try {
+            const response = await APP.API.get('/analytics/subject-comparison?studentId=me');
+            const data = response?.data;
+            if (!response?.success || !Array.isArray(data?.subjects) || !data.subjects.length) return;
+            const wrap = document.querySelector('#marksTableBody')?.closest('.table-responsive');
+            if (!wrap || document.getElementById('subjectComparisonLine')) return;
+            const line = document.createElement('p');
+            line.id = 'subjectComparisonLine';
+            line.style.cssText = 'margin:0.6rem 0 0;font-family:\'IBM Plex Mono\',monospace;font-size:0.72rem;letter-spacing:0.06em;color:var(--text-secondary);';
+            line.textContent = 'CLASS AVERAGE \u00b7 ' + data.subjects
+                .map((subject, i) => `${subject}: ${Number(data.classAverage?.[i] || 0).toFixed(1)}%`)
+                .join(' \u00b7 ');
+            wrap.insertAdjacentElement('afterend', line);
+        } catch (_) { }
     }
 
     function buildSubjectStats(summary) {

@@ -56,6 +56,13 @@
     // Show loading states immediately
     showLoadingStates();
 
+    // Pending assignments stat box navigates to the assignments page
+    const pendingBox = document.getElementById('pendingAssignments')?.closest('.stat-box');
+    if (pendingBox) {
+      pendingBox.style.cursor = 'pointer';
+      pendingBox.addEventListener('click', () => { window.location.href = '/dashboard/student-assignments.html'; });
+    }
+
     // Render static content immediately
     renderTodaySchedule();
     renderRecentActivity();
@@ -64,7 +71,8 @@
     // Fetch all data in parallel for faster loading
     await Promise.all([
       refreshDashboardData(),
-      loadNextDeadline()
+      loadNextDeadline(),
+      loadBunkBudgetCell()
     ]);
 
     // Start auto-refresh for charts
@@ -825,6 +833,27 @@
         ? `${attendance.present}/${attendance.total} classes`
         : '';
     }
+  }
+
+  async function loadBunkBudgetCell() {
+    const strip = document.getElementById('todayStrip');
+    if (!strip || document.getElementById('stripBunkBudget')) return;
+    const cell = document.createElement('div');
+    cell.className = 'today-cell';
+    cell.innerHTML = '<span class="today-label">BUNK BUDGET</span><span class="today-value" id="stripBunkBudget">--</span><span class="today-sub" id="stripBunkBudgetSub"></span>';
+    strip.appendChild(cell);
+    try {
+      const r = await APP.API.get('/attendance/bunk-plan?threshold=75');
+      const canMissValues = (Array.isArray(r?.subjects) ? r.subjects : [])
+        .map((s) => Number(s.canMiss))
+        .filter((v) => Number.isFinite(v));
+      const el = document.getElementById('stripBunkBudget');
+      if (el && canMissValues.length) {
+        el.textContent = `${Math.min(...canMissValues)} classes`;
+        const subEl = document.getElementById('stripBunkBudgetSub');
+        if (subEl) subEl.textContent = 'at 75% target';
+      }
+    } catch (_) { }
   }
 
   async function loadNextDeadline() {
