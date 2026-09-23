@@ -42,16 +42,19 @@ body.creator-page::after {
 
 body.creator-page.light-theme {
     --creator-bg: #f5ecde;
-    --creator-surface: rgba(255, 250, 245, 0.82);
-    --creator-surface-strong: rgba(255, 252, 248, 0.94);
-    --creator-surface-soft: rgba(41, 25, 16, 0.03);
+    --creator-surface: rgba(255, 250, 245, 0.88);
+    --creator-surface-strong: rgba(255, 252, 248, 0.96);
+    --creator-surface-soft: rgba(185, 120, 69, 0.05);
     --creator-border: rgba(78, 52, 36, 0.12);
-    --creator-border-strong: rgba(78, 52, 36, 0.2);
+    --creator-border-strong: rgba(78, 52, 36, 0.24);
     --creator-text: #1f1711;
     --creator-muted: #6f5c4d;
     --creator-muted-strong: #4a392f;
+    --creator-accent: #b97845;
+    --creator-accent-strong: #9e5926;
     --creator-accent-soft: rgba(185, 120, 69, 0.12);
-    --creator-shadow: 0 24px 60px rgba(76, 50, 33, 0.12);
+    --creator-accent-glow: rgba(185, 120, 69, 0.14);
+    --creator-shadow: 0 24px 60px rgba(76, 50, 33, 0.08);
     background:
         radial-gradient(circle at 14% 16%, rgba(185, 120, 69, 0.12), transparent 28%),
         radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.78), transparent 26%),
@@ -65,6 +68,254 @@ body.creator-page.light-theme::before {
 
 body.creator-page.light-theme::after {
     filter: blur(24px);
+}
+
+.creator-page.light-theme .creator-grid-glow {
+    border-color: rgba(78, 52, 36, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 62%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.4), transparent 46%, rgba(185, 120, 69, 0.06));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.creator-page.light-theme .creator-noise {
+    opacity: 0.03;
+    mix-blend-mode: multiply;
+}
+
+/* Light Theme: Hero Grid Container & Children */
+.creator-page.light-theme .creator-hero-grid {
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 250, 245, 0.88)),
+        var(--creator-surface);
+    border: 1px solid var(--creator-border);
+    box-shadow:
+        0 24px 60px rgba(76, 50, 33, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+}
+
+.creator-page.light-theme .creator-hero-grid::before {
+    background:
+        radial-gradient(circle at top right, rgba(214, 151, 96, 0.14), transparent 35%),
+        radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.75), transparent 26%);
+}
+
+.creator-page.light-theme .hero-badge.creator-badge {
+    background: rgba(185, 120, 69, 0.08);
+    border-color: rgba(185, 120, 69, 0.22);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .creator-note-strip {
+    background:
+        linear-gradient(135deg, rgba(185, 120, 69, 0.08), transparent 55%),
+        rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--creator-border);
+    box-shadow: 0 8px 24px rgba(76, 50, 33, 0.05);
+}
+
+.creator-page.light-theme .creator-note-label {
+    background: rgba(185, 120, 69, 0.12);
+    color: #925324;
+}
+
+.creator-page.light-theme .creator-note-strip p {
+    color: var(--creator-text);
+}
+
+.creator-page.light-theme .creator-proof-card,
+.creator-page.light-theme .creator-glance-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--creator-border);
+    box-shadow: 0 4px 16px rgba(76, 50, 33, 0.04);
+}
+
+.creator-page.light-theme .creator-proof-card::before,
+.creator-page.light-theme .creator-glance-card::before {
+    background: linear-gradient(90deg, transparent, rgba(185, 120, 69, 0.25), transparent);
+}
+
+.creator-page.light-theme .creator-proof-label,
+.creator-page.light-theme .creator-glance-card span {
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .creator-proof-card p,
+.creator-page.light-theme .creator-glance-card strong {
+    color: var(--creator-text);
+}
+
+.creator-page.light-theme .btn-outline,
+.creator-page.light-theme .btn-secondary,
+.creator-page.light-theme .project-link {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid var(--creator-border);
+    color: var(--creator-text);
+    box-shadow: 0 2px 8px rgba(76, 50, 33, 0.04);
+}
+
+.creator-page.light-theme .btn-outline:hover,
+.creator-page.light-theme .btn-secondary:hover,
+.creator-page.light-theme .project-link:hover {
+    background: #ffffff;
+    border-color: var(--creator-border-strong);
+    color: var(--creator-text);
+    box-shadow: 0 6px 18px rgba(76, 50, 33, 0.08);
+}
+
+/* Light Theme: Showcase & Profile Items */
+.creator-page.light-theme .creator-showcase {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 245, 0.92)),
+        #ffffff;
+    border: 1px solid var(--creator-border);
+    box-shadow:
+        0 18px 48px rgba(76, 50, 33, 0.08),
+        0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.creator-page.light-theme .creator-status {
+    background: rgba(185, 120, 69, 0.08);
+    border-color: rgba(185, 120, 69, 0.22);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .creator-portrait {
+    background:
+        radial-gradient(circle at center, rgba(185, 120, 69, 0.12) 0%, rgba(185, 120, 69, 0.05) 30%, transparent 68%),
+        linear-gradient(180deg, #fbf7f2 0%, #f4ede3 100%);
+    border: 1px solid var(--creator-border);
+}
+
+.creator-page.light-theme .creator-portrait::before,
+.creator-page.light-theme .creator-portrait::after,
+.creator-page.light-theme .creator-portrait-ring {
+    border-color: rgba(78, 52, 36, 0.08);
+}
+
+.creator-page.light-theme .creator-monogram {
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), transparent 50%),
+        linear-gradient(135deg, rgba(185, 120, 69, 0.14), rgba(255, 250, 245, 0.9));
+    border: 1px solid rgba(185, 120, 69, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 14px 30px rgba(76, 50, 33, 0.08);
+    color: var(--creator-text);
+}
+
+.creator-page.light-theme .creator-profile-item,
+.creator-page.light-theme .project-proof-grid > div {
+    background: #ffffff;
+    border: 1px solid var(--creator-border);
+    box-shadow: 0 2px 8px rgba(76, 50, 33, 0.03);
+}
+
+.creator-page.light-theme .creator-profile-item span,
+.creator-page.light-theme .project-proof-grid span {
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .creator-profile-item strong,
+.creator-page.light-theme .project-proof-grid strong {
+    color: var(--creator-text);
+}
+
+.creator-page.light-theme .creator-metric {
+    background: linear-gradient(180deg, rgba(185, 120, 69, 0.06), rgba(255, 255, 255, 0.85));
+    border: 1px solid var(--creator-border);
+}
+
+/* Light Theme: Sections, Timeline, Skills, Projects, Features */
+.creator-page.light-theme .creator-section-link {
+    background: #ffffff;
+    border-color: var(--creator-border);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .creator-section-link:hover,
+.creator-page.light-theme .creator-section-link:focus-visible,
+.creator-page.light-theme .creator-section-link.is-active {
+    background: linear-gradient(135deg, rgba(185, 120, 69, 0.14), rgba(255, 250, 245, 0.9));
+    border-color: rgba(185, 120, 69, 0.3);
+    color: var(--creator-text);
+    box-shadow: 0 8px 20px rgba(76, 50, 33, 0.08);
+}
+
+.creator-page.light-theme .timeline-icon {
+    background: linear-gradient(180deg, rgba(185, 120, 69, 0.12), #ffffff);
+    border-color: var(--creator-border);
+    color: var(--creator-text);
+}
+
+.creator-page.light-theme .timeline-date {
+    background: rgba(185, 120, 69, 0.1);
+    border-color: rgba(185, 120, 69, 0.22);
+    color: #925324;
+}
+
+.creator-page.light-theme .edu-tag {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--creator-border);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .skill-level {
+    background: rgba(185, 120, 69, 0.08);
+    border-color: rgba(185, 120, 69, 0.2);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .skill-item {
+    border-color: var(--creator-border);
+}
+
+.creator-page.light-theme .project-badge,
+.creator-page.light-theme .tech-tag-small,
+.creator-page.light-theme .tech-tag-pill {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--creator-border);
+    color: var(--creator-muted-strong);
+}
+
+.creator-page.light-theme .tech-tag-pill:hover {
+    background: linear-gradient(135deg, rgba(185, 120, 69, 0.14), rgba(255, 250, 245, 0.9));
+    border-color: rgba(185, 120, 69, 0.3);
+    color: var(--creator-text);
+    box-shadow: 0 8px 20px rgba(76, 50, 33, 0.08);
+}
+
+.creator-page.light-theme .feature-item {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--creator-border);
+    box-shadow: 0 2px 10px rgba(76, 50, 33, 0.03);
+}
+
+.creator-page.light-theme .feature-item:hover {
+    border-color: var(--creator-border-strong);
+    box-shadow: 0 14px 28px rgba(76, 50, 33, 0.08);
+}
+
+.creator-page.light-theme .feature-icon {
+    background: linear-gradient(180deg, rgba(185, 120, 69, 0.14), rgba(255, 250, 245, 0.9));
+    color: var(--creator-text);
+}
+
+/* Light Theme: Card Hover Elevation */
+body.creator-page.light-theme .creator-showcase:hover,
+body.creator-page.light-theme .principle-item:hover,
+body.creator-page.light-theme .skill-category:hover,
+body.creator-page.light-theme .timeline-item:hover,
+body.creator-page.light-theme .project-card:hover,
+body.creator-page.light-theme .contact-card:hover,
+body.creator-page.light-theme .disclaimer-card:hover,
+body.creator-page.light-theme .tech-stack-note:hover,
+body.creator-page.light-theme .creator-proof-card:hover,
+body.creator-page.light-theme .creator-glance-card:hover {
+    border-color: var(--creator-border-strong);
+    box-shadow: 0 20px 44px rgba(76, 50, 33, 0.1);
 }
 
 .creator-page a {
