@@ -539,7 +539,12 @@ const Storage = {
         if (storageAvailable) {
             try {
                 const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : null;
+                if (item === null) return null;
+                try {
+                    return JSON.parse(item);
+                } catch (e) {
+                    return item;
+                }
             } catch (error) {
                 // Fall through to next option
             }
@@ -549,7 +554,12 @@ const Storage = {
         if (sessionStorageAvailable) {
             try {
                 const item = sessionStorage.getItem(key);
-                return item ? JSON.parse(item) : null;
+                if (item === null) return null;
+                try {
+                    return JSON.parse(item);
+                } catch (e) {
+                    return item;
+                }
             } catch (error) {
                 // Fall through to next option
             }
@@ -631,6 +641,19 @@ const Storage = {
         }
     }
 };
+
+// Immediate Theme Initialization (defaults to light mode)
+function applyInitialTheme() {
+    try {
+        const currentTheme = Storage.get('theme') || 'light';
+        if (document.body) {
+            document.body.classList.toggle('light-theme', currentTheme === 'light');
+        }
+    } catch (e) {
+        // Ignore theme initialization errors
+    }
+}
+applyInitialTheme();
 
 // API Helper
 const API = {
@@ -871,16 +894,13 @@ function initThemeToggle() {
 
     applyThemeToggleFallback(themeToggle);
 
-    if (themeToggle.dataset.bound === 'true') {
-        const currentTheme = Storage.get('theme') || 'dark';
-        document.body.classList.toggle('light-theme', currentTheme === 'light');
-        updateThemeIcon(currentTheme);
-        return;
-    }
-
-    const currentTheme = Storage.get('theme') || 'dark';
+    const currentTheme = Storage.get('theme') || 'light';
     document.body.classList.toggle('light-theme', currentTheme === 'light');
     updateThemeIcon(currentTheme);
+
+    if (themeToggle.dataset.bound === 'true') {
+        return;
+    }
 
     themeToggle.addEventListener('click', () => {
         const isDark = !document.body.classList.contains('light-theme');

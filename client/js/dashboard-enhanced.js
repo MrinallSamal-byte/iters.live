@@ -11,7 +11,11 @@
     // ===== THEME TOGGLE FUNCTIONALITY =====
     class ThemeManager {
         constructor() {
-            this.currentTheme = localStorage.getItem('theme') || 'dark';
+            let saved = localStorage.getItem('theme');
+            if (saved) {
+                try { saved = JSON.parse(saved); } catch (e) {}
+            }
+            this.currentTheme = saved || 'light';
             this.init();
         }
         

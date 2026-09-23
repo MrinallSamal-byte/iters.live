@@ -17,9 +17,18 @@
         }
         
         // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.body.classList.toggle('light-theme', savedTheme === 'light');
-        updateThemeIcon(savedTheme);
+        const rawTheme = localStorage.getItem('theme');
+        let savedTheme = 'light';
+        if (rawTheme) {
+            try {
+                savedTheme = JSON.parse(rawTheme);
+            } catch (e) {
+                savedTheme = rawTheme;
+            }
+        }
+        const isLightTheme = savedTheme !== 'dark';
+        document.body.classList.toggle('light-theme', isLightTheme);
+        updateThemeIcon(isLightTheme ? 'light' : 'dark');
         
         // Add click handler
         themeToggle.addEventListener('click', () => {
