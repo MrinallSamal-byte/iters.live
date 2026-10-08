@@ -37,6 +37,7 @@
     "test:scraper": "node scripts/tests/test-soa-scraper-status.js",
     "verify:ai": "node scripts/ops/verify-ai-service.js",
     "check:ai": "node scripts/ops/check-ai-service.js",
+    "security:check": "node scripts/security/check-secrets.js",
     "build:client": "echo 'Client is vanilla HTML/CSS/JS - no build needed'",
     "build:electron": "electron-builder",
     "build:android": "node scripts/build-android.js",
