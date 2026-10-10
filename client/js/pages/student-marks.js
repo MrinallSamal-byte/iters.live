@@ -18,7 +18,7 @@
         if (typeof ParticleSystem !== 'undefined' && document.getElementById('particleCanvas')) {
             new ParticleSystem('particleCanvas', {
                 particleCount: 50,
-                particleColor: 'rgba(99, 102, 241, 0.5)',
+                particleColor: 'rgba(255, 90, 79, 0.5)',
                 speed: 0.3
             });
         }
@@ -323,7 +323,7 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#fff',
+                            color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d'),
                             font: { size: 12 }
                         }
                     }

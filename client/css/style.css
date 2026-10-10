@@ -201,7 +201,7 @@ body.light-theme [style*="rgba(255,255,255"] {
 
 /* Sidebar and menu hover states */
 body.light-theme .sidebar-nav {
-    background: linear-gradient(180deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    background: linear-gradient(180deg, rgba(255, 90, 79, 0.08) 0%, rgba(226, 73, 63, 0.08) 100%);
     border-right-color: rgba(2, 6, 23, 0.08);
 }
 body.light-theme .sidebar-menu-item:hover {
@@ -254,7 +254,7 @@ body.light-theme .profile-dropdown {
 }
 
 .nav-logo:hover .logo-img {
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 16px rgba(255, 90, 79, 0.3);
     transform: rotate(5deg);
 }
 
@@ -425,7 +425,7 @@ body.light-theme select optgroup {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 24px rgba(255, 90, 79, 0.4);
 }
 
 .btn-secondary {
@@ -449,7 +449,7 @@ body.light-theme select optgroup {
     background: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 90, 79, 0.3);
 }
 
 .btn-large {
@@ -463,7 +463,7 @@ body.light-theme select optgroup {
 }
 
 .btn-glow {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 30px rgba(255, 90, 79, 0.5);
 }
 
 .btn-copy {
@@ -513,8 +513,8 @@ body.light-theme select optgroup {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.2), rgba(255, 123, 104, 0.2));
+    border: 1px solid rgba(255, 90, 79, 0.3);
     padding: 0.65rem 1.25rem;
     border-radius: 50px;
     margin-bottom: 2rem;
@@ -651,7 +651,7 @@ body.light-theme select optgroup {
     object-fit: contain;
     position: relative;
     z-index: 2;
-    filter: drop-shadow(0 20px 40px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 20px 40px rgba(255, 90, 79, 0.3));
     animation: float 6s ease-in-out infinite;
 }
 
@@ -662,7 +662,7 @@ body.light-theme select optgroup {
     transform: translate(-50%, -50%);
     width: 80%;
     height: 80%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(139, 92, 246, 0.2) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 90, 79, 0.4) 0%, rgba(255, 123, 104, 0.2) 40%, transparent 70%);
     border-radius: 50%;
     filter: blur(40px);
     z-index: 1;
@@ -812,7 +812,7 @@ body.light-theme select optgroup {
 
 /* About Section */
 .about-section {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.05) 0%, rgba(255, 123, 104, 0.05) 100%);
 }
 
 .about-content {
@@ -874,7 +874,7 @@ body.light-theme select optgroup {
 
 .academic-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 12px 40px rgba(255, 90, 79, 0.15);
 }
 
 .academic-icon {
@@ -918,7 +918,7 @@ body.light-theme select optgroup {
 
 /* Contact Section */
 .contact-section {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.05) 0%, rgba(255, 123, 104, 0.05) 100%);
 }
 
 .contact-grid {
@@ -937,7 +937,7 @@ body.light-theme select optgroup {
 
 .contact-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12);
+    box-shadow: 0 8px 30px rgba(255, 90, 79, 0.12);
 }
 
 .contact-icon {
@@ -1041,7 +1041,7 @@ body.light-theme select optgroup {
 
 .theme-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 90, 79, 0.3);
     border-color: var(--primary);
 }
 
@@ -1452,7 +1452,7 @@ body.light-theme .data-table th {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.1), rgba(255, 123, 104, 0.1));
     opacity: 0;
     transition: opacity 0.4s;
 }
@@ -1463,21 +1463,21 @@ body.light-theme .data-table th {
 
 .stat-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3),
-                0 0 0 1px rgba(99, 102, 241, 0.2);
-    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 20px 40px rgba(255, 90, 79, 0.3),
+                0 0 0 1px rgba(255, 90, 79, 0.2);
+    border-color: rgba(255, 90, 79, 0.5);
 }
 
 .stat-icon {
     font-size: 2.5rem;
     margin-bottom: var(--spacing-md);
-    filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 4px 8px rgba(255, 90, 79, 0.3));
 }
 
 .stat-value {
     font-size: 3rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, #ff5a4f, #ff7b68);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1652,7 +1652,7 @@ body.light-theme .data-table th {
 
 .file-input-label:hover {
     border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(255, 90, 79, 0.1);
 }
 
 /* Data Tables */
@@ -1713,7 +1713,7 @@ body.light-theme .data-table th {
 }
 
 .badge.primary {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(255, 90, 79, 0.2);
     color: var(--primary);
 }
 
@@ -1758,7 +1758,7 @@ body.light-theme .data-table th {
 /* Why Choose Section */
 .why-choose-section {
     padding: var(--spacing-2xl) 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+    background: linear-gradient(135deg, rgba(255, 90, 79, 0.05), rgba(255, 123, 104, 0.05));
 }
 
 .why-choose-grid {
@@ -1891,7 +1891,7 @@ body.light-theme .data-table th {
 /* Facilities Section */
 .facilities-section {
     padding: var(--spacing-2xl) 0;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
+    background: linear-gradient(135deg, rgba(255, 123, 104, 0.05), rgba(236, 72, 153, 0.05));
 }
 
 .facilities-grid {
@@ -1988,7 +1988,7 @@ body.light-theme .data-table th {
     background: var(--primary);
     border-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 90, 79, 0.3);
 }
 
 /* Enhanced Hero Stats */
@@ -3412,5 +3412,185 @@ body:not(.nothing-home) .theme-toggle {
     body:not(.nothing-home) .top-profile-container,
     body:not(.nothing-home) .universal-profile {
         right: 0.6rem !important;
+    }
+}
+
+/* ==========================================================================
+   Shared UI standard (see docs/ui-standard.md)
+   One definition for stat grids, buttons and status badges so every
+   dashboard page renders them the same way.
+   ========================================================================== */
+
+/* Stat grids: flush with the page hero, four cards per row on desktop */
+body:not(.nothing-home) .dashboard-main .quick-stats {
+    padding: 0;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Buttons: colour variants */
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info {
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+.btn-success { background: #1f9d63; }
+.btn-danger { background: #dc3f3f; }
+.btn-warning { background: #c98410; }
+.btn-info { background: #2f7fd1; }
+
+.btn-success:hover,
+.btn-danger:hover,
+.btn-warning:hover,
+.btn-info:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+}
+
+/* Buttons: sizes. .btn-small / .btn-large are aliases of .btn-sm / .btn-lg */
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Zero-specificity default so any colour class (.btn-success, .btn-view, ...) wins */
+:where(.btn-small) {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    color: var(--text-primary);
+}
+
+.btn-small.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+}
+
+.btn-sm,
+.btn-small,
+body:not(.nothing-home) .dashboard-main .btn-sm,
+body:not(.nothing-home) .dashboard-main .btn-small {
+    min-height: 36px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+}
+
+.btn-lg,
+.btn-large,
+body:not(.nothing-home) .dashboard-main .btn-lg,
+body:not(.nothing-home) .dashboard-main .btn-large {
+    min-height: 52px;
+    padding: 0.85rem 1.75rem;
+    font-size: 1rem;
+}
+
+.btn:disabled,
+.btn[disabled],
+.btn-small:disabled,
+.btn.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn:focus-visible,
+.btn-small:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* Status badges: one look for Good / Warning / Critical everywhere */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.status-good,
+.badge-success {
+    background: rgba(31, 157, 99, 0.14);
+    color: #1f9d63;
+}
+
+.status-warning,
+.badge-warning {
+    background: rgba(201, 132, 16, 0.16);
+    color: #b07210;
+}
+
+.status-critical,
+.status-danger,
+.badge-error,
+.badge-danger {
+    background: rgba(220, 63, 63, 0.14);
+    color: #d23b3b;
+}
+
+.badge-info {
+    background: rgba(47, 127, 209, 0.14);
+    color: #2a72bd;
+}
+
+body:not(.light-theme) .status-good,
+body:not(.light-theme) .badge-success { color: #45d593; }
+body:not(.light-theme) .status-warning,
+body:not(.light-theme) .badge-warning { color: #f5c063; }
+body:not(.light-theme) .status-critical,
+body:not(.light-theme) .status-danger,
+body:not(.light-theme) .badge-error,
+body:not(.light-theme) .badge-danger { color: #ff7d7d; }
+body:not(.light-theme) .badge-info { color: #73b4f5; }
+
+/* Legacy token aliases still used by some pages (payment, marks, assignments).
+   Declared on body so they follow the light/dark theme values. */
+body {
+    --primary-color: var(--primary);
+    --success-color: var(--success);
+    --border-color: var(--glass-border);
+    --info: #2f7fd1;
+}
+
+/* Tables: on desktop let cells wrap (action buttons stack if needed) so the
+   whole table fits; phones keep the nowrap + horizontal scroll behaviour */
+@media (min-width: 1024px) {
+    body:not(.nothing-home) .dashboard-main .data-table th,
+    body:not(.nothing-home) .dashboard-main .data-table td {
+        white-space: normal;
+    }
+
+    body:not(.nothing-home) .dashboard-main .data-table td .btn {
+        margin: 0.15rem 0.1rem;
+    }
+
+    /* .action-btns is display:flex, which pulls the cell out of the table layout */
+    body:not(.nothing-home) .dashboard-main .data-table td.action-btns {
+        display: table-cell;
     }
 }

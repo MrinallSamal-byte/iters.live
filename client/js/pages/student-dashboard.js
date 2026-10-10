@@ -352,7 +352,7 @@
             legend: {
               display: true,
               position: 'bottom',
-              labels: { color: '#fff' }
+              labels: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') }
             }
           },
           animation: {
@@ -430,7 +430,7 @@
           datasets: [{
             label: 'Percentage',
             data,
-            backgroundColor: '#6366f1',
+            backgroundColor: '#ff5a4f',
             borderRadius: 6
           }]
         },
@@ -442,11 +442,11 @@
             y: {
               beginAtZero: true,
               max: 100,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
+              grid: { color: (document.body.classList.contains('light-theme') ? 'rgba(19,19,19,0.08)' : 'rgba(255,255,255,0.1)') }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
               grid: { display: false }
             }
           },

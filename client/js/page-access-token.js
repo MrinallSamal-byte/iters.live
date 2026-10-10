@@ -344,6 +344,11 @@
      * @returns {string} Dashboard type (student, teacher, admin)
      */
     function getDashboardType(path) {
+        // Use the page name prefix first so /dashboard/teacher-students.html is a teacher page
+        const pageName = String(path || '').split('/').pop();
+        if (pageName.startsWith('teacher')) return 'teacher';
+        if (pageName.startsWith('admin')) return 'admin';
+        if (pageName.startsWith('student')) return 'student';
         if (path.includes('student')) return 'student';
         if (path.includes('teacher')) return 'teacher';
         if (path.includes('admin')) return 'admin';

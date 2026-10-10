@@ -318,7 +318,7 @@
               stats.totalTeachers || 95, 
               stats.totalAdmins || 3
             ],
-            backgroundColor: ['#6366f1', '#22c55e', '#f59e0b'],
+            backgroundColor: ['#ff5a4f', '#22c55e', '#f59e0b'],
             borderWidth: 0
           }]
         },
@@ -329,7 +329,7 @@
             legend: {
               position: 'bottom',
               labels: {
-                color: '#fff',
+                color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d'),
                 font: { size: 13 }
               }
             }
@@ -362,7 +362,7 @@
           datasets: [{
             label: 'Students',
             data: departments.map(d => d.count),
-            backgroundColor: '#6366f1',
+            backgroundColor: '#ff5a4f',
             borderRadius: 8
           }]
         },
@@ -375,11 +375,11 @@
           scales: {
             y: { 
               beginAtZero: true,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
+              grid: { color: (document.body.classList.contains('light-theme') ? 'rgba(19,19,19,0.08)' : 'rgba(255,255,255,0.1)') }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
               grid: { display: false }
             }
           }

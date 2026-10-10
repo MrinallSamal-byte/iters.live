@@ -38,7 +38,7 @@ async function loadAnalytics() {
             type: 'pie',
             data: {
                 labels: ['Students', 'Teachers', 'Admins'],
-                datasets: [{ data: [res.data.totalStudents, res.data.totalTeachers, res.data.totalAdmins || 0], backgroundColor: ['#6366f1','#22c55e','#f59e0b'] }]
+                datasets: [{ data: [res.data.totalStudents, res.data.totalTeachers, res.data.totalAdmins || 0], backgroundColor: ['#ff5a4f','#22c55e','#f59e0b'] }]
             }
         });
     }
@@ -49,7 +49,7 @@ async function loadAnalytics() {
             type: 'bar',
             data: {
                 labels: (res.data.departments||[]).map(d=>d.name),
-                datasets: [{ label: 'Students', data: (res.data.departments||[]).map(d=>d.count), backgroundColor: '#6366f1' }]
+                datasets: [{ label: 'Students', data: (res.data.departments||[]).map(d=>d.count), backgroundColor: '#ff5a4f' }]
             },
             options: { plugins: { legend: { display: false } } }
         });

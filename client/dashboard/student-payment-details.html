@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff5a4f">
+    <link rel="icon" href="/assets/soa-logo.png">
     <title>Payment Details - ITERasn hub</title>
     <!-- SECURITY: Immediate authentication check before any content loads -->
     <script>
@@ -364,7 +366,7 @@
 
         .status-refunded {
             background: rgba(168, 85, 247, 0.1);
-            color: #a855f7;
+            color: #ff7b68;
         }
 
         .actions-container {
@@ -372,39 +374,6 @@
             gap: 1rem;
             padding: 1.5rem;
             justify-content: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-tertiary);
         }
 
         @keyframes spin {

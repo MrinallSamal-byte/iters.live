@@ -110,8 +110,8 @@
           datasets: [{
             label: 'Attendance %',
             data: [85, 88, 90, 87, 89, 86, 0],
-            borderColor: '#6366f1',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderColor: '#ff5a4f',
+            backgroundColor: 'rgba(255, 90, 79, 0.1)',
             tension: 0.4,
             fill: true
           }]
@@ -126,11 +126,11 @@
             y: { 
               beginAtZero: true, 
               max: 100,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
+              grid: { color: (document.body.classList.contains('light-theme') ? 'rgba(19,19,19,0.08)' : 'rgba(255,255,255,0.1)') }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
               grid: { display: false }
             }
           }
@@ -169,11 +169,11 @@
           scales: {
             y: { 
               beginAtZero: true,
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255,255,255,0.1)' }
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
+              grid: { color: (document.body.classList.contains('light-theme') ? 'rgba(19,19,19,0.08)' : 'rgba(255,255,255,0.1)') }
             },
             x: {
-              ticks: { color: '#fff' },
+              ticks: { color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d') },
               grid: { display: false }
             }
           }

@@ -69,7 +69,7 @@
 
 .mobile-bottom-nav .nav-item.active {
   color: rgb(99, 102, 241);
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(255, 90, 79, 0.1);
 }
 
 .mobile-bottom-nav .nav-item.active::before {
@@ -98,7 +98,7 @@
 
 .mobile-bottom-nav .nav-item.active .icon {
   transform: scale(1.1);
-  filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.4));
+  filter: drop-shadow(0 2px 4px rgba(255, 90, 79, 0.4));
 }
 
 .mobile-bottom-nav .nav-item .badge {
@@ -209,7 +209,7 @@
 
   .nav-links a:hover,
   .nav-links a.active {
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(255, 90, 79, 0.1);
     color: rgb(99, 102, 241);
     transform: translateX(8px);
   }

@@ -21,6 +21,7 @@
                 { icon: '🔗', text: 'Connect SOA Portal', href: '/connect-portal.html', page: 'connect-portal' },
                 { icon: '📅', text: 'Timetable', href: '/dashboard/student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: '/dashboard/student-notes.html', page: 'notes' },
+                { icon: '🤖', text: 'AI Assistant', href: '/dashboard/student-ai-assistant.html', page: 'ai-assistant' },
                 { icon: '💬', text: 'Forum', href: '/dashboard/student-forum.html', page: 'forum' },
                 { icon: '💳', text: 'Payments', href: '/dashboard/student-payment-history.html', page: 'payments' },
                 { icon: '🎫', text: 'Admit Card', href: '/dashboard/student-admit-card.html', page: 'admit-card' },

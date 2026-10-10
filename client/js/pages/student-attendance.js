@@ -17,7 +17,7 @@
         if (typeof ParticleSystem !== 'undefined' && document.getElementById('particleCanvas')) {
             new ParticleSystem('particleCanvas', {
                 particleCount: 50,
-                particleColor: 'rgba(99, 102, 241, 0.5)',
+                particleColor: 'rgba(255, 90, 79, 0.5)',
                 speed: 0.3
             });
         }
@@ -60,7 +60,7 @@
 
         const tbody = document.getElementById('attendanceTableBody');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">${escapeHtml(message)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${escapeHtml(message)}</td></tr>`;
         }
 
         if (attendanceChart) {
@@ -134,7 +134,7 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#fff',
+                            color: (getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#5b544d'),
                             font: { size: 14 }
                         }
                     }
@@ -155,6 +155,7 @@
                 : (totalCount > 0 ? Number(((presentCount / totalCount) * 100).toFixed(2)) : 0);
             const status = percentage >= 75 ? 'Good' : percentage >= 65 ? 'Warning' : 'Critical';
             const statusClass = percentage >= 75 ? 'status-good' : percentage >= 65 ? 'status-warning' : 'status-critical';
+            const plan = getAttendancePlan(presentCount, totalCount);
 
             return `
                 <tr>
@@ -164,9 +165,21 @@
                     <td>${totalCount}</td>
                     <td><strong>${percentage.toFixed(2)}%</strong></td>
                     <td><span class="badge ${statusClass}">${status}</span></td>
+                    <td>${plan}</td>
                 </tr>
             `;
         }).join('');
+    }
+
+    // Classes the student must attend (or can still miss) to stay at the 75% target
+    function getAttendancePlan(present, total) {
+        if (total <= 0) return '—';
+        if (present / total < 0.75) {
+            const needed = Math.ceil((0.75 * total - present) / 0.25);
+            return `Attend next ${needed} class${needed === 1 ? '' : 'es'}`;
+        }
+        const canMiss = Math.floor((present - 0.75 * total) / 0.75);
+        return canMiss > 0 ? `Can miss ${canMiss}` : 'On the line';
     }
 
     function setText(id, value) {

@@ -3,55 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff5a4f">
+    <link rel="icon" href="/assets/soa-logo.png">
     <title>AI Assistant - ITERasn hub</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            // Check if user is authenticated before showing any content
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            // If not authenticated, redirect immediately
+            if (!checkAuth()) {
+                // Store intended destination
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access the AI Assistant.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                // Stop script execution and prevent any content from loading
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="manifest" href="/manifest.json">
     <style>
-        * {
-            box-sizing: border-box;
-        }
 
-        body {
-            overflow-x: hidden;
-        }
 
-        .ai-container {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
 
-        .ai-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            color: white;
-        }
 
-        .ai-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
 
-        .ai-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 15px;
             padding: 1.5rem;
             transition: all 0.3s ease;
@@ -60,7 +66,7 @@
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(255, 90, 79, 0.3);
         }
 
         .feature-icon {
@@ -69,17 +75,17 @@
         }
 
         .feature-card h3 {
-            color: #667eea;
+            color: #ff5a4f;
             margin-bottom: 0.5rem;
         }
 
         .feature-card p {
-            color: #666;
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
         .prediction-card, .recommendations-card {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -96,17 +102,17 @@
         .prediction-score {
             font-size: 3rem;
             font-weight: bold;
-            color: #667eea;
+            color: #ff5a4f;
         }
 
         .prediction-grade {
             font-size: 2rem;
-            color: #764ba2;
+            color: #e2493f;
         }
 
         .confidence-bar {
             height: 10px;
-            background: #e0e0e0;
+            background: var(--glass-border);
             border-radius: 5px;
             overflow: hidden;
             margin: 1rem 0;
@@ -114,7 +120,7 @@
 
         .confidence-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #ff5a4f, #e2493f);
             transition: width 0.5s ease;
         }
 
@@ -152,33 +158,19 @@
         }
 
         .recommendations-list li {
-            background: rgba(102, 126, 234, 0.05);
+            background: rgba(255, 90, 79, 0.05);
             padding: 1rem;
             margin: 0.5rem 0;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #ff5a4f;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
 
-        .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
 
         .loading {
             text-align: center;
             padding: 2rem;
-            color: #667eea;
+            color: #ff5a4f;
         }
 
         .loading::after {
@@ -212,7 +204,7 @@
         .risk-high { background: #F44336; color: white; }
 
         .study-plan-section {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -224,7 +216,7 @@
         }
 
         .day-schedule {
-            background: rgba(102, 126, 234, 0.05);
+            background: rgba(255, 90, 79, 0.05);
             padding: 1rem;
             margin: 0.5rem 0;
             border-radius: 8px;
@@ -234,7 +226,7 @@
             display: flex;
             justify-content: space-between;
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .session-item:last-child {
@@ -260,7 +252,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--bg-secondary);
             padding: 2rem;
             border-radius: 15px;
             max-width: 500px;
@@ -273,7 +265,7 @@
         }
 
         .modal-header h3 {
-            color: #667eea;
+            color: #ff5a4f;
             margin-bottom: 0.5rem;
         }
 
@@ -285,14 +277,14 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .modal-body input[type="number"],
         .modal-body select {
             width: 100%;
             padding: 0.8rem;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--glass-border);
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
@@ -301,7 +293,7 @@
         .modal-body input[type="number"]:focus,
         .modal-body select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #ff5a4f;
         }
 
         .modal-footer {
@@ -310,46 +302,12 @@
             justify-content: flex-end;
         }
 
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-
-        @media (max-width: 1024px) {
-            .ai-container {
-                padding: 1.25rem;
-            }
-        }
-
         @media (max-width: 768px) {
-            .ai-container {
-                padding: 1rem;
-            }
-
-            .ai-header,
             .prediction-card,
             .recommendations-card,
             .study-plan-section,
             .modal-content {
                 padding: 1.25rem;
-            }
-
-            .ai-header {
-                text-align: left;
-            }
-
-            .ai-header h1 {
-                font-size: clamp(1.9rem, 8vw, 2.4rem);
             }
 
             .feature-grid,
@@ -373,8 +331,7 @@
                 font-size: 1.45rem;
             }
 
-            .btn-primary,
-            .btn-secondary {
+            .modal-footer .btn {
                 width: 100%;
             }
 
@@ -384,11 +341,6 @@
         }
 
         @media (max-width: 480px) {
-            .ai-container {
-                padding: 0.75rem;
-            }
-
-            .ai-header,
             .prediction-card,
             .recommendations-card,
             .study-plan-section,
@@ -400,17 +352,27 @@
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Navigation will be injected here -->
-        <div id="nav-placeholder"></div>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
 
-        <main class="main-content">
-            <div class="ai-container">
-                <!-- Header -->
-                <div class="ai-header">
-                    <h1>🤖 AI Assistant</h1>
-                    <p>Your personal AI-powered study companion with smart recommendations</p>
-                </div>
+    <!-- Main Content -->
+    <main class="dashboard-main">
+                <!-- Page Hero -->
+                <section class="page-hero glass-card">
+                    <div class="hero-content-inline">
+                        <div>
+                            <h1 class="page-title">
+                                <span class="title-icon">🤖</span>
+                                AI Assistant
+                            </h1>
+                            <p class="page-subtitle">Your personal AI-powered study companion with smart recommendations</p>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Feature Cards -->
                 <div class="feature-grid">
@@ -487,9 +449,7 @@
                     <h2>🎯 Smart Study Plan</h2>
                     <div id="studyPlanContent"></div>
                 </div>
-            </div>
-        </main>
-    </div>
+    </main>
 
     <!-- Study Hours Input Modal -->
     <div class="modal-overlay" id="studyHoursModal">
@@ -501,23 +461,30 @@
             <div class="modal-body">
                 <label for="studyHoursInput">How many hours do you study per day on average?</label>
                 <input type="number" id="studyHoursInput" min="0" max="24" step="0.5" value="4" placeholder="Enter hours (e.g., 4)">
-                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
                     💡 Be honest - this helps us give you accurate predictions!
                 </p>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeStudyHoursModal()">Cancel</button>
-                <button class="btn-primary" onclick="submitStudyHours()">Generate Prediction</button>
+                <button class="btn btn-secondary" onclick="closeStudyHoursModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitStudyHours()">Generate Prediction</button>
             </div>
         </div>
     </div>
 
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
     <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
     <script src="/js/chatbot.js"></script>
     <script>
-        // Load navigation
-        if (typeof loadDashboardNav === 'function') {
-            loadDashboardNav('student');
+        // Open the floating chatbot from the "24/7 Chatbot" card
+        function openChatbot() {
+            if (window.chatbot && typeof window.chatbot.open === 'function') {
+                window.chatbot.open();
+            }
         }
 
         let currentUser = null;
@@ -757,7 +724,7 @@
 
             // Overall Strategy
             if (plan.overallStrategy) {
-                html += `<div style="background: rgba(102, 126, 234, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                html += `<div style="background: rgba(255, 90, 79, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                     <h4>🎯 Overall Strategy</h4>
                     <p>${plan.overallStrategy}</p>
                 </div>`;

@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff5a4f">
+    <link rel="icon" href="/assets/soa-logo.png">
     <title>Timetable - ITERasn hub</title>
     <!-- SECURITY: Immediate authentication check before any content loads -->
     <script>
@@ -205,8 +207,8 @@
             align-items: center;
             gap: 1rem;
             padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-            border: 2px solid rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, rgba(255, 90, 79, 0.2), rgba(255, 123, 104, 0.2));
+            border: 2px solid rgba(255, 90, 79, 0.4);
             border-radius: var(--radius-lg);
         }
         
@@ -250,7 +252,7 @@
         }
         
         .timetable-table thead tr {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            background: linear-gradient(135deg, rgba(255, 90, 79, 0.1), rgba(255, 123, 104, 0.1));
         }
         
         .timetable-table th {
@@ -270,7 +272,7 @@
         
         .day-column {
             font-weight: 700;
-            background: rgba(99, 102, 241, 0.15);
+            background: rgba(255, 90, 79, 0.15);
             position: sticky;
             left: 0;
             z-index: 10;
@@ -287,7 +289,7 @@
         }
         
         .class-cell:hover {
-            background: rgba(99, 102, 241, 0.15);
+            background: rgba(255, 90, 79, 0.15);
             transform: scale(1.05);
         }
         
@@ -323,7 +325,7 @@
         .schedule-item:hover {
             transform: translateX(10px);
             border-color: var(--primary);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 20px rgba(255, 90, 79, 0.2);
         }
         
         @media (max-width: 768px) {

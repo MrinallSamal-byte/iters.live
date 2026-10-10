@@ -182,7 +182,7 @@ async function loadMarks() {
                         datasets: [{
                             label: 'Average Marks %',
                             data: summary.map(s => ((s.avg_marks / s.avg_total) * 100).toFixed(1)),
-                            backgroundColor: '#6366f1',
+                            backgroundColor: '#ff5a4f',
                         }]
                     },
                     options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
