@@ -815,3 +815,69 @@ body:not(.nothing-home) .universal-sidebar.collapsed .sidebar-nav-icon {
     width: 40px;
     height: 40px;
 }
+
+/* Quick actions: global search + notification bell */
+.sidebar-quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.75rem 0.9rem;
+}
+
+.sidebar-quick-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: var(--glass-bg);
+    color: var(--sidebar-text, var(--text-secondary));
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-quick-btn:hover,
+.sidebar-quick-btn:focus-visible {
+    border-color: rgba(255, 90, 79, 0.4);
+    color: var(--sidebar-text-active, var(--text-primary));
+}
+
+.sidebar-notification-slot .notification-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: var(--glass-bg);
+    color: var(--sidebar-text, var(--text-secondary));
+    cursor: pointer;
+}
+
+.universal-sidebar.collapsed .sidebar-quick-actions {
+    flex-direction: column;
+}
+
+.universal-sidebar.collapsed .sidebar-quick-btn {
+    justify-content: center;
+    width: 40px;
+    flex: none;
+    padding: 0;
+}
+
+.universal-sidebar.collapsed .sidebar-quick-btn .sidebar-nav-text {
+    display: none;
+}
+
+.sidebar-notification-slot .notification-bell i {
+    color: inherit;
+    font-size: 1rem;
+}

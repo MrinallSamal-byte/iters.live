@@ -86,7 +86,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff5a4f 0%, #e2493f 100%);
   color: white;
 }
 
@@ -139,7 +139,7 @@
   border-radius: 2px;
 }
 
-.filter-btn {
+.notification-filters .filter-btn {
   background: rgba(0, 0, 0, 0.05);
   border: none;
   padding: 8px 16px;
@@ -151,12 +151,12 @@
   color: #333;
 }
 
-.filter-btn:hover {
+.notification-filters .filter-btn:hover {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.filter-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.notification-filters .filter-btn.active {
+  background: linear-gradient(135deg, #ff5a4f 0%, #e2493f 100%);
   color: white;
 }
 
@@ -208,11 +208,11 @@
 }
 
 .notification-item.unread {
-  background: linear-gradient(to right, rgba(102, 126, 234, 0.1), white);
+  background: linear-gradient(to right, rgba(255, 90, 79, 0.1), white);
 }
 
 .notification-item.unread::before {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff5a4f 0%, #e2493f 100%);
 }
 
 /* Type-specific colors */
@@ -302,7 +302,7 @@
 
 .unread-indicator {
   font-size: 0.5rem;
-  color: #667eea;
+  color: #ff5a4f;
 }
 
 .delete-notification {
@@ -364,7 +364,7 @@
 .notification-footer .btn-primary {
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff5a4f 0%, #e2493f 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -375,7 +375,7 @@
 
 .notification-footer .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 90, 79, 0.4);
 }
 
 /* Mobile Responsiveness */
@@ -421,48 +421,39 @@
 }
 
 /* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .notification-panel {
-    background: rgba(30, 30, 30, 0.95);
-  }
-
-  .notification-list {
-    background: #1a1a1a;
-  }
-
-  .notification-item {
-    background: #2a2a2a;
-  }
-
-  .notification-item.unread {
-    background: linear-gradient(to right, rgba(102, 126, 234, 0.2), #2a2a2a);
-  }
-
-  .notification-title {
-    color: #e0e0e0;
-  }
-
-  .notification-message {
-    color: #b0b0b0;
-  }
-
-  .notification-time {
-    color: #808080;
-  }
-
-  .filter-btn {
-    color: #e0e0e0;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .filter-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .notification-footer {
-    background: #2a2a2a;
-  }
+/* Dark theme follows the site theme toggle, not the OS setting */
+body:not(.light-theme) .notification-panel {
+  background: rgba(30, 30, 30, 0.95);
 }
+body:not(.light-theme) .notification-list {
+  background: #1a1a1a;
+}
+body:not(.light-theme) .notification-item {
+  background: #2a2a2a;
+}
+body:not(.light-theme) .notification-item.unread {
+  background: linear-gradient(to right, rgba(255, 90, 79, 0.2), #2a2a2a);
+}
+body:not(.light-theme) .notification-title {
+  color: #e0e0e0;
+}
+body:not(.light-theme) .notification-message {
+  color: #b0b0b0;
+}
+body:not(.light-theme) .notification-time {
+  color: #808080;
+}
+body:not(.light-theme) .notification-filters .filter-btn {
+  color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.05);
+}
+body:not(.light-theme) .notification-filters .filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+body:not(.light-theme) .notification-footer {
+  background: #2a2a2a;
+}
+
 
 /* Animations */
 @keyframes slideIn {

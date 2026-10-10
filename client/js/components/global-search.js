@@ -133,7 +133,7 @@ class GlobalSearch {
         });
         
         // Filter buttons
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const filterBtns = this.searchModal.querySelectorAll('.filter-btn');
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
@@ -459,9 +459,15 @@ class GlobalSearch {
     }
 }
 
-// Initialize global search
+// Initialize global search (also works when this script is injected after DOMContentLoaded)
 let globalSearch;
-document.addEventListener('DOMContentLoaded', () => {
+function initGlobalSearch() {
+    if (window.globalSearch) return;
     globalSearch = new GlobalSearch();
-    console.log('Global search initialized. Press Ctrl+K to open.');
-});
+    window.globalSearch = globalSearch;
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGlobalSearch);
+} else {
+    initGlobalSearch();
+}

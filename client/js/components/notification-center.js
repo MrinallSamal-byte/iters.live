@@ -34,13 +34,23 @@ class NotificationCenter {
     const button = document.createElement('div');
     button.id = 'notification-bell';
     button.className = 'notification-bell';
+    button.setAttribute('role', 'button');
+    button.setAttribute('tabindex', '0');
+    button.setAttribute('aria-label', 'Notifications');
+    button.title = 'Notifications';
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        button.click();
+      }
+    });
     button.innerHTML = `
       <i class="fas fa-bell"></i>
       <span class="notification-badge" id="notification-badge">0</span>
     `;
 
     // Find a suitable place to insert (e.g., header or top-right corner)
-    const header = document.querySelector('header') || document.querySelector('.top-right-profile');
+    const header = document.getElementById('sidebarNotificationSlot') || document.querySelector('header') || document.querySelector('.top-right-profile');
     if (header) {
       header.appendChild(button);
     }
@@ -112,7 +122,7 @@ class NotificationCenter {
     });
 
     // Filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    document.querySelectorAll('#notification-panel .filter-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         this.filterNotifications(e.target.dataset.filter);
       });
@@ -154,7 +164,11 @@ class NotificationCenter {
   async loadNotifications(append = false) {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        const list = document.getElementById('notification-list');
+        if (list) list.innerHTML = '<div class="notification-empty"><p>No notifications yet.</p></div>';
+        return;
+      }
 
       const response = await fetch(
         `/api/notifications?page=${this.page}&pageSize=20`,
@@ -182,6 +196,10 @@ class NotificationCenter {
       }
     } catch (error) {
       console.error('Failed to load notifications:', error);
+      const list = document.getElementById('notification-list');
+      if (list && !append) {
+        list.innerHTML = '<div class="notification-empty"><p>Notifications are unavailable right now. Please try again later.</p></div>';
+      }
     }
   }
 
@@ -401,7 +419,7 @@ class NotificationCenter {
    */
   filterNotifications(type) {
     // Update active filter button
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    document.querySelectorAll('#notification-panel .filter-btn').forEach(btn => {
       btn.classList.remove('active');
       if (btn.dataset.filter === type) {
         btn.classList.add('active');

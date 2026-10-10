@@ -3594,3 +3594,13 @@ body {
         display: table-cell;
     }
 }
+
+/* Stat values that could not be loaded */
+body:not(.nothing-home) .stat-unavailable {
+    color: var(--text-muted) !important;
+    -webkit-text-fill-color: currentColor;
+}
+
+body:not(.nothing-home) .stat-trend[hidden] {
+    display: none !important;
+}

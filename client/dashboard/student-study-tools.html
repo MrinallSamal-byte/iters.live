@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff5a4f">
+    <link rel="icon" href="/assets/soa-logo.png">
+    <title>Study Tools - ITERasn hub</title>
+    <!-- SECURITY: Immediate authentication check before any content loads -->
+    <script>
+        (function() {
+            'use strict';
+            // Check if user is authenticated before showing any content
+            function checkAuth() {
+                try {
+                    var accessToken = localStorage.getItem('accessToken');
+                    var user = localStorage.getItem('user');
+                    if (!accessToken || !user) return false;
+                    var userData = JSON.parse(user);
+                    return userData && userData.role === 'student';
+                } catch (e) {
+                    return false;
+                }
+            }
+            // If not authenticated, redirect immediately
+            if (!checkAuth()) {
+                // Store intended destination
+                try {
+                    sessionStorage.setItem('loginRedirect', window.location.pathname);
+                    sessionStorage.setItem('loginMessage', 'Please log in to access Study Tools.');
+                } catch (e) {}
+                window.location.replace('/login.html');
+                // Stop script execution and prevent any content from loading
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/clean-dashboard.css">
+    <link rel="stylesheet" href="/css/universal-sidebar.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/css/gpa-calculator.css">
+    <link rel="stylesheet" href="/css/pomodoro-timer.css">
+    <link rel="stylesheet" href="/css/assignment-calendar.css">
+    <style>
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tools-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-panel[hidden] {
+            display: none;
+        }
+
+        .tool-intro {
+            margin: 0 0 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        /* Flashcards ship without their own stylesheet */
+        .flashcard-header,
+        .deck-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .deck-stats,
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .deck-stats .stat-card,
+        .deck-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            background: var(--glass-bg);
+        }
+
+        .deck-stats .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .deck-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .btn-icon {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.35rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Page Hero -->
+        <section class="page-hero glass-card">
+            <div class="hero-content-inline">
+                <div>
+                    <h1 class="page-title">
+                        <span class="title-icon">🧰</span>
+                        Study Tools
+                    </h1>
+                    <p class="page-subtitle">GPA calculator, focus timer, assignment calendar and flashcards in one place. Your data stays saved on this device.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section glass-card">
+            <div class="tools-tabs" role="tablist" aria-label="Study tools">
+                <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tool="gpa">🎓 GPA Calculator</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tool="timer">⏱️ Focus Timer</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tool="calendar">📅 Assignment Calendar</button>
+                <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tool="flashcards">🎴 Flashcards</button>
+            </div>
+
+            <div class="tool-panel" id="panel-gpa" role="tabpanel">
+                <p class="tool-intro">Add your semesters and subjects to work out SGPA and CGPA on the 10-point scale.</p>
+                <div id="gpa-calculator"></div>
+            </div>
+            <div class="tool-panel" id="panel-timer" role="tabpanel" hidden>
+                <p class="tool-intro">Pomodoro sessions: 25 minutes of focus, then a short break.</p>
+                <div id="pomodoro-timer"></div>
+            </div>
+            <div class="tool-panel" id="panel-calendar" role="tabpanel" hidden>
+                <p class="tool-intro">Track assignment deadlines on a calendar.</p>
+                <div id="assignment-calendar"></div>
+            </div>
+            <div class="tool-panel" id="panel-flashcards" role="tabpanel" hidden>
+                <p class="tool-intro">Make decks of question/answer cards and revise them.</p>
+                <div id="flashcard-container"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <script src="/js/toast.js"></script>
+    <script src="/js/page-access-token.js"></script>
+    <script src="/js/session-timeout.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/linkEncoding.js"></script>
+    <script src="/js/universal-sidebar.js"></script>
+    <script src="/js/chatbot.js"></script>
+    <script type="module" src="/js/components/gpa-calculator.js"></script>
+    <script type="module" src="/js/components/pomodoro-timer.js"></script>
+    <script type="module" src="/js/components/assignment-calendar.js"></script>
+    <script src="/js/components/flashcard-system.js"></script>
+    <script type="module" src="/js/pages/student-study-tools.js"></script>
+</body>
+</html>

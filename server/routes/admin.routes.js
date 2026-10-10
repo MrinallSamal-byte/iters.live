@@ -6,6 +6,7 @@ const { authMiddleware, roleMiddleware } = require('../middleware/auth');
 const parityService = require('../services/mobile-parity.service');
 const {
   createRecord,
+  getRecord,
   listRecords,
   updateRecord
 } = require('../services/firebase-data.service');
@@ -251,6 +252,68 @@ router.get('/approvals', authMiddleware, roleMiddleware('admin'), async (req, re
         ...file,
         uploaded_by_name: userNameById.get(file.uploaded_by) || null
       }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Recently approved files (most recent first)
+router.get('/approvals/recent', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const users = await listRecords('users');
+    const userNameById = new Map(users.map((user) => [user.id, user.name]));
+    const files = await listRecords('files', {
+      filters: [{ field: 'approved', value: true }]
+    });
+
+    const recent = files
+      .filter((file) => file.approved_at)
+      .sort((a, b) => String(b.approved_at).localeCompare(String(a.approved_at)))
+      .slice(0, 10)
+      .map((file) => ({
+        ...file,
+        uploaded_by_name: userNameById.get(file.uploaded_by) || null
+      }));
+
+    res.json({ success: true, data: recent });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Approve or reject a pending file
+router.post('/approvals/:id/:decision', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
+  try {
+    const { id, decision } = req.params;
+    if (!['approve', 'reject'].includes(decision)) {
+      return res.status(400).json({ success: false, message: 'Decision must be approve or reject' });
+    }
+
+    const file = await getRecord('files', id);
+    if (!file) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    const reviewer = req.user.id || req.user.uid || null;
+    const now = new Date().toISOString();
+    const update = decision === 'approve'
+      ? { approved: true, approved_at: now, approved_by: reviewer }
+      : {
+        // null keeps it out of both the pending queue (approved === false) and public lists (approved === true)
+        approved: null,
+        rejected: true,
+        rejected_at: now,
+        rejected_by: reviewer,
+        rejection_reason: typeof req.body?.reason === 'string' ? req.body.reason.slice(0, 500) : null
+      };
+
+    await updateRecord('files', id, update);
+
+    res.json({
+      success: true,
+      message: decision === 'approve' ? 'Item approved' : 'Item rejected',
+      data: { id, ...update }
     });
   } catch (error) {
     next(error);

@@ -22,6 +22,7 @@
                 { icon: '📅', text: 'Timetable', href: '/dashboard/student-timetable.html', page: 'timetable' },
                 { icon: '📚', text: 'Study Notes', href: '/dashboard/student-notes.html', page: 'notes' },
                 { icon: '🤖', text: 'AI Assistant', href: '/dashboard/student-ai-assistant.html', page: 'ai-assistant' },
+                { icon: '🧰', text: 'Study Tools', href: '/dashboard/student-study-tools.html', page: 'study-tools' },
                 { icon: '💬', text: 'Forum', href: '/dashboard/student-forum.html', page: 'forum' },
                 { icon: '💳', text: 'Payments', href: '/dashboard/student-payment-history.html', page: 'payments' },
                 { icon: '🎫', text: 'Admit Card', href: '/dashboard/student-admit-card.html', page: 'admit-card' },
@@ -59,6 +60,7 @@
             this.ensureUniversalProfile();
 
             this.createSidebar();
+            this.loadEnhancements();
             // Avoid duplicate top-right profile if global profile control exists
             const hasGlobalProfile = document.getElementById('profileAvatarBtn') || document.querySelector('.profile-control-wrapper');
             if (!hasGlobalProfile) {
@@ -176,6 +178,44 @@
             }
         },
 
+        /**
+         * Load global search (Ctrl+K) and the notification bell on every dashboard page
+         */
+        loadEnhancements() {
+            const addStyle = (href) => {
+                if (document.querySelector(`link[href="${href}"]`)) return;
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                document.head.appendChild(link);
+            };
+            const addScript = (src) => {
+                if (document.querySelector(`script[src="${src}"]`)) return;
+                const script = document.createElement('script');
+                script.src = src;
+                document.body.appendChild(script);
+            };
+
+            try {
+                addStyle('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+                addStyle('/css/components/global-search.css');
+                addStyle('/css/base/notification-center.css');
+                addScript('/js/components/global-search.js');
+                addScript('/js/components/notification-center.js');
+            } catch (e) {
+                console.warn('Failed to load search/notifications:', e);
+            }
+
+            const searchBtn = document.getElementById('sidebarSearchBtn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', () => {
+                    if (window.globalSearch && typeof window.globalSearch.open === 'function') {
+                        window.globalSearch.open();
+                    }
+                });
+            }
+        },
+
         detectRole() {
             // Detect role from current page or localStorage
             const currentPage = window.location.pathname.split('/').pop();
@@ -222,6 +262,13 @@
                                 <span class="sidebar-mode-text">Demo Mode</span>
                             </div>
                         ` : ''}
+                        <div class="sidebar-quick-actions">
+                            <button type="button" class="sidebar-quick-btn" id="sidebarSearchBtn" title="Search (Ctrl+K)" aria-label="Search">
+                                <span class="sidebar-nav-icon" aria-hidden="true">🔍</span>
+                                <span class="sidebar-nav-text">Search…</span>
+                            </button>
+                            <div class="sidebar-notification-slot" id="sidebarNotificationSlot"></div>
+                        </div>
                         <ul class="sidebar-nav-list">
                             ${menuItems.map(item => `
                                 <li class="sidebar-nav-item">

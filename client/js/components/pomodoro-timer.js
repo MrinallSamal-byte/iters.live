@@ -32,6 +32,7 @@ class PomodoroTimer {
     };
 
     this.timer = null;
+    this.pageTitle = document.title;
     this.init();
   }
 
@@ -356,8 +357,10 @@ class PomodoroTimer {
     const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     document.getElementById('time-display').textContent = timeStr;
 
-    // Update document title
-    document.title = `${timeStr} - ${this.getModeLabel()} | Focus Timer`;
+    // Show the countdown in the tab title only while the timer runs
+    document.title = this.state.isRunning
+      ? `${timeStr} - ${this.getModeLabel()} | Focus Timer`
+      : this.pageTitle;
 
     // Update mode indicator
     const modeIndicator = document.getElementById('mode-indicator');

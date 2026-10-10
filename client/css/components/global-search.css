@@ -74,8 +74,8 @@
 
 .search-input-container:focus-within {
     background: white;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #ff5a4f;
+    box-shadow: 0 0 0 3px rgba(255, 90, 79, 0.1);
 }
 
 .dark-mode .search-input-container {
@@ -85,7 +85,7 @@
 
 .dark-mode .search-input-container:focus-within {
     background: #2d2d2d;
-    border-color: #667eea;
+    border-color: #ff5a4f;
 }
 
 .search-icon {
@@ -112,7 +112,7 @@
 
 /* Keyboard shortcuts */
 .search-kbd,
-kbd {
+.search-modal-overlay kbd {
     display: inline-block;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
@@ -126,7 +126,7 @@ kbd {
 }
 
 .dark-mode .search-kbd,
-.dark-mode kbd {
+.dark-mode .search-modal-overlay kbd {
     background: #2d2d2d;
     border-color: #3d3d3d;
     color: #94a3b8;
@@ -139,7 +139,7 @@ kbd {
     flex-wrap: wrap;
 }
 
-.filter-btn {
+.search-filters .filter-btn {
     padding: 0.5rem 1rem;
     border: 1px solid #e2e8f0;
     background: white;
@@ -150,24 +150,24 @@ kbd {
     color: #64748b;
 }
 
-.filter-btn:hover {
+.search-filters .filter-btn:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
 }
 
-.filter-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.search-filters .filter-btn.active {
+    background: linear-gradient(135deg, #ff5a4f 0%, #e2493f 100%);
     color: white;
     border-color: transparent;
 }
 
-.dark-mode .filter-btn {
+.dark-mode .search-filters .filter-btn {
     background: #2d2d2d;
     border-color: #3d3d3d;
     color: #94a3b8;
 }
 
-.dark-mode .filter-btn:hover {
+.dark-mode .search-filters .filter-btn:hover {
     background: #3d3d3d;
 }
 
@@ -262,7 +262,7 @@ kbd {
 .clear-history-btn {
     background: none;
     border: none;
-    color: #667eea;
+    color: #ff5a4f;
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
@@ -272,7 +272,7 @@ kbd {
 }
 
 .clear-history-btn:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(255, 90, 79, 0.1);
 }
 
 .result-group-items {
@@ -425,7 +425,7 @@ kbd {
         -webkit-overflow-scrolling: touch;
     }
 
-    .filter-btn {
+    .search-filters .filter-btn {
         white-space: nowrap;
         flex-shrink: 0;
     }

@@ -703,7 +703,25 @@ const API = {
             return data;
         } catch (error) {
             console.error('API request error:', error);
-            throw error;
+            let finalError = error;
+
+            // Network failures ("Failed to fetch") and non-JSON replies (server down / proxy page)
+            // get a message people can act on instead of a browser-internal one.
+            if (error instanceof TypeError || error instanceof SyntaxError) {
+                finalError = new Error(navigator.onLine === false
+                    ? 'You appear to be offline. Check your connection and try again.'
+                    : 'We couldn\'t reach the server right now. Please try again in a moment.');
+                finalError.cause = error;
+                finalError.isNetworkError = true;
+            }
+
+            try {
+                window.dispatchEvent(new CustomEvent('app:api-error', { detail: { endpoint, status: finalError.status || null } }));
+            } catch (eventError) {
+                // Ignore event errors
+            }
+
+            throw finalError;
         }
     },
 
@@ -1115,6 +1133,35 @@ function logout() {
 }
 
 // Initialize
+// Friendly placeholders: when data can't load, replace "--" stat values and stuck
+// "Loading..." table rows with a clear "not available" state instead of leaving them hanging.
+function markUnavailablePlaceholders() {
+    document.querySelectorAll('.stat-number, .stat-value, .analytics-value').forEach((el) => {
+        const text = (el.textContent || '').trim();
+        if (/^--%?$/.test(text)) {
+            el.textContent = '—';
+            el.classList.add('stat-unavailable');
+            el.title = 'Not available right now';
+            // Hide trend chips that would describe data we don't have
+            const trend = el.parentElement && el.parentElement.querySelector('.stat-trend');
+            if (trend) trend.hidden = true;
+        }
+    });
+
+    document.querySelectorAll('tbody td[colspan]').forEach((cell) => {
+        if (/^loading\b/i.test((cell.textContent || '').trim()) && cell.parentElement.children.length === 1) {
+            cell.innerHTML = '<div class="empty-state"><p>We couldn\'t load this right now. Please refresh the page or try again later.</p></div>';
+        }
+    });
+}
+
+let placeholderTimer = null;
+window.addEventListener('app:api-error', () => {
+    clearTimeout(placeholderTimer);
+    // Give page scripts a moment to fall back to cached or demo data first
+    placeholderTimer = setTimeout(markUnavailablePlaceholders, 1500);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const currentPage = decodeVisiblePathname(window.location.pathname);
 
