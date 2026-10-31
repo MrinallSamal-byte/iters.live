@@ -8,6 +8,22 @@ const {
 } = require('../services/soa-data.service');
 
 describe('mobile-parity.service', () => {
+  // These suites cover the in-memory portal store. A SQL database configured in the environment
+  // (CI sets DB_HOST for Postgres; a local .env may too) would switch the service to SQL storage,
+  // so the variables are cleared for the run and restored afterwards.
+  const SQL_ENV_KEYS = ['POSTGRES_URL', 'DATABASE_URL', 'DB_HOST'];
+  let savedSqlEnv;
+  beforeAll(() => {
+    savedSqlEnv = Object.fromEntries(SQL_ENV_KEYS.map((key) => [key, process.env[key]]));
+    SQL_ENV_KEYS.forEach((key) => { delete process.env[key]; });
+  });
+  afterAll(() => {
+    SQL_ENV_KEYS.forEach((key) => {
+      if (savedSqlEnv[key] === undefined) delete process.env[key];
+      else process.env[key] = savedSqlEnv[key];
+    });
+  });
+
   beforeEach(() => {
     localPortalStore.clear();
   });
