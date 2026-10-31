@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Details · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Payment Details on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -35,15 +36,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/responsive.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 
 <body>
@@ -56,20 +60,17 @@
                     <h1 class="page-title">Payment Details</h1>
                     <p class="page-subtitle">Complete information about your transaction</p>
                 </div>
-                <a href="/dashboard/student-payment-history.html" class="btn btn-secondary">
-                    ← Back to History
-                </a>
+                <a href="/dashboard/student-payment-history.html" class="btn btn-secondary">Back to History </a>
             </div>
         </section>
 
         <!-- Loading State -->
         <div id="loadingState" class="loading-state">
-            <div class="loading-text">Loading payment details...</div>
+            <div class="loading-text">Loading payment details…</div>
         </div>
 
         <!-- Error State -->
         <div id="errorState" class="error-state" style="display: none;">
-            <div class="empty-state-label">Error</div>
             <h3>Payment Not Found</h3>
             <p id="errorMessage">Unable to load payment details.</p>
             <a href="/dashboard/student-payment-history.html" class="btn btn-primary">Go to Payment History</a>
@@ -93,7 +94,7 @@
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
                         Payment Information
-                    </h3>
+                    </h2>
                 </div>
                 <div class="details-grid">
                     <div class="detail-item">
@@ -120,7 +121,7 @@
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
                         Student Information
-                    </h3>
+                    </h2>
                 </div>
                 <div class="details-grid">
                     <div class="detail-item">
@@ -143,7 +144,7 @@
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
                         Payment Details
-                    </h3>
+                    </h2>
                 </div>
                 <div class="details-grid">
                     <div class="detail-item">
@@ -185,7 +186,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -200,8 +201,9 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
-            padding: 2rem 2.5rem;
+            padding: 2rem var(--space-xl);
         }
 
         .hero-content-inline {
@@ -217,18 +219,18 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .hero-content-inline .btn {
             align-self: center;
             white-space: nowrap;
-            padding: 0.8rem 1.5rem;
-            font-family: var(--r-font-mono);
+            padding: 0.8rem var(--space-lg);
+            font-family: var(--font-body);
             font-size: 0.76rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             height: fit-content;
         }
 
@@ -245,18 +247,18 @@
         .loading-state,
         .error-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: var(--space-2xl) 2rem;
         }
 
         .error-state .empty-state-label {
             display: block;
-            margin-bottom: 0.75rem;
+            margin-bottom: var(--space-sm);
         }
 
         .payment-status-header {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: var(--space-lg);
             padding: 2rem;
             border-bottom: 1px dotted var(--r-line);
         }
@@ -281,26 +283,26 @@
         .payment-status-header h2 {
             margin: 0;
             color: var(--r-text);
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
         }
 
         .payment-status-header p {
             margin: 0.4rem 0 0;
             color: var(--r-text-3);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .details-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.25rem 2rem;
-            padding: 0.25rem 1.5rem 1.5rem;
+            padding: var(--space-2xs) var(--space-lg) var(--space-lg);
         }
 
         .detail-item {
@@ -316,19 +318,19 @@
         .detail-item.amount-item {
             grid-column: 1 / -1;
             background: var(--r-panel-inset);
-            padding: 1.5rem;
+            padding: var(--space-lg);
             border: 1px solid var(--r-line-strong);
             border-radius: var(--r-radius);
             text-align: center;
         }
 
         .detail-item label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
             color: var(--r-text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .detail-item span {
@@ -339,14 +341,14 @@
         #paymentId,
         #transactionId,
         #studentRegNo {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.82rem;
-            letter-spacing: 0.08em;
+            letter-spacing: normal;
             color: var(--r-text-2);
         }
 
         .amount-value {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 2.1rem !important;
             font-weight: 800;
             letter-spacing: 0.02em;
@@ -358,18 +360,18 @@
             display: inline-block;
             padding: 0.26rem 0.55rem;
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             border: 1px solid transparent;
             width: fit-content;
         }
 
         .status-completed,
         .status-refunded {
-            background: rgba(255, 255, 255, 0.06);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             color: var(--r-ok);
             border-color: var(--r-line-strong);
         }
@@ -377,40 +379,40 @@
         .status-pending {
             background: var(--r-accent-wash);
             color: var(--r-warn);
-            border-color: rgba(215, 25, 33, 0.4);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .status-failed {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--r-accent);
         }
 
         body.light-theme .status-completed,
         body.light-theme .status-refunded {
-            background: rgba(0, 0, 0, 0.05);
-            color: #0d0d0d;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            color: var(--color-ink);
         }
 
         .actions-container {
             display: flex;
-            gap: 0.75rem;
-            padding: 0 1.5rem 1.5rem;
+            gap: var(--space-sm);
+            padding: 0 var(--space-lg) var(--space-lg);
             justify-content: center;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             padding: 0.8rem 1.75rem;
             border: none;
             border-radius: var(--r-radius);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.76rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             cursor: pointer;
             transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
         }
@@ -418,7 +420,7 @@
         .btn-primary {
             background: var(--r-accent);
             border: 1px solid var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
         }
 
         .btn-primary:hover {
@@ -441,13 +443,13 @@
 
         @media (max-width: 768px) {
             .page-hero {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
 
             .hero-content-inline {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 1.5rem;
+                gap: var(--space-lg);
                 min-height: auto;
             }
 
@@ -485,7 +487,7 @@
 
         @media (max-width: 480px) {
             .page-hero {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .page-title {
@@ -497,7 +499,7 @@
             }
 
             .hero-content-inline .btn {
-                padding: 0.75rem 1.5rem;
+                padding: var(--space-sm) var(--space-lg);
             }
         }
 
@@ -510,7 +512,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .detail-item span {
@@ -560,7 +562,7 @@
 
             .loading-state,
             .error-state {
-                padding: 2.5rem 1rem;
+                padding: var(--space-xl) var(--space-md);
             }
         }
 

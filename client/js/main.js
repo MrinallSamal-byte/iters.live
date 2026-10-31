@@ -708,7 +708,7 @@ function ensureThemeToggle() {
     themeToggle.className = 'theme-toggle';
     themeToggle.title = 'Toggle theme';
     themeToggle.setAttribute('aria-label', 'Toggle dark and light theme');
-    themeToggle.innerHTML = '<span class="theme-icon">🌙</span>';
+    themeToggle.innerHTML = '<span class="theme-icon" aria-hidden="true"></span>';
 
     document.body.appendChild(themeToggle);
 }
@@ -786,9 +786,7 @@ function initThemeToggle() {
 function updateThemeIcon(theme) {
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.querySelector('.theme-icon');
-    if (themeIcon) {
-        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
-    }
+    // The icon is drawn by CSS from the body theme (.theme-icon); no text is written.
 
     if (themeToggle?.dataset.fallbackStyled === 'true') {
         const isLight = theme === 'light';

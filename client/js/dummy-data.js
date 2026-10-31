@@ -32,16 +32,16 @@ const eventNames = [
 ];
 
 const clubsList = [
-    { name: 'Coding Club', category: 'Technical', icon: '💻' },
-    { name: 'Robotics Club', category: 'Technical', icon: '🤖' },
-    { name: 'Photography Club', category: 'Cultural', icon: '📸' },
-    { name: 'Music Club', category: 'Cultural', icon: '🎵' },
-    { name: 'Drama Society', category: 'Cultural', icon: '🎭' },
-    { name: 'Sports Club', category: 'Sports', icon: '⚽' },
-    { name: 'Entrepreneurship Cell', category: 'Professional', icon: '💼' },
-    { name: 'Literary Society', category: 'Cultural', icon: '📚' },
-    { name: 'Dance Club', category: 'Cultural', icon: '💃' },
-    { name: 'IEEE Student Branch', category: 'Technical', icon: '⚡' }
+    { name: 'Coding Club', category: 'Technical', icon: '' },
+    { name: 'Robotics Club', category: 'Technical', icon: '' },
+    { name: 'Photography Club', category: 'Cultural', icon: '' },
+    { name: 'Music Club', category: 'Cultural', icon: '' },
+    { name: 'Drama Society', category: 'Cultural', icon: '' },
+    { name: 'Sports Club', category: 'Sports', icon: '' },
+    { name: 'Entrepreneurship Cell', category: 'Professional', icon: '' },
+    { name: 'Literary Society', category: 'Cultural', icon: '' },
+    { name: 'Dance Club', category: 'Cultural', icon: '' },
+    { name: 'IEEE Student Branch', category: 'Technical', icon: '' }
 ];
 
 // Central demo accounts

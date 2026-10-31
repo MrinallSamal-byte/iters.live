@@ -333,7 +333,7 @@ function () {
             return;
         }
 
-        console.log('🔧 Initializing mobile responsive features...');
+        console.log(' Initializing mobile responsive features...');
 
         try {
             initMobileMenu();
@@ -351,7 +351,7 @@ function () {
             // Optional: Pull to refresh (can be disabled if not needed)
             // initPullToRefresh();
 
-            console.log('✅ Mobile responsive features initialized');
+            console.log(' Mobile responsive features initialized');
         } catch (error) {
             console.error('Error initializing mobile features:', error);
         }

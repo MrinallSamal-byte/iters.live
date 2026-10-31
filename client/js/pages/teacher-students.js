@@ -23,7 +23,7 @@ class TeacherStudentsPage {
 
   bind() {
     const search = document.getElementById('searchInput');
-    search?.addEventListener('input', this.debounce(() => this.applyLocalFilters(), 350));
+    search?.addEventListener('input', debounce(() => this.applyLocalFilters(), 350));
     ['deptFilter', 'yearFilter', 'sectionFilter'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', () => this.applyLocalFilters());
     });
@@ -145,7 +145,7 @@ class TeacherStudentsPage {
         </td>
         <td><span class="performance-badge ${badgeClass}">${badgeText}</span></td>
         <td>
-          <button class="btn-icon" title="View Details" onclick="viewStudent('${this.jsId(s.id)}')">👁️</button>
+          <button class="btn-icon" title="View Details" onclick="viewStudent('${this.jsId(s.id)}')"></button>
         </td>
       </tr>
     `;
@@ -210,7 +210,7 @@ class TeacherStudentsPage {
 
     const needy = this.students.filter(s => Number(s.attendance_percent || 0) < 75 || Number(s.avg_marks || 0) < 50);
     if (!needy.length) {
-      list.innerHTML = '<div class="loading-text">All students are on track 🎉</div>';
+      list.innerHTML = '<div class="loading-text">All students are on track</div>';
       return;
     }
 

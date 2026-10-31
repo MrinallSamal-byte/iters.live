@@ -192,7 +192,7 @@
                     </div>
                     <div>
                         <small style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Amount</small>
-                        <strong style="color: var(--primary); font-size: 1.5rem;">₹ ${paymentData.amount.toFixed(2)}</strong>
+                        <strong style="color:var(--color-accent-text); font-size: 1.5rem;">₹ ${paymentData.amount.toFixed(2)}</strong>
                     </div>
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.875rem;">

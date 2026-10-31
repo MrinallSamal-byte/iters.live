@@ -259,7 +259,7 @@
             warningModal.innerHTML = `
                 <div class="session-warning-overlay">
                     <div class="session-warning-modal">
-                        <div class="session-warning-icon">⏰</div>
+                        <div class="session-warning-icon"></div>
                         <h3>Session Expiring Soon</h3>
                         <p>Your session will expire in <span id="sessionCountdown">2:00</span></p>
                         <p class="session-warning-subtext">Click anywhere or press any key to stay logged in</p>

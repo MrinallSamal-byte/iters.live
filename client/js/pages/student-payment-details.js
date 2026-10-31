@@ -97,7 +97,7 @@
             statusTitle.textContent = 'Payment Successful';
             statusSubtitle.textContent = 'Your payment has been processed successfully';
         } else if (payment.status === 'pending') {
-            statusIcon.textContent = '⏳';
+            statusIcon.textContent = '';
             statusIcon.style.background = 'rgba(234, 179, 8, 0.1)';
             statusTitle.textContent = 'Payment Pending';
             statusSubtitle.textContent = 'Your payment is being processed';
@@ -107,7 +107,7 @@
             statusTitle.textContent = 'Payment Failed';
             statusSubtitle.textContent = 'There was an issue processing your payment';
         } else if (payment.status === 'refunded') {
-            statusIcon.textContent = '↩️';
+            statusIcon.textContent = '';
             statusIcon.style.background = 'rgba(168, 85, 247, 0.1)';
             statusTitle.textContent = 'Payment Refunded';
             statusSubtitle.textContent = 'This payment has been refunded';

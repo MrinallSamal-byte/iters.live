@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Events on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Sidebar will be injected by student-sidebar.js -->
@@ -88,7 +92,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Filter Events
-                </h3>
+                </h2>
             </div>
             <div class="event-filters">
                 <button class="filter-chip active" data-category="all">All Events</button>
@@ -106,13 +110,13 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Available Events
-                </h3>
+                </h2>
                 <span class="section-badge">Browse &amp; Register</span>
             </div>
             <div class="events-grid" id="eventsGrid">
                 <!-- CUT CORNER: student-events.js re-injects .empty-state-icon with an emoji on empty results (file not in ownership scope) -->
                 <div class="empty-state">
-                    <div class="loading-text">Loading events...</div>
+                    <div class="loading-text">Loading events…</div>
                 </div>
             </div>
         </section>
@@ -120,7 +124,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -135,6 +139,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -145,12 +150,12 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1.5rem;
+            gap: var(--space-lg);
         }
 
         .page-title {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--r-text);
         }
 
@@ -161,9 +166,9 @@
 
         .event-filters {
             display: flex;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             flex-wrap: wrap;
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
         }
 
         .filter-chip {
@@ -172,11 +177,11 @@
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
             color: var(--r-text-2);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             cursor: pointer;
             transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
         }
@@ -189,21 +194,21 @@
         .filter-chip.active {
             background: var(--r-accent);
             border-color: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
         }
 
         .events-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
 
         .event-card {
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
-            overflow: hidden;
+            overflow: clip;
             transition: border-color 160ms ease;
             cursor: pointer;
         }
@@ -215,7 +220,7 @@
         .event-banner {
             height: 150px;
             background:
-                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 14px 14px,
+                radial-gradient(color-mix(in oklab, var(--color-ink) 8%, transparent) 1px, transparent 1px) 0 0 / 14px 14px,
                 var(--r-panel-inset);
             border-bottom: 1px dotted var(--r-line-strong);
             display: flex;
@@ -223,7 +228,7 @@
             justify-content: center;
             font-size: 3rem;
             position: relative;
-            overflow: hidden;
+            overflow: clip;
         }
 
         .event-category-badge {
@@ -232,26 +237,26 @@
             right: 1rem;
             padding: 0.35rem 0.65rem;
             border-radius: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: color-mix(in oklab, var(--color-paper) 70%, transparent);
             border: 1px solid var(--r-line-strong);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            color: #ffffff;
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--color-ink);
         }
 
         .event-content {
-            padding: 1.5rem;
+            padding: var(--space-lg);
         }
 
         .event-title {
             font-size: 1.15rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            margin-bottom: 0.75rem;
+            text-transform: none;
+            letter-spacing: normal;
+            margin-bottom: var(--space-sm);
             color: var(--r-text);
         }
 
@@ -262,42 +267,42 @@
             padding-bottom: 0.9rem;
             margin-bottom: 0.9rem;
             border-bottom: 1px dotted var(--r-line-strong);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .event-meta-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .event-description {
             font-size: 0.95rem;
             line-height: 1.6;
             color: var(--r-text-2);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .event-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 1rem;
+            padding-top: var(--space-md);
             border-top: 1px solid var(--r-line);
         }
 
         .event-participants {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -306,13 +311,13 @@
             border-radius: 2px;
             background: var(--r-accent);
             border: 1px solid var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             cursor: pointer;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: background 160ms ease, border-color 160ms ease;
         }
 
@@ -331,7 +336,7 @@
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 3rem var(--space-md);
             color: var(--r-text-3);
         }
 
@@ -350,7 +355,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .event-title,
@@ -395,7 +400,7 @@
             }
 
             .event-filters {
-                gap: 0.5rem;
+                gap: var(--space-xs);
             }
 
             .filter-chip {
@@ -439,7 +444,7 @@
             }
 
             .empty-state {
-                padding: 2rem 0.75rem;
+                padding: 2rem var(--space-sm);
             }
         }
 
@@ -450,14 +455,14 @@
 
             .filter-chip {
                 padding: 0.55rem 0.9rem;
-                letter-spacing: 0.1em;
+                letter-spacing: normal;
             }
         }
 
         /* 360px: no horizontal page scroll */
         @media (max-width: 360px) {
             .page-hero {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .event-content {

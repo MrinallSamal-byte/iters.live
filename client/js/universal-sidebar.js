@@ -35,6 +35,10 @@
             'announcements': svg('<path d="M4 10.5l13-5.5v14l-13-5.5z"/><path d="M7 12.4V17a1.75 1.75 0 0 0 3.5 0v-3.3"/><path d="M19.5 10a3 3 0 0 1 0 4"/>'),
             'departments': svg('<path d="M4.5 20V6l7-2.5V20"/><path d="M11.5 9.5l8 2.5v8"/><path d="M3.5 20h17"/><path d="M7 9.5h1.5"/><path d="M7 13h1.5"/><path d="M14.5 14.5H16"/><path d="M14.5 17.5H16"/>'),
             'settings': svg('<path d="M4 7.5h9"/><path d="M17 7.5h3"/><circle cx="15" cy="7.5" r="2"/><path d="M4 16.5h3"/><path d="M11 16.5h9"/><circle cx="9" cy="16.5" r="2"/>'),
+            'camera': svg('<path d="M4 7.5h3.2l1.6-2.25h6.4l1.6 2.25H20v11.5H4z"/><circle cx="12" cy="12.25" r="3.25"/>'),
+            'id-card': svg('<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h3.5"/><path d="M14 13.5h3.5"/><path d="M6.5 16.25c.5-1.2 1.4-1.85 2.5-1.85s2 .65 2.5 1.85"/>'),
+            'chevron': svg('<path d="M14.5 6.5L9 12l5.5 5.5"/>'),
+            'menu': svg('<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>'),
             'logout': svg('<path d="M9.5 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.5"/><path d="M15.5 16.5L20 12l-4.5-4.5"/><path d="M20 12H9.5"/>')
         };
     })();
@@ -331,14 +335,13 @@
                             <span class="sidebar-subtitle">${roleTitle} Dashboard</span>
                         </div>
                         <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-controls="universalSidebar" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">
-                            <span class="sidebar-toggle-icon" aria-hidden="true">←</span>
+                            <span class="sidebar-toggle-icon" aria-hidden="true">${SIDEBAR_ICONS.chevron}</span>
                         </button>
                     </div>
 
                     <nav class="sidebar-nav">
                         ${isDemoMode ? `
                             <div class="sidebar-mode-pill" title="Local demo session is active">
-                                <span class="sidebar-mode-dot"></span>
                                 <span class="sidebar-mode-text">Demo Mode</span>
                             </div>
                         ` : ''}
@@ -353,7 +356,7 @@
                 
                 <!-- Mobile toggle button -->
                 <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" type="button" aria-controls="universalSidebar" aria-expanded="false" aria-label="Open sidebar menu">
-                    ☰
+                    ${SIDEBAR_ICONS.menu}
                 </button>
             `;
 
@@ -388,20 +391,20 @@
                             <ul class="profile-dropdown-menu">
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link" onclick="UniversalSidebar.changeProfilePicture(); return false;">
-                                        <span class="profile-dropdown-icon">📷</span>
+                                        <span class="profile-dropdown-icon" aria-hidden="true">${SIDEBAR_ICONS.camera}</span>
                                         <span>Change Profile Picture</span>
                                     </a>
                                 </li>
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link" onclick="UniversalSidebar.showIDCard(); return false;">
-                                        <span class="profile-dropdown-icon">🆔</span>
+                                        <span class="profile-dropdown-icon" aria-hidden="true">${SIDEBAR_ICONS['id-card']}</span>
                                         <span>Show ID Card</span>
                                     </a>
                                 </li>
                                 ${this.currentRole === 'admin' ? `
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link" onclick="UniversalSidebar.openSettings(); return false;">
-                                        <span class="profile-dropdown-icon">⚙️</span>
+                                        <span class="profile-dropdown-icon" aria-hidden="true">${SIDEBAR_ICONS.settings}</span>
                                         <span>Settings</span>
                                     </a>
                                 </li>
@@ -409,7 +412,7 @@
                                 <div class="profile-dropdown-divider"></div>
                                 <li class="profile-dropdown-item">
                                     <a href="#" class="profile-dropdown-link danger" onclick="UniversalSidebar.logout(); return false;">
-                                        <span class="profile-dropdown-icon">🚪</span>
+                                        <span class="profile-dropdown-icon" aria-hidden="true">${SIDEBAR_ICONS.logout}</span>
                                         <span>Logout</span>
                                     </a>
                                 </li>
@@ -598,8 +601,8 @@
                 toggleBtn.setAttribute('aria-label', isCollapsed ? 'Open sidebar' : 'Collapse sidebar');
                 toggleBtn.setAttribute('title', isCollapsed ? 'Open sidebar' : 'Collapse sidebar');
                 toggleBtn.hidden = isMobile;
-                if (icon) {
-                    icon.textContent = isCollapsed ? '→' : '←';
+                if (icon && !icon.querySelector('svg')) {
+                    icon.innerHTML = SIDEBAR_ICONS.chevron;
                 }
             }
 

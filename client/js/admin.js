@@ -373,7 +373,7 @@
       console.error('Error loading approvals:', err);
       if (countBadge) countBadge.textContent = '';
       tbody.innerHTML = `
-        <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--danger, #d71921);">
+        <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-error);">
           Error loading approvals
           <button class="btn-small btn-secondary" onclick="loadPendingApprovals()" style="margin-left: 0.75rem;">Retry</button>
         </td></tr>`;

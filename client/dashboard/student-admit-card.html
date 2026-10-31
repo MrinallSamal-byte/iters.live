@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admit Card · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Admit Card on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -66,16 +70,16 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Student Information
-                </h3>
+                </h2>
             </div>
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">Enrollment No.</span>
-                    <span class="info-value" id="enrollmentNo">Loading...</span>
+                    <span class="info-value" id="enrollmentNo">Loading…</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Student Name</span>
-                    <span class="info-value" id="studentNameDisplay">Loading...</span>
+                    <span class="info-value" id="studentNameDisplay">Loading…</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Program</span>
@@ -83,11 +87,11 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Branch</span>
-                    <span class="info-value" id="branch">Loading...</span>
+                    <span class="info-value" id="branch">Loading…</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Current Semester</span>
-                    <span class="info-value" id="semester">Loading...</span>
+                    <span class="info-value" id="semester">Loading…</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Academic Year</span>
@@ -101,7 +105,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Select Examination
-                </h3>
+                </h2>
             </div>
             <div class="exam-form">
                 <div class="form-group">
@@ -126,8 +130,8 @@
                     <label for="examCode" class="form-label">Exam Code *</label>
                     <select id="examCode" class="form-select">
                         <option value="">Select Exam Code</option>
-                        <option value="EXAM-2025-MID">EXAM-2025-MID</option>
-                        <option value="EXAM-2025-END">EXAM-2025-END</option>
+                        <option value="EXAM-2025-MID">Exam-2025-mid</option>
+                        <option value="EXAM-2025-END">Exam-2025-end</option>
                     </select>
                 </div>
                 
@@ -142,24 +146,24 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Important Instructions
-                </h3>
+                </h2>
             </div>
             <div class="notes-container">
-                <div class="note-card">
+                <div class="note-item">
                     <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 1</h4>
                         <p>Please contact the University Office in case of any dispute or mismatch in data.</p>
                     </div>
                 </div>
-                <div class="note-card">
+                <div class="note-item">
                     <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 2</h4>
                         <p>This is a computer-generated report. No signature is required.</p>
                     </div>
                 </div>
-                <div class="note-card">
+                <div class="note-item">
                     <div class="note-icon">+</div>
                     <div class="note-content">
                         <h4>Note 3</h4>
@@ -172,7 +176,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -187,6 +191,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -195,11 +200,11 @@
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
         
         .page-subtitle {
@@ -210,15 +215,15 @@
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
         
         .info-item {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            padding: 1.5rem;
+            gap: var(--space-xs);
+            padding: var(--space-lg);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
             border-radius: 0;
@@ -230,11 +235,11 @@
         }
 
         .info-label {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            letter-spacing: 0.16em;
-            color: #757575;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            color: var(--color-ink-2);
+            text-transform: none;
         }
         
         .info-value {
@@ -245,34 +250,34 @@
         
         .exam-form {
             display: grid;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
         
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
         
         .form-label {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #757575;
+            letter-spacing: normal;
+            text-transform: none;
+            color: var(--color-ink-2);
         }
 
         .form-select {
-            padding: 0.85rem 1rem;
+            padding: 0.85rem var(--space-md);
             border-radius: 0;
             border: 1px solid var(--r-line);
             background: var(--r-panel-inset);
             color: var(--text-primary);
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.8rem;
-            letter-spacing: 0.04em;
+            letter-spacing: normal;
             transition: border-color 0.15s ease;
             cursor: pointer;
         }
@@ -284,57 +289,57 @@
         }
         
         .btn-large {
-            padding: 1rem 2rem;
+            padding: var(--space-md) 2rem;
             font-size: 0.78rem;
-            letter-spacing: 0.16em;
-            margin-top: 1rem;
+            letter-spacing: normal;
+            margin-top: var(--space-md);
         }
         
         .notes-container {
             display: grid;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
         }
         
-        .note-card {
+        .note-item {
             display: flex;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid #1f1f1f;
+            gap: var(--space-lg);
+            padding: var(--space-lg);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            border: 1px solid var(--color-rule);
             border-left: 2px solid var(--primary);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
-        .note-card:hover {
-            background: rgba(255, 255, 255, 0.05);
+        .note-item:hover {
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
-        body.light-theme .note-card {
-            background: rgba(19, 19, 19, 0.02);
+        body.light-theme .note-item {
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
-        body.light-theme .note-card:hover {
-            background: rgba(19, 19, 19, 0.04);
+        body.light-theme .note-item:hover {
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
         
         .note-icon {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 1.25rem;
             line-height: 1;
-            color: var(--r-accent);
+            color: var(--color-accent-text);
             flex-shrink: 0;
         }
         
         .note-content h4 {
-            margin-bottom: 0.5rem;
-            font-family: 'IBM Plex Mono', monospace;
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.72rem;
             font-weight: 600;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #f4f4f4;
+            letter-spacing: normal;
+            text-transform: none;
+            color: var(--color-ink);
         }
         
         .note-content p {
@@ -394,8 +399,8 @@
                 width: 100%;
             }
 
-            .note-card {
-                gap: 1rem;
+            .note-item {
+                gap: var(--space-md);
                 padding: 1.1rem;
             }
 

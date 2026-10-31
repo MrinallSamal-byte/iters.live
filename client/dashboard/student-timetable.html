@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timetable · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Timetable on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,16 +40,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Sidebar will be injected by student-sidebar.js -->
@@ -96,13 +99,13 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Weekly Schedule
-                </h3>
+                </h2>
                 <div class="timetable-controls">
                     <button class="btn btn-sm btn-primary" onclick="downloadTimetable()">
                         Download PDF
                     </button>
                     <a href="/api/calendar.ics" class="btn btn-sm btn-outline" download="timetable.ics">
-                        CALENDAR
+                        Calendar
                     </a>
                     <!-- ponytail: duplicate third export control (.ics ADD TO CALENDAR link) collapsed -->
                 </div>
@@ -123,7 +126,7 @@
                         </tr>
                     </thead>
                     <tbody id="timetableBody">
-                        <tr><td colspan="9" style="text-align: center; padding: 3rem;">Loading timetable...</td></tr>
+                        <tr><td colspan="9" style="text-align: center; padding: 3rem;">Loading timetable…</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -133,9 +136,9 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    Today's Schedule
-                </h3>
-                <span class="section-badge" id="todayDate">Loading...</span>
+                    Today’s Schedule
+                </h2>
+                <span class="section-badge" id="todayDate">Loading…</span>
             </div>
             <div class="today-schedule" id="todaySchedule">
                 <!-- Today's classes will be populated here -->
@@ -145,7 +148,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -162,6 +165,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -172,17 +176,17 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1.5rem;
+            gap: var(--space-lg);
         }
         
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
         
         .page-subtitle {
@@ -193,9 +197,9 @@
         .current-class-badge {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            background: rgba(255, 255, 255, 0.03);
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
         }
@@ -206,11 +210,11 @@
         }
         
         .badge-label {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            letter-spacing: 0.16em;
+            letter-spacing: normal;
             color: var(--r-text-3);
-            text-transform: uppercase;
+            text-transform: none;
         }
 
         .badge-value {
@@ -221,13 +225,13 @@
         
         .timetable-controls {
             display: flex;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             flex-wrap: wrap;
         }
         
         .timetable-wrapper {
             overflow-x: auto;
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
         }
         
         .timetable-table {
@@ -242,34 +246,34 @@
         }
 
         .timetable-table th {
-            padding: 1rem 0.5rem;
-            font-family: 'IBM Plex Mono', monospace;
+            padding: var(--space-md) var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--r-text-3);
             text-align: center;
             border: 1px solid var(--glass-border);
         }
         
         .timetable-table td {
-            padding: 1rem 0.5rem;
+            padding: var(--space-md) var(--space-xs);
             text-align: center;
             border: 1px solid var(--glass-border);
-            transition: all 0.2s ease;
+            transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
         }
         
         .day-column {
             font-weight: 700;
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             position: sticky;
             left: 0;
             z-index: 10;
         }
 
         .break-column {
-            background: rgba(255, 255, 255, 0.02);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         <!-- ponytail: red edge scoped to current-day-cell, the class student-timetable.js adds to today's column -->
@@ -283,26 +287,26 @@
         }
 
         .class-cell:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         body.light-theme .day-column {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .break-column {
-            background: rgba(0, 0, 0, 0.02);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .class-cell:hover {
-            background: rgba(0, 0, 0, 0.05);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         .class-name {
             font-weight: 700;
             color: var(--text-primary);
             display: block;
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
         
         .class-room {
@@ -312,15 +316,15 @@
         
         .today-schedule {
             display: grid;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
         }
         
         .schedule-item {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
-            padding: 1.5rem;
+            gap: var(--space-lg);
+            padding: var(--space-lg);
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 0;
@@ -329,11 +333,11 @@
 
         .schedule-item:hover {
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         body.light-theme .schedule-item:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
         
         @media (max-width: 768px) {
@@ -354,30 +358,30 @@
         .reconnect-cta {
             display: inline-block;
             margin-top: 0.6rem;
-            padding: 0.5rem 0.9rem;
+            padding: var(--space-xs) 0.9rem;
             border: 1px solid var(--primary);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            letter-spacing: 0.12em;
-            color: var(--primary);
+            letter-spacing: normal;
+            color: var(--color-accent-text);
             text-decoration: none;
             background: transparent;
         }
 
         .reconnect-cta:hover {
-            background: rgba(215, 25, 33, 0.08);
+            background: color-mix(in oklab, var(--color-accent) 8%, transparent);
         }
 
         .cache-badge {
             display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.25rem 0.6rem;
+            margin-top: var(--space-xs);
+            padding: var(--space-2xs) 0.6rem;
             border: 1px solid var(--glass-border);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.12em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
@@ -463,7 +467,7 @@
             .schedule-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 0.75rem;
+                gap: var(--space-sm);
                 padding: 1.1rem;
             }
         }

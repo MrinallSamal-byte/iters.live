@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Analytics on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,18 +40,22 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
 </head>
 <body>
     <main class="dashboard-main" aria-label="Admin Analytics main content" id="main-content">
         <section class="page-hero glass-card">
             <h1 class="page-title"> System Analytics </h1>
-            <p class="page-subtitle">PLATFORM TOTALS &mdash; FILES / ASSIGNMENTS / EVENTS</p>
+            <p class="page-subtitle">Platform totals: files / assignments / events</p>
         </section>
 
         <section class="quick-stats stagger-animation">
@@ -100,15 +105,15 @@
                     </tr>
                 </thead>
                 <tbody id="activityLogBody">
-                    <tr><td colspan="4" class="loading-text">Loading...</td></tr>
+                    <tr><td colspan="4" class="loading-text">Loading…</td></tr>
                 </tbody>
             </table>
         </section>
     </main>
 
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script defer src="/js/universal-sidebar.js"></script>
@@ -123,6 +128,7 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         /* ---- NOTHING EDITION - page-local normalization ---- */
 
         .page-hero {
@@ -132,13 +138,13 @@
         }
 
         .page-title {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-size: 2.5rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
-            margin-bottom: 0.5rem;
-            color: var(--r-text, #f4f4f4);
+            margin-bottom: var(--space-xs);
+            color: var(--r-text, var(--color-ink));
         }
 
         .title-icon {
@@ -146,48 +152,48 @@
         }
 
         .page-subtitle {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .dashboard-section > h3 {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-size: 1.15rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
-            color: var(--r-text, #f4f4f4);
-            margin: 0 0 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px dotted var(--r-line-strong, #333);
+            color: var(--r-text, var(--color-ink));
+            margin: 0 0 var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px dotted var(--r-line-strong, var(--color-rule));
         }
 
         .stat-number {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-            color: var(--r-text, #f4f4f4);
+            color: var(--r-text, var(--color-ink));
         }
 
         .stat-text {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .chart-wrapper {
-            padding: 1.5rem;
+            padding: var(--space-lg);
         }
 
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 1.5rem;
+            gap: var(--space-lg);
             margin-bottom: 2rem;
         }
 
@@ -203,22 +209,22 @@
         }
 
         .data-table th {
-            padding: 0.9rem 1rem;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            padding: 0.9rem var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             text-align: left;
             background: transparent;
-            border-bottom: 1px solid var(--r-line-strong, #333);
-            color: var(--r-text-3, #757575);
+            border-bottom: 1px solid var(--r-line-strong, var(--color-rule));
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .data-table td {
-            padding: 1rem;
-            border-bottom: 1px dotted var(--r-line, #1f1f1f);
-            color: var(--r-text-2, #b0b0b0);
+            padding: var(--space-md);
+            border-bottom: 1px dotted var(--r-line, var(--color-rule));
+            color: var(--r-text-2, var(--color-ink-2));
         }
 
         .data-table tbody tr {
@@ -226,22 +232,22 @@
         }
 
         .data-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         /* script-injected action badges - squared gray outline */
         .badge.primary,
         .badge.success,
         .badge.info {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.06));
-            color: var(--r-ok, #e8e8e8);
-            border: 1px solid var(--r-line-strong, #333);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            color: var(--r-ok, var(--color-ink));
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: 0;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .badge.warning,
@@ -249,54 +255,54 @@
         .badge-warning,
         .badge-error,
         .badge-primary {
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-            color: var(--r-accent, #d71921);
-            border: 1px solid rgba(215, 25, 33, 0.4);
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+            color: var(--color-accent-text);
+            border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
             border-radius: 0;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* re-point legacy tokens used by script-injected inline styles */
-        :root {
-            --error: #d71921;
-            --success: #e8e8e8;
-            --warning: #d71921;
+        body {
+            --error: var(--color-accent);
+            --success: var(--color-paper-2);
+            --warning: var(--color-accent);
         }
 
         .loading-text {
             text-align: center;
-            padding: 1rem;
-            color: var(--r-text-3, #757575);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            padding: var(--space-md);
+            color: var(--r-text-3, var(--color-ink-2));
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* Light theme normalization */
         body.light-theme .page-title,
         body.light-theme .dashboard-section > h3,
         body.light-theme .stat-number {
-            color: #0d0d0d;
+            color: var(--color-ink);
         }
 
         body.light-theme .page-subtitle,
         body.light-theme .stat-text,
         body.light-theme .data-table th {
-            color: #757575;
+            color: var(--color-ink-2);
         }
 
         body.light-theme .data-table td {
-            color: #4a4a4a;
-            border-bottom-color: #e4e4e4;
+            color: var(--color-ink);
+            border-bottom-color: var(--color-rule);
         }
 
         body.light-theme .data-table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         @media (max-width: 768px) {
@@ -379,16 +385,16 @@
             }
 
             #activityLogBody tr {
-                margin-bottom: 0.75rem;
+                margin-bottom: var(--space-sm);
                 padding: 0.9rem 0.85rem;
-                border: 1px solid var(--r-line, #1f1f1f);
-                border-left: 2px solid var(--r-line-strong, #333);
-                background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+                border: 1px solid var(--r-line, var(--color-rule));
+                border-left: 2px solid var(--r-line-strong, var(--color-rule));
+                background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
             }
 
             #activityLogBody tr:hover {
                 transform: none;
-                background: rgba(255, 255, 255, 0.04);
+                background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             }
 
             #activityLogBody td {
@@ -404,12 +410,12 @@
             }
 
             #activityLogBody td::before {
-                font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+                font-family: var(--font-body);
                 font-size: 0.56rem;
                 font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.14em;
-                color: var(--r-text-3, #757575);
+                text-transform: none;
+                letter-spacing: normal;
+                color: var(--r-text-3, var(--color-ink-2));
             }
 
             #activityLogBody td:nth-child(1)::before { content: "TIME"; }
@@ -419,7 +425,7 @@
 
             #activityLogBody td:nth-child(2) {
                 font-weight: 600;
-                color: var(--r-text, #f4f4f4);
+                color: var(--r-text, var(--color-ink));
             }
         }
 
@@ -430,7 +436,7 @@
             }
 
             .page-subtitle {
-                letter-spacing: 0.1em;
+                letter-spacing: normal;
             }
         }
     </style>

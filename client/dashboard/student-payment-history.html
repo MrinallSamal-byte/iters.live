@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment History · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Payment History on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -35,15 +36,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 
 <body>
@@ -117,17 +121,17 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     All Transactions
-                </h3>
+                </h2>
             </div>
 
             <div class="table-container">
                 <div id="loadingState" class="loading-state">
-                    <div class="loading-text">Loading payment history...</div>
+                    <div class="loading-text">Loading payment history…</div>
                 </div>
 
                 <div id="emptyState" class="empty-state" style="display: none;">
                     <div class="empty-state-label">No Payments Recorded</div>
-                    <p class="empty-state-hint">You haven't made any payments yet.</p>
+                    <p class="empty-state-hint">You haven’t made any payments yet.</p>
                     <a href="/dashboard/student-payment-make.html" class="btn btn-primary">Make Your First Payment</a>
                 </div>
 
@@ -153,7 +157,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -168,13 +172,14 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         body {
             --text-primary: var(--r-text);
             --text-secondary: var(--r-text-2);
         }
 
         .page-hero {
-            padding: 2rem 2.5rem;
+            padding: 2rem var(--space-xl);
         }
 
         .hero-content-inline {
@@ -190,13 +195,13 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .hero-content-inline .btn {
             align-self: center;
             white-space: nowrap;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem var(--space-lg);
             height: fit-content;
         }
 
@@ -213,24 +218,24 @@
         .filters-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: var(--space-md);
+            padding: var(--space-lg);
             align-items: flex-end;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
             color: var(--r-text-3);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .filter-select {
@@ -239,7 +244,7 @@
             border-radius: var(--r-radius);
             background: var(--r-panel-inset);
             color: var(--r-text);
-            font-family: var(--r-font-body);
+            font-family: var(--font-body);
             font-size: 0.9rem;
             min-width: 150px;
             transition: border-color 140ms ease;
@@ -252,7 +257,7 @@
         }
 
         .table-container {
-            padding: 1.5rem;
+            padding: var(--space-lg);
             overflow-x: auto;
         }
 
@@ -262,13 +267,13 @@
         }
 
         .data-table th {
-            padding: 0.85rem 1rem;
+            padding: 0.85rem var(--space-md);
             text-align: left;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
             background: transparent;
             border-bottom: 1px solid var(--r-line-strong);
@@ -276,7 +281,7 @@
         }
 
         .data-table td {
-            padding: 0.95rem 1rem;
+            padding: 0.95rem var(--space-md);
             border-bottom: 1px dotted var(--r-line);
             color: var(--r-text-2);
         }
@@ -287,14 +292,14 @@
         }
 
         .data-table tbody td:first-child strong {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.78rem;
             font-weight: 500;
-            letter-spacing: 0.08em;
+            letter-spacing: normal;
         }
 
         #paymentsTableBody td:nth-child(5) strong {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.02rem;
             font-weight: 700;
             letter-spacing: 0.02em;
@@ -306,28 +311,28 @@
         }
 
         .data-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         body.light-theme .data-table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         .status-badge {
             display: inline-block;
             padding: 0.26rem 0.55rem;
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             border: 1px solid transparent;
         }
 
         .status-completed,
         .status-refunded {
-            background: rgba(255, 255, 255, 0.06);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             color: var(--r-ok);
             border-color: var(--r-line-strong);
         }
@@ -335,33 +340,33 @@
         .status-pending {
             background: var(--r-accent-wash);
             color: var(--r-warn);
-            border-color: rgba(215, 25, 33, 0.4);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .status-failed {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--r-accent);
         }
 
         body.light-theme .status-completed,
         body.light-theme .status-refunded {
-            background: rgba(0, 0, 0, 0.05);
-            color: #0d0d0d;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            color: var(--color-ink);
         }
 
         .action-buttons {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .btn-small {
             padding: 0.4rem 0.8rem;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             border-radius: var(--r-radius);
             border: 1px solid var(--r-line-strong);
             background: transparent;
@@ -377,12 +382,12 @@
         }
 
         .btn-view:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border-color: var(--r-text);
         }
 
         body.light-theme .btn-view:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         .btn-download:hover {
@@ -397,7 +402,7 @@
 
         .empty-state-label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .empty-state-hint {
@@ -406,13 +411,13 @@
 
         @media (max-width: 768px) {
             .page-hero {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
 
             .hero-content-inline {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 1.5rem;
+                gap: var(--space-lg);
                 min-height: auto;
             }
 
@@ -446,7 +451,7 @@
 
         @media (max-width: 480px) {
             .page-hero {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .page-title {
@@ -467,7 +472,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* Transactions table scrolls inside its wrapper on small screens
@@ -517,7 +522,7 @@
             }
 
             .table-container {
-                padding: 1rem 0.75rem;
+                padding: var(--space-md) var(--space-sm);
             }
 
             .action-buttons {
@@ -537,7 +542,7 @@
 
             .loading-state,
             .empty-state {
-                padding: 2rem 0.75rem;
+                padding: 2rem var(--space-sm);
             }
         }
 

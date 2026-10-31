@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mark Attendance · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Mark Attendance on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -32,19 +33,21 @@
                 } catch (e) {}
                 window.location.replace('/login.html');
                 // Stop script execution and prevent any content from loading
-                document.write('<html><body>
-    <p>Redirecting to login...</p></body></html>'); return;
+                document.write('<html><body><p>Redirecting to login...</p></body></html>'); return;
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
 </head>
 <body>
     <main class="dashboard-main" aria-label="Teacher Attendance main content" id="main-content">
@@ -86,8 +89,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Select Class
-                </h3>
+                    Select Class
+                </h2>
             </div>
             
             <form id="attendanceForm" class="filter-container">
@@ -167,9 +170,9 @@
         <section id="studentsList" class="dashboard-section glass-card scroll-reveal" style="display:none;">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Student List
+                    Student List
                     <span id="studentCount" class="result-count"></span>
-                </h3>
+                </h2>
                 <div class="attendance-summary">
                     <span class="summary-item success">
                         <span class="summary-icon">✓</span>
@@ -206,7 +209,7 @@
                     <span>✓</span> Submit Attendance
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                    <span>↺</span> Reset
+                    <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></span> Reset
                 </button>
             </div>
         </section>
@@ -215,20 +218,20 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Recent Attendance Records
-                </h3>
+                    Recent Attendance Records
+                </h2>
             </div>
             
             <div class="recent-records" id="recentRecords">
-                <div class="loading-text">Loading recent records...</div>
+                <div class="loading-text">Loading recent records…</div>
             </div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Scripts -->
     <script defer src="/js/universal-sidebar.js"></script>
@@ -243,6 +246,7 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         body {
             --text-primary: var(--r-text);
             --text-secondary: var(--r-text-2);
@@ -255,21 +259,21 @@
         }
 
         .filter-container {
-            margin-top: 1.5rem;
-            padding: 0 1.5rem 1.5rem;
+            margin-top: var(--space-lg);
+            padding: 0 var(--space-lg) var(--space-lg);
         }
 
         .filter-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.25rem 1.5rem;
-            margin-bottom: 1.5rem;
+            gap: 1.25rem var(--space-lg);
+            margin-bottom: var(--space-lg);
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-icon {
@@ -280,12 +284,12 @@
 
         .filter-input,
         .filter-select {
-            padding: 0.75rem 0.9rem;
+            padding: var(--space-sm) 0.9rem;
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
             border-radius: var(--r-radius);
             color: var(--r-text);
-            font-family: var(--r-font-body);
+            font-family: var(--font-body);
             font-size: 0.92rem;
             transition: border-color 140ms ease;
         }
@@ -303,7 +307,7 @@
 
         .form-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             flex-wrap: wrap;
         }
 
@@ -314,16 +318,16 @@
         .btn-success {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             background: var(--r-accent);
             border: 1px solid var(--r-accent);
             border-radius: var(--r-radius);
-            color: #ffffff;
-            font-family: var(--r-font-mono);
+            color: var(--color-accent-ink);
+            font-family: var(--font-body);
             font-size: 0.76rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             cursor: pointer;
             transition: background 140ms ease, border-color 140ms ease;
         }
@@ -337,7 +341,7 @@
 
         .attendance-summary {
             display: flex;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             align-items: center;
             flex-wrap: wrap;
         }
@@ -345,12 +349,12 @@
         .summary-item {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             padding: 0.32rem 0.65rem;
             border-radius: 0;
             background: transparent;
@@ -367,13 +371,13 @@
         }
 
         body.light-theme .summary-item.success {
-            color: #0d0d0d;
+            color: var(--color-ink);
         }
 
         .summary-item.warning {
             color: var(--r-warn);
             background: var(--r-accent-wash);
-            border-color: rgba(215, 25, 33, 0.4);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .summary-icon {
@@ -381,12 +385,12 @@
         }
 
         .result-count {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            letter-spacing: 0.1em;
+            letter-spacing: normal;
             color: var(--r-text-3);
-            margin-left: 0.5rem;
+            margin-left: var(--space-xs);
         }
 
         .modern-table {
@@ -428,10 +432,10 @@
         }
 
         .demo-warning {
-            margin: 0 1.5rem 1rem;
-            padding: 0.75rem 1rem;
+            margin: 0 var(--space-lg) var(--space-md);
+            padding: var(--space-sm) var(--space-md);
             background: var(--r-accent-wash);
-            border: 1px solid rgba(215, 25, 33, 0.4);
+            border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
             border-radius: var(--r-radius);
             color: var(--r-text-2);
             font-size: 0.82rem;
@@ -444,21 +448,21 @@
         }
 
         .recent-records {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             gap: 0.65rem;
-            padding: 0 1.5rem 1.5rem;
+            padding: 0 var(--space-lg) var(--space-lg);
         }
 
         .record-item {
-            padding: 0.9rem 1rem;
+            padding: 0.9rem var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
             border-radius: var(--r-radius);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
             transition: border-color 140ms ease;
         }
 
@@ -474,23 +478,23 @@
             font-weight: 600;
             font-size: 0.92rem;
             color: var(--r-text);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
 
         .record-meta {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .record-stats {
             display: flex;
-            gap: 1rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.06em;
+            letter-spacing: normal;
         }
 
         .stat-present {
@@ -498,7 +502,7 @@
         }
 
         body.light-theme .stat-present {
-            color: #0d0d0d;
+            color: var(--color-ink);
         }
 
         .stat-absent {
@@ -507,7 +511,7 @@
 
         @media (max-width: 768px) {
             .page-hero {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
 
             .filter-row {
@@ -525,7 +529,7 @@
             .attendance-summary {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 0.5rem;
+                gap: var(--space-xs);
             }
         }
 
@@ -551,7 +555,7 @@
             html,
             body {
                 max-width: 100%;
-                overflow-x: hidden;
+                overflow-x: clip;
             }
 
             .dashboard-main {
@@ -608,20 +612,20 @@
             }
 
             .filter-container {
-                padding: 0 1rem 1.25rem;
+                padding: 0 var(--space-md) 1.25rem;
             }
 
             .recent-records {
-                padding: 0 1rem 1.25rem;
+                padding: 0 var(--space-md) 1.25rem;
             }
 
             .demo-warning {
-                margin: 0 1rem 1rem;
+                margin: 0 var(--space-md) var(--space-md);
             }
 
             .section-header-formal {
                 flex-wrap: wrap;
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
         }
 
@@ -648,7 +652,7 @@
             }
 
             .summary-item {
-                padding: 0.5rem 0.75rem;
+                padding: var(--space-xs) var(--space-sm);
             }
         }
 

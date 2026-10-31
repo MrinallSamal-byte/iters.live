@@ -366,7 +366,7 @@
         if (!q || !els.modalBody) return;
         const optionRows = (q.options || []).map(o => `
             <div style="padding:0.35rem 0;">
-                ${o.letter === q.correct_answer ? '✅' : '▫️'} <strong>${esc(o.letter)})</strong> ${esc(o.text)}
+                ${o.letter === q.correct_answer ? '' : ''} <strong>${esc(o.letter)})</strong> ${esc(o.text)}
             </div>
         `).join('');
         els.modalBody.innerHTML = `
@@ -484,7 +484,7 @@
                     <p>${esc(examType || '')} • Total Marks: ${paperMarks}${totalMarks ? ` / ${totalMarks}` : ''} • Duration: ${duration} mins</p>
                 </div>
                 ${sectionsHtml}
-                ${paperMarks !== totalMarks ? `<p style="color:var(--warning,#d71921);">⚠️ Paper totals ${paperMarks} marks vs a target of ${totalMarks}. Adjust counts or question marks.</p>` : ''}
+                ${paperMarks !== totalMarks ? `<p style="color:var(--warning,#d71921);"> Paper totals ${paperMarks} marks vs a target of ${totalMarks}. Adjust counts or question marks.</p>` : ''}
             `;
         }
         if (els.modal) els.modal.style.display = 'flex';

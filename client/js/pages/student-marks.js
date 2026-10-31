@@ -147,7 +147,7 @@
     }
 
     function reconnectCtaHtml() {
-        return '<a class="reconnect-cta" href="/connect-portal.html" style="display:inline-block;margin-top:0.6rem;padding:0.5rem 0.9rem;border:1px solid var(--primary);font-family:\'IBM Plex Mono\',monospace;font-size:0.68rem;letter-spacing:0.12em;color:var(--primary);text-decoration:none;background:transparent;">CONNECT SOA PORTAL</a>';
+        return '<a class="reconnect-cta" href="/connect-portal.html" style="display:inline-block;margin-top:0.6rem;padding:0.5rem 0.9rem;border:1px solid var(--primary);font-family:\'IBM Plex Mono\',monospace;font-size:0.68rem;letter-spacing:0.12em;color:var(--color-accent-text);text-decoration:none;background:transparent;">CONNECT SOA PORTAL</a>';
     }
 
     function showEmptyMarks(message) {
@@ -324,7 +324,7 @@
         historyEl.innerHTML = rows.map((item) => `
             <div class="semester-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h4 style="margin:0; color: var(--primary);">Semester ${escapeHtml(item.semester || 'Latest')}</h4>
+                    <h4 style="margin:0; color:var(--color-accent-text);">Semester ${escapeHtml(item.semester || 'Latest')}</h4>
                     <span style="color: var(--text-secondary); font-size:0.85rem;">
                         ${item.courseCredits != null ? `${escapeHtml(String(item.courseCredits))} credits` : 'Imported snapshot'}
                     </span>

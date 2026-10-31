@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes & Resources · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Notes & Resources on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,15 +40,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -73,40 +77,40 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Quick Access - Semester Folders
-                </h3>
+                </h2>
             </div>
             <div class="semester-links-grid">
                 <a href="https://drive.google.com/drive/folders/19eD6lO_ZITSCaFdD2cH3oaSOwu6QlcZd" 
                    target="_blank" 
-                   class="semester-link-card">
+                   class="semester-link">
                     <span class="semester-number">1</span>
                     <span class="semester-label">Semester 1</span>
                 </a>
                 <a href="https://drive.google.com/drive/folders/1ajqpRqYCntqOO6MnS_IYezU_3i_HPMdD" 
                    target="_blank" 
-                   class="semester-link-card">
+                   class="semester-link">
                     <span class="semester-number">2</span>
                     <span class="semester-label">Semester 2</span>
                 </a>
                 <a href="https://drive.google.com/drive/folders/1rY3THSdETNyJ-40J4olVVB5BgoW19nYA" 
                    target="_blank" 
-                   class="semester-link-card">
+                   class="semester-link">
                     <span class="semester-number">3</span>
                     <span class="semester-label">Semester 3</span>
                 </a>
                 <a href="https://drive.google.com/drive/folders/1lCp6gst04w-QWR6hBVKDlIRk3H_jsWen" 
                    target="_blank" 
-                   class="semester-link-card">
+                   class="semester-link">
                     <span class="semester-number">4</span>
                     <span class="semester-label">Semester 4</span>
                 </a>
                 <a href="https://drive.google.com/drive/folders/1WjEVA_KqnbLN1Lr4O_UnqZJyg24lhZHZ" 
                    target="_blank" 
-                   class="semester-link-card">
+                   class="semester-link">
                     <span class="semester-number">5</span>
                     <span class="semester-label">Semester 5</span>
                 </a>
-                <div class="semester-link-card semester-6-partial">
+                <div class="semester-link semester-6-partial">
                     <span class="semester-number">6</span>
                     <span class="semester-label">Semester 6</span>
                     <span class="partial-badge">Partial</span>
@@ -139,7 +143,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Filter Notes
-                </h3>
+                </h2>
             </div>
             
             <div class="filter-container">
@@ -224,7 +228,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Popular Subjects
-                </h3>
+                </h2>
             </div>
             <div class="subject-tags" id="popularSubjectTags">
                 <button class="subject-tag" data-subject="data-structures">
@@ -234,7 +238,7 @@
                     Algorithms
                 </button>
                 <button class="subject-tag" data-subject="dbms">
-                    DBMS
+                    Dbms
                 </button>
                 <button class="subject-tag" data-subject="os">
                     Operating Systems
@@ -246,7 +250,7 @@
                     Machine Learning
                 </button>
                 <button class="subject-tag" data-subject="oops">
-                    OOPS
+                    Oops
                 </button>
                 <button class="subject-tag" data-subject="se">
                     Software Engineering
@@ -260,12 +264,12 @@
                 <h2 class="section-title-formal">
                     Available Resources
                     <span id="resultCount" class="result-count"></span>
-                </h3>
+                </h2>
             </div>
             
             <!-- Loading State -->
             <div id="loadingState" class="loading-container">
-                <div class="loading-text">Loading resources...</div>
+                <div class="loading-text">Loading resources…</div>
             </div>
 
             <!-- No Results State -->
@@ -285,7 +289,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Recent Downloads
-                </h3>
+                </h2>
             </div>
             <div class="recent-list" id="recentDownloads">
                 <!-- Recent downloads will be populated here -->
@@ -296,11 +300,11 @@
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="requestPaperSection" style="display: none;">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    Can't Find a Paper?
-                </h3>
+                    Can’t Find a Paper?
+                </h2>
             </div>
             <div class="request-form">
-                <p class="request-text">Request a question paper and we'll try to add it to our collection.</p>
+                <p class="request-text">Request a question paper and we’ll try to add it to our collection.</p>
                 <div class="request-row">
                     <input type="text" id="requestSubject" class="form-input" placeholder="Subject Name" aria-label="Subject Name">
                     <input type="text" id="requestYear" class="form-input" placeholder="Year (e.g., 2023)" aria-label="Year">
@@ -320,7 +324,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -335,6 +339,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             margin-bottom: 2rem;
         }
@@ -343,17 +348,17 @@
         .semester-links-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
         }
 
-        .semester-link-card {
+        .semester-link {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 132px;
-            padding: 1.25rem 1rem;
+            padding: 1.25rem var(--space-md);
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 0;
@@ -363,13 +368,13 @@
             position: relative;
         }
 
-        .semester-link-card:hover {
+        .semester-link:hover {
             border-color: var(--r-accent);
             background: var(--r-panel-inset);
         }
 
         .semester-number {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.8rem;
             font-weight: 800;
             color: var(--r-text);
@@ -377,11 +382,11 @@
         }
 
         .semester-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-2);
             text-align: center;
         }
@@ -398,11 +403,11 @@
             position: absolute;
             top: 0.85rem;
             right: 0.85rem;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             padding: 0.2rem 0.45rem;
             background: transparent;
             color: var(--r-text-3);
@@ -414,33 +419,33 @@
         .subject-code-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.25rem 0.5rem;
+            padding: var(--space-2xs) var(--space-xs);
             background: transparent;
             color: var(--r-text-2);
             border: 1px dotted var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* No link available badge */
         .no-link-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
+            gap: var(--space-2xs);
+            padding: var(--space-2xs) var(--space-xs);
             background: transparent;
             color: var(--r-text-3);
             border: 1px dotted var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* No link card style */
@@ -456,36 +461,36 @@
         }
 
         .filter-container {
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
         }
 
         .filter-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-2);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-select {
-            padding: 0.875rem 1rem;
+            padding: 0.875rem var(--space-md);
             min-height: 52px;
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
@@ -509,19 +514,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             min-height: 52px;
             padding: 0.875rem 1.25rem;
             border-radius: 2px;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .filter-apply-btn {
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .search-box-container {
@@ -531,7 +536,7 @@
         .search-input {
             width: 100%;
             min-height: 56px;
-            padding: 1rem 1.15rem;
+            padding: var(--space-md) 1.15rem;
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -546,38 +551,38 @@
         }
 
         .result-count {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             color: var(--r-text-3);
             font-weight: 500;
-            margin-left: 0.5rem;
+            margin-left: var(--space-xs);
         }
 
         .loading-container {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: var(--space-2xl) 2rem;
         }
 
         .no-results-container {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: var(--space-2xl) 2rem;
         }
 
         .no-results-container .empty-state-label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .no-results-container p {
             color: var(--r-text-3);
-            margin-top: 0.75rem;
+            margin-top: var(--space-sm);
         }
 
         .resources-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
             gap: 1.15rem;
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
         }
 
         .resource-card {
@@ -622,16 +627,16 @@
         }
 
         .resource-badge {
-            padding: 0.25rem 0.6rem;
+            padding: var(--space-2xs) 0.6rem;
             background: var(--r-accent-wash);
             border: 1px dotted var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.58rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .resource-badge-row {
@@ -644,11 +649,11 @@
         }
 
         .resource-context {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--r-text-3);
             overflow-wrap: anywhere;
         }
@@ -666,7 +671,7 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.65rem;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             color: var(--r-text-3);
         }
@@ -685,16 +690,16 @@
 
         .resource-actions {
             display: grid;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             margin-top: auto;
-            padding-top: 0.75rem;
+            padding-top: var(--space-sm);
             border-top: 1px dotted var(--r-line-strong);
         }
 
         .resource-primary-actions {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.75rem;
+            gap: var(--space-sm);
         }
 
         .resource-primary-actions.single-action {
@@ -704,26 +709,26 @@
         .resource-actions .btn {
             width: 100%;
             min-height: 48px;
-            padding: 0.7rem 1rem;
-            font-family: var(--r-font-mono);
+            padding: 0.7rem var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             border-radius: 2px;
         }
 
         .recent-list {
             display: grid;
             gap: 0;
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
             border-top: 1px solid var(--r-line);
         }
 
         .recent-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem 0.25rem;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-2xs);
             background: transparent;
             border: none;
             border-bottom: 1px dotted var(--r-line-strong);
@@ -746,14 +751,14 @@
         .recent-name {
             font-weight: 600;
             color: var(--r-text);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
 
         .recent-time {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -761,24 +766,24 @@
         .subject-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
         }
 
         .subject-tag {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             padding: 0.6rem 1.1rem;
             background: transparent;
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
             color: var(--r-text-2);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             cursor: pointer;
             transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
         }
@@ -792,18 +797,18 @@
 
         /* Request Paper Form */
         .request-form {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
         }
 
         .request-text {
             color: var(--r-text-2);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .request-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
-            gap: 1rem;
+            gap: var(--space-md);
             align-items: end;
         }
 
@@ -811,7 +816,7 @@
         .request-row .form-select {
             min-width: 0;
             min-height: 52px;
-            padding: 0.75rem 1rem;
+            padding: var(--space-sm) var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -828,34 +833,34 @@
         .solution-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
+            gap: var(--space-2xs);
+            padding: var(--space-2xs) var(--space-xs);
             background: transparent;
             color: var(--r-text-2);
             border: 1px dotted var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* Google Drive Badge */
         .drive-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
+            gap: var(--space-2xs);
+            padding: var(--space-2xs) var(--space-xs);
             background: transparent;
             color: var(--r-text-2);
             border: 1px dotted var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* Google Drive Resource Card - red download accent rule */
@@ -871,7 +876,7 @@
 
         /* Drive Path */
         .drive-path {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             opacity: 0.8;
             grid-column: 1 / -1;
@@ -881,7 +886,7 @@
         .quick-access-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             width: 100%;
         }
 
@@ -889,23 +894,23 @@
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            padding: 0.5rem 0.75rem;
-            font-family: var(--r-font-mono);
+            padding: var(--space-xs) var(--space-sm);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             border-radius: 2px;
             background: var(--r-accent-wash);
             border: 1px dotted var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
             cursor: pointer;
             transition: background 160ms ease, border-style 160ms ease;
             white-space: nowrap;
         }
 
         .btn-quick-access:hover {
-            background: rgba(215, 25, 33, 0.18);
+            background: color-mix(in oklab, var(--color-accent) 18%, transparent);
             border-style: solid;
         }
 
@@ -947,7 +952,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .semester-link-card {
+            .semester-link {
                 min-height: 120px;
             }
 
@@ -976,10 +981,10 @@
         }
 
         @media (max-width: 560px) {
-            .semester-link-card,
+            .semester-link,
             .resource-card,
             .recent-item {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .resource-meta-grid,
@@ -993,7 +998,7 @@
             }
 
             .resource-header {
-                gap: 0.75rem;
+                gap: var(--space-sm);
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -1017,7 +1022,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .recent-name,
@@ -1068,12 +1073,12 @@
         /* 360px: no horizontal page scroll */
         @media (max-width: 360px) {
             .page-hero {
-                padding-left: 1rem;
-                padding-right: 1rem;
+                padding-left: var(--space-md);
+                padding-right: var(--space-md);
             }
 
             .filter-row {
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
 
             .section-badge {

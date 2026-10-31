@@ -1,0 +1,46 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "job": "sign in and work through daily tasks",
+  "genre": "modern-minimal",
+  "theme": "brand",
+  "shape": "app screen: fixed sidebar, top bar (notifications, theme, profile), page header, panels, figures, lists, forms, tables, dialogs, toasts, states",
+  "hero": "none (app screen)",
+  "nav": "sidebar with sections; under 1023px a drawer behind a menu button",
+  "footer": "none",
+  "imagery": "none added",
+  "photos": 0,
+  "signature": "the sidebar nav and the top bar, one hairline per surface",
+  "sections": "shell, page header, panels, figures, lists, forms, tables, dialogs, toasts, states",
+  "waived": [],
+  "prompt": "redesign the whole website: dashboards and connect-portal in the same system as the public pages",
+  "date": "2026-10-31"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "job": "sign up",
+  "genre": "editorial",
+  "theme": "brand",
+  "shape": "stage hero, rows, index, figures, split, statement, band; creator as overview, figures, split and contact grid",
+  "hero": "Stage",
+  "nav": "edge-aligned: wordmark left, links and two actions right",
+  "footer": "mast: wordmark over the links",
+  "imagery": "none added; the product drawn as one import, five answers",
+  "photos": 0,
+  "signature": "one import, five answers, drawn in the hero from the page own facts",
+  "sections": "hero,rows,figures,index,split,statement,band,footer",
+  "waived": [
+   "77 on login and register (forms, not landing pages)",
+   "58 on register (a form is one idea)"
+  ],
+  "prompt": "redesign the whole public website (landing, login, register, creator, soa-scraper); dashboards and connect-portal untouched",
+  "date": "2026-10-31",
+  "axes": "dark/pixel/chromatic-red",
+  "entry": "college-student-portal-iter-276b·67e2702b·2026-10-31·r0",
+  "fingerprint": "67e2702b"
+ }
+]

@@ -115,10 +115,10 @@
         if (menuSection) menuSection.style.display = 'block';
 
         const mealTypes = {
-            'breakfast': '🌅 Breakfast',
-            'lunch': '🍛 Lunch',
-            'snacks': '☕ Snacks',
-            'dinner': '🌙 Dinner'
+            'breakfast': ' Breakfast',
+            'lunch': ' Lunch',
+            'snacks': ' Snacks',
+            'dinner': ' Dinner'
         };
 
         let html = '';

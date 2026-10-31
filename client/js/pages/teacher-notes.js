@@ -54,7 +54,7 @@
             const file = els.file.files?.[0];
             if (!els.filePreview) return;
             els.filePreview.innerHTML = file
-                ? `<div style="padding:0.75rem;">📎 <strong>${esc(file.name)}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>`
+                ? `<div style="padding:0.75rem;"> <strong>${esc(file.name)}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)</div>`
                 : '';
         });
 
@@ -200,9 +200,9 @@
                 <td>${Number(m.download_count || 0)}</td>
                 <td>${m.created_at ? esc(new Date(m.created_at).toLocaleDateString()) : '-'}</td>
                 <td>
-                    <button class="btn-icon" title="Details" onclick="showMaterialDetails('${jsId(m.id)}')">👁️</button>
-                    <a class="btn-icon" title="Download" href="/api/files/download/${encodeURIComponent(String(m.id))}">📥</a>
-                    <button class="btn-icon" title="Delete" onclick="deleteMaterial('${jsId(m.id)}', this)">🗑️</button>
+                    <button class="btn-icon" title="Details" onclick="showMaterialDetails('${jsId(m.id)}')"></button>
+                    <a class="btn-icon" title="Download" href="/api/files/download/${encodeURIComponent(String(m.id))}"></a>
+                    <button class="btn-icon" title="Delete" onclick="deleteMaterial('${jsId(m.id)}', this)"></button>
                 </td>
             </tr>
         `).join('');
@@ -232,7 +232,7 @@
         els.popular.innerHTML = top.map(m => `
             <div class="card" style="margin-bottom:0.5rem;">
                 <div class="card-header"><strong>${esc(prettyName(m))}</strong></div>
-                <div class="card-body">📥 ${Number(m.download_count || 0)} downloads • ${esc(m.subject || '-')}</div>
+                <div class="card-body"> ${Number(m.download_count || 0)} downloads • ${esc(m.subject || '-')}</div>
             </div>
         `).join('');
     }
@@ -267,7 +267,7 @@
             setTimeout(() => {
                 if (btn.isConnected) {
                     delete btn.dataset.confirming;
-                    btn.textContent = '🗑️';
+                    btn.textContent = '';
                 }
             }, 4000);
             return;

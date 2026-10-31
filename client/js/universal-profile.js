@@ -697,19 +697,19 @@
                         <ul class="profile-dropdown-menu">
                             <li>
                                 <button class="profile-dropdown-item" id="changeProfilePicBtn">
-                                    <span class="profile-dropdown-icon">📷</span>
+                                    <span class="profile-dropdown-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h3.2l1.6-2.25h6.4l1.6 2.25H20v11.5H4z"/><circle cx="12" cy="12.25" r="3.25"/></svg></span>
                                     <span>Change Profile Picture</span>
                                 </button>
                             </li>
                             <li>
                                 <button class="profile-dropdown-item" id="viewIdCardBtn">
-                                    <span class="profile-dropdown-icon">🎫</span>
+                                    <span class="profile-dropdown-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h3.5"/><path d="M14 13.5h3.5"/><path d="M6.5 16.25c.5-1.2 1.4-1.85 2.5-1.85s2 .65 2.5 1.85"/></svg></span>
                                     <span>View ID Card</span>
                                 </button>
                             </li>
                             <li>
                                 <button class="profile-dropdown-item" id="settingsBtn">
-                                    <span class="profile-dropdown-icon">⚙️</span>
+                                    <span class="profile-dropdown-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h9"/><path d="M17 7.5h3"/><circle cx="15" cy="7.5" r="2"/><path d="M4 16.5h3"/><path d="M11 16.5h9"/><circle cx="9" cy="16.5" r="2"/></svg></span>
                                     <span>Settings</span>
                                 </button>
                             </li>
@@ -718,7 +718,7 @@
                             </li>
                             <li>
                                 <button class="profile-dropdown-item profile-dropdown-item-danger" id="logoutBtn">
-                                    <span class="profile-dropdown-icon">🚪</span>
+                                    <span class="profile-dropdown-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.5"/><path d="M15.5 16.5L20 12l-4.5-4.5"/><path d="M20 12H9.5"/></svg></span>
                                     <span>Logout</span>
                                 </button>
                             </li>
@@ -737,7 +737,7 @@
                             <div class="profile-upload-preview">
                                 <img src="" alt="Preview" id="profilePreviewImg" style="display: none;">
                                 <div class="profile-preview-placeholder" id="profilePreviewPlaceholder">
-                                    <span>📷</span>
+                                    <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h3.2l1.6-2.25h6.4l1.6 2.25H20v11.5H4z"/><circle cx="12" cy="12.25" r="3.25"/></svg></span>
                                     <p>No image selected</p>
                                 </div>
                             </div>
@@ -834,7 +834,7 @@
                             </div>
                             <div class="id-card-actions">
                                 <button class="btn btn-primary" onclick="UniversalProfile.downloadIdCard()">
-                                    📥 Download ID Card
+                                    <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M12 4v11'/><path d='M7.5 10.5L12 15l4.5-4.5'/><path d='M5 19.5h14'/></svg> Download ID card
                                 </button>
                             </div>
                         </div>

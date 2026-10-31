@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Settings on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
 </head>
 <body>
     <main class="dashboard-main" aria-label="Admin Settings main content" id="main-content">
@@ -178,9 +182,9 @@
                             <div class="form-group">
                                 <label class="form-label">Date Format</label>
                                 <select name="date_format" class="form-select">
-                                    <option value="DD-MM-YYYY" selected>DD-MM-YYYY</option>
-                                    <option value="MM-DD-YYYY">MM-DD-YYYY</option>
-                                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    <option value="DD-MM-YYYY" selected>Dd-mm-yyyy</option>
+                                    <option value="MM-DD-YYYY">Mm-dd-yyyy</option>
+                                    <option value="YYYY-MM-DD">Yyyy-mm-dd</option>
                                 </select>
                             </div>
                         </div>
@@ -362,7 +366,7 @@
                         Database Management
                     </h3>
                     <div class="action-cards">
-                        <div class="action-card">
+                        <div class="action-item">
                             <div class="action-icon">+</div>
                             <h4>Backup Database</h4>
                             <p>Create a complete backup of all system data</p>
@@ -370,7 +374,7 @@
                                 Create Backup
                             </button>
                         </div>
-                        <div class="action-card">
+                        <div class="action-item">
                             <div class="action-icon">&gt;</div>
                             <h4>Restore Database</h4>
                             <p>Restore from a previous backup file</p>
@@ -378,7 +382,7 @@
                                 Restore Backup
                             </button>
                         </div>
-                        <div class="action-card">
+                        <div class="action-item">
                             <div class="action-icon">#</div>
                             <h4>Clear Cache</h4>
                             <p>Clear all cached data to improve performance</p>
@@ -386,7 +390,7 @@
                                 Clear Cache
                             </button>
                         </div>
-                        <div class="action-card">
+                        <div class="action-item">
                             <div class="action-icon">%</div>
                             <h4>Optimize Database</h4>
                             <p>Run optimization and cleanup tasks</p>
@@ -574,8 +578,8 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Scripts -->
     <script defer src="/js/universal-sidebar.js"></script>
@@ -589,10 +593,10 @@
     <script defer src="/js/linkEncoding.js"></script>
     <script defer src="/js/pages/admin-settings.js"></script>
     <script defer src="/js/chatbot.js"></script>
-
-    <link rel="stylesheet" href="/css/admin-pages-enhanced.css">
+    
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         /* ---- NOTHING EDITION - page-local normalization (overrides admin-pages-enhanced.css) ---- */
 
         .page-hero {
@@ -602,13 +606,13 @@
         }
 
         .page-title {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-size: 2.5rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
-            margin-bottom: 0.5rem;
-            color: var(--r-text, #f4f4f4);
+            margin-bottom: var(--space-xs);
+            color: var(--r-text, var(--color-ink));
         }
 
         .title-icon {
@@ -616,51 +620,51 @@
         }
 
         .page-subtitle {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .stat-subtext {
             font-size: 0.76rem;
-            color: var(--r-text-3, #757575);
-            margin-top: 0.25rem;
+            color: var(--r-text-3, var(--color-ink-2));
+            margin-top: var(--space-2xs);
         }
 
         /* hero actions - Save All is the page's primary action */
         .btn-success {
-            background: var(--r-accent, #d71921);
-            border: 1px solid var(--r-accent, #d71921);
-            color: #ffffff;
+            background: var(--r-accent, var(--color-accent));
+            border: 1px solid var(--r-accent, var(--color-accent));
+            color: var(--color-accent-ink);
             border-radius: var(--r-radius, 2px);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             box-shadow: none;
         }
 
         .btn-success:hover:not(:disabled) {
-            background: var(--r-accent-deep, #a31016);
-            border-color: var(--r-accent-deep, #a31016);
+            background: var(--r-accent-deep, var(--color-accent));
+            border-color: var(--r-accent-deep, var(--color-accent));
         }
 
         /* settings tabs - squared mono */
         .settings-tabs {
-            border-bottom: 1px dotted var(--r-line-strong, #333);
+            border-bottom: 1px dotted var(--r-line-strong, var(--color-rule));
         }
 
         .settings-tab {
-            border: 1px solid var(--r-line-strong, #333);
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: var(--r-radius, 2px);
-            color: var(--r-text-2, #b0b0b0);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            color: var(--color-ink);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
         }
 
@@ -669,32 +673,32 @@
         }
 
         .settings-tab:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--r-text, #f4f4f4);
-            color: var(--r-text, #f4f4f4);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            border-color: var(--r-text, var(--color-rule));
+            color: var(--r-text, var(--color-ink));
         }
 
         .settings-tab.active {
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-            border-color: rgba(215, 25, 33, 0.4);
-            color: var(--r-accent, #d71921);
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+            color: var(--color-accent-text);
         }
 
         /* sections - hairline panels */
         .settings-section {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
-            border: 1px solid var(--r-line, #1f1f1f);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: var(--r-radius, 2px);
         }
 
         .settings-section-title {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-size: 1.15rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
-            color: var(--r-text, #f4f4f4);
-            border-bottom: 1px dotted var(--r-line-strong, #333);
+            color: var(--r-text, var(--color-ink));
+            border-bottom: 1px dotted var(--r-line-strong, var(--color-rule));
         }
 
         .settings-section-title .title-icon {
@@ -703,22 +707,22 @@
 
         /* forms - sharp hairline inputs */
         .form-label {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .form-input,
         .form-select,
         .form-textarea {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
-            border: 1px solid var(--r-line, #1f1f1f);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: var(--r-radius, 2px);
-            color: var(--r-text, #f4f4f4);
-            font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+            color: var(--r-text, var(--color-ink));
+            font-family: var(--font-body);
             box-shadow: none;
             transition: border-color 140ms ease;
         }
@@ -727,36 +731,36 @@
         .form-select:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: var(--r-accent, #d71921);
+            border-color: var(--r-accent, var(--color-accent));
             box-shadow: none;
         }
 
         .form-hint {
             font-style: normal;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         /* toggles - squared switch, red when on */
         .toggle-label {
             background: transparent;
-            border: 1px solid var(--r-line, #1f1f1f);
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: var(--r-radius, 2px);
             transition: border-color 140ms ease, background 140ms ease;
         }
 
         .toggle-label:hover {
-            background: rgba(255, 255, 255, 0.03);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         .toggle-switch {
             width: 40px;
             height: 20px;
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.08));
-            border: 1px solid var(--r-line-strong, #333);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: 0;
             transition: background 140ms ease, border-color 140ms ease;
         }
@@ -765,162 +769,162 @@
             width: 14px;
             height: 14px;
             border-radius: 0;
-            background: var(--r-text-3, #757575);
+            background: var(--r-text-3, var(--color-paper-3));
             top: 2px;
             left: 2px;
             transition: transform 140ms ease, background 140ms ease;
         }
 
         .toggle-input:checked + .toggle-switch {
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-            border-color: var(--r-accent, #d71921);
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+            border-color: var(--r-accent, var(--color-accent));
         }
 
         .toggle-input:checked + .toggle-switch::before {
             transform: translateX(20px);
-            background: var(--r-accent, #d71921);
+            background: var(--r-accent, var(--color-accent));
         }
 
         .toggle-text strong {
-            color: var(--r-text, #f4f4f4);
+            color: var(--r-text, var(--color-ink));
         }
 
         .toggle-text small {
-            color: var(--r-text-3, #757575);
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         /* database action cards / info grid / activity log - sharp hairlines */
-        .action-card {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
-            border: 1px solid var(--r-line, #1f1f1f);
+        .action-item {
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: var(--r-radius, 2px);
             transition: border-color 140ms ease, transform 140ms ease;
         }
 
-        .action-card:hover {
+        .action-item:hover {
             transform: none;
-            border-color: var(--r-accent, #d71921);
+            border-color: var(--r-accent, var(--color-accent));
         }
 
-        .action-card h4 {
-            font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+        .action-item h4 {
+            font-family: var(--font-body);
             font-weight: 600;
-            color: var(--r-text, #f4f4f4);
+            color: var(--r-text, var(--color-ink));
         }
 
-        .action-card p {
-            color: var(--r-text-3, #757575);
+        .action-item p {
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
-        .action-card .btn {
+        .action-item .btn {
             border-radius: var(--r-radius, 2px);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .btn-warning {
             background: transparent;
-            border: 1px solid rgba(215, 25, 33, 0.4);
-            color: var(--r-accent, #d71921);
+            border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
+            color: var(--color-accent-text);
         }
 
         .btn-info,
         .btn-secondary {
             background: transparent;
-            border: 1px solid var(--r-line-strong, #333);
-            color: var(--r-text, #f4f4f4);
+            border: 1px solid var(--r-line-strong, var(--color-rule));
+            color: var(--r-text, var(--color-ink));
         }
 
         .info-item {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
-            border: 1px solid var(--r-line, #1f1f1f);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: var(--r-radius, 2px);
         }
 
         .info-label {
             display: block;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
             margin-bottom: 0.35rem;
         }
 
         .info-value {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-            text-transform: uppercase;
-            color: var(--r-text, #f4f4f4);
+            text-transform: none;
+            color: var(--r-text, var(--color-ink));
         }
 
         .activity-item {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
-            border: 1px solid var(--r-line, #1f1f1f);
-            border-left: 2px solid var(--r-line-strong, #333);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
+            border-left: 2px solid var(--r-line-strong, var(--color-rule));
             border-radius: var(--r-radius, 2px);
         }
 
         .activity-icon {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
-            border: 1px solid var(--r-line, #1f1f1f);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
             border-radius: 0;
         }
 
         .activity-details strong {
-            color: var(--r-text, #f4f4f4);
+            color: var(--r-text, var(--color-ink));
         }
 
         .activity-details small {
-            color: var(--r-text-3, #757575);
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .activity-time {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
             white-space: nowrap;
         }
 
         /* file upload - dashed hairline */
         .file-upload-area {
-            border: 1px dashed var(--r-line-strong, #333);
+            border: 1px dashed var(--r-line-strong, var(--color-rule));
             border-radius: var(--r-radius, 2px);
             transition: border-color 140ms ease, background 140ms ease;
         }
 
         .file-upload-area:hover {
-            border-color: var(--r-accent, #d71921);
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.05));
+            border-color: var(--r-accent, var(--color-accent));
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 8%, transparent));
         }
 
         .file-upload-label span {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--r-text-2, #b0b0b0);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-2, var(--color-ink-2));
         }
 
         .file-upload-label small {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         /* re-point legacy tokens */
-        :root {
-            --error: #d71921;
-            --success: #e8e8e8;
-            --warning: #d71921;
+        body {
+            --error: var(--color-accent);
+            --success: var(--color-paper-2);
+            --warning: var(--color-accent);
         }
 
         /* Light theme normalization */
@@ -929,8 +933,8 @@
         body.light-theme .toggle-text strong,
         body.light-theme .activity-details strong,
         body.light-theme .info-value,
-        body.light-theme .action-card h4 {
-            color: #0d0d0d;
+        body.light-theme .action-item h4 {
+            color: var(--color-ink);
         }
 
         body.light-theme .page-subtitle,
@@ -942,90 +946,90 @@
         body.light-theme .activity-details small,
         body.light-theme .activity-time,
         body.light-theme .info-label,
-        body.light-theme .action-card p,
+        body.light-theme .action-item p,
         body.light-theme .file-upload-label span,
         body.light-theme .file-upload-label small {
-            color: #757575;
+            color: var(--color-ink-2);
         }
 
         body.light-theme .settings-tab:hover {
-            border-color: #0d0d0d;
-            color: #0d0d0d;
-            background: rgba(0, 0, 0, 0.03);
+            border-color: var(--color-rule);
+            color: var(--color-ink);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .settings-tab.active {
-            background: rgba(215, 25, 33, 0.07);
-            border-color: rgba(215, 25, 33, 0.4);
-            color: #d71921;
+            background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+            color: var(--color-accent-text);
         }
 
         body.light-theme .settings-section {
-            background: #ffffff;
-            border-color: #e4e4e4;
+            background: var(--color-paper-2);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .settings-section-title {
-            border-bottom-color: #e4e4e4;
+            border-bottom-color: var(--color-rule);
         }
 
         body.light-theme .settings-tabs {
-            border-bottom-color: #e4e4e4;
+            border-bottom-color: var(--color-rule);
         }
 
         body.light-theme .form-input,
         body.light-theme .form-select,
         body.light-theme .form-textarea {
-            background: #ffffff;
-            border-color: #e4e4e4;
-            color: #0d0d0d;
+            background: var(--color-paper-2);
+            border-color: var(--color-rule);
+            color: var(--color-ink);
         }
 
         body.light-theme .form-input:focus,
         body.light-theme .form-select:focus,
         body.light-theme .form-textarea:focus {
-            border-color: #d71921;
+            border-color: var(--color-accent);
         }
 
         body.light-theme .toggle-label,
-        body.light-theme .action-card,
+        body.light-theme .action-item,
         body.light-theme .info-item {
-            background: #ffffff;
-            border-color: #e4e4e4;
+            background: var(--color-paper-2);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .toggle-label:hover {
-            background: rgba(0, 0, 0, 0.02);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .activity-item {
-            background: #ffffff;
-            border-color: #e4e4e4;
-            border-left-color: #c9c9c9;
+            background: var(--color-paper-2);
+            border-color: var(--color-rule);
+            border-left-color: var(--color-rule);
         }
 
         body.light-theme .activity-icon {
-            background: rgba(0, 0, 0, 0.03);
-            border-color: #e4e4e4;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .toggle-switch {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: #c9c9c9;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .toggle-switch::before {
-            background: #8a8a8a;
+            background: var(--color-paper-3);
         }
 
         body.light-theme .btn-secondary,
         body.light-theme .btn-info {
-            border-color: #c9c9c9;
-            color: #0d0d0d;
+            border-color: var(--color-rule);
+            color: var(--color-ink);
         }
 
         body.light-theme .file-upload-area {
-            border-color: #c9c9c9;
+            border-color: var(--color-rule);
         }
 
         /* ==========================================================
@@ -1066,16 +1070,16 @@
             .settings-tabs {
                 flex-wrap: nowrap;
                 overflow-x: auto;
-                overflow-y: hidden;
+                overflow-y: clip;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: thin;
-                padding: 1rem;
+                padding: var(--space-md);
                 gap: 0.4rem;
             }
 
             .settings-tab {
                 flex: 0 0 auto;
-                padding: 0.6rem 1rem;
+                padding: 0.6rem var(--space-md);
             }
 
             .action-cards,
@@ -1147,7 +1151,7 @@
             }
 
             .page-subtitle {
-                letter-spacing: 0.1em;
+                letter-spacing: normal;
             }
 
             .activity-time {

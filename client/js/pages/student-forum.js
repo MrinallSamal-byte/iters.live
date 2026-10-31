@@ -164,7 +164,7 @@
         if (forumData.questions.length === 0) {
             container.innerHTML = `
                 <div class="loading-text">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
                     <h3>NO QUESTIONS YET</h3>
                     <p>Be the first to ask!</p>
                 </div>
@@ -186,7 +186,7 @@
 
         let paginationHTML = `
             <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} 
-                onclick="changePage(${currentPage - 1})">← Prev</button>
+                onclick="changePage(${currentPage - 1})">Prev</button>
         `;
 
         for (let i = 1; i <= totalPages; i++) {
@@ -202,7 +202,7 @@
 
         paginationHTML += `
             <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} 
-                onclick="changePage(${currentPage + 1})">Next →</button>
+                onclick="changePage(${currentPage + 1})">Next</button>
         `;
 
         document.getElementById('pagination').innerHTML = paginationHTML;
@@ -227,7 +227,7 @@
         if (questions.length === 0) {
             container.innerHTML = `
                 <div class="loading-text">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
                     <h3>No questions found</h3>
                     <p>Try adjusting your filters or be the first to ask!</p>
                 </div>
@@ -241,7 +241,7 @@
                 <div class="question-header">
                     <h3 class="question-title">${esc(q.title)}</h3>
                     <span class="question-status ${q.status === 'answered' ? 'status-answered' : 'status-open'}">
-                        ${q.status === 'answered' ? '✅ Answered' : '❓ Open'}
+                        ${q.status === 'answered' ? ' Answered' : ' Open'}
                     </span>
                 </div>
                 <p class="question-excerpt">${esc(q.description)}</p>
@@ -251,9 +251,9 @@
                         <span>${esc(q.author.name)}</span>
                     </div>
                     <div class="question-stats">
-                        <span class="stat-item">💬 ${q.answers} answers</span>
-                        <span class="stat-item">👁️ ${q.views} views</span>
-                        <span class="stat-item">👍 ${q.upvotes}</span>
+                        <span class="stat-item"> ${q.answers} answers</span>
+                        <span class="stat-item"> ${q.views} views</span>
+                        <span class="stat-item"> ${q.upvotes}</span>
                     </div>
                     <div class="question-tags">
                         ${q.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
@@ -272,12 +272,12 @@
 
         try {
             const res = await APP.API.get('/forum/contributors');
-            const badges = ['🏆', '🥇', '🥈', '🥉'];
+            const badges = ['', '', '', ''];
             forumData.contributors = (res.contributors || []).map((c, i) => ({
                 name: c.name || 'Anonymous',
                 role: String(c.role || 'member').charAt(0).toUpperCase() + String(c.role || '').slice(1),
                 answers: c.answer_count ?? c.answers ?? 0,
-                badge: badges[i] || '⭐'
+                badge: badges[i] || ''
             }));
 
             const topEl = document.getElementById('topContributors');
@@ -473,23 +473,23 @@
                     ${question.tags.map(tag => `<span class="question-tag">${esc(tag)}</span>`).join('')}
                 </div>
                 <div class="question-stats" style="margin-bottom: 1.5rem;">
-                    <span class="stat-item">👁️ ${question.views} views</span>
-                    <span class="stat-item">👍 ${question.upvotes} upvotes</span>
+                    <span class="stat-item"> ${question.views} views</span>
+                    <span class="stat-item"> ${question.upvotes} upvotes</span>
                 </div>
                 
                 <div class="answer-section">
                     <h4 style="color: var(--text-primary); margin-bottom: 1rem;">
-                        💬 ${answers.length} Answers
+                        ${answers.length} Answers
                     </h4>
                     ${renderAnswers(answers, question, isAuthor)}
                     
                     <div style="margin-top: 1.5rem;">
-                        <h4 style="color: var(--text-primary); margin-bottom: 0.75rem;">✍️ Your Answer</h4>
+                        <h4 style="color: var(--text-primary); margin-bottom: 0.75rem;"> Your Answer</h4>
                         <textarea id="answerContent" class="form-textarea" rows="4" 
                             placeholder="Share your knowledge or insights..."></textarea>
                         <div style="margin-top: 0.75rem;">
                             <button class="btn btn-primary" onclick="submitAnswer('${esc(question.id)}')">
-                                📤 Post Answer
+                                Post Answer
                             </button>
                         </div>
                     </div>
@@ -511,15 +511,15 @@
                         <span class="author-avatar">${esc(a.avatar)}</span>
                         <span style="font-weight: 600; color: var(--text-primary);">${esc(a.author)}</span>
                         <span style="color: var(--text-secondary); font-size: 0.85rem;">${esc(a.role)}</span>
-                        ${a.accepted ? '<span style="color: #22c55e; font-weight: 600; margin-left: 0.5rem;">✅ Accepted</span>' : ''}
+                        ${a.accepted ? '<span style="color: #22c55e; font-weight: 600; margin-left: 0.5rem;"> Accepted</span>' : ''}
                     </div>
                 </div>
                 <p class="answer-content">${esc(a.content)}</p>
                 <div class="answer-actions">
-                    <button class="vote-btn" onclick="upvoteAnswer('${esc(a.id)}', this)">👍 ${a.upvotes}</button>
-                    <button class="vote-btn">👎</button>
-                    <button class="vote-btn">💬 Reply</button>
-                    ${isAuthor && !a.accepted ? `<button class="vote-btn" onclick="acceptAnswer('${esc(question.id)}', '${esc(a.id)}')">✅ Accept</button>` : ''}
+                    <button class="vote-btn" onclick="upvoteAnswer('${esc(a.id)}', this)"> ${a.upvotes}</button>
+                    <button class="vote-btn"></button>
+                    <button class="vote-btn"> Reply</button>
+                    ${isAuthor && !a.accepted ? `<button class="vote-btn" onclick="acceptAnswer('${esc(question.id)}', '${esc(a.id)}')"> Accept</button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -535,7 +535,7 @@
         try {
             const res = await APP.API.post(`/forum/answers/${encodeURIComponent(answerId)}/upvote`, {});
             if (btn && typeof res.upvotes === 'number') {
-                btn.textContent = `👍 ${res.upvotes}`;
+                btn.textContent = ` ${res.upvotes}`;
             }
         } catch (err) {
             console.error('Upvote error:', err);

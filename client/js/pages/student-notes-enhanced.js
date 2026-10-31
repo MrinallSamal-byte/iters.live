@@ -39,9 +39,9 @@
 
     // Shared constant for link type labels (used in createNoteCard and openTypeLink)
     const LINK_TYPE_LABELS = {
-        previousYearQuestions: { label: 'PYQ', icon: '📋', tooltip: 'Previous Year Questions' },
-        classNotes: { label: 'Notes', icon: '📝', tooltip: 'Class Notes' },
-        midTerm: { label: 'Mid-Term', icon: '📄', tooltip: 'Mid-Term Papers' }
+        previousYearQuestions: { label: 'PYQ', icon: '', tooltip: 'Previous Year Questions' },
+        classNotes: { label: 'Notes', icon: '', tooltip: 'Class Notes' },
+        midTerm: { label: 'Mid-Term', icon: '', tooltip: 'Mid-Term Papers' }
     };
 
     // Whitelist of valid link type keys for security
@@ -1350,10 +1350,10 @@
 
         createNoteCard(note) {
             const typeIcons = {
-                notes: '📝',
-                pyqs: '📋',
-                assignments: '📄',
-                books: '📚'
+                notes: '',
+                pyqs: '',
+                assignments: '',
+                books: ''
             };
 
             const typeLabels = {
@@ -1372,17 +1372,17 @@
 
             // Solution badge for PYQs
             const solutionBadge = (note.type === 'pyqs' && note.hasSolution) 
-                ? '<span class="solution-badge">✅ With Solution</span>' 
+                ? '<span class="solution-badge"> With Solution</span>' 
                 : '';
 
             // Google Drive badge
             const driveBadge = note.isGoogleDrive 
-                ? '<span class="drive-badge">📁 Drive</span>' 
+                ? '<span class="drive-badge"> Drive</span>' 
                 : '';
 
             // No link available badge
             const noLinkBadge = note.noLinkAvailable 
-                ? '<span class="no-link-badge">⚠️ Coming Soon</span>' 
+                ? '<span class="no-link-badge"> Coming Soon</span>' 
                 : '';
 
             // Subject code badge
@@ -1392,12 +1392,12 @@
 
             // Exam type info for PYQs
             const examTypeInfo = (note.type === 'pyqs' && note.examType) 
-                ? `<span class="resource-meta-item"><span>📝</span> ${examTypeLabels[note.examType] || this.esc(note.examType)}</span>` 
+                ? `<span class="resource-meta-item"><span></span> ${examTypeLabels[note.examType] || this.esc(note.examType)}</span>` 
                 : '';
 
             // Drive path info
             const drivePathInfo = note.isGoogleDrive && note.drivePath
-                ? `<span class="resource-meta-item drive-path"><span>📂</span> ${this.esc(note.drivePath)}</span>`
+                ? `<span class="resource-meta-item drive-path"><span></span> ${this.esc(note.drivePath)}</span>`
                 : '';
 
             // Action buttons - different for Google Drive files and unavailable links
@@ -1407,7 +1407,7 @@
                 actionRowClass += ' single-action';
                 actionButtons = `<div class="${actionRowClass}">
                         <button class="btn btn-secondary" disabled>
-                            ⏳ Link Coming Soon
+                            Link Coming Soon
                         </button>
                     </div>`;
             } else if (note.isGoogleDrive) {
@@ -1415,7 +1415,7 @@
                 const rootLink = note.links?.root;
                 const primaryButton = rootLink 
                     ? `<button class="btn btn-primary" onclick="NotesManager.openInDrive('${this.jsId(note.id)}')">
-                           🔗 Open in Drive
+                           Open in Drive
                        </button>`
                     : '';
                 
@@ -1442,16 +1442,16 @@
                     </div>
                     ${quickAccessButtons ? `<div class="quick-access-container">${quickAccessButtons}</div>` : ''}
                     <button class="btn btn-secondary btn-browse-semester" onclick="NotesManager.openDriveFolder(${Number(note.semester) || 0})">
-                        📂 Open Semester ${this.esc(note.semester)} Folder
+                        Open Semester ${this.esc(note.semester)} Folder
                     </button>`;
             } else {
                 actionButtons = `
                     <div class="${actionRowClass}">
                         <button class="btn btn-primary" onclick="NotesManager.downloadNote('${this.jsId(note.id)}')">
-                            📥 Download
+                            Download
                         </button>
                         <button class="btn btn-secondary" onclick="NotesManager.viewNote('${this.jsId(note.id)}')">
-                            👁️ Preview
+                            Preview
                         </button>
                     </div>`;
             }
@@ -1460,7 +1460,7 @@
                 <div class="resource-card ${note.isGoogleDrive ? 'drive-resource' : ''} ${note.noLinkAvailable ? 'no-link' : ''}" data-id="${this.esc(note.id)}" ${note.isGoogleDrive && !note.noLinkAvailable ? `onclick="NotesManager.openInDrive('${this.jsId(note.id)}')"` : ''}>
                     <div class="resource-header">
                         <div class="resource-icon-shell">
-                            <div class="resource-icon">${typeIcons[note.type] || '📄'}</div>
+                            <div class="resource-icon">${typeIcons[note.type] || ''}</div>
                         </div>
                         <div class="resource-badge-row">
                             ${subjectCodeBadge}
@@ -1476,18 +1476,18 @@
                     <h4 class="resource-title">${this.esc(note.title)}</h4>
                     <div class="resource-meta-grid">
                         <span class="resource-meta-item">
-                            <span>📚</span> ${this.esc(note.subject)}
+                            <span></span> ${this.esc(note.subject)}
                         </span>
                         <span class="resource-meta-item">
-                            <span>🎓</span> ${this.esc(note.branch)} - Sem ${this.esc(note.semester)}
+                            <span></span> ${this.esc(note.branch)} - Sem ${this.esc(note.semester)}
                         </span>
                         ${examTypeInfo}
                         ${drivePathInfo}
                         <span class="resource-meta-item">
-                            <span>📊</span> ${this.esc(note.file_type)} - ${this.esc(note.file_size)}
+                            <span></span> ${this.esc(note.file_type)} - ${this.esc(note.file_size)}
                         </span>
                         <span class="resource-meta-item">
-                            <span>📥</span> ${this.formatDownloads(note.downloads)} downloads
+                            <span></span> ${this.formatDownloads(note.downloads)} downloads
                         </span>
                     </div>
                     <div class="resource-actions" onclick="event.stopPropagation()">
@@ -1729,7 +1729,7 @@
 
             container.innerHTML = recent.map(note => `
                 <div class="recent-item">
-                    <div class="recent-icon">📥</div>
+                    <div class="recent-icon"></div>
                     <div class="recent-details">
                         <div class="recent-name">${this.esc(note.title)}</div>
                         <div class="recent-time">${this.formatDate(note.downloadedAt)}</div>

@@ -689,12 +689,12 @@
     return `
       <div class="schedule-item"${isNow ? ' style="border-left: 2px solid var(--primary);"' : ''}>
         <div>
-          <strong>${isNow ? '<span style="color: var(--primary);">NOW</span> \u00b7 ' : ''}${APP.sanitize(entry.subject || 'Saved class')}</strong>
+          <strong>${isNow ? '<span style="color:var(--color-accent-text);">NOW</span> \u00b7 ' : ''}${APP.sanitize(entry.subject || 'Saved class')}</strong>
           <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0 0;">
             ${APP.sanitize(entry.details || entry.rawText)}
           </p>
         </div>
-        <div style="color: var(--primary); font-weight: 600;">${APP.sanitize(entry.timeLabel || '')}</div>
+        <div style="color:var(--color-accent-text); font-weight: 600;">${APP.sanitize(entry.timeLabel || '')}</div>
       </div>
     `;
   }

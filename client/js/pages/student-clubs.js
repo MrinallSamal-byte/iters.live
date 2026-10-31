@@ -18,7 +18,7 @@
         return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    const CATEGORY_ICONS = { tech: '💻', cultural: '🎭', sports: '🏏', academic: '📚', hobby: '📸', social: '🌱', general: '🏛️' };
+    const CATEGORY_ICONS = { tech: '', cultural: '', sports: '', academic: '', hobby: '', social: '', general: '' };
 
     // Sample clubs data
     const sampleClubs = [
@@ -26,7 +26,7 @@
             id: 1,
             name: 'Coding Club',
             category: 'tech',
-            icon: '💻',
+            icon: '',
             description: 'Learn programming, participate in coding competitions, and build amazing projects together.',
             members: 234,
             events: 12,
@@ -36,7 +36,7 @@
             id: 2,
             name: 'Drama Society',
             category: 'cultural',
-            icon: '🎭',
+            icon: '',
             description: 'Express yourself through theater, drama, and stage performances. Weekly rehearsals and annual shows.',
             members: 89,
             events: 8,
@@ -46,7 +46,7 @@
             id: 3,
             name: 'Cricket Club',
             category: 'sports',
-            icon: '🏏',
+            icon: '',
             description: 'Play cricket, improve your skills, and represent college in inter-college tournaments.',
             members: 156,
             events: 15,
@@ -56,7 +56,7 @@
             id: 4,
             name: 'AI/ML Club',
             category: 'tech',
-            icon: '🤖',
+            icon: '',
             description: 'Explore artificial intelligence and machine learning through workshops and hands-on projects.',
             members: 178,
             events: 10,
@@ -66,7 +66,7 @@
             id: 5,
             name: 'Music Society',
             category: 'cultural',
-            icon: '🎵',
+            icon: '',
             description: 'For music lovers! Learn instruments, vocals, and perform at college events.',
             members: 123,
             events: 20,
@@ -76,7 +76,7 @@
             id: 6,
             name: 'Photography Club',
             category: 'hobby',
-            icon: '📸',
+            icon: '',
             description: 'Capture moments, learn photography techniques, and showcase your work in exhibitions.',
             members: 95,
             events: 6,
@@ -86,7 +86,7 @@
             id: 7,
             name: 'Debate Society',
             category: 'academic',
-            icon: '🗣️',
+            icon: '',
             description: 'Sharpen your speaking skills, participate in debates, and represent college at MUNs.',
             members: 67,
             events: 14,
@@ -96,7 +96,7 @@
             id: 8,
             name: 'Environmental Club',
             category: 'social',
-            icon: '🌱',
+            icon: '',
             description: 'Work towards a greener campus through plantation drives, awareness campaigns, and sustainability projects.',
             members: 145,
             events: 18,
@@ -106,7 +106,7 @@
             id: 9,
             name: 'Robotics Club',
             category: 'tech',
-            icon: '🤖',
+            icon: '',
             description: 'Build robots, participate in competitions, and explore automation and IoT.',
             members: 112,
             events: 9,
@@ -116,7 +116,7 @@
             id: 10,
             name: 'Dance Crew',
             category: 'cultural',
-            icon: '💃',
+            icon: '',
             description: 'Learn various dance forms, choreograph routines, and perform at events.',
             members: 201,
             events: 16,
@@ -126,7 +126,7 @@
             id: 11,
             name: 'Chess Club',
             category: 'hobby',
-            icon: '♟️',
+            icon: '',
             description: 'Strategic thinking and chess mastery. Regular tournaments and training sessions.',
             members: 56,
             events: 7,
@@ -136,7 +136,7 @@
             id: 12,
             name: 'Entrepreneurship Cell',
             category: 'academic',
-            icon: '💼',
+            icon: '',
             description: 'For aspiring entrepreneurs! Learn business skills, attend startup talks, and launch your ideas.',
             members: 189,
             events: 11,
@@ -235,7 +235,7 @@
             html += `
                 <div class="club-card">
                     <div class="club-header ${esc(club.category)}">
-                        <span style="z-index: 1;">${esc(club.icon || CATEGORY_ICONS[club.category] || '🏛️')}</span>
+                        <span style="z-index: 1;">${esc(club.icon || CATEGORY_ICONS[club.category] || '')}</span>
                     </div>
                     <div class="club-content">
                         <div class="club-name">${esc(club.name)}</div>
@@ -243,11 +243,11 @@
                         <div class="club-description">${esc(club.description)}</div>
                         <div class="club-stats">
                             <div class="club-stat">
-                                <span>👥</span>
+                                <span></span>
                                 <span>${esc(club.members)} members</span>
                             </div>
                             <div class="club-stat">
-                                <span>📅</span>
+                                <span></span>
                                 <span>${esc(club.events)} events</span>
                             </div>
                         </div>
@@ -288,7 +288,7 @@
             html += `
                 <div class="my-club-item">
                     <div class="my-club-icon ${esc(club.category)}">
-                        ${esc(club.icon || CATEGORY_ICONS[club.category] || '🏛️')}
+                        ${esc(club.icon || CATEGORY_ICONS[club.category] || '')}
                     </div>
                     <div class="my-club-info">
                         <div class="my-club-name">${esc(club.name)}</div>

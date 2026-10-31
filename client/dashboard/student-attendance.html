@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Attendance on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,16 +40,19 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -88,28 +92,28 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Attendance Distribution
-                </h3>
+                </h2>
                 <span class="section-badge">Visual Overview</span>
             </div>
             <div class="bunk-budget" id="bunkBudgetLine" aria-live="polite"></div>
             <div class="bunk-controls">
-                <label class="bunk-threshold-label" for="bunkThreshold">TARGET</label>
+                <label class="bunk-threshold-label" for="bunkThreshold">Target</label>
                 <select id="bunkThreshold" class="bunk-threshold-select">
                     <option value="75" selected>75%</option>
                     <option value="80">80%</option>
                     <option value="85">85%</option>
                 </select>
-                <button type="button" id="bunkBreakdownToggle" class="bunk-breakdown-toggle" aria-expanded="false" aria-controls="bunkBreakdownWrap">SHOW PER-SUBJECT BREAKDOWN</button>
+                <button type="button" id="bunkBreakdownToggle" class="bunk-breakdown-toggle" aria-expanded="false" aria-controls="bunkBreakdownWrap">show per-subject breakdown</button>
             </div>
             <div id="bunkBreakdownWrap" class="table-scroll" hidden>
                 <table class="data-table modern-table bunk-table">
                     <thead>
                         <tr>
-                            <th>SUBJECT</th>
-                            <th>ATTENDED</th>
+                            <th>Subject</th>
+                            <th>Attended</th>
                             <th>%</th>
-                            <th>CAN MISS</th>
-                            <th>NEEDS</th>
+                            <th>Can miss</th>
+                            <th>Needs</th>
                         </tr>
                     </thead>
                     <tbody id="bunkTableBody"></tbody>
@@ -125,7 +129,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Subject-wise Attendance
-                </h3>
+                </h2>
             </div>
             <div class="table-responsive">
                 <table class="data-table modern-table">
@@ -140,7 +144,7 @@
                         </tr>
                     </thead>
                     <tbody id="attendanceTableBody">
-                        <tr><td colspan="6" style="text-align:center; padding: 3rem;">Loading attendance data...</td></tr>
+                        <tr><td colspan="6" style="text-align:center; padding: 3rem;">Loading attendance data…</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -151,21 +155,21 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Attendance Insights
-                </h3>
+                </h2>
             </div>
             <div class="insights-grid">
-                <div class="insight-card glass-card">
+                <div class="insight-item">
                     <div class="insight-icon">01</div>
                     <h4>Action Required</h4>
                     <!-- ponytail: copy made factual; id kept for student-attendance.js -->
                     <p id="lowAttendanceWarning">Listed here when any subject falls below your selected target.</p>
                 </div>
-                <div class="insight-card glass-card">
+                <div class="insight-item">
                     <div class="insight-icon">02</div>
                     <h4>This Week</h4>
                     <p id="weeklyAttendance">Totals reflect the latest SOA portal import.</p>
                 </div>
-                <div class="insight-card glass-card">
+                <div class="insight-item">
                     <div class="insight-icon">03</div>
                     <h4>Attendance Goal</h4>
                     <p>University minimum is 75% overall attendance.</p>
@@ -176,7 +180,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts - Load in specific order -->
@@ -194,6 +198,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -202,11 +207,11 @@
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
         
         .page-subtitle {
@@ -225,19 +230,19 @@
         }
 
         .modern-table th {
-            padding: 0.85rem 1rem;
-            font-family: 'IBM Plex Mono', monospace;
+            padding: 0.85rem var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--r-text-3);
             text-align: left;
             border-bottom: 1px solid var(--r-line-strong);
         }
 
         .modern-table td {
-            padding: 1rem;
+            padding: var(--space-md);
             border-bottom: 1px dotted var(--r-line);
         }
 
@@ -246,26 +251,26 @@
         }
 
         .modern-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         body.light-theme .modern-table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.04);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .modern-table td {
-            border-bottom-color: #e4e4e4;
+            border-bottom-color: var(--color-rule);
         }
 
         .stat-number {
-            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
         }
 
         #attendanceTableBody td:nth-child(5),
         #bunkTableBody td:nth-child(3) {
-            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
         }
@@ -273,55 +278,55 @@
         .insights-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
         
-        .insight-card {
-            padding: 1.5rem;
+        .insight-item {
+            padding: var(--space-lg);
             text-align: center;
             border-radius: 0;
             transition: border-color 0.15s ease;
         }
 
-        .insight-card:hover {
+        .insight-item:hover {
             border-color: var(--r-line-strong);
         }
 
         .insight-icon {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.12em;
+            letter-spacing: normal;
             color: var(--text-secondary);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
         
-        .insight-card h4 {
-            margin-bottom: 0.5rem;
-            font-family: 'IBM Plex Mono', monospace;
+        .insight-item h4 {
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.72rem;
             font-weight: 600;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #f4f4f4;
+            letter-spacing: normal;
+            text-transform: none;
+            color: var(--color-ink);
         }
         
-        .insight-card p {
+        .insight-item p {
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
         
         .chart-wrapper {
-            padding: 1rem;
+            padding: var(--space-md);
         }
         
         .stat-trend {
-            margin-top: 0.75rem;
+            margin-top: var(--space-sm);
             font-size: 0.875rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.25rem;
+            gap: var(--space-2xs);
         }
         
         .stat-trend.positive {
@@ -336,15 +341,15 @@
             margin: 0 auto;
             max-width: 500px;
             text-align: center;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.1em;
+            letter-spacing: normal;
             color: var(--text-secondary);
             min-height: 1em;
         }
 
         .bunk-budget.below {
-            color: var(--primary);
+            color: var(--color-accent-text);
         }
 
         .bunk-controls {
@@ -356,16 +361,16 @@
         }
 
         .bunk-threshold-label {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.12em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
         .bunk-threshold-select {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            letter-spacing: 0.08em;
+            letter-spacing: normal;
             color: var(--text-primary);
             background: transparent;
             border: 1px solid var(--glass-border);
@@ -379,10 +384,10 @@
         }
 
         .bunk-breakdown-toggle {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.12em;
-            color: var(--primary);
+            letter-spacing: normal;
+            color: var(--color-accent-text);
             background: transparent;
             border: none;
             cursor: pointer;
@@ -394,7 +399,7 @@
         }
 
         .bunk-table {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
         }
 
         .bunk-table thead tr {
@@ -402,10 +407,10 @@
         }
 
         .bunk-table th {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--r-text-3);
             border-bottom: 1px solid var(--r-line-strong);
         }
@@ -415,36 +420,36 @@
         }
 
         .bunk-needs {
-            color: var(--primary);
+            color: var(--color-accent-text);
         }
 
         .reconnect-cta {
             display: inline-block;
             margin-top: 0.6rem;
-            padding: 0.5rem 0.9rem;
+            padding: var(--space-xs) 0.9rem;
             border: 1px solid var(--primary);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            letter-spacing: 0.12em;
-            color: var(--primary);
+            letter-spacing: normal;
+            color: var(--color-accent-text);
             text-decoration: none;
             background: transparent;
         }
 
         .reconnect-cta:hover {
-            background: rgba(215, 25, 33, 0.08);
+            background: color-mix(in oklab, var(--color-accent) 8%, transparent);
         }
 
         .cache-badge {
             display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.25rem 0.6rem;
+            margin-top: var(--space-xs);
+            padding: var(--space-2xs) 0.6rem;
             border: 1px solid var(--glass-border);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.12em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 

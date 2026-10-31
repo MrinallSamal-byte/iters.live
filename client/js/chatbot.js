@@ -348,11 +348,11 @@ class Chatbot {
         return {
             'help': {
                 keywords: ['help', 'support', 'issue', 'problem', 'not working'],
-                answer: `🆘 <strong>Need Help?</strong>\n\n<strong>Contact Options:</strong>\n•  Email: support@iter.ac.in\n•  Helpdesk: +91-674-2350171\n•  Admin Office (Block A)\n•  Use this chatbot!\n\n<strong>Common Issues:</strong>\n• Login problems → Try password reset\n• Page not loading → Clear cache & refresh\n• Data not showing → Check internet connection`
+                answer: ` <strong>Need Help?</strong>\n\n<strong>Contact Options:</strong>\n•  Email: support@iter.ac.in\n•  Helpdesk: +91-674-2350171\n•  Admin Office (Block A)\n•  Use this chatbot!\n\n<strong>Common Issues:</strong>\n• Login problems Try password reset\n• Page not loading Clear cache & refresh\n• Data not showing Check internet connection`
             },
             'password': {
                 keywords: ['password', 'forgot password', 'reset', 'login issue', 'change password'],
-                answer: ` <strong>Password Help</strong>\n\n<strong>Forgot Password?</strong>\n1. Click "Forgot Password" on login page\n2. Enter registered email\n3. Check inbox for reset link\n4. Create new password\n\n<strong>Change Password:</strong>\n• Login → Profile → Change Password\n\n<strong>Still having issues?</strong>\nContact IT Helpdesk: +91-674-2350171`
+                answer: ` <strong>Password Help</strong>\n\n<strong>Forgot Password?</strong>\n1. Click "Forgot Password" on login page\n2. Enter registered email\n3. Check inbox for reset link\n4. Create new password\n\n<strong>Change Password:</strong>\n• Login Profile Change Password\n\n<strong>Still having issues?</strong>\nContact IT Helpdesk: +91-674-2350171`
             }
         };
     }

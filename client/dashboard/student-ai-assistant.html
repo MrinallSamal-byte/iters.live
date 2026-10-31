@@ -4,21 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Assistant · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="AI Assistant on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         * {
             box-sizing: border-box;
         }
 
         body {
-            overflow-x: hidden;
+            overflow-x: clip;
             background-color: var(--r-bg);
             color: var(--r-text);
         }
@@ -41,26 +47,26 @@
         }
 
         .ai-header h1 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 2.5rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .ai-header p {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            gap: var(--space-lg);
             margin-bottom: 2rem;
         }
 
@@ -68,7 +74,7 @@
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
-            padding: 1.5rem;
+            padding: var(--space-lg);
             transition: border-color 160ms ease;
             cursor: pointer;
         }
@@ -80,22 +86,22 @@
         }
 
         .feature-icon {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.18em;
+            letter-spacing: normal;
             color: var(--r-text-3);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .feature-card h3 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.15rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text);
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .feature-card p {
@@ -124,10 +130,10 @@
         .prediction-card h2,
         .recommendations-card h2,
         .study-plan-section h2 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.5rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
             padding-bottom: 0.85rem;
             margin-bottom: 1.25rem;
@@ -137,11 +143,11 @@
         .prediction-card h3,
         .recommendations-card h3,
         .study-plan-section h3 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.05rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .prediction-card h4,
@@ -149,22 +155,22 @@
         .study-plan-section h4,
         .day-schedule h4,
         .factor-item h4 {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-2);
         }
 
         .prediction-card h5,
         .recommendations-card h5,
         .study-plan-section h5 {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -172,11 +178,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--space-lg);
         }
 
         .prediction-score {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 3rem;
             font-weight: 800;
             color: var(--r-text);
@@ -184,10 +190,10 @@
         }
 
         .prediction-grade {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -196,25 +202,25 @@
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
-            overflow: hidden;
-            margin: 1rem 0;
+            overflow: clip;
+            margin: var(--space-md) 0;
         }
 
         .confidence-fill {
             height: 100%;
             background: var(--r-accent);
-            transition: width 0.5s ease;
+            transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
         }
 
         .factor-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1.5rem 0;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
         }
 
         .factor-item {
-            padding: 1rem;
+            padding: var(--space-md);
             border-radius: 0;
             text-align: center;
         }
@@ -241,24 +247,24 @@
 
         .recommendations-list li {
             background: var(--r-panel-inset);
-            padding: 1rem;
-            margin: 0.5rem 0;
+            padding: var(--space-md);
+            margin: var(--space-xs) 0;
             border-radius: 0;
             border-left: 2px solid var(--r-accent);
         }
 
         .btn-primary {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             padding: 0.8rem 2rem;
             border: 1px solid var(--r-accent);
             border-radius: 2px;
             cursor: pointer;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: background 160ms ease, border-color 160ms ease;
         }
 
@@ -273,10 +279,10 @@
             text-align: center;
             padding: 2rem;
             color: var(--r-text-3);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .loading::after {
@@ -292,8 +298,8 @@
 
         .action-buttons {
             display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
+            gap: var(--space-md);
+            margin: var(--space-md) 0;
             flex-wrap: wrap;
         }
 
@@ -301,34 +307,34 @@
             display: inline-block;
             padding: 0.45rem 0.85rem;
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            margin: 0.5rem 0;
+            text-transform: none;
+            letter-spacing: normal;
+            margin: var(--space-xs) 0;
         }
 
         .risk-low { background: transparent; color: var(--r-text); border: 1px solid var(--r-line-strong); }
         .risk-medium { background: transparent; color: var(--r-text-2); border: 1px dotted var(--r-line-strong); }
-        .risk-high { background: var(--r-accent); color: #ffffff; border: 1px solid var(--r-accent); }
+        .risk-high { background: var(--r-accent); color: var(--color-accent-ink); border: 1px solid var(--r-accent); }
 
         .week-container {
-            margin: 1.5rem 0;
+            margin: var(--space-lg) 0;
         }
 
         .day-schedule {
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
-            padding: 1rem;
-            margin: 0.5rem 0;
+            padding: var(--space-md);
+            margin: var(--space-xs) 0;
             border-radius: 0;
         }
 
         .session-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: var(--space-xs) 0;
             border-bottom: 1px dotted var(--r-line-strong);
         }
 
@@ -344,7 +350,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: color-mix(in oklab, var(--color-paper) 75%, transparent);
             z-index: 9999;
             align-items: center;
             justify-content: center;
@@ -365,31 +371,31 @@
         }
 
         .modal-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--space-lg);
         }
 
         .modal-header h3 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-size: 1.15rem;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text);
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .modal-body {
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--space-lg);
         }
 
         .modal-body label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-family: var(--r-font-mono);
+            margin-bottom: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-2);
         }
 
@@ -413,7 +419,7 @@
 
         .modal-footer {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             justify-content: flex-end;
         }
 
@@ -424,11 +430,11 @@
             padding: 0.8rem 2rem;
             border-radius: 2px;
             cursor: pointer;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: border-color 160ms ease, color 160ms ease;
         }
 
@@ -440,20 +446,20 @@
 
         /* Shared inline error line for failed API calls */
         .error-line {
-            color: var(--r-accent);
-            font-family: var(--r-font-mono);
+            color: var(--color-accent-text);
+            font-family: var(--font-body);
             font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             border: 1px solid var(--r-accent);
-            padding: 0.75rem 1rem;
+            padding: var(--space-sm) var(--space-md);
         }
 
         .strategy-block {
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
-            padding: 1rem;
-            margin-bottom: 1rem;
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
         }
 
         @media (max-width: 1024px) {
@@ -464,7 +470,7 @@
 
         @media (max-width: 768px) {
             .ai-container {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .ai-header,
@@ -506,13 +512,13 @@
             }
 
             .modal-content {
-                width: min(100%, calc(100vw - 20px));
+                width: min(100%, 100%);
             }
         }
 
         @media (max-width: 480px) {
             .ai-container {
-                padding: 0.75rem;
+                padding: var(--space-sm);
             }
 
             .ai-header,
@@ -521,7 +527,7 @@
             .study-plan-section,
             .modal-content,
             .feature-card {
-                padding: 1rem;
+                padding: var(--space-md);
             }
         }
 
@@ -534,7 +540,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* Result panels + chat/strategy blocks always full-width */
@@ -582,17 +588,17 @@
             }
 
             .ai-header p {
-                letter-spacing: 0.1em;
+                letter-spacing: normal;
             }
 
             .modal-overlay {
-                padding: 0.5rem;
+                padding: var(--space-xs);
             }
 
             /* Modal: bounded width + internal scroll */
             .modal-content {
-                width: min(560px, calc(100vw - 32px));
-                max-width: min(560px, calc(100vw - 32px));
+                width: min(560px, 100%);
+                max-width: min(560px, 100%);
                 max-height: calc(100vh - 32px);
                 max-height: calc(100dvh - 32px);
                 overflow-y: auto;
@@ -628,8 +634,8 @@
             }
 
             .modal-content {
-                width: calc(100vw - 16px);
-                max-width: calc(100vw - 16px);
+                width: 100%;
+                max-width: 100%;
                 max-height: calc(100vh - 16px);
                 max-height: calc(100dvh - 16px);
             }
@@ -663,7 +669,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <div class="dashboard-container">

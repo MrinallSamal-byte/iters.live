@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Forum · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Student Forum on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,18 +40,19 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -97,7 +99,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Categories
-                </h3>
+                </h2>
             </div>
             <div class="category-grid">
                 <button class="category-btn active" data-category="all">
@@ -151,8 +153,8 @@
                 <span class="tag-label">Popular Tags:</span>
                 <button class="filter-tag" data-tag="python">Python</button>
                 <button class="filter-tag" data-tag="java">Java</button>
-                <button class="filter-tag" data-tag="dsa">DSA</button>
-                <button class="filter-tag" data-tag="dbms">DBMS</button>
+                <button class="filter-tag" data-tag="dsa">Dsa</button>
+                <button class="filter-tag" data-tag="dbms">Dbms</button>
                 <button class="filter-tag" data-tag="placement">Placement</button>
                 <button class="filter-tag" data-tag="exam">Exams</button>
             </div>
@@ -162,7 +164,7 @@
         <section class="questions-container">
             <div id="questionsList" class="questions-list">
                 <!-- Questions will be loaded here -->
-                <div class="loading-text">Loading discussions...</div>
+                <div class="loading-text">Loading discussions…</div>
             </div>
         </section>
 
@@ -176,7 +178,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Top Contributors
-                </h3>
+                </h2>
             </div>
             <!-- CUT CORNER: student-forum.js injects contributor medal emojis (badge field, file not in ownership scope) -->
             <div id="contributorsList" class="contributors-grid">
@@ -257,7 +259,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -273,6 +275,7 @@
     <script defer src="/js/pages/student-forum.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -283,12 +286,12 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .page-title {
             font-size: 2rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--r-text);
         }
 
@@ -298,28 +301,28 @@
         }
 
         .stat-subtext {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
-            margin-top: 0.25rem;
+            margin-top: var(--space-2xs);
         }
 
         /* Category Grid */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
         }
 
         .category-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 1.25rem 1rem;
+            gap: var(--space-xs);
+            padding: 1.25rem var(--space-md);
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
@@ -335,21 +338,21 @@
 
         .category-btn.active {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--r-accent);
         }
 
         .category-name {
             font-weight: 600;
             font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .category-count {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            padding: 0.2rem 0.5rem;
+            padding: 0.2rem var(--space-xs);
             background: transparent;
             border: 1px dotted currentColor;
             border-radius: 0;
@@ -358,15 +361,15 @@
         /* Forum Controls */
         .forum-controls {
             padding: 1.25rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--space-lg);
             border-radius: 2px;
         }
 
         .search-filter-row {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .search-box-forum {
@@ -377,7 +380,7 @@
 
         .search-input {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: var(--space-sm) var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -391,7 +394,7 @@
         }
 
         .filter-select {
-            padding: 0.75rem 1rem;
+            padding: var(--space-sm) var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -408,28 +411,28 @@
         .filter-tags {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
         }
 
         .tag-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
             font-weight: 500;
         }
 
         .filter-tag {
-            padding: 0.35rem 0.75rem;
+            padding: 0.35rem var(--space-sm);
             background: transparent;
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-2);
             cursor: pointer;
             transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
@@ -438,7 +441,7 @@
         .filter-tag:hover,
         .filter-tag.active {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--r-accent);
         }
 
@@ -450,14 +453,14 @@
         .questions-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .question-card {
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
-            padding: 1.5rem;
+            padding: var(--space-lg);
             transition: border-color 160ms ease;
             cursor: pointer;
         }
@@ -470,8 +473,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 0.75rem;
+            gap: var(--space-md);
+            margin-bottom: var(--space-sm);
         }
 
         .question-title {
@@ -488,11 +491,11 @@
             gap: 0.35rem;
             padding: 0.28rem 0.6rem;
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.58rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             flex-shrink: 0;
         }
 
@@ -505,28 +508,28 @@
         .status-open {
             background: var(--r-accent-wash);
             border: 1px solid var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
         }
 
         .question-excerpt {
             color: var(--r-text-2);
             font-size: 0.9rem;
             line-height: 1.5;
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            overflow: hidden;
+            overflow: clip;
         }
 
         .question-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: var(--space-md);
             align-items: center;
             padding-top: 0.9rem;
             border-top: 1px dotted var(--r-line-strong);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             color: var(--r-text-3);
         }
@@ -534,7 +537,7 @@
         .question-author {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             color: var(--r-text-2);
         }
 
@@ -549,48 +552,48 @@
             align-items: center;
             justify-content: center;
             color: var(--r-text);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-weight: 600;
             font-size: 0.7rem;
         }
 
         .question-stats {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             color: var(--r-text-3);
         }
 
         .stat-item {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: var(--space-2xs);
         }
 
         .question-tags {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
             margin-left: auto;
         }
 
         .question-tag {
-            padding: 0.22rem 0.5rem;
+            padding: 0.22rem var(--space-xs);
             background: transparent;
             color: var(--r-text-2);
             border: 1px dotted var(--r-line-strong);
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             margin-bottom: 2rem;
         }
 
@@ -600,7 +603,7 @@
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
             color: var(--r-text-2);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             cursor: pointer;
             transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
@@ -609,7 +612,7 @@
         .page-btn:hover,
         .page-btn.active {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--r-accent);
         }
 
@@ -622,15 +625,15 @@
         .contributors-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
         }
 
         .contributor-card {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
+            gap: var(--space-sm);
+            padding: var(--space-md);
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
@@ -651,7 +654,7 @@
             align-items: center;
             justify-content: center;
             color: var(--r-text);
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
             font-size: 1rem;
         }
@@ -667,10 +670,10 @@
         }
 
         .contributor-stats {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -685,12 +688,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: color-mix(in oklab, var(--color-paper) 75%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10000;
-            padding: 1rem;
+            padding: var(--space-md);
         }
 
         .modal-content {
@@ -710,7 +713,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem;
+            padding: var(--space-lg);
             border-bottom: 1px dotted var(--r-line-strong);
         }
 
@@ -718,8 +721,8 @@
             color: var(--r-text);
             font-size: 1.15rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
             margin: 0;
         }
 
@@ -737,11 +740,11 @@
 
         .modal-close:hover {
             border-color: var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
         }
 
         .modal-body {
-            padding: 1.5rem;
+            padding: var(--space-lg);
         }
 
         .form-group {
@@ -751,13 +754,13 @@
         .form-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            margin-bottom: 0.5rem;
+            text-transform: none;
+            letter-spacing: normal;
+            margin-bottom: var(--space-xs);
             color: var(--r-text-2);
         }
 
@@ -765,7 +768,7 @@
         .form-select,
         .form-textarea {
             width: 100%;
-            padding: 0.875rem 1rem;
+            padding: 0.875rem var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line-strong);
             border-radius: 2px;
@@ -787,25 +790,25 @@
 
         .form-actions {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             justify-content: flex-end;
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
         }
 
         .loading-text {
             text-align: center;
             padding: 3rem;
             color: var(--r-text-3);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* Answer Section in Modal - flat bordered panels */
         .answer-section {
             margin-top: 2rem;
-            padding-top: 1.5rem;
+            padding-top: var(--space-lg);
             border-top: 1px dotted var(--r-line-strong);
         }
 
@@ -814,7 +817,7 @@
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 0;
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .answer-card.accepted {
@@ -827,25 +830,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.75rem;
+            margin-bottom: var(--space-sm);
         }
 
         .answer-author {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .answer-content {
             color: var(--r-text);
             line-height: 1.6;
-            margin-bottom: 0.75rem;
+            margin-bottom: var(--space-sm);
         }
 
         .answer-actions {
             display: flex;
-            gap: 1rem;
-            padding-top: 0.75rem;
+            gap: var(--space-md);
+            padding-top: var(--space-sm);
             border-top: 1px dotted var(--r-line-strong);
         }
 
@@ -853,22 +856,22 @@
             display: flex;
             align-items: center;
             gap: 0.35rem;
-            padding: 0.35rem 0.75rem;
+            padding: 0.35rem var(--space-sm);
             background: transparent;
             border: 1px solid var(--r-line-strong);
             border-radius: 0;
             cursor: pointer;
             color: var(--r-text-3);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: border-color 160ms ease, color 160ms ease;
         }
 
         .vote-btn:hover {
             border-color: var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
         }
 
         /* Responsive */
@@ -931,7 +934,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .question-title,
@@ -944,8 +947,8 @@
 
         /* Modals: bounded width + scrollable body */
         body:not(.nothing-home) .modal .modal-content {
-            width: min(560px, calc(100vw - 32px));
-            max-width: min(560px, calc(100vw - 32px));
+            width: min(560px, 100%);
+            max-width: min(560px, 100%);
             max-height: calc(100vh - 32px);
             max-height: calc(100dvh - 32px);
             overflow-y: auto;
@@ -954,8 +957,8 @@
         }
 
         body:not(.nothing-home) .modal .modal-content.modal-large {
-            width: min(800px, calc(100vw - 32px));
-            max-width: min(800px, calc(100vw - 32px));
+            width: min(800px, 100%);
+            max-width: min(800px, 100%);
         }
 
         /* Contributors grid: 2 columns on mid-small screens */
@@ -987,12 +990,12 @@
 
             /* Search overlay row becomes a stacked, full-width control bar */
             .forum-controls {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .search-filter-row {
                 flex-direction: column;
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
 
             .search-box-forum,
@@ -1062,18 +1065,18 @@
             }
 
             .category-btn {
-                padding: 1rem 0.75rem;
+                padding: var(--space-md) var(--space-sm);
             }
 
             .modal {
-                padding: 0.5rem;
+                padding: var(--space-xs);
                 align-items: center;
             }
 
             body:not(.nothing-home) .modal .modal-content,
             body:not(.nothing-home) .modal .modal-content.modal-large {
-                width: calc(100vw - 16px);
-                max-width: calc(100vw - 16px);
+                width: 100%;
+                max-width: 100%;
                 max-height: calc(100vh - 16px);
                 max-height: calc(100dvh - 16px);
             }
@@ -1088,7 +1091,7 @@
             }
 
             .loading-text {
-                padding: 2rem 1rem;
+                padding: 2rem var(--space-md);
             }
         }
 
@@ -1106,7 +1109,7 @@
         /* 360px: no horizontal page scroll */
         @media (max-width: 360px) {
             .page-hero {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .forum-controls,

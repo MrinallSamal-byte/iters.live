@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set initial state without hiding the element
             gsap.set(element, { opacity: 1, y: 0 });
             
-            gsap.from(element, {
+            gsap.from(element, { immediateRender: false,
                 scrollTrigger: {
                     trigger: element,
                     start: 'top 85%',
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const profileIcon = document.querySelector('.profile-icon');
         if (profileIcon) {
             gsap.set(profileIcon, { scale: 1, rotation: 0 });
-            gsap.from(profileIcon, {
+            gsap.from(profileIcon, { immediateRender: false,
                 scale: 0,
                 rotation: 360,
                 duration: 1,
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const techTagPills = document.querySelectorAll('.tech-tag-pill');
         if (techTagPills.length > 0) {
             gsap.set(techTagPills, { opacity: 1, scale: 1 });
-            gsap.from(techTagPills, {
+            gsap.from(techTagPills, { immediateRender: false,
                 scrollTrigger: {
                     trigger: '.tech-tags',
                     start: 'top 80%',
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (timelineItems.length > 0) {
             gsap.set(timelineItems, { opacity: 1, x: 0 });
             timelineItems.forEach((item, index) => {
-                gsap.from(item, {
+                gsap.from(item, { immediateRender: false,
                     scrollTrigger: {
                         trigger: item,
                         start: 'top 85%',
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (projectCards.length > 0) {
             gsap.set(projectCards, { opacity: 1, y: 0 });
             projectCards.forEach((card, index) => {
-                gsap.from(card, {
+                gsap.from(card, { immediateRender: false,
                     scrollTrigger: {
                         trigger: card,
                         start: 'top 85%',
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (skillCategories.length > 0) {
             gsap.set(skillCategories, { opacity: 1, y: 0 });
             skillCategories.forEach((category, index) => {
-                gsap.from(category, {
+                gsap.from(category, { immediateRender: false,
                     scrollTrigger: {
                         trigger: category,
                         start: 'top 85%',
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (contactCards.length > 0) {
             gsap.set(contactCards, { opacity: 1, y: 0 });
             contactCards.forEach((card, index) => {
-                gsap.from(card, {
+                gsap.from(card, { immediateRender: false,
                     scrollTrigger: {
                         trigger: card,
                         start: 'top 85%',
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const featureItems = document.querySelectorAll('.feature-item');
         if (featureItems.length > 0) {
             gsap.set(featureItems, { opacity: 1, scale: 1 });
-            gsap.from(featureItems, {
+            gsap.from(featureItems, { immediateRender: false,
                 scrollTrigger: {
                     trigger: '.features-list',
                     start: 'top 85%',
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const infoCards = document.querySelectorAll('.info-card');
         if (infoCards.length > 0) {
             gsap.set(infoCards, { opacity: 1, y: 0 });
-            gsap.from(infoCards, {
+            gsap.from(infoCards, { immediateRender: false,
                 scrollTrigger: {
                     trigger: '.creator-info-grid',
                     start: 'top 80%',
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const creatorLinks = document.querySelectorAll('.creator-link');
         if (creatorLinks.length > 0) {
             gsap.set(creatorLinks, { opacity: 1, x: 0 });
-            gsap.from(creatorLinks, {
+            gsap.from(creatorLinks, { immediateRender: false,
                 scrollTrigger: {
                     trigger: '.creator-links',
                     start: 'top 80%',

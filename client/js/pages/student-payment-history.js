@@ -179,7 +179,7 @@
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 3rem;">
                             <div style="color: var(--text-secondary);">
-                                <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+                                <div style="font-size: 2rem; margin-bottom: 1rem;"></div>
                                 <p>No payments found matching your filters.</p>
                                 <button class="btn btn-secondary" onclick="document.getElementById('clearFilters').click()" style="margin-top: 1rem;">
                                     Clear Filters

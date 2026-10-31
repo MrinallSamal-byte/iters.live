@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Students · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="My Students on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -40,14 +41,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
 </head>
 
 <body>
@@ -57,7 +61,7 @@
             <div class="hero-content-inline">
                 <div>
                     <h1 class="page-title"> My Students </h1>
-                    <p class="page-subtitle">ROSTER // FILTER BY DEPT / YEAR / SECTION</p>
+                    <p class="page-subtitle">Roster // filter by dept / year / section</p>
                 </div>
             </div>
         </section>
@@ -90,8 +94,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Filter Students
-                </h3>
+                    Filter Students
+                </h2>
             </div>
 
             <div class="filter-container">
@@ -151,7 +155,7 @@
                         Apply Filters
                     </button>
                     <button class="btn btn-secondary" onclick="resetFilters()">
-                        <span>↺</span> Reset
+                        <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></span> Reset
                     </button>
                     <button class="btn btn-secondary" onclick="exportToExcel()">
                         Export Excel
@@ -164,9 +168,9 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Student List
+                    Student List
                     <span id="studentCount" class="result-count"></span>
-                </h3>
+                </h2>
                 <div class="view-toggle">
                     <button class="view-btn active" data-view="table" onclick="switchView('table')">
                         Table
@@ -196,7 +200,7 @@
                     </thead>
                     <tbody id="studentsTableBody">
                         <tr>
-                            <td colspan="10" class="loading-text">Loading students...</td>
+                            <td colspan="10" class="loading-text">Loading students…</td>
                         </tr>
                     </tbody>
                 </table>
@@ -204,7 +208,7 @@
 
             <!-- Card View -->
             <div id="cardView" class="students-grid" style="display:none;">
-                <div class="loading-text">Loading students...</div>
+                <div class="loading-text">Loading students…</div>
             </div>
         </section>
 
@@ -212,8 +216,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Class Performance Distribution
-                </h3>
+                    Class Performance Distribution
+                </h2>
             </div>
 
             <div class="chart-wrapper">
@@ -225,20 +229,20 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Students Needing Attention
-                </h3>
+                    Students Needing Attention
+                </h2>
             </div>
 
             <div class="attention-list" id="attentionList">
-                <div class="loading-text">Loading data...</div>
+                <div class="loading-text">Loading data…</div>
             </div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Student Details Modal -->
     <div id="studentModal" class="modal" style="display:none;">
@@ -269,6 +273,7 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         /* ============================================================
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
@@ -281,27 +286,27 @@
             --danger: var(--r-accent);
         }
 
-        :root {
-            --np-panel: #0a0a0a;
-            --np-inset: rgba(255, 255, 255, 0.04);
-            --np-line: #1f1f1f;
-            --np-line-strong: #333333;
-            --np-text: #f4f4f4;
-            --np-text-2: #b0b0b0;
-            --np-text-3: #757575;
-            --np-red: #d71921;
-            --np-red-wash: rgba(215, 25, 33, 0.1);
+        body {
+            --np-panel: var(--color-paper);
+            --np-inset: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            --np-line: var(--color-rule);
+            --np-line-strong: var(--color-rule);
+            --np-text: var(--color-ink);
+            --np-text-2: var(--color-ink-2);
+            --np-text-3: var(--color-ink-2);
+            --np-red: var(--color-accent);
+            --np-red-wash: color-mix(in oklab, var(--color-accent) 10%, transparent);
         }
 
         body.light-theme {
-            --np-panel: #ffffff;
-            --np-inset: rgba(0, 0, 0, 0.03);
-            --np-line: #e4e4e4;
-            --np-line-strong: #c9c9c9;
-            --np-text: #0d0d0d;
-            --np-text-2: #4a4a4a;
-            --np-text-3: #8a8a8a;
-            --np-red-wash: rgba(215, 25, 33, 0.07);
+            --np-panel: var(--color-paper-2);
+            --np-inset: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            --np-line: var(--color-rule);
+            --np-line-strong: var(--color-rule);
+            --np-text: var(--color-ink);
+            --np-text-2: var(--color-ink);
+            --np-text-3: var(--color-ink-2);
+            --np-red-wash: color-mix(in oklab, var(--color-accent) 8%, transparent);
         }
 
         /* Hero - layout only; Doto masthead handled by refined-ui */
@@ -312,17 +317,17 @@
         }
 
         .page-title {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 800;
             font-size: clamp(1.8rem, 4vw, 2.5rem);
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
             line-height: 1.05;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--np-text);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .title-icon {
@@ -330,10 +335,10 @@
         }
 
         .page-subtitle {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
         }
 
@@ -345,9 +350,9 @@
 
         /* Filter panel - sharp fields, red focus, dotted rule under header */
         .filter-container {
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
             border-top: 1px dotted var(--np-line-strong);
-            padding-top: 1.5rem;
+            padding-top: var(--space-lg);
         }
 
         .filter-row {
@@ -364,15 +369,15 @@
         }
 
         .filter-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-icon { font-size: 0.85rem; }
@@ -401,38 +406,38 @@
         }
 
         body.light-theme .filter-select option {
-            background: #ffffff;
-            color: #0d0d0d;
+            background: var(--color-paper-2);
+            color: var(--color-ink);
         }
 
         .form-actions {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
         }
 
         /* Count + view toggle - squared mono chips */
         .result-count {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
             font-weight: 500;
-            margin-left: 0.5rem;
+            margin-left: var(--space-xs);
         }
 
         .view-toggle {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .view-btn {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             padding: 0.45rem 0.9rem;
             background: transparent;
             border: 1px solid var(--np-line-strong);
@@ -449,7 +454,7 @@
         .view-btn.active {
             background: var(--np-red);
             border-color: var(--np-red);
-            color: #ffffff;
+            color: var(--color-accent-ink);
         }
 
         /* Table - mono heads, dotted rows */
@@ -464,30 +469,30 @@
         }
 
         .modern-table th {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
-            padding: 0.9rem 1rem;
+            padding: 0.9rem var(--space-md);
             text-align: left;
             border-bottom: 1px solid var(--np-line-strong);
             white-space: nowrap;
         }
 
         .modern-table td {
-            padding: 0.95rem 1rem;
+            padding: 0.95rem var(--space-md);
             border-bottom: 1px dotted var(--np-line);
             color: var(--np-text-2);
         }
 
         .modern-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         body.light-theme .modern-table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         /* Photos - squared frames instead of circles */
@@ -502,11 +507,11 @@
 
         /* Performance pills - squared mono (monochrome + red scale) */
         .performance-badge {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             padding: 0.26rem 0.55rem;
             border-radius: 0;
             border: 1px solid var(--np-line-strong);
@@ -526,28 +531,28 @@
 
         .performance-average {
             background: var(--np-red-wash);
-            color: var(--np-red);
-            border-color: rgba(215, 25, 33, 0.4);
+            color: var(--color-accent-text);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .performance-poor {
             background: var(--np-red);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--np-red);
         }
 
         /* Student cards - flat bordered tiles, red tick */
         .students-grid {
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .student-card {
             position: relative;
-            overflow: hidden;
-            padding: 1.5rem 1.35rem 1.35rem;
+            overflow: clip;
+            padding: var(--space-lg) 1.35rem 1.35rem;
             background: var(--np-panel);
             border: 1px solid var(--np-line);
             border-radius: 2px;
@@ -575,7 +580,7 @@
             height: 80px;
             border-radius: 2px;
             object-fit: cover;
-            margin: 0 auto 1rem;
+            margin: 0 auto var(--space-md);
             border: 1px solid var(--np-line-strong);
             background: var(--np-inset);
         }
@@ -590,7 +595,7 @@
         .student-card-info {
             display: grid;
             gap: 0.45rem;
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             padding-top: 0.85rem;
             border-top: 1px dotted var(--np-line);
             text-align: left;
@@ -600,14 +605,14 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .info-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
         }
 
@@ -622,9 +627,9 @@
 
         /* Attention list - red tick rows */
         .attention-list {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
-            gap: 0.75rem;
+            gap: var(--space-sm);
         }
 
         .attention-item {
@@ -636,7 +641,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
             transition: background 140ms ease, border-color 140ms ease;
         }
 
@@ -652,7 +657,7 @@
         .attention-name {
             font-weight: 600;
             color: var(--np-text);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
 
         .attention-reason {
@@ -662,11 +667,11 @@
 
         .attention-stats {
             display: flex;
-            gap: 1rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-2);
         }
 
@@ -688,7 +693,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: color-mix(in oklab, var(--color-paper) 70%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -696,7 +701,7 @@
         }
 
         body.light-theme .modal {
-            background: rgba(0, 0, 0, 0.45);
+            background: color-mix(in oklab, var(--color-paper) 45%, transparent);
         }
 
         .modal-content {
@@ -718,14 +723,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.35rem 1.5rem;
+            padding: 1.35rem var(--space-lg);
             border-bottom: 1px dotted var(--np-line-strong);
         }
 
         .modal-header h3 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
             color: var(--np-text);
         }
@@ -742,7 +747,7 @@
         }
 
         .modal-close:hover {
-            color: var(--np-red);
+            color: var(--color-accent-text);
             border-color: var(--np-red);
         }
 
@@ -770,7 +775,7 @@
 
             .view-toggle {
                 width: 100%;
-                margin-top: 1rem;
+                margin-top: var(--space-md);
             }
 
             .view-btn {
@@ -803,7 +808,7 @@
             html,
             body {
                 max-width: 100%;
-                overflow-x: hidden;
+                overflow-x: clip;
             }
 
             .dashboard-main {
@@ -835,12 +840,12 @@
             }
 
             .chart-wrapper {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .section-header-formal {
                 flex-wrap: wrap;
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
         }
 
@@ -866,18 +871,18 @@
             /* Modals fit small screens and scroll internally */
             .modal {
                 align-items: flex-start;
-                padding: 16px;
+                padding: var(--space-md);
             }
 
             .modal-content {
-                width: min(560px, calc(100vw - 32px));
+                width: min(560px, 100%);
                 max-width: 100%;
                 max-height: calc(100vh - 32px);
                 overflow-y: auto;
             }
 
             .modal-large {
-                width: min(900px, calc(100vw - 32px));
+                width: min(900px, 100%);
             }
 
             .modal-body {

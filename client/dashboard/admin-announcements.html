@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Announcements · ITERasn hub</title>
-  <meta name="theme-color" content="#000000">
+    <meta name="description" content="Announcements on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+  <meta name="theme-color" content="#0f0b0b">
   <link rel="icon" href="/assets/icon.png">
   <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/components.css" />
-  <link rel="stylesheet" href="/css/clean-dashboard.css" />
-  <link rel="stylesheet" href="/css/universal-sidebar.css" />
-  <link rel="stylesheet" href="/css/universal-profile.css" />
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+  
+  
+    
+    
 </head>
 <body>
     <main class="dashboard-main" aria-label="Admin Announcements main content" id="main-content">
@@ -96,8 +100,8 @@
     <section class="dashboard-section glass-card scroll-reveal">
       <div class="section-header-formal">
         <h2 class="section-title-formal">
-          # Filter & Search
-        </h3>
+          Filter & Search
+        </h2>
       </div>
       
       <div class="filter-container">
@@ -149,7 +153,7 @@
         
         <div style="margin-top: 1rem;">
           <button id="resetFilters" class="btn btn-secondary">
-            <span>↺</span> Reset Filters
+            <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></span> Reset Filters
           </button>
         </div>
       </div>
@@ -159,22 +163,22 @@
     <section class="dashboard-section glass-card scroll-reveal">
       <div class="section-header-formal">
         <h2 class="section-title-formal">
-          # All Announcements
+          All Announcements
           <span id="annCount" class="result-count"></span>
-        </h3>
+        </h2>
         <div class="view-toggle">
           <button class="view-btn active" data-view="grid" title="Grid View">
             <span>⊞</span>
           </button>
           <button class="view-btn" data-view="list" title="List View">
-            <span>☰</span>
+            <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></span>
           </button>
         </div>
       </div>
       
       <div id="annList" class="announcements-grid"></div>
       <div id="annEmpty" class="empty-state" style="display: none;">
-        <div class="empty-state-label"># NO ANNOUNCEMENTS FOUND</div>
+        <div class="empty-state-label"># no announcements found</div>
         <p class="empty-state-hint">Create your first announcement to get started</p>
         <button class="btn btn-primary" onclick="document.getElementById('newAnnBtn').click()">
           Create Announcement
@@ -297,8 +301,8 @@
 
   <!-- Theme Toggle -->
   <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-    <span aria-hidden="true">&gt;</span>
-  </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
   <!-- Scripts -->
   <script defer src="/js/universal-sidebar.js"></script>
@@ -312,10 +316,10 @@
     <script defer src="/js/linkEncoding.js"></script>
   <script defer src="/js/pages/admin-announcements.js"></script>
   <script defer src="/js/chatbot.js"></script>
-
-  <link rel="stylesheet" href="/css/admin-pages-enhanced.css">
+  
 
   <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
     /* ---- NOTHING EDITION - page-local normalization (overrides admin-pages-enhanced.css) ---- */
 
     .page-hero {
@@ -325,13 +329,13 @@
     }
 
     .page-title {
-      font-family: var(--r-font-display, "Doto", sans-serif);
+      font-family: var(--font-body);
       font-size: 2.5rem;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
       letter-spacing: 0.01em;
-      margin-bottom: 0.5rem;
-      color: var(--r-text, #f4f4f4);
+      margin-bottom: var(--space-xs);
+      color: var(--r-text, var(--color-ink));
     }
 
     .title-icon {
@@ -339,26 +343,26 @@
     }
 
     .page-subtitle {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--r-text-3, #757575);
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .stat-subtext {
       font-size: 0.76rem;
-      color: var(--r-text-3, #757575);
-      margin-top: 0.25rem;
+      color: var(--r-text-3, var(--color-ink-2));
+      margin-top: var(--space-2xs);
     }
 
     .filter-label {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.64rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--r-text-3, #757575);
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .filter-icon {
@@ -367,12 +371,12 @@
 
     .filter-input,
     .filter-select {
-      padding: 0.875rem 1rem;
-      background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
-      border: 1px solid var(--r-line, #1f1f1f);
+      padding: 0.875rem var(--space-md);
+      background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+      border: 1px solid var(--r-line, var(--color-rule));
       border-radius: var(--r-radius, 2px);
-      color: var(--r-text, #f4f4f4);
-      font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+      color: var(--r-text, var(--color-ink));
+      font-family: var(--font-body);
       font-size: 0.95rem;
       box-shadow: none;
       transition: border-color 140ms ease;
@@ -381,31 +385,31 @@
     .filter-input:focus,
     .filter-select:focus {
       outline: none;
-      border-color: var(--r-accent, #d71921);
+      border-color: var(--r-accent, var(--color-accent));
       box-shadow: none;
     }
 
     .filter-input::placeholder {
-      color: var(--r-text-3, #757575);
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .result-count {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.62rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--r-text-3, #757575);
-      margin-left: 0.5rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
+      margin-left: var(--space-xs);
     }
 
     /* view toggle - squared mono */
     .view-toggle {
       display: flex;
-      gap: 0.25rem;
+      gap: var(--space-2xs);
       background: transparent;
       padding: 0;
-      border: 1px solid var(--r-line-strong, #333);
+      border: 1px solid var(--r-line-strong, var(--color-rule));
       border-radius: var(--r-radius, 2px);
     }
 
@@ -413,7 +417,7 @@
       background: transparent;
       border: none;
       border-radius: 0;
-      color: var(--r-text-3, #757575);
+      color: var(--r-text-3, var(--color-ink-2));
       padding: 0.45rem 0.85rem;
       cursor: pointer;
       font-size: 1rem;
@@ -422,20 +426,20 @@
     }
 
     .view-btn:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--r-text, #f4f4f4);
+      background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+      color: var(--r-text, var(--color-ink));
     }
 
     .view-btn.active {
-      background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-      color: var(--r-accent, #d71921);
+      background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+      color: var(--color-accent-text);
     }
 
     /* announcement cards - sharp hairline panels */
     .announcement-card {
-      background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
+      background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
       backdrop-filter: none;
-      border: 1px solid var(--r-line, #1f1f1f);
+      border: 1px solid var(--r-line, var(--color-rule));
       border-radius: var(--r-radius, 2px);
       transition: border-color 140ms ease, transform 140ms ease;
     }
@@ -444,32 +448,32 @@
       width: 2px;
     }
 
-    .announcement-card[data-priority="urgent"]::before { background: #d71921; }
-    .announcement-card[data-priority="normal"]::before { background: #333; }
-    .announcement-card[data-priority="info"]::before { background: #1f1f1f; }
+    .announcement-card[data-priority="urgent"]::before { background: var(--color-accent); }
+    .announcement-card[data-priority="normal"]::before { background: var(--color-paper-2); }
+    .announcement-card[data-priority="info"]::before { background: var(--color-paper-2); }
 
     .announcement-card:hover {
       transform: translateX(3px);
-      border-color: var(--r-accent, #d71921);
+      border-color: var(--r-accent, var(--color-accent));
       box-shadow: none;
     }
 
     .announcement-title {
-      font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+      font-family: var(--font-body);
       font-weight: 600;
-      color: var(--r-text, #f4f4f4);
+      color: var(--r-text, var(--color-ink));
     }
 
     .announcement-meta {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--r-text-3, #757575);
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .announcement-content {
-      color: var(--r-text-2, #b0b0b0);
+      color: var(--r-text-2, var(--color-ink-2));
     }
 
     /* squared mono pills - urgent red-tinted, rest gray outline */
@@ -481,140 +485,140 @@
       gap: 0.35rem;
       padding: 0.26rem 0.55rem;
       border-radius: 0;
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.62rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
+      text-transform: none;
+      letter-spacing: normal;
     }
 
     .priority-badge.urgent {
-      background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-      color: var(--r-accent, #d71921);
-      border: 1px solid rgba(215, 25, 33, 0.4);
+      background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+      color: var(--color-accent-text);
+      border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
     }
 
     .priority-badge.normal {
-      background: var(--r-panel-inset, rgba(255, 255, 255, 0.06));
-      color: var(--r-ok, #e8e8e8);
-      border: 1px solid var(--r-line-strong, #333);
+      background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+      color: var(--r-ok, var(--color-ink));
+      border: 1px solid var(--r-line-strong, var(--color-rule));
     }
 
     .priority-badge.info {
       background: transparent;
-      color: var(--r-text-2, #b0b0b0);
-      border: 1px solid var(--r-line, #1f1f1f);
+      color: var(--r-text-2, var(--color-ink-2));
+      border: 1px solid var(--r-line, var(--color-rule));
     }
 
     .audience-badge {
       background: transparent;
-      color: var(--r-text-2, #b0b0b0);
-      border: 1px solid var(--r-line-strong, #333);
+      color: var(--r-text-2, var(--color-ink-2));
+      border: 1px solid var(--r-line-strong, var(--color-rule));
     }
 
     .pinned-badge {
-      background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-      color: var(--r-accent, #d71921);
-      border: 1px solid rgba(215, 25, 33, 0.4);
+      background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+      color: var(--color-accent-text);
+      border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
     }
 
     .announcement-actions {
-      border-top: 1px dotted var(--r-line-strong, #333);
+      border-top: 1px dotted var(--r-line-strong, var(--color-rule));
     }
 
     .announcement-actions .btn {
       border-radius: var(--r-radius, 2px);
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.66rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
+      text-transform: none;
+      letter-spacing: normal;
       box-shadow: none;
     }
 
     .btn-danger.btn-sm {
-      background: var(--r-accent, #d71921);
-      border: 1px solid var(--r-accent, #d71921);
-      color: #ffffff;
+      background: var(--r-accent, var(--color-accent));
+      border: 1px solid var(--r-accent, var(--color-accent));
+      color: var(--color-accent-ink);
     }
 
     .btn-danger.btn-sm:hover {
-      background: var(--r-accent-deep, #a31016);
-      border-color: var(--r-accent-deep, #a31016);
+      background: var(--r-accent-deep, var(--color-accent));
+      border-color: var(--r-accent-deep, var(--color-accent));
     }
 
     /* empty state - mono label + hint */
     .empty-state-label {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.72rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--r-text, #f4f4f4);
-      margin-bottom: 0.5rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text, var(--color-ink));
+      margin-bottom: var(--space-xs);
     }
 
     .empty-state-hint {
-      color: var(--r-text-3, #757575);
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .empty-state p {
-      color: var(--r-text-3, #757575);
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     /* modal - sharp panel on hairline */
     .modal-content {
-      background: var(--r-panel, #0a0a0a) !important;
-      border: 1px solid var(--r-line-strong, #333);
+      background: var(--r-panel, var(--color-paper)) !important;
+      border: 1px solid var(--r-line-strong, var(--color-rule));
       border-radius: 0 !important;
       box-shadow: none;
       backdrop-filter: none;
     }
 
     .modal-header {
-      border-bottom: 1px dotted var(--r-line-strong, #333);
+      border-bottom: 1px dotted var(--r-line-strong, var(--color-rule));
     }
 
     .modal-title {
-      font-family: var(--r-font-display, "Doto", sans-serif);
+      font-family: var(--font-body);
       font-size: 1.35rem;
       font-weight: 800;
-      text-transform: uppercase;
+      text-transform: none;
       letter-spacing: 0.02em;
-      color: var(--r-text, #f4f4f4);
+      color: var(--r-text, var(--color-ink));
     }
 
     .modal-close {
-      color: var(--r-text-3, #757575);
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .modal-close:hover {
-      color: var(--r-text, #f4f4f4);
+      color: var(--r-text, var(--color-ink));
       transform: none;
     }
 
     /* forms - sharp hairline inputs */
     .form-label {
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.64rem;
       font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--r-text-3, #757575);
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .required {
-      color: var(--r-accent, #d71921);
+      color: var(--color-accent-text);
     }
 
     .form-input,
     .form-select,
     .form-textarea {
-      background: var(--r-panel-inset, rgba(255, 255, 255, 0.04));
-      border: 1px solid var(--r-line, #1f1f1f);
+      background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+      border: 1px solid var(--r-line, var(--color-rule));
       border-radius: var(--r-radius, 2px);
-      color: var(--r-text, #f4f4f4);
-      font-family: var(--r-font-body, "Space Grotesk", sans-serif);
+      color: var(--r-text, var(--color-ink));
+      font-family: var(--font-body);
       box-shadow: none;
       transition: border-color 140ms ease;
     }
@@ -623,37 +627,37 @@
     .form-select:focus,
     .form-textarea:focus {
       outline: none;
-      border-color: var(--r-accent, #d71921);
+      border-color: var(--r-accent, var(--color-accent));
       box-shadow: none;
     }
 
     .form-hint {
       font-style: normal;
-      font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+      font-family: var(--font-body);
       font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--r-text-3, #757575);
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--r-text-3, var(--color-ink-2));
     }
 
     .form-checkbox {
-      background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
-      border: 1px solid var(--r-line, #1f1f1f);
+      background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+      border: 1px solid var(--r-line, var(--color-rule));
       border-radius: var(--r-radius, 2px);
     }
 
     /* re-point legacy tokens used by script-injected inline styles */
-    :root {
-      --error: #d71921;
-      --success: #e8e8e8;
-      --warning: #d71921;
+    body {
+      --error: var(--color-accent);
+      --success: var(--color-paper-2);
+      --warning: var(--color-accent);
     }
 
     /* Light theme normalization */
     body.light-theme .page-title,
     body.light-theme .announcement-title,
     body.light-theme .modal-title {
-      color: #0d0d0d;
+      color: var(--color-ink);
     }
 
     body.light-theme .page-subtitle,
@@ -664,15 +668,15 @@
     body.light-theme .empty-state p,
     body.light-theme .modal-close,
     body.light-theme .form-hint {
-      color: #757575;
+      color: var(--color-ink-2);
     }
 
     body.light-theme .announcement-meta {
-      color: #757575;
+      color: var(--color-ink-2);
     }
 
     body.light-theme .announcement-content {
-      color: #4a4a4a;
+      color: var(--color-ink);
     }
 
     body.light-theme .filter-input,
@@ -681,9 +685,9 @@
     body.light-theme .form-select,
     body.light-theme .form-textarea,
     body.light-theme .form-checkbox {
-      background: #ffffff;
-      border-color: #e4e4e4;
-      color: #0d0d0d;
+      background: var(--color-paper-2);
+      border-color: var(--color-rule);
+      color: var(--color-ink);
     }
 
     body.light-theme .filter-input:focus,
@@ -691,51 +695,51 @@
     body.light-theme .form-input:focus,
     body.light-theme .form-select:focus,
     body.light-theme .form-textarea:focus {
-      border-color: #d71921;
+      border-color: var(--color-accent);
     }
 
     body.light-theme .modal-content {
-      background: #ffffff !important;
-      border-color: #c9c9c9;
+      background: var(--color-paper-2) !important;
+      border-color: var(--color-rule);
     }
 
     body.light-theme .modal-header {
-      border-bottom-color: #e4e4e4;
+      border-bottom-color: var(--color-rule);
     }
 
     body.light-theme .view-toggle {
-      border-color: #c9c9c9;
+      border-color: var(--color-rule);
     }
 
     body.light-theme .view-btn.active {
-      background: rgba(215, 25, 33, 0.07);
-      color: #d71921;
+      background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+      color: var(--color-accent-text);
     }
 
     body.light-theme .announcement-card {
-      background: #ffffff;
-      border-color: #e4e4e4;
+      background: var(--color-paper-2);
+      border-color: var(--color-rule);
     }
 
     body.light-theme .announcement-card:hover {
-      border-color: #d71921;
+      border-color: var(--color-accent);
     }
 
     body.light-theme .priority-badge.normal,
     body.light-theme .audience-badge {
-      background: rgba(0, 0, 0, 0.05);
-      color: #0d0d0d;
-      border-color: #c9c9c9;
+      background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+      color: var(--color-ink);
+      border-color: var(--color-rule);
     }
 
     body.light-theme .priority-badge.info {
       background: transparent;
-      color: #4a4a4a;
-      border-color: #e4e4e4;
+      color: var(--color-ink);
+      border-color: var(--color-rule);
     }
 
     body.light-theme .announcement-actions {
-      border-top-color: #e4e4e4;
+      border-top-color: var(--color-rule);
     }
 
     /* ==========================================================
@@ -744,7 +748,7 @@
 
     /* Modal: fits any viewport, scrolls internally */
     .modal-content {
-      width: min(560px, calc(100vw - 32px));
+      width: min(560px, 100%);
       max-height: min(88vh, calc(100vh - 32px));
       overflow-y: auto;
     }
@@ -812,7 +816,7 @@
       }
 
       .modal {
-        padding: 16px;
+        padding: var(--space-md);
       }
 
       .modal-header {
@@ -872,7 +876,7 @@
       }
 
       .page-subtitle {
-        letter-spacing: 0.1em;
+        letter-spacing: normal;
       }
 
       .announcement-actions .btn {

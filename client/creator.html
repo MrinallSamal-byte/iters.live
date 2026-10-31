@@ -7,56 +7,43 @@
     <meta name="description" content="Creator profile for Mrinall Samal, the student builder behind ITERasn hub.">
     <meta name="keywords" content="Mrinall Samal, ITERasn hub, ITER, SOA University, full-stack developer, product designer, portfolio">
     <meta name="author" content="Mrinall Samal">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0f0b0b">
     <title>Creator | ITERasn hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link rel="stylesheet" href="/css/responsive-enhanced.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/navbar-scroll-behavior.css">
-    <link rel="stylesheet" href="/css/responsive-polish.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/home-minimal.css">
-    <link rel="stylesheet" href="/css/creator-page.css">
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site/tokens.css">
+    <link rel="stylesheet" href="css/site/base.css">
+    <link rel="stylesheet" href="css/site/chatbot.css">
+    <link rel="stylesheet" href="css/site/site.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
-    <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 
 <body class="landing-page nothing-home public-creator-page creator-page">
-    <div class="bg-animation" aria-hidden="true">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-        <div class="creator-grid-glow"></div>
-        <div class="creator-noise"></div>
-    </div>
 
-    <nav class="navbar glass-card" aria-label="Primary">
-        <div class="nav-container">
-            <a href="/index.html" class="nav-logo" aria-label="ITERasn hub Home">
-                <img src="/assets/soa-logo.png" alt="SOA University logo" class="logo-img">
-                <div class="logo-lockup">
+    <nav class="navbar" aria-label="Primary">
+        <div class="container nav-container">
+            <a href="/index.html" class="nav-logo" aria-label="ITERasn hub home">
+                <img src="assets/soa-logo.png" alt="SOA University logo" class="logo-img">
+                <span class="logo-lockup">
                     <span class="logo-text">ITERasn hub</span>
                     <span class="logo-subtext">Institute of Technical Education &amp; Research</span>
-                </div>
+                </span>
             </a>
 
             <div class="nav-links">
                 <a href="/index.html#about" class="nav-link">About</a>
                 <a href="/index.html#features" class="nav-link">Features</a>
                 <a href="/index.html#academics" class="nav-link">Programs</a>
-                <a href="/creator.html" class="nav-link active">Creator</a>
+                <a href="/creator.html" class="nav-link active" aria-current="page">Creator</a>
                 <a href="/index.html#contact" class="nav-link">Contact</a>
                 <div class="nav-cta">
                     <a href="/register.html" class="btn btn-outline">Register</a>
                     <a href="/login.html" class="btn btn-primary">Portal Login</a>
+                    <button type="button" class="theme-toggle" id="themeToggle" title="Toggle theme"
+                        aria-label="Toggle dark and light theme"><span class="theme-icon" aria-hidden="true"></span></button>
                 </div>
             </div>
 
@@ -71,41 +58,11 @@
     <main class="creator-content-wrapper">
         <section class="hero-section creator-hero">
             <div class="container creator-hero-grid">
-                <div class="hero-content creator-story">
-                    <p class="creator-section-kicker scroll-reveal">About the Creator</p>
-                    <div class="hero-badge creator-badge scroll-reveal">
-                        <span>Independent Builder</span>
-                        <span class="creator-badge-divider"></span>
-                        <span>ITER, SOA University</span>
-                    </div>
-                    <h1 class="hero-title scroll-reveal">
-                        Mrinall Samal builds campus software with product taste and engineering discipline.
-                    </h1>
-                    <p class="creator-subtitle scroll-reveal">
-                        B.Tech CSE student working across interface systems, backend architecture, and the details that make software feel trustworthy.
-                    </p>
-                    <p class="hero-description scroll-reveal">
-                        ITERasn hub is the clearest expression of that work so far: a student platform shaped end to end, from public-facing identity and responsive UI to APIs, data flow, analytics, and AI-assisted tools. The goal is not to make something flashy. It is to make something clear, fast, and credible.
-                    </p>
-                    <div class="creator-note-strip glass-card scroll-reveal">
-                        <span class="creator-note-label">Current direction</span>
-                        <p>Refining student software into a product experience that feels deliberate instead of improvised.</p>
-                    </div>
-                    <div class="creator-proof-points scroll-reveal" aria-label="Core strengths">
-                        <article class="creator-proof-card">
-                            <span class="creator-proof-label">Product lens</span>
-                            <p>Translating student workflows into interfaces that feel clear, premium, and usable.</p>
-                        </article>
-                        <article class="creator-proof-card">
-                            <span class="creator-proof-label">Execution</span>
-                            <p>Comfortable moving from page structure and motion systems into APIs, auth, and data flow.</p>
-                        </article>
-                        <article class="creator-proof-card">
-                            <span class="creator-proof-label">Priority</span>
-                            <p>Making every screen feel intentional, from wide desktops to narrow mobile devices.</p>
-                        </article>
-                    </div>
-                    <div class="hero-buttons scroll-reveal">
+                <div class="creator-copy creator-story">
+                    
+                    <h1 class="creator-title">About the creator</h1>
+                    <p class="creator-lead">Mrinall Samal builds campus software with product taste and engineering discipline.</p>
+                    <div class="hero-buttons">
                         <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer"
                             class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
                             View GitHub
@@ -123,9 +80,15 @@
                             Contact
                         </a>
                     </div>
-                </div>
+                    <p class="creator-subtitle">
+                        B.Tech CSE student working across interface systems, backend architecture, and the details that make software feel trustworthy.
+                    </p>
+                    <p class="hero-description">
+                        ITERasn hub is the clearest expression of that work so far: a student platform shaped end to end, from public-facing identity and responsive UI to APIs, data flow, analytics, and AI-assisted tools. The goal is not to make something flashy. It is to make something clear, fast, and credible.
+                    </p></div>
 
-                <aside class="creator-showcase glass-card scroll-reveal" aria-label="Creator profile summary">
+                <aside class="creator-showcase" aria-label="Creator profile summary">
+                    <p class="creator-meta">Independent builder at ITER, SOA University.</p>
                     <div class="creator-showcase-top">
                         <p class="creator-panel-label">Profile</p>
                         <span class="creator-status">Available for collaboration</span>
@@ -162,27 +125,44 @@
                             <strong>Design-aware and execution-heavy</strong>
                         </div>
                     </div>
-
-                    <div class="creator-metric-band">
-                        <div class="creator-metric">
-                            <strong>01</strong>
-                            <span>flagship student platform in active development</span>
-                        </div>
-                        <div class="creator-metric">
-                            <strong>03</strong>
-                            <span>core lanes: UI, backend, deployment</span>
-                        </div>
-                    </div>
                 </aside>
             </div>
         </section>
 
         <section class="creator-overview-section" aria-label="Quick creator overview">
             <div class="container">
-                <div class="creator-overview-shell glass-card scroll-reveal">
-                    <div class="creator-overview-copy">
-                        <p class="section-kicker">Quick map</p>
-                        <h2 class="creator-overview-title">A cleaner way to scan the work, focus, and collaboration fit.</h2>
+                <div class="creator-overview-shell">
+                        <div class="creator-note-strip">
+                        <span class="creator-note-label">Current direction</span>
+                        <p>Refining student software into a product experience that feels deliberate instead of improvised.</p>
+                    </div>
+                        <div class="creator-proof-points" aria-label="Core strengths">
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Product lens</span>
+                            <p>Translating student workflows into interfaces that feel clear, premium, and usable.</p>
+                        </article>
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Execution</span>
+                            <p>Comfortable moving from page structure and motion systems into APIs, auth, and data flow.</p>
+                        </article>
+                        <article class="creator-proof-card">
+                            <span class="creator-proof-label">Priority</span>
+                            <p>Making every screen feel intentional, from wide desktops to narrow mobile devices.</p>
+                        </article>
+                    </div>
+                    <div class="creator-metric-band">
+                        <div class="creator-metric">
+                            <strong>1</strong>
+                            <span>flagship student platform in active development</span>
+                        </div>
+                        <div class="creator-metric">
+                            <strong>3</strong>
+                            <span>core lanes: UI, backend, deployment</span>
+                        </div>
+                    </div>
+                        <div class="creator-overview-copy">
+                        <h2 class="creator-overview-title">Quick map</h2>
+                        <p class="section-lead">A cleaner way to scan the work, focus, and collaboration fit.</p>
                         <p class="creator-overview-text">
                             Start with the key signals below, then jump straight to the part of the page that matters to you.
                         </p>
@@ -217,17 +197,17 @@
 
         <section class="creator-essay-section" id="approach">
             <div class="container">
-                <div class="creator-section-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Approach</p>
-                        <h2 class="section-title">Built around clarity, systems thinking, and restraint.</h2>
+                <div class="creator-section-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Approach</h2>
+                        <p class="section-lead">Built around clarity, systems thinking, and restraint.</p>
                         <p class="section-subtitle">
                             The most interesting part of software is where product decisions and engineering decisions start affecting each other.
                         </p>
                     </div>
 
                     <div class="creator-essay-grid">
-                        <div class="about-me-text scroll-reveal">
+                        <div class="about-me-text">
                             <p>
                                 Most academic software solves the function and forgets the experience. My work sits in that gap: translating cluttered student workflows into interfaces that are easier to understand, easier to trust, and easier to come back to.
                             </p>
@@ -240,20 +220,17 @@
                         </div>
 
                         <div class="creator-principles">
-                            <article class="principle-item glass-card scroll-reveal">
-                                <span class="principle-index">01</span>
+                            <article class="principle-item">
                                 <h3>Clarity over noise</h3>
                                 <p>Reduce friction, tighten hierarchy, and keep the interface useful under real student workloads.</p>
                             </article>
 
-                            <article class="principle-item glass-card scroll-reveal">
-                                <span class="principle-index">02</span>
+                            <article class="principle-item">
                                 <h3>Systems over one-offs</h3>
                                 <p>Reusable patterns, cleaner structure, and decisions that scale beyond a single screen or feature.</p>
                             </article>
 
-                            <article class="principle-item glass-card scroll-reveal">
-                                <span class="principle-index">03</span>
+                            <article class="principle-item">
                                 <h3>Polish with purpose</h3>
                                 <p>Motion, surfaces, and copy should reinforce trust, not compensate for weak product thinking.</p>
                             </article>
@@ -265,18 +242,17 @@
 
         <section class="education-section" id="education">
             <div class="container">
-                <div class="creator-section-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Academic Path</p>
-                        <h2 class="section-title">Formal training, applied through real product work.</h2>
+                <div class="creator-section-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Academic Path</h2>
+                        <p class="section-lead">Formal training, applied through real product work.</p>
                         <p class="section-subtitle">
                             A foundation in computer science, reinforced by building outside the syllabus.
                         </p>
                     </div>
 
                     <div class="education-timeline">
-                        <div class="timeline-item glass-card scroll-reveal">
-                            <div class="timeline-icon">01</div>
+                        <div class="timeline-item">
                             <div class="timeline-content">
                                 <div class="timeline-header">
                                     <h3>B.Tech in Computer Science and Engineering</h3>
@@ -294,8 +270,7 @@
                             </div>
                         </div>
 
-                        <div class="timeline-item glass-card scroll-reveal">
-                            <div class="timeline-icon">02</div>
+                        <div class="timeline-item">
                             <div class="timeline-content">
                                 <div class="timeline-header">
                                     <h3>Higher Secondary Education</h3>
@@ -319,17 +294,17 @@
 
         <section class="skills-section" id="capabilities">
             <div class="container">
-                <div class="creator-section-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Capabilities</p>
-                        <h2 class="section-title">A builder's stack, not a checkbox list.</h2>
+                <div class="creator-section-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Capabilities</h2>
+                        <p class="section-lead">A builder’s stack, not a checkbox list.</p>
                         <p class="section-subtitle">
                             Each area combines tools with the kind of decisions required to ship a usable product.
                         </p>
                     </div>
 
                     <div class="skills-grid">
-                        <article class="skill-category glass-card scroll-reveal">
+                        <article class="skill-category">
                             <div class="skill-category-header">
                                 <span class="skill-category-label">Frontend systems</span>
                                 <h3>Interfaces with hierarchy, motion, and responsive discipline.</h3>
@@ -359,7 +334,7 @@
                             </div>
                         </article>
 
-                        <article class="skill-category glass-card scroll-reveal">
+                        <article class="skill-category">
                             <div class="skill-category-header">
                                 <span class="skill-category-label">Backend architecture</span>
                                 <h3>APIs, auth flows, data models, and the plumbing behind the experience.</h3>
@@ -389,7 +364,7 @@
                             </div>
                         </article>
 
-                        <article class="skill-category glass-card scroll-reveal">
+                        <article class="skill-category">
                             <div class="skill-category-header">
                                 <span class="skill-category-label">Product delivery</span>
                                 <h3>From code to deployment, with enough rigor to keep shipping cleanly.</h3>
@@ -425,17 +400,17 @@
 
         <section class="projects-section" id="work">
             <div class="container">
-                <div class="creator-section-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Selected Work</p>
-                        <h2 class="section-title">One flagship product, supported by focused systems work.</h2>
+                <div class="creator-section-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Selected Work</h2>
+                        <p class="section-lead">One flagship product, supported by focused systems work.</p>
                         <p class="section-subtitle">
                             The emphasis is on building real surfaces and tightening the details that make them feel finished.
                         </p>
                     </div>
 
                     <div class="projects-grid">
-                        <article class="project-card project-card-featured glass-card scroll-reveal">
+                        <article class="project-card project-card-featured">
                             <div class="project-card-top">
                                 <span class="project-eyebrow">Flagship platform</span>
                                 <span class="project-badge featured">In progress</span>
@@ -481,7 +456,7 @@
                             </div>
                         </article>
 
-                        <article class="project-card glass-card scroll-reveal">
+                        <article class="project-card">
                             <div class="project-card-top">
                                 <span class="project-eyebrow">Interface direction</span>
                             </div>
@@ -501,7 +476,7 @@
                             </div>
                         </article>
 
-                        <article class="project-card glass-card scroll-reveal">
+                        <article class="project-card">
                             <div class="project-card-top">
                                 <span class="project-eyebrow">Delivery layer</span>
                             </div>
@@ -527,18 +502,18 @@
 
         <section class="tech-stack-section" id="stack">
             <div class="container">
-                <div class="creator-section-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Stack Notes</p>
-                        <h2 class="section-title">Pragmatic tooling, chosen to keep the product moving.</h2>
+                <div class="creator-section-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Stack Notes</h2>
+                        <p class="section-lead">Pragmatic tooling, chosen to keep the product moving.</p>
                         <p class="section-subtitle">
                             The stack favors speed of iteration, maintainability, and enough depth to support a growing platform.
                         </p>
                     </div>
 
-                    <div class="tech-stack-note glass-card scroll-reveal">
-                        <p class="creator-panel-label">Why this stack</p>
-                        <h3>Lean enough to move fast, deep enough to support real product complexity.</h3>
+                    <div class="tech-stack-note">
+                        <h3>Why this stack</h3>
+                            <p class="section-lead">Lean enough to move fast, deep enough to support real product complexity.</p>
                         <p>
                             ITERasn hub uses practical technologies that support multi-role logic, real-time capability, structured data, and a responsive experience without adding unnecessary weight.
                         </p>
@@ -563,23 +538,19 @@
                         </div>
                     </div>
 
-                    <div class="key-features scroll-reveal">
+                    <div class="key-features">
                         <h3 class="features-subtitle">What it enables</h3>
                         <div class="features-list">
                             <div class="feature-item">
-                                <span class="feature-icon">01</span>
                                 <span class="feature-text">Multi-role experiences with shared product consistency</span>
                             </div>
                             <div class="feature-item">
-                                <span class="feature-icon">02</span>
                                 <span class="feature-text">Structured academic data, analytics, and content flows</span>
                             </div>
                             <div class="feature-item">
-                                <span class="feature-icon">03</span>
                                 <span class="feature-text">Responsive delivery across desktop, tablet, and mobile</span>
                             </div>
                             <div class="feature-item">
-                                <span class="feature-icon">04</span>
                                 <span class="feature-text">Real-time and AI-assisted features layered into the platform</span>
                             </div>
                         </div>
@@ -590,38 +561,38 @@
 
         <section class="contact-creator-section" id="contact">
             <div class="container">
-                <div class="contact-creator-shell glass-card">
-                    <div class="section-header scroll-reveal creator-section-header">
-                        <p class="section-kicker">Contact</p>
-                        <h2 class="section-title">Open to thoughtful collaborations and product-minded conversations.</h2>
+                <div class="contact-creator-shell">
+                    <div class="section-header creator-section-header">
+                        <h2 class="section-title">Contact</h2>
+                        <p class="section-lead">Open to thoughtful collaborations and product-minded conversations.</p>
                         <p class="section-subtitle">
                             Email is the best route for internships, freelance work, or discussing how this platform is built.
                         </p>
                     </div>
 
                     <div class="contact-cards">
-                        <a href="mailto:samalmrinall9@gmail.com" class="contact-card glass-card scroll-reveal">
+                        <a href="mailto:samalmrinall9@gmail.com" class="contact-card">
                             <span class="contact-card-label">Email</span>
                             <h3>samalmrinall9@gmail.com</h3>
                             <p>Best for collaboration, internships, and detailed conversations.</p>
                         </a>
 
                         <a href="https://mrinall.dev" target="_blank" rel="noopener noreferrer"
-                            class="contact-card glass-card scroll-reveal">
+                            class="contact-card">
                             <span class="contact-card-label">Website</span>
                             <h3>mrinall.dev</h3>
                             <p>Portfolio site with selected work, design direction, and product-focused case studies.</p>
                         </a>
 
                         <a href="https://github.com/MrinallSamal-byte" target="_blank" rel="noopener noreferrer"
-                            class="contact-card glass-card scroll-reveal">
+                            class="contact-card">
                             <span class="contact-card-label">GitHub</span>
                             <h3>@MrinallSamal-byte</h3>
                             <p>Code, experiments, and the implementation side of the work.</p>
                         </a>
 
                         <a href="https://www.linkedin.com/in/mrinall-samal-34004233b/" target="_blank" rel="noopener noreferrer"
-                            class="contact-card glass-card scroll-reveal">
+                            class="contact-card">
                             <span class="contact-card-label">LinkedIn</span>
                             <h3>Mrinall Samal</h3>
                             <p>Professional updates, background, and direct outreach.</p>
@@ -631,27 +602,9 @@
             </div>
         </section>
 
-        <section class="disclaimer-section">
-            <div class="container">
-                <div class="disclaimer-card glass-card scroll-reveal">
-                    <div class="disclaimer-copy">
-                        <span class="disclaimer-label">Project context</span>
-                        <h4>Student-built, independent, and intentionally experimental.</h4>
-                        <p>
-                            ITERasn hub is an educational project and is not an official ITER or SOA University product. Any demo content or simulated data is used to prototype features and showcase engineering work.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        
 
-        <section class="back-home-section">
-            <div class="container">
-                <a href="/index.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift">
-                    Return to Home
-                </a>
-            </div>
-        </section>
+        
     </main>
 
     <footer class="footer">
@@ -676,15 +629,22 @@
                     <a href="mailto:samalmrinall9@gmail.com">Email</a>
                 </div>
             </div>
+            <div class="disclaimer-card">
+                    <div class="disclaimer-copy">
+                        <span class="disclaimer-label">Project context</span>
+                        <h4>Student-built, independent, and intentionally experimental.</h4>
+                        <p>
+                            ITERasn hub is an educational project and is not an official ITER or SOA University product. Any demo content or simulated data is used to prototype features and showcase engineering work.
+                        </p>
+                    </div>
+                </div>
             <div class="footer-bottom">
                 <p>&copy; ITERasn hub. Designed and built by Mrinall Samal.</p>
+                <a href="/index.html" class="btn btn-large btn-primary btn-glow ripple-effect hover-lift"> Return to Home </a>
             </div>
         </div>
     </footer>
 
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">&#9790;</span>
-    </button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>

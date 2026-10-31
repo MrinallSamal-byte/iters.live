@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clubs · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Clubs on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Sidebar will be injected by student-sidebar.js -->
@@ -88,7 +92,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     My Clubs
-                </h3>
+                </h2>
             </div>
             <div class="my-clubs-list" id="myClubsList">
                 <!-- My clubs will be loaded here -->
@@ -100,13 +104,13 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     All Clubs
-                </h3>
+                </h2>
                 <span class="section-badge">Explore &amp; Join</span>
             </div>
             <div class="clubs-grid" id="clubsGrid">
                 <!-- CUT CORNER: student-clubs.js re-injects .empty-state-icon and club emoji icons (file not in ownership scope) -->
                 <div class="empty-state">
-                    <div class="loading-text">Loading clubs...</div>
+                    <div class="loading-text">Loading clubs…</div>
                 </div>
             </div>
         </section>
@@ -114,7 +118,7 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -129,6 +133,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -136,7 +141,7 @@
 
         .page-title {
             font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--r-text);
         }
 
@@ -147,15 +152,15 @@
 
         .my-clubs-list {
             display: grid;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
         }
 
         .my-club-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: var(--space-md);
+            padding: var(--space-lg);
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
@@ -185,52 +190,52 @@
         .my-club-name {
             font-size: 1.05rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
 
         .my-club-role {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .leave-btn {
-            padding: 0.5rem 1.25rem;
+            padding: var(--space-xs) 1.25rem;
             border-radius: 0;
             background: transparent;
             border: 1px solid var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
             cursor: pointer;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: background 160ms ease, color 160ms ease;
         }
 
         .leave-btn:hover {
             background: var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
         }
 
         .clubs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
 
         .club-card {
             background: var(--r-panel-raised);
             border: 1px solid var(--r-line);
             border-radius: 2px;
-            overflow: hidden;
+            overflow: clip;
             transition: border-color 160ms ease;
         }
 
@@ -245,20 +250,20 @@
             justify-content: center;
             font-size: 3.5rem;
             background:
-                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 14px 14px,
+                radial-gradient(color-mix(in oklab, var(--color-ink) 8%, transparent) 1px, transparent 1px) 0 0 / 14px 14px,
                 var(--r-panel-inset);
             border-bottom: 1px dotted var(--r-line-strong);
         }
 
         .club-content {
-            padding: 1.5rem;
+            padding: var(--space-lg);
         }
 
         .club-name {
             font-size: 1.15rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            text-transform: none;
+            letter-spacing: normal;
             margin-bottom: 0.6rem;
             color: var(--r-text);
         }
@@ -267,46 +272,46 @@
             display: inline-block;
             padding: 0.3rem 0.65rem;
             border-radius: 0;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            margin-bottom: 1rem;
+            text-transform: none;
+            letter-spacing: normal;
+            margin-bottom: var(--space-md);
             background: var(--r-accent-wash);
             border: 1px solid var(--r-accent);
-            color: var(--r-accent);
+            color: var(--color-accent-text);
         }
 
         .club-description {
             font-size: 0.9rem;
             line-height: 1.6;
             color: var(--r-text-2);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
             min-height: 60px;
         }
 
         .club-stats {
             display: flex;
-            gap: 1.5rem;
+            gap: var(--space-lg);
             padding-bottom: 0.9rem;
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
             border-bottom: 1px dotted var(--r-line-strong);
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .club-stat {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .club-footer {
-            padding-top: 1rem;
+            padding-top: var(--space-md);
             border-top: none;
         }
 
@@ -316,13 +321,13 @@
             border-radius: 0;
             background: var(--r-accent);
             border: 1px solid var(--r-accent);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             cursor: pointer;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
+            text-transform: none;
+            letter-spacing: normal;
             transition: background 160ms ease, border-color 160ms ease;
         }
 
@@ -341,7 +346,7 @@
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 3rem var(--space-md);
             color: var(--r-text-3);
         }
 
@@ -360,7 +365,7 @@
         html,
         body {
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .club-name,
@@ -454,11 +459,11 @@
 
             .club-stats {
                 flex-wrap: wrap;
-                gap: 0.75rem 1.25rem;
+                gap: var(--space-sm) 1.25rem;
             }
 
             .empty-state {
-                padding: 2rem 0.75rem;
+                padding: 2rem var(--space-sm);
             }
         }
 
@@ -471,7 +476,7 @@
         /* 360px: no horizontal page scroll */
         @media (max-width: 360px) {
             .page-hero {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .club-content,

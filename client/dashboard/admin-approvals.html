@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Approvals · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Approvals on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -40,14 +41,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
 </head>
 
 <body>
@@ -90,8 +94,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Filter Approvals
-                </h3>
+                    Filter Approvals
+                </h2>
             </div>
 
             <div class="filter-buttons-container">
@@ -117,9 +121,9 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Approval Queue
+                    Approval Queue
                     <span id="approvalCount" class="result-count"></span>
-                </h3>
+                </h2>
             </div>
 
             <div class="table-responsive">
@@ -137,7 +141,7 @@
                     </thead>
                     <tbody id="approvalsTableBody">
                         <tr>
-                            <td colspan="7" class="loading-text">Loading approval queue...</td>
+                            <td colspan="7" class="loading-text">Loading approval queue…</td>
                         </tr>
                     </tbody>
                 </table>
@@ -148,20 +152,20 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Recently Approved
-                </h3>
+                    Recently Approved
+                </h2>
             </div>
 
             <div class="approved-list" id="recentlyApproved">
-                <div class="loading-text">Loading recent approvals...</div>
+                <div class="loading-text">Loading recent approvals…</div>
             </div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Scripts -->
     <script defer src="/js/universal-sidebar.js"></script>
@@ -176,6 +180,7 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         /* ---- NOTHING EDITION - page-local normalization ---- */
 
         .page-hero {
@@ -185,16 +190,16 @@
         }
 
         .page-title {
-            font-family: var(--r-font-display, "Doto", sans-serif);
+            font-family: var(--font-body);
             font-size: 2.5rem;
             font-weight: 800;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
-            margin-bottom: 0.5rem;
-            color: var(--r-text, #f4f4f4);
+            margin-bottom: var(--space-xs);
+            color: var(--r-text, var(--color-ink));
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .title-icon {
@@ -202,67 +207,67 @@
         }
 
         .page-subtitle {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: var(--r-text-3, #757575);
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .stat-subtext {
             font-size: 0.76rem;
-            color: var(--r-text-3, #757575);
-            margin-top: 0.25rem;
+            color: var(--r-text-3, var(--color-ink-2));
+            margin-top: var(--space-2xs);
         }
 
         .filter-buttons-container {
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
+            gap: var(--space-sm);
         }
 
         .filter-btn {
             padding: 0.7rem 1.1rem;
             background: transparent;
-            border: 1px solid var(--r-line-strong, #333);
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: var(--r-radius, 2px);
-            color: var(--r-text-2, #b0b0b0);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            color: var(--r-text-2, var(--color-ink-2));
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             cursor: pointer;
             box-shadow: none;
             transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .filter-btn:hover {
-            border-color: var(--r-text, #f4f4f4);
-            color: var(--r-text, #f4f4f4);
-            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--r-text, var(--color-rule));
+            color: var(--r-text, var(--color-ink));
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             transform: none;
             box-shadow: none;
         }
 
         .filter-btn.active {
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-            border-color: rgba(215, 25, 33, 0.4);
-            color: var(--r-accent, #d71921);
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+            color: var(--color-accent-text);
         }
 
         .result-count {
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: var(--r-text-3, #757575);
-            margin-left: 0.5rem;
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--r-text-3, var(--color-ink-2));
+            margin-left: var(--space-xs);
         }
 
         .modern-table {
@@ -276,21 +281,21 @@
         }
 
         .modern-table th {
-            padding: 0.9rem 1rem;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            padding: 0.9rem var(--space-md);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             text-align: left;
-            border-bottom: 1px solid var(--r-line-strong, #333);
-            color: var(--r-text-3, #757575);
+            border-bottom: 1px solid var(--r-line-strong, var(--color-rule));
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         .modern-table td {
-            padding: 1rem;
-            border-bottom: 1px dotted var(--r-line, #1f1f1f);
-            color: var(--r-text-2, #b0b0b0);
+            padding: var(--space-md);
+            border-bottom: 1px dotted var(--r-line, var(--color-rule));
+            color: var(--r-text-2, var(--color-ink-2));
         }
 
         .modern-table tbody tr {
@@ -298,28 +303,28 @@
         }
 
         .modern-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
         }
 
         .loading-text {
             text-align: center;
             padding: 3rem;
-            color: var(--r-text-3, #757575);
+            color: var(--r-text-3, var(--color-ink-2));
         }
 
         /* script-injected type/priority pills - pending red-tinted, rest gray outline */
         .badge.primary,
         .badge.success,
         .badge.info {
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.06));
-            color: var(--r-ok, #e8e8e8);
-            border: 1px solid var(--r-line-strong, #333);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            color: var(--r-ok, var(--color-ink));
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: 0;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .badge.warning,
@@ -327,21 +332,21 @@
         .badge-warning,
         .badge-error,
         .badge-primary {
-            background: var(--r-accent-wash, rgba(215, 25, 33, 0.1));
-            color: var(--r-accent, #d71921);
-            border: 1px solid rgba(215, 25, 33, 0.4);
+            background: var(--r-accent-wash, color-mix(in oklab, var(--color-accent) 10%, transparent));
+            color: var(--color-accent-text);
+            border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
             border-radius: 0;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         /* script-injected queue controls - squared mono */
         .action-btns {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
         }
 
@@ -349,59 +354,59 @@
         .btn-small,
         .btn-sm {
             border-radius: var(--r-radius, 2px);
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             box-shadow: none;
         }
 
         .btn-success.btn-sm,
         .btn-secondary.btn-sm {
             background: transparent;
-            border: 1px solid var(--r-line-strong, #333);
-            color: var(--r-text, #f4f4f4);
+            border: 1px solid var(--r-line-strong, var(--color-rule));
+            color: var(--r-text, var(--color-ink));
         }
 
         .btn-success.btn-sm:hover,
         .btn-secondary.btn-sm:hover {
-            border-color: var(--r-text, #f4f4f4);
+            border-color: var(--r-text, var(--color-rule));
         }
 
         .btn-danger.btn-sm {
-            background: var(--r-accent, #d71921);
-            border: 1px solid var(--r-accent, #d71921);
-            color: #ffffff;
+            background: var(--r-accent, var(--color-accent));
+            border: 1px solid var(--r-accent, var(--color-accent));
+            color: var(--color-accent-ink);
         }
 
         .btn-danger.btn-sm:hover {
-            background: var(--r-accent-deep, #a31016);
-            border-color: var(--r-accent-deep, #a31016);
+            background: var(--r-accent-deep, var(--color-accent));
+            border-color: var(--r-accent-deep, var(--color-accent));
         }
 
         .approved-list {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             gap: 0.65rem;
         }
 
         .approved-item {
-            padding: 1rem;
-            background: var(--r-panel-inset, rgba(255, 255, 255, 0.03));
-            border: 1px solid var(--r-line, #1f1f1f);
-            border-left: 2px solid var(--r-line-strong, #333);
+            padding: var(--space-md);
+            background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
+            border: 1px solid var(--r-line, var(--color-rule));
+            border-left: 2px solid var(--r-line-strong, var(--color-rule));
             border-radius: var(--r-radius, 2px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
             transition: border-color 140ms ease, transform 140ms ease;
         }
 
         .approved-item:hover {
             transform: translateX(3px);
-            border-left-color: var(--r-ok, #e8e8e8);
+            border-left-color: var(--r-ok, var(--color-rule));
         }
 
         .approved-content {
@@ -410,40 +415,40 @@
 
         .approved-title {
             font-weight: 600;
-            color: var(--r-text, #f4f4f4);
-            margin-bottom: 0.25rem;
+            color: var(--r-text, var(--color-ink));
+            margin-bottom: var(--space-2xs);
         }
 
         .approved-meta {
             font-size: 0.86rem;
-            color: var(--r-text-2, #b0b0b0);
+            color: var(--r-text-2, var(--color-ink-2));
         }
 
         .approved-badge {
             padding: 0.3rem 0.7rem;
             background: transparent;
-            color: var(--r-ok, #e8e8e8);
-            border: 1px solid var(--r-line-strong, #333);
+            color: var(--r-ok, var(--color-ink));
+            border: 1px solid var(--r-line-strong, var(--color-rule));
             border-radius: 0;
-            font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             white-space: nowrap;
         }
 
         /* re-point legacy tokens used by script-injected inline styles */
-        :root {
-            --error: #d71921;
-            --success: #e8e8e8;
-            --warning: #d71921;
+        body {
+            --error: var(--color-accent);
+            --success: var(--color-paper-2);
+            --warning: var(--color-accent);
         }
 
         /* Light theme normalization */
         body.light-theme .page-title,
         body.light-theme .approved-title {
-            color: #0d0d0d;
+            color: var(--color-ink);
         }
 
         body.light-theme .page-subtitle,
@@ -451,54 +456,54 @@
         body.light-theme .result-count,
         body.light-theme .modern-table th,
         body.light-theme .loading-text {
-            color: #757575;
+            color: var(--color-ink-2);
         }
 
         body.light-theme .modern-table td,
         body.light-theme .approved-meta {
-            color: #4a4a4a;
+            color: var(--color-ink);
         }
 
         body.light-theme .filter-btn {
-            border-color: #c9c9c9;
-            color: #4a4a4a;
+            border-color: var(--color-rule);
+            color: var(--color-ink);
         }
 
         body.light-theme .filter-btn:hover {
-            border-color: #0d0d0d;
-            color: #0d0d0d;
-            background: rgba(0, 0, 0, 0.03);
+            border-color: var(--color-rule);
+            color: var(--color-ink);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .filter-btn.active {
-            background: rgba(215, 25, 33, 0.07);
-            border-color: rgba(215, 25, 33, 0.4);
-            color: #d71921;
+            background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
+            color: var(--color-accent-text);
         }
 
         body.light-theme .modern-table tbody tr:hover {
-            background: rgba(0, 0, 0, 0.03);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
         }
 
         body.light-theme .approved-item {
-            background: #ffffff;
-            border-color: #e4e4e4;
-            border-left-color: #c9c9c9;
+            background: var(--color-paper-2);
+            border-color: var(--color-rule);
+            border-left-color: var(--color-rule);
         }
 
         body.light-theme .badge.primary,
         body.light-theme .badge.success,
         body.light-theme .badge.info,
         body.light-theme .approved-badge {
-            background: rgba(0, 0, 0, 0.05);
-            color: #0d0d0d;
-            border-color: #c9c9c9;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            color: var(--color-ink);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .btn-success.btn-sm,
         body.light-theme .btn-secondary.btn-sm {
-            color: #0d0d0d;
-            border-color: #c9c9c9;
+            color: var(--color-ink);
+            border-color: var(--color-rule);
         }
 
         /* Responsive */
@@ -508,13 +513,13 @@
             }
 
             .filter-buttons-container {
-                gap: 0.5rem;
+                gap: var(--space-xs);
             }
 
             .filter-btn {
                 flex: 1 1 auto;
                 justify-content: center;
-                padding: 0.6rem 0.75rem;
+                padding: 0.6rem var(--space-sm);
             }
 
             .action-btns {
@@ -544,7 +549,7 @@
         /* <=900: hero stacks; stat band stays 2-up */
         @media (max-width: 900px) {
             .page-hero {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
         }
 
@@ -605,16 +610,16 @@
             }
 
             #approvalsTableBody tr {
-                margin-bottom: 0.75rem;
+                margin-bottom: var(--space-sm);
                 padding: 0.9rem 0.85rem;
-                border: 1px solid var(--r-line, #1f1f1f);
-                border-left: 2px solid var(--r-line-strong, #333);
-                background: var(--r-panel-inset, rgba(255, 255, 255, 0.02));
+                border: 1px solid var(--r-line, var(--color-rule));
+                border-left: 2px solid var(--r-line-strong, var(--color-rule));
+                background: var(--r-panel-inset, color-mix(in oklab, var(--color-ink) 8%, transparent));
             }
 
             #approvalsTableBody tr:hover {
                 transform: none;
-                background: rgba(255, 255, 255, 0.04);
+                background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             }
 
             #approvalsTableBody td {
@@ -630,12 +635,12 @@
             }
 
             #approvalsTableBody td::before {
-                font-family: var(--r-font-mono, "IBM Plex Mono", monospace);
+                font-family: var(--font-body);
                 font-size: 0.56rem;
                 font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.14em;
-                color: var(--r-text-3, #757575);
+                text-transform: none;
+                letter-spacing: normal;
+                color: var(--r-text-3, var(--color-ink-2));
             }
 
             #approvalsTableBody td:nth-child(1)::before { content: "TYPE"; }
@@ -647,17 +652,17 @@
 
             #approvalsTableBody td:nth-child(2) {
                 font-weight: 600;
-                color: var(--r-text, #f4f4f4);
+                color: var(--r-text, var(--color-ink));
             }
 
             /* approve / reject render as a full-width button pair */
             #approvalsTableBody td.action-btns {
                 flex-direction: row;
                 flex-flow: row wrap;
-                gap: 0.5rem;
+                gap: var(--space-xs);
                 margin-top: 0.65rem;
                 padding-top: 0.65rem;
-                border-top: 1px dotted var(--r-line-strong, #333);
+                border-top: 1px dotted var(--r-line-strong, var(--color-rule));
             }
 
             #approvalsTableBody td.action-btns::before {
@@ -697,7 +702,7 @@
             }
 
             .page-subtitle {
-                letter-spacing: 0.1em;
+                letter-spacing: normal;
             }
 
             .filter-btn {

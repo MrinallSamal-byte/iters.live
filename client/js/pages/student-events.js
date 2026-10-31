@@ -19,7 +19,7 @@
         return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    const CATEGORY_ICONS = { competition: '🏆', cultural: '🎭', workshop: '🛠️', seminar: '🎤', sports: '🏏', technical: '⚡', general: '🎪' };
+    const CATEGORY_ICONS = { competition: '', cultural: '', workshop: '', seminar: '', sports: '', technical: '', general: '' };
 
     function normalizeEvent(ev) {
         if (ev.date && ev.venue !== undefined) return ev;
@@ -41,7 +41,7 @@
             id: 1,
             title: 'Inter-College Coding Competition',
             category: 'competition',
-            icon: '💻',
+            icon: '',
             date: '2025-10-15',
             time: '10:00 AM',
             venue: 'Computer Lab 1',
@@ -55,7 +55,7 @@
             id: 2,
             title: 'Annual Cultural Fest 2025',
             category: 'cultural',
-            icon: '🎭',
+            icon: '',
             date: '2025-10-20',
             time: '5:00 PM',
             venue: 'Main Auditorium',
@@ -69,7 +69,7 @@
             id: 3,
             title: 'Web Development Workshop',
             category: 'workshop',
-            icon: '🌐',
+            icon: '',
             date: '2025-10-12',
             time: '2:00 PM',
             venue: 'Seminar Hall',
@@ -83,7 +83,7 @@
             id: 4,
             title: 'AI & Machine Learning Seminar',
             category: 'seminar',
-            icon: '🤖',
+            icon: '',
             date: '2025-10-18',
             time: '11:00 AM',
             venue: 'Conference Room',
@@ -97,7 +97,7 @@
             id: 5,
             title: 'Cricket Tournament 2025',
             category: 'sports',
-            icon: '🏏',
+            icon: '',
             date: '2025-10-25',
             time: '7:00 AM',
             venue: 'Sports Ground',
@@ -111,7 +111,7 @@
             id: 6,
             title: 'Hackathon 24 Hours',
             category: 'technical',
-            icon: '⚡',
+            icon: '',
             date: '2025-11-01',
             time: '9:00 AM',
             venue: 'Tech Park',
@@ -125,7 +125,7 @@
             id: 7,
             title: 'Photography Exhibition',
             category: 'cultural',
-            icon: '📸',
+            icon: '',
             date: '2025-10-22',
             time: '10:00 AM',
             venue: 'Art Gallery',
@@ -139,7 +139,7 @@
             id: 8,
             title: 'Career Guidance Seminar',
             category: 'seminar',
-            icon: '💼',
+            icon: '',
             date: '2025-10-14',
             time: '3:00 PM',
             venue: 'Auditorium',
@@ -244,7 +244,7 @@
         if (filteredEvents.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">🎪</div>
+                    <div class="empty-state-icon"></div>
                     <p>No events found in this category.</p>
                 </div>
             `;
@@ -261,33 +261,33 @@
             html += `
                 <div class="event-card">
                     <div class="event-banner">
-                        <span style="font-size: 3rem; z-index: 1;">${esc(event.icon || CATEGORY_ICONS[event.category] || '🎪')}</span>
+                        <span style="font-size: 3rem; z-index: 1;">${esc(event.icon || CATEGORY_ICONS[event.category] || '')}</span>
                         <span class="event-category-badge">${esc(event.category)}</span>
                     </div>
                     <div class="event-content">
                         <div class="event-title">${esc(event.title)}</div>
                         <div class="event-meta">
                             <div class="event-meta-item">
-                                <span>📅</span>
+                                <span></span>
                                 <span>${esc(formatDate(event.date))}${isToday ? ' (Today)' : ''}</span>
                             </div>
                             <div class="event-meta-item">
-                                <span>⏰</span>
+                                <span></span>
                                 <span>${esc(event.time || 'TBA')}</span>
                             </div>
                             <div class="event-meta-item">
-                                <span>📍</span>
+                                <span></span>
                                 <span>${esc(event.venue)}</span>
                             </div>
                             <div class="event-meta-item">
-                                <span>👤</span>
+                                <span></span>
                                 <span>${esc(event.organizer)}</span>
                             </div>
                         </div>
                         <div class="event-description">${esc(event.description)}</div>
                         <div class="event-footer">
                             <div class="event-participants">
-                                <span>👥</span>
+                                <span></span>
                                 <span>${esc(event.participants)}${event.max_participants != null ? '/' + esc(event.max_participants) : ''}</span>
                             </div>
                             <button 

@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marks · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Marks on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -40,15 +41,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 
 <body>
@@ -89,7 +93,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Performance Trend
-                </h3>
+                </h2>
                 <span class="section-badge">Semester-wise Analysis</span>
             </div>
             <div class="chart-wrapper">
@@ -102,7 +106,7 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Current Semester Marks
-                </h3>
+                </h2>
                 <span class="section-badge">Latest Results</span>
             </div>
             <div class="table-responsive">
@@ -120,7 +124,7 @@
                     </thead>
                     <tbody id="marksTableBody">
                         <tr>
-                            <td colspan="7" style="text-align:center; padding: 3rem;">Loading marks data...</td>
+                            <td colspan="7" style="text-align:center; padding: 3rem;">Loading marks data…</td>
                         </tr>
                     </tbody>
                 </table>
@@ -133,7 +137,7 @@
                 <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Grade Distribution
-                </h3>
+                </h2>
                 </div>
                 <div class="chart-wrapper" style="max-width: 400px; margin: 0 auto;">
                     <canvas id="gradeDistChart" height="250"></canvas>
@@ -144,28 +148,28 @@
                 <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Performance Insights
-                </h3>
+                </h2>
             </div>
             <div class="insights-list">
                 <div class="insight-item">
                     <div class="insight-icon-small">01</div>
                     <div>
                         <h4>Top Performing Subject</h4>
-                        <p id="topSubject">Loading...</p>
+                        <p id="topSubject">Loading…</p>
                     </div>
                 </div>
                 <div class="insight-item">
                     <div class="insight-icon-small">02</div>
                     <div>
                         <h4>Average Score</h4>
-                        <p id="averageScore">Loading...</p>
+                        <p id="averageScore">Loading…</p>
                     </div>
                 </div>
                 <div class="insight-item">
                     <div class="insight-icon-small">03</div>
                     <div>
                         <h4>Needs Improvement</h4>
-                        <p id="weakSubject">Loading...</p>
+                        <p id="weakSubject">Loading…</p>
                     </div>
                 </div>
                 <div class="insight-item">
@@ -185,34 +189,32 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Semester History
-                </h3>
+                </h2>
                 <span class="section-badge">All Semesters</span>
             </div>
             <div class="semester-timeline" id="semesterHistory">
                 <!-- Semester cards will be populated here -->
-                <div class="loading-text">Loading semester history...</div>
+                <div class="loading-text">Loading semester history…</div>
             </div>
         </section>
 
         <!-- CGPA Planner -->
         <section class="dashboard-section glass-card hover-lift scroll-reveal" id="cgpaPlanner">
             <div class="projection-head">
-                <span class="mono-eyebrow">CGPA PLANNER</span>
                 <span class="section-badge">Next Semester Projection</span>
             </div>
             <form id="projectionForm" class="projection-form" autocomplete="off">
-                <label class="mono-eyebrow" for="targetCgpaInput">TARGET CGPA</label>
+                <label class="mono-eyebrow" for="targetCgpaInput">Target CGPA</label>
                 <input type="number" id="targetCgpaInput" class="projection-input" step="0.1" min="0" max="10" inputmode="decimal" placeholder="8.5" />
-                <button type="submit" id="projectButton" class="projection-btn">PROJECT</button>
+                <button type="submit" id="projectButton" class="projection-btn">Project</button>
             </form>
-            <p class="mono-eyebrow projection-hint">AVERAGE SGPA NEEDED NEXT SEMESTER TO HIT THE TARGET</p>
             <div id="projectionResult" class="projection-result"></div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts - Load in specific order -->
@@ -228,12 +230,13 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             margin-bottom: 2rem;
         }
 
         .stat-number {
-            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
         }
@@ -241,29 +244,29 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
+            gap: var(--space-md);
             margin-bottom: 2rem;
         }
 
         .insights-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
         }
 
         .insight-item {
             display: flex;
-            gap: 1rem;
-            padding: 1rem 1.05rem;
-            background: rgba(255, 255, 255, 0.03);
+            gap: var(--space-md);
+            padding: var(--space-md) 1.05rem;
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .insight-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border-color: var(--r-line-strong);
         }
 
@@ -274,9 +277,9 @@
             width: 3rem;
             height: 3rem;
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.12em;
+            letter-spacing: normal;
             color: var(--text-secondary);
             flex-shrink: 0;
             background: transparent;
@@ -298,47 +301,47 @@
         .semester-timeline {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
         }
 
         .semester-card {
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.03);
+            padding: var(--space-lg);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .semester-card:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border-color: var(--r-line-strong);
         }
 
         .semester-card h4 {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
             font-weight: 600;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
         }
 
         .semester-card > div > div > p:first-child {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
         }
 
         .semester-card p:last-child {
-            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-weight: 800;
             font-variant-numeric: tabular-nums;
         }
 
         .chart-wrapper {
-            padding: 1rem;
+            padding: var(--space-md);
             min-height: 320px;
         }
 
@@ -349,10 +352,10 @@
         }
 
         .mono-eyebrow {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--text-secondary);
         }
 
@@ -360,7 +363,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
         }
 
@@ -375,11 +378,11 @@
         .projection-input {
             width: 8.5rem;
             padding: 0.65rem 0.85rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            border: 1px solid var(--color-rule);
             border-radius: 0;
             color: var(--text-primary);
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.95rem;
         }
 
@@ -389,16 +392,16 @@
         }
 
         .projection-btn {
-            padding: 0.65rem 1.5rem;
+            padding: 0.65rem var(--space-lg);
             background: var(--primary);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border: 1px solid var(--primary);
             border-radius: 0;
             cursor: pointer;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.7rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
         }
 
         .projection-btn:hover {
@@ -418,10 +421,10 @@
             margin-top: 1.25rem;
             display: none;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
             padding-top: 1.1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--color-rule);
         }
 
         .projection-result.is-visible {
@@ -430,18 +433,18 @@
 
         .projection-line {
             display: inline-flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.78rem;
-            letter-spacing: 0.1em;
+            letter-spacing: normal;
             color: var(--text-primary);
         }
 
         .projection-muted {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.08em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
@@ -449,9 +452,9 @@
             display: inline-block;
             padding: 0.3rem 0.7rem;
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
         }
 
         .proj-tag.feasible {
@@ -461,8 +464,8 @@
 
         .proj-tag.not-feasible {
             border: 1px solid var(--primary);
-            background: rgba(215, 25, 33, 0.12);
-            color: var(--primary);
+            background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+            color: var(--color-accent-text);
         }
 
         .projection-retry {
@@ -470,36 +473,36 @@
             background: transparent;
             border: none;
             border-bottom: 1px solid var(--primary);
-            color: var(--primary);
+            color: var(--color-accent-text);
             cursor: pointer;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
         }
 
         body.light-theme .projection-input {
-            background: rgba(19, 19, 19, 0.02);
-            border-color: rgba(19, 19, 19, 0.12);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .projection-result {
-            border-top-color: rgba(19, 19, 19, 0.1);
+            border-top-color: var(--color-rule);
         }
 
         body.light-theme .insight-item,
         body.light-theme .semester-card {
-            background: rgba(19, 19, 19, 0.02);
-            border-color: rgba(19, 19, 19, 0.1);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .insight-icon-small {
-            border-color: rgba(19, 19, 19, 0.12);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .insight-item:hover,
         body.light-theme .semester-card:hover {
-            background: rgba(19, 19, 19, 0.04);
-            border-color: rgba(19, 19, 19, 0.25);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         @media (max-width: 980px) {
@@ -511,12 +514,12 @@
         @media (max-width: 640px) {
             .chart-wrapper {
                 min-height: 260px;
-                padding: 0.25rem 0;
+                padding: var(--space-2xs) 0;
             }
 
             .insight-item,
             .semester-card {
-                padding: 1rem;
+                padding: var(--space-md);
             }
         }
 

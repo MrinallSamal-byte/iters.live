@@ -4,118 +4,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Log in to ITERasn hub, the campus portal for students, teachers and admins at ITER, SOA University.">
+    <meta name="theme-color" content="#0f0b0b">
     <title>Login - ITERasn hub</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link rel="stylesheet" href="/css/responsive-enhanced.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/button-fixes.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/login-split.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/home-minimal.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site/tokens.css">
+    <link rel="stylesheet" href="css/site/base.css">
+    <link rel="stylesheet" href="css/site/site.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
-    <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 
 <body class="nothing-home public-auth-page login-page">
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
+    <div class="auth-grid">
+        <aside class="auth-brand" aria-label="ITERasn hub">
+            <a href="/index.html" class="auth-wordmark" aria-label="ITERasn hub home">
+                <img class="brand-logo" src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
+                <span>ITERasn hub</span>
+            </a>
+            <div class="auth-brand-copy">
+                <h1 class="brand-title">ITERasn hub</h1>
+                <p class="brand-subtitle">Import your official SOA portal data once. Attendance, marks, timetable, checked in seconds.</p>
+            </div>
+            <p class="auth-brand-foot">Institute of Technical Education &amp; Research, SOA</p>
+        </aside>
 
-    <div class="login-container">
-        <div class="login-wrapper">
-            <!-- Left Side: Branding -->
-            <div class="login-brand-section">
-                <div class="brand-content">
-                    <div class="brand-kicker">
-                        <span class="r-glyphs" aria-hidden="true"><i class="lit"></i><i></i><i></i><i class="lit"></i><i></i><i></i><i></i></span>
-                        <span class="brand-kicker-text">SOA // Access Terminal</span>
-                    </div>
-                    <img class="brand-logo" src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
-                    <h1 class="brand-title">ITERasn hub</h1>
-                    <p class="brand-subtitle">Import your official SOA portal data once. Attendance, marks, timetable — checked in seconds.</p>
-                </div>
+        <div class="auth-panel">
+            <div class="auth-topbar">
+                <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">Back to home</a>
+                <button type="button" class="theme-toggle" id="themeToggle" title="Toggle theme"
+                    aria-label="Toggle dark and light theme"><span class="theme-icon" aria-hidden="true"></span></button>
             </div>
 
-            <!-- Right Side: Login Form -->
-            <div class="login-form-section">
-                <!-- Mobile Header (Visible only on small screens) -->
-                <div class="mobile-brand-header">
-                    <img class="mobile-brand-logo" src="/assets/soa-logo.png" alt="SOA Logo">
-                    <h2 class="mobile-brand-title">ITERasn hub</h2>
+            <div class="mobile-brand-header">
+                <img class="mobile-brand-logo" src="assets/soa-logo.png" alt="SOA Logo">
+                <h2 class="mobile-brand-title">ITERasn hub</h2>
+            </div>
+
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p>Please login to your account</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="registration_number">Registration Number</label>
+                    <input type="text" id="registration_number" name="registration_number"
+                        placeholder="e.g. STU20250001" required autocomplete="username">
                 </div>
 
-                <div class="login-header">
-                    <h2>Welcome Back</h2>
-                    <p>Please login to your account</p>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" placeholder="Enter your password"
+                            required autocomplete="current-password">
+                        <button type="button" class="password-toggle-btn" data-password-toggle="password"
+                            aria-label="Toggle password visibility" aria-pressed="false">Show</button>
+                    </div>
                 </div>
 
-                <form id="loginForm" class="login-form">
-                    <div class="form-group">
-                        <label for="registration_number">Registration Number</label>
-                        <input type="text" id="registration_number" name="registration_number"
-                            placeholder="e.g. STU20250001" required autocomplete="username">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="password-field">
-                            <input type="password" id="password" name="password" placeholder="Enter your password"
-                                required autocomplete="current-password">
-                            <button type="button" class="password-toggle-btn" data-password-toggle="password"
-                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
-                        </div>
-                    </div>
-
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="remember"> Remember me
-                        </label>
-                        <button type="button" id="forgotPasswordBtn" class="forgot-link forgot-link-btn">Forgot
-                            Password?</button>
-                    </div>
-                    <p class="forgot-hint" id="forgotPasswordHint" hidden>Password resets are handled by the college
-                        admin office.</p>
-
-                    <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
-                        Login
-                    </button>
-
-                    <div class="divider">
-                        <span>OR</span>
-                    </div>
-
-                    <button type="button" class="btn btn-secondary btn-block" id="googleLoginBtn"
-                        style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-                            style="width: 18px; height: 18px;">
-                        Sign in with Google
-                    </button>
-
-                    <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
-                    <div class="status-message" id="statusMessage" role="status" aria-live="polite"
-                        style="display: none;"></div>
-                </form>
-
-                <div class="login-footer">
-                    <p>Don't have an account? <a href="/register.html" data-public-nav="register">Register here</a></p>
-                    <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">← Back to Home</a>
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember"> Remember me
+                    </label>
+                    <button type="button" id="forgotPasswordBtn" class="forgot-link forgot-link-btn">Forgot
+                        Password?</button>
                 </div>
+                <p class="forgot-hint" id="forgotPasswordHint" hidden>Password resets are handled by the college
+                    admin office.</p>
+
+                <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                    Login
+                </button>
+
+                <div class="divider">
+                    <span>or</span>
+                </div>
+
+                <button type="button" class="btn btn-outline btn-block" id="googleLoginBtn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" width="18" height="18">
+                    Sign in with Google
+                </button>
+
+                <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
+                <div class="status-message" id="statusMessage" role="status" aria-live="polite"
+                    style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>Don’t have an account? <a href="/register.html" data-public-nav="register">Register here</a></p>
             </div>
         </div>
     </div>
-
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
-    </button>
 
     <script defer src="/js/mobile-fixes.js"></script>
     <script defer src="/js/prevent-empty-hash.js"></script>
@@ -507,7 +490,7 @@
                 btn.addEventListener('click', () => {
                     const willShow = input.type === 'password';
                     input.type = willShow ? 'text' : 'password';
-                    btn.textContent = willShow ? '[ HIDE ]' : '[ SHOW ]';
+                    btn.textContent = willShow ? 'Hide' : 'Show';
                     btn.setAttribute('aria-pressed', String(willShow));
                 });
             });

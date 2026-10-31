@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Question Bank · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Question Bank on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
+    
 </head>
 <body>
     <main class="dashboard-main" aria-label="Teacher Question Bank main content" id="main-content">
@@ -88,8 +92,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Add New Question
-                </h3>
+                    Add New Question
+                </h2>
             </div>
             
             <form id="addQuestionForm" class="upload-form">
@@ -150,7 +154,7 @@
 
                     <div class="form-group">
                         <label for="bloomLevel" class="form-label">
-                            Bloom's Level
+                            Bloom’s Level
                         </label>
                         <select id="bloomLevel" name="bloomLevel" class="form-select">
                             <option value="">Select Level</option>
@@ -225,7 +229,7 @@
                         <span>✓</span> Add Question
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="resetQuestionForm()">
-                        <span>↺</span> Reset
+                        <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></span> Reset
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="importQuestions()">
                         Import CSV
@@ -238,8 +242,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Generate Question Paper
-                </h3>
+                    Generate Question Paper
+                </h2>
             </div>
 
             <form id="generatePaperForm" class="upload-form">
@@ -312,11 +316,11 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Question Bank
-                </h3>
+                    Question Bank
+                </h2>
                 <div class="filter-tabs">
                     <button class="tab-btn active" data-filter="all">All</button>
-                    <button class="tab-btn" data-filter="mcq">MCQ</button>
+                    <button class="tab-btn" data-filter="mcq">Mcq</button>
                     <button class="tab-btn" data-filter="short_answer">Short</button>
                     <button class="tab-btn" data-filter="essay">Long</button>
                 </div>
@@ -342,15 +346,15 @@
             </div>
 
             <div class="questions-list" id="questionsList">
-                <div class="loading-text">Loading questions...</div>
+                <div class="loading-text">Loading questions…</div>
             </div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Question Preview Modal -->
     <div id="questionModal" class="modal" style="display:none;">
@@ -387,6 +391,7 @@
     </script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         /* ============================================================
            NOTHING EDITION - page-local overrides
            Black panels, hairline borders, mono labels, red #d71921
@@ -399,27 +404,27 @@
             --danger: var(--r-accent);
         }
 
-        :root {
-            --np-panel: #0a0a0a;
-            --np-inset: rgba(255, 255, 255, 0.04);
-            --np-line: #1f1f1f;
-            --np-line-strong: #333333;
-            --np-text: #f4f4f4;
-            --np-text-2: #b0b0b0;
-            --np-text-3: #757575;
-            --np-red: #d71921;
-            --np-red-wash: rgba(215, 25, 33, 0.1);
+        body {
+            --np-panel: var(--color-paper);
+            --np-inset: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            --np-line: var(--color-rule);
+            --np-line-strong: var(--color-rule);
+            --np-text: var(--color-ink);
+            --np-text-2: var(--color-ink-2);
+            --np-text-3: var(--color-ink-2);
+            --np-red: var(--color-accent);
+            --np-red-wash: color-mix(in oklab, var(--color-accent) 10%, transparent);
         }
 
         body.light-theme {
-            --np-panel: #ffffff;
-            --np-inset: rgba(0, 0, 0, 0.03);
-            --np-line: #e4e4e4;
-            --np-line-strong: #c9c9c9;
-            --np-text: #0d0d0d;
-            --np-text-2: #4a4a4a;
-            --np-text-3: #8a8a8a;
-            --np-red-wash: rgba(215, 25, 33, 0.07);
+            --np-panel: var(--color-paper-2);
+            --np-inset: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            --np-line: var(--color-rule);
+            --np-line-strong: var(--color-rule);
+            --np-text: var(--color-ink);
+            --np-text-2: var(--color-ink);
+            --np-text-3: var(--color-ink-2);
+            --np-red-wash: color-mix(in oklab, var(--color-accent) 8%, transparent);
         }
 
         /* Hero - layout only; Doto masthead handled by refined-ui */
@@ -430,17 +435,17 @@
         }
 
         .page-title {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 800;
             font-size: clamp(1.8rem, 4vw, 2.5rem);
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.01em;
             line-height: 1.05;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--np-text);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .title-icon {
@@ -448,10 +453,10 @@
         }
 
         .page-subtitle {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
         }
 
@@ -463,9 +468,9 @@
 
         /* Form - sharp fields, red focus, dotted rule under header */
         .upload-form {
-            margin-top: 1.5rem;
+            margin-top: var(--space-lg);
             border-top: 1px dotted var(--np-line-strong);
-            padding-top: 1.5rem;
+            padding-top: var(--space-lg);
         }
 
         .form-row {
@@ -482,15 +487,15 @@
         }
 
         .form-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-3);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--space-xs);
         }
 
         .label-icon { font-size: 0.85rem; }
@@ -521,8 +526,8 @@
         }
 
         body.light-theme .form-select option {
-            background: #ffffff;
-            color: #0d0d0d;
+            background: var(--color-paper-2);
+            color: var(--color-ink);
         }
 
         .form-textarea {
@@ -532,7 +537,7 @@
 
         /* MCQ options - flat bordered rows with mono index numerals */
         .mcq-options-section {
-            margin: 1.5rem 0;
+            margin: var(--space-lg) 0;
             padding: 1.25rem;
             background: var(--np-inset);
             border: 1px solid var(--np-line);
@@ -540,25 +545,25 @@
         }
 
         .options-title {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
             font-size: 0.95rem;
             color: var(--np-text);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .options-grid {
             counter-reset: np-opt;
             display: grid;
-            gap: 0.75rem;
+            gap: var(--space-sm);
         }
 
         .option-group {
             counter-increment: np-opt;
             position: relative;
-            padding: 0.9rem 1rem 0.9rem 3.4rem;
+            padding: 0.9rem var(--space-md) 0.9rem 3.4rem;
             background: var(--np-panel);
             border: 1px solid var(--np-line);
             border-radius: 2px;
@@ -570,7 +575,7 @@
             position: absolute;
             left: 1rem;
             top: 0.95rem;
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
             font-size: 1rem;
             color: var(--np-text-3);
@@ -581,21 +586,21 @@
         }
 
         .option-group:focus-within::before {
-            color: var(--np-red);
+            color: var(--color-accent-text);
         }
 
         .option-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-family: var(--r-font-mono);
+            gap: var(--space-xs);
+            font-family: var(--font-body);
             font-size: 0.64rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--np-text-2);
             cursor: pointer;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
         }
 
         .option-label input[type="radio"] {
@@ -626,7 +631,7 @@
 
         /* Difficulty distribution panel */
         .difficulty-distribution {
-            margin: 1.5rem 0;
+            margin: var(--space-lg) 0;
             padding: 1.25rem;
             background: var(--np-inset);
             border: 1px solid var(--np-line);
@@ -634,19 +639,19 @@
         }
 
         .difficulty-distribution h4 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
             font-size: 0.95rem;
             color: var(--np-text);
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         /* Actions / buttons */
         .form-actions {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
             margin-top: 2rem;
         }
@@ -659,16 +664,16 @@
         /* Filter tabs - squared mono chips */
         .filter-tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
         }
 
         .tab-btn {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.66rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             padding: 0.45rem 0.9rem;
             background: transparent;
             border: 1px solid var(--np-line-strong);
@@ -682,14 +687,14 @@
         .tab-btn.active {
             background: var(--np-red);
             border-color: var(--np-red);
-            color: #ffffff;
+            color: var(--color-accent-ink);
         }
 
         /* Search / filter bar */
         .search-filter-bar {
             display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
             flex-wrap: wrap;
         }
 
@@ -745,7 +750,7 @@
 
         /* Question cards - flat panels with red tick */
         .questions-list {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             gap: 0.85rem;
         }
@@ -769,23 +774,23 @@
             display: flex;
             justify-content: space-between;
             align-items: start;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             margin-bottom: 0.9rem;
         }
 
         .question-meta {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             flex-wrap: wrap;
         }
 
         /* Meta badges - squared mono chips */
         .meta-badge {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             padding: 0.24rem 0.55rem;
             border-radius: 0;
             border: 1px solid var(--np-line-strong);
@@ -794,8 +799,8 @@
 
         .badge-type {
             background: var(--np-red-wash);
-            color: var(--np-red);
-            border-color: rgba(215, 25, 33, 0.4);
+            color: var(--color-accent-text);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .badge-difficulty-easy {
@@ -805,13 +810,13 @@
 
         .badge-difficulty-medium {
             background: var(--np-red-wash);
-            color: var(--np-red);
-            border-color: rgba(215, 25, 33, 0.4);
+            color: var(--color-accent-text);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         .badge-difficulty-hard {
             background: var(--np-red);
-            color: #ffffff;
+            color: var(--color-accent-ink);
             border-color: var(--np-red);
         }
 
@@ -819,12 +824,12 @@
             color: var(--np-text);
             font-size: 0.98rem;
             line-height: 1.6;
-            margin-bottom: 1rem;
+            margin-bottom: var(--space-md);
         }
 
         .question-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--space-xs);
             justify-content: flex-end;
         }
 
@@ -840,7 +845,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: color-mix(in oklab, var(--color-paper) 70%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -848,7 +853,7 @@
         }
 
         body.light-theme .modal {
-            background: rgba(0, 0, 0, 0.45);
+            background: color-mix(in oklab, var(--color-paper) 45%, transparent);
         }
 
         .modal-content {
@@ -866,14 +871,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.35rem 1.5rem;
+            padding: 1.35rem var(--space-lg);
             border-bottom: 1px dotted var(--np-line-strong);
         }
 
         .modal-header h3 {
-            font-family: var(--r-font-display);
+            font-family: var(--font-body);
             font-weight: 700;
-            text-transform: uppercase;
+            text-transform: none;
             letter-spacing: 0.02em;
             color: var(--np-text);
         }
@@ -890,7 +895,7 @@
         }
 
         .modal-close:hover {
-            color: var(--np-red);
+            color: var(--color-accent-text);
             border-color: var(--np-red);
         }
 
@@ -938,7 +943,7 @@
             html,
             body {
                 max-width: 100%;
-                overflow-x: hidden;
+                overflow-x: clip;
             }
 
             .dashboard-main {
@@ -971,12 +976,12 @@
 
             .mcq-options-section,
             .difficulty-distribution {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .section-header-formal {
                 flex-wrap: wrap;
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
 
             .question-actions {
@@ -1034,11 +1039,11 @@
             /* Modals fit small screens and scroll internally */
             .modal {
                 align-items: flex-start;
-                padding: 16px;
+                padding: var(--space-md);
             }
 
             .modal-content {
-                width: min(560px, calc(100vw - 32px));
+                width: min(560px, 100%);
                 max-width: 100%;
                 max-height: calc(100vh - 32px);
                 overflow-y: auto;

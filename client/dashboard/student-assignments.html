@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assignments · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Assignments on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,14 +40,17 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -66,11 +70,10 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     Upcoming Deadlines
-                </h3>
-                <span class="mono-eyebrow">NEXT 6 ITEMS</span>
+                </h2>
             </div>
             <div class="deadlines-list" id="deadlinesList">
-                <div class="loading-text">Loading deadlines...</div>
+                <div class="loading-text">Loading deadlines…</div>
             </div>
         </section>
 
@@ -79,18 +82,18 @@
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
                     My Assignments
-                </h3>
-                <span class="section-badge" id="assignmentCountBadge">Loading...</span>
+                </h2>
+                <span class="section-badge" id="assignmentCountBadge">Loading…</span>
             </div>
             <div class="assignments-grid" id="assignmentsList">
-                <div class="loading-text">Loading assignments...</div>
+                <div class="loading-text">Loading assignments…</div>
             </div>
         </section>
     </main>
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
+        <span class="theme-icon" aria-hidden="true"></span>
     </button>
 
     <!-- Scripts -->
@@ -105,6 +108,7 @@
     <script defer src="/js/chatbot.js"></script>
 
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         .page-hero {
             padding: 2rem;
             margin-bottom: 2rem;
@@ -115,17 +119,17 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1.5rem;
+            gap: var(--space-lg);
         }
 
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-xs);
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: var(--space-md);
         }
 
         .page-subtitle {
@@ -134,10 +138,10 @@
         }
 
         .mono-eyebrow {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             color: var(--text-secondary);
         }
 
@@ -150,7 +154,7 @@
         .deadlines-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             margin-top: 1.25rem;
         }
 
@@ -159,7 +163,7 @@
             align-items: center;
             gap: 1.1rem;
             padding: 0.9rem 1.1rem;
-            background: rgba(255, 255, 255, 0.03);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border: 1px solid var(--r-line);
             border-left: 2px solid transparent;
             border-radius: 0;
@@ -174,20 +178,20 @@
             flex-direction: column;
             align-items: center;
             min-width: 3.4rem;
-            padding: 0.45rem 0.5rem;
+            padding: 0.45rem var(--space-xs);
             border: 1px solid var(--r-line);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
         }
 
         .deadline-month {
             font-size: 0.6rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
         .deadline-day {
-            font-family: 'Doto', 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 1.3rem;
             font-weight: 800;
             line-height: 1.1;
@@ -213,18 +217,18 @@
         .deadline-type {
             align-self: flex-start;
             padding: 0.18rem 0.55rem;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid var(--color-rule);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.58rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
         .deadline-due {
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.68rem;
-            letter-spacing: 0.08em;
+            letter-spacing: normal;
             color: var(--text-secondary);
             white-space: nowrap;
         }
@@ -233,9 +237,9 @@
         .empty-assignments {
             padding: 2rem;
             text-align: center;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.72rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
@@ -243,7 +247,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
+            gap: var(--space-md);
             flex-wrap: wrap;
             padding: 2rem;
         }
@@ -255,20 +259,20 @@
 
         .reconnect-cta {
             display: inline-block;
-            padding: 0.5rem 0.9rem;
+            padding: var(--space-xs) 0.9rem;
             border: 1px solid var(--primary);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.66rem;
-            letter-spacing: 0.12em;
-            color: var(--primary);
+            letter-spacing: normal;
+            color: var(--color-accent-text);
             text-decoration: none;
             background: transparent;
             cursor: pointer;
         }
 
         .reconnect-cta:hover {
-            background: rgba(215, 25, 33, 0.08);
+            background: color-mix(in oklab, var(--color-accent) 8%, transparent);
         }
 
         .assignments-grid {
@@ -283,22 +287,22 @@
             flex-direction: column;
             gap: 0.7rem;
             padding: 1.25rem;
-            background: rgba(255, 255, 255, 0.03);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             border: 1px solid var(--r-line);
             border-radius: 0;
             transition: border-color 0.15s ease, background 0.15s ease;
         }
 
         .assignment-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(215, 25, 33, 0.45);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+            border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
         }
 
         .assignment-card-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 0.75rem;
+            gap: var(--space-sm);
         }
 
         .assignment-title {
@@ -312,11 +316,11 @@
         .status-pill {
             flex-shrink: 0;
             padding: 0.22rem 0.6rem;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid var(--color-rule);
             border-radius: 0;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.58rem;
-            letter-spacing: 0.14em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
@@ -327,16 +331,16 @@
 
         .status-pill.graded {
             border-color: var(--primary);
-            color: var(--primary);
+            color: var(--color-accent-text);
         }
 
         .assignment-meta {
             display: flex;
             gap: 0.9rem;
             flex-wrap: wrap;
-            font-family: 'IBM Plex Mono', monospace;
+            font-family: var(--font-body);
             font-size: 0.64rem;
-            letter-spacing: 0.1em;
+            letter-spacing: normal;
             color: var(--text-secondary);
         }
 
@@ -349,8 +353,8 @@
 
         body.light-theme .deadline-item,
         body.light-theme .assignment-card {
-            background: rgba(19, 19, 19, 0.02);
-            border-color: rgba(19, 19, 19, 0.1);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: var(--color-rule);
         }
 
         body.light-theme .deadline-item.is-urgent {
@@ -358,19 +362,19 @@
         }
 
         body.light-theme .assignment-card:hover {
-            background: rgba(19, 19, 19, 0.04);
-            border-color: rgba(215, 25, 33, 0.5);
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            border-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
         }
 
         body.light-theme .deadline-date,
         body.light-theme .deadline-type,
         body.light-theme .status-pill {
-            border-color: rgba(19, 19, 19, 0.12);
+            border-color: var(--color-rule);
         }
 
         @media (max-width: 640px) {
             .page-hero {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
 
             .page-title {
@@ -414,7 +418,7 @@
         @media (max-width: 480px) {
             .deadline-item {
                 flex-wrap: wrap;
-                gap: 0.75rem;
+                gap: var(--space-sm);
                 padding: 0.85rem;
             }
 

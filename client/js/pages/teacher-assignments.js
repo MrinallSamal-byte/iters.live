@@ -103,9 +103,9 @@ function renderAssignmentsList() {
                 <span class="assignment-status status-active">Active</span>
             </div>
             <div class="assignment-meta">
-                <span class="meta-item">🎓 ${assignmentsEscape(a.department)} · Year ${assignmentsEscape(a.year)}</span>
-                <span class="meta-item">🎯 ${assignmentsEscape(a.total_marks)} marks</span>
-                <span class="meta-item">📅 Due ${assignmentsEscape(formatDeadline(a.deadline))}</span>
+                <span class="meta-item"> ${assignmentsEscape(a.department)} · Year ${assignmentsEscape(a.year)}</span>
+                <span class="meta-item"> ${assignmentsEscape(a.total_marks)} marks</span>
+                <span class="meta-item"> Due ${assignmentsEscape(formatDeadline(a.deadline))}</span>
             </div>
             <p style="font-size: 0.875rem; color: var(--text-secondary);">${assignmentsEscape(a.description)}</p>
             <div class="assignment-actions">
@@ -229,11 +229,11 @@ function viewAssignment(id) {
     if (modalTitle) modalTitle.textContent = assignment.title;
     if (modalBody) {
         modalBody.innerHTML = `
-            <p class="assignment-subject">📖 ${assignmentsEscape(assignment.subject)}</p>
+            <p class="assignment-subject"> ${assignmentsEscape(assignment.subject)}</p>
             <div class="assignment-meta">
-                <span class="meta-item">🎓 ${assignmentsEscape(assignment.department)} · Year ${assignmentsEscape(assignment.year)}</span>
-                <span class="meta-item">🎯 ${assignmentsEscape(assignment.total_marks)} marks</span>
-                <span class="meta-item">📅 Due ${assignmentsEscape(formatDeadline(assignment.deadline))}</span>
+                <span class="meta-item"> ${assignmentsEscape(assignment.department)} · Year ${assignmentsEscape(assignment.year)}</span>
+                <span class="meta-item"> ${assignmentsEscape(assignment.total_marks)} marks</span>
+                <span class="meta-item"> Due ${assignmentsEscape(formatDeadline(assignment.deadline))}</span>
             </div>
             <p style="color: var(--text-primary);">${assignmentsEscape(assignment.description)}</p>
             <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">Click Grade on this assignment to review and score student submissions.</p>

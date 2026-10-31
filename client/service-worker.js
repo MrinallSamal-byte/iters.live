@@ -1,5 +1,5 @@
 // ITERasn hub service worker — offline-first caching strategies
-const CACHE_VERSION = 'v8-icon-fix';
+const CACHE_VERSION = 'v10-app-redesign';
 const CACHE_NAME = `iter-core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `iter-runtime-${CACHE_VERSION}`;
 const RUNTIME_MAX_ENTRIES = 200;
@@ -23,6 +23,12 @@ const PRECACHE_URLS = [
   '/css/home-minimal.css',
   '/css/refined-ui.css',
   '/css/home-nothing.css',
+  '/css/site/tokens.css',
+  '/css/site/base.css',
+  '/css/site/site.css',
+  '/css/site/chatbot.css',
+  '/css/site/app.css',
+  '/css/base/notification-center.css',
   '/js/main.js',
   '/js/landing.js',
   '/js/mobile-fixes.js',

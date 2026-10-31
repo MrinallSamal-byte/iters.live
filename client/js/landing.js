@@ -54,7 +54,7 @@
                     const eased = 1 - Math.pow(1 - progress, 3);
                     const value = Math.round(target * eased);
 
-                    counter.textContent = `${value}${suffix}`;
+                    counter.textContent = `${value.toLocaleString('en-US')}${suffix}`;
 
                     if (progress < 1) {
                         window.requestAnimationFrame(step);

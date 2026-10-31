@@ -58,7 +58,7 @@
     if (elements.empty) elements.empty.style.display = 'none';
     elements.list.innerHTML = `
       <div class="announcement-card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
-        <p style="color: var(--error, #ff6b6b); margin-bottom: 1rem;">Failed to load announcements${error && error.message ? `: ${escapeHtml(error.message)}` : ''}</p>
+        <p style="color: var(--color-error); margin-bottom: 1rem;">Failed to load announcements${error && error.message ? `: ${escapeHtml(error.message)}` : ''}</p>
         <button class="btn btn-primary" id="annRetryBtn">Retry</button>
       </div>
     `;
@@ -127,19 +127,19 @@
     const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    const priorityIcon = {urgent: '🔴', normal: '🟢', info: '🔵'}[ann.priority] || '🟢';
-    const audienceIcon = {all: '👥', students: '👨‍🎓', teachers: '👨‍🏫', department: '🎓'}[ann.target_audience] || '👥';
+    const priorityIcon = {urgent: '', normal: '', info: ''}[ann.priority] || '';
+    const audienceIcon = {all: '', students: '‍', teachers: '‍', department: ''}[ann.target_audience] || '';
 
     return `
       <div class="announcement-card" data-priority="${escapeHtml(String(ann.priority || ''))}" data-id="${escapeHtml(String(ann.id))}">
-        ${ann.pinned ? '<div class="pinned-badge">📌 Pinned</div>' : ''}
+        ${ann.pinned ? '<div class="pinned-badge"> Pinned</div>' : ''}
 
         <h3 class="announcement-title">${escapeHtml(ann.title)}</h3>
 
         <div class="announcement-meta">
-          <span class="announcement-meta-item">📅 ${dateStr}</span>
-          <span class="announcement-meta-item">🕐 ${timeStr}</span>
-          <span class="announcement-meta-item">👤 ${escapeHtml(ann.created_by || 'Admin')}</span>
+          <span class="announcement-meta-item"> ${dateStr}</span>
+          <span class="announcement-meta-item"> ${timeStr}</span>
+          <span class="announcement-meta-item"> ${escapeHtml(ann.created_by || 'Admin')}</span>
         </div>
 
         <p class="announcement-content">${escapeHtml(ann.content)}</p>
@@ -150,8 +150,8 @@
         </div>
 
         <div class="announcement-actions">
-          <button class="btn btn-sm btn-primary" onclick="editAnnouncement('${escapeHtml(String(ann.id))}')">✏️ Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement('${escapeHtml(String(ann.id))}', this)">🗑️ Delete</button>
+          <button class="btn btn-sm btn-primary" onclick="editAnnouncement('${escapeHtml(String(ann.id))}')"> Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteAnnouncement('${escapeHtml(String(ann.id))}', this)"> Delete</button>
         </div>
       </div>
     `;
@@ -299,7 +299,7 @@
       setTimeout(() => {
         if (btn.isConnected) {
           delete btn.dataset.confirming;
-          btn.textContent = '🗑️ Delete';
+          btn.textContent = ' Delete';
         }
       }, 4000);
       return;

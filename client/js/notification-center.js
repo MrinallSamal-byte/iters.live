@@ -60,7 +60,7 @@
             setUnread(res.unreadCount || 0);
             const items = res.notifications || [];
             if (!items.length) {
-                el.list.innerHTML = '<div class="notification-empty"><i>\uD83D\uDD14</i><p>NO NOTIFICATIONS</p></div>';
+                el.list.innerHTML = '<div class="notification-empty"><i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2h-14z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg></i><p>NO NOTIFICATIONS</p></div>';
                 return;
             }
             el.list.innerHTML = '';
@@ -100,16 +100,15 @@
     }
     function buildUi() {
         if (document.getElementById('notificationBell') || !document.body) return;
-        // Inject the bell into the sidebar header, next to the collapse toggle.
+        // Dashboards: the bell goes in the top bar (see app.css), not the sidebar header.
         const header = document.querySelector('.sidebar-header');
         const sidebarToggle = document.getElementById('sidebarToggle');
         el.bell = document.createElement('button');
         el.bell.id = 'notificationBell'; el.bell.type = 'button'; el.bell.className = 'notification-bell';
         el.bell.setAttribute('aria-label', 'Notifications'); el.bell.title = 'Notifications';
-        el.bell.innerHTML = '<i>\uD83D\uDD14</i><span class="notification-badge" id="notificationBadge"></span>';
-        if (header && sidebarToggle && sidebarToggle.parentElement === header) header.insertBefore(el.bell, sidebarToggle);
-        else if (header) header.appendChild(el.bell);
-        else document.body.appendChild(el.bell);
+        el.bell.innerHTML = '<i><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2h-14z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg></i><span class="notification-badge" id="notificationBadge"></span>';
+        // Dashboards: the bell lives in the top bar beside the theme toggle and profile, not in the sidebar header.
+        document.body.appendChild(el.bell);
         el.badge = el.bell.querySelector('.notification-badge');
         el.panel = document.createElement('div');
         el.panel.className = 'notification-panel';

@@ -3,172 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Create an ITERasn hub account as a student or teacher at ITER, SOA University.">
+    <meta name="theme-color" content="#0f0b0b">
     <title>Register - ITERasn hub</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/animations.css">
-    <link rel="stylesheet" href="/css/responsive.css">
-    <link rel="stylesheet" href="/css/responsive-enhanced.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/responsive-universal.css">
-    <link rel="stylesheet" href="/css/button-fixes.css">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/login-split.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="stylesheet" href="/css/home-minimal.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/site/tokens.css">
+    <link rel="stylesheet" href="css/site/base.css">
+    <link rel="stylesheet" href="css/site/site.css">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
-    <link rel="stylesheet" href="/css/refined-ui.css">
 </head>
 <body class="nothing-home public-auth-page register-page">
-    <div class="bg-animation">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
+    <div class="auth-grid">
+        <aside class="auth-brand" aria-label="ITERasn hub">
+            <a href="/index.html" class="auth-wordmark" aria-label="ITERasn hub home">
+                <img class="brand-logo" src="assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
+                <span>ITERasn hub</span>
+            </a>
+            <div class="auth-brand-copy">
+                <h1 class="brand-title">ITERasn hub</h1>
+                <p class="brand-subtitle">Import your official SOA portal data once. Attendance, marks, timetable, checked in seconds.</p>
+                <ul class="register-highlights">
+                    <li><strong>Students</strong> can get attendance, marks, timetable, notes, events, and payments in one place.</li>
+                    <li><strong>Teachers</strong> can handle attendance, marks, assignments, materials, and rubrics faster.</li>
+                    <li><strong>Designed for flow</strong> with a lighter, cleaner interface that matches ITERasn hub everywhere.</li>
+                </ul>
+            </div>
+            <p class="auth-brand-foot">Institute of Technical Education &amp; Research, SOA</p>
+        </aside>
 
-    <div class="login-container">
-        <div class="login-wrapper register-wrapper">
-            <div class="login-brand-section">
-                <div class="brand-content">
-                    <div class="brand-kicker">
-                        <span class="r-glyphs" aria-hidden="true"><i class="lit"></i><i></i><i></i><i class="lit"></i><i></i><i></i><i></i></span>
-                        <span class="brand-kicker-text">SOA // New Account</span>
-                    </div>
-                    <img class="brand-logo" src="/assets/soa-logo.png" alt="Siksha 'O' Anusandhan University">
-                    <h1 class="brand-title">ITERasn hub</h1>
-                    <p class="brand-subtitle">Import your official SOA portal data once. Attendance, marks, timetable — checked in seconds.</p>
-
-                    <div class="demo-hint-compact register-highlights">
-                        <ul>
-                            <li><span>01</span> <strong>Students</strong> can get attendance, marks, timetable, notes, events, and payments in one place.</li>
-                            <li><span>02</span> <strong>Teachers</strong> can handle attendance, marks, assignments, materials, and rubrics faster.</li>
-                            <li><span>03</span> <strong>Designed for flow</strong> with a lighter, cleaner interface that matches ITERasn hub everywhere.</li>
-                        </ul>
-                    </div>
-                </div>
+        <div class="auth-panel">
+            <div class="auth-topbar">
+                <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">Back to home</a>
+                <button type="button" class="theme-toggle" id="themeToggle" title="Toggle theme"
+                    aria-label="Toggle dark and light theme"><span class="theme-icon" aria-hidden="true"></span></button>
             </div>
 
-            <div class="login-form-section">
-                <div class="mobile-brand-header">
-                    <img class="mobile-brand-logo" src="/assets/soa-logo.png" alt="SOA Logo">
-                    <h2 class="mobile-brand-title">ITERasn hub</h2>
+            <div class="mobile-brand-header">
+                <img class="mobile-brand-logo" src="assets/soa-logo.png" alt="SOA Logo">
+                <h2 class="mobile-brand-title">ITERasn hub</h2>
+            </div>
+
+            <div class="login-header">
+                <h1>Create Account</h1>
+                <p>Register for ITERasn hub and choose the role that fits your workspace.</p>
+            </div>
+
+            <div class="role-selection" role="group" aria-label="Account role">
+                <button type="button" class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">Student</button>
+                <button type="button" class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">Teacher</button>
+            </div>
+
+            <form id="registerForm" class="login-form">
+                <input type="hidden" name="role" id="selectedRole" value="student">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
                 </div>
-
-                <div class="login-header">
-                    <h1>Create Account</h1>
-                    <p>Register for ITERasn hub and choose the role that fits your workspace.</p>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
                 </div>
-
-                <div class="role-selection">
-                    <button class="btn btn-outline role-btn active" data-role="student" onclick="selectRole('student')">
-                        Student
-                    </button>
-                    <button class="btn btn-outline role-btn" data-role="teacher" onclick="selectRole('teacher')">
-                        Teacher
-                    </button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registration_number">Registration Number</label>
+                        <input type="text" id="registration_number" name="registration_number" placeholder="STU20250001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+91 1234567890" required>
+                    </div>
                 </div>
-
-                <form id="registerForm" class="login-form">
-                    <input type="hidden" name="role" id="selectedRole" value="student">
-
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="">Select Department</option>
+                        <option value="CSE">Computer Science &amp; Engineering</option>
+                        <option value="ECE">Electronics &amp; Communication</option>
+                        <option value="MECH">Mechanical Engineering</option>
+                        <option value="CIVIL">Civil Engineering</option>
+                        <option value="EEE">Electrical Engineering</option>
+                    </select>
+                </div>
+                <div class="form-row" id="studentFields">
                     <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="registration_number">Registration Number</label>
-                            <input type="text" id="registration_number" name="registration_number" placeholder="STU20250001" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" placeholder="+91 1234567890" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="department">Department</label>
-                        <select id="department" name="department" required>
-                            <option value="">Select Department</option>
-                            <option value="CSE">Computer Science & Engineering</option>
-                            <option value="ECE">Electronics & Communication</option>
-                            <option value="MECH">Mechanical Engineering</option>
-                            <option value="CIVIL">Civil Engineering</option>
-                            <option value="EEE">Electrical Engineering</option>
+                        <label for="year">Year</label>
+                        <select id="year" name="year" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
                         </select>
                     </div>
-
-                    <div class="form-row" id="studentFields">
-                        <div class="form-group">
-                            <label for="year">Year</label>
-                            <select id="year" name="year" required>
-                                <option value="">Select Year</option>
-                                <option value="1">1st Year</option>
-                                <option value="2">2nd Year</option>
-                                <option value="3">3rd Year</option>
-                                <option value="4">4th Year</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="section">Section</label>
-                            <select id="section" name="section" required>
-                                <option value="">Select Section</option>
-                                <option value="A">Section A</option>
-                                <option value="B">Section B</option>
-                                <option value="C">Section C</option>
-                                <option value="D">Section D</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="password-field">
-                            <input type="password" id="password" name="password" placeholder="Enter strong password"
-                                required>
-                            <button type="button" class="password-toggle-btn" data-password-toggle="password"
-                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
-                        </div>
-                        <small class="form-hint">Min 10 characters, with uppercase, lowercase, number and at least one
-                            of these symbols: @$!%*?&amp;</small>
+                        <label for="section">Section</label>
+                        <select id="section" name="section" required>
+                            <option value="">Select Section</option>
+                            <option value="A">Section A</option>
+                            <option value="B">Section B</option>
+                            <option value="C">Section C</option>
+                            <option value="D">Section D</option>
+                        </select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="confirm_password">Confirm Password</label>
-                        <div class="password-field">
-                            <input type="password" id="confirm_password" name="confirm_password"
-                                placeholder="Re-enter password" required>
-                            <button type="button" class="password-toggle-btn" data-password-toggle="confirm_password"
-                                aria-label="Toggle password visibility" aria-pressed="false">[ SHOW ]</button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
-                        Register
-                    </button>
-
-                    <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
-                </form>
-
-                <div class="login-footer">
-                    <p>Already have an account? <a href="/login.html" data-public-nav="login">Login here</a></p>
-                    <a href="/" class="back-link" data-public-nav="home" data-replace-history="true">← Back to Home</a>
                 </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" placeholder="Enter strong password" required>
+                        <button type="button" class="password-toggle-btn" data-password-toggle="password"
+                            aria-label="Toggle password visibility" aria-pressed="false">Show</button>
+                    </div>
+                    <small class="form-hint">Min 10 characters, with uppercase, lowercase, number and at least one of these symbols: @$!%*?&amp;</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <div class="password-field">
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                        <button type="button" class="password-toggle-btn" data-password-toggle="confirm_password"
+                            aria-label="Toggle password visibility" aria-pressed="false">Show</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large btn-block" id="registerBtn">
+                    Register
+                </button>
+                <div class="error-message" id="errorMessage" role="alert" style="display: none;"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>Already have an account? <a href="/login.html" data-public-nav="login">Login here</a></p>
             </div>
         </div>
     </div>
-
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span class="theme-icon">🌙</span>
-    </button>
 
     <script defer src="/js/mobile-fixes.js"></script>
     <script defer src="/js/prevent-empty-hash.js"></script>
@@ -211,7 +180,7 @@
                 btn.addEventListener('click', () => {
                     const willShow = input.type === 'password';
                     input.type = willShow ? 'text' : 'password';
-                    btn.textContent = willShow ? '[ HIDE ]' : '[ SHOW ]';
+                    btn.textContent = willShow ? 'Hide' : 'Show';
                     btn.setAttribute('aria-pressed', String(willShow));
                 });
             });

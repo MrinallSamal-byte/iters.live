@@ -344,6 +344,10 @@
      * @returns {string} Dashboard type (student, teacher, admin)
      */
     function getDashboardType(path) {
+        // Match the page prefix first: teacher-students.html contains "student" but is a teacher page.
+        if (/\/dashboard\/teacher/i.test(path)) return 'teacher';
+        if (/\/dashboard\/admin/i.test(path)) return 'admin';
+        if (/\/dashboard\/student/i.test(path)) return 'student';
         if (path.includes('student')) return 'student';
         if (path.includes('teacher')) return 'teacher';
         if (path.includes('admin')) return 'admin';

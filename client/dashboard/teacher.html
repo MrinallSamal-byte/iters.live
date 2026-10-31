@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard · ITERasn hub</title>
-    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Teacher Dashboard on ITERasn hub, the portal for ITER, SOA University students, teachers and admins.">
+    <meta name="theme-color" content="#0f0b0b">
     <link rel="icon" href="/assets/icon.png">
     <link rel="apple-touch-icon" href="/assets/icon.png">
     <!-- SECURITY: Immediate authentication check before any content loads -->
@@ -39,15 +40,18 @@
             }
         })();
     </script>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/clean-dashboard.css">
-    <link rel="stylesheet" href="/css/universal-sidebar.css">
-    <link rel="stylesheet" href="/css/universal-profile.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/site/tokens.css">
+    <link rel="stylesheet" href="../css/site/base.css">
+    <link rel="stylesheet" href="../css/site/app.css">
+    <link rel="stylesheet" href="../css/site/chatbot.css">
+    
+    
+    
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/table-responsive-global.css">
-    <link rel="stylesheet" href="/css/refined-ui.css">
+    
 </head>
 <body>
     <!-- Main Content -->
@@ -57,7 +61,7 @@
             <div class="hero-content-inline">
                 <div>
                     <h1 class="page-title">Teacher Dashboard</h1>
-                    <p class="page-subtitle">OPERATOR // <span id="teacherName">Teacher</span> // SESSION ACTIVE</p>
+                    <p class="page-subtitle">Operator // <span id="teacherName">Teacher</span> // session active</p>
                 </div>
             </div>
         </section>
@@ -92,8 +96,8 @@
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
-                        # Attendance Overview
-                    </h3>
+                        Attendance Overview
+                    </h2>
                     <span class="section-badge">Last 7 Days</span>
                 </div>
                 <div class="chart-wrapper">
@@ -105,8 +109,8 @@
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
-                        # Performance Distribution
-                    </h3>
+                        Performance Distribution
+                    </h2>
                     <span class="section-badge">Current Semester</span>
                 </div>
                 <div class="chart-wrapper">
@@ -119,8 +123,8 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Pending Submissions
-                </h3>
+                    Pending Submissions
+                </h2>
                 <span class="notification-badge" id="submissionCount">0</span>
             </div>
             <div class="table-responsive">
@@ -135,7 +139,7 @@
                         </tr>
                     </thead>
                     <tbody id="submissionsTableBody">
-                        <tr><td colspan="5" class="loading-text">Loading submissions...</td></tr>
+                        <tr><td colspan="5" class="loading-text">Loading submissions…</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -147,12 +151,12 @@
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
-                        # Today's Classes
-                    </h3>
+                        Today’s Classes
+                    </h2>
                 </div>
                 <!-- CUT: static sample rows removed; timetable feed not wired yet -->
                 <div id="todayClasses" class="schedule-list empty-state-inline">
-                    <span class="empty-state-label">// NO CLASSES SCHEDULED TODAY</span>
+                    <span class="empty-state-label">// no classes scheduled today</span>
                     <span class="empty-state-hint">Timetable entries will appear here once connected</span>
                 </div>
             </section>
@@ -161,12 +165,12 @@
             <section class="dashboard-section glass-card scroll-reveal">
                 <div class="section-header-formal">
                     <h2 class="section-title-formal">
-                        # Recent Announcements
-                    </h3>
+                        Recent Announcements
+                    </h2>
                 </div>
                 <!-- CUT: static sample posts removed; announcements feed not wired yet -->
                 <div id="recentAnnouncements" class="announcements-list empty-state-inline">
-                    <span class="empty-state-label">// NO NEW ANNOUNCEMENTS</span>
+                    <span class="empty-state-label">// no new announcements</span>
                     <span class="empty-state-hint">Institute notices will appear here once connected</span>
                 </div>
             </section>
@@ -176,46 +180,46 @@
         <section class="dashboard-section glass-card scroll-reveal">
             <div class="section-header-formal">
                 <h2 class="section-title-formal">
-                    # Quick Actions
-                </h3>
+                    Quick Actions
+                </h2>
             </div>
             <div class="quick-links-grid">
-                <a href="/dashboard/teacher-attendance.html" class="quick-link-card">
+                <a href="/dashboard/teacher-attendance.html" class="quick-link">
                     <div class="quick-link-icon">&gt;</div>
                     <div class="quick-link-content">
                         <h4>Mark Attendance</h4>
                         <p>Take class attendance</p>
                     </div>
                 </a>
-                <a href="/dashboard/teacher-marks.html" class="quick-link-card">
+                <a href="/dashboard/teacher-marks.html" class="quick-link">
                     <div class="quick-link-icon">+</div>
                     <div class="quick-link-content">
                         <h4>Upload Marks</h4>
                         <p>Enter student scores</p>
                     </div>
                 </a>
-                <a href="/dashboard/teacher-assignments.html" class="quick-link-card">
+                <a href="/dashboard/teacher-assignments.html" class="quick-link">
                     <div class="quick-link-icon">#</div>
                     <div class="quick-link-content">
                         <h4>Assignments</h4>
                         <p>Create & manage tasks</p>
                     </div>
                 </a>
-                <a href="/dashboard/teacher-notes.html" class="quick-link-card">
+                <a href="/dashboard/teacher-notes.html" class="quick-link">
                     <div class="quick-link-icon">&gt;</div>
                     <div class="quick-link-content">
                         <h4>Study Materials</h4>
                         <p>Upload learning resources</p>
                     </div>
                 </a>
-                <a href="/dashboard/teacher-students.html" class="quick-link-card">
+                <a href="/dashboard/teacher-students.html" class="quick-link">
                     <div class="quick-link-icon">#</div>
                     <div class="quick-link-content">
                         <h4>My Students</h4>
                         <p>View student details</p>
                     </div>
                 </a>
-                <a href="/dashboard/teacher-rubric-creator.html" class="quick-link-card">
+                <a href="/dashboard/teacher-rubric-creator.html" class="quick-link">
                     <div class="quick-link-icon">+</div>
                     <div class="quick-link-content">
                         <h4>Rubric Creator</h4>
@@ -228,8 +232,8 @@
 
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-        <span aria-hidden="true">&gt;</span>
-    </button>
+            <span class="theme-icon" aria-hidden="true"></span>
+        </button>
 
     <!-- Scripts - Load in specific order -->
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -246,6 +250,7 @@
     <script defer src="/js/chatbot.js"></script>
     
     <style>
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: brand · redesign: full · scope: app · built: the project · v2.0.0 */
         body {
             --text-primary: var(--r-text);
             --text-secondary: var(--r-text-2);
@@ -255,7 +260,7 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 1.5rem;
+            gap: var(--space-lg);
             margin-bottom: 2rem;
         }
 
@@ -271,57 +276,57 @@
         }
 
         .chart-wrapper {
-            padding: 1.5rem;
+            padding: var(--space-lg);
         }
 
         .quick-links-grid {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
         }
 
         /* mono glyph slot where the emoji icon used to be */
         .quick-link-icon {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-weight: 500;
-            color: var(--r-accent);
+            color: var(--color-accent-text);
         }
 
         /* empty-state pattern: mono label + hint (used until feeds are wired) */
         .empty-state-inline {
             display: grid;
             gap: 0.35rem;
-            padding: 1rem 0 0.25rem;
+            padding: var(--space-md) 0 var(--space-2xs);
         }
 
         .empty-state-label {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.68rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text);
         }
 
         .empty-state-hint {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
         .schedule-list {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             gap: 0.65rem;
         }
 
         .schedule-item {
-            padding: 0.9rem 1rem;
+            padding: 0.9rem var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
             border-radius: var(--r-radius);
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             transition: border-color 140ms ease;
         }
 
@@ -330,12 +335,12 @@
         }
 
         .schedule-time {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-weight: 500;
             color: var(--r-text-2);
             font-size: 0.68rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             white-space: nowrap;
             padding-top: 0.2rem;
         }
@@ -357,26 +362,26 @@
         }
 
         .notification-badge {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-warn);
             background: var(--r-accent-wash);
-            border: 1px solid rgba(215, 25, 33, 0.4);
+            border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
             border-radius: 0;
             padding: 0.22rem 0.55rem;
         }
 
         .announcements-list {
-            margin-top: 1rem;
+            margin-top: var(--space-md);
             display: grid;
             gap: 0.65rem;
         }
 
         .announcement-item {
-            padding: 0.9rem 1rem;
+            padding: 0.9rem var(--space-md);
             background: var(--r-panel-inset);
             border: 1px solid var(--r-line);
             border-radius: var(--r-radius);
@@ -386,24 +391,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 0.75rem;
+            gap: var(--space-sm);
             margin-bottom: 0.6rem;
         }
 
         .priority-badge {
             display: inline-block;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             border-radius: 0;
             padding: 0.22rem 0.55rem;
             border: 1px solid transparent;
         }
 
         .priority-info {
-            background: rgba(255, 255, 255, 0.06);
+            background: color-mix(in oklab, var(--color-ink) 8%, transparent);
             color: var(--r-text-2);
             border-color: var(--r-line-strong);
         }
@@ -411,19 +416,19 @@
         .priority-reminder {
             background: var(--r-accent-wash);
             color: var(--r-warn);
-            border-color: rgba(215, 25, 33, 0.4);
+            border-color: color-mix(in oklab, var(--color-accent) 40%, transparent);
         }
 
         body.light-theme .priority-info {
-            background: rgba(0, 0, 0, 0.05);
-            color: #0d0d0d;
+            background: color-mix(in oklab, var(--color-paper) 8%, transparent);
+            color: var(--color-ink);
         }
 
         .announcement-date {
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
+            text-transform: none;
+            letter-spacing: normal;
             color: var(--r-text-3);
         }
 
@@ -431,7 +436,7 @@
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--r-text);
-            margin-bottom: 0.25rem;
+            margin-bottom: var(--space-2xs);
         }
 
         .announcement-text {
@@ -452,11 +457,11 @@
 
         .btn-small {
             padding: 0.4rem 0.8rem;
-            font-family: var(--r-font-mono);
+            font-family: var(--font-body);
             font-size: 0.62rem;
             font-weight: 500;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            letter-spacing: normal;
+            text-transform: none;
             border-radius: var(--r-radius);
             border: 1px solid transparent;
             cursor: pointer;
@@ -481,7 +486,7 @@
             html,
             body {
                 max-width: 100%;
-                overflow-x: hidden;
+                overflow-x: clip;
             }
 
             .dashboard-main {
@@ -530,12 +535,12 @@
             }
 
             .chart-wrapper {
-                padding: 1rem;
+                padding: var(--space-md);
             }
 
             .section-header-formal {
                 flex-wrap: wrap;
-                gap: 0.75rem;
+                gap: var(--space-sm);
             }
         }
 
