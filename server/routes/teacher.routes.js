@@ -31,6 +31,43 @@ function gradeLabel(percentage) {
   return 'F';
 }
 
+const IN_QUERY_CHUNK = 30;
+
+/**
+ * Ids of the assignments this user manages: a teacher's own, or null for an
+ * admin (null = no restriction).
+ */
+async function ownedAssignmentIds(user) {
+  if (user.role === 'admin') return null;
+  const owned = await listRecords('assignments', {
+    filters: [{ field: 'created_by', value: String(user.id) }]
+  });
+  return owned.map((assignment) => assignment.id);
+}
+
+/**
+ * Submissions for the given assignments (null = all), optionally filtered.
+ */
+async function loadSubmissions(assignmentIds, extraFilters = []) {
+  if (assignmentIds === null) {
+    return listRecords('assignment_submissions', {
+      filters: extraFilters,
+      orderBy: [{ field: 'submitted_at', direction: 'desc' }]
+    });
+  }
+
+  const rows = [];
+  for (let index = 0; index < assignmentIds.length; index += IN_QUERY_CHUNK) {
+    rows.push(...await listRecords('assignment_submissions', {
+      filters: [
+        { field: 'assignment_id', op: 'in', value: assignmentIds.slice(index, index + IN_QUERY_CHUNK) },
+        ...extraFilters
+      ]
+    }));
+  }
+  return rows.sort((left, right) => String(right.submitted_at || '').localeCompare(String(left.submitted_at || '')));
+}
+
 router.get('/rubrics', auth, teacherOnly, async (req, res) => {
   try {
     const rubrics = await listRecords('rubrics', {
@@ -72,13 +109,20 @@ router.post('/rubrics', auth, teacherOnly, async (req, res) => {
 });
 
 // 'pending' = submitted but not yet graded (stored status is 'submitted')
-router.get('/stats', auth, teacherOnly, async (req, res) => {
+router.get('/stats', auth, teacherOnly, async (req, res, next) => {
   try {
+    // A teacher sees their own department; an admin (or a teacher without a
+    // department on record) sees the whole institution.
+    const scope = req.user.role === 'teacher' && req.user.department
+      ? [{ field: 'department', value: req.user.department }]
+      : [];
+
+    const ownAssignmentIds = await ownedAssignmentIds(req.user);
     const [students, attendance, submissions, marks] = await Promise.all([
-      listRecords('users', { filters: [{ field: 'role', value: 'student' }] }),
-      listRecords('attendance'),
-      listRecords('assignment_submissions', { filters: [{ field: 'status', value: 'submitted' }] }),
-      listRecords('marks')
+      listRecords('users', { filters: [{ field: 'role', value: 'student' }, ...scope] }),
+      listRecords('attendance', { filters: scope }),
+      loadSubmissions(ownAssignmentIds, [{ field: 'status', value: 'submitted' }]),
+      listRecords('marks', { filters: scope })
     ]);
 
     const attendanceByStudent = new Map();
@@ -141,45 +185,59 @@ router.get('/stats', auth, teacherOnly, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
-router.get('/submissions', auth, teacherOnly, async (req, res) => {
+router.get('/submissions', auth, teacherOnly, async (req, res, next) => {
   try {
     const status = req.query.status;
     const filters = [];
     if (status) filters.push({ field: 'status', value: status === 'pending' ? 'submitted' : String(status) });
 
-    const [submissions, assignments, users] = await Promise.all([
-      listRecords('assignment_submissions', {
-        filters,
-        orderBy: [{ field: 'submitted_at', direction: 'desc' }]
-      }),
-      listRecords('assignments'),
-      listRecords('users')
+    // Only submissions to the caller's own assignments (admins: all).
+    const assignmentIds = await ownedAssignmentIds(req.user);
+    const submissions = await loadSubmissions(assignmentIds, filters);
+
+    const assignmentIdsInUse = Array.from(new Set(submissions.map((item) => item.assignment_id)));
+    const studentIdsInUse = Array.from(new Set(submissions.map((item) => String(item.student_id))));
+
+    const lookup = async (collection, ids) => {
+      const found = new Map();
+      for (let index = 0; index < ids.length; index += IN_QUERY_CHUNK) {
+        const rows = await listRecords(collection, {
+          filters: [{ field: 'id', op: 'in', value: ids.slice(index, index + IN_QUERY_CHUNK) }]
+        });
+        rows.forEach((row) => found.set(String(row.id), row));
+      }
+      return found;
+    };
+
+    const [assignmentById, userById] = await Promise.all([
+      lookup('assignments', assignmentIdsInUse),
+      lookup('users', studentIdsInUse)
     ]);
 
-    const assignmentById = new Map(assignments.map((item) => [item.id, item]));
-    const userById = new Map(users.map((item) => [String(item.id), item]));
-
     const data = submissions.map((submission) => {
-      const assignment = assignmentById.get(submission.assignment_id) || {};
+      const assignment = assignmentById.get(String(submission.assignment_id)) || {};
       const student = userById.get(String(submission.student_id)) || {};
       return {
         id: submission.id,
+        assignment_id: submission.assignment_id,
+        student_id: submission.student_id,
         assignment_title: assignment.title || 'Assignment',
         subject: assignment.subject || null,
         student_name: student.name || submission.student_id,
         student_reg: student.registration_number || '',
         submitted_at: submission.submitted_at || null,
+        is_late: Boolean(submission.is_late),
         status: submission.status
       };
     });
 
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

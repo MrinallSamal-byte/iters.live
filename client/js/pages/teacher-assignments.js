@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAssignmentStats();
     renderAssignmentsList();
     renderPendingSubmissions();
+    loadMyAssignments();
+    loadPendingSubmissions();
 
     const form = document.getElementById('createAssignmentForm');
     if (form) form.addEventListener('submit', handleCreateAssignment);
@@ -71,11 +73,63 @@ function setStat(statId, value) {
     if (el) el.textContent = value;
 }
 
-function renderAssignmentStats() {
-    setStat('totalAssignments', '--');
-    setStat('activeAssignments', '--');
-    setStat('pendingSubmissions', '--');
-    setStat('avgSubmissionRate', '--');
+function renderAssignmentStats(stats) {
+    if (!stats) {
+        setStat('totalAssignments', '--');
+        setStat('activeAssignments', '--');
+        setStat('pendingSubmissions', '--');
+        setStat('avgSubmissionRate', '--');
+        return;
+    }
+    setStat('totalAssignments', String(stats.totalAssignments));
+    setStat('activeAssignments', String(stats.activeAssignments));
+    setStat('pendingSubmissions', String(stats.pendingSubmissions));
+    setStat('avgSubmissionRate', stats.avgSubmissionRate === null || stats.avgSubmissionRate === undefined
+        ? '--%'
+        : `${stats.avgSubmissionRate}%`);
+}
+
+// Assignments are stored on the server: without this fetch a teacher would lose
+// sight of everything they created as soon as the page was reloaded.
+async function loadMyAssignments() {
+    try {
+        const resp = await fetch('/api/assignments/mine', { headers: assignmentsAuthHeaders() });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok || !payload.success) throw new Error(payload.message || `Request failed (${resp.status})`);
+        createdAssignments = payload.data || [];
+        renderAssignmentsList();
+        renderAssignmentStats(payload.stats);
+    } catch (err) {
+        const container = document.getElementById('assignmentsList');
+        if (container) {
+            container.innerHTML = `<div class="loading-text">Could not load your assignments.<br>${assignmentsEscape(err.message)}</div>`;
+        }
+    }
+}
+
+async function loadPendingSubmissions() {
+    const tbody = document.getElementById('submissionsTableBody');
+    if (!tbody) return;
+    try {
+        const resp = await fetch('/api/teacher/submissions?status=pending', { headers: assignmentsAuthHeaders() });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok || !payload.success) throw new Error(payload.message || payload.error || `Request failed (${resp.status})`);
+        const rows = payload.data || [];
+        setStat('pendingCount', String(rows.length));
+        if (!rows.length) return;
+        tbody.innerHTML = rows.map((row) => `
+            <tr>
+                <td>${assignmentsEscape(row.assignment_title)}</td>
+                <td>${assignmentsEscape(row.student_name)}</td>
+                <td>${assignmentsEscape(row.student_reg)}</td>
+                <td>${assignmentsEscape(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-')}</td>
+                <td>${assignmentsEscape(row.status === 'submitted' ? 'Awaiting grade' : row.status)}</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openGradingModal('${assignmentsEscape(row.assignment_id)}', '${assignmentsEscape(row.student_id)}')">Grade</button></td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Could not load submissions.<br>${assignmentsEscape(err.message)}</td></tr>`;
+    }
 }
 
 function formatDeadline(deadline) {
@@ -100,12 +154,13 @@ function renderAssignmentsList() {
                     <h4 class="assignment-title">${assignmentsEscape(a.title)}</h4>
                     <p class="assignment-subject">${assignmentsEscape(a.subject)}</p>
                 </div>
-                <span class="assignment-status status-active">Active</span>
+                <span class="assignment-status ${a.is_open === false ? 'status-closed' : 'status-active'}">${a.is_open === false ? 'Closed' : 'Active'}</span>
             </div>
             <div class="assignment-meta">
                 <span class="meta-item"> ${assignmentsEscape(a.department)} · Year ${assignmentsEscape(a.year)}</span>
                 <span class="meta-item"> ${assignmentsEscape(a.total_marks)} marks</span>
                 <span class="meta-item"> Due ${assignmentsEscape(formatDeadline(a.deadline))}</span>
+                ${a.counts ? `<span class="meta-item"> ${assignmentsEscape(a.counts.submitted)}/${assignmentsEscape(a.counts.expected)} submitted · ${assignmentsEscape(a.counts.pending)} to grade${a.counts.late ? ` · ${assignmentsEscape(a.counts.late)} late` : ''}</span>` : ''}
             </div>
             <p style="font-size: 0.875rem; color: var(--text-secondary);">${assignmentsEscape(a.description)}</p>
             <div class="assignment-actions">
@@ -158,7 +213,15 @@ async function handleCreateAssignment(e) {
     if (!dueTime) { setAssignmentFieldError(dueTimeInput, 'Due time is required'); valid = false; }
     if (!valid) return;
 
-    const deadline = `${dueDate}T${dueTime}:00`;
+    // The browser knows the teacher's time zone; the server does not. Send an
+    // absolute instant so "due 23:59" means 23:59 for the teacher, not for the server.
+    const localDeadline = new Date(`${dueDate}T${dueTime}:00`);
+    if (Number.isNaN(localDeadline.getTime())) {
+        setAssignmentFieldError(dueDateInput, 'Enter a valid due date and time');
+        return;
+    }
+    const deadline = localDeadline.toISOString();
+    const allowLate = Boolean(document.getElementById('allowLate')?.checked);
     const submitBtn = form.querySelector('button[type="submit"]');
 
     assignmentCreating = true;
@@ -179,7 +242,8 @@ async function handleCreateAssignment(e) {
                 department,
                 year,
                 total_marks: totalMarks,
-                deadline
+                deadline,
+                allow_late: allowLate
             })
         });
         const payload = await resp.json().catch(() => ({}));
@@ -187,20 +251,14 @@ async function handleCreateAssignment(e) {
             throw new Error(payload.message || `Request failed (${resp.status})`);
         }
 
-        createdAssignments.unshift({
-            id: payload.data?.id ?? `local-${Date.now()}`,
-            title,
-            description,
-            subject,
-            department,
-            year,
-            total_marks: totalMarks,
-            deadline
-        });
-
-        assignmentsToast('success', 'Assignment created successfully.', 'Created');
-        renderAssignmentsList();
+        const notified = payload.data?.notified;
+        assignmentsToast(
+            'success',
+            notified ? `Assignment created. ${notified} student${notified === 1 ? '' : 's'} notified.` : 'Assignment created successfully.',
+            'Created'
+        );
         form.reset();
+        await loadMyAssignments();
     } catch (err) {
         assignmentsToast('error', err.message || 'Failed to create assignment', 'Create failed');
     } finally {
@@ -242,7 +300,17 @@ function viewAssignment(id) {
     openModal('assignmentModal');
 }
 
-async function openGradingModal(assignmentId) {
+function showSubmissionPreview(studentId) {
+    const group = document.getElementById('gradeSubmissionPreviewGroup');
+    const preview = document.getElementById('gradeSubmissionPreview');
+    if (!group || !preview) return;
+    const submission = (gradingContext?.submissions || []).find((s) => String(s.student_id) === String(studentId));
+    const text = submission?.submission_text || (submission?.file_id ? `Attached file: ${submission.file_id}` : '');
+    preview.textContent = text;
+    group.style.display = text ? '' : 'none';
+}
+
+async function openGradingModal(assignmentId, preselectStudentId) {
     const assignment = createdAssignments.find((a) => String(a.id) === String(assignmentId));
     if (!assignment) return;
 
@@ -276,9 +344,18 @@ async function openGradingModal(assignmentId) {
             } else {
                 studentSelect.innerHTML = gradingContext.submissions.map((s) => {
                     const graded = s.status === 'graded' ? ` — graded (${Number(s.marks_obtained || 0)})` : '';
-                    return `<option value="${assignmentsEscape(s.student_id)}">${assignmentsEscape(s.student_id)}${graded}</option>`;
+                    const late = s.is_late ? ' — late' : '';
+                    const who = s.student_name
+                        ? `${s.student_name}${s.registration_number ? ` (${s.registration_number})` : ''}`
+                        : s.student_id;
+                    return `<option value="${assignmentsEscape(s.student_id)}">${assignmentsEscape(who)}${graded}${late}</option>`;
                 }).join('');
                 studentSelect.disabled = false;
+                if (preselectStudentId && gradingContext.submissions.some((s) => String(s.student_id) === String(preselectStudentId))) {
+                    studentSelect.value = String(preselectStudentId);
+                }
+                studentSelect.onchange = () => showSubmissionPreview(studentSelect.value);
+                showSubmissionPreview(studentSelect.value);
             }
         }
     } catch (err) {
@@ -347,6 +424,8 @@ async function handleGradeSubmit(e) {
         }
         assignmentsToast('success', payload.message || 'Submission graded.', 'Graded');
         closeGradingModal();
+        loadMyAssignments();
+        loadPendingSubmissions();
     } catch (err) {
         assignmentsToast('error', err.message || 'Failed to save grade', 'Grade failed');
     }

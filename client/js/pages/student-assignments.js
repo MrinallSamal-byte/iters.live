@@ -17,6 +17,9 @@
     const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
     const URGENT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
+    let currentAssignments = [];
+    let activeAssignment = null;
+
     document.addEventListener('DOMContentLoaded', async () => {
         if (typeof NavLoader !== 'undefined') {
             await NavLoader.load('student', 'assignments');
@@ -99,6 +102,7 @@
         try {
             const response = await APP.API.get('/assignments/student');
             const assignments = Array.isArray(response?.data) ? response.data : [];
+            currentAssignments = assignments;
 
             setBadge(assignments.length ? `${assignments.length} SHARED` : 'NONE YET');
 
@@ -115,33 +119,146 @@
     }
 
     function renderAssignmentCard(assignment) {
-        const status = resolveStatus(assignment.submission_status);
+        const status = resolveStatus(assignment);
         const deadline = formatDeadline(assignment.deadline);
 
+        let actionBtn = '';
+        if (assignment.submission_status === 'graded') {
+            actionBtn = `<button class="btn btn-sm btn-outline" onclick="openSubmissionModal('${escapeHtml(assignment.id)}')">View Grade</button>`;
+        } else if (assignment.submission_status === 'submitted') {
+            actionBtn = `<button class="btn btn-sm btn-outline" onclick="openSubmissionModal('${escapeHtml(assignment.id)}')">View / Edit Work</button>`;
+        } else if (assignment.is_overdue && !assignment.allow_late) {
+            actionBtn = `<button class="btn btn-sm btn-secondary" disabled>Submissions Closed</button>`;
+        } else {
+            actionBtn = `<button class="btn btn-sm btn-primary" onclick="openSubmissionModal('${escapeHtml(assignment.id)}')">Submit Work</button>`;
+        }
+
         return `
-            <article class="assignment-card">
-                <div class="assignment-card-top">
-                    <h4 class="assignment-title">${escapeHtml(assignment.title || 'Untitled assignment')}</h4>
-                    <span class="status-pill ${status.className}">${status.label}</span>
+            <article class="assignment-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div class="assignment-card-top">
+                        <h4 class="assignment-title">${escapeHtml(assignment.title || 'Untitled assignment')}</h4>
+                        <span class="status-pill ${status.className}">${status.label}</span>
+                    </div>
+                    <div class="assignment-meta" style="margin-top:0.5rem;">
+                        <span>${escapeHtml(assignment.subject || 'GENERAL')}</span>
+                        ${deadline ? `<span>DUE ${escapeHtml(deadline)}</span>` : ''}
+                        <span>${escapeHtml(String(assignment.total_marks || 0))} MARKS</span>
+                    </div>
+                    ${assignment.description ? `<p class="assignment-desc" style="margin-top:0.75rem;">${escapeHtml(String(assignment.description))}</p>` : ''}
                 </div>
-                <div class="assignment-meta">
-                    <span>${escapeHtml(assignment.subject || 'GENERAL')}</span>
-                    ${deadline ? `<span>DUE ${escapeHtml(deadline)}</span>` : ''}
+                <div style="margin-top:1rem; display:flex; justify-content:flex-end;">
+                    ${actionBtn}
                 </div>
-                ${assignment.description ? `<p class="assignment-desc">${escapeHtml(String(assignment.description))}</p>` : ''}
             </article>
         `;
     }
 
-    function resolveStatus(submissionStatus) {
-        if (submissionStatus === 'graded') {
+    function resolveStatus(assignment) {
+        if (assignment.submission_status === 'graded') {
             return { label: 'GRADED', className: 'graded' };
         }
-        if (submissionStatus === 'submitted') {
-            return { label: 'SUBMITTED', className: 'submitted' };
+        if (assignment.submission_status === 'submitted') {
+            return {
+                label: assignment.submission_is_late ? 'SUBMITTED (LATE)' : 'SUBMITTED',
+                className: 'submitted'
+            };
+        }
+        if (assignment.is_overdue) {
+            return {
+                label: assignment.allow_late ? 'OVERDUE (LATE ACCEPTED)' : 'DEADLINE PASSED',
+                className: assignment.allow_late ? 'pending' : 'error'
+            };
         }
         return { label: 'PENDING', className: '' };
     }
+
+    window.openSubmissionModal = async function openSubmissionModal(assignmentId) {
+        const assignment = currentAssignments.find(a => String(a.id) === String(assignmentId));
+        if (!assignment) return;
+        activeAssignment = assignment;
+
+        document.getElementById('subModalTitle').textContent = assignment.title || 'Assignment Details';
+        document.getElementById('subAssignmentMeta').textContent = `${assignment.subject || 'General'} · Due ${formatDeadline(assignment.deadline)} · Total Marks: ${assignment.total_marks ?? '—'}`;
+        document.getElementById('subAssignmentDesc').textContent = assignment.description || 'No detailed instructions provided.';
+
+        const gradedSec = document.getElementById('subGradedSection');
+        const prevSec = document.getElementById('subPreviousSection');
+        const closedNotice = document.getElementById('subClosedNotice');
+        const form = document.getElementById('assignmentSubmitForm');
+        const textarea = document.getElementById('submissionText');
+
+        gradedSec.style.display = 'none';
+        prevSec.style.display = 'none';
+        closedNotice.style.display = 'none';
+        form.style.display = '';
+        textarea.value = '';
+
+        if (assignment.submission_status) {
+            try {
+                const resp = await APP.API.get(`/assignments/${assignment.id}/my-submission`);
+                const sub = resp?.data;
+                if (sub) {
+                    if (sub.status === 'graded') {
+                        gradedSec.style.display = 'block';
+                        document.getElementById('subGradedMarks').textContent = `Score: ${sub.marks_obtained ?? '—'} / ${assignment.total_marks ?? '—'}`;
+                        document.getElementById('subGradedFeedback').textContent = sub.feedback ? `Feedback: ${sub.feedback}` : 'No written feedback.';
+                        prevSec.style.display = 'block';
+                        document.getElementById('subPreviousText').textContent = sub.submission_text || (sub.file_id ? `File attachment: ${sub.file_id}` : '');
+                        document.getElementById('subPreviousStatus').textContent = `Graded · Submitted ${new Date(sub.submitted_at).toLocaleString()}`;
+                        form.style.display = 'none';
+                    } else {
+                        prevSec.style.display = 'block';
+                        document.getElementById('subPreviousText').textContent = sub.submission_text || (sub.file_id ? `File attachment: ${sub.file_id}` : '');
+                        document.getElementById('subPreviousStatus').textContent = `Submitted ${new Date(sub.submitted_at).toLocaleString()}${sub.is_late ? ' (Late)' : ''}`;
+                        textarea.value = sub.submission_text || '';
+                    }
+                }
+            } catch (_) {}
+        } else if (assignment.is_overdue && !assignment.allow_late) {
+            closedNotice.style.display = 'block';
+            form.style.display = 'none';
+        }
+
+        document.getElementById('assignmentSubmissionModal').style.display = 'flex';
+    };
+
+    window.closeSubmissionModal = function closeSubmissionModal() {
+        document.getElementById('assignmentSubmissionModal').style.display = 'none';
+        activeAssignment = null;
+    };
+
+    window.handleAssignmentSubmit = async function handleAssignmentSubmit(event) {
+        event.preventDefault();
+        if (!activeAssignment) return;
+
+        const text = document.getElementById('submissionText').value.trim();
+        if (!text) return;
+
+        const submitBtn = document.getElementById('subSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        try {
+            const resp = await APP.API.post(`/assignments/${activeAssignment.id}/submit`, { submission_text: text });
+            if (typeof Toast !== 'undefined') {
+                Toast.success(resp.message || 'Assignment submitted successfully');
+            } else if (typeof APP.showToast === 'function') {
+                APP.showToast(resp.message || 'Assignment submitted', 'success');
+            }
+            closeSubmissionModal();
+            loadAssignments();
+        } catch (err) {
+            if (typeof Toast !== 'undefined') {
+                Toast.error(err.message || 'Submission failed');
+            } else if (typeof APP.showToast === 'function') {
+                APP.showToast(err.message || 'Submission failed', 'error');
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Work';
+        }
+    };
 
     function formatDeadline(value) {
         if (!value) return '';

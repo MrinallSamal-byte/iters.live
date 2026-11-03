@@ -176,28 +176,31 @@ async function submitAttendance() {
         submitBtn.textContent = 'Saving...';
     }
 
+    // One request for the whole class: per-student requests would exhaust the
+    // API rate limit after a couple of submissions.
     let saved = 0;
     let lastError = '';
-    for (const entry of entries) {
-        try {
-            const resp = await fetch('/api/attendance/mark', {
-                method: 'POST',
-                headers: attendanceAuthHeaders(),
-                body: JSON.stringify({
-                    student_id: entry.student_id,
-                    subject,
-                    date,
-                    status: entry.status
-                })
-            });
-            const payload = await resp.json().catch(() => ({}));
-            if (!resp.ok || !payload.success) {
-                throw new Error(payload.message || `Request failed (${resp.status})`);
-            }
-            saved++;
-        } catch (err) {
-            lastError = err.message;
+    try {
+        const resp = await fetch('/api/attendance/mark-bulk', {
+            method: 'POST',
+            headers: attendanceAuthHeaders(),
+            body: JSON.stringify({
+                subject,
+                date,
+                records: entries.map((entry) => ({ student_id: entry.student_id, status: entry.status }))
+            })
+        });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok && !payload.data) {
+            throw new Error(payload.message || `Request failed (${resp.status})`);
         }
+        saved = payload.data?.marked ?? 0;
+        const rejected = payload.data?.rejected || [];
+        if (rejected.length) {
+            lastError = rejected[0].error || 'some students could not be saved';
+        }
+    } catch (err) {
+        lastError = err.message;
     }
 
     attendanceSubmitting = false;

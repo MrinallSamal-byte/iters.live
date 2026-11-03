@@ -11,7 +11,7 @@ const {
   isFirebaseAdminReady,
   isRealtimeDbReady
 } = require('../database/firebase');
-const { listRecords } = require('../services/firebase-data.service');
+const { countRecords, syncRealtimeMirror } = require('../services/firebase-data.service');
 const { authMiddleware: auth } = require('../middleware/auth');
 const os = require('os');
 const fs = require('fs').promises;
@@ -107,9 +107,25 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     res.status(503).json({
-      status: 'unhealthy',
-      error: error.message
+      status: 'unhealthy'
     });
+  }
+});
+
+/**
+ * @route   GET /api/health/ready
+ * @desc    Readiness probe for load balancers / orchestrators: 200 only when the
+ *          datastore answers, 503 otherwise. Exposes no internal detail.
+ * @access  Public
+ */
+router.get('/ready', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  try {
+    const health = await getDatabaseHealth();
+    const ready = health.status === 'healthy';
+    res.status(ready ? 200 : 503).json({ ready });
+  } catch (error) {
+    res.status(503).json({ ready: false });
   }
 });
 
@@ -129,7 +145,8 @@ router.get('/detailed', auth, async (req, res) => {
     const collectionSnapshots = await Promise.all(
       CORE_COLLECTIONS.map(async (collection) => ({
         name: collection,
-        count: (await listRecords(collection, { preferRealtime: true })).length
+        // Server-side count aggregation: no documents are downloaded for a health page.
+        count: await countRecords(collection)
       }))
     );
 
@@ -163,7 +180,8 @@ router.get('/detailed', auth, async (req, res) => {
         nodeVersion: process.version,
         uptime: process.uptime(),
         cpus: cpus.length,
-        cpuModel: cpus[0].model
+        // Some container runtimes report no CPUs at all.
+        cpuModel: cpus.length > 0 ? cpus[0].model : null
       },
       memory: {
         process: {
@@ -196,8 +214,7 @@ router.get('/detailed', auth, async (req, res) => {
   } catch (error) {
     console.error('Health check error:', error);
     res.status(500).json({
-      status: 'error',
-      error: error.message
+      status: 'error'
     });
   }
 });
@@ -213,13 +230,21 @@ router.post('/refresh-views', auth, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    await Promise.all(CORE_COLLECTIONS.map((collection) => listRecords(collection, {
-      preferRealtime: false
-    }).catch(() => [])));
+    const results = await Promise.all(CORE_COLLECTIONS.map(async (collection) => {
+      try {
+        return { collection, ...(await syncRealtimeMirror(collection)) };
+      } catch (syncError) {
+        return { collection, enabled: true, synced: 0, error: syncError.message };
+      }
+    }));
 
+    const enabled = results.some((result) => result.enabled);
     res.json({
-      success: true,
-      message: 'Firebase collection mirrors refreshed successfully',
+      success: results.every((result) => !result.error),
+      message: enabled
+        ? 'Realtime Database mirrors rebuilt from Firestore'
+        : 'Realtime Database mirroring is not enabled; nothing to refresh',
+      collections: results,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -299,8 +324,7 @@ router.get('/ai-service', auth, async (req, res) => {
   } catch (error) {
     console.error('AI service check error:', error);
     res.status(500).json({
-      status: 'error',
-      error: error.message
+      status: 'error'
     });
   }
 });

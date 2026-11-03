@@ -4,6 +4,12 @@ const crypto = require('crypto');
 const { authMiddleware } = require('../middleware/auth');
 const { listRecords } = require('../services/firebase-data.service');
 const { getPortalSnapshotForUser } = require('../services/soa-data.service');
+const {
+  createFeedToken,
+  resolveFeedUser,
+  currentFeedVersion,
+  rotateFeedVersion
+} = require('../services/calendar-feed.service');
 
 const WEEKDAY_OFFSETS = {
   monday: 0,
@@ -81,17 +87,28 @@ function escapeText(value) {
 }
 
 function foldLine(line) {
-  if (line.length <= 73) return line;
+  const MAX_OCTETS = 75;
+  if (Buffer.byteLength(line, 'utf8') <= MAX_OCTETS) return line;
+
   const parts = [];
-  let rest = line;
-  let first = true;
-  while (rest.length > 0) {
-    const size = first ? 73 : 72;
-    parts.push((first ? '' : ' ') + rest.slice(0, size));
-    rest = rest.slice(size);
-    first = false;
+  let current = '';
+  let currentOctets = 0;
+  let limit = MAX_OCTETS; // continuation lines start with a space, which counts too
+
+  for (const character of line) {
+    const size = Buffer.byteLength(character, 'utf8');
+    if (currentOctets + size > limit) {
+      parts.push(current);
+      current = '';
+      currentOctets = 0;
+      limit = MAX_OCTETS - 1;
+    }
+    current += character;
+    currentOctets += size;
   }
-  return parts.join('\r\n');
+  if (current) parts.push(current);
+
+  return parts.map((part, index) => (index === 0 ? part : ` ${part}`)).join('\r\n');
 }
 
 function stableUid(seed) {
@@ -195,7 +212,63 @@ function buildSingleEvent(uidSeed, summary, dueAtIso, location) {
   ];
 }
 
-router.get('/', authMiddleware, async (req, res, next) => {
+/**
+ * The feed accepts either a normal Bearer session or a subscription token in
+ * `?token=` (what calendar apps need, since they cannot send headers).
+ */
+async function feedAuth(req, res, next) {
+  if (typeof req.query.token !== 'string' || !req.query.token) {
+    return authMiddleware(req, res, next);
+  }
+
+  try {
+    const user = await resolveFeedUser(req.query.token);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'This calendar link is invalid or has been reset. Generate a new one from your timetable page.'
+      });
+    }
+    req.user = user;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+function subscriptionUrls(req, token) {
+  const base = (process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+  const url = `${base}/api/calendar.ics?token=${encodeURIComponent(token)}`;
+  return { url, webcalUrl: url.replace(/^https?:/i, 'webcal:') };
+}
+
+// Get (or re-display) this account's subscription link
+router.post('/subscription', authMiddleware, async (req, res, next) => {
+  try {
+    const version = await currentFeedVersion(req.user.id);
+    const token = createFeedToken(req.user, version);
+    res.json({ success: true, data: { ...subscriptionUrls(req, token), version } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Invalidate every link handed out so far and issue a fresh one
+router.post('/subscription/reset', authMiddleware, async (req, res, next) => {
+  try {
+    const version = await rotateFeedVersion(req.user.id);
+    const token = createFeedToken(req.user, version);
+    res.json({
+      success: true,
+      message: 'Old calendar links no longer work. Re-subscribe using the new link.',
+      data: { ...subscriptionUrls(req, token), version }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/', feedAuth, async (req, res, next) => {
   try {
     const stampUtc = formatUtc(new Date());
     const eventLines = [];
@@ -253,6 +326,8 @@ router.get('/', authMiddleware, async (req, res, next) => {
 
     res.set('Content-Type', 'text/calendar; charset=utf-8');
     res.set('Content-Disposition', 'attachment; filename="iterasn-timetable.ics"');
+    // Per-user content: never let a shared cache serve it to someone else.
+    res.set('Cache-Control', 'private, max-age=900');
     res.send(`${calendarLines.join('\r\n')}\r\n`);
   } catch (error) {
     next(error);

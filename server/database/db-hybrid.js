@@ -127,6 +127,7 @@ if (useVercelPostgres) {
     transaction,
     healthCheck,
     queryLogger,
+    closePool: async () => {}, // serverless: connections are managed by the platform
     getPoolStats: () => ({ provider: 'Vercel Postgres', type: 'serverless' })
   };
 
@@ -278,19 +279,24 @@ if (useVercelPostgres) {
     }
   };
   
-  // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, closing database pool...');
+  // The pool is closed by the server's graceful shutdown (closePool) *after* in-flight
+  // requests finish. A private SIGTERM handler here used to end the pool immediately,
+  // failing every request still being served.
+  let poolClosed = false;
+  const closePool = async () => {
+    if (poolClosed) return;
+    poolClosed = true;
     await pool.end();
     console.log('Database pool closed');
-  });
-  
+  };
+
   module.exports = {
     pool,
     query,
     transaction,
     healthCheck,
     queryLogger,
+    closePool,
     getPoolStats: () => ({
       totalCount: pool.totalCount,
       idleCount: pool.idleCount,

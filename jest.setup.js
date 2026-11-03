@@ -1,5 +1,9 @@
 // Jest setup: lightweight browser component stubs for jsdom tests
 
+// A fixed signing secret keeps server tests quiet and deterministic (without one,
+// utils/app-session generates a random secret and logs a warning on every load).
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'jest-test-secret';
+
 // Simple toast stub used by tests and some components
 global.showToast = function showToast(message, type = 'info') {
   // no-op for tests; could log if needed

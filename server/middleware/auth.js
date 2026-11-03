@@ -1,16 +1,64 @@
 const { auth, db } = require('../database/firebase');
 const { verifyAppSessionToken } = require('../utils/app-session');
 const { getLocalDemoUserFromToken } = require('../services/demo-auth.service');
+const { evaluateSession } = require('../services/session-guard.service');
+
+// Never let credential material ride along on req.user.
+const CREDENTIAL_FIELDS = ['password', 'password_hash'];
 
 function attachSessionUser(req, user) {
+  const safeUser = { ...user };
+  for (const field of CREDENTIAL_FIELDS) {
+    delete safeUser[field];
+  }
   req.user = {
-    ...user,
-    id: user.id || user.uid || user.registration_number
+    ...safeUser,
+    id: safeUser.id || safeUser.uid || safeUser.registration_number
   };
 }
 
+function isAccountInactive(user) {
+  return Boolean(user) && user.is_active === false;
+}
+
 /**
- * Verify Firebase ID token and attach user to request
+ * Try to authenticate an app-session JWT.
+ * Returns null when the token is not an app-session token at all, otherwise
+ * the guard verdict ({ allowed, reason, user }).
+ */
+async function resolveAppSession(token) {
+  let decodedSession;
+  try {
+    decodedSession = verifyAppSessionToken(token);
+  } catch (_) {
+    return null;
+  }
+
+  if (!decodedSession?.user) {
+    return null;
+  }
+
+  return evaluateSession(decodedSession.user, decodedSession);
+}
+
+function sendSessionDenied(res, reason) {
+  if (reason === 'inactive') {
+    return res.status(403).json({
+      success: false,
+      message: 'Account is inactive',
+      code: 'ACCOUNT_INACTIVE'
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: 'Session has been revoked. Please sign in again.',
+    code: 'SESSION_REVOKED'
+  });
+}
+
+/**
+ * Verify the bearer token and attach the user to the request
  */
 const authMiddleware = async (req, res, next) => {
   try {
@@ -26,19 +74,16 @@ const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.substring(7);
 
-    try {
-      // ponytail: full user in 7d token, no revocation -> store uid only + per-request Firestore lookup if session revocation is ever needed
-      const decodedSession = verifyAppSessionToken(token);
-      const sessionUser = decodedSession?.user;
-      if (sessionUser) {
-        attachSessionUser(req, sessionUser);
-        return next();
+    const verdict = await resolveAppSession(token);
+    if (verdict) {
+      if (!verdict.allowed) {
+        return sendSessionDenied(res, verdict.reason);
       }
-    } catch (_) {
-      // Continue to demo/Firebase verification.
+      attachSessionUser(req, verdict.user);
+      return next();
     }
 
-    // ponytail: per-token HMAC signing skipped -> sign demo tokens if demo mode is ever needed in prod
+    // Local demo tokens are unsigned, so they are only honoured outside production.
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.ALLOW_LOCAL_DEMO_AUTH === 'true'
@@ -54,12 +99,7 @@ const authMiddleware = async (req, res, next) => {
     const decodedToken = await auth.verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    // Get user from Firestore
-    // Note: We might want to cache this or just use the token data if sufficient
-    // But for full user details (role, department, etc.), we usually need the DB record
-    // unless we put custom claims in the token.
-    // For now, let's fetch from DB to be safe and consistent with previous logic.
-
+    // The role, department, etc. live in the user record, not in the token.
     const userDoc = await db.collection('users').doc(uid).get();
 
     if (!userDoc.exists) {
@@ -68,14 +108,14 @@ const authMiddleware = async (req, res, next) => {
         const snapshot = await db.collection('users').where('email', '==', decodedToken.email).limit(1).get();
         if (!snapshot.empty) {
           const fallbackUser = snapshot.docs[0].data();
-          if (fallbackUser.is_active === false) {
+          if (isAccountInactive(fallbackUser)) {
             return res.status(403).json({
               success: false,
-              message: 'Account is inactive'
+              message: 'Account is inactive',
+              code: 'ACCOUNT_INACTIVE'
             });
           }
-          req.user = fallbackUser;
-          req.user.id = snapshot.docs[0].id;
+          attachSessionUser(req, { ...fallbackUser, id: snapshot.docs[0].id });
           return next();
         }
       }
@@ -88,10 +128,11 @@ const authMiddleware = async (req, res, next) => {
 
     const user = userDoc.data();
 
-    if (!user.is_active) {
+    if (isAccountInactive(user)) {
       return res.status(403).json({
         success: false,
-        message: 'Account is inactive'
+        message: 'Account is inactive',
+        code: 'ACCOUNT_INACTIVE'
       });
     }
 
@@ -119,9 +160,13 @@ const authMiddleware = async (req, res, next) => {
 };
 
 /**
- * Check if user has required role(s)
+ * Check if user has required role(s).
+ * Accepts roles as separate arguments or as arrays: roleMiddleware('a', 'b')
+ * and roleMiddleware(['a', 'b']) are equivalent.
  */
 const roleMiddleware = (...allowedRoles) => {
+  const roles = allowedRoles.flat();
+
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -130,7 +175,7 @@ const roleMiddleware = (...allowedRoles) => {
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: 'Access denied - insufficient permissions'
@@ -150,18 +195,16 @@ const optionalAuth = async (req, res, next) => {
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      
-      try {
-        const decodedSession = verifyAppSessionToken(token);
-        if (decodedSession?.user) {
-          attachSessionUser(req, decodedSession.user);
-          return next();
+
+      const verdict = await resolveAppSession(token);
+      if (verdict) {
+        // A revoked/inactive session is treated exactly like a guest.
+        if (verdict.allowed) {
+          attachSessionUser(req, verdict.user);
         }
-      } catch (_) {
-        // Continue to legacy token handling.
+        return next();
       }
 
-      // ponytail: per-token HMAC signing skipped -> sign demo tokens if demo mode is ever needed in prod
       if (
         process.env.NODE_ENV !== 'production' &&
         process.env.ALLOW_LOCAL_DEMO_AUTH === 'true'
@@ -178,7 +221,7 @@ const optionalAuth = async (req, res, next) => {
         const uid = decodedToken.uid;
 
         const userDoc = await db.collection('users').doc(uid).get();
-        if (userDoc.exists) {
+        if (userDoc.exists && !isAccountInactive(userDoc.data())) {
           attachSessionUser(req, {
             ...userDoc.data(),
             id: userDoc.id

@@ -2,6 +2,7 @@ const { auth } = require('../database/firebase');
 const { getLocalDemoUserFromToken } = require('../services/demo-auth.service');
 const { verifyAppSessionToken } = require('../utils/app-session');
 const ChatService = require('../services/chat.service');
+const { evaluateSession } = require('../services/session-guard.service');
 
 let io = null;
 let chatService = null;
@@ -20,17 +21,26 @@ const initializeSocket = (socketIo) => {
       return next(new Error('Authentication required'));
     }
 
+    let decodedSession = null;
     try {
-      const decodedSession = verifyAppSessionToken(token);
-      if (decodedSession?.user) {
-        socket.userId = decodedSession.user.id || decodedSession.user.uid || decodedSession.user.registration_number;
-        socket.userRole = decodedSession.user.role;
-        socket.userName = decodedSession.user.name || 'User';
-        socket.userDepartment = decodedSession.user.department || null;
-        return next();
-      }
+      decodedSession = verifyAppSessionToken(token);
     } catch (_) {
-      // Fall through to demo/Firebase token handling.
+      // Not an app-session token: fall through to demo/Firebase token handling.
+    }
+
+    if (decodedSession?.user) {
+      // Same revocation/deactivation rules as the REST middleware.
+      const verdict = await evaluateSession(decodedSession.user, decodedSession);
+      if (!verdict.allowed) {
+        return next(new Error('Session is no longer valid'));
+      }
+
+      const sessionUser = verdict.user;
+      socket.userId = sessionUser.id || sessionUser.uid || sessionUser.registration_number;
+      socket.userRole = sessionUser.role;
+      socket.userName = sessionUser.name || 'User';
+      socket.userDepartment = sessionUser.department || null;
+      return next();
     }
 
     // Same demo-token gate as auth middleware
@@ -82,11 +92,12 @@ const initializeSocket = (socketIo) => {
       }
 
       // Validate the requested department against the authenticated user's own
-      // department; admins may join any department room.
-      if (socket.userRole !== 'admin' && socket.userDepartment && requested !== socket.userDepartment) {
+      // department; admins may join any department room. A user with no known
+      // department may not join any (previously the check was skipped for them,
+      // letting them subscribe to every department's events).
+      if (socket.userRole !== 'admin' && requested !== socket.userDepartment) {
         return;
       }
-      // ponytail: dept claim not in token -> embed dept in token to validate room joins
 
       socket.join(`dept:${requested}`);
       socket.join(`dept-${requested}`);

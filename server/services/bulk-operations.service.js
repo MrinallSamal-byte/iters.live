@@ -4,7 +4,6 @@
  */
 
 const csv = require('csv-parse');
-const { stringify } = require('csv-stringify/sync');
 const ExcelJS = require('exceljs');
 const fs = require('fs').promises;
 const crypto = require('crypto');
@@ -12,14 +11,64 @@ const bcrypt = require('bcrypt');
 const {
   createRecord,
   listRecords,
-  updateRecord
+  updateRecord,
+  isValidDocId
 } = require('./firebase-data.service');
+const cacheService = require('./cache.service');
+const { toSafeCsv } = require('../utils/csv.util');
+const { normalizeDateOnly, isFutureDateOnly } = require('../utils/date.util');
+
+const IN_QUERY_CHUNK = 30;
+const MAX_IMPORT_ROWS = 5000;
+const REGISTRATION_NUMBER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,39}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Collapse the many shapes an Excel cell can have (rich text, hyperlink,
+ * formula result, Date) to a plain value; CSV cells are already plain.
+ */
+function plainCellValue(value) {
+  if (value === null || value === undefined) return undefined;
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (typeof value !== 'object') return value;
+  if (Array.isArray(value.richText)) return value.richText.map((part) => part.text).join('');
+  if (value.result !== undefined) return plainCellValue(value.result);
+  if (value.text !== undefined) return value.text;
+  return String(value);
+}
+
+/** A cell that is missing, empty, or whitespace. */
+function isBlank(value) {
+  return value === undefined || value === null || String(value).trim() === '';
+}
+
+/** Fetch documents by id in `in` chunks into a Map keyed by id. */
+async function loadByIds(collection, ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.map(String).filter(isValidDocId)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const rows = await listRecords(collection, {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    rows.forEach((row) => found.set(String(row.id), row));
+  }
+  return found;
+}
+
+function assertRowLimit(rows) {
+  if (rows.length > MAX_IMPORT_ROWS) {
+    const error = new Error(`A single import can contain at most ${MAX_IMPORT_ROWS} rows (this file has ${rows.length})`);
+    error.statusCode = 400;
+    throw error;
+  }
+}
 
 class BulkOperationsService {
   async bulkCreateUsers(filePath, fileType = 'csv') {
     const users = fileType === 'csv'
       ? await this.parseCSV(filePath)
       : await this.parseExcel(filePath);
+    assertRowLimit(users);
 
     const results = {
       success: 0,
@@ -28,12 +77,16 @@ class BulkOperationsService {
       credentials: []
     };
 
-    const existingUsers = await listRecords('users');
-    const existingUserIds = new Map(existingUsers.map((user) => [String(user.id), user]));
+    // Only the registration numbers present in the file are checked for clashes.
+    const existingUsers = await loadByIds(
+      'users',
+      users.map((user) => user.registration_number || user.username).filter((value) => !isBlank(value))
+    );
+    const seenInFile = new Set();
 
     for (const user of users) {
       try {
-        if (!user.username || !user.email || !user.role) {
+        if (isBlank(user.username) || isBlank(user.email) || isBlank(user.role)) {
           throw new Error('Missing required fields (username, email, role)');
         }
 
@@ -43,23 +96,42 @@ class BulkOperationsService {
           throw new Error('Invalid role. Must be student, teacher, or admin');
         }
 
+        if (!EMAIL_PATTERN.test(String(user.email).trim())) {
+          throw new Error('Invalid email format');
+        }
+
         const registrationNumber = String(user.registration_number || user.username).trim();
-        if (existingUserIds.has(registrationNumber)) {
+        if (!REGISTRATION_NUMBER_PATTERN.test(registrationNumber)) {
+          throw new Error('registration number / username must be 3-40 letters, digits, hyphens or underscores');
+        }
+        if (existingUsers.has(registrationNumber) || seenInFile.has(registrationNumber)) {
           throw new Error('User already exists');
         }
 
-        const password = user.password || this.generatePassword();
+        let year = null;
+        if (!isBlank(user.year)) {
+          year = Number(user.year);
+          if (!Number.isInteger(year) || year < 1 || year > 6) {
+            throw new Error('year must be a whole number between 1 and 6');
+          }
+        }
+
+        if (!isBlank(user.password) && String(user.password).length < 8) {
+          throw new Error('password must be at least 8 characters');
+        }
+
+        const password = isBlank(user.password) ? this.generatePassword() : String(user.password);
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await createRecord('users', {
-          username: user.username,
+          username: String(user.username).trim(),
           name: user.full_name || user.name || user.username,
-          email: user.email,
+          email: String(user.email).trim(),
           password: hashedPassword,
           full_name: user.full_name || user.name || user.username,
           role,
           department: user.department || null,
-          year: user.year ? Number(user.year) : null,
+          year,
           section: user.section || null,
           phone: user.phone || null,
           phone_number: user.phone || null,
@@ -67,9 +139,11 @@ class BulkOperationsService {
           registration_number: registrationNumber,
           is_active: true,
           last_login: null
-        }, { id: registrationNumber });
+        }, { id: registrationNumber, exclusive: true });
 
-        if (!user.password) {
+        seenInFile.add(registrationNumber);
+
+        if (isBlank(user.password)) {
           results.credentials.push({
             username: user.username,
             email: user.email,
@@ -83,7 +157,7 @@ class BulkOperationsService {
         results.errors.push({
           row: user.row,
           username: user.username,
-          error: error.message
+          error: error.code === 6 ? 'User already exists' : error.message
         });
       }
     }
@@ -96,43 +170,69 @@ class BulkOperationsService {
     const records = fileType === 'csv'
       ? await this.parseCSV(filePath)
       : await this.parseExcel(filePath);
+    assertRowLimit(records);
+
     const results = {
       success: 0,
       failed: 0,
       errors: []
     };
 
-    const existingAttendance = await listRecords('attendance');
-    const attendanceByKey = new Map(existingAttendance.map((row) => [`${row.student_id}_${row.subject}_${row.date}`, row]));
+    // Look up only the students (and their existing rows) that appear in the file.
+    const students = await loadByIds('users', records.map((record) => record.student_id).filter((value) => !isBlank(value)));
+    const existingByKey = new Map();
+    const studentIds = Array.from(students.keys());
+    for (let index = 0; index < studentIds.length; index += IN_QUERY_CHUNK) {
+      const rows = await listRecords('attendance', {
+        filters: [{ field: 'student_id', op: 'in', value: studentIds.slice(index, index + IN_QUERY_CHUNK) }]
+      });
+      rows.forEach((row) => existingByKey.set(`${row.student_id}|${row.subject}|${normalizeDateOnly(row.date)}`, row));
+    }
+
+    const touched = new Set();
 
     for (const record of records) {
       try {
-        if (!record.student_id || !record.subject || !record.date || !record.status) {
+        if (isBlank(record.student_id) || isBlank(record.subject) || isBlank(record.date) || isBlank(record.status)) {
           throw new Error('Missing required fields (student_id, subject, date, status)');
         }
 
-        const status = String(record.status).toLowerCase();
+        const status = String(record.status).trim().toLowerCase();
         if (!['present', 'absent', 'late'].includes(status)) {
           throw new Error('Invalid status. Must be present, absent, or late');
         }
 
-        const existing = attendanceByKey.get(`${record.student_id}_${record.subject}_${record.date}`);
+        const date = normalizeDateOnly(record.date);
+        if (!date) throw new Error('date must be a valid date');
+        if (isFutureDateOnly(date)) throw new Error('date cannot be in the future');
+
+        const student = students.get(String(record.student_id).trim());
+        if (!student || student.role !== 'student') throw new Error('Student not found');
+
+        const subject = String(record.subject).trim();
+        const key = `${student.id}|${subject}|${date}`;
+        const existing = existingByKey.get(key);
 
         const payload = {
-          student_id: String(record.student_id),
-          subject: record.subject,
-          date: record.date,
+          student_id: student.id,
+          subject,
+          date,
           status,
           marked_by: teacherId,
-          remarks: record.remarks || null
+          remarks: record.remarks || null,
+          department: student.department || null,
+          year: student.year ?? null,
+          section: student.section || null
         };
 
         if (existing) {
           await updateRecord('attendance', existing.id, payload);
         } else {
-          await createRecord('attendance', payload);
+          const created = await createRecord('attendance', payload);
+          existingByKey.set(key, created);
         }
 
+        touched.add(student.id);
         results.success += 1;
       } catch (error) {
         results.failed += 1;
@@ -142,6 +242,14 @@ class BulkOperationsService {
           error: error.message
         });
       }
+    }
+
+    // Cached attendance summaries must not outlive the data they summarise.
+    touched.forEach((studentId) => cacheService.invalidateAttendance(studentId));
+    if (touched.size > 0) {
+      await cacheService.invalidateAnalytics().catch((error) => {
+        console.warn('Analytics cache invalidation failed:', error.message);
+      });
     }
 
     return results;
@@ -151,48 +259,82 @@ class BulkOperationsService {
     const records = fileType === 'csv'
       ? await this.parseCSV(filePath)
       : await this.parseExcel(filePath);
+    assertRowLimit(records);
+
     const results = {
       success: 0,
       failed: 0,
       errors: []
     };
 
-    const existingMarks = await listRecords('marks');
-    const marksByKey = new Map(existingMarks.map((row) => [`${row.student_id}_${row.subject}_${row.exam_type}`, row]));
+    const students = await loadByIds('users', records.map((record) => record.student_id).filter((value) => !isBlank(value)));
+    const existingByKey = new Map();
+    const studentIds = Array.from(students.keys());
+    for (let index = 0; index < studentIds.length; index += IN_QUERY_CHUNK) {
+      const rows = await listRecords('marks', {
+        filters: [{ field: 'student_id', op: 'in', value: studentIds.slice(index, index + IN_QUERY_CHUNK) }]
+      });
+      // Same uniqueness rule as the single-entry endpoint: student + subject + exam type + date.
+      rows.forEach((row) => existingByKey.set(
+        `${row.student_id}|${row.subject}|${row.exam_type}|${normalizeDateOnly(row.exam_date)}`,
+        row
+      ));
+    }
+
+    const touched = new Set();
 
     for (const record of records) {
       try {
-        if (!record.student_id || !record.subject || !record.exam_type ||
-            record.marks_obtained === undefined || record.total_marks === undefined) {
-          throw new Error('Missing required fields');
+        if (isBlank(record.student_id) || isBlank(record.subject) || isBlank(record.exam_type)
+          || isBlank(record.marks_obtained) || isBlank(record.total_marks)) {
+          throw new Error('Missing required fields (student_id, subject, exam_type, marks_obtained, total_marks)');
         }
 
         const marksObtained = Number(record.marks_obtained);
         const totalMarks = Number(record.total_marks);
-        if (!Number.isFinite(marksObtained) || !Number.isFinite(totalMarks) || marksObtained < 0 || marksObtained > totalMarks) {
+        if (!Number.isFinite(marksObtained) || !Number.isFinite(totalMarks)
+          || totalMarks < 1 || marksObtained < 0 || marksObtained > totalMarks) {
           throw new Error('Invalid marks value');
         }
 
-        const existing = marksByKey.get(`${record.student_id}_${record.subject}_${record.exam_type}`);
+        const examDate = isBlank(record.exam_date || record.date)
+          ? new Date().toISOString().slice(0, 10)
+          : normalizeDateOnly(record.exam_date || record.date);
+        if (!examDate) throw new Error('exam_date must be a valid date');
+        if (isFutureDateOnly(examDate)) throw new Error('exam_date cannot be in the future');
+
+        const student = students.get(String(record.student_id).trim());
+        if (!student || student.role !== 'student') throw new Error('Student not found');
+
+        const subject = String(record.subject).trim();
+        const examType = String(record.exam_type).trim();
+        const key = `${student.id}|${subject}|${examType}|${examDate}`;
+        const existing = existingByKey.get(key);
 
         const payload = {
-          student_id: String(record.student_id),
-          subject: record.subject,
-          exam_type: record.exam_type,
+          student_id: student.id,
+          subject,
+          exam_type: examType,
           marks_obtained: marksObtained,
           total_marks: totalMarks,
           grade: this.calculateGrade(marksObtained, totalMarks),
           uploaded_by: teacherId,
           remarks: record.remarks || null,
-          exam_date: record.exam_date || record.date || new Date().toISOString().slice(0, 10)
+          exam_date: examDate,
+          semester: student.semester ?? null,
+          department: student.department || null,
+          year: student.year ?? null,
+          section: student.section || null
         };
 
         if (existing) {
           await updateRecord('marks', existing.id, payload);
         } else {
-          await createRecord('marks', payload);
+          const created = await createRecord('marks', payload);
+          existingByKey.set(key, created);
         }
 
+        touched.add(student.id);
         results.success += 1;
       } catch (error) {
         results.failed += 1;
@@ -204,12 +346,20 @@ class BulkOperationsService {
       }
     }
 
+    touched.forEach((studentId) => cacheService.invalidateMarks(studentId));
+    if (touched.size > 0) {
+      await cacheService.invalidateAnalytics().catch((error) => {
+        console.warn('Analytics cache invalidation failed:', error.message);
+      });
+    }
+
     return results;
   }
 
   async exportToCSV(type, filters = {}) {
     const { data, columns } = await this.getExportDataset(type, filters);
-    return stringify(data, { header: true, columns });
+    // Spreadsheet-safe: user-controlled text must not execute as a formula.
+    return toSafeCsv(data, columns);
   }
 
   async exportToExcel(type, filters = {}) {
@@ -230,7 +380,9 @@ class BulkOperationsService {
   }
 
   async getExportDataset(type, filters = {}, excel = false) {
-    const users = await listRecords('users');
+    // Users are listed in full only when they are the export; for attendance and
+    // marks just the students that appear in the data are looked up (below).
+    const users = type === 'users' ? await listRecords('users') : [];
     const userById = new Map(users.map((user) => [String(user.id), user]));
 
     if (type === 'users') {
@@ -268,6 +420,7 @@ class BulkOperationsService {
       const records = await listRecords('attendance', {
         orderBy: [{ field: 'date', direction: 'desc' }]
       });
+      await this.attachReferencedUsers(userById, records, ['student_id', 'marked_by']);
 
       const data = this.filterRecordsByUser(records, userById, filters)
         .map((record) => ({
@@ -304,6 +457,7 @@ class BulkOperationsService {
       const records = await listRecords('marks', {
         orderBy: [{ field: 'exam_date', direction: 'desc' }, { field: 'created_at', direction: 'desc' }]
       });
+      await this.attachReferencedUsers(userById, records, ['student_id', 'uploaded_by']);
 
       const data = this.filterRecordsByUser(records, userById, filters)
         .map((record) => ({
@@ -341,6 +495,18 @@ class BulkOperationsService {
     }
 
     throw new Error('Invalid export type');
+  }
+
+  /** Load the users referenced by `records` (in `fields`) into `userById`. */
+  async attachReferencedUsers(userById, records, fields) {
+    const ids = [];
+    for (const record of records) {
+      for (const field of fields) {
+        if (record[field]) ids.push(record[field]);
+      }
+    }
+    const found = await loadByIds('users', ids);
+    found.forEach((user, id) => userById.set(id, user));
   }
 
   filterUsers(users, filters = {}) {
@@ -386,20 +552,25 @@ class BulkOperationsService {
     await workbook.xlsx.readFile(filePath);
 
     const worksheet = workbook.worksheets[0];
+    if (!worksheet) {
+      const error = new Error('The workbook has no worksheets');
+      error.statusCode = 400;
+      throw error;
+    }
     const records = [];
     const headers = [];
 
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) {
         row.eachCell((cell) => {
-          headers.push(String(cell.value || '').toLowerCase().replace(/\s+/g, '_'));
+          headers.push(String(plainCellValue(cell.value) || '').trim().toLowerCase().replace(/\s+/g, '_'));
         });
         return;
       }
 
       const record = { row: rowNumber };
       row.eachCell((cell, colNumber) => {
-        record[headers[colNumber - 1]] = cell.value;
+        record[headers[colNumber - 1]] = plainCellValue(cell.value);
       });
       records.push(record);
     });

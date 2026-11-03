@@ -104,9 +104,12 @@
                     <button class="btn btn-sm btn-primary" onclick="downloadTimetable()">
                         Download PDF
                     </button>
-                    <a href="/api/calendar.ics" class="btn btn-sm btn-outline" download="timetable.ics">
-                        Calendar
-                    </a>
+                    <button class="btn btn-sm btn-outline" onclick="downloadCalendarFile()">
+                        Calendar (.ics)
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="openCalendarSubscription()">
+                        Subscribe
+                    </button>
                     <!-- ponytail: duplicate third export control (.ics ADD TO CALENDAR link) collapsed -->
                 </div>
             </div>
@@ -472,5 +475,24 @@
             }
         }
     </style>
+
+    <div id="calendarSubscribeModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="calendarSubscribeTitle">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="calendarSubscribeTitle">Subscribe to your calendar</h3>
+                <button class="modal-close" onclick="closeCalendarSubscription()" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Add this link to Google Calendar, Apple Calendar or Outlook ("Add calendar from URL"). Your classes, assignment deadlines and events then stay up to date automatically.</p>
+                <input type="text" id="calendarSubscribeUrl" class="form-input" readonly onclick="this.select()">
+                <p style="font-size:0.8rem;margin-top:0.5rem;">Anyone with this link can see your schedule. If it leaks, reset it &mdash; the old link stops working immediately.</p>
+                <div class="form-actions" style="margin-top:1rem;">
+                    <button type="button" class="btn btn-primary" onclick="copyCalendarSubscription()">Copy link</button>
+                    <a id="calendarSubscribeWebcal" class="btn btn-secondary" href="#">Open in calendar app</a>
+                    <button type="button" class="btn btn-secondary" onclick="resetCalendarSubscription()">Reset link</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -432,5 +432,45 @@
             }
         }
     </style>
+
+    <div id="assignmentSubmissionModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="subModalTitle">
+        <div class="modal-content glass-card" style="max-width: 600px; width: 90%;">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="subModalTitle" style="margin:0;">Assignment Details</h3>
+                <button class="modal-close" onclick="closeSubmissionModal()" aria-label="Close" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-secondary);">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top:1rem;">
+                <div id="subAssignmentMeta" style="margin-bottom: 0.75rem; color: var(--text-secondary); font-size: 0.9rem;"></div>
+                <div id="subAssignmentDesc" style="margin-bottom: 1.25rem; line-height: 1.5; color: var(--text-primary); white-space: pre-wrap;"></div>
+                
+                <div id="subGradedSection" style="display:none; padding: 1rem; margin-bottom: 1rem; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 4px;">
+                    <h4 style="color: var(--success, #22c55e); margin: 0 0 0.5rem 0;">Graded</h4>
+                    <p id="subGradedMarks" style="font-size: 1.1rem; font-weight: 600; margin: 0;"></p>
+                    <p id="subGradedFeedback" style="color: var(--text-secondary); margin: 0.25rem 0 0 0;"></p>
+                </div>
+
+                <div id="subPreviousSection" style="display:none; padding: 1rem; margin-bottom: 1rem; background: var(--bg-surface, rgba(255,255,255,0.05)); border: 1px solid var(--r-line, rgba(255,255,255,0.1)); border-radius: 4px;">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem;">Your Submitted Answer</h4>
+                    <pre id="subPreviousText" style="white-space: pre-wrap; word-break: break-word; font-family: inherit; margin: 0;"></pre>
+                    <p id="subPreviousStatus" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;"></p>
+                </div>
+
+                <div id="subClosedNotice" style="display:none; padding: 0.75rem; margin-bottom: 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 4px; color: var(--danger, #ef4444); font-size: 0.9rem;">
+                    The deadline for this assignment has passed and late submissions are not accepted.
+                </div>
+
+                <form id="assignmentSubmitForm" onsubmit="handleAssignmentSubmit(event)">
+                    <div class="form-group" id="subInputGroup">
+                        <label for="submissionText" class="form-label" style="display:block; margin-bottom:0.5rem;">Your Solution / Answer / Link</label>
+                        <textarea id="submissionText" class="form-input" rows="5" placeholder="Enter your written answer, code snippet, or share link..." style="width:100%; box-sizing:border-box;" required></textarea>
+                    </div>
+                    <div class="form-actions" style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeSubmissionModal()">Close</button>
+                        <button type="submit" id="subSubmitBtn" class="btn btn-primary">Submit Work</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

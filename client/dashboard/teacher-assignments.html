@@ -180,6 +180,16 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="allowLate" class="form-label">
+                            Late Submissions
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.5rem;">
+                            <input type="checkbox" id="allowLate" name="allowLate">
+                            <span>Accept after the deadline (flagged as late)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
                         <label for="maxMarks" class="form-label">
                             Max Marks
                         </label>
@@ -293,6 +303,10 @@
                         <select id="gradeStudent" class="form-select" required>
                             <option value="">Select a submission</option>
                         </select>
+                    </div>
+                    <div class="form-group" id="gradeSubmissionPreviewGroup" style="display:none;">
+                        <label>Submitted Answer</label>
+                        <pre id="gradeSubmissionPreview" style="white-space:pre-wrap;word-break:break-word;max-height:12rem;overflow:auto;margin:0;"></pre>
                     </div>
                     <div class="form-group">
                         <label>Marks Obtained</label>

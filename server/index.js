@@ -9,6 +9,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
+const { requestId, redactUrl, rateLimitKey } = require('./middleware/request-context');
+const { startReminderScheduler } = require('./services/assignment-reminders.service');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -54,6 +56,9 @@ const errorHandler = require('./middleware/errorHandler');
 const { initializeSocket } = require('./socket/socket');
 
 const app = express();
+
+// Correlation id first, so every log line and error response can carry it.
+app.use(requestId);
 
 // On Vercel (serverless) we must not bind ports or hold WebSocket servers.
 // Socket.IO is unavailable there, so routes get a no-op emitter instead.
@@ -185,10 +190,17 @@ app.use(cors({
 app.set('trust proxy', 1);
 
 // Rate limiting
+// Signed-in users are counted individually (see rateLimitKey) so a shared campus
+// IP does not exhaust one common budget; anonymous traffic is counted per IP.
+// The reply is JSON: the web client parses every API response as JSON and would
+// otherwise show a rate-limited user an opaque "Server error (HTTP 429)".
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: 'Too many requests from this IP, please try again later.'
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 600,
+  keyGenerator: rateLimitKey,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests. Please wait a moment and try again.' }
 });
 
 app.use('/api/', limiter);
@@ -208,17 +220,27 @@ app.use(compression());
 
 // Short-lived public cache headers for read-mostly public GET endpoints
 app.use('/api/', (req, res, next) => {
-  if (req.method === 'GET' && ['/api/events', '/api/clubs', '/api/hostel', '/api/agenda'].some(p => req.path.startsWith(p))) {
-    res.set('Cache-Control', 'public, max-age=60');
+  if (req.method === 'GET' && ['/api/events', '/api/clubs', '/api/hostel', '/api/agenda'].some(p => req.originalUrl.startsWith(p))) {
+    if (req.headers.authorization) {
+      // Personalised response (e.g. "am I registered"): a shared cache must not
+      // hand one user's copy to another.
+      res.set('Cache-Control', 'private, no-cache');
+    } else {
+      res.set('Cache-Control', 'public, max-age=60');
+    }
+    res.vary('Authorization');
   }
   next();
 });
 
-// Logging middleware
+// Logging middleware. URLs are logged through redactUrl so credentials in query
+// strings (calendar subscription tokens) never reach the access log.
+morgan.token('safe-url', (req) => redactUrl(req.originalUrl || req.url));
+morgan.token('request-id', (req) => req.id || '-');
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+  app.use(morgan(':method :safe-url :status :response-time ms - :res[content-length] :request-id'));
 } else {
-  app.use(morgan('combined'));
+  app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :safe-url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :request-id'));
 }
 
 // URL Obfuscation Middleware - Must come BEFORE static file serving
@@ -532,7 +554,8 @@ app.use((err, req, res, next) => {
       : err.message || 'Internal Server Error';
     res.status(status).json({
       success: false,
-      message
+      message,
+      requestId: req.id
     });
   }
 });
@@ -544,6 +567,7 @@ const { startRenderKeepAlive } = require('./utils/render-keepalive');
 // Start server (skipped on Vercel - the platform manages the HTTP listener)
 const PORT = process.env.PORT || 5000;
 let stopRenderKeepAlive = () => {};
+let stopReminders = () => {};
 
 if (!IS_SERVERLESS) {
   async function startServer() {
@@ -564,6 +588,7 @@ if (!IS_SERVERLESS) {
       `);
 
         stopRenderKeepAlive = startRenderKeepAlive();
+        stopReminders = startReminderScheduler();
       });
     } catch (error) {
       console.error('Failed to start server:', error);
@@ -574,27 +599,55 @@ if (!IS_SERVERLESS) {
   // Start the server
   startServer();
 
-  // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, closing server gracefully...');
-    stopRenderKeepAlive();
-    await closeRedis();
-    io.close();
-    server.close(() => {
-      console.log('Server closed');
-      process.exit(0);
-    });
-  });
+  // Graceful shutdown: stop taking connections, let in-flight requests finish,
+  // and force the exit after a grace period so a stuck keep-alive socket can
+  // never leave the process (and the deploy) hanging.
+  let shuttingDown = false;
+  const SHUTDOWN_GRACE_MS = parseInt(process.env.SHUTDOWN_GRACE_MS, 10) || 10000;
 
-  process.on('SIGINT', async () => {
-    console.log('SIGINT received, closing server gracefully...');
-    stopRenderKeepAlive();
-    await closeRedis();
-    io.close();
-    server.close(() => {
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received, closing server gracefully...`);
+
+    const forceExit = setTimeout(() => {
+      console.error(`Shutdown did not finish within ${SHUTDOWN_GRACE_MS}ms; forcing exit`);
+      process.exit(1);
+    }, SHUTDOWN_GRACE_MS);
+    forceExit.unref();
+
+    try {
+      stopRenderKeepAlive();
+      stopReminders();
+      io.close();
+      await new Promise((resolve) => server.close(resolve));
+      await closeRedis();
+      try {
+        const { closePool } = require('./database/db-hybrid');
+        if (typeof closePool === 'function') await closePool();
+      } catch (poolError) {
+        console.warn('Database pool close failed:', poolError.message);
+      }
       console.log('Server closed');
       process.exit(0);
-    });
+    } catch (error) {
+      console.error('Error during shutdown:', error);
+      process.exit(1);
+    }
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  // A rejected promise nobody handled is a bug to log, not a reason to drop
+  // every connected user. An uncaught exception leaves the process in an
+  // unknown state, so log it and exit for the supervisor to restart.
+  process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled promise rejection:', reason);
+  });
+  process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    shutdown('uncaughtException');
   });
 }
 

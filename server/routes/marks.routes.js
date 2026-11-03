@@ -11,14 +11,30 @@ const {
   findOne,
   getRecord,
   createRecord,
-  listRecords
+  updateRecord,
+  deleteRecord,
+  listRecords,
+  isValidDocId
 } = require('../services/firebase-data.service');
 const { emitToUser } = require('../socket/socket');
 const notificationService = require('../services/notification.service');
+const { recordAudit } = require('../services/audit.service');
+const { normalizeDateOnly, isFutureDateOnly } = require('../utils/date.util');
+
+const IN_QUERY_CHUNK = 30;
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+/**
+ * True when the number has at most one decimal place. Shared by the upload and
+ * correction endpoints so both apply exactly the same rule (rounding to 1e-6
+ * absorbs floating-point noise from values that were computed, not typed).
+ */
+function hasAtMostOneDecimal(value) {
+  return Number.isInteger(Math.round(value * 10 * 1e6) / 1e6);
 }
 
 function sortMarks(records = []) {
@@ -125,6 +141,32 @@ function creditsOf(record) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+async function invalidateMarksCaches(studentId) {
+  cacheService.invalidateMarks(studentId);
+  try {
+    await cacheService.invalidateAnalytics();
+  } catch (error) {
+    console.warn('Analytics cache invalidation failed:', error.message);
+  }
+}
+
+/**
+ * Marks of the student's classmates for the given subjects. Scoped by subject
+ * (and department when known) instead of downloading every mark in the system.
+ */
+async function loadClassMarks(subjects, user) {
+  const uniqueSubjects = Array.from(new Set(subjects.filter(Boolean)));
+  const marks = [];
+
+  for (let index = 0; index < uniqueSubjects.length; index += IN_QUERY_CHUNK) {
+    const filters = [{ field: 'subject', op: 'in', value: uniqueSubjects.slice(index, index + IN_QUERY_CHUNK) }];
+    if (user.department) filters.push({ field: 'department', value: user.department });
+    marks.push(...await listRecords('marks', { filters }));
+  }
+
+  return marks;
+}
+
 router.get('/projection', authMiddleware, async (req, res, next) => {
   try {
     const targetCgpa = Number(req.query.target);
@@ -216,8 +258,6 @@ router.get('/projection', authMiddleware, async (req, res, next) => {
   }
 });
 
-module.exports = router;
-
 // Upload marks
 router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
   try {
@@ -253,7 +293,7 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
     const marksIsValid = Number.isFinite(parsedMarks)
       && parsedMarks >= 0
       && parsedMarks <= parsedTotal
-      && (Number.isInteger(parsedMarks) || Number.isInteger(parsedMarks * 10));
+      && hasAtMostOneDecimal(parsedMarks);
     if (!marksIsValid) {
       return res.status(400).json({
         success: false,
@@ -261,29 +301,31 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
       });
     }
 
-    const parsedExamDate = new Date(exam_date);
-    if (!exam_date || Number.isNaN(parsedExamDate.getTime())) {
+    const normalizedDate = exam_date !== undefined ? normalizeDateOnly(exam_date) : normalizeDateOnly(new Date());
+    if (!normalizedDate) {
       return res.status(400).json({
         success: false,
         message: 'exam_date must be a valid date'
       });
     }
-    if (parsedExamDate > new Date()) {
+    if (isFutureDateOnly(normalizedDate)) {
       return res.status(400).json({
         success: false,
         message: 'exam_date cannot be in the future'
       });
     }
 
+    if (!isValidDocId(student_id)) {
+      return res.status(400).json({ success: false, message: 'student_id is invalid' });
+    }
+
     const student = await getRecord('users', student_id);
-    if (!student) {
+    if (!student || student.role !== 'student') {
       return res.status(404).json({
         success: false,
         message: 'Student not found'
       });
     }
-
-    const normalizedDate = String(exam_date).slice(0, 10);
     const duplicate = await findOne('marks', {
       filters: [
         { field: 'student_id', value: student_id },
@@ -300,7 +342,7 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
     }
 
     const record = await createRecord('marks', {
-      student_id,
+      student_id: student.id,
       subject,
       exam_type,
       marks_obtained: parsedMarks,
@@ -314,16 +356,18 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
       section: student?.section || null
     });
 
-    cacheService.invalidateMarks(student_id);
-    try {
-      await cacheService.invalidateAnalytics();
-    } catch (_) {
-      void 0;
-    }
-    emitToUser(student_id, 'marks:update', { student_id, id: record.id });
+    await invalidateMarksCaches(student.id);
+    emitToUser(student.id, 'marks:update', { student_id: student.id, id: record.id });
+    await recordAudit(req, {
+      action: 'marks_upload',
+      entityType: 'marks',
+      entityId: record.id,
+      summary: `${subject} ${exam_type}: ${parsedMarks}/${parsedTotal} for ${student.registration_number || student.id}`,
+      metadata: { student_id: student.id, subject, exam_type, marks_obtained: parsedMarks, total_marks: parsedTotal }
+    });
 
     await notificationService.create({
-      userId: student_id,
+      userId: student.id,
       title: 'Marks Updated',
       message: `${subject} ${exam_type} marks were uploaded.`,
       type: 'marks',
@@ -346,6 +390,143 @@ router.post('/upload', authMiddleware, roleMiddleware('teacher', 'admin'), async
   }
 });
 
+// Bulk upload marks for an entire class
+router.post('/upload-bulk', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
+  try {
+    const {
+      subject,
+      exam_type,
+      total_marks,
+      exam_date,
+      semester,
+      records
+    } = req.body || {};
+
+    if (!subject || typeof subject !== 'string' || !subject.trim()) {
+      return res.status(400).json({ success: false, message: 'subject is required' });
+    }
+    if (!exam_type || typeof exam_type !== 'string' || !exam_type.trim()) {
+      return res.status(400).json({ success: false, message: 'exam_type is required' });
+    }
+
+    const parsedTotal = toNumber(total_marks, NaN);
+    if (!Number.isFinite(parsedTotal) || !Number.isInteger(parsedTotal) || parsedTotal < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'total_marks must be an integer greater than or equal to 1'
+      });
+    }
+
+    const normalizedDate = exam_date !== undefined ? normalizeDateOnly(exam_date) : normalizeDateOnly(new Date());
+    if (!normalizedDate) {
+      return res.status(400).json({ success: false, message: 'exam_date must be a valid date' });
+    }
+    if (isFutureDateOnly(normalizedDate)) {
+      return res.status(400).json({ success: false, message: 'exam_date cannot be in the future' });
+    }
+
+    if (!Array.isArray(records) || records.length === 0) {
+      return res.status(400).json({ success: false, message: 'records array is required' });
+    }
+    if (records.length > 200) {
+      return res.status(400).json({ success: false, message: 'A single bulk upload cannot exceed 200 records' });
+    }
+
+    let marked = 0;
+    const rejected = [];
+    const affectedStudents = new Set();
+
+    for (const item of records) {
+      if (!item || !isValidDocId(item.student_id)) {
+        rejected.push({ student_id: item?.student_id, error: 'invalid student_id' });
+        continue;
+      }
+
+      const parsedMarks = toNumber(item.marks_obtained, NaN);
+      const marksIsValid = Number.isFinite(parsedMarks)
+        && parsedMarks >= 0
+        && parsedMarks <= parsedTotal
+        && hasAtMostOneDecimal(parsedMarks);
+      if (!marksIsValid) {
+        rejected.push({ student_id: item.student_id, error: 'invalid marks_obtained' });
+        continue;
+      }
+
+      const student = await getRecord('users', String(item.student_id));
+      if (!student || student.role !== 'student') {
+        rejected.push({ student_id: item.student_id, error: 'student not found' });
+        continue;
+      }
+
+      const existing = await findOne('marks', {
+        filters: [
+          { field: 'student_id', value: student.id },
+          { field: 'subject', value: subject.trim() },
+          { field: 'exam_type', value: exam_type.trim() },
+          { field: 'exam_date', value: normalizedDate }
+        ]
+      });
+
+      const payload = {
+        student_id: student.id,
+        subject: subject.trim(),
+        exam_type: exam_type.trim(),
+        marks_obtained: parsedMarks,
+        total_marks: parsedTotal,
+        exam_date: normalizedDate,
+        semester: semester ?? student?.semester ?? null,
+        remarks: item.remarks || null,
+        department: student?.department || null,
+        year: student?.year ?? null,
+        section: student?.section || null
+      };
+
+      if (existing) {
+        await updateRecord('marks', existing.id, {
+          ...payload,
+          updated_by: req.user.id
+        });
+      } else {
+        await createRecord('marks', {
+          ...payload,
+          uploaded_by: req.user.id
+        });
+      }
+
+      affectedStudents.add(student.id);
+      marked++;
+    }
+
+    for (const studentId of affectedStudents) {
+      await invalidateMarksCaches(studentId);
+      emitToUser(studentId, 'marks:update', { student_id: studentId });
+      await notificationService.create({
+        userId: studentId,
+        title: 'Marks Updated',
+        message: `${subject.trim()} ${exam_type.trim()} marks were uploaded.`,
+        type: 'marks',
+        link: '/dashboard/student-marks.html',
+        metadata: { subject: subject.trim(), exam_type: exam_type.trim() }
+      }).catch(() => {});
+    }
+
+    await recordAudit(req, {
+      action: 'marks_upload_bulk',
+      entityType: 'marks',
+      summary: `${subject} (${exam_type}): ${marked} marked, ${rejected.length} rejected`,
+      metadata: { subject, exam_type, total_marks: parsedTotal, exam_date: normalizedDate, marked, rejectedCount: rejected.length }
+    });
+
+    res.json({
+      success: true,
+      message: `Uploaded marks for ${marked} student${marked === 1 ? '' : 's'}`,
+      data: { marked, rejected }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get student marks
 router.get('/student/:id', authMiddleware, async (req, res, next) => {
   try {
@@ -356,6 +537,10 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
         success: false,
         message: 'Access denied - students can only view their own marks'
       });
+    }
+
+    if (!isValidDocId(studentId)) {
+      return res.status(400).json({ success: false, message: 'Invalid student id' });
     }
 
     const cached = await cacheService.getMarks(studentId);
@@ -413,12 +598,10 @@ router.get('/student/:id', authMiddleware, async (req, res, next) => {
 router.get('/summary', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const [studentRecords, allMarks] = await Promise.all([
-      listRecords('marks', {
-        filters: [{ field: 'student_id', value: userId }]
-      }),
-      listRecords('marks')
-    ]);
+    const studentRecords = await listRecords('marks', {
+      filters: [{ field: 'student_id', value: userId }]
+    });
+    const allMarks = await loadClassMarks(studentRecords.map((record) => record.subject), req.user);
     const records = sortMarks(studentRecords);
 
     const trendData = records.slice(0, 10).map((record) => {
@@ -492,6 +675,133 @@ router.get('/summary', authMiddleware, async (req, res, next) => {
         cgpa: calculateCgpa(records) || 0
       }
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Correct a marks entry
+router.put('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
+  try {
+    const existing = await getRecord('marks', req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Marks record not found' });
+    }
+
+    const updates = {};
+    const body = req.body || {};
+
+    const subject = body.subject !== undefined ? String(body.subject).trim() : existing.subject;
+    const examType = body.exam_type !== undefined ? String(body.exam_type).trim() : existing.exam_type;
+    if (!subject || !examType) {
+      return res.status(400).json({ success: false, message: 'subject and exam_type cannot be empty' });
+    }
+    updates.subject = subject;
+    updates.exam_type = examType;
+
+    const totalMarks = body.total_marks !== undefined ? toNumber(body.total_marks, NaN) : toNumber(existing.total_marks, NaN);
+    if (!Number.isInteger(totalMarks) || totalMarks < 1) {
+      return res.status(400).json({ success: false, message: 'total_marks must be an integer greater than or equal to 1' });
+    }
+    updates.total_marks = totalMarks;
+
+    const marksObtained = body.marks_obtained !== undefined ? toNumber(body.marks_obtained, NaN) : toNumber(existing.marks_obtained, NaN);
+    const marksAreValid = Number.isFinite(marksObtained)
+      && marksObtained >= 0
+      && marksObtained <= totalMarks
+      && hasAtMostOneDecimal(marksObtained);
+    if (!marksAreValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'marks_obtained must be a number between 0 and total_marks, with at most one decimal place'
+      });
+    }
+    updates.marks_obtained = marksObtained;
+
+    let examDate = existing.exam_date;
+    if (body.exam_date !== undefined) {
+      examDate = normalizeDateOnly(body.exam_date);
+      if (!examDate) {
+        return res.status(400).json({ success: false, message: 'exam_date must be a valid date' });
+      }
+      if (isFutureDateOnly(examDate)) {
+        return res.status(400).json({ success: false, message: 'exam_date cannot be in the future' });
+      }
+    }
+    updates.exam_date = examDate;
+
+    if (body.remarks !== undefined) updates.remarks = body.remarks ? String(body.remarks) : null;
+    if (body.semester !== undefined) updates.semester = body.semester || null;
+
+    // The (student, subject, exam type, date) combination must stay unique.
+    const duplicate = await findOne('marks', {
+      filters: [
+        { field: 'student_id', value: existing.student_id },
+        { field: 'subject', value: subject },
+        { field: 'exam_type', value: examType },
+        { field: 'exam_date', value: examDate }
+      ]
+    });
+    if (duplicate && duplicate.id !== existing.id) {
+      return res.status(409).json({
+        success: false,
+        message: `A record for this student already exists for ${subject} (${examType}) on ${examDate}`
+      });
+    }
+
+    updates.updated_by = req.user.id;
+    await updateRecord('marks', existing.id, updates);
+    await invalidateMarksCaches(existing.student_id);
+    emitToUser(existing.student_id, 'marks:update', { student_id: existing.student_id, id: existing.id });
+
+    await recordAudit(req, {
+      action: 'marks_update',
+      entityType: 'marks',
+      entityId: existing.id,
+      summary: `${subject} ${examType}: ${existing.marks_obtained}/${existing.total_marks} -> ${marksObtained}/${totalMarks}`,
+      metadata: {
+        student_id: existing.student_id,
+        before: { marks_obtained: existing.marks_obtained, total_marks: existing.total_marks },
+        after: { marks_obtained: marksObtained, total_marks: totalMarks }
+      }
+    });
+
+    await notificationService.create({
+      userId: existing.student_id,
+      title: 'Marks Corrected',
+      message: `${subject} ${examType} marks were corrected.`,
+      type: 'marks',
+      link: '/dashboard/student-marks.html',
+      metadata: { subject, exam_type: examType, marks_obtained: marksObtained, total_marks: totalMarks }
+    });
+
+    res.json({ success: true, message: 'Marks updated successfully', data: { id: existing.id } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Remove a marks entry entered by mistake
+router.delete('/:id', authMiddleware, roleMiddleware('teacher', 'admin'), async (req, res, next) => {
+  try {
+    const existing = await getRecord('marks', req.params.id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Marks record not found' });
+    }
+
+    await deleteRecord('marks', existing.id);
+    await invalidateMarksCaches(existing.student_id);
+    emitToUser(existing.student_id, 'marks:update', { student_id: existing.student_id, id: existing.id });
+
+    await recordAudit(req, {
+      action: 'marks_delete',
+      entityType: 'marks',
+      entityId: existing.id,
+      summary: `${existing.subject} ${existing.exam_type}: ${existing.marks_obtained}/${existing.total_marks} removed`,
+      metadata: { student_id: existing.student_id, removed: existing }
+    });
+
+    res.json({ success: true, message: 'Marks record deleted' });
   } catch (error) {
     next(error);
   }

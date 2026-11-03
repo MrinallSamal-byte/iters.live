@@ -613,11 +613,23 @@
                     if (newPassword) {
                         try {
                             await APP.API.put('/users/password', { currentPassword, newPassword });
+                            // The server ends every session on a password change
+                            // (including this one), so sign in again with the new password.
                             if (typeof Toast !== 'undefined') {
-                                Toast.success('Password updated');
+                                Toast.success('Password updated. Please sign in again.');
                             } else {
-                                alert('Password updated');
+                                alert('Password updated. Please sign in again.');
                             }
+                            setTimeout(() => {
+                                if (window.APP?.logout) {
+                                    APP.logout('password_changed');
+                                } else if (window.SessionTimeout?.logout) {
+                                    window.SessionTimeout.logout('password_changed');
+                                } else {
+                                    window.location.href = '../login.html';
+                                }
+                            }, 1200);
+                            return;
                         } catch (err) {
                             APP.showToast(err.message, 'error');
                             return;

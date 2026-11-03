@@ -556,6 +556,73 @@ const API = {
     }
 };
 
+// Authenticated file downloads.
+// A plain <a href="/api/files/download/ID"> navigation cannot carry the Bearer
+// token, so the server answers 401 and the user gets a JSON error page instead
+// of the file. These links are intercepted and fetched with the token instead.
+const AUTH_DOWNLOAD_PATTERN = /^\/api\/(files\/download\/[^/]+|notes\/[^/]+\/(download|view))$/;
+
+function filenameFromDisposition(header, fallback) {
+    if (!header) return fallback;
+    const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header);
+    if (utf8) {
+        try { return decodeURIComponent(utf8[1]); } catch (_) { /* fall through */ }
+    }
+    const plain = /filename="?([^";]+)"?/i.exec(header);
+    return plain ? plain[1] : fallback;
+}
+
+async function downloadWithAuth(url, fallbackName = 'download') {
+    const token = Storage.get('accessToken');
+    const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+
+    if (!response.ok) {
+        let message = `Download failed (HTTP ${response.status})`;
+        try {
+            const data = await response.json();
+            message = data.message || message;
+        } catch (_) { /* body was not JSON */ }
+        if (response.status === 401 && !authExpiryHandled) {
+            handleAuthExpiry();
+        }
+        throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const name = filenameFromDisposition(response.headers.get('content-disposition'), fallbackName);
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', (event) => {
+        const anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+        if (!anchor) return;
+
+        let path;
+        try {
+            path = new URL(anchor.getAttribute('href'), window.location.origin).pathname;
+        } catch (_) {
+            return;
+        }
+        if (!AUTH_DOWNLOAD_PATTERN.test(path)) return;
+
+        event.preventDefault();
+        downloadWithAuth(path, anchor.textContent.trim() || 'download').catch((error) => {
+            console.error('Download failed:', error);
+            if (typeof showToast === 'function') showToast(error.message || 'Download failed', 'error');
+        });
+    });
+}
+
 // Socket.IO Helper
 let socket = null;
 let socketClientLoadingPromise = null;
@@ -1098,6 +1165,7 @@ window.APP = {
     sanitizeExpiredPublicSession,
     consumePostLogoutRedirect,
     checkAuth,
+    downloadWithAuth,
     logout,
     isAuthenticated,
     getUserRole,

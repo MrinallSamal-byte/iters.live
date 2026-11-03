@@ -441,6 +441,65 @@
         return APP.sanitize ? APP.sanitize(String(value || '')) : String(value || '');
     }
 
+    // The .ics feed needs the Bearer token, which a plain <a download> cannot send.
+    window.downloadCalendarFile = async function downloadCalendarFile() {
+        try {
+            await APP.downloadWithAuth('/api/calendar.ics', 'iterasn-timetable.ics');
+        } catch (error) {
+            notifyCalendar(error.message || 'Could not download the calendar file', 'error');
+        }
+    };
+
+    function notifyCalendar(message, type) {
+        if (typeof showToast === 'function') showToast(message, type);
+        else if (window.Toast && typeof window.Toast.show === 'function') window.Toast.show({ type, message });
+    }
+
+    async function requestSubscription(path) {
+        const response = await APP.API.post(path, {});
+        const data = response?.data;
+        if (!data?.url) throw new Error('The server did not return a calendar link');
+        document.getElementById('calendarSubscribeUrl').value = data.url;
+        document.getElementById('calendarSubscribeWebcal').href = data.webcalUrl || data.url;
+        return response;
+    }
+
+    window.openCalendarSubscription = async function openCalendarSubscription() {
+        try {
+            await requestSubscription('/calendar.ics/subscription');
+            document.getElementById('calendarSubscribeModal').style.display = 'flex';
+        } catch (error) {
+            notifyCalendar(error.message || 'Could not create a calendar link', 'error');
+        }
+    };
+
+    window.closeCalendarSubscription = function closeCalendarSubscription() {
+        document.getElementById('calendarSubscribeModal').style.display = 'none';
+    };
+
+    window.copyCalendarSubscription = async function copyCalendarSubscription() {
+        const input = document.getElementById('calendarSubscribeUrl');
+        try {
+            await navigator.clipboard.writeText(input.value);
+            notifyCalendar('Calendar link copied', 'success');
+        } catch (_) {
+            input.select();
+            notifyCalendar('Press Ctrl+C to copy the selected link', 'info');
+        }
+    };
+
+    window.resetCalendarSubscription = async function resetCalendarSubscription() {
+        if (!window.confirm('Reset the calendar link? Calendars already subscribed will stop updating until you add the new link.')) {
+            return;
+        }
+        try {
+            const response = await requestSubscription('/calendar.ics/subscription/reset');
+            notifyCalendar(response.message || 'Calendar link reset', 'success');
+        } catch (error) {
+            notifyCalendar(error.message || 'Could not reset the calendar link', 'error');
+        }
+    };
+
     window.downloadTimetable = function downloadTimetable() {
         const table = document.getElementById('timetableTable');
         if (!table || !timetableState) {

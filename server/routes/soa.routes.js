@@ -184,8 +184,19 @@ router.get('/me', authMiddleware, requireStudent, async (req, res) => {
 
 router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (req, res) => {
   if (!isPortalEnabled()) {
-    const snapshot = await loadSnapshot(req);
-    return res.status(503).json(buildUnavailableResponse(snapshot));
+    try {
+      const snapshot = await loadSnapshot(req);
+      return res.status(503).json(buildUnavailableResponse(snapshot));
+    } catch (snapshotError) {
+      console.error('SOA unavailable-snapshot error:', snapshotError.message);
+      return res.status(503).json({
+        success: false,
+        status: soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
+        message: 'The SOA portal import is currently unavailable.',
+        portalEnabled: false,
+        demoAvailable: true
+      });
+    }
   }
 
   try {
@@ -261,8 +272,19 @@ router.get('/captcha', authMiddleware, requireStudent, captchaLimiter, async (re
 
 router.post('/refresh-captcha', authMiddleware, requireStudent, captchaLimiter, async (req, res) => {
   if (!isPortalEnabled()) {
-    const snapshot = await loadSnapshot(req);
-    return res.status(503).json(buildUnavailableResponse(snapshot));
+    try {
+      const snapshot = await loadSnapshot(req);
+      return res.status(503).json(buildUnavailableResponse(snapshot));
+    } catch (snapshotError) {
+      console.error('SOA unavailable-snapshot error:', snapshotError.message);
+      return res.status(503).json({
+        success: false,
+        status: soaScraperService.STATUS_RUNTIME_UNAVAILABLE,
+        message: 'The SOA portal import is currently unavailable.',
+        portalEnabled: false,
+        demoAvailable: true
+      });
+    }
   }
 
   try {

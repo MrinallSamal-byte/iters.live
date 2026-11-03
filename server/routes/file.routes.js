@@ -4,11 +4,21 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
-const { db } = require('../database/firebase');
+const { db, admin } = require('../database/firebase');
 const { authMiddleware, roleMiddleware } = require('../middleware/auth');
-const { emitToClass, emitToDepartment, emitToRole } = require('../socket/socket');
+const { emitToDepartment } = require('../socket/socket');
 const { getUploadsBaseDir } = require('../utils/uploads-dir.util');
 const { getExtensionFromMime } = require('../utils/file.util');
+const {
+  createRecord,
+  getRecord,
+  listRecords,
+  updateRecord,
+  deleteRecord,
+  isValidDocId
+} = require('../services/firebase-data.service');
+const notificationService = require('../services/notification.service');
+const { recordAudit } = require('../services/audit.service');
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -48,7 +58,10 @@ const fileFilter = (req, file, cb) => {
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only PDF, DOC, DOCX, PPT, PPTX, images, TXT, and ZIP are allowed.'));
+    // 400, not 500: this is the uploader's mistake, and 5xx messages are hidden in production.
+    const error = new Error('Invalid file type. Only PDF, DOC, DOCX, PPT, PPTX, images, TXT, and ZIP are allowed.');
+    error.statusCode = 400;
+    cb(error);
   }
 };
 
@@ -69,62 +82,31 @@ const calculateChecksum = async (filePath) => {
 };
 
 /**
- * Log activity to Firestore
+ * Fields safe to show to any signed-in user. Server-side paths, stored names and
+ * checksums stay internal.
  */
-const logActivity = async (userId, action, entityType, entityId, metadata = null) => {
-  try {
-    await db.collection('activity_log').add({
-      user_id: userId,
-      action,
-      entity_type: entityType,
-      entity_id: entityId,
-      metadata: metadata || {},
-      created_at: new Date()
-    });
-  } catch (error) {
-    console.warn('Failed to log activity:', error.message);
-  }
-};
+function toPublicFile(file) {
+  return {
+    id: file.id,
+    original_name: file.original_name,
+    category: file.category,
+    subject: file.subject || null,
+    description: file.description || null,
+    mime_type: file.mime_type || null,
+    file_size: file.file_size || 0,
+    download_count: file.download_count || 0,
+    approved: file.approved === true,
+    status: file.status || (file.approved === true ? 'approved' : 'pending'),
+    uploaded_by: file.uploaded_by,
+    uploaded_by_name: file.uploaded_by_name || null,
+    created_at: file.created_at || null,
+    download_url: `/api/files/download/${encodeURIComponent(file.id)}`
+  };
+}
 
-// Helper to generate dummy files data
-const getDummyFiles = () => [
-  {
-    id: '1',
-    original_name: 'Data_Structures_Unit1_Notes.pdf',
-    category: 'note',
-    subject: 'Data Structures',
-    uploaded_by_name: 'Dr. Priya Verma',
-    file_size: 2500000,
-    download_count: 125,
-    approved: true,
-    public_url: '/uploads/dummy-file.pdf',
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: '2',
-    original_name: 'Database_PYQ_2024.pdf',
-    category: 'pyq',
-    subject: 'Database Management',
-    uploaded_by_name: 'Dr. Amit Singh',
-    file_size: 1800000,
-    download_count: 89,
-    approved: true,
-    public_url: '/uploads/dummy-file.pdf',
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-  },
-  {
-    id: '3',
-    original_name: 'Operating_Systems_Assignment.pdf',
-    category: 'assignment',
-    subject: 'Operating Systems',
-    uploaded_by_name: 'Prof. Rahul Kumar',
-    file_size: 950000,
-    download_count: 45,
-    approved: true,
-    public_url: '/uploads/dummy-file.pdf',
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-  }
-];
+function actorId(req) {
+  return req.user.id || req.user.uid;
+}
 
 /**
  * POST /api/files/upload
@@ -152,37 +134,33 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res, n
     // Calculate checksum
     const checksum = await calculateChecksum(req.file.path);
 
-    // Public URL
-    const publicUrl = `/static/uploads/${req.file.filename}`;
-
     // Determine approval status (teacher uploads need approval)
     const approved = req.user.role === 'student' ? true : false;
 
-    // Save to Firestore
-    const fileData = {
+    const record = await createRecord('files', {
       original_name: req.file.originalname,
       stored_name: req.file.filename,
       mime_type: req.file.mimetype,
       file_size: req.file.size,
       checksum,
       file_path: req.file.path,
-      public_url: publicUrl,
       category,
       subject: subject || null,
-      uploaded_by: req.user.id || req.user.uid,
+      uploaded_by: actorId(req),
+      uploaded_by_name: req.user.name || null,
       approved,
+      status: approved ? 'approved' : 'pending',
       description: description || null,
-      download_count: 0,
-      created_at: new Date()
-    };
+      download_count: 0
+    });
+    const fileId = record.id;
 
-    const docRef = await db.collection('files').add(fileData);
-    const fileId = docRef.id;
-
-    // Log activity
-    await logActivity(req.user.id || req.user.uid, 'file_upload', 'file', fileId, {
-      filename: req.file.originalname,
-      category
+    await recordAudit(req, {
+      action: 'file_upload',
+      entityType: 'file',
+      entityId: fileId,
+      summary: req.file.originalname,
+      metadata: { category }
     });
 
     // Emit socket event for approved files
@@ -204,7 +182,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res, n
       data: {
         id: fileId,
         originalName: req.file.originalname,
-        publicUrl,
+        downloadUrl: `/api/files/download/${encodeURIComponent(fileId)}`,
         category,
         subject,
         size: req.file.size,
@@ -221,86 +199,100 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res, n
 
 /**
  * GET /api/files
- * Get files list with pagination and filters
+ * Files list with real pagination, filters, search and totals
  */
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const {
-      category,
-      subject,
-      approved,
-      page = 1,
-      limit = 20,
-      search
-    } = req.query;
+    const { category, subject, approved, search } = req.query;
 
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
-    
-    try {
-      // Build Firestore query
-      let filesRef = db.collection('files');
-      
-      if (category) {
-        filesRef = filesRef.where('category', '==', category);
-      }
-      
-      if (subject) {
-        filesRef = filesRef.where('subject', '==', subject);
-      }
-      
-      // Role-based filtering
-      if (req.user.role === 'student') {
-        // Students see approved files
-        filesRef = filesRef.where('approved', '==', true);
-      } else if (approved !== undefined) {
-        filesRef = filesRef.where('approved', '==', approved === 'true');
-      }
-      
-      filesRef = filesRef.orderBy('created_at', 'desc').limit(limitNum);
-      
-      const snapshot = await filesRef.get();
-      let files = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Client-side search filter (Firestore doesn't support LIKE)
-      if (search) {
-        const searchLower = search.toLowerCase();
-        files = files.filter(f => 
-          f.original_name?.toLowerCase().includes(searchLower) ||
-          f.description?.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      res.json({
-        success: true,
-        data: {
-          files: files.length > 0 ? files : getDummyFiles(),
-          pagination: {
-            page: pageNum,
-            limit: limitNum,
-            total: files.length || getDummyFiles().length,
-            totalPages: 1
-          }
-        }
-      });
-    } catch (firestoreError) {
-      console.warn('Firestore error, using dummy data:', firestoreError.message);
-      res.json({
-        success: true,
-        data: {
-          files: getDummyFiles(),
-          pagination: {
-            page: pageNum,
-            limit: limitNum,
-            total: getDummyFiles().length,
-            totalPages: 1
-          }
-        }
-      });
+    const pageNum = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+
+    const filters = [];
+    if (category) filters.push({ field: 'category', value: String(category) });
+    if (subject) filters.push({ field: 'subject', value: String(subject) });
+
+    // Role-based filtering: students only ever see approved files
+    if (req.user.role === 'student') {
+      filters.push({ field: 'approved', value: true });
+    } else if (approved !== undefined) {
+      filters.push({ field: 'approved', value: approved === 'true' });
     }
+
+    let files = await listRecords('files', {
+      filters,
+      orderBy: [{ field: 'created_at', direction: 'desc' }]
+    });
+
+    if (search) {
+      const needle = String(search).toLowerCase();
+      files = files.filter((file) => [file.original_name, file.description, file.subject]
+        .some((field) => String(field || '').toLowerCase().includes(needle)));
+    }
+
+    const total = files.length;
+    const offset = (pageNum - 1) * limitNum;
+
+    res.json({
+      success: true,
+      data: {
+        files: files.slice(offset, offset + limitNum).map(toPublicFile),
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / limitNum))
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/files/stats/overview
+ * Real file statistics (zeros when there are no files; never invented numbers)
+ */
+router.get('/stats/overview', authMiddleware, async (req, res, next) => {
+  try {
+    const files = await listRecords('files');
+
+    const categoryMap = new Map();
+    let totalSize = 0;
+    let totalDownloads = 0;
+    let approvedFiles = 0;
+
+    for (const file of files) {
+      totalSize += file.file_size || 0;
+      totalDownloads += file.download_count || 0;
+      if (file.approved === true) approvedFiles += 1;
+
+      if (file.category) {
+        const entry = categoryMap.get(file.category) || { count: 0, size: 0 };
+        entry.count += 1;
+        entry.size += file.file_size || 0;
+        categoryMap.set(file.category, entry);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        overview: {
+          total_files: files.length,
+          total_size: totalSize,
+          total_downloads: totalDownloads,
+          approved_files: approvedFiles,
+          pending_files: files.length - approvedFiles
+        },
+        byCategory: Array.from(categoryMap.entries()).map(([category, entry]) => ({
+          category,
+          count: entry.count,
+          size: entry.size
+        }))
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -313,58 +305,56 @@ router.get('/', authMiddleware, async (req, res, next) => {
 router.get('/download/:id', authMiddleware, async (req, res, next) => {
   try {
     const fileId = req.params.id;
+    const file = isValidDocId(fileId) ? await getRecord('files', fileId) : null;
 
-    try {
-      const fileDoc = await db.collection('files').doc(fileId).get();
-
-      if (!fileDoc.exists) {
-        return res.status(404).json({
-          success: false,
-          message: 'File not found'
-        });
-      }
-
-      const file = fileDoc.data();
-
-      // Permission check
-      if (req.user.role === 'student') {
-        if (!file.approved && file.uploaded_by !== (req.user.id || req.user.uid)) {
-          return res.status(403).json({
-            success: false,
-            message: 'Access denied - file not approved'
-          });
-        }
-      }
-
-      // Check if file exists
-      try {
-        await fs.access(file.file_path);
-      } catch (error) {
-        return res.status(404).json({
-          success: false,
-          message: 'File not found on server'
-        });
-      }
-
-      // Increment download count
-      await db.collection('files').doc(fileId).update({
-        download_count: (file.download_count || 0) + 1
-      });
-
-      // Log activity
-      await logActivity(req.user.id || req.user.uid, 'file_download', 'file', fileId, {
-        filename: file.original_name
-      });
-
-      // Send file
-      res.download(file.file_path, file.original_name);
-    } catch (firestoreError) {
-      console.error('Firestore error:', firestoreError.message);
-      res.status(404).json({
+    if (!file) {
+      return res.status(404).json({
         success: false,
         message: 'File not found'
       });
     }
+
+    // Permission check
+    if (req.user.role === 'student') {
+      if (!file.approved && file.uploaded_by !== actorId(req)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied - file not approved'
+        });
+      }
+    }
+
+    try {
+      await fs.access(file.file_path);
+    } catch (error) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found on server'
+      });
+    }
+
+    // Atomic increment: concurrent downloads must not overwrite each other's count.
+    try {
+      const increment = admin?.firestore?.FieldValue?.increment;
+      await db.collection('files').doc(fileId).update({
+        download_count: typeof increment === 'function' ? increment(1) : (file.download_count || 0) + 1
+      });
+    } catch (countError) {
+      console.warn('Failed to update download count:', countError.message);
+    }
+
+    await recordAudit(req, {
+      action: 'file_download',
+      entityType: 'file',
+      entityId: fileId,
+      summary: file.original_name
+    });
+
+    res.download(file.file_path, file.original_name, (downloadError) => {
+      if (downloadError && !res.headersSent) {
+        next(downloadError);
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -377,50 +367,55 @@ router.get('/download/:id', authMiddleware, async (req, res, next) => {
 router.post('/approve/:id', authMiddleware, roleMiddleware('admin'), async (req, res, next) => {
   try {
     const fileId = req.params.id;
+    const file = isValidDocId(fileId) ? await getRecord('files', fileId) : null;
 
-    try {
-      const fileDoc = await db.collection('files').doc(fileId).get();
-
-      if (!fileDoc.exists) {
-        return res.status(404).json({
-          success: false,
-          message: 'File not found'
-        });
-      }
-
-      const file = fileDoc.data();
-
-      // Update approval status
-      await db.collection('files').doc(fileId).update({
-        approved: true,
-        approved_by: req.user.id || req.user.uid,
-        approved_at: new Date()
-      });
-
-      // Log activity
-      await logActivity(req.user.id || req.user.uid, 'file_approve', 'file', fileId);
-
-      // Emit socket event
-      if (req.user.department) {
-        emitToDepartment(req.user.department, 'file:approved', {
-          fileId,
-          category: file.category,
-          subject: file.subject,
-          originalName: file.original_name
-        });
-      }
-
-      res.json({
-        success: true,
-        message: 'File approved successfully'
-      });
-    } catch (firestoreError) {
-      console.error('Firestore error:', firestoreError.message);
-      res.status(500).json({
+    if (!file) {
+      return res.status(404).json({
         success: false,
-        message: 'Failed to approve file'
+        message: 'File not found'
       });
     }
+
+    await updateRecord('files', fileId, {
+      approved: true,
+      status: 'approved',
+      approved_by: actorId(req),
+      approved_at: new Date().toISOString(),
+      rejection_reason: null
+    });
+
+    await recordAudit(req, {
+      action: 'file_approve',
+      entityType: 'file',
+      entityId: fileId,
+      summary: file.original_name
+    });
+
+    if (file.uploaded_by) {
+      await notificationService.create({
+        userId: file.uploaded_by,
+        title: 'File approved',
+        message: `Your file "${file.original_name}" was approved and is now visible to students.`,
+        type: 'file',
+        link: '/dashboard/student-notes.html',
+        metadata: { fileId }
+      });
+    }
+
+    // Emit socket event
+    if (req.user.department) {
+      emitToDepartment(req.user.department, 'file:approved', {
+        fileId,
+        category: file.category,
+        subject: file.subject,
+        originalName: file.original_name
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'File approved successfully'
+    });
   } catch (error) {
     next(error);
   }
@@ -433,129 +428,44 @@ router.post('/approve/:id', authMiddleware, roleMiddleware('admin'), async (req,
 router.delete('/:id', authMiddleware, async (req, res, next) => {
   try {
     const fileId = req.params.id;
+    const file = isValidDocId(fileId) ? await getRecord('files', fileId) : null;
 
-    try {
-      const fileDoc = await db.collection('files').doc(fileId).get();
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found'
+      });
+    }
 
-      if (!fileDoc.exists) {
-        return res.status(404).json({
-          success: false,
-          message: 'File not found'
-        });
-      }
+    // Permission check
+    if (req.user.role !== 'admin' && file.uploaded_by !== actorId(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
 
-      const file = fileDoc.data();
-
-      // Permission check
-      if (req.user.role !== 'admin' && file.uploaded_by !== (req.user.id || req.user.uid)) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied'
-        });
-      }
-
-      // Delete file from filesystem
+    // Delete file from filesystem
+    if (file.file_path) {
       try {
         await fs.unlink(file.file_path);
       } catch (error) {
         console.error('Error deleting file:', error);
       }
-
-      // Delete from Firestore
-      await db.collection('files').doc(fileId).delete();
-
-      // Log activity
-      await logActivity(req.user.id || req.user.uid, 'file_delete', 'file', fileId, {
-        filename: file.original_name
-      });
-
-      res.json({
-        success: true,
-        message: 'File deleted successfully'
-      });
-    } catch (firestoreError) {
-      console.error('Firestore error:', firestoreError.message);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete file'
-      });
     }
-  } catch (error) {
-    next(error);
-  }
-});
 
-/**
- * GET /api/files/stats
- * Get file statistics
- */
-router.get('/stats/overview', authMiddleware, async (req, res, next) => {
-  try {
-    // Return default stats
-    let stats = {
-      total_files: 45,
-      total_size: 125000000,
-      total_downloads: 1250,
-      approved_files: 42,
-      pending_files: 3
-    };
-    
-    let byCategory = [
-      { category: 'note', count: 20, size: 50000000 },
-      { category: 'pyq', count: 15, size: 40000000 },
-      { category: 'assignment', count: 10, size: 35000000 }
-    ];
+    await deleteRecord('files', fileId);
 
-    try {
-      const filesSnapshot = await db.collection('files').get();
-      
-      if (filesSnapshot.size > 0) {
-        let totalSize = 0;
-        let totalDownloads = 0;
-        let approved = 0;
-        let pending = 0;
-        const categoryMap = {};
-        
-        filesSnapshot.docs.forEach(doc => {
-          const file = doc.data();
-          totalSize += file.file_size || 0;
-          totalDownloads += file.download_count || 0;
-          if (file.approved) approved++;
-          else pending++;
-          
-          if (file.category) {
-            if (!categoryMap[file.category]) {
-              categoryMap[file.category] = { count: 0, size: 0 };
-            }
-            categoryMap[file.category].count++;
-            categoryMap[file.category].size += file.file_size || 0;
-          }
-        });
-        
-        stats = {
-          total_files: filesSnapshot.size,
-          total_size: totalSize,
-          total_downloads: totalDownloads,
-          approved_files: approved,
-          pending_files: pending
-        };
-        
-        byCategory = Object.entries(categoryMap).map(([category, data]) => ({
-          category,
-          count: data.count,
-          size: data.size
-        }));
-      }
-    } catch (firestoreError) {
-      console.warn('Firestore error:', firestoreError.message);
-    }
+    await recordAudit(req, {
+      action: 'file_delete',
+      entityType: 'file',
+      entityId: fileId,
+      summary: file.original_name
+    });
 
     res.json({
       success: true,
-      data: {
-        overview: stats,
-        byCategory
-      }
+      message: 'File deleted successfully'
     });
   } catch (error) {
     next(error);

@@ -272,7 +272,13 @@ function exportUsers() {
             u.is_active ? 'Active' : 'Inactive'
         ]);
     });
-    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    // Names and emails are user-controlled: a cell starting with = + - @ would run
+    // as a formula when this file is opened in Excel/Sheets, so mark it as text.
+    const neutralize = (v) => {
+        const text = String(v ?? '');
+        return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    };
+    const csv = rows.map(r => r.map(v => `"${neutralize(v).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

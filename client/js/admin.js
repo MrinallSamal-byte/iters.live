@@ -447,8 +447,8 @@
     }
 
     container.innerHTML = logs.map(a => {
-      const who = a.user_name || a.user_id || 'System';
-      const what = a.action || a.details || 'activity';
+      const who = a.actor_name || a.user_name || a.user_id || 'System';
+      const what = a.summary || a.action || a.details || 'activity';
       const when = a.created_at || a.timestamp;
       const timeStr = when ? new Date(when).toLocaleString() : '';
       return `

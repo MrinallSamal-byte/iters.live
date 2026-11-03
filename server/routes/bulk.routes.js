@@ -11,6 +11,7 @@ const fsp = require('fs').promises;
 const { body, query, validationResult } = require('express-validator');
 const { authMiddleware: authenticate, roleMiddleware: authorize } = require('../middleware/auth');
 const bulkOperationsService = require('../services/bulk-operations.service');
+const { recordAudit } = require('../services/audit.service');
 const { ensureUploadsDir } = require('../utils/uploads-dir.util');
 
 // Configure multer for file uploads
@@ -34,10 +35,32 @@ const upload = multer({
     if (allowedTypes.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only CSV and Excel files are allowed.'));
+      // 400 rather than 500: the caller picked the wrong file, and 5xx messages are hidden in production.
+      const error = new Error('Invalid file type. Only CSV and Excel files are allowed.');
+      error.statusCode = 400;
+      cb(error);
     }
   }
 });
+
+/**
+ * Failures that are the caller's fault (bad file, too many rows) carry a
+ * statusCode and a message that is safe to show; everything else is a generic 500.
+ */
+function sendImportError(res, error, fallbackMessage) {
+  console.error(fallbackMessage, error);
+  const status = error.statusCode >= 400 && error.statusCode < 500 ? error.statusCode : 500;
+  res.status(status).json({
+    success: false,
+    message: status === 500 ? fallbackMessage : error.message
+  });
+}
+
+function unlinkUpload(req) {
+  if (req.file) {
+    fsp.unlink(req.file.path).catch(() => {});
+  }
+}
 
 /**
  * POST /api/bulk/users/import
@@ -59,22 +82,24 @@ router.post('/users/import',
       const fileType = path.extname(req.file.originalname).toLowerCase() === '.csv' ? 'csv' : 'xlsx';
       const results = await bulkOperationsService.bulkCreateUsers(req.file.path, fileType);
 
+      await recordAudit(req, {
+        action: 'bulk_user_import',
+        entityType: 'user',
+        summary: `${results.success} created, ${results.failed} failed`,
+        metadata: { file: req.file.originalname, success: results.success, failed: results.failed }
+      });
+
+      // The response carries one-time temporary passwords: nothing may cache it.
+      res.setHeader('Cache-Control', 'no-store');
       res.json({
         success: true,
         message: 'Bulk user creation completed',
         data: results
       });
     } catch (error) {
-      console.error('Bulk user import error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to import users',
-        error: error.message
-      });
+      sendImportError(res, error, 'Failed to import users');
     } finally {
-      if (req.file) {
-        fsp.unlink(req.file.path).catch(() => {});
-      }
+      unlinkUpload(req);
     }
   }
 );
@@ -104,10 +129,17 @@ router.post('/attendance/import',
       if (io) {
         io.emit('attendance:bulk-update', {
           teacherId: req.user.id,
-          teacherName: req.user.full_name,
+          teacherName: req.user.name,
           count: results.success
         });
       }
+
+      await recordAudit(req, {
+        action: 'bulk_attendance_import',
+        entityType: 'attendance',
+        summary: `${results.success} marked, ${results.failed} failed`,
+        metadata: { file: req.file.originalname, success: results.success, failed: results.failed }
+      });
 
       res.json({
         success: true,
@@ -115,12 +147,9 @@ router.post('/attendance/import',
         data: results
       });
     } catch (error) {
-      console.error('Bulk attendance import error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to import attendance',
-        error: error.message
-      });
+      sendImportError(res, error, 'Failed to import attendance');
+    } finally {
+      unlinkUpload(req);
     }
   }
 );
@@ -150,10 +179,17 @@ router.post('/marks/import',
       if (io) {
         io.emit('marks:bulk-update', {
           teacherId: req.user.id,
-          teacherName: req.user.full_name,
+          teacherName: req.user.name,
           count: results.success
         });
       }
+
+      await recordAudit(req, {
+        action: 'bulk_marks_import',
+        entityType: 'marks',
+        summary: `${results.success} saved, ${results.failed} failed`,
+        metadata: { file: req.file.originalname, success: results.success, failed: results.failed }
+      });
 
       res.json({
         success: true,
@@ -161,12 +197,9 @@ router.post('/marks/import',
         data: results
       });
     } catch (error) {
-      console.error('Bulk marks import error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to import marks',
-        error: error.message
-      });
+      sendImportError(res, error, 'Failed to import marks');
+    } finally {
+      unlinkUpload(req);
     }
   }
 );
@@ -219,8 +252,7 @@ router.get('/export',
       console.error('Export error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to export data',
-        error: error.message
+        message: 'Failed to export data'
       });
     }
   }
@@ -248,7 +280,7 @@ router.get('/templates/:type',
           headers = ['student_id', 'subject', 'date', 'status', 'remarks'];
           break;
         case 'marks':
-          headers = ['student_id', 'subject', 'exam_type', 'marks_obtained', 'total_marks', 'remarks'];
+          headers = ['student_id', 'subject', 'exam_type', 'marks_obtained', 'total_marks', 'exam_date', 'remarks'];
           break;
         default:
           return res.status(400).json({
@@ -291,8 +323,7 @@ router.get('/templates/:type',
       console.error('Template download error:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to generate template',
-        error: error.message
+        message: 'Failed to generate template'
       });
     }
   }

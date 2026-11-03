@@ -206,6 +206,7 @@
             if (response.ok) {
                 const data = await response.json();
                 allEvents = (data.data || []).map(normalizeEvent);
+                registeredEvents = new Set(allEvents.filter(e => e.is_registered).map(e => String(e.id)));
             }
         } catch (error) {
             console.log('Using sample data');
@@ -253,7 +254,7 @@
 
         let html = '';
         filteredEvents.forEach(event => {
-            const isRegistered = registeredEvents.has(event.id);
+            const isRegistered = registeredEvents.has(String(event.id)) || Boolean(event.is_registered);
             const isFull = event.max_participants != null && event.participants >= event.max_participants;
             const eventDate = new Date(event.date);
             const isToday = eventDate.toDateString() === new Date().toDateString();
@@ -293,9 +294,10 @@
                             <button 
                                 class="register-btn ${isRegistered ? 'registered' : ''}" 
                                 data-event-id="${esc(event.id)}"
-                                ${(!event.registration_open || isFull) ? 'disabled' : ''}
+                                ${(!isRegistered && (!event.registration_open || isFull)) ? 'disabled' : ''}
+                                title="${isRegistered ? 'Click to cancel your registration' : 'Click to register'}"
                             >
-                                ${isRegistered ? '✓ Registered' : (isFull ? 'Full' : 'Register')}
+                                ${isRegistered ? '✓ Registered (Cancel)' : (isFull ? 'Full' : 'Register')}
                             </button>
                         </div>
                     </div>
@@ -305,13 +307,17 @@
 
         grid.innerHTML = html;
 
-        // Add event listeners to register buttons
-        const registerButtons = grid.querySelectorAll('.register-btn:not(.registered):not(:disabled)');
+        // Add event listeners to register/unregister buttons
+        const registerButtons = grid.querySelectorAll('.register-btn');
         registerButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const eventId = this.dataset.eventId;
-                const event = allEvents.find(e => String(e.id) === String(eventId));
-                handleRegistration(event ? event.id : eventId);
+                const isReg = this.classList.contains('registered');
+                if (isReg) {
+                    handleCancelRegistration(eventId);
+                } else if (!this.disabled) {
+                    handleRegistration(eventId);
+                }
             });
         });
     }
@@ -335,34 +341,59 @@
                     'Content-Type': 'application/json'
                 }
             });
+            const payload = await response.json().catch(() => ({}));
 
-            if (response.ok) {
-                registeredEvents.add(eventId);
+            if (response.ok && payload.success) {
+                registeredEvents.add(String(eventId));
                 window.APP.showToast('Successfully registered for event!', 'success');
                 
-                // Update participant count
-                const event = allEvents.find(e => e.id === eventId);
+                const event = allEvents.find(e => String(e.id) === String(eventId));
                 if (event) {
-                    event.participants++;
+                    event.participants = payload.data?.registration_count ?? (event.participants + 1);
+                    event.is_registered = true;
                 }
                 
                 displayEvents();
                 updateStats();
             } else {
-                throw new Error('Registration failed');
+                throw new Error(payload.message || 'Registration failed');
             }
         } catch (error) {
             console.error('Registration error:', error);
-            
-            // For demo purposes, still allow registration
-            registeredEvents.add(eventId);
-            const event = allEvents.find(e => e.id === eventId);
-            if (event) {
-                event.participants++;
+            window.APP.showToast(error.message || 'Failed to register', 'error');
+        }
+    }
+
+    async function handleCancelRegistration(eventId) {
+        if (!confirm('Cancel your registration for this event?')) return;
+        try {
+            const token = APP.Storage.get('accessToken');
+            const response = await fetch(`/api/events/${eventId}/register`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const payload = await response.json().catch(() => ({}));
+
+            if (response.ok && payload.success) {
+                registeredEvents.delete(String(eventId));
+                window.APP.showToast('Registration cancelled', 'info');
+
+                const event = allEvents.find(e => String(e.id) === String(eventId));
+                if (event && event.participants > 0) {
+                    event.participants = payload.data?.registration_count ?? (event.participants - 1);
+                    event.is_registered = false;
+                }
+
+                displayEvents();
+                updateStats();
+            } else {
+                throw new Error(payload.message || 'Failed to cancel registration');
             }
-            window.APP.showToast('Registered for event!', 'success');
-            displayEvents();
-            updateStats();
+        } catch (error) {
+            console.error('Cancel registration error:', error);
+            window.APP.showToast(error.message || 'Failed to cancel registration', 'error');
         }
     }
 

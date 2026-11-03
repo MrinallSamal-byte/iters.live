@@ -15,12 +15,14 @@ router.get('/', auth, async (req, res) => {
     const result = await notificationService.getForUser(req.user.id, {
       isRead: isRead === 'true' ? true : isRead === 'false' ? false : null,
       type,
-      page: parseInt(page) || 1,
-      pageSize: parseInt(pageSize) || 20
+      // Clamp: a negative page would slice from the end of the list and a huge
+      // pageSize would defeat pagination altogether.
+      page: Math.max(1, parseInt(page, 10) || 1),
+      pageSize: Math.min(100, Math.max(1, parseInt(pageSize, 10) || 20))
     });
 
     if (!result.success) {
-      return res.status(500).json(result);
+      return res.status(500).json({ success: false, message: 'Notification service is temporarily unavailable' });
     }
 
     res.json(result);
@@ -28,8 +30,7 @@ router.get('/', auth, async (req, res) => {
     console.error('Get notifications error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get notifications',
-      error: error.message
+      message: 'Failed to get notifications'
     });
   }
 });
@@ -44,7 +45,7 @@ router.get('/unread-count', auth, async (req, res) => {
     const result = await notificationService.getUnreadCount(req.user.id);
 
     if (!result.success) {
-      return res.status(500).json(result);
+      return res.status(500).json({ success: false, message: 'Notification service is temporarily unavailable' });
     }
 
     res.json(result);
@@ -52,8 +53,7 @@ router.get('/unread-count', auth, async (req, res) => {
     console.error('Get unread count error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get unread count',
-      error: error.message
+      message: 'Failed to get unread count'
     });
   }
 });
@@ -68,7 +68,7 @@ router.get('/stats', auth, async (req, res) => {
     const result = await notificationService.getStats(req.user.id);
 
     if (!result.success) {
-      return res.status(500).json(result);
+      return res.status(500).json({ success: false, message: 'Notification service is temporarily unavailable' });
     }
 
     res.json(result);
@@ -76,8 +76,7 @@ router.get('/stats', auth, async (req, res) => {
     console.error('Get notification stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get notification statistics',
-      error: error.message
+      message: 'Failed to get notification statistics'
     });
   }
 });
@@ -109,8 +108,7 @@ router.put('/:id/read', auth, async (req, res) => {
     console.error('Mark as read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to mark notification as read',
-      error: error.message
+      message: 'Failed to mark notification as read'
     });
   }
 });
@@ -125,7 +123,7 @@ router.put('/read-all', auth, async (req, res) => {
     const result = await notificationService.markAllAsRead(req.user.id);
 
     if (!result.success) {
-      return res.status(500).json(result);
+      return res.status(500).json({ success: false, message: 'Notification service is temporarily unavailable' });
     }
 
     res.json({
@@ -136,8 +134,7 @@ router.put('/read-all', auth, async (req, res) => {
     console.error('Mark all as read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to mark all notifications as read',
-      error: error.message
+      message: 'Failed to mark all notifications as read'
     });
   }
 });
@@ -169,8 +166,7 @@ router.delete('/:id', auth, async (req, res) => {
     console.error('Delete notification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete notification',
-      error: error.message
+      message: 'Failed to delete notification'
     });
   }
 });
@@ -185,7 +181,7 @@ router.delete('/read/all', auth, async (req, res) => {
     const result = await notificationService.deleteAllRead(req.user.id);
 
     if (!result.success) {
-      return res.status(500).json(result);
+      return res.status(500).json({ success: false, message: 'Notification service is temporarily unavailable' });
     }
 
     res.json({
@@ -196,8 +192,7 @@ router.delete('/read/all', auth, async (req, res) => {
     console.error('Delete read notifications error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete read notifications',
-      error: error.message
+      message: 'Failed to delete read notifications'
     });
   }
 });

@@ -1,233 +1,250 @@
 const express = require('express');
+const NodeCache = require('node-cache');
 const router = express.Router();
 const { verifyToken, optionalAuth } = require('../middleware/auth');
-const { db } = require('../database/firebase');
+const { db, admin } = require('../database/firebase');
+const {
+  createRecord,
+  getRecord,
+  listRecords,
+  isValidDocId
+} = require('../services/firebase-data.service');
+const notificationService = require('../services/notification.service');
 
 /**
- * Forum Routes for Student Q&A Platform
- * Part of ITERasn hub Enhancement Suite
- * 
- * Note: Migrated from SQL to Firestore with dummy data fallback
+ * Forum routes for the student Q&A board.
+ *
+ * Everything here is real data. When the datastore is unavailable the request
+ * fails with an error status: nothing is invented to fill an empty screen and a
+ * write is never reported as successful unless it was stored.
  */
 
-// Helper function to get user ID from request
-const getUserId = (user) => user?.id || user?.uid || null;
+const QUESTIONS = 'forum_questions';
+const ANSWERS = 'forum_answers';
+const IN_QUERY_CHUNK = 30;
+const MAX_TITLE = 200;
+const MAX_BODY = 10000;
 
-// Helper to generate dummy questions
-const getDummyQuestions = () => [
-    {
-        id: '1',
-        title: 'How to implement Binary Search Tree in Java?',
-        description: 'I need help understanding the implementation of BST in Java. Can someone explain with code examples?',
-        category: 'Data Structures',
-        status: 'answered',
-        views: 125,
-        upvotes: 15,
-        tags: 'java,dsa,bst',
-        author_name: 'Aditya Kumar',
-        author_role: 'student',
-        answer_count: 3,
-        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    },
-    {
-        id: '2',
-        title: 'Difference between HashMap and TreeMap?',
-        description: 'Can someone explain the key differences between HashMap and TreeMap in Java? When should I use each?',
-        category: 'Java',
-        status: 'open',
-        views: 89,
-        upvotes: 8,
-        tags: 'java,collections,hashmap',
-        author_name: 'Priya Sharma',
-        author_role: 'student',
-        answer_count: 2,
-        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-    },
-    {
-        id: '3',
-        title: 'SQL JOIN types explained',
-        description: 'I am confused about different JOIN types in SQL. Can someone explain INNER, LEFT, RIGHT, and FULL OUTER JOINs with examples?',
-        category: 'Database',
-        status: 'answered',
-        views: 234,
-        upvotes: 22,
-        tags: 'sql,database,joins',
-        author_name: 'Rahul Verma',
-        author_role: 'student',
-        answer_count: 4,
-        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    }
-];
+// Stats and contributors scan two collections; a minute of staleness is fine.
+const summaryCache = new NodeCache({ stdTTL: 60, checkperiod: 120, useClones: false });
+
+const getUserId = (user) => (user?.id || user?.uid || null);
+
+function increment(by) {
+  const fieldValue = admin?.firestore?.FieldValue;
+  if (!fieldValue || typeof fieldValue.increment !== 'function') {
+    throw new Error('Firestore FieldValue.increment is unavailable');
+  }
+  return fieldValue.increment(by);
+}
+
+/** Never expose who voted: only whether the caller did. */
+function toPublicPost(post, viewerId) {
+  const { upvotedBy, ...rest } = post;
+  const voters = Array.isArray(upvotedBy) ? upvotedBy : [];
+  return {
+    ...rest,
+    userHasUpvoted: viewerId ? voters.includes(viewerId) : false
+  };
+}
+
+async function lookupUsers(ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    users.forEach((user) => found.set(String(user.id), user));
+  }
+  return found;
+}
+
+/** Posts written before author names were stored get them from the user record. */
+async function withAuthors(posts) {
+  const missing = posts.filter((post) => !post.author_name).map((post) => post.user_id);
+  if (missing.length === 0) return posts;
+
+  const users = await lookupUsers(missing);
+  return posts.map((post) => {
+    if (post.author_name) return post;
+    const author = users.get(String(post.user_id));
+    return { ...post, author_name: author?.name || 'Unknown user', author_role: author?.role || null };
+  });
+}
+
+function parsePaging(query, defaultLimit = 10) {
+  return {
+    page: Math.max(1, parseInt(query.page, 10) || 1),
+    limit: Math.min(50, Math.max(1, parseInt(query.limit, 10) || defaultLimit))
+  };
+}
 
 /**
  * @route   GET /api/forum/questions
- * @desc    Get all questions with pagination and filters
- * @access  Public (with optional auth for personalized data)
+ * @desc    List questions with filters, search, sorting and pagination
+ * @access  Public (optional auth personalises the upvote state)
  */
-router.get('/questions', optionalAuth, async (req, res) => {
-    try {
-        const { 
-            page = 1, 
-            limit = 10, 
-            category, 
-            status, 
-            search,
-            sortBy = 'newest',
-            tag 
-        } = req.query;
+router.get('/questions', optionalAuth, async (req, res, next) => {
+  try {
+    const { category, status, search, sortBy = 'newest', tag } = req.query;
+    const { page, limit } = parsePaging(req.query);
+    const viewerId = getUserId(req.user);
 
-        const pageNum = Math.max(1, parseInt(page) || 1);
-        const limitNum = Math.min(50, Math.max(1, parseInt(limit) || 10));
-        
-        // Try Firestore first
-        try {
-            let questionsRef = db.collection('forum_questions');
-            
-            if (category && category !== 'all') {
-                questionsRef = questionsRef.where('category', '==', category);
-            }
-            
-            if (status === 'answered') {
-                questionsRef = questionsRef.where('status', '==', 'answered');
-            } else if (status === 'open') {
-                questionsRef = questionsRef.where('status', '==', 'open');
-            }
+    const filters = [];
+    if (category && category !== 'all') filters.push({ field: 'category', value: String(category) });
+    if (status === 'answered' || status === 'open') filters.push({ field: 'status', value: status });
 
-            // Count must share the filters but not ordering/offset/limit
-            const countSnapshot = await questionsRef.count().get();
-            const total = countSnapshot.data().count || 0;
-            
-            // Sorting
-            if (sortBy === 'popular') {
-                questionsRef = questionsRef.orderBy('upvotes', 'desc');
-            } else if (sortBy === 'oldest') {
-                questionsRef = questionsRef.orderBy('created_at', 'asc');
-            } else {
-                questionsRef = questionsRef.orderBy('created_at', 'desc');
-            }
-            
-            questionsRef = questionsRef
-                .offset((pageNum - 1) * limitNum)
-                .limit(limitNum);
-            
-            const snapshot = await questionsRef.get();
-            const questions = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
-            res.json({
-                success: true,
-                questions: questions.length > 0 ? questions : getDummyQuestions(),
-                pagination: {
-                    page: pageNum,
-                    limit: limitNum,
-                    total,
-                    totalPages: Math.ceil(total / limitNum)
-                }
-            });
-        } catch (firestoreError) {
-            console.warn('Firestore error, using dummy data:', firestoreError.message);
-            res.json({
-                success: true,
-                questions: getDummyQuestions(),
-                pagination: {
-                    page: pageNum,
-                    limit: limitNum,
-                    total: getDummyQuestions().length,
-                    totalPages: 1
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Forum questions error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch questions'
-        });
+    let questions = await listRecords(QUESTIONS, { filters });
+
+    if (tag) {
+      const wanted = String(tag).trim().toLowerCase();
+      questions = questions.filter((question) => String(question.tags || '')
+        .split(',').map((item) => item.trim().toLowerCase()).includes(wanted));
     }
+
+    if (search) {
+      const needle = String(search).trim().toLowerCase();
+      questions = questions.filter((question) => [question.title, question.description, question.tags]
+        .some((field) => String(field || '').toLowerCase().includes(needle)));
+    }
+
+    const byNewest = (left, right) => String(right.created_at || '').localeCompare(String(left.created_at || ''));
+    if (sortBy === 'popular') {
+      questions.sort((left, right) => (right.upvotes || 0) - (left.upvotes || 0) || byNewest(left, right));
+    } else if (sortBy === 'oldest') {
+      questions.sort((left, right) => -byNewest(left, right));
+    } else if (sortBy === 'unanswered') {
+      questions = questions.filter((question) => !(question.answer_count > 0));
+      questions.sort(byNewest);
+    } else {
+      questions.sort(byNewest);
+    }
+
+    const total = questions.length;
+    const pageItems = await withAuthors(questions.slice((page - 1) * limit, page * limit));
+
+    res.json({
+      success: true,
+      questions: pageItems.map((question) => toPublicPost(question, viewerId)),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit))
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   GET /api/forum/stats
+ * @desc    Forum statistics (real counts; zeros when the forum is empty)
+ * @access  Public
+ */
+router.get('/stats', async (req, res, next) => {
+  try {
+    const cached = summaryCache.get('stats');
+    if (cached) return res.json({ success: true, stats: cached });
+
+    const [questions, answers] = await Promise.all([listRecords(QUESTIONS), listRecords(ANSWERS)]);
+
+    const stats = {
+      total_questions: questions.length,
+      answered_questions: questions.filter((question) => question.status === 'answered').length,
+      active_users: new Set([...questions, ...answers].map((post) => post.user_id).filter(Boolean)).size,
+      total_answers: answers.length
+    };
+
+    summaryCache.set('stats', stats);
+    res.json({ success: true, stats });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route   GET /api/forum/contributors
+ * @desc    Top answerers, ranked by upvotes received
+ * @access  Public
+ */
+router.get('/contributors', async (req, res, next) => {
+  try {
+    const cached = summaryCache.get('contributors');
+    if (cached) return res.json({ success: true, contributors: cached });
+
+    const answers = await listRecords(ANSWERS);
+
+    const totals = new Map();
+    for (const answer of answers) {
+      if (!answer.user_id) continue;
+      const entry = totals.get(answer.user_id) || { answer_count: 0, total_upvotes: 0 };
+      entry.answer_count += 1;
+      entry.total_upvotes += answer.upvotes || 0;
+      totals.set(answer.user_id, entry);
+    }
+
+    const top = Array.from(totals.entries())
+      .sort(([, left], [, right]) => right.total_upvotes - left.total_upvotes || right.answer_count - left.answer_count)
+      .slice(0, 5);
+
+    const users = await lookupUsers(top.map(([userId]) => userId));
+    const contributors = top.map(([userId, entry]) => ({
+      id: userId,
+      name: users.get(String(userId))?.name || 'Unknown user',
+      role: users.get(String(userId))?.role || null,
+      ...entry
+    }));
+
+    summaryCache.set('contributors', contributors);
+    res.json({ success: true, contributors });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * @route   GET /api/forum/questions/:id
- * @desc    Get a specific question with answers
+ * @desc    A question with its answers (accepted first, then by votes)
  * @access  Public
  */
-router.get('/questions/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        try {
-            const questionDoc = await db.collection('forum_questions').doc(id).get();
-            
-            if (!questionDoc.exists) {
-                // Return dummy data
-                const dummyQuestions = getDummyQuestions();
-                const dummyQuestion = dummyQuestions.find(q => q.id === id) || dummyQuestions[0];
-                
-                return res.json({
-                    success: true,
-                    question: {
-                        ...dummyQuestion,
-                        answers: [
-                            {
-                                id: '1',
-                                content: 'Great question! Here is a detailed explanation...',
-                                author_name: 'Dr. Priya Verma',
-                                author_role: 'teacher',
-                                upvotes: 12,
-                                is_accepted: true,
-                                created_at: new Date()
-                            }
-                        ]
-                    }
-                });
-            }
-            
-            const question = { id: questionDoc.id, ...questionDoc.data() };
-            
-            // Get answers
-            const answersSnapshot = await db.collection('forum_answers')
-                .where('question_id', '==', id)
-                .orderBy('is_accepted', 'desc')
-                .orderBy('upvotes', 'desc')
-                .get();
-            
-            const answers = answersSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
-            // Increment view count
-            await db.collection('forum_questions').doc(id).update({
-                views: (question.views || 0) + 1
-            }).catch(() => {});
-            
-            res.json({
-                success: true,
-                question: {
-                    ...question,
-                    answers
-                }
-            });
-        } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
-            const dummyQuestions = getDummyQuestions();
-            res.json({
-                success: true,
-                question: {
-                    ...dummyQuestions[0],
-                    answers: []
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Get question error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch question'
-        });
+router.get('/questions/:id', optionalAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const viewerId = getUserId(req.user);
+
+    const question = isValidDocId(id) ? await getRecord(QUESTIONS, id) : null;
+    if (!question) {
+      return res.status(404).json({ success: false, message: 'Question not found' });
     }
+
+    const answers = (await listRecords(ANSWERS, {
+      filters: [{ field: 'question_id', value: id }]
+    })).sort((left, right) => {
+      if (Boolean(right.is_accepted) !== Boolean(left.is_accepted)) return right.is_accepted ? 1 : -1;
+      return (right.upvotes || 0) - (left.upvotes || 0)
+        || String(left.created_at || '').localeCompare(String(right.created_at || ''));
+    });
+
+    const [[withAuthor], answersWithAuthors] = await Promise.all([withAuthors([question]), withAuthors(answers)]);
+
+    // Atomic, best-effort view counter (a failed count must not fail the read).
+    db.collection(QUESTIONS).doc(id).update({ views: increment(1) }).catch((error) => {
+      console.warn('Forum view count failed:', error.message);
+    });
+
+    res.json({
+      success: true,
+      question: {
+        ...toPublicPost(withAuthor, viewerId),
+        answers: answersWithAuthors.map((answer) => toPublicPost(answer, viewerId))
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
@@ -235,379 +252,267 @@ router.get('/questions/:id', async (req, res) => {
  * @desc    Create a new question
  * @access  Private
  */
-router.post('/questions', verifyToken, async (req, res) => {
-    try {
-        const { title, description, category, tags } = req.body;
-        const userId = getUserId(req.user);
-        
-        if (!title || !description || !category) {
-            return res.status(400).json({
-                success: false,
-                message: 'Title, description, and category are required'
-            });
-        }
-        
-        const tagsString = Array.isArray(tags) ? tags.join(',') : tags || '';
-        
-        const questionData = {
-            user_id: userId,
-            title,
-            description,
-            category,
-            tags: tagsString,
-            status: 'open',
-            views: 0,
-            upvotes: 0,
-            created_at: new Date(),
-            updated_at: new Date()
-        };
-        
-        try {
-            const docRef = await db.collection('forum_questions').add(questionData);
-            
-            res.status(201).json({
-                success: true,
-                question: { id: docRef.id, ...questionData },
-                message: 'Question posted successfully'
-            });
-        } catch (firestoreError) {
-            console.error('Firestore write failed for forum question:', firestoreError.message);
-            // Never fake a 201 with a temp id outside development — the write did not persist
-            if (process.env.NODE_ENV === 'production') {
-                return res.status(503).json({
-                    success: false,
-                    message: 'Question could not be saved. Please try again shortly.'
-                });
-            }
-            res.status(201).json({
-                success: true,
-                question: { id: 'temp-' + Date.now(), ...questionData },
-                message: 'Question posted (demo mode)'
-            });
-        }
-    } catch (error) {
-        console.error('Create question error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to create question'
-        });
+router.post('/questions', verifyToken, async (req, res, next) => {
+  try {
+    const { title, description, category, tags } = req.body || {};
+    const userId = getUserId(req.user);
+
+    const cleanTitle = typeof title === 'string' ? title.trim() : '';
+    const cleanDescription = typeof description === 'string' ? description.trim() : '';
+    const cleanCategory = typeof category === 'string' ? category.trim() : '';
+
+    if (!cleanTitle || !cleanDescription || !cleanCategory) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, description, and category are required'
+      });
     }
+    if (cleanTitle.length > MAX_TITLE || cleanDescription.length > MAX_BODY) {
+      return res.status(400).json({
+        success: false,
+        message: `Title is limited to ${MAX_TITLE} characters and the description to ${MAX_BODY}`
+      });
+    }
+
+    const tagsString = Array.isArray(tags)
+      ? tags.map((tagItem) => String(tagItem).trim()).filter(Boolean).join(',')
+      : String(tags || '').trim();
+
+    const question = await createRecord(QUESTIONS, {
+      user_id: userId,
+      author_name: req.user.name || null,
+      author_role: req.user.role || null,
+      title: cleanTitle,
+      description: cleanDescription,
+      category: cleanCategory,
+      tags: tagsString,
+      status: 'open',
+      views: 0,
+      upvotes: 0,
+      upvotedBy: [],
+      answer_count: 0
+    });
+
+    summaryCache.flushAll();
+    res.status(201).json({
+      success: true,
+      question: toPublicPost(question, userId),
+      message: 'Question posted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * @route   POST /api/forum/questions/:id/answers
- * @desc    Post an answer to a question
+ * @desc    Answer a question
  * @access  Private
  */
-router.post('/questions/:id/answers', verifyToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { content } = req.body;
-        const userId = getUserId(req.user);
-        
-        if (!content) {
-            return res.status(400).json({
-                success: false,
-                message: 'Answer content is required'
-            });
-        }
-        
-        const answerData = {
-            question_id: id,
-            user_id: userId,
-            content,
-            upvotes: 0,
-            is_accepted: false,
-            created_at: new Date()
-        };
-        
-        try {
-            const docRef = await db.collection('forum_answers').add(answerData);
-            
-            // Update question's updated_at
-            await db.collection('forum_questions').doc(id).update({
-                updated_at: new Date()
-            }).catch(() => {});
-            
-            res.status(201).json({
-                success: true,
-                answer: { id: docRef.id, ...answerData },
-                message: 'Answer posted successfully'
-            });
-        } catch (firestoreError) {
-            console.error('Firestore write failed for forum answer:', firestoreError.message);
-            // Never fake a 201 with a temp id outside development — the write did not persist
-            if (process.env.NODE_ENV === 'production') {
-                return res.status(503).json({
-                    success: false,
-                    message: 'Answer could not be saved. Please try again shortly.'
-                });
-            }
-            res.status(201).json({
-                success: true,
-                answer: { id: 'temp-' + Date.now(), ...answerData },
-                message: 'Answer posted (demo mode)'
-            });
-        }
-    } catch (error) {
-        console.error('Post answer error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to post answer'
-        });
+router.post('/questions/:id/answers', verifyToken, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = getUserId(req.user);
+    const content = typeof req.body?.content === 'string' ? req.body.content.trim() : '';
+
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Answer content is required'
+      });
     }
+    if (content.length > MAX_BODY) {
+      return res.status(400).json({ success: false, message: `Answers are limited to ${MAX_BODY} characters` });
+    }
+
+    const question = isValidDocId(id) ? await getRecord(QUESTIONS, id) : null;
+    if (!question) {
+      return res.status(404).json({ success: false, message: 'Question not found' });
+    }
+
+    const answerRef = db.collection(ANSWERS).doc();
+    const now = new Date().toISOString();
+    const answer = {
+      id: answerRef.id,
+      question_id: id,
+      user_id: userId,
+      author_name: req.user.name || null,
+      author_role: req.user.role || null,
+      content,
+      upvotes: 0,
+      upvotedBy: [],
+      is_accepted: false,
+      created_at: now
+    };
+
+    // The answer and the question's counters change together or not at all.
+    const batch = db.batch();
+    batch.set(answerRef, answer);
+    batch.update(db.collection(QUESTIONS).doc(id), {
+      answer_count: increment(1),
+      status: 'answered',
+      updated_at: now
+    });
+    await batch.commit();
+
+    summaryCache.flushAll();
+
+    if (question.user_id && question.user_id !== userId) {
+      await notificationService.create({
+        userId: question.user_id,
+        title: 'New answer to your question',
+        message: `${req.user.name || 'Someone'} answered "${question.title}".`,
+        type: 'forum',
+        link: '/dashboard/student-forum.html',
+        metadata: { questionId: id, answerId: answer.id }
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      answer: toPublicPost(answer, userId),
+      message: 'Answer posted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
+ * Toggle the caller's upvote on a question or answer, atomically.
+ */
+async function toggleUpvote(collection, id, userId) {
+  const ref = db.collection(collection).doc(id);
+
+  return db.runTransaction(async (tx) => {
+    const snapshot = await tx.get(ref);
+    if (!snapshot.exists) return { status: 'not_found' };
+
+    const data = snapshot.data();
+    if (data.user_id === userId) return { status: 'own_post' };
+
+    const voters = Array.isArray(data.upvotedBy) ? data.upvotedBy : [];
+    const hasUpvoted = voters.includes(userId);
+    const nextVoters = hasUpvoted ? voters.filter((voterId) => voterId !== userId) : [...voters, userId];
+    const upvotes = nextVoters.length;
+
+    tx.update(ref, { upvotes, upvotedBy: nextVoters });
+    return { status: 'ok', upvotes, userHasUpvoted: !hasUpvoted };
+  });
+}
+
+function sendUpvoteResult(res, result, noun) {
+  if (result.status === 'not_found') {
+    return res.status(404).json({ success: false, message: `${noun} not found` });
+  }
+  if (result.status === 'own_post') {
+    return res.status(400).json({ success: false, message: `You cannot upvote your own ${noun.toLowerCase()}` });
+  }
+  return res.json({
+    success: true,
+    message: result.userHasUpvoted ? `${noun} upvoted` : `${noun} upvote removed`,
+    upvotes: result.upvotes,
+    userHasUpvoted: result.userHasUpvoted
+  });
+}
+
+/**
  * @route   POST /api/forum/questions/:id/upvote
- * @desc    Upvote a question
  * @access  Private
  */
-router.post('/questions/:id/upvote', verifyToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = getUserId(req.user);
-
-        try {
-            const questionRef = db.collection('forum_questions').doc(id);
-            const questionDoc = await questionRef.get();
-
-            if (questionDoc.exists) {
-                const data = questionDoc.data();
-                const upvotedBy = Array.isArray(data.upvotedBy) ? data.upvotedBy : [];
-                const hasUpvoted = upvotedBy.includes(userId);
-                const updatedUpvotedBy = hasUpvoted
-                    ? upvotedBy.filter((voterId) => voterId !== userId)
-                    : [...upvotedBy, userId];
-                const updatedUpvotes = Math.max(0, (data.upvotes || 0) + (hasUpvoted ? -1 : 1));
-
-                await questionRef.update({
-                    upvotes: updatedUpvotes,
-                    upvotedBy: updatedUpvotedBy
-                });
-
-                return res.json({
-                    success: true,
-                    message: hasUpvoted ? 'Question upvote removed' : 'Question upvoted',
-                    upvotes: updatedUpvotes,
-                    userHasUpvoted: !hasUpvoted
-                });
-            }
-        } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
-        }
-
-        res.json({
-            success: true,
-            message: 'Question upvoted',
-            upvotes: 0,
-            userHasUpvoted: false
-        });
-    } catch (error) {
-        console.error('Upvote error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to upvote'
-        });
+router.post('/questions/:id/upvote', verifyToken, async (req, res, next) => {
+  try {
+    if (!isValidDocId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Question not found' });
     }
+    const result = await toggleUpvote(QUESTIONS, req.params.id, getUserId(req.user));
+    summaryCache.flushAll();
+    sendUpvoteResult(res, result, 'Question');
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * @route   POST /api/forum/answers/:id/upvote
- * @desc    Upvote an answer
  * @access  Private
  */
-router.post('/answers/:id/upvote', verifyToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = getUserId(req.user);
-
-        try {
-            const answerRef = db.collection('forum_answers').doc(id);
-            const answerDoc = await answerRef.get();
-
-            if (answerDoc.exists) {
-                const data = answerDoc.data();
-                const upvotedBy = Array.isArray(data.upvotedBy) ? data.upvotedBy : [];
-                const hasUpvoted = upvotedBy.includes(userId);
-                const updatedUpvotedBy = hasUpvoted
-                    ? upvotedBy.filter((voterId) => voterId !== userId)
-                    : [...upvotedBy, userId];
-                const updatedUpvotes = Math.max(0, (data.upvotes || 0) + (hasUpvoted ? -1 : 1));
-
-                await answerRef.update({
-                    upvotes: updatedUpvotes,
-                    upvotedBy: updatedUpvotedBy
-                });
-
-                return res.json({
-                    success: true,
-                    message: hasUpvoted ? 'Answer upvote removed' : 'Answer upvoted',
-                    upvotes: updatedUpvotes,
-                    userHasUpvoted: !hasUpvoted
-                });
-            }
-        } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
-        }
-        
-        res.json({
-            success: true,
-            message: 'Answer upvoted',
-            upvotes: 0,
-            userHasUpvoted: false
-        });
-    } catch (error) {
-        console.error('Upvote error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to upvote'
-        });
+router.post('/answers/:id/upvote', verifyToken, async (req, res, next) => {
+  try {
+    if (!isValidDocId(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Answer not found' });
     }
+    const result = await toggleUpvote(ANSWERS, req.params.id, getUserId(req.user));
+    summaryCache.flushAll();
+    sendUpvoteResult(res, result, 'Answer');
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * @route   POST /api/forum/answers/:id/accept
- * @desc    Accept an answer (only by question author)
+ * @desc    Accept an answer (question author, or an admin)
  * @access  Private
  */
-router.post('/answers/:id/accept', verifyToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = getUserId(req.user);
-        
-        try {
-            const answerDoc = await db.collection('forum_answers').doc(id).get();
-            
-            if (!answerDoc.exists) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Answer not found'
-                });
-            }
-            
-            const answer = answerDoc.data();
-            
-            const questionDoc = await db.collection('forum_questions').doc(answer.question_id).get();
-            
-            if (!questionDoc.exists) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Question not found'
-                });
-            }
-            
-            if ((questionDoc.data().user_id || null) !== userId) {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Only the question author can accept an answer'
-                });
-            }
-            
-            const siblingsSnapshot = await db.collection('forum_answers')
-                .where('question_id', '==', answer.question_id)
-                .get();
-            
-            const batch = db.batch();
-            siblingsSnapshot.docs.forEach((doc) => {
-                if (doc.id !== id && doc.data().is_accepted) {
-                    batch.update(doc.ref, { is_accepted: false });
-                }
-            });
-            batch.update(answerDoc.ref, { is_accepted: true });
-            await batch.commit();
-            
-            return res.json({
-                success: true,
-                message: 'Answer accepted',
-                is_accepted: true
-            });
-        } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
-        }
-        
-        res.json({
-            success: true,
-            message: 'Answer accepted',
-            is_accepted: true
-        });
-    } catch (error) {
-        console.error('Accept answer error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to accept answer'
-        });
-    }
-});
+router.post('/answers/:id/accept', verifyToken, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = getUserId(req.user);
 
-/**
- * @route   GET /api/forum/stats
- * @desc    Get forum statistics
- * @access  Public
- */
-router.get('/stats', async (req, res) => {
-    try {
-        let stats = {
-            total_questions: 15,
-            answered_questions: 8,
-            active_users: 45,
-            total_answers: 42
-        };
-        
-        try {
-            const questionsSnapshot = await db.collection('forum_questions').get();
-            const answersSnapshot = await db.collection('forum_answers').get();
-            
-            stats = {
-                total_questions: questionsSnapshot.size,
-                answered_questions: questionsSnapshot.docs.filter(d => d.data().status === 'answered').length,
-                active_users: new Set(questionsSnapshot.docs.map(d => d.data().user_id)).size,
-                total_answers: answersSnapshot.size
-            };
-        } catch (firestoreError) {
-            console.warn('Firestore error:', firestoreError.message);
-        }
-        
-        res.json({
-            success: true,
-            stats
-        });
-    } catch (error) {
-        console.error('Forum stats error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch stats'
-        });
+    const answer = isValidDocId(id) ? await getRecord(ANSWERS, id) : null;
+    if (!answer) {
+      return res.status(404).json({ success: false, message: 'Answer not found' });
     }
-});
 
-/**
- * @route   GET /api/forum/contributors
- * @desc    Get top contributors
- * @access  Public
- */
-router.get('/contributors', async (req, res) => {
-    try {
-        // Return dummy contributors
-        const contributors = [
-            { id: '1', name: 'Dr. Priya Verma', role: 'teacher', answer_count: 45, total_upvotes: 156 },
-            { id: '2', name: 'Rahul Kumar', role: 'student', answer_count: 32, total_upvotes: 89 },
-            { id: '3', name: 'Sneha Sharma', role: 'student', answer_count: 28, total_upvotes: 72 },
-            { id: '4', name: 'Dr. Amit Singh', role: 'teacher', answer_count: 24, total_upvotes: 98 },
-            { id: '5', name: 'Vikram Patel', role: 'student', answer_count: 19, total_upvotes: 45 }
-        ];
-        
-        res.json({
-            success: true,
-            contributors
-        });
-    } catch (error) {
-        console.error('Contributors error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch contributors'
-        });
+    const question = await getRecord(QUESTIONS, answer.question_id);
+    if (!question) {
+      return res.status(404).json({ success: false, message: 'Question not found' });
     }
+
+    if (question.user_id !== userId && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the question author can accept an answer'
+      });
+    }
+
+    const siblings = await listRecords(ANSWERS, {
+      filters: [{ field: 'question_id', value: answer.question_id }]
+    });
+
+    // Only one answer is accepted at a time.
+    const batch = db.batch();
+    siblings.forEach((sibling) => {
+      if (sibling.id !== id && sibling.is_accepted) {
+        batch.update(db.collection(ANSWERS).doc(sibling.id), { is_accepted: false });
+      }
+    });
+    batch.update(db.collection(ANSWERS).doc(id), { is_accepted: true });
+    batch.update(db.collection(QUESTIONS).doc(answer.question_id), { status: 'answered' });
+    await batch.commit();
+
+    summaryCache.flushAll();
+
+    if (answer.user_id && answer.user_id !== userId) {
+      await notificationService.create({
+        userId: answer.user_id,
+        title: 'Your answer was accepted',
+        message: `Your answer to "${question.title}" was marked as the solution.`,
+        type: 'forum',
+        link: '/dashboard/student-forum.html',
+        metadata: { questionId: answer.question_id, answerId: id }
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Answer accepted',
+      is_accepted: true
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

@@ -276,27 +276,29 @@ async function submitMarks() {
 
     let uploaded = 0;
     let lastError = '';
-    for (const entry of entries) {
-        try {
-            const resp = await fetch('/api/marks/upload', {
-                method: 'POST',
-                headers: marksAuthHeaders(),
-                body: JSON.stringify({
-                    student_id: entry.student_id,
-                    subject,
-                    exam_type: examType,
-                    marks_obtained: entry.marks_obtained,
-                    total_marks: maxMarks
-                })
-            });
-            const payload = await resp.json().catch(() => ({}));
-            if (!resp.ok || !payload.success) {
-                throw new Error(payload.message || payload.error || `Request failed (${resp.status})`);
-            }
-            uploaded++;
-        } catch (err) {
-            lastError = err.message;
+    try {
+        const resp = await fetch('/api/marks/upload-bulk', {
+            method: 'POST',
+            headers: marksAuthHeaders(),
+            body: JSON.stringify({
+                subject,
+                exam_type: examType,
+                total_marks: maxMarks,
+                exam_date: new Date().toISOString().slice(0, 10),
+                records: entries
+            })
+        });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok || !payload.success) {
+            throw new Error(payload.message || payload.error || `Request failed (${resp.status})`);
         }
+        uploaded = payload.data?.marked ?? 0;
+        const rejected = payload.data?.rejected || [];
+        if (rejected.length) {
+            lastError = rejected[0].error || 'Some students could not be saved';
+        }
+    } catch (err) {
+        lastError = err.message;
     }
 
     marksSubmitting = false;
@@ -305,11 +307,13 @@ async function submitMarks() {
         submitBtn.textContent = submitBtn.dataset.originalText || 'Submit Marks';
     }
 
-    if (uploaded === entries.length) {
+    if (uploaded > 0 && !lastError) {
         marksToast('success', `Uploaded marks for ${uploaded} student${uploaded === 1 ? '' : 's'}.`, 'Submitted');
         resetForm();
+    } else if (uploaded > 0 && lastError) {
+        marksToast('warning', `Uploaded ${uploaded}/${entries.length}. Note: ${lastError}`, 'Partial Upload');
     } else {
-        marksToast('error', `Uploaded ${uploaded}/${entries.length}. Last error: ${lastError || 'unknown'}`, 'Incomplete');
+        marksToast('error', `Upload failed: ${lastError || 'unknown error'}`, 'Failed');
     }
 }
 
