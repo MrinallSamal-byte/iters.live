@@ -151,6 +151,26 @@ router.post('/chat', optionalAuth, async (req, res) => {
                 message: 'Message is required'
             });
         }
+
+        // Length caps: this endpoint allows guests, so bound what can be sent.
+        if (userMessage.length > 2000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Message must be 2000 characters or fewer'
+            });
+        }
+        if (typeof context === 'string' && context.length > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Context must be 1000 characters or fewer'
+            });
+        }
+        if (typeof systemPrompt === 'string' && systemPrompt.length > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: 'System prompt must be 1000 characters or fewer'
+            });
+        }
         
         if (!aiService.isAvailable()) {
             return res.status(503).json({

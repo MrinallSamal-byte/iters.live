@@ -25,6 +25,8 @@
     const itemsPerPage = 6;
     let filteredQuestions = [];
     let currentCategory = 'all';
+    let questionSubmitting = false;
+    let answerSubmitting = false;
 
     function esc(str) {
         return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -396,6 +398,7 @@
     // Handle new question submission
     async function handleNewQuestion(e) {
         e.preventDefault();
+        if (questionSubmitting) return;
 
         const title = document.getElementById('questionTitle').value.trim();
         const category = document.getElementById('questionCategory').value;
@@ -405,6 +408,16 @@
         if (!title || !category || !description) {
             toast('Please fill in all required fields', 'error');
             return;
+        }
+
+        const form = document.getElementById('newQuestionForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        questionSubmitting = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Posting...';
         }
 
         try {
@@ -426,6 +439,12 @@
         } catch (err) {
             console.error('Create question error:', err);
             toast(err.message || 'Failed to post question', 'error');
+        } finally {
+            questionSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = submitBtn.dataset.originalText || 'Post Question';
+            }
         }
     }
 
@@ -488,7 +507,7 @@
                         <textarea id="answerContent" class="form-textarea" rows="4" 
                             placeholder="Share your knowledge or insights..."></textarea>
                         <div style="margin-top: 0.75rem;">
-                            <button class="btn btn-primary" onclick="submitAnswer('${esc(question.id)}')">
+                            <button class="btn btn-primary" id="postAnswerBtn" onclick="submitAnswer('${esc(question.id)}')">
                                 Post Answer
                             </button>
                         </div>
@@ -557,12 +576,23 @@
 
     // Submit answer
     window.submitAnswer = async function(questionId) {
+        if (answerSubmitting) return;
+
         const textarea = document.getElementById('answerContent');
         const content = textarea ? textarea.value.trim() : '';
 
         if (!content) {
             toast('Please write your answer first', 'error');
             return;
+        }
+
+        const submitBtn = document.getElementById('postAnswerBtn');
+
+        answerSubmitting = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Posting...';
         }
 
         try {
@@ -581,6 +611,12 @@
         } catch (err) {
             console.error('Post answer error:', err);
             toast(err.message || 'Failed to post answer', 'error');
+        } finally {
+            answerSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = submitBtn.dataset.originalText || 'Post Answer';
+            }
         }
     };
 

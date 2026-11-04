@@ -56,7 +56,7 @@ router.get(
       res.status(500).json({
         success: false,
         message: 'Search failed',
-        error: error.message
+        error: 'Internal server error'
       });
     }
   }
@@ -113,7 +113,7 @@ router.get(
       res.status(500).json({
         success: false,
         message: 'User search failed',
-        error: error.message
+        error: 'Internal server error'
       });
     }
   }
@@ -177,7 +177,7 @@ router.get(
       res.status(500).json({
         success: false,
         message: 'File search failed',
-        error: error.message
+        error: 'Internal server error'
       });
     }
   }

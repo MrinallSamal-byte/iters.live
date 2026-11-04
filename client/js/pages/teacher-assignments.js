@@ -11,6 +11,7 @@
 let createdAssignments = [];
 let assignmentCreating = false;
 let gradingContext = null;
+let gradingSubmitting = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     renderAssignmentStats();
@@ -382,6 +383,7 @@ function closeGradingModal() {
 
 async function handleGradeSubmit(e) {
     e.preventDefault();
+    if (gradingSubmitting) return;
     if (!gradingContext) {
         assignmentsToast('warning', 'No submission selected for grading.', 'Nothing to grade');
         return;
@@ -408,6 +410,16 @@ async function handleGradeSubmit(e) {
         return;
     }
 
+    const form = document.getElementById('gradingForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    gradingSubmitting = true;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.dataset.originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+    }
+
     try {
         const resp = await fetch(`/api/assignments/${encodeURIComponent(gradingContext.assignmentId)}/grade`, {
             method: 'POST',
@@ -428,5 +440,11 @@ async function handleGradeSubmit(e) {
         loadPendingSubmissions();
     } catch (err) {
         assignmentsToast('error', err.message || 'Failed to save grade', 'Grade failed');
+    } finally {
+        gradingSubmitting = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = submitBtn.dataset.originalText || 'Submit Grade';
+        }
     }
 }

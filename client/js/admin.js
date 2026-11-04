@@ -281,9 +281,32 @@
     }
   }
 
+  // Mirrors client/js/teacher.js so both dashboards show the same
+  // consistent empty state when there is no chart data to draw.
+  function showChartEmptyState(canvas){
+    const wrapper = canvas.parentElement;
+    if (!wrapper || wrapper.querySelector('.chart-empty-state')) return;
+    canvas.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.className = 'chart-empty-state';
+    msg.style.cssText = 'display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.85rem;';
+    msg.textContent = '// No user data yet';
+    wrapper.appendChild(msg);
+  }
+
   function renderUserChart(stats){
     const el = document.getElementById('userChart');
     if (!el || typeof Chart === 'undefined') return;
+
+    const students = stats.totalStudents ?? 0;
+    const teachers = stats.totalTeachers ?? 0;
+    const admins = stats.totalAdmins ?? 0;
+
+    // Stats failed to load or are empty - don't fabricate data.
+    if (students === 0 && teachers === 0 && admins === 0) {
+      showChartEmptyState(el);
+      return;
+    }
 
     try {
       new Chart(el, {
@@ -292,9 +315,9 @@
           labels: ['Students', 'Teachers', 'Admins'],
           datasets: [{
             data: [
-              stats.totalStudents || 1250, 
-              stats.totalTeachers || 95, 
-              stats.totalAdmins || 3
+              students,
+              teachers,
+              admins
             ],
             backgroundColor: ['#6366f1', '#22c55e', '#f59e0b'],
             borderWidth: 0

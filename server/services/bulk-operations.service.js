@@ -592,11 +592,9 @@ class BulkOperationsService {
   generatePassword() {
     const length = 12;
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    // ponytail: modulo bias negligible for one-time temp passwords -> rejection sampling if audited
-    const bytes = crypto.randomBytes(length);
     let password = '';
     for (let i = 0; i < length; i += 1) {
-      password += charset.charAt(bytes[i] % charset.length);
+      password += charset.charAt(crypto.randomInt(charset.length));
     }
     return password;
   }

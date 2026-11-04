@@ -55,18 +55,26 @@ function getSessionData(userId, sessionId) {
  */
 function validateSession(userId, sessionId, clientLastActivity) {
     const sessionData = getSessionData(userId, sessionId);
-    
+    const now = Date.now();
+
+    // The client's timestamp is only a hint: it must be a finite number that is
+    // not in the future, and it can never push activity past the server clock.
+    const parsedClientActivity = Number(clientLastActivity);
+    const clientActivity = Number.isFinite(parsedClientActivity) && parsedClientActivity <= now
+        ? Math.min(parsedClientActivity, now)
+        : null;
+
     if (!sessionData) {
         // No server-side session, trust client activity if reasonable
-        if (clientLastActivity) {
-            const elapsed = Date.now() - clientLastActivity;
+        if (clientActivity !== null) {
+            const elapsed = now - clientActivity;
             if (elapsed < SESSION_TIMEOUT_MS) {
-                // Create session from client data
-                updateSessionActivity(userId, sessionId, clientLastActivity);
+                // Create session from server clock (the client value is only a hint)
+                updateSessionActivity(userId, sessionId, now);
                 return {
                     valid: true,
                     reason: 'created_from_client',
-                    serverLastActivity: clientLastActivity
+                    serverLastActivity: now
                 };
             }
         }
@@ -77,11 +85,10 @@ function validateSession(userId, sessionId, clientLastActivity) {
         };
     }
     
-    // Use the most recent activity (server or client)
+    // Use the most recent activity (server or client), never one from the future
     const serverLastActivity = sessionData.lastActivity;
-    const safeClientActivity = clientLastActivity ?? 0;
-    const mostRecentActivity = Math.max(serverLastActivity, safeClientActivity);
-    const elapsed = Date.now() - mostRecentActivity;
+    const mostRecentActivity = Math.max(serverLastActivity, clientActivity ?? 0);
+    const elapsed = now - mostRecentActivity;
     
     if (elapsed >= SESSION_TIMEOUT_MS) {
         // Session has timed out
@@ -94,8 +101,8 @@ function validateSession(userId, sessionId, clientLastActivity) {
     }
     
     // Update with most recent activity
-    if (clientLastActivity && clientLastActivity > serverLastActivity) {
-        updateSessionActivity(userId, sessionId, clientLastActivity);
+    if (clientActivity !== null && clientActivity > serverLastActivity) {
+        updateSessionActivity(userId, sessionId, clientActivity);
     }
     
     return {

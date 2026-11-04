@@ -51,6 +51,7 @@ router.get('/',
         query('status').optional().isIn(['pending', 'completed', 'failed', 'refunded']),
         query('category').optional().isString()
     ],
+    validate,
     paymentController.getPaymentHistory
 );
 

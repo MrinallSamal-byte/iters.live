@@ -474,6 +474,13 @@ const API = {
     async request(endpoint, options = {}) {
         const token = Storage.get('accessToken');
 
+        // Auth endpoints must surface their own 401s to the page-level error
+        // handler (e.g. a failed login shows its message on login.html) instead
+        // of triggering the global session-expiry redirect.
+        const isAuthEndpoint = endpoint.startsWith('/auth/login')
+            || endpoint.startsWith('/auth/register')
+            || endpoint.startsWith('/auth/google-login');
+
         const config = {
             ...options,
             headers: {
@@ -504,7 +511,7 @@ const API = {
                 error.status = response.status;
                 error.data = null;
 
-                if (response.status === 401 && !authExpiryHandled) {
+                if (response.status === 401 && !authExpiryHandled && !isAuthEndpoint) {
                     handleAuthExpiry();
                 }
 
@@ -517,7 +524,7 @@ const API = {
                 error.status = response.status;
                 error.data = data;
 
-                if (response.status === 401 && !authExpiryHandled) {
+                if (response.status === 401 && !authExpiryHandled && !isAuthEndpoint) {
                     handleAuthExpiry();
                 }
 

@@ -229,6 +229,21 @@
     function navigateTo(rawUrl) {
         const target = resolvePlainPath(rawUrl);
         if (!target) return;
+
+        // Refresh the page access token for dashboard navigation so authed
+        // users aren't bounced to login by an expired token. Mirrors the
+        // sidebar's navigateWithinApp pattern (universal-sidebar.js).
+        // Best-effort only: never block navigation.
+        if (target.startsWith('/dashboard/')) {
+            try {
+                if (window.PageAccessToken && typeof window.PageAccessToken.createPageAccessToken === 'function') {
+                    window.PageAccessToken.createPageAccessToken(target);
+                }
+            } catch (error) {
+                // Token refresh is optional; navigate anyway
+            }
+        }
+
         window.location.href = target;
     }
 

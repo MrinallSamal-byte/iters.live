@@ -21,6 +21,19 @@ function isAccountInactive(user) {
   return Boolean(user) && user.is_active === false;
 }
 
+// Mirror of the session guard's revocation rule for the raw Firebase-token
+// channel: a token issued before `sessions_revoked_at` is dead, however valid
+// it still is cryptographically.
+function isSessionRevoked(user, decodedToken) {
+  const revokedAt = Date.parse(user?.sessions_revoked_at || '');
+  if (Number.isNaN(revokedAt)) return false;
+
+  const issuedAt = Number(decodedToken.auth_time || decodedToken.iat);
+  if (!Number.isFinite(issuedAt)) return false;
+
+  return issuedAt * 1000 < revokedAt;
+}
+
 /**
  * Try to authenticate an app-session JWT.
  * Returns null when the token is not an app-session token at all, otherwise
@@ -104,7 +117,9 @@ const authMiddleware = async (req, res, next) => {
 
     if (!userDoc.exists) {
       // Fallback: Try to find by email if UID doesn't match (e.g. legacy data migration issue)
-      if (decodedToken.email) {
+      // Only an email the identity provider has verified may match an account,
+      // otherwise anyone could take one over by registering that address.
+      if (decodedToken.email && decodedToken.email_verified === true) {
         const snapshot = await db.collection('users').where('email', '==', decodedToken.email).limit(1).get();
         if (!snapshot.empty) {
           const fallbackUser = snapshot.docs[0].data();
@@ -114,6 +129,9 @@ const authMiddleware = async (req, res, next) => {
               message: 'Account is inactive',
               code: 'ACCOUNT_INACTIVE'
             });
+          }
+          if (isSessionRevoked(fallbackUser, decodedToken)) {
+            return sendSessionDenied(res, 'revoked');
           }
           attachSessionUser(req, { ...fallbackUser, id: snapshot.docs[0].id });
           return next();
@@ -134,6 +152,10 @@ const authMiddleware = async (req, res, next) => {
         message: 'Account is inactive',
         code: 'ACCOUNT_INACTIVE'
       });
+    }
+
+    if (isSessionRevoked(user, decodedToken)) {
+      return sendSessionDenied(res, 'revoked');
     }
 
     // Attach user to request

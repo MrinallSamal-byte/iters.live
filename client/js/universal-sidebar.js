@@ -43,6 +43,14 @@
         };
     })();
 
+    // Escapes user-controlled values (e.g. the profile name) before they are
+    // interpolated into HTML markup.
+    function escapeHtml(value){
+        return String(value ?? '').replace(/[&<>"']/g, (ch) => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[ch]
+        ));
+    }
+
     const UniversalSidebar = {
         currentRole: '',
         lastSidebarNavTouchAt: 0,
@@ -373,19 +381,20 @@
             const userName = user.name || 'User';
             const userInitial = userName.charAt(0).toUpperCase();
             const roleText = this.currentRole.charAt(0).toUpperCase() + this.currentRole.slice(1);
+            const safeUserName = escapeHtml(userName);
 
             const profileHTML = `
                 <div class="top-profile-container">
                     <div class="profile-icon-wrapper">
-                        <div class="profile-icon" id="profileIcon" title="${userName}">
+                        <div class="profile-icon" id="profileIcon" title="${safeUserName}">
                             ${user.profile_picture ?
-                    `<img src="${user.profile_picture}" alt="${userName}">` :
+                    `<img src="${escapeHtml(user.profile_picture)}" alt="${safeUserName}">` :
                     userInitial
                 }
                         </div>
                         <div class="profile-dropdown" id="profileDropdown">
                             <div class="profile-dropdown-header">
-                                <div class="profile-dropdown-name">${userName}</div>
+                                <div class="profile-dropdown-name">${safeUserName}</div>
                                 <div class="profile-dropdown-role">${roleText}</div>
                             </div>
                             <ul class="profile-dropdown-menu">

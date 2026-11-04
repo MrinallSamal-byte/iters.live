@@ -53,7 +53,14 @@ self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(url))))
+      .then((results) => {
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.warn('[SW] Precache failed for', PRECACHE_URLS[index], result.reason);
+          }
+        });
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -160,6 +167,28 @@ async function staleWhileRevalidate(request) {
   return new Response('', { status: 503, statusText: 'Offline' });
 }
 
+async function handleNetworkFirstAsset(request) {
+  // Network-first for same-origin JS/CSS: a freshly deployed file must never
+  // be shadowed by yesterday's cached copy alongside new HTML. The cache is
+  // only the offline fallback.
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, response.clone())
+        .then(() => pruneCache(RUNTIME_CACHE, RUNTIME_MAX_ENTRIES))
+        .catch(() => {});
+    }
+    return response;
+  } catch (err) {
+    // Runtime cache only; caches.match() would resolve the oldest matching
+    // cache first and serve frozen iter-core copies forever.
+    const cached = await caches.open(RUNTIME_CACHE).then((cache) => cache.match(request));
+    if (cached) return cached;
+    return new Response('', { status: 503, statusText: 'Offline' });
+  }
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
@@ -183,7 +212,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets (css/js/img/fonts): stale-while-revalidate.
+  // Same-origin scripts and styles: network-first so freshly deployed files
+  // are never served stale (cache is only the offline fallback).
+  if (/\.(js|mjs|css)$/i.test(url.pathname)) {
+    event.respondWith(handleNetworkFirstAsset(request));
+    return;
+  }
+
+  // Other static assets (img/fonts): stale-while-revalidate.
   if (STATIC_ASSET_RE.test(url.pathname)) {
     event.respondWith(staleWhileRevalidate(request));
   }

@@ -96,7 +96,12 @@ if (useVercelPostgres) {
       await client.query('COMMIT');
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      // Best-effort rollback: a failed ROLLBACK must not mask the original error.
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        void 0;
+      }
       throw error;
     } finally {
       client.release();
@@ -250,7 +255,12 @@ if (useVercelPostgres) {
       await client.query('COMMIT');
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      // Best-effort rollback: a failed ROLLBACK must not mask the original error.
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        void 0;
+      }
       throw error;
     } finally {
       client.release();

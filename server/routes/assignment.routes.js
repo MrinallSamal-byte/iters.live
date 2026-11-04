@@ -638,6 +638,10 @@ router.get('/:id/submissions', authMiddleware, roleMiddleware('teacher', 'admin'
     const assignment = await loadAssignmentOr404(req, res);
     if (!assignment) return;
 
+    if (!canManage(req.user, assignment)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who created this assignment can view its submissions' });
+    }
+
     const submissions = await listRecords('assignment_submissions', {
       filters: [{ field: 'assignment_id', value: assignment.id }]
     });
@@ -681,6 +685,10 @@ router.post('/:id/grade', authMiddleware, roleMiddleware('teacher', 'admin'), as
   try {
     const assignment = await loadAssignmentOr404(req, res);
     if (!assignment) return;
+
+    if (!canManage(req.user, assignment)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who created this assignment can grade it' });
+    }
 
     const { student_id, marks_obtained, feedback } = req.body || {};
 
@@ -754,6 +762,10 @@ router.post('/:id/answer-key', authMiddleware, roleMiddleware('teacher', 'admin'
     const assignment = await loadAssignmentOr404(req, res);
     if (!assignment) return;
 
+    if (!canManage(req.user, assignment)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who created this assignment can save its answer key' });
+    }
+
     const { answerKey, totalPoints = 0, passPercentage = 40 } = req.body || {};
 
     if (!Array.isArray(answerKey) || answerKey.length === 0) {
@@ -778,6 +790,10 @@ router.post('/:id/auto-grade', authMiddleware, roleMiddleware('teacher', 'admin'
   try {
     const assignment = await loadAssignmentOr404(req, res);
     if (!assignment) return;
+
+    if (!canManage(req.user, assignment)) {
+      return res.status(403).json({ success: false, message: 'Only the teacher who created this assignment can auto-grade it' });
+    }
 
     const key = await findOne('assignment_answer_keys', {
       filters: [{ field: 'assignment_id', value: assignment.id }]

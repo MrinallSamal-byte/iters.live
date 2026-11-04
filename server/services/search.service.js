@@ -1,6 +1,30 @@
 const cacheService = require('./cache.service');
 const { listRecords } = require('./firebase-data.service');
 
+/**
+ * Fields safe to show to any signed-in user. Server-side paths, stored names and
+ * checksums stay internal. Mirrors toPublicFile in routes/file.routes.js so the
+ * shape matches the rest of the API.
+ */
+function toPublicFile(file) {
+  return {
+    id: file.id,
+    original_name: file.original_name,
+    category: file.category,
+    subject: file.subject || null,
+    description: file.description || null,
+    mime_type: file.mime_type || null,
+    file_size: file.file_size || 0,
+    download_count: file.download_count || 0,
+    approved: file.approved === true,
+    status: file.status || (file.approved === true ? 'approved' : 'pending'),
+    uploaded_by: file.uploaded_by,
+    uploaded_by_name: file.uploaded_by_name || null,
+    created_at: file.created_at || null,
+    download_url: `/api/files/download/${encodeURIComponent(file.id)}`
+  };
+}
+
 class SearchService {
   async globalSearch(query, options = {}) {
     const {
@@ -234,7 +258,7 @@ class SearchService {
       return response;
     } catch (error) {
       console.error('Global search error:', error);
-      return { success: false, error: error.message, results: [] };
+      return { success: false, error: 'Internal server error', results: [] };
     }
   }
 
@@ -283,7 +307,7 @@ class SearchService {
       };
     } catch (error) {
       console.error('Search users error:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'Internal server error' };
     }
   }
 
@@ -329,19 +353,20 @@ class SearchService {
       });
 
       const offset = (page - 1) * pageSize;
+      const publicFiles = files.map(toPublicFile);
       return {
         success: true,
-        files: files.slice(offset, offset + pageSize),
+        files: publicFiles.slice(offset, offset + pageSize),
         pagination: {
           page,
           pageSize,
-          total: files.length,
-          totalPages: Math.ceil(files.length / pageSize)
+          total: publicFiles.length,
+          totalPages: Math.ceil(publicFiles.length / pageSize)
         }
       };
     } catch (error) {
       console.error('Search files error:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'Internal server error' };
     }
   }
 }

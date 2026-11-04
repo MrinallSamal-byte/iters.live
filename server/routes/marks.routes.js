@@ -150,6 +150,19 @@ async function invalidateMarksCaches(studentId) {
   }
 }
 
+/** Fetch documents by id in `in` chunks into a Map keyed by id. */
+async function loadByIds(collection, ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const rows = await listRecords(collection, {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    rows.forEach((row) => found.set(String(row.id), row));
+  }
+  return found;
+}
+
 /**
  * Marks of the student's classmates for the given subjects. Scoped by subject
  * (and department when known) instead of downloading every mark in the system.
@@ -436,6 +449,26 @@ router.post('/upload-bulk', authMiddleware, roleMiddleware('teacher', 'admin'), 
     const rejected = [];
     const affectedStudents = new Set();
 
+    // Pre-fetch the batch's students and their existing marks for this exam so
+    // the loop below does Map lookups instead of two reads per record.
+    const studentIds = Array.from(new Set(records
+      .filter((item) => item && isValidDocId(item.student_id))
+      .map((item) => String(item.student_id))));
+    const studentsById = await loadByIds('users', studentIds);
+
+    const existingByStudentId = new Map();
+    for (let index = 0; index < studentIds.length; index += IN_QUERY_CHUNK) {
+      const rows = await listRecords('marks', {
+        filters: [
+          { field: 'student_id', op: 'in', value: studentIds.slice(index, index + IN_QUERY_CHUNK) },
+          { field: 'subject', value: subject.trim() },
+          { field: 'exam_type', value: exam_type.trim() },
+          { field: 'exam_date', value: normalizedDate }
+        ]
+      });
+      rows.forEach((row) => existingByStudentId.set(String(row.student_id), row));
+    }
+
     for (const item of records) {
       if (!item || !isValidDocId(item.student_id)) {
         rejected.push({ student_id: item?.student_id, error: 'invalid student_id' });
@@ -452,20 +485,13 @@ router.post('/upload-bulk', authMiddleware, roleMiddleware('teacher', 'admin'), 
         continue;
       }
 
-      const student = await getRecord('users', String(item.student_id));
+      const student = studentsById.get(String(item.student_id));
       if (!student || student.role !== 'student') {
         rejected.push({ student_id: item.student_id, error: 'student not found' });
         continue;
       }
 
-      const existing = await findOne('marks', {
-        filters: [
-          { field: 'student_id', value: student.id },
-          { field: 'subject', value: subject.trim() },
-          { field: 'exam_type', value: exam_type.trim() },
-          { field: 'exam_date', value: normalizedDate }
-        ]
-      });
+      const existing = existingByStudentId.get(student.id);
 
       const payload = {
         student_id: student.id,
@@ -482,15 +508,19 @@ router.post('/upload-bulk', authMiddleware, roleMiddleware('teacher', 'admin'), 
       };
 
       if (existing) {
-        await updateRecord('marks', existing.id, {
+        const updated = await updateRecord('marks', existing.id, {
           ...payload,
           updated_by: req.user.id
         });
+        // Duplicate rows for the same student in one payload must keep
+        // updating that record instead of creating a second one.
+        existingByStudentId.set(student.id, updated);
       } else {
-        await createRecord('marks', {
+        const created = await createRecord('marks', {
           ...payload,
           uploaded_by: req.user.id
         });
+        existingByStudentId.set(student.id, created);
       }
 
       affectedStudents.add(student.id);

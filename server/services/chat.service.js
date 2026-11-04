@@ -18,6 +18,22 @@ function createNoopIo() {
   return { emit: noop, to: chainable, in: chainable };
 }
 
+// Firestore allows at most 30 values in an `in` clause.
+const IN_QUERY_CHUNK = 30;
+
+/** Fetch only the senders referenced by a batch of messages, in `in` chunks. */
+async function lookupUsers(ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    users.forEach((user) => found.set(String(user.id), user));
+  }
+  return found;
+}
+
 class ChatService {
   constructor(io) {
     this.io = io || createNoopIo();
@@ -309,8 +325,7 @@ class ChatService {
         limit
       });
 
-      const users = await listRecords('users');
-      const userById = new Map(users.map((user) => [String(user.id), user]));
+      const userById = await lookupUsers(messages.map((message) => message.user_id));
 
       return messages
         .slice()

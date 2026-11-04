@@ -23,6 +23,7 @@ const IN_QUERY_CHUNK = 30;
 const ROLES = ['student', 'teacher', 'admin'];
 const REGISTRATION_NUMBER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,39}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_NUMBER_PATTERN = /^[+\d][\d\s-]{0,19}$/;
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -318,6 +319,18 @@ router.post('/users', authMiddleware, roleMiddleware('admin'), async (req, res, 
       return res.status(400).json({ success: false, message: 'year must be a whole number between 1 and 6' });
     }
 
+    if (phone_number && (typeof phone_number !== 'string' || !PHONE_NUMBER_PATTERN.test(phone_number))) {
+      return res.status(400).json({ success: false, message: 'phone_number must be a string of up to 20 characters, starting with + or a digit' });
+    }
+
+    if (department && (typeof department !== 'string' || department.length > 100)) {
+      return res.status(400).json({ success: false, message: 'department must be a string of 1-100 characters' });
+    }
+
+    if (section && (typeof section !== 'string' || section.length > 10)) {
+      return res.status(400).json({ success: false, message: 'section must be a string of 1-10 characters' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
     const payload = {
       name: String(name).trim(),
@@ -460,6 +473,9 @@ router.patch('/users/:id', authMiddleware, roleMiddleware('admin'), async (req, 
     }
 
     if (department !== undefined) {
+      if (department !== null && department !== '' && (typeof department !== 'string' || department.length < 1 || department.length > 100)) {
+        return res.status(400).json({ success: false, message: 'department must be a string of 1-100 characters' });
+      }
       updates.department = department || null;
     }
 

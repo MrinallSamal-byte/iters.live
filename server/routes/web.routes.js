@@ -52,9 +52,10 @@ router.get('/:sessionId', (req, res) => {
         const mapping = urlRouter.resolveSessionId(sessionId);
         
         if (!mapping) {
-            // Session ID not found or expired - redirect to home with new session
-            const homeUrl = urlRouter.getObfuscatedUrl('home');
-            return res.redirect(homeUrl);
+            // Session ID not found or expired - fall back to the real home page.
+            // A freshly generated obfuscated URL is process-local, so redirecting
+            // to it can ping-pong forever across multiple server instances.
+            return res.redirect('/');
         }
         
         // Extract the actual file path (without hash fragments)

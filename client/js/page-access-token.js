@@ -11,7 +11,10 @@
     'use strict';
 
     // Configuration
-    const TOKEN_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+    // Token lifetime matches the 20-minute inactivity session timeout below so
+    // a short idle never invalidates the page token before the session itself
+    // expires. Guard is purely client-side; there is no server counterpart.
+    const TOKEN_EXPIRY_MS = 20 * 60 * 1000; // 20 minutes
     const SESSION_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
     const TOKEN_STORAGE_KEY = 'pageAccessToken';
     const TOKEN_TIMESTAMP_KEY = 'pageAccessTokenTimestamp';

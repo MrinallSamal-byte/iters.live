@@ -47,7 +47,10 @@ async function findAdmitCardFile(studentId, registrationNumber, metadata = null)
     if (!/\.(pdf|png|jpe?g)$/i.test(file)) {
       return false;
     }
-    return file.includes(String(studentId)) || (registrationNumber && file.includes(String(registrationNumber)));
+    // Exact stem match only: a substring test can collide with another
+    // student's id and serve the wrong admit card.
+    const stem = path.parse(file).name;
+    return stem === String(studentId) || (registrationNumber && stem === `admitcard-${registrationNumber}`);
   });
 
   if (candidate) {
@@ -174,6 +177,10 @@ async function downloadAdmitCard(req, res) {
 async function uploadAdmitCard(req, res) {
   try {
     if (!['admin', 'teacher'].includes(req.user.role)) {
+      // Multer already wrote the file; do not leave it orphaned on disk.
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(() => {});
+      }
       return res.status(403).json({
         success: false,
         error: 'Only admins and teachers can upload admit cards'
@@ -189,6 +196,7 @@ async function uploadAdmitCard(req, res) {
 
     const studentId = String(req.body.student_id || req.body.registration_number || '').trim();
     if (!studentId) {
+      await fs.unlink(req.file.path).catch(() => {});
       return res.status(400).json({
         success: false,
         error: 'student_id is required'
@@ -236,6 +244,9 @@ async function uploadAdmitCard(req, res) {
     });
   } catch (error) {
     console.error('Upload admit card error:', error);
+    if (req.file) {
+      await fs.unlink(req.file.path).catch(() => {});
+    }
     return res.status(500).json({
       success: false,
       error: 'Failed to upload admit card'

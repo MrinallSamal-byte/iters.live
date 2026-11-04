@@ -173,7 +173,7 @@ router.get('/student-performance/:studentId', authMiddleware, analyticsCacheMidd
     });
   } catch (error) {
     console.error('Student performance analytics error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch student performance analytics' });
   }
 });
 
@@ -219,7 +219,7 @@ router.get('/attendance-patterns', authMiddleware, roleMiddleware('admin', 'teac
     res.json({ success: true, data: patterns });
   } catch (error) {
     console.error('Attendance patterns error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch attendance patterns' });
   }
 });
 
@@ -246,7 +246,7 @@ router.get('/teacher/:teacherId', authMiddleware, roleMiddleware('admin', 'teach
     });
   } catch (error) {
     console.error('Teacher analytics error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch teacher analytics' });
   }
 });
 

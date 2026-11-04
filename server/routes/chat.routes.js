@@ -62,7 +62,10 @@ router.post('/groups/:groupId/messages', authMiddleware, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not a member' });
     }
     const status = error.message === 'User not found' ? 404 : 500;
-    res.status(status).json({ success: false, message: error.message || 'Failed to send message' });
+    res.status(status).json({
+      success: false,
+      message: status === 404 ? 'User not found' : 'Failed to send message'
+    });
   }
 });
 
@@ -87,7 +90,10 @@ router.put('/messages/:messageId', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error editing chat message:', error);
     const status = error.message === 'Cannot edit this message' ? 403 : 500;
-    res.status(status).json({ success: false, message: error.message || 'Failed to edit message' });
+    res.status(status).json({
+      success: false,
+      message: status === 403 ? 'Cannot edit this message' : 'Failed to edit message'
+    });
   }
 });
 
@@ -106,7 +112,10 @@ router.delete('/messages/:messageId', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error deleting chat message:', error);
     const status = error.message === 'Cannot delete this message' ? 403 : 500;
-    res.status(status).json({ success: false, message: error.message || 'Failed to delete message' });
+    res.status(status).json({
+      success: false,
+      message: status === 403 ? 'Cannot delete this message' : 'Failed to delete message'
+    });
   }
 });
 

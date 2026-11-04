@@ -480,6 +480,9 @@ class Chatbot {
         this.messagesContainer.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (link && link.getAttribute('href')) {
+                // Let modified clicks (new tab/window) fall through to the browser
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
                 const href = link.getAttribute('href');
                 // Check if this is a dashboard link
                 if (href.startsWith('/dashboard/') || href.includes('/dashboard/')) {

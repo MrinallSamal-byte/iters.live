@@ -13,6 +13,21 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+const IN_QUERY_CHUNK = 30;
+
+/** Fetch users by id in Firestore-safe `in` chunks instead of listing the collection. */
+async function lookupUsers(ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    users.forEach((user) => found.set(String(user.id), user));
+  }
+  return found;
+}
+
 function sortPapers(items = [], sortBy = 'newest') {
   const sorted = [...items];
   switch (sortBy) {
@@ -61,21 +76,22 @@ router.get('/papers', verifyToken, async (req, res) => {
       );
     }
 
-    const users = await listRecords('users');
-    const userNameById = new Map(users.map((user) => [user.id, user.name]));
-
-    const sorted = sortPapers(papers, sortBy).map((paper) => ({
-      ...paper,
-      uploaded_by: userNameById.get(paper.uploaded_by) || paper.uploaded_by || null
-    }));
+    const sorted = sortPapers(papers, sortBy);
 
     const pageNum = toNumber(page, 1);
     const limitNum = toNumber(limit, 10);
     const offset = (pageNum - 1) * limitNum;
+    const pagePapers = sorted.slice(offset, offset + limitNum);
+
+    // Only the page that is returned needs uploader names.
+    const usersById = await lookupUsers(pagePapers.map((paper) => paper.uploaded_by));
 
     res.json({
       success: true,
-      papers: sorted.slice(offset, offset + limitNum),
+      papers: pagePapers.map((paper) => ({
+        ...paper,
+        uploaded_by: usersById.get(String(paper.uploaded_by))?.name || paper.uploaded_by || null
+      })),
       pagination: {
         page: pageNum,
         limit: limitNum,

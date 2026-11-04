@@ -189,6 +189,12 @@ describe('assignment routes', () => {
       expect(firebase.__all('activity_log').some((entry) => entry.action === 'assignment_grade')).toBe(true);
     });
 
+    test('only the owner (or an admin) may grade', async () => {
+      expect((await grade({ student_id: 'STU1', marks_obtained: 5 }, tokens.teacher2)).status).toBe(403);
+      expect(firebase.__all('assignment_submissions')[0].status).toBe('submitted');
+      expect((await grade({ student_id: 'STU1', marks_obtained: 5 }, tokens.admin)).status).toBe(200);
+    });
+
     test.each([
       [{ student_id: 'STU1', marks_obtained: 25 }, /exceed/],
       [{ student_id: 'STU1', marks_obtained: -1 }, /marks_obtained/],

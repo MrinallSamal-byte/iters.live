@@ -1716,7 +1716,14 @@
             const container = document.getElementById('recentDownloads');
             if (!container) return;
 
-            const recent = JSON.parse(localStorage.getItem('recentDownloads') || '[]');
+            let recent;
+            try {
+                recent = JSON.parse(localStorage.getItem('recentDownloads') || '[]');
+            } catch (e) {
+                console.warn('Corrupt recentDownloads data, resetting:', e);
+                recent = [];
+            }
+            if (!Array.isArray(recent)) recent = [];
 
             if (recent.length === 0) {
                 container.innerHTML = `

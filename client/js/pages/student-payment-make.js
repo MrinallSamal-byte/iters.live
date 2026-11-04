@@ -69,7 +69,6 @@
         e.preventDefault();
 
         if (paymentInFlight) return;
-        paymentInFlight = true;
 
         const form = e.target;
         const submitBtn = document.getElementById('submitPayment');
@@ -100,6 +99,11 @@
         submitBtn.disabled = true;
         btnText.style.display = 'none';
         btnLoading.style.display = 'inline-flex';
+
+        // Lock the form only after validation passes so a validation failure
+        // doesn't leave paymentInFlight stuck true (which would silently
+        // block every later submit).
+        paymentInFlight = true;
 
         try {
             // Create payment

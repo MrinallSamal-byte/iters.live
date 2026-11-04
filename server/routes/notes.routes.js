@@ -60,33 +60,55 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function getUserMap(users = []) {
-  return new Map(users.map((user) => [user.id, user.name]));
+const IN_QUERY_CHUNK = 30;
+
+/** Fetch users by id in Firestore-safe `in` chunks instead of listing the collection. */
+async function lookupUsers(ids) {
+  const found = new Map();
+  const unique = Array.from(new Set(ids.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const users = await listRecords('users', {
+      filters: [{ field: 'id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    users.forEach((user) => found.set(String(user.id), user));
+  }
+  return found;
+}
+
+/** Download counts for the given notes only, instead of listing all downloads. */
+async function countDownloads(noteIds) {
+  const counts = new Map();
+  const unique = Array.from(new Set(noteIds.filter(Boolean).map(String)));
+  for (let index = 0; index < unique.length; index += IN_QUERY_CHUNK) {
+    const rows = await listRecords('note_downloads', {
+      filters: [{ field: 'note_id', op: 'in', value: unique.slice(index, index + IN_QUERY_CHUNK) }]
+    });
+    rows.forEach((row) => counts.set(row.note_id, (counts.get(row.note_id) || 0) + 1));
+  }
+  return counts;
 }
 
 async function enrichNotes(notes, userId) {
-  const [users, downloads, favorites] = await Promise.all([
-    listRecords('users'),
-    listRecords('note_downloads'),
-    listRecords('note_favorites')
+  const [usersById, downloadCountById, favorites] = await Promise.all([
+    lookupUsers(notes.map((note) => note.uploaded_by)),
+    countDownloads(notes.map((note) => note.id)),
+    listRecords('note_favorites', { filters: [{ field: 'user_id', value: userId }] })
   ]);
 
-  const userNameById = getUserMap(users);
-  const downloadCountById = downloads.reduce((map, item) => {
-    map.set(item.note_id, (map.get(item.note_id) || 0) + 1);
-    return map;
-  }, new Map());
-  const favoriteSet = new Set(favorites.filter((item) => item.user_id === userId).map((item) => item.note_id));
+  const favoriteSet = new Set(favorites.map((item) => item.note_id));
 
-  return notes.map((note) => ({
-    ...note,
-    uploaded_by_name: userNameById.get(note.uploaded_by) || null,
-    uploader_role: users.find((user) => user.id === note.uploaded_by)?.role || null,
-    downloads: downloadCountById.get(note.id) || 0,
-    is_favorited: favoriteSet.has(note.id),
-    file_type: path.extname(note.file_path || note.file_name || '').toUpperCase().replace('.', ''),
-    file_size: note.file_size || 'Unknown'
-  }));
+  return notes.map((note) => {
+    const uploader = usersById.get(String(note.uploaded_by));
+    return {
+      ...note,
+      uploaded_by_name: uploader?.name || null,
+      uploader_role: uploader?.role || null,
+      downloads: downloadCountById.get(note.id) || 0,
+      is_favorited: favoriteSet.has(note.id),
+      file_type: path.extname(note.file_path || note.file_name || '').toUpperCase().replace('.', ''),
+      file_size: note.file_size || 'Unknown'
+    };
+  });
 }
 
 router.get('/', authMiddleware, async (req, res) => {
@@ -215,6 +237,9 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
     const { title, subject, branch, semester, type, description } = req.body;
 
     if (!['teacher', 'admin'].includes(req.user.role)) {
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(() => {});
+      }
       return res.status(403).json({ success: false, message: 'Only teachers and admins can upload notes' });
     }
 
@@ -243,6 +268,9 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       noteId: note.id
     });
   } catch (error) {
+    if (req.file) {
+      await fs.unlink(req.file.path).catch(() => {});
+    }
     console.error('Error uploading note:', error);
     res.status(500).json({ success: false, message: 'Failed to upload note' });
   }

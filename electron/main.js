@@ -25,11 +25,21 @@ function createWindow() {
 
   // Load the app
   if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
+    mainWindow.loadURL('http://localhost:5000');
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../client/index.html'));
   }
+
+  // Navigation hardening: only the app's own origins may be loaded
+  // (dev server in development, packaged file:// URLs in production).
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const allowedOrigin = isDev ? 'http://localhost:5000' : 'file://';
+    if (!url.startsWith(allowedOrigin)) {
+      event.preventDefault();
+    }
+  });
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
   // Show window when ready
   mainWindow.once('ready-to-show', () => {

@@ -120,7 +120,7 @@ describe('auth routes', () => {
   describe('POST /google-login', () => {
     test('a deactivated account cannot sign in with Google', async () => {
       firebase.__seed('users', 'STU1', { ...USERS.student, is_active: false });
-      firebase.auth.verifyIdToken.mockResolvedValue({ uid: 'g1', email: USERS.student.email, name: 'Asha' });
+      firebase.auth.verifyIdToken.mockResolvedValue({ uid: 'g1', email: USERS.student.email, name: 'Asha', email_verified: true });
 
       const res = await api.post('/api/auth/google-login', { idToken: 'token' });
       expect(res.status).toBe(403);
@@ -141,13 +141,14 @@ describe('auth routes', () => {
 
   describe('GET /me', () => {
     test('works for app-session tokens (which carry id, not uid)', async () => {
-      firebase.__seed('users', 'STU1', { ...USERS.student, password: 'hash' });
+      firebase.__seed('users', 'STU1', { ...USERS.student, password: 'hash', password_hash: 'legacy-hash' });
 
       const res = await api.get('/api/auth/me', { token: tokenFor(USERS.student) });
 
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ id: 'STU1', name: 'Asha Student' });
       expect(res.body.data.password).toBeUndefined();
+      expect(res.body.data.password_hash).toBeUndefined();
     });
   });
 

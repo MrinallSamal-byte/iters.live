@@ -117,8 +117,8 @@ const getPaymentHistory = async (req, res) => {
         // Apply ordering and pagination
         query = query.orderBy('paymentDate', 'desc');
         
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
+        const pageNum = Math.max(1, parseInt(page) || 1);
+        const limitNum = Math.max(1, Math.min(100, parseInt(limit) || 10));
         const offset = (pageNum - 1) * limitNum;
 
         if (offset >= total) {

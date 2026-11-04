@@ -6,7 +6,7 @@ const { authMiddleware } = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
 const sessionModule = require('../middleware/session');
 const { createAppSessionToken } = require('../utils/app-session');
-const { getLocalDemoUser, registerLocalDemoStudent } = require('../services/demo-auth.service');
+const { getLocalDemoUser, getAllLocalUsers, registerLocalDemoStudent } = require('../services/demo-auth.service');
 const { revokeUserSessions } = require('../services/session-guard.service');
 const { isValidDocId } = require('../services/firebase-data.service');
 const bcrypt = require('bcrypt');
@@ -147,8 +147,28 @@ router.post('/google-login', loginLimiter, async (req, res, next) => {
       user = userDoc.data();
       user.id = userDoc.id;
 
+      // Matching an existing account by email is only safe when Google has
+      // verified that address; an unverified token cannot prove ownership.
+      if (decodedToken.email_verified !== true) {
+        return res.status(401).json({
+          success: false,
+          message: 'The Google account email is not verified, so it cannot be used to sign in.'
+        });
+      }
+
       if (user.is_active === false) {
         return res.status(403).json({ success: false, message: 'Account is inactive.' });
+      }
+
+      // A session issued before the user was signed out everywhere is dead.
+      const revokedAt = Date.parse(user.sessions_revoked_at || '');
+      const issuedAt = Number(decodedToken.auth_time || decodedToken.iat);
+      if (!Number.isNaN(revokedAt) && Number.isFinite(issuedAt) && issuedAt * 1000 < revokedAt) {
+        return res.status(401).json({
+          success: false,
+          message: 'Session has been revoked. Please sign in again.',
+          code: 'SESSION_REVOKED'
+        });
       }
 
       // Portal fetching is suspended - all users go directly to dashboard
@@ -309,6 +329,12 @@ router.post('/register-student', registerLimiter, [
       }
 
       const { name, registration_number, email, password, department, year, section } = req.body;
+
+      // Same 409 the Firebase branch returns for a taken registration number.
+      if (getAllLocalUsers()[registration_number]) {
+        return res.status(409).json({ success: false, message: 'User already exists' });
+      }
+
       const user = registerLocalDemoStudent({
         name,
         registration_number,
@@ -446,6 +472,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
 
     const userData = userDoc.data();
     delete userData.password;
+    delete userData.password_hash;
 
     res.json({
       success: true,

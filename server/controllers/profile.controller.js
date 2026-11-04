@@ -53,6 +53,20 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
+// updateProfile input rules: the values are stored verbatim in Firestore otherwise.
+const PHONE_REGEX = /^[+\d][\d\s-]{0,19}$/;
+const SOCIAL_LINK_KEYS = ['linkedin', 'github', 'twitter', 'instagram', 'website'];
+
+const isValidHttpUrl = (value) => {
+    if (typeof value !== 'string' || value.length > 2048) return false;
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+};
+
 /**
  * PUT /api/users/me
  * Update current user profile
@@ -62,10 +76,72 @@ const updateProfile = async (req, res) => {
         const userId = req.user.id;
         const { phone, bio, skills, social_links } = req.body;
 
+        if (phone !== undefined && (typeof phone !== 'string' || !PHONE_REGEX.test(phone))) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid phone: must be a string of up to 20 digits, optionally starting with +, with spaces or dashes allowed'
+            });
+        }
+
+        if (bio !== undefined && (typeof bio !== 'string' || bio.length > 500)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid bio: must be a string of at most 500 characters'
+            });
+        }
+
+        let normalizedSkills;
+        if (skills !== undefined) {
+            if (Array.isArray(skills)) {
+                if (skills.length > 20 || skills.some((skill) => typeof skill !== 'string' || skill.length > 50)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid skills: an array may contain at most 20 strings of at most 50 characters each'
+                    });
+                }
+                normalizedSkills = skills;
+            } else if (typeof skills === 'string') {
+                normalizedSkills = skills.split(',').map((skill) => skill.trim()).filter(Boolean);
+                if (normalizedSkills.length > 20 || normalizedSkills.some((skill) => skill.length > 50)) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid skills: at most 20 skills of at most 50 characters each'
+                    });
+                }
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid skills: must be an array of strings or a comma-separated string'
+                });
+            }
+        }
+
+        if (social_links !== undefined) {
+            if (typeof social_links !== 'object' || social_links === null || Array.isArray(social_links)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid social_links: must be an object'
+                });
+            }
+            const keys = Object.keys(social_links);
+            if (keys.some((key) => !SOCIAL_LINK_KEYS.includes(key))) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Invalid social_links: allowed keys are ${SOCIAL_LINK_KEYS.join(', ')}`
+                });
+            }
+            if (keys.some((key) => !isValidHttpUrl(social_links[key]))) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid social_links: each value must be an http(s) URL of at most 2048 characters'
+                });
+            }
+        }
+
         const updateData = {};
         if (phone !== undefined) updateData.phone_number = phone;
         if (bio !== undefined) updateData.bio = bio;
-        if (skills !== undefined) updateData.skills = skills;
+        if (skills !== undefined) updateData.skills = normalizedSkills;
         if (social_links !== undefined) updateData.social_links = social_links;
 
         updateData.updated_at = new Date();
